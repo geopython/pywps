@@ -1,0 +1,19 @@
+For installing PyWPS:
+    
+1) unzip the archive with the program
+
+    $ tar xzf pywps-0.1.tgz
+
+
+2) Run the installation script
+    
+    $ cd pywps-0.1
+    $ python setup.py install
+
+3) Make symlink to wps.py file in your cgi-bin directory
+
+    $ ln -s /usr/bin/wps.py /usr/lib/cgi-bin/wps.py
+
+4) Update your configuration in etc/setup.py and etc/grass.py
+
+5) See doc/install.pdf/txt/html for more details

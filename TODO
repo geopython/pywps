@@ -1,0 +1,7 @@
+* the order of XML elements matters (dictionary -> array(?))
+* contant info according to ISO 19115
+* list of allowed literal data inputs
+* many outputs array, also metadata about outputs (size, time)
+* for referenced outputs We need element <ValuesReference> instead of <ComplexOutput>
+* add xsd link for execute response document
+* HTTP POST

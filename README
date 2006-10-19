@@ -1,0 +1,7 @@
+Pywps - Web Processing Service in Python
+
+This is a try of implementation o OGS's Web Processing service. The main
+reason for this application is to bring at laest part of GRASS GIS
+Functionality to World Wide Web.
+
+For instalation and configuration read the INSTALL file.

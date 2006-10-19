@@ -1,0 +1,48 @@
+GetCapabilities
+	Pøíjem
+		Povinné parametry:
+			* service=WPS
+			* request=GetCapabilities
+		
+	Odpovìï
+		Vyjímky
+			MissingParameterValue
+			InvalidParameterValue
+			VersionNegotiationFailed
+			InvalidUpdateSequence
+			NoApplicableCode
+		Ka¾dý dokument by mìl obsahovat mimo jiné parametr
+			version
+		Sekce - mìly by být u v¹ech dokumentù OWS
+			ServiceIdentification - Metadata o serveru. Povinné údaje:
+				ServiceType
+				ServiceTypeVersion
+				Title
+			ServiceProvider - Metadata o poskytovateli slu¾by. Povinné údaje:
+				ProviderName
+				ServiceContact
+			OperationsMetadata - Metadata o operacích poskytovaných serverm
+				Operation - jedna pro ka¾dou operaci
+					name
+					DCP - Informace pro Distributed Computing Platform
+						HTTP - HTTP URL pro distribuovanou platformu
+							Get
+							Post
+			Content - Metadata o datech - pro ka¾dý OWS zvlá¹»ní formulace ve specifikacích
+					- obsah
+		Vyjímky
+			Povinné argumenty:
+				ExceptionText (opt)
+				exceptionCode (man)
+				locator	(opt)
+				version (man)
+				
+
+Operace
+	Pøíjem
+		service
+		request
+		version
+
+HTTP GET
+	* Na velikosti nezále¾í: request == ReQUEsT

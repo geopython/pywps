@@ -1,0 +1,21 @@
+include setup.py
+
+graft Wps
+graft processes
+graft etc
+graft doc
+
+global-exclude *.pyc
+global-exclude *~
+global-exclude *.swp
+global-exclude *.toc
+global-exclude *.bak
+global-exclude *.dvi
+global-exclude *.log
+global-exclude *.aux
+
+exclude processes/pf_*
+
+global-include README
+global-include AUTHORS
+global-include INSTALL
