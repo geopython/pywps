@@ -1,0 +1,57 @@
+.TH pywps 1 "" "PyWPS 1.0.0" "PyWPS"
+.SH NAME
+\fI\fBPyWPS\fR\fR  - Implementation of OGC's Web Processing Service
+.br
+
+.SH DESCRIPTION
+.PP
+
+This program is to be used as CGI aplication. It is (not yet full)
+implementation of Open Geospatial Consorcium Web Processing Service (WPS)
+standard according to document OGC 05-007r4. As background  tool GRASS GIS
+is used.
+.SH FEATURES
+.PP
+
+PyWPS Supports all three types of request:
+.br
+
+    GetCapabilities
+.br
+
+    DescribeProcess
+.br
+
+    Execute
+.br
+
+Execute can be called assynchronously. 
+.PP
+
+GRASS can work on temporary location in x/y coordinte system (default) or
+on existing location. Other popular tools (R, PROJ,  GDAL/OGR) may be used
+too.
+.SH OPTIONS
+.PP
+
+This program should be run as web application
+Initial mapset directory which is a subdirectory of LOCATION_NAME
+.PP
+.SH BUGS AND CAVEAT
+.PP
+
+Not known so far
+
+.SH SEE ALSO
+OGC Web Processin Service standard
+.PP
+
+PyWPS Web site
+.SH AUTHORS (of this page)
+Jachym Cepicky
+.br
+
+.PP
+\fILast changed: $Date: 2006-10-23 $\fR
+.PP
+Help Index
