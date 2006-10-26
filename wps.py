@@ -192,7 +192,7 @@ def main():
         # check for number of running operations
         try:
             nPIDFiles = len(glob.glob(
-                os.path.join(settings.ServerSettings['tempPath'],"pywps*")))
+                os.path.join(settings.ServerSettings['tempPath'],"pywps-pidfile-*")))
             # cleaning if something goes wrong
             # for file in glob.glob(
             #         os.path.join(settings.ServerSettings['tempPath'],"pywps*")):
@@ -212,11 +212,11 @@ def main():
         # too many processes ?
         if nPIDFiles >=  maxPIDFiles:
             print "Content-type: text/xml\n"
-            print wpsExceptions.make_exception("ServerBusy")
+            print wpsExceptions.make_exception("ServerBusy","%d %d" % (nPIDFiles, maxPIDFiles))
             #os.remove(PIDFile[1])
             return
         else:
-            PIDFile = tempfile.mkstemp(prefix='pywps')
+            PIDFile = tempfile.mkstemp(prefix="pywps-pidfile-")
             pass
 
 
