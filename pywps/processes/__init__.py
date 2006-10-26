@@ -16,4 +16,5 @@ __all__ = [
         "shortestpath", 
         "spearpath", 
         "visibility",
+        "inputsoutputs",
         ]
