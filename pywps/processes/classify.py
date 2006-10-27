@@ -94,15 +94,15 @@ class Process:
         # Optional attributes
         #
         #
-        # storeSuport = "true" or "false" - should the resulting map be stored on our disk?
-        self.storeSupport = "true"
+        # storeSuported = "true" or "false" - should the resulting map be stored on our disk?
+        self.storeSupported = "true"
         
         #
-        # statusSupport = "true" or "false" - if statusLocation is set, the server 
+        # statusSupported = "true" or "false" - if statusLocation is set, the server 
         # will not wait for the end of the operation and will return the 
         # ExectuceResponce XML file immediately, without the ProcessOutput section
         # but with the statusLocation parameter
-        self.statusSupport = "true"
+        self.statusSupported = "true"
         # and many others
         
     #####################################################################
