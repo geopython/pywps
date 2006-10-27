@@ -115,7 +115,7 @@ WPS = {
 ServerSettings = {
     #
     # outputPath - directory, where your files will be stored, if
-    # storeSupport is set to "true"
+    # storeSupported is set to "true"
     # NOTE: You have to create this directory manualy and set rights, so
     #       the program is able to store data in there 
     # 'outputPath':'/var/www/wpsoutputs',
