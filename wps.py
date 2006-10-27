@@ -78,10 +78,12 @@ def main():
     try: #  Maximal length of one input
         if os.getenv("REQUEST_METHOD") == "GET":
             maxSize = int(serverSettings['maxInputParamLength'])
-        else:
             maxSize = int(serverSettings['maxSize'])
     except:
-        maxSize = 1024
+        if os.getenv("REQUEST_METHOD") == "GET":
+            maxSize = 1024
+        else:
+            maxSize = 0 # will be controlled later
 
     # key values to lower case
     if os.getenv("REQUEST_METHOD") == "GET":
@@ -94,7 +96,7 @@ def main():
 
             value = value.strip()
 
-            if len(value) > maxSize:
+            if len(value) > maxSize and maxSize > 0:
                 print "Content-type: text/xml\n"
                 print wpsExceptions.make_exception("FileSizeExceeded",key)
                 return
@@ -146,7 +148,11 @@ def main():
     #
     # HTTP POST
     else:
-        e = inpts.formvalsPost2dict(sys.stdin)
+        try:
+            size = serverSettings['maxSize']
+        except:
+            size = 0
+        e = inpts.formvalsPost2dict(sys.stdin,size)
         if e:
             print "Content-type: text/xml\n"
             print wpsExceptions.make_exception(str(e))

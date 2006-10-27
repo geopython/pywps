@@ -145,15 +145,22 @@ class Inputs:
     #--------------------------------------------------------------------#
     # formvalsPost2dict - convert xml input to dictionary structure      #
     #--------------------------------------------------------------------#
-    def formvalsPost2dict(self,file):
+    def formvalsPost2dict(self,file,size):
         """
         stores the input formValues to to input structure. suppose,
         formValues['request'] parameter is xml string
         """
         import xml.dom.minidom
 
-        # FIXME sys.stdin.read() should  be with *size* option
-        inputxml = file.read()
+        # read only defined size
+        if size:
+            inputxml = file.read(size)
+        else:
+            inputxml = file.read()
+
+        # maximum size exceeded
+        if file.read():
+            return "FileSizeExceeded"
 
         try:
             formDocument = xml.dom.minidom.parseString(inputxml)
@@ -209,7 +216,6 @@ class Inputs:
             parser.setContentHandler(eh)
 
             # Parse the input
-            # FIXME sys.stdin.read() should  be with *size* option
             parser.feed(inputxml)
             self.values = eh.values
 

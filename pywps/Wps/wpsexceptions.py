@@ -19,7 +19,9 @@ class WPSExceptions:
         return
 
     def make_exception(self,code,locator=None):
-        locator =  "%s" % locator
+        if locator:
+            locator =  "%s" % locator
+            
         if code =="NoApplicableCode":
             self.Exception = self.document.createElement("Exception")
             self.Exception.setAttribute("exceptionCode",code)
@@ -27,11 +29,13 @@ class WPSExceptions:
         else:
             self.Exception = self.document.createElement("Exception")
             self.Exception.setAttribute("exceptionCode",code)
+
         if locator:
             self.Exception.setAttribute("locator",locator)
             self.ExceptionReport.appendChild(self.Exception)
 
         self.ExceptionReport.appendChild(self.Exception)
+
         return self.document.toprettyxml(indent='\t', newl='\n', encoding="utf-8")
 
         
