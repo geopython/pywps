@@ -6,7 +6,7 @@ class Process:
     def __init__(self):
         self.Identifier = "spearpath"
         self.processVersion = "0.1"
-        self.storeSupport = "true"
+        self.storeSupported = "true"
         self.Title="Find the shortes path on the roads map on Spearfish dataset"
         self.grassLocation="/var/www/wps/spearfish60/"
         self.Inputs = [

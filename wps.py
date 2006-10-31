@@ -68,52 +68,54 @@ def main():
     and everything should happen in this directory.
     """
     
-    form = cgi.FieldStorage()  # the input values (GET method)
     wpsExceptions = wpsexceptions.WPSExceptions() # class for exceptions
     formValues = {}  # input values
     serverSettings = settings.ServerSettings
     inpts = inputs.Inputs() # data inputs
     pid = os.getpid()
     
+
     try: #  Maximal length of one input
-        maxSize = int(serverSettings['maxInputParamLength'])
+        if os.getenv("REQUEST_METHOD") == "GET":
+            maxSize = int(serverSettings['maxInputParamLength'])
+            maxSize = int(serverSettings['maxSize'])
     except:
-        maxSize = 1024
+        if os.getenv("REQUEST_METHOD") == "GET":
+            maxSize = 1024
+        else:
+            maxSize = 0 # will be controlled later
 
     # key values to lower case
-    for key in form.keys():
-        value = form.getvalue(key)
-        # to avoid problems with more then one inputs
-        if type(form.getvalue(key)) == type([]):
-            value = value[-1].strip()
+    if os.getenv("REQUEST_METHOD") == "GET":
+        form = cgi.FieldStorage()  # the input values (GET method)
+        for key in form.keys():
+            value = form.getvalue(key)
+            # to avoid problems with more then one inputs
+            if type(form.getvalue(key)) == type([]):
+                value = value[-1].strip()
 
-        value = value.strip()
+            value = value.strip()
 
-        if len(value) > maxSize:
+            if len(value) > maxSize and maxSize > 0:
+                print "Content-type: text/xml\n"
+                print wpsExceptions.make_exception("FileSizeExceeded",key)
+                return
+            formValues[key.lower()] = value
+
+    #
+    # HTTP GET
+    if os.getenv("REQUEST_METHOD") == "GET":
+        e = inpts.formvalsGet2dict(formValues)
+        if e:
             print "Content-type: text/xml\n"
-            print wpsExceptions.make_exception("FileSizeExceeded",key)
+            print wpsExceptions.make_exception(e,"")
             return
-        formValues[key.lower()] = value
 
-    if 'request' in formValues.keys():
-        #
-        # HTTP POST
-        if formValues['request'].find("<?") == 0:
-            e = inpts.formvalsPost2dict(formValues)
-            if e:
-                print "Content-type: text/xml\n"
-                print wpsExceptions.make_exception(str(e))
-                return
-
-        #
-        # HTTP GET
-        else:
-            e = inpts.formvalsGet2dict(formValues)
-            if e:
-                print "Content-type: text/xml\n"
-                print wpsExceptions.make_exception(e,"")
-                return
-
+        # request 
+        if not 'request' in inpts.values.keys():
+            print "Content-type: text/xml\n"
+            print wpsExceptions.make_exception("MissingParameterValue","request")
+            return
 
         #
         # Check inputs again
@@ -121,6 +123,7 @@ def main():
             print "Content-type: text/xml\n"
             print wpsExceptions.make_exception("MissingParameterValue",'service')
             return
+
         elif not 'version' in inpts.values.keys() and \
             inpts.values['request'].lower() != "getcapabilities":
             print "Content-type: text/xml\n"
@@ -141,28 +144,38 @@ def main():
                     'version')
             return
 
-        # Controll of all 'identifier' values - if wrongprocess is
-        # set, exception, nothing otherwice
-        wrongprocess = inpts.controllProcesses(
-                processes.__all__,inpts.values)
-        if wrongprocess:
-            if wrongprocess != "identifier":
-                print "Content-type: text/xml\n"
-                print wpsExceptions.make_exception(
-                        "InvalidParameterValue",wrongprocess
-                        )
-            else:
-                print "Content-type: text/xml\n"
-                print wpsExceptions.make_exception(
-                        "MissingParameterValue",wrongprocess
-                        )
 
+    #
+    # HTTP POST
+    else:
+        try:
+            size = serverSettings['maxSize']
+        except:
+            size = 0
+        e = inpts.formvalsPost2dict(sys.stdin,size)
+        if e:
+            print "Content-type: text/xml\n"
+            print wpsExceptions.make_exception(str(e))
             return
 
-    # missing request
-    else:
-        print "Content-type: text/xml\n"
-        print wpsExceptions.make_exception("MissingParameterValue",'request')
+
+
+    # Controll of all 'identifier' values - if wrongprocess is
+    # set, exception, nothing otherwice
+    wrongprocess = inpts.controllProcesses(
+            processes.__all__,inpts.values)
+    if wrongprocess:
+        if wrongprocess != "identifier":
+            print "Content-type: text/xml\n"
+            print wpsExceptions.make_exception(
+                    "InvalidParameterValue",wrongprocess
+                    )
+        else:
+            print "Content-type: text/xml\n"
+            print wpsExceptions.make_exception(
+                    "MissingParameterValue",wrongprocess
+                    )
+
         return
 
     #---------------------------------------------------------------------
@@ -192,7 +205,7 @@ def main():
         # check for number of running operations
         try:
             nPIDFiles = len(glob.glob(
-                os.path.join(settings.ServerSettings['tempPath'],"pywps*")))
+                os.path.join(settings.ServerSettings['tempPath'],"pywps-pidfile-*")))
             # cleaning if something goes wrong
             # for file in glob.glob(
             #         os.path.join(settings.ServerSettings['tempPath'],"pywps*")):
@@ -212,11 +225,11 @@ def main():
         # too many processes ?
         if nPIDFiles >=  maxPIDFiles:
             print "Content-type: text/xml\n"
-            print wpsExceptions.make_exception("ServerBusy")
+            print wpsExceptions.make_exception("ServerBusy","%d %d" % (nPIDFiles, maxPIDFiles))
             #os.remove(PIDFile[1])
             return
         else:
-            PIDFile = tempfile.mkstemp(prefix='pywps')
+            PIDFile = tempfile.mkstemp(prefix="pywps-pidfile-")
             pass
 
 

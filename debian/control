@@ -1,0 +1,13 @@
+Source: pywps
+Section: web
+Priority: optional
+Maintainer: Jachym Cepicky <jachym@les-ejk.cz>
+Build-Depends: debhelper (>= 4.0.0)
+Standards-Version: 3.6.2
+
+Package: pywps
+Architecture: any
+Depends: python, python-xml
+Suggests: grass, apache2, apache
+Description: Implementation of OGC's Web Processing Service
+ PyWPS is implementation of Web Processing Service from Open Geospatial Consortium Inc.(R) with help of  Python Programming Language and GIS GRASS as working tool in background.

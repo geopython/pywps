@@ -1,0 +1,16 @@
+Document: pywps
+Title: Install and Setup PyWPS
+Author: Jachym Cepicky <jachym@les-ejk.cz>
+Abstract: This manual describes what pywps is
+ and how it can be installed, setuped and how to 
+ add your own processes to it.
+Section: web
+
+Format: PDF
+Files: /usr/share/doc/pywps/install.pdf
+
+Format: text
+Files: /usr/share/doc/pywps/intall.txt
+
+Format: HTML
+Index: /usr/share/doc/pywps/html/install.html

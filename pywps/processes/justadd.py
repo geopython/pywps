@@ -6,7 +6,7 @@ class Process:
     def __init__(self):
         self.Identifier = "justadd"
         self.processVersion = "0.1"
-        self.storeSupport = "true"
+        self.storeSupported = "true"
         self.Title="Add some value to number"
         self.Inputs = [
                  {

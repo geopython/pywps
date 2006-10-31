@@ -131,10 +131,10 @@ class Execute:
         self.timestamp = "%d-%d-%d-%d-%d-%d" % (time.localtime()[0:6])
 
                                     # the output XML file name - needed, if
-                                    # statusSupport == true
+                                    # statusSupported == true
         self.executeresponseXmlName = "executeresponse-%s.xml" % (self.timestamp)
         self.statusLocation = None  # URL to executeresponseXmlName file
-        self.statusSupport = None   # Default -> everything will be printed
+        self.statusSupported = None   # Default -> everything will be printed
                                     # to STDOUT and what more, no fork is
                                     # needed
  
@@ -221,7 +221,7 @@ class Execute:
             print >>sys.stderr, "Execute.execute failed with AttributeError: %s" % (e) 
 
         #
-        # Return just XML response -> statusSupport == "true"
+        # Return just XML response -> statusSupported == "true"
         # or execute the process and return the XML after that
         #
         self.execute()
