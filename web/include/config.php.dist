@@ -1,0 +1,51 @@
+<?php
+/**********************************************************************
+ *
+ * purpose: an AJAX interface to Pywps
+ *
+ * authors: Luca Casagrande (...) and Lorenzo Becchi (lorenzo@ominiverdi.com)
+ *
+ *   - it should work like this (jachym suggestion): 
+ *		1) user will set the server address 
+ *		2) webinterface would getcapabilities - all the processes offered by the server 
+ * 		3) user would choose some process 
+ * 		4) web interface would describe process and create input form for the user
+ * 
+ *   TODO:
+ * 		- tranlate all comments in english
+ * 		- stick to the planned interface
+ * 
+ **********************************************************************
+ *
+ * Copyright (C) 2006 ominiverdi.org
+ *  
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *  
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ **********************************************************************/
+
+
+// Parametri di default
+
+$script_name = "template_pywps.php";
+$map_path = "/home/geko/progetti/pywps/";
+$map_file = "spearfish.map";
+$img_path = "/var/www/localhost/htdocs/tmp/";
+$pywps_path = "/var/www/localhost/htdocs/wps/wpsoutputs/";
+
+// Crea l'oggetto map per il mapfile specificato
+
+if(extension_loaded('MapScript')){
+	$map = ms_newMapObj($map_path.$map_file);
+}

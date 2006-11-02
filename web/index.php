@@ -35,14 +35,9 @@
  *
  **********************************************************************/
 
-
-// Parametri di default
-
-$script_name = "template_pywps.php";
-$map_path = "/home/geko/progetti/pywps/";
-$map_file = "spearfish.map";
-$img_path = "/var/www/localhost/htdocs/tmp/";
-$pywps_path = "/var/www/localhost/htdocs/wps/wpsoutputs/";
+//CONFIG VALUES
+//application related parameters. please edit this file
+include('include/config.php');
 
 // Crea l'oggetto map per il mapfile specificato
 
