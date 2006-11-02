@@ -1,4 +1,5 @@
 <?php
+
 /**********************************************************************
  *
  * purpose: an AJAX interface to Pywps
@@ -41,27 +42,19 @@ include('include/config.php');
 
 // Crea l'oggetto map per il mapfile specificato
 
-if(extension_loaded('MapScript')){
+if(extension_loaded('MapScript'))
 	$map = ms_newMapObj($map_path.$map_file);
 
 // Crea la prima immagine
     
 	$map_id = sprintf("%0.6d",rand(0,999999));
-        $image_name = "pywps".$map_id.".png";
-        $image_url="/tmp/".$image_name;
+        $init_image_name = "pywps".$map_id.".png";
+        $init_image_url="tmp/".$init_image_name;
         $image=$map->draw();
-        $image->saveImage($img_path.$image_name);
+        $image->saveImage($img_path.$init_image_name);
 
-// Il form viene inviato
-
-if (isset($_POST['submit']))
-    {
-    include ('mod/r_los.php');
-    }
-} else {
-	$image_url= 'tmp/pywps616979.png';
-}
-
+//init image url
+	//$init_image_url= 'tmp/'.$init_image_name;
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -87,7 +80,7 @@ if (isset($_POST['submit']))
 	</p>
 </div>
 <div id="output">
-<img id="outimg" src="<?php echo $image_url;?>" width="640" height="480" />
+<img id="outimg" src="<?=$init_image_url;?>" width="640" height="480" />
 </div>
 
 <div  id="params">

@@ -56,14 +56,15 @@
     //$filename = $aNodo[aNodo.length];
     $filename = end($aNodo);
     //$filename = substr($nodo, 32, 30);
-    $pywps_path.=$filename;
-    //var_dump($pywps_path);
+    //$pywps_path.=$filename;
+   // var_dump($img_path.$filename);
+	//die;
 
 // Aggiorna il mapfile con il file creato e visualizza il layer
         $layer = ms_newLayerObj($map);
         $layer->set('name', "visibility");
 	$layer->set('status', MS_DEFAULT );
-	$layer->set('data', $pywps_path);
+	$layer->set('data', $img_path.$filename);
 	$layer->set('type', MS_LAYER_RASTER);
     
         $class = ms_newClassObj($layer);
@@ -76,11 +77,13 @@
 
         $map_id = sprintf("%0.6d",rand(0,999999));
         $image_name = "pywps".$map_id.".png";
-        $image_url="/tmp/".$image_name;
+        $image_url="tmp/".$image_name;
         $image=$map->draw();
+		//echo"$img_path $image_name";
         $image->saveImage($img_path.$image_name);
         $map->save("/tmp/".$sessionId.".map");
 	echo "/*r los output*/";
 	echo "image_url='$image_url';";
 	echo "xml_dump='".urlencode($dom->saveXML())."';";
+	echo "mapfile='/tmp/".$sessionId.".map';";
 ?>
