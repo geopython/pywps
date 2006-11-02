@@ -33,7 +33,7 @@
  
         $map = ms_newMapObj($map_path.$map_file);
     
-    $stringa_query = "http://localhost/cgi-bin/wps.py?service=wps&version=0.4.0&request=Execute&Identifier=visibility2&";
+    $stringa_query = $cgi_executable."?service=wps&version=0.4.0&request=Execute&Identifier=visibility2&";
     $array = array('x', $_REQUEST['xvalue'],'y',$_REQUEST['yvalue'],'maxdist',$_REQUEST['maxdist'],'observer',$_REQUEST['observer']);
     $comma_separated = implode(",", $array);
     $stringa_query .= "datainputs=";
