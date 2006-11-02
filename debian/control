@@ -11,3 +11,5 @@ Depends: python, python-xml
 Suggests: grass, apache2, apache
 Description: Implementation of OGC's Web Processing Service
  PyWPS is implementation of Web Processing Service from Open Geospatial Consortium Inc.(R) with help of  Python Programming Language and GIS GRASS as working tool in background.
+
+ Homepage of PyWPS can be found at http://pywps.wald.intevation.org

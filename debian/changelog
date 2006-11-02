@@ -1,4 +1,10 @@
-pywps (1.0.0-1) unstable; urgency=low
+pywps (1.0.0rc3-1) unstable; urgency=low
+
+  * Release candidate 3
+
+ -- Jachym Cepicky <jachym@les-ejk.cz>  Fri, 2 Nov 2006 15:38:00 +0200
+ 
+ pywps (1.0.0-1) unstable; urgency=low
 
   * Initial release
 

@@ -33,7 +33,7 @@ doclines = __doc__.split("\n")
 
 setup(
         name = 'pywps',
-        version = '1.0',
+        version = '1.0rc3',
         maintainer="Jachym Cepicky",
         maintainer_email = 'jachym.cepicky@centrum.cz',
         author = 'Jachym Cepicky',
