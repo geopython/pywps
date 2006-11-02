@@ -38,8 +38,8 @@
 
 // Parametri di default
 
-$script_name = "template_pywps.php";
-$map_path = "/home/geko/progetti/pywps/";
+//$script_name = "template_pywps.php";
+$map_path = "/path_to_my_mapfile_dir/";
 $map_file = "spearfish.map";
 $img_path = "/var/www/localhost/htdocs/tmp/";
 $pywps_path = "/var/www/localhost/htdocs/wps/wpsoutputs/";
