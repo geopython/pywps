@@ -35,7 +35,18 @@
  *
  **********************************************************************/
 
-
+ session_start();
+  //ERROR HANDLING
+  if(isset($_REQUEST['debug'])) error_reporting ( E_ALL );
+  else error_reporting( E_ERROR );
+  
+    //check if the session is on
+  if (isset($_GET['sessionId'])){
+  	 $sessionId=trim($_GET['sessionId']);
+  	   session_id($sessionId);
+  }
+  else  $sessionId=session_id(); 
+  
 // Parametri di default
 
 //$script_name = "template_pywps.php";
@@ -43,7 +54,7 @@ $map_path = "/path_to_my_mapfile_dir/";
 $map_file = "spearfish.map";
 $img_path = "/var/www/localhost/htdocs/tmp/";
 $pywps_path = "/var/www/localhost/htdocs/wps/wpsoutputs/";
-
+$cgi_executable= "http://localhost/cgi-bin/wps.py";
 // Crea l'oggetto map per il mapfile specificato
 
 if(extension_loaded('MapScript')){

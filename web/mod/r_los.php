@@ -79,7 +79,7 @@
         $image_url="/tmp/".$image_name;
         $image=$map->draw();
         $image->saveImage($img_path.$image_name);
-        $map->save("/var/www/localhost/htdocs/tmp/mapfile.map");
+        $map->save("/tmp/".$sessionId.".map");
 	echo "/*r los output*/";
 	echo "image_url='$image_url';";
 	echo "xml_dump='".urlencode($dom->saveXML())."';";
