@@ -48,4 +48,8 @@ $pywps_path = "/var/www/localhost/htdocs/wps/wpsoutputs/";
 
 if(extension_loaded('MapScript')){
 	$map = ms_newMapObj($map_path.$map_file);
+}else {
+        echo "no mapscript available";
+        die;
 }
+

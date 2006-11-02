@@ -28,11 +28,9 @@
  *
  **********************************************************************/
 
-	$script_name = "template_pywps.php";
-  	$map_path = "/home/geko/progetti/pywps/";
-  	$map_file = "spearfish.map";
-  	$img_path = "/var/www/localhost/htdocs/tmp/";
-  	$pywps_path = "/var/www/localhost/htdocs/wps/wpsoutputs/";
+
+ include('../include/config.php');
+ 
         $map = ms_newMapObj($map_path.$map_file);
     
     $stringa_query = "http://localhost/cgi-bin/wps.py?service=wps&version=0.4.0&request=Execute&Identifier=visibility2&";
