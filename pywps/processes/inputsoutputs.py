@@ -26,7 +26,7 @@ class Process:
                     'Title': 'Bounding Box Value',
                     'Abstract': ' "bounding box value" ',
                     'BoundingBoxValue': {},
-                    'value': ["0 0", "10 10"],
+                    'value': [0,0, 10,10],
                  },
 
                 ]
