@@ -53,7 +53,7 @@ if(extension_loaded('MapScript'))
         $image=$map->draw();
         $image->saveImage($img_path.$init_image_name);
 
-//init image url
+//init image url aaa
 	//$init_image_url= 'tmp/'.$init_image_name;
 ?>
 
