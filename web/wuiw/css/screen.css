@@ -1,0 +1,115 @@
+/**********************************************************************
+ *
+ * purpose: stylesheet for WUIW
+ *
+ * authors: Luca Casagrande (...) and Lorenzo Becchi (lorenzo@ominiverdi.com)
+ *
+ * TODO:
+ *   - a lot...
+ * 
+ **********************************************************************
+ *
+ * Copyright (C) 2006 ominiverdi.org
+ *  
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *  
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ **********************************************************************/
+
+#header {
+	position:relative;
+	margin-left:660px;
+	width:200px;
+	display:none;
+}
+#output {
+	position:absolute;
+	left:0px;
+}
+#panels {
+	position:relative;
+	margin-left:660px;
+	overflow:auto;
+	height:460px;
+}
+#console {
+	position:relative;
+	display:none;
+
+}
+#console textarea{
+	width:630px;
+	height:160px;
+}
+#description {
+	/*visibility:hidden;*/
+	border:1px solid rgb(130,130,230);
+	margin:5px;
+	padding:0px;
+	position:relative;
+}
+#connector {
+	/*visibility:hidden;*/
+	border:1px solid rgb(130,130,230);
+	margin:5px;
+	padding:0px;
+	position:relative;
+}
+#params {
+	display:none;
+	/*visibility:hidden;*/
+}
+body {
+	margin:0;
+	padding:0;
+	font-size:0.9em;
+	background-color:rgb(192,192,192);
+}
+h1{
+	font-size:1.1em;
+	color: rgb(130,130,230);
+}
+h2{
+	font-size:1em;
+	color: rgb(130,130,230);
+	border-bottom:1px solid rgb(130,130,230);
+	background-color:white;
+	margin:0;
+	padding:5px;
+}
+h3{
+	font-size:0.9em;
+	color: white;
+	padding:5px;
+}
+
+p{
+	margin:0.5em;
+}
+fieldset {
+	border:1px solid rgb(130,130,230);
+}
+legend {
+	border:1px solid rgb(130,130,230);
+}
+label {
+	display:block;
+	font-size:0.9em;
+	margin:0;
+	margin-top:0.5em;
+	font-weight:bold;
+}
+select{
+	width:160px;	
+}
