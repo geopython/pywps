@@ -225,7 +225,7 @@ def main():
         # too many processes ?
         if nPIDFiles >=  maxPIDFiles:
             print "Content-type: text/xml\n"
-            print wpsExceptions.make_exception("ServerBusy","%d %d" % (nPIDFiles, maxPIDFiles))
+            print wpsExceptions.make_exception("ServerBusy")
             #os.remove(PIDFile[1])
             return
         else:

@@ -3,9 +3,10 @@ class Process:
         self.Identifier = "inputsoutputs"
         self.processVersion = "0.1"
         self.Title="Test input and output structures"
-        self.statusSuported="false"
-        self.storeSuported="false"
+        self.statusSupported="false"
+        self.storeSupported="false"
         self.Inputs = [
+                # 0
                  {
                     'Identifier': 'literal',
                     'Title': 'Literal Value',
@@ -14,6 +15,7 @@ class Process:
                     'MinimumOccurs': "3",
                     'value': "",
                  },
+                # 1
                  {
                     'Identifier': 'complexref',
                     'Title': 'Literal Value Reference',
@@ -21,6 +23,7 @@ class Process:
                     'ComplexValueReference': {"Formats":["image/jpeg"]},
                     'value': "http://les-ejk.cz/img/jaja.jpg",
                  },
+                # 2
                  {
                     'Identifier': 'bbox',
                     'Title': 'Bounding Box Value',
@@ -28,9 +31,18 @@ class Process:
                     'BoundingBoxValue': {},
                     'value': [0,0, 10,10],
                  },
+                # 3
+                 {
+                    'Identifier': 'xml',
+                    'Title': 'ComplexValue input',
+                    'Abstract': ' "embed xml" ',
+                    'ComplexValue': {"Formats":['text/xml']},
+                 },
+
 
                 ]
         self.Outputs = [
+                # 0
                  {
                     'Identifier': 'literal',
                     'Title': 'Literal Value',
@@ -38,6 +50,7 @@ class Process:
                     'LiteralValue':{'UOMs':["cm"]},
                     'value': "10",
                  },
+                # 1
                  {
                     'Identifier': 'complexref',
                     'Title': 'Literal Value Reference',
@@ -45,6 +58,7 @@ class Process:
                     'ComplexValueReference': {"Formats":["image/jpeg"]},
                     'value': None,
                  },
+                # 2
                  {
                     'Identifier': 'bbox',
                     'Title': 'Bounding Box Value',
@@ -52,13 +66,21 @@ class Process:
                     'BoundingBoxValue': {},
                     'value': [11, 11, 14,14.4],
                  },
-
+                # 3
+                 {
+                    'Identifier': 'xml',
+                    'Title': 'ComplexValue input',
+                    'Abstract': ' "embed xml" ',
+                    'ComplexValue': {"Formats":['text/xml']},
+                 },
         ]
         
     def execute(self):
         self.Outputs[1]['value'] = self.Inputs[1]['value']
-        self.Outputs[2]['value'] = [self.Inputs[2]['value'][0].split()[0],
-                                    self.Inputs[2]['value'][0].split()[1],
-                                    self.Inputs[2]['value'][1].split()[0],
-                                    self.Inputs[2]['value'][1].split()[1]]
+        self.Outputs[2]['value'] = [self.Inputs[2]['value'][0],
+                                    self.Inputs[2]['value'][1],
+                                    self.Inputs[2]['value'][2],
+                                    self.Inputs[2]['value'][3]]
+
+        self.Outputs[3]['value'] = self.Inputs[3]['value']
         return 
