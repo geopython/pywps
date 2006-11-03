@@ -2,12 +2,12 @@
 
 // Parametri di default
 
-$script_name = "network.php";
-$map_path = "/home/geko/progetti/pywps/";
-$map_file = "spearfish_net.map";
-$img_path = "/var/www/localhost/htdocs/tmp/";
-$pywps_path = "/var/www/localhost/htdocs/wps/wpsoutputs/";
-
+$script_name =
+$map_path = 
+$map_file = 
+$img_path = 
+$pywps_path =
+ 
 // Crea l'oggetto map per il mapfile specificato
 
 $map = ms_newMapObj($map_path.$map_file);
