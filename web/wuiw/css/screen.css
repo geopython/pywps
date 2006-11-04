@@ -52,16 +52,10 @@
 	width:630px;
 	height:160px;
 }
-#description {
+
+.panel {
 	/*visibility:hidden;*/
-	border:1px solid rgb(130,130,230);
-	margin:5px;
-	padding:0px;
-	position:relative;
-}
-#connector {
-	/*visibility:hidden;*/
-	border:1px solid rgb(130,130,230);
+	/*border:1px solid rgb(130,130,230);*/
 	margin:5px;
 	padding:0px;
 	position:relative;

@@ -35,7 +35,7 @@
 /*file vuoto*/
 session_start();
 
-header("Content-Type:text/xml");
+//header("Content-Type:text/xml");
 if (isset($_GET['owsURL']))  $wpsURL=trim($_GET['owsURL']);
 else {
 	echo '<?xml version="1.0" ?><error>connection problem</error>';

@@ -67,19 +67,24 @@ if(extension_loaded('MapScript'))
 		<script type="text/javascript" src="js/dhtml.js"></script>
 		<script type="text/javascript" src="js/layout.js"></script>
 		
-		<script type="text/javascript" src="js/wpyconnector.js"></script>
+		<script type="text/javascript" src="js/wpsconnector.js"></script>
+		<script type="text/javascript" src="js/wmsconnector.js"></script>
 		<script type="text/javascript" src="js/console.js"></script>
 		<script type="text/javascript" >
 			function load(){
-			
-				//create connector object
+				//create wms connector object
+				wmsConnector = new wmsConnector;
+				wmsConnector.addServer('ominiverdi.org wms service','http://pywps.ominiverdi.org/cgi-bin/wps.py');
+				wmsConnector.addServer('fao.org wms service','http://193.43.36.137/cgi-bin/wms?map=/GeoNetwork_data/14000-14099/14052/wms/14052.map');
+				wmsConnector.drawInitForm('wmsconnector');	
+				//create wps connector object
 				wpsConnector = new wpsConnector;
-				//add servers
-				wpsConnector.addServer('ominiverdi.org','http://pywps.ominiverdi.org/cgi-bin/wps.py');
-				wpsConnector.addServer('ominiverdi2.org','http://pywps.ominiverdi.org/cgi-bin/wps.py');
-				wpsConnector.addServer('ominiverdi3.org','http://pywps.ominiverdi.org/cgi-bin/wps.py');
-				//draw form interface
-				wpsConnector.drawInitForm('connector');	
+				//add  wps servers
+				wpsConnector.addServer('ominiverdi.org wps service','http://pywps.ominiverdi.org/cgi-bin/wps.py');
+				wpsConnector.addServer('ominiverdi.org server 2','http://pywps.ominiverdi.org/cgi-bin/wps.py');
+				wpsConnector.addServer('ominiverdi.org server 3','http://pywps.ominiverdi.org/cgi-bin/wps.py');
+				//draw wps form interface
+				wpsConnector.drawInitForm('wpsconnector');	
 			};
 		</script>
 		<link href="css/screen.css" rel="stylesheet" type="text/css" media="all">
@@ -92,11 +97,15 @@ if(extension_loaded('MapScript'))
 </div>
 
 <div id="panels">
-	<div id="connector">
+	<div id="wmsconnector" class="panel">
+		
+	</div>
+
+	<div id="wpsconnector" class="panel">
 		
 	</div>
 	
-	<div id="description">
+	<div id="description"  class="panel">
 	
 	</div>
 </div>
