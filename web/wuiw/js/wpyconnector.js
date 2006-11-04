@@ -141,9 +141,14 @@ function wpsConnector(console) {
 	 	var self= wpsConnector;
 	 	var aProcess = xml.getElementsByTagName('Process');
 		 
+		var myp = getRawObject('pProcess');
+		if( myp)myp.parentNode.removeChild(myp);
 		var p = document.createElement('p');
 		p.innerHTML = 'choose a Process';
+		p.id = 'pProcess';
 		self.formObj.appendChild(p);
+		var myselect = getRawObject('processlist');
+		if( myselect)myselect.parentNode.removeChild(myselect);
 		var select = document.createElement('select');
 		select.name = 'processlist';
 		select.onchange = this.getProcess;
@@ -226,14 +231,25 @@ function wpsConnector(console) {
 	   var title = xml.getElementsByTagName('Title')[0].textContent;
 	   var labstract = xml.getElementsByTagName('Abstract')[0].textContent;
 	   
+	   var myh2 = getRawObject('myh2');
+		if( myh2)myh2.parentNode.removeChild(myh2);
 	   var h2 = document.createElement('h2');
 	   h2.innerHTML = 'Identifier: ' + identifier;
+	   h2.id = 'myh2';
+	   description.appendChild(h2);
+	   //clean and add subtitle
+	   var myh3 = getRawObject('myh3');
+	   if( myh3)myh3.parentNode.removeChild(myh3);
 	   var h3 = document.createElement('h3');
 	   h3.innerHTML = 'Title: ' + title;
+	   h3.id = 'myh3';
+	   description.appendChild(h3);
+	   //clean and add paragraph
+	   var myp = getRawObject('myp');
+	   if( myp)myp.parentNode.removeChild(myp);
 	   var p = document.createElement('p');
 	   p.innerHTML = labstract;
-	   description.appendChild(h2);
-	   description.appendChild(h3);
+	   p.id = 'myp';
 	   description.appendChild(p);
 	  
    };
