@@ -1,5 +1,4 @@
-<?php
-
+<!--
 /**********************************************************************
  *
  * purpose: an AJAX interface to Pywps
@@ -35,34 +34,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **********************************************************************/
-
-//CONFIG VALUES
-//application related parameters. please edit this file
-include('../include/config.php');
-
-// Crea l'oggetto map per il mapfile specificato
-/*
-if(extension_loaded('MapScript'))
-	$map = ms_newMapObj($map_path.$map_file);
-
-// Crea la prima immagine
-    
-	$map_id = sprintf("%0.6d",rand(0,999999));
-        $init_image_name = "pywps".$map_id.".png";
-        $init_image_url="tmp/".$init_image_name;
-        $image=$map->draw();
-        $image->saveImage($img_path.$init_image_name);
-*/
-//init image url 
-	$init_image_url= 'img/base_map.png';
-?>
+-->
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="en">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<title>PyQPS Test Project by ominiverdi.org</title>
-		<!--<script type="text/javascript" src="js/xhr.js"></script><script type="text/javascript" src="js/startUp.js"></script>-->
+		
 		<script type="text/javascript" src="js/ajax.js"></script>
 		<script type="text/javascript" src="js/dhtml.js"></script>
 		<script type="text/javascript" src="js/layout.js"></script>
@@ -93,7 +72,7 @@ if(extension_loaded('MapScript'))
         
 
 <div id="output">
-<img id="outimg" src="<?=$init_image_url;?>" width="640" height="480" alt="Output image">
+<img id="outimg" src="img/base_map.png" width="640" height="480" alt="Output image">
 <div id="debug"></div>
 </div>
 
