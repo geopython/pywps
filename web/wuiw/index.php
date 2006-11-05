@@ -74,8 +74,8 @@ if(extension_loaded('MapScript'))
 			function load(){
 				//create wms connector object
 				wmsConnector = new wmsConnector;
-				wmsConnector.addServer('ominiverdi.org wms service','http://pywps.ominiverdi.org/cgi-bin/wps.py');
-				wmsConnector.addServer('fao.org wms service','http://193.43.36.137/cgi-bin/wms?map=/GeoNetwork_data/14000-14099/14052/wms/14052.map');
+				wmsConnector.addServer('ominiverdi.org wms service','http://www.ominiverdi.org/cgi-bin/mapserv?map=/home/doktoreas/data/wms/mapfile/pywps_wms_spearfish.map');
+				wmsConnector.addServer('DM Solutions wms service','http://www2.dmsolutions.ca/cgi-bin/mswms_gmap?');
 				wmsConnector.drawInitForm('wmsconnector');	
 				//create wps connector object
 				wpsConnector = new wpsConnector;
@@ -94,6 +94,7 @@ if(extension_loaded('MapScript'))
 
 <div id="output">
 <img id="outimg" src="<?=$init_image_url;?>" width="640" height="480" alt="Output image">
+<div id="debug"></div>
 </div>
 
 <div id="panels">

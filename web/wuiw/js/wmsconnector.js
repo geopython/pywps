@@ -36,6 +36,13 @@ function wmsConnector(console) {
     this.formObj;//obj to draw form fields
     this.version = '1.0.0';
     this.sessionId;
+	
+	//GEO vars
+	this.extent;	
+	this.srs;
+	this.pCoords;//pixel coords
+	this.gCoords;//geo coords	
+	this.agCoords= new Array();//geo coords	array
 
 	this.XMLcode = '';//temporaneo per metterci su il GML della feature
 
@@ -107,11 +114,12 @@ function wmsConnector(console) {
             this.baseURL = this.baseURL.slice( 0, -1 );
     }
 	
-    this.baseURL = this.baseURL+ "&service=wms";
-    this.baseURL = this.baseURL + "&request=getcapabilities";
+    this.baseURL = this.baseURL+ "&service=WMS";
     this.baseURL = this.baseURL +  "&version="+self.version;
+    this.baseURL = this.baseURL + "&request=getCapabilities";
     var connector = 'tools/proxy/proxy_xml.php?';
     var myURL = connector + 'owsURL='+myurlencode(this.baseURL);
+	self.waitStart();
     self.ajax.doGet(myURL, self.parseCapabilities,'xml');
  
  };
@@ -128,7 +136,7 @@ function wmsConnector(console) {
 			// alert(this.id);
 			 self.drawLayersForm(xml);
 		 } else {
-				alert('no Processes availalbe on this server');
+				alert('no Layers availalbe on this server');
 		 }
 	 } else {
 		alert('connection error: response is not an object');
@@ -138,14 +146,35 @@ function wmsConnector(console) {
  
  wmsConnector.prototype.drawLayersForm = function(xml){
 	 	var self= wmsConnector;
-	 	var aProcess = xml.getElementsByTagName('Layer');
-		 
-		var myp = getRawObject('wmsLayerP');
+		
+		//get Extent (to implent BoundingBox alternative) 
+		var bbox = xml.getElementsByTagName('LatLonBoundingBox')[0];
+		self.extent = [bbox.getAttribute('minx'),bbox.getAttribute('miny'),bbox.getAttribute('maxx'),bbox.getAttribute('maxy')];
+		var myextent = getRawObject('wmsExtent');
+		if( myextent)myextent.parentNode.removeChild(myextent);
+		var p = document.createElement('p');
+		p.innerHTML = 'map extent: '+ self.extent;
+		p.id = 'wmsExtent';
+		self.formObj.appendChild(p);
+		
+		//get map SRS (shoud be layer related)
+		self.srs = xml.getElementsByTagName('SRS')[0].textContent;
+		var mywmssrs = getRawObject('wmsSRS');
+		if( mywmssrs)mywmssrs.parentNode.removeChild(mywmssrs);
+		var p = document.createElement('p');
+		p.innerHTML = 'SRS: '+ self.srs;
+		p.id = 'wmsSRS';
+		self.formObj.appendChild(p);
+		
+		
+		//get Layers
+		var aProcess = xml.getElementsByTagName('Layer');
+		/*var myp = getRawObject('wmsLayerP');
 		if( myp)myp.parentNode.removeChild(myp);
 		var p = document.createElement('p');
 		p.innerHTML = 'choose a Process';
 		p.id = 'wmsLayerP';
-		self.formObj.appendChild(p);
+		self.formObj.appendChild(p);*/
 		var myselect = getRawObject('wmsLayerList');
 		if( myselect)myselect.parentNode.removeChild(myselect);
 		var select = document.createElement('select');
@@ -162,12 +191,15 @@ function wmsConnector(console) {
 			select[j++] = new Option(name,name,false,false);
 		}
 		self.formObj.appendChild(select);
-		var input = document.createElement('input');
+		/*var input = document.createElement('input');
 		input.type='button';
 		input.value='go';
 		input.processes=aProcess;
 		input.onclick=this.getWmsLayer;
-		//self.formObj.appendChild(input);
+		self.formObj.appendChild(input);*/
+		
+		self.waitEnd();
+
  };
  
  
@@ -195,83 +227,93 @@ function wmsConnector(console) {
         if (this.baseURL.charAt( this.baseURL.length - 1 ) == '&')
             this.baseURL = this.baseURL.slice( 0, -1 );
     }
-	this.baseURL = this.baseURL + "&service=wms&request=getmap&version="+ self.version;
+	this.baseURL = this.baseURL + "&SERVICE=WMS&REQUEST=getmap&WIDTH=640&HEIGHT=480&VERSION="+ self.version;
     this.baseURL = this.baseURL +  "&layers="+process ;
     var connector = 'tools/proxy/proxy_inline.php?';
     var myURL = connector + 'owsURL='+myurlencode(this.baseURL);
     //myURL = this.wmsConnector.addRequestParameter(myURL, 'com', "&com=getCapabilities" );
     
 	//self.ajax.doGet(myURL, self.parseProcesses);
+	self.waitStart();
 	 getRawObject('outimg').src = myURL;
+	 getRawObject('outimg').onload = self.waitEnd;
+	 getRawObject('outimg').onclick = self.getCoords;
   };
   
   
-  wmsConnector.prototype.parseProcesses = function(xml){
+  //get coords from click event on the map
+ wmsConnector.prototype.getCoords =  function (e){
 	  var self = wmsConnector;
-	 if(typeof xml=='object'){
-		 //alert(xml);
-		 var aProcess = xml.getElementsByTagName('ProcessDescription');
-		 if(aProcess.length>0){
-			// alert(this.id);
-			 self.drawProcessDescription(xml);
-		 } else {
-				alert('no Processes availalbe on this server');
-		 }
-	 } else {
-		alert('connection error: response is not an object');
-	 }
-	  
-  };
-  
-   wmsConnector.prototype.drawProcessDescription = function (xml) {
-	   var self = wmsConnector;
-	   var description = getRawObject('description');
-	   
-	   var identifier = xml.getElementsByTagName('Identifier')[0].textContent;
-	   var title = xml.getElementsByTagName('Title')[0].textContent;
-	   var labstract = xml.getElementsByTagName('Abstract')[0].textContent;
-	   
-	   var myh2 = getRawObject('myh2');
-		if( myh2)myh2.parentNode.removeChild(myh2);
-	   var h2 = document.createElement('h2');
-	   h2.innerHTML = 'Identifier: ' + identifier;
-	   h2.id = 'myh2';
-	   description.appendChild(h2);
-	   //clean and add subtitle
-	   var myh3 = getRawObject('myh3');
-	   if( myh3)myh3.parentNode.removeChild(myh3);
-	   var h3 = document.createElement('h3');
-	   h3.innerHTML = 'Title: ' + title;
-	   h3.id = 'myh3';
-	   description.appendChild(h3);
-	   //clean and add paragraph
-	   var myp = getRawObject('myp');
-	   if( myp)myp.parentNode.removeChild(myp);
-	   var p = document.createElement('p');
-	   p.innerHTML = labstract;
-	   p.id = 'myp';
-	   description.appendChild(p);
-	  
-   };
 
+	 e = (e)?e:((event)?event:null);
+    if (e.button==2) {
+        return;
+    } else {
+        var x = e.pageX || (e.clientX +
+             (document.documentElement.scrollLeft || document.body.scrollLeft));
+        var y = e.pageY || (e.clientY +
+             (document.documentElement.scrollTop || document.body.scrollTop));
+        
+		//set coords
+		self.pCoords =[x,y];
+        self.gCoords = self.pix2geo(x,y);
+        self.agCoords.push(self.gCoords);
+		
+		//stupid demo code to show clicked points
+		var mypoints = getRawObject('mypoints');
+		if( mypoints)mypoints.parentNode.removeChild(mypoints);
+		var p = document.createElement('p');
+		p.innerHTML = 'first click coords:' + self.agCoords[0]  + '<br> last click coords: '+ self.gCoords;
+		p.id = 'mypoints';
+		self.formObj.appendChild(p);
+		
+		//event propagation
+        e.cancelBubble = true;
+        e.returnValue = false;
+        if (e.stopPropogation) e.stopPropogation();
+        if (e.preventDefault) e.preventDefault();
+        return false;
+	}
+}
 
+//trasform coords from image pixel space to map geo space
+wmsConnector.prototype.pix2geo =  function (pX,pY){
+	  var self = wmsConnector;
 
-wmsConnector.prototype.getFeatures = function(sessionId,features)
-{
-  /*???*/
-  var featURL = this.server;
-  featURL = this.addRequestParameter(featURL, 'service', "&service=WFS" );
-  featURL =   this.addRequestParameter(featURL, 'request', "&request=GetFeature" );
-  featURL =   this.addRequestParameter(featURL, 'version', "&version="+this.version );
-  featURL =   this.addRequestParameter(featURL, 'typename', "&typename="+features );
- 
-  myURL = this.connector + 'wfsURL='+encodeMyHtml(featURL);
-  myURL =   this.addRequestParameter(myURL, 'sessionId', "&sessionId="+this.sessionId );
-  myURL =   this.addRequestParameter(myURL, 'com', "&com=getFeature" );
-  myURL =   this.addRequestParameter(myURL, 'epsg', "&epsg="+this.epsg );
-   //document.getElementById('legend').innerHTML = myURL;//DEBUG
-   
-  call(myURL,this, this.draw);
-  
-};
+	var minX = self.extent[0];
+	var minY = self.extent[3];
+	var maxX = self.extent[2];
+	var maxY = self.extent[1];
+	var dX = maxX - minX;
+	var dY = maxY - minY;
+	var imgW = getObjectWidth('outimg');
+	var imgH = getObjectHeight('outimg');
+	//(gX-minX):pX=dX:imgW;
 
+	var gX = parseInt(minX*1000)/1000 + pX * dX/imgW;
+    var gY = parseInt(minY*1000)/1000 + pY * dY/imgH;
+    gX = parseInt(gX*1000)/1000;
+    gY = parseInt(gY*1000)/1000;
+return [gX, gY];
+    
+	
+}
+
+//trasform coords from image pixel space to map geo space
+wmsConnector.prototype.waitStart =  function (){
+	self = wmsConnector;
+	var parent = getRawObject('output');
+	var wait = getRawObject('wait');
+	if( wait)wait.parentNode.removeChild(wait);
+	var div = document.createElement('div');
+	div.id = 'wait';
+	div.innerHTML ='downloading... please wait';
+	parent.insertBefore(div,parent.firstChild);
+}
+
+//trasform coords from image pixel space to map geo space
+wmsConnector.prototype.waitEnd =  function (){
+	self = wmsConnector;
+	var wait = getRawObject('wait');
+	if( wait)wait.parentNode.removeChild(wait);
+}

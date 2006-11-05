@@ -60,9 +60,21 @@
 	padding:0px;
 	position:relative;
 }
-#params {
-	display:none;
+#wait {
+	position:absolute;
+	width:640px;
+	height:480px;
+	z-index:10;
+	border:1px solid black;
+	font-size:2em;
+	color:rgb(0,159,0);
+	background-color:white;
+	padding-top:2em;
 	/*visibility:hidden;*/
+	text-align:center;
+    filter:alpha(opacity=75); 
+    -moz-opacity:0.75;
+    opacity:0.75; 
 }
 body {
 	margin:0;
@@ -72,12 +84,12 @@ body {
 }
 h1{
 	font-size:1.1em;
-	color: rgb(130,130,230);
+	color:rgb(0,159,0);
 }
 h2{
 	font-size:1em;
-	color: rgb(130,130,230);
-	border-bottom:1px solid rgb(130,130,230);
+	color: rgb(0,159,0);
+	border-bottom:1px solid rgb(0,159,0);
 	background-color:white;
 	margin:0;
 	padding:5px;

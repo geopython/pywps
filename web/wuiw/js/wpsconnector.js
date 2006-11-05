@@ -89,7 +89,6 @@ function wpsConnector(console) {
 	 var select = getRawObject('wpsserverlist');
 	 
 	 var url = select[select.selectedIndex].value;
-	 alert(url);
 	 if(url.length>0) {
 		 this.baseURL = url;
 	 } else {
@@ -112,6 +111,7 @@ function wpsConnector(console) {
 
     var connector = 'tools/proxy/proxy_xml.php?';
     var myURL = connector + 'owsURL='+myurlencode(this.baseURL);
+	self.waitStart();
     self.ajax.doGet(myURL, self.parseCapabilities,'xml');
  
  };
@@ -162,12 +162,14 @@ function wpsConnector(console) {
 			select[j++] = new Option(name,name,false,false);
 		}
 		self.formObj.appendChild(select);
-		var input = document.createElement('input');
+		/*var input = document.createElement('input');
 		input.type='button';
 		input.value='go';
 		input.processes=aProcess;
 		input.onclick=this.getProcess;
-		//self.formObj.appendChild(input);
+		//self.formObj.appendChild(input);*/
+		self.waitEnd();
+
  };
  
  
@@ -200,7 +202,8 @@ function wpsConnector(console) {
     var connector = 'tools/proxy/proxy_xml.php?';
     var myURL = connector + 'owsURL='+myurlencode(this.baseURL);
     //myURL = this.wpsConnector.addRequestParameter(myURL, 'com', "&com=getCapabilities" );
-    self.ajax.doGet(myURL, self.parseProcesses,'xml');
+    self.waitStart();
+	self.ajax.doGet(myURL, self.parseProcesses,'xml');
 	 
   };
   
@@ -250,27 +253,97 @@ function wpsConnector(console) {
 	   p.innerHTML = labstract;
 	   p.id = 'myp';
 	   description.appendChild(p);
-	  
+	   self.waitEnd();
+
+	  //draw form for this function
+
+	  var hr = document.createElement('hr');
+	  self.formObj.appendChild(hr);
+	  var input = document.createElement('input');
+		input.type='button';
+		input.value='execute';
+		input.onclick=this.wpsExecute;
+		self.formObj.appendChild(input);
+	  //appendChild(p);
+	  //
    };
 
+   wpsConnector.prototype.wpsExecute = function(){
+	   var self = wpsConnector;
+	  var select = getRawObject('processlist');
+	  var process = trim(select[select.selectedIndex].value);
+	  
+	   var select2 = getRawObject('wpsserverlist');
+	 var url = select2[select2.selectedIndex].value;
+	 
+	 if(process.length>0) this.baseURL = url;
+	 else { 
+		 alert('select a process first'); return;
+	 }
+	 if (this.baseURL.indexOf('?') == -1)
+    {
+        this.baseURL = this.baseURL + '?';
+    }
+    else
+    {
+        if (this.baseURL.charAt( this.baseURL.length - 1 ) == '&')
+            this.baseURL = this.baseURL.slice( 0, -1 );
+    }
+		//?service=wps&version=0.4.0&request=Execute
+		//&Identifier=visibility2&datainputs=....
+		//&status=true&store=true
+		var datainputs = 'x,603456,y,4922763,maxdist,1000,observer,3';
+		this.baseURL = this.baseURL + "&service=wps&request=Execute&version="+ self.version;
+		this.baseURL = this.baseURL +  "&identifier="+process ;
+		this.baseURL = this.baseURL +  "&datainputs="+datainputs ;
+		this.baseURL = this.baseURL +  "&status=true&store=true" ;
+		var connector = 'tools/proxy/proxy_xml.php?';
+		var myURL = connector + 'owsURL='+myurlencode(this.baseURL);
+		//self.waitStart();
+		self.ajax.doGet(myURL, self.parseExecute,'xml');
+   }
 
+wpsConnector.prototype.parseExecute = function (xml){
+	 //var tot = szText.getElemtentsByTagName('Process');
+	 //alert(typeof xml);
+	 var self = wpsConnector;
+	 if(typeof xml=='object'){
+		 //alert(xml);
+		 var aProcess = xml.getElementsByTagName('ProcessOutputs');
+		 if(aProcess.length>0){
+			// alert(this.id);
+			 self.drawExecuteOut(xml);
+		 } else {
+				alert('no ProcessOutputs available on this server');
+		 }
+	 } else {
+		alert('connection error: response is not an object');
+	 }
+ };
+ wpsConnector.prototype.drawExecuteOut = function (xml){
+	 var self= wpsConnector;
+	 var ComplexValueReference = xml.getElementsByTagName('ComplexValueReference');
+	 var outFormat = ComplexValueReference[0].getAttribute('format');
+	 var outReference = ComplexValueReference[0].getAttribute('ows:reference');
+	 alert(' Image url: ' + outReference + ' | image path: ' + outFormat );
+	 getRawObject('outimg').src = 'tools/proxy/proxy_mime.php?mime='+ unescape('image/png').replace(/\+/g," ") + '&wpsURL='+unescape(outReference).replace(/\+/g," ");
+	 getRawObject('debug').innerHTML = '<a href="tools/proxy/proxy_mime.php?mime='+ unescape('image/png').replace(/\+/g," ") + '&wpsURL='+unescape(outReference).replace(/\+/g," ")+'" target="_black">image show</a>';
+ } 
+//trasform coords from image pixel space to map geo space
+wpsConnector.prototype.waitStart =  function (){
+	self = wpsConnector;
+	var parent = getRawObject('output');
+	var wait = getRawObject('wait');
+	if( wait)wait.parentNode.removeChild(wait);
+	var div = document.createElement('div');
+	div.id = 'wait';
+	div.innerHTML ='downloading... please wait';
+	parent.insertBefore(div,parent.firstChild);
+}
 
-wpsConnector.prototype.getFeatures = function(sessionId,features)
-{
-  /*???*/
-  var featURL = this.server;
-  featURL = this.addRequestParameter(featURL, 'service', "&service=WFS" );
-  featURL =   this.addRequestParameter(featURL, 'request', "&request=GetFeature" );
-  featURL =   this.addRequestParameter(featURL, 'version', "&version="+this.version );
-  featURL =   this.addRequestParameter(featURL, 'typename', "&typename="+features );
- 
-  myURL = this.connector + 'wfsURL='+encodeMyHtml(featURL);
-  myURL =   this.addRequestParameter(myURL, 'sessionId', "&sessionId="+this.sessionId );
-  myURL =   this.addRequestParameter(myURL, 'com', "&com=getFeature" );
-  myURL =   this.addRequestParameter(myURL, 'epsg', "&epsg="+this.epsg );
-   //document.getElementById('legend').innerHTML = myURL;//DEBUG
-   
-  call(myURL,this, this.draw);
-  
-};
-
+//trasform coords from image pixel space to map geo space
+wpsConnector.prototype.waitEnd =  function (){
+	self = wpsConnector;
+	var wait = getRawObject('wait');
+	if( wait)wait.parentNode.removeChild(wait);
+}
