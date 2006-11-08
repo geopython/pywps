@@ -8,7 +8,6 @@ class Process:
         self.processVersion = "0.1"
         self.storeSupported = "true"
         self.Title="Find the shortes path on the roads map"
-        #self.grassLocation="/var/www/wps/spearfish60/"
         self.Inputs = [
                     {
                         'Identifier': 'streetmap',

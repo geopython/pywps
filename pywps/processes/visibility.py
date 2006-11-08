@@ -46,7 +46,7 @@ class Process:
         # Title - title for this process
         self.Title="Visibility analysis"
         self.Abstract="GRASS processed line of sight analysis."
-        self.grassLocation="/home/bnhelp/grassdata/mylocation/"
+        self.grassLocation="/var/www/wps/spearfish61/"
         
         #
         # Inputs

@@ -46,7 +46,7 @@ class Process:
         # Title - title for this process
         self.Title="Flow analysis"
         self.Abstract="GRASS processed r.flow analysis."
-        self.grassLocation="/home/bnhelp/grassdata/mylocation/"
+        self.grassLocation="/var/www/wps/spearfish61/"
         
         #
         # Inputs

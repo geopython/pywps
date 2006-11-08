@@ -8,7 +8,7 @@ class Process:
         self.processVersion = "0.1"
         self.storeSupported = "true"
         self.Title="Find the shortes path on the roads map on Spearfish dataset"
-        self.grassLocation="/var/www/wps/spearfish60/"
+        self.grassLocation="/var/www/wps/spearfish61/"
         self.Inputs = [
                     {
                         'Identifier': 'x1',

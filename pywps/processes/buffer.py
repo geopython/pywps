@@ -12,14 +12,14 @@ class Process:
         self.storeSupport = "true"
         self.Title="Create a buffer around a point "
         self.Abstract="Create a buffer around point"
-        self.grassLocation="/home/geko/progetti/grass/dati/spearfish61/"
+        self.grassLocation="/var/www/wps/spearfish61/"
         self.Inputs = [
                     # 0
                     {
    			'Identifier': 'point',
    			'Title': 'Input points',
    			'ComplexValueReference': {
-       			'Formats':["text"],
+       			'Formats':["text/plain"],
        				},
 		    },
 

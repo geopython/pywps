@@ -1,0 +1,55 @@
+Dear (new) PyWPS Developer,
+
+When submitting Python code to PyWPS SVN repository, please take
+care of following rules:
+
+1. Look in the User documentation [http://wald.intevation.org/docman/view.php/22/71/install.pdf], so that you know, how PyWPS is working with custom processes.
+
+2.  Add a header section to each file you submit and make sure you include
+    the copyright. The purpose section is meant to contain a general
+    overview of the code in the file to assist other programmers that will
+    need to make changes to your code.
+
+    Example (ficticious header for a file called color.c) :
+
+# Author:	Your Name
+#        	http://your.site
+# Lince: 
+# 
+# Your Process Description
+# Copyright (C) 2006 Your Name
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+    The copyright protects your rights according to GNU General Public
+    License (www.gnu.org).
+
+3.  If your process is using some GRASS location, please set the
+    self.grassLocation to "/var/www/wps/spearfish61/"
+
+4.  Do not fear to use "if" condition for os.system calls, so you can
+    check, if some external program failed or no:
+
+    def execute(self):
+        ...
+        if os.system("g.copy rast1,rast2"):
+            return "Failed to copy raster maps"
+
+5.  For lucidity purposes, you can use self.DataInputs['identifier'] and
+    self.DataOutputs['identifier'] rather then self.Inputs[0]['value']
+
+6.  In PyWPS SVN repository, only representation processes should be
+    stored. All other processes should go to PyWPS Addons, which is located
+    at PyWPS Wiki [http://pywps.ominiverdi.org/wiki]

@@ -12,8 +12,7 @@ class Process:
         self.storeSupported = "true"
         self.Title="Shortest path"
         self.Abstract="Find the shortes path on the roads map on Czech republic road network"
-        self.grassLocation="/home/bnhelp/grassdata/mylocation/"
-        #self.grassLocation="/var/www/wps/spearfish60/"
+        self.grassLocation="/var/www/wps/spearfish61/"
         self.Inputs = [
                     # 0
                     {
