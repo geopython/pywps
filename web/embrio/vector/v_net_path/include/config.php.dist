@@ -1,8 +1,8 @@
 <?php
-$script_name = 
-$map_path = 
-$map_file = 
-$img_path = 
-$pywps_path = 
-$cgi_executable= 
+$script_name = "name of your script";
+$map_path = "path/to/your/mapfile";
+$map_file = "yourmapfile.map"
+$img_path = "path/to/your/image/tmp_dir/";
+$pywps_path = "path/to/your/pywps/temp_dir"; #same as in settings.py
+$cgi_executable = "http://myserver.org/cgi-bin/pywps.py";
 ?>
