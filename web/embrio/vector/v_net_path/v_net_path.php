@@ -1,9 +1,39 @@
 <?php
-
+ /**********************************************************************
+ *
+ * purpose: a connector v.net.path GRASS function
+ *
+ * authors: Luca Casagrande (luca.casagrande@gmail.com) and Lorenzo Becchi (lorenzo@ominiverdi.com)
+ *
+ * TODO:
+ *   - a lot...
+ *
+ **********************************************************************
+ *
+ * Copyright (C) 2006 ominiverdi.org
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ **********************************************************************/
+ 
 // Parametri di default
 
-include ('include/config_dist.php');
- 
+if(file_exists('include/config.php')) include('include/config.php');
+else die('create your include/config.php using include/config.php.dist as template');
+
+
 // Crea l'oggetto map per il mapfile specificato
 
 $map = ms_newMapObj($map_path.$map_file);

@@ -28,7 +28,8 @@
  *
  **********************************************************************/
 
- include('include/config_dist.php');
+if(file_exists('include/config.php')) include('include/config.php');
+else die('create your include/config.php using include/config.php.dist as template');
 
 $map = ms_newMapObj($map_path.$map_file);
 
