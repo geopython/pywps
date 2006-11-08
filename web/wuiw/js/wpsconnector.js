@@ -36,8 +36,12 @@ function wpsConnector(console) {
     this.formObj;//obj to draw form fields
     this.version = '0.4.0';
     this.sessionId;
+	
+	//data sources Connector Object
+	this.owsConnector = owsConnector;
 
-	this.XMLcode = '';//temporaneo per metterci su il GML della feature
+	//temp XML storer
+	this.XMLcode = '';
 
  };
  
@@ -327,7 +331,7 @@ wpsConnector.prototype.parseExecute = function (xml){
 	 var outReference = ComplexValueReference[0].getAttribute('ows:reference');
 	 alert(' Image url: ' + outReference + ' | image path: ' + outFormat );
 	 getRawObject('outimg').src = 'tools/proxy/proxy_mime.php?mime='+ unescape('image/png').replace(/\+/g," ") + '&wpsURL='+unescape(outReference).replace(/\+/g," ");
-	 getRawObject('debug').innerHTML = '<a href="tools/proxy/proxy_mime.php?mime='+ unescape('image/png').replace(/\+/g," ") + '&wpsURL='+unescape(outReference).replace(/\+/g," ")+'" target="_blank">proxied image</a> <a href="'+outReference+'" target="_blank">result image</a>';
+	 getRawObject('debug').innerHTML = '<a href="tools/proxy/proxy_mime.php?mime='+ unescape('image/png').replace(/\+/g," ") + '&wpsURL='+unescape(outReference).replace(/\+/g," ")+'" target="_blank">proxied image (not working)</a> <a href="'+outReference+'" target="_blank">result image (working)</a>';
  } 
 //trasform coords from image pixel space to map geo space
 wpsConnector.prototype.waitStart =  function (){
@@ -341,6 +345,10 @@ wpsConnector.prototype.waitStart =  function (){
 	parent.insertBefore(div,parent.firstChild);
 }
 
+wpsConnector.prototype.addOwsConnector =  function (owsConnector){
+		self = wpsConnector;
+		self.owsConnector= owsConnector;
+}
 //trasform coords from image pixel space to map geo space
 wpsConnector.prototype.waitEnd =  function (){
 	self = wpsConnector;

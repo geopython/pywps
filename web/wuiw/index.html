@@ -47,21 +47,22 @@
 		<script type="text/javascript" src="js/layout.js"></script>
 		
 		<script type="text/javascript" src="js/wpsconnector.js"></script>
-		<script type="text/javascript" src="js/wmsconnector.js"></script>
+		<script type="text/javascript" src="js/owsconnector.js"></script>
 		<script type="text/javascript" src="js/console.js"></script>
 		<script type="text/javascript" >
 			function load(){
-				//create wms connector object
-				wmsConnector = new wmsConnector;
-				wmsConnector.addServer('ominiverdi.org wms service','http://www.ominiverdi.org/cgi-bin/mapserv?map=/home/doktoreas/data/wms/mapfile/pywps_wms_spearfish.map');
-				wmsConnector.addServer('DM Solutions wms service','http://www2.dmsolutions.ca/cgi-bin/mswms_gmap?');
-				wmsConnector.drawInitForm('wmsconnector');	
+				//create OWS connector object
+				owsConnector = new owsConnector;
+				//add server (name,url,type)
+				owsConnector.addServer('ominiverdi.org wcs service','http://www.ominiverdi.org/cgi-bin/mapserv?map=/home/doktoreas/data/wcs/mapfile/pywps_wcs_spearfish-r1.map','WCS');
 				//create wps connector object
 				wpsConnector = new wpsConnector;
 				//add  wps servers
 				wpsConnector.addServer('ominiverdi.org wps service','http://pywps.ominiverdi.org/cgi-bin/wps.py');
 				wpsConnector.addServer('ominiverdi.org server 2','http://pywps.ominiverdi.org/cgi-bin/wps.py');
 				wpsConnector.addServer('ominiverdi.org server 3','http://pywps.ominiverdi.org/cgi-bin/wps.py');
+				//add OWS server connector
+				wpsConnector.addOwsConnector(owsConnector);
 				//draw wps form interface
 				wpsConnector.drawInitForm('wpsconnector');	
 			};
