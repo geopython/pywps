@@ -37,7 +37,7 @@ $map = ms_newMapObj($map_path.$map_file);
     
 $map_id = sprintf("%0.6d",rand(0,999999));
 $image_name = "pywps".$map_id.".png";
-$image_url="/tmp/".$image_name;
+$image_url=$img_rel_path.$image_name;
 $image=$map->draw();
 $image->saveImage($img_path.$image_name);
 
@@ -50,7 +50,7 @@ if (isset($_POST['submit']))
         
 	$input_id = sprintf("%0.6d",rand(0,999999));
         $input_name = "input".$input_id.".txt";
-        $input_url="/var/www/localhost/htdocs/tmp/".$input_name;
+        $input_url=$img_path.$input_name;
   	$x=$_POST['x'];
 	$y=$_POST['y'];
         $array_cord = array($x,$y);
@@ -67,7 +67,7 @@ if (isset($_POST['submit']))
     $stringa_query .= "&status=true&store=true";
 
 //L'indirizzo completo Ã¨ terminato, estraggo il nome del file    
-
+//TODO: questa parte va debuggata cos“ com' fa un po' acqua
     $dom = new DOMDocument();
     $dom->load($stringa_query);
     $CVR = $dom->getElementsByTagName('ComplexValueReference');
@@ -76,7 +76,7 @@ if (isset($_POST['submit']))
 // Estrae il nome del file
     $aNodo = explode('/',$nodo);
     $filename = end($aNodo);
-    $pywps_path.=$filename;
+    $pywps_outputPath.=$filename;
 
 // Aggiorna il mapfile con il file creato e visualizza il layer
    $layer = ms_newLayerObj($map);
@@ -96,10 +96,11 @@ if (isset($_POST['submit']))
 
     $map_id = sprintf("%0.6d",rand(0,999999));
     $image_name = "pywps".$map_id.".png";
-    $image_url="/tmp/".$image_name;
+    $image_url="tmp/".$image_name;
     $image=$map->draw();
     $image->saveImage($img_path.$image_name);
-    $map->save("/var/www/localhost/htdocs/tmp/mapfile_buffer.map");
+	//non dovrebbe esserci bisogno di salvare questo mapfile
+    $map->save($pywps_outputPath."/mapfile_buffer.map");
 }
 
 ?>
@@ -131,19 +132,19 @@ if (isset($_POST['submit']))
     	</p>
 	<p>
          X:<br />
-         	<input type=text name="x" size="20" maxlength="40" value="" />
+         	<input type=text name="x" size="20" maxlength="10" value="594790" />
     	</p>
 	
 	<p>
          Y:<br />
-         <input type=text name="y" size="20" maxlength="40" value="" />
+         <input type=text name="y" size="20" maxlength="10" value="4921822" />
     	</p>
     
 	<p>
         
 	<p>
          Radius:<br />
-         	<input type=text name="radius" size="20" maxlength="40" value="" />
+         	<input type=text name="radius" size="20" maxlength="4" value="1000" />
     	</p>
 	
 	
