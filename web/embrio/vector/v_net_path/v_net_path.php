@@ -2,7 +2,7 @@
 
 // Parametri di default
 
-include ('include/config.php');
+include ('include/config_dist.php');
  
 // Crea l'oggetto map per il mapfile specificato
 
@@ -22,8 +22,8 @@ $map = ms_newMapObj($map_path.$map_file);
 
 if (isset($_POST['submit']))
     {
-    
-    $stringa_query = "http://pywps.ominiverdi.org/cgi-bin/wps.py?service=wps&version=0.4.0&request=Execute&Identifier=shortestpath2&";
+    $stringa_query = $cgi_executable."?service=wps&version=0.4.0&request=Execute&Identifier=shortestpath2&";
+    #$stringa_query = "http://localhost/cgi-bin/wps.py?service=wps&version=0.4.0&request=Execute&Identifier=shortestpath2&";
     $array = array('x1', $_POST['x1value'],'y1',$_POST['y1value'],'x2', $_POST['x2value'],'y2',$_POST['y2value'],'cost',$_POST['cost']);
     $comma_separated = implode(",", $array);
     $stringa_query .= "datainputs=";

@@ -1,24 +1,44 @@
 <?php
+ /**********************************************************************
+ *
+ * purpose: a connector v.buff GRASS function
+ *
+ * authors: Luca Casagrande (luca.casagrande@gmail.com) and Lorenzo Becchi (lorenzo@ominiverdi.com)
+ *
+ * TODO:
+ *   - a lot...
+ *
+ **********************************************************************
+ *
+ * Copyright (C) 2006 ominiverdi.org
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ **********************************************************************/
 
-// Parametri di default
+ include('include/config_dist.php');
 
-$script_name = "buffer.php";
-$map_path = "/home/geko/progetti/mapfile/";
-$map_file = "buffer.map";
-$img_path = "/var/www/localhost/htdocs/tmp/";
-$pywps_path = "/var/www/localhost/htdocs/wps/wpsoutputs/";
-
-// Crea l'oggetto map per il mapfile specificato
-
-	$map = ms_newMapObj($map_path.$map_file);
+$map = ms_newMapObj($map_path.$map_file);
 
 // Creo la prima immagine
     
-	$map_id = sprintf("%0.6d",rand(0,999999));
-        $image_name = "pywps".$map_id.".png";
-        $image_url="/tmp/".$image_name;
-        $image=$map->draw();
-        $image->saveImage($img_path.$image_name);
+$map_id = sprintf("%0.6d",rand(0,999999));
+$image_name = "pywps".$map_id.".png";
+$image_url="/tmp/".$image_name;
+$image=$map->draw();
+$image->saveImage($img_path.$image_name);
 
 // Il form viene inviato
 
@@ -38,14 +58,12 @@ if (isset($_POST['submit']))
 
 //Crea la richiesta per pywps
     
-   $stringa_query = "http://localhost/cgi-bin/wps.py?service=wps&version=0.4.0&request=Execute&Identifier=buffer&";
+   $stringa_query = $cgi_executable."?service=wps&version=0.4.0&request=Execute&Identifier=buffer&";
     $array = array('point',$input_url,'radius',$_POST['radius']);
     $comma_separated = implode(",", $array);
     $stringa_query .= "datainputs=";
     $stringa_query .= $comma_separated;
     $stringa_query .= "&status=true&store=true";
-    #var_dump($stringa_query);
-    #die();
 
 //L'indirizzo completo è terminato, estraggo il nome del file    
 
@@ -60,13 +78,13 @@ if (isset($_POST['submit']))
     $pywps_path.=$filename;
 
 // Aggiorna il mapfile con il file creato e visualizza il layer
-        $layer = ms_newLayerObj($map);
-        $layer->set('name', "buffer");
-	$layer->set('status', MS_DEFAULT );
-	$layer->set('connection', $pywps_path);
-	$layer->set('type', MS_LAYER_POLYGON);
-  	$layer->set('transparency',"50");
-	$layer->set('connectiontype',MS_OGR);  
+   $layer = ms_newLayerObj($map);
+   $layer->set('name', "buffer");
+   $layer->set('status', MS_DEFAULT );
+   $layer->set('connection', $pywps_path);
+   $layer->set('type', MS_LAYER_POLYGON);
+   $layer->set('transparency',"50");
+   $layer->set('connectiontype',MS_OGR);  
         $class = ms_newClassObj($layer);
 	$style = ms_newStyleObj($class);
         $style=$class->getStyle(0);
