@@ -58,34 +58,15 @@ function startUp(){
 	//get params
 	map_extent = document.getElementById('map_extent').value;
 	map_extent = map_extent.split(',');
-	height_extent = document.getElementById('height_extent').value.split(',');
-	height_unit = parseInt((height_extent[1]-height_extent[0])/steps*100)/100;
-	distance_extent = document.getElementById('distance_extent').value.split(',');
-	distance_unit = parseInt((distance_extent[1]-distance_extent[0])/steps*100)/100;
+	//height_extent = document.getElementById('height_extent').value.split(',');
+	//height_unit = parseInt((height_extent[1]-height_extent[0])/steps*100)/100;
+	//distance_extent = document.getElementById('distance_extent').value.split(',');
+	//distance_unit = parseInt((distance_extent[1]-distance_extent[0])/steps*100)/100;
 	
 	//print ranges
-	getRawObject('observer_range').innerHTML = height_extent[0] + ' -&gt; ' + height_extent[1]; 
-	getRawObject('maxdist_range').innerHTML = distance_extent[0] + ' -&gt; ' + distance_extent[1]; 
+	//getRawObject('observer_range').innerHTML = height_extent[0] + ' -&gt; ' + height_extent[1]; 
+	//getRawObject('maxdist_range').innerHTML = distance_extent[0] + ' -&gt; ' + distance_extent[1]; 
 	
-	//update selects
-	var maxdist = getRawObject('maxdist');
-	var observer = getRawObject('observer');
-	var height = parseInt(height_extent[0]);
-	var distance = parseInt(distance_extent[0]);
-    for(i=0;i<=steps;i++) {
-        if(i==steps){
-			height = parseInt(height_extent[1]);
-			distance = parseInt(distance_extent[1]);
-			maxdist[i] = new Option(distance,distance,false,false);
-			observer[i] = new Option(height,height,false,false);
-		} else{  
-			maxdist[i] = new Option(distance,distance,false,false);
-			observer[i] = new Option(height,height,false,false);
-		}
-		
-		height = parseInt((height + height_unit)*100)/100;
-		distance = parseInt(distance + distance_unit);
-    }
 	
 	//set button event
 	getRawObject('go').onclick = runPywps;
