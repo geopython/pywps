@@ -41,17 +41,25 @@ $map = ms_newMapObj($map_path.$map_file);
 
 
 // Crea la prima immagine
-    
 	$map_id = sprintf("%0.6d",rand(0,999999));
-        $image_name = "pywps".$map_id.".png";
-        $image_url="/tmp/".$image_name;
-        $image=$map->draw();
-        $image->saveImage($img_path.$image_name);
+	$image_name = "pywps".$map_id.".png";
+	$image_url=$img_rel_path.$image_name;
+	$image=$map->draw();
+	$image->saveImage($img_path.$image_name);
 
 // Il form viene inviato
 
 if (isset($_POST['submit']))
     {
+    
+    // Verifica l esattezza dei parametri inseriti
+    
+
+if ($_POST['cost'] != 0) {
+      die ("Sorry in this example, the path can't be selected using a cost parameter.Please assign 0 to the cost form");
+   } else 
+   
+   {
     $stringa_query = $cgi_executable."?service=wps&version=0.4.0&request=Execute&Identifier=shortestpath2&";
     #$stringa_query = "http://localhost/cgi-bin/wps.py?service=wps&version=0.4.0&request=Execute&Identifier=shortestpath2&";
     $array = array('x1', $_POST['x1value'],'y1',$_POST['y1value'],'x2', $_POST['x2value'],'y2',$_POST['y2value'],'cost',$_POST['cost']);
@@ -70,13 +78,13 @@ if (isset($_POST['submit']))
 // Estrae il nome del file
     $aNodo = explode('/',$nodo);
     $filename = end($aNodo);
-    $pywps_path.=$filename;
+    $pywps_outputPath.=$filename;
 
 // Aggiorna il mapfile con il file creato e visualizza il layer
         $layer = ms_newLayerObj($map);
         $layer->set('name', "path");
 	$layer->set('status', MS_DEFAULT );
-	$layer->set('connection', $pywps_path);
+	$layer->set('connection', $pywps_outputPath);
 	$layer->set('type', MS_LAYER_LINE);
   	$layer->set('connectiontype',MS_OGR);  
         $class = ms_newClassObj($layer);
@@ -84,20 +92,17 @@ if (isset($_POST['submit']))
         $style=$class->getStyle(0);
 	$style->color->setRGB( 255,0,0);
         
-
-        
-
-
 // Creo l'immagine
-
+    
     $map_id = sprintf("%0.6d",rand(0,999999));
     $image_name = "pywps".$map_id.".png";
-    $image_url="/tmp/".$image_name;
+    $image_url=$img_rel_path.$image_name;
     $image=$map->draw();
     $image->saveImage($img_path.$image_name);
-    #$map->save("/var/www/localhost/htdocs/tmp/mapfile_net.map");
+//non dovrebbe esserci bisogno di salvare questo mapfile
+    $map->save($img_path."/mapfile_path.map");
 }
-
+}
 ?>
 <html>
 <head><title>Samplepage</title></head>
