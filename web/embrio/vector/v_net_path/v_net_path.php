@@ -57,10 +57,12 @@ if (isset($_POST['submit']))
 
 if ($_POST['cost'] != 0) {
       die ("Sorry in this example, the path can't be selected using a cost parameter.Please assign 0 to the cost form");
-   } 
-    else 
-   
-   {
+}  
+elseif ($_POST['x1value']  < 589435 |  $_POST['y1value']  < 4914010 | $_POST['x1value']  > 609527 |  $_POST['y1value'] >  4928060) { 
+	die("The first point it's outside the extent. Please use suggested value.");
+} elseif ($_POST['x2value']  < 589435 |  $_POST['y2value']  < 4914010 | $_POST['x2value']  > 609527 |  $_POST['y2value'] >  4928060) { 
+	die("The second point it's outside the extent. Please use suggested value.");
+}  else    {
     $stringa_query = $cgi_executable."?service=wps&version=0.4.0&request=Execute&Identifier=shortestpath2&";
     #$stringa_query = "http://localhost/cgi-bin/wps.py?service=wps&version=0.4.0&request=Execute&Identifier=shortestpath2&";
     $array = array('x1', $_POST['x1value'],'y1',$_POST['y1value'],'x2', $_POST['x2value'],'y2',$_POST['y2value'],'cost',$_POST['cost']);
