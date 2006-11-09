@@ -60,7 +60,7 @@ if ($_POST['radius'] > $maxradius) {
 //Crea la richiesta per pywps
     
    $stringa_query = $cgi_executable."?service=wps&version=0.4.0&request=Execute&Identifier=buffer&";
-    $array = array('point',$input_url,'radius',$_POST['radius']);
+    $array = array('point',$input_url,'radius',$_REQUEST['radius']);
     $comma_separated = implode(",", $array);
     $stringa_query .= "datainputs=";
     $stringa_query .= $comma_separated;
