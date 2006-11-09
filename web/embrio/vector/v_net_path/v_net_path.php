@@ -135,29 +135,29 @@ if ($_POST['cost'] != 0) {
     	</p>
 	<p>
          X1:<br />
-         	<input type=text name="x1value" size="20" maxlength="40" value="" />
+         	<input type=text name="x1value" size="20" maxlength="40" value="590436" />
     	</p>
 	
 	<p>
          Y1:<br />
-         <input type=text name="y1value" size="20" maxlength="40" value="" />
+         <input type=text name="y1value" size="20" maxlength="40" value="4927222" />
     	</p>
     
 	<p>
         
 	<p>
          X2:<br />
-         	<input type=text name="x2value" size="20" maxlength="40" value="" />
+         	<input type=text name="x2value" size="20" maxlength="40" value="608598" />
     	</p>
 	
 	<p>
          Y2:<br />
-         <input type=text name="y2value" size="20" maxlength="40" value="" />
+         <input type=text name="y2value" size="20" maxlength="40" value="4915649" />
     	</p>
     
 	<p>
 	Cost:<br />
-         	<input type=text name="cost" size="20" maxlength="40" value="" />
+         	<input type=text name="cost" size="20" maxlength="40" value="0" />
     	</p>
 	
 	<input type="submit" name = "submit" value="Go!" /> </td></tr>

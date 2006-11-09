@@ -50,9 +50,12 @@ if (isset($_POST['submit']))
 $maxradius = 3000;
 
 if ($_POST['radius'] > $maxradius) {
-      die ("Sorry in this example, radius can't be greater of $maxradius");
-   } else 
+      die ("In this example, radius can't be greater of $maxradius.Please use suggested value.");
    
+   } elseif ($_POST['x']  < 589435 |  $_POST['y']  < 4914010 | $_POST['x']  > 609527 |  $_POST['y'] >  4928060) {
+     die("The point it's outside the extent. Please use suggested value.");
+     
+     }else
    {
       
 //Crea il file contenente le coordinate
@@ -142,19 +145,19 @@ if ($_POST['radius'] > $maxradius) {
     	</p>
 	<p>
          X:<br />
-         	<input type=text name="x" size="20" maxlength="10" value="594790" />
+         	<input type=text name="x" size="20" maxlength="6" value="594790" max="609527" />
     	</p>
 	
 	<p>
          Y:<br />
-         <input type=text name="y" size="20" maxlength="10" value="4921822" />
+         <input type=text name="y" size="20" maxlength="7" value="4921822" max="4928060" />
     	</p>
     
 	<p>
         
 	<p>
          Radius:<br />
-         	<input type=text name="radius" size="20" maxlength="4" value="1000" />
+         	<input type=text name="radius" size="20" maxlength="4" value="1000" max="3000" />
     	</p>
 	
 	
