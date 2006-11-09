@@ -57,7 +57,8 @@ if (isset($_POST['submit']))
 
 if ($_POST['cost'] != 0) {
       die ("Sorry in this example, the path can't be selected using a cost parameter.Please assign 0 to the cost form");
-   } else 
+   } 
+    else 
    
    {
     $stringa_query = $cgi_executable."?service=wps&version=0.4.0&request=Execute&Identifier=shortestpath2&";
@@ -135,29 +136,29 @@ if ($_POST['cost'] != 0) {
     	</p>
 	<p>
          X1:<br />
-         	<input type=text name="x1value" size="20" maxlength="40" value="590436" />
+         	<input type=text name="x1value" size="20" maxlength="6" value="590436" />
     	</p>
 	
 	<p>
          Y1:<br />
-         <input type=text name="y1value" size="20" maxlength="40" value="4927222" />
+         <input type=text name="y1value" size="20" maxlength="7" value="4927222" />
     	</p>
     
 	<p>
         
 	<p>
          X2:<br />
-         	<input type=text name="x2value" size="20" maxlength="40" value="608598" />
+         	<input type=text name="x2value" size="20" maxlength="6" value="608598" />
     	</p>
 	
 	<p>
          Y2:<br />
-         <input type=text name="y2value" size="20" maxlength="40" value="4915649" />
+         <input type=text name="y2value" size="20" maxlength="7" value="4915649" />
     	</p>
     
 	<p>
 	Cost:<br />
-         	<input type=text name="cost" size="20" maxlength="40" value="0" />
+         	<input type=text name="cost" size="20" maxlength="1" value="0" />
     	</p>
 	
 	<input type="submit" name = "submit" value="Go!" /> </td></tr>
