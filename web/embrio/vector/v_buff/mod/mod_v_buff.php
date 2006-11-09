@@ -36,11 +36,11 @@
     
 	$maxradius = 3000;
 
-if ($_POST['radius'] > $maxradius) {
+if ($_REQUEST['radius'] > $maxradius) {
       die ("In this example, radius can't be greater of $maxradius.Please use suggested value.");
    
    /*} 
-   elseif ($_POST['x']  < 589435 ||  $_POST['y']  < 4914010 || $_POST['x']  > 609527 ||  $_POST['y'] >  4928060) {
+   elseif ($_REQUEST['x']  < 589435 ||  $_REQUEST['y']  < 4914010 || $_REQUEST['x']  > 609527 ||  $_REQUEST['y'] >  4928060) {
      die("The point it's outside the extent. Please use suggested value.");
      */
      }else
@@ -51,8 +51,8 @@ if ($_POST['radius'] > $maxradius) {
 	$input_id = sprintf("%0.6d",rand(0,999999));
         $input_name = "input".$input_id.".txt";
         $input_url=$img_path.$input_name;
-  	$x=$_POST['x'];
-	$y=$_POST['y'];
+  	$x=$_REQUEST['xvalue'];
+	$y=$_REQUEST['yvalue'];
         $array_cord = array($x,$y);
         $coord = implode(",", $array_cord);
 	file_put_contents($input_url,$coord);
@@ -70,9 +70,7 @@ if ($_POST['radius'] > $maxradius) {
 //TODO: questa parte va debuggata cos“ com' fa un po' acqua
     $dom = new DOMDocument();
     $dom->load($stringa_query);
-	echo "<p>$stringa_query = $stringa_query</p>";
-	print_r($dom);
-	die;
+	
     $CVR = $dom->getElementsByTagName('ComplexValueReference');
     $nodo = $CVR->item(0)->getAttribute('reference');
     
