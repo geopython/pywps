@@ -136,6 +136,7 @@ elseif ($_POST['x1value']  < 589435 |  $_POST['y1value']  < 4914010 | $_POST['x1
 	<p>
 	Cost=0  
     	</p>
+		<p>extent: 589435,4914010,609527,4928060</p>
 	<p>
          X1:<br />
          	<input type=text name="x1value" size="20" maxlength="6" value="590436" />

@@ -52,7 +52,7 @@ $maxradius = 3000;
 if ($_POST['radius'] > $maxradius) {
       die ("In this example, radius can't be greater of $maxradius.Please use suggested value.");
    
-   } elseif ($_POST['x']  < 589435 |  $_POST['y']  < 4914010 | $_POST['x']  > 609527 |  $_POST['y'] >  4928060) {
+   } elseif ($_POST['x']  < 589435 ||  $_POST['y']  < 4914010 || $_POST['x']  > 609527 ||  $_POST['y'] >  4928060) {
      die("The point it's outside the extent. Please use suggested value.");
      
      }else
