@@ -34,6 +34,9 @@ window.onload=startUp;
 var isCSS, isW3C, isIE4, isNN4;
 
 
+//MODULE NAME
+var module_path = 'mod/mod_v_buff.php';
+
 //MAP variables
 var outimg;
 var map_extent;
@@ -78,11 +81,10 @@ function runPywps(){
 		alert('click on map for coords first');
 		return;
 	}
-	var maxdistSel = getRawObject('maxdist');
-	var maxdist= maxdistSel.options	[maxdistSel.selectedIndex].value;
-	var observerSel = getRawObject('observer');
-	var observer = observerSel.options[observerSel.selectedIndex].value;
-	var url = 'mod/r_los.php?xvalue='+input_x+'&yvalue='+input_y+'&maxdist='+maxdist+'&observer='+observer;
+	//Find value in the form and create the request url
+	var radiusInput = getRawObject('radius');
+	var radius= radiusInput.value;
+	var url = module_path+'?xvalue='+input_x+'&yvalue='+input_y+'&radius='+radius;
 	
 	call(url, this, parsePywpsOut);
 }

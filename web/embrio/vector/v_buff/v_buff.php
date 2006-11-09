@@ -165,7 +165,7 @@ if ($_POST['radius'] > $maxradius) {
 	
 	<p>
 	Radius:<br />
-	<input type=text name="radius" size="20" maxlength="4" value="1000" max="3000" />
+	<input type=text name="radius"  id="radius" size="20" maxlength="4" value="1000" max="3000" />
 	</p>
 	
 	
@@ -177,6 +177,8 @@ if ($_POST['radius'] > $maxradius) {
 	-->
 	<input type="hidden" name="map_extent" id="map_extent" value="588913.043478,4913700.000000,610066.956522,4928010.000000">
  </form>
+ </div>
+ <div id="console">
  </div>
 </body>
 </html>
