@@ -82,7 +82,7 @@ if (isset($_POST['submit']))
    $layer = ms_newLayerObj($map);
    $layer->set('name', "buffer");
    $layer->set('status', MS_DEFAULT );
-   $layer->set('connection', $pywps_path);
+   $layer->set('connection', $pywps_outputPath);
    $layer->set('type', MS_LAYER_POLYGON);
    $layer->set('transparency',"50");
    $layer->set('connectiontype',MS_OGR);  
@@ -96,7 +96,7 @@ if (isset($_POST['submit']))
 
     $map_id = sprintf("%0.6d",rand(0,999999));
     $image_name = "pywps".$map_id.".png";
-    $image_url="tmp/".$image_name;
+    $image_url=$img_rel_path.$image_name;
     $image=$map->draw();
     $image->saveImage($img_path.$image_name);
 	//non dovrebbe esserci bisogno di salvare questo mapfile
