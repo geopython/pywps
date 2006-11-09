@@ -100,7 +100,7 @@ if (isset($_POST['submit']))
     $image=$map->draw();
     $image->saveImage($img_path.$image_name);
 	//non dovrebbe esserci bisogno di salvare questo mapfile
-    $map->save($pywps_outputPath."/mapfile_buffer.map");
+    $map->save($img_path."/mapfile_buffer.map");
 }
 
 ?>
