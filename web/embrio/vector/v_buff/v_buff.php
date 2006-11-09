@@ -169,7 +169,7 @@ if ($_POST['radius'] > $maxradius) {
 	</p>
 	
 	
-	<input type="submit" name = "submit" value="Go!" /> </td></tr>
+	<input type="button" name="submit" id="go" value="Go!" />
 	</fieldset>
 	<!-- 
 		INTERFACE PARAMS
