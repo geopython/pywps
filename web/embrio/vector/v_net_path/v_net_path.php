@@ -125,10 +125,10 @@ if ($_POST['cost'] != 0) {
 	For this test please input this value (javascript check are not jet implemented)
 	</p> 
 	<p>
-	x1=594790 y1=4921822  
+	x1=590436 y1=4927222  
     	</p>
 	<p>
-	x2=596367 y2=4924878 
+	x2=608598 y2=4915649 
     	</p>
 	<p>
 	Cost=0  
