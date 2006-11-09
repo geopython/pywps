@@ -70,6 +70,9 @@ if ($_POST['radius'] > $maxradius) {
 //TODO: questa parte va debuggata cos“ com' fa un po' acqua
     $dom = new DOMDocument();
     $dom->load($stringa_query);
+	echo "<p>$stringa_query = $stringa_query</p>";
+	print_r($dom);
+	die;
     $CVR = $dom->getElementsByTagName('ComplexValueReference');
     $nodo = $CVR->item(0)->getAttribute('reference');
     
