@@ -45,7 +45,16 @@ $image->saveImage($img_path.$image_name);
 
 if (isset($_POST['submit']))
     	{
+// Verifica l esattezza dei parametri inseriti
 
+$maxradius = 3000;
+
+if ($_POST['radius'] > $maxradius) {
+      die ("Sorry in this example, radius can't be greater of $maxradius");
+   } else 
+   
+   {
+      
 //Crea il file contenente le coordinate
         
 	$input_id = sprintf("%0.6d",rand(0,999999));
@@ -101,6 +110,7 @@ if (isset($_POST['submit']))
     $image->saveImage($img_path.$image_name);
 	//non dovrebbe esserci bisogno di salvare questo mapfile
     $map->save($img_path."/mapfile_buffer.map");
+}
 }
 
 ?>
