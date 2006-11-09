@@ -108,8 +108,13 @@ elseif ($_POST['x1value']  < 589435 |  $_POST['y1value']  < 4914010 | $_POST['x1
 }
 ?>
 <html>
-<head><title>Samplepage</title></head>
-<body bgcolor="#E6E6E6">
+<head>
+	<title>PyWPS v.buffer example by ominiverdi.org</title>
+	<script type="text/javascript" src="../../js/xhr.js"></script>
+	<script type="text/javascript" src="js/startUp.js"></script>
+	<link href="../../css/screen.css" rel="stylesheet" type="text/css" media="all">
+</head>
+<body>
 
  
 

@@ -70,11 +70,16 @@ if(extension_loaded('MapScript'))
 	<body>
         
 <div id="header">
-	<h1>GRASS visibility module</h1>
+	<h1>GRASS Buffer module</h1>
 	<p>
-		<strong>r.los</strong> generates a raster map output in which the cells that are visible from a user-specified observer location are marked with integer values that represent the vertical angle (in degrees) required to see those cells (viewshed).
-
-	</p>
+	For this test please input this value (javascript check are not jet implemented)
+	</p> 
+	<p>
+	x=594790 y=4921822  
+    	</p>
+	<p>
+	Radius=1000
+    	</p>
 	<p><strong>Usage:</strong> click on map to set <em>coords</em>. Use selects to change <em>distance</em> and
 	<em>height</em> params.<br>
 	Then click on <strong>Go!</strong> button to see overlayed output.

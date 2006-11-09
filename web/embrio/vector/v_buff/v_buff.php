@@ -118,22 +118,17 @@ if ($_POST['radius'] > $maxradius) {
 
 ?>
 <html>
-<head><title>Test for buffer function</title></head>
-<body bgcolor="#E6E6E6">
+<head>
+	<title>PyWPS v.net.path example by ominiverdi.org</title>
+	<script type="text/javascript" src="../../js/xhr.js"></script>
+	<script type="text/javascript" src="js/startUp.js"></script>
+	<link href="../../css/screen.css" rel="stylesheet" type="text/css" media="all">
+</head>
+<body>
 
- 
 
-  <table width="80%" border="1">
-
-   <tr><td width="60%" rowspan="6">
-        
-	<input  name="img" type="image" src="<?php echo $image_url;?>"
-         	width=640 height=480 border=2></td>
-
-       <td width="40%" align="left" colspan="3">
-        <form method=post action="<?php echo $script_name;?>">
-
-	GRASS Buffer module
+<div id="header">
+	<h1>GRASS Buffer module</h1>
 	<p>
 	For this test please input this value (javascript check are not jet implemented)
 	</p> 
@@ -143,29 +138,41 @@ if ($_POST['radius'] > $maxradius) {
 	<p>
 	Radius=1000
     	</p>
-	<p>
-         X:<br />
-         	<input type=text name="x" size="20" maxlength="6" value="594790" max="609527" />
-    	</p>
+
+	</p>
+	<p><strong>Usage:</strong> click on map to set <em>coords</em>. Use selects to change <em>distance</em> and
+	<em>height</em> params.<br>
+	Then click on <strong>Go!</strong> button to see overlayed output.
+	</p>
+</div>
+ 
+
+<div id="output">
+<img id="outimg" src="<?=$image_url;?>" width="640" height="480" />
+</div>
+        
+<div  id="params">
+	<form method="post" action="<?php echo $script_name;?>">
+	<fieldset>
+	<legend>Params</legend>
+	
+	<label>X:</label><span id="xvalue_span">0</span> 
+	<input type="hidden" name="xvalue" id="xvalue" size="20" maxlength="40" value="599043" />		
+	
+	<label>Y:</label><span id="yvalue_span">0</span> 
+	<input type="hidden" name="yvalue" id="yvalue" size="20" maxlength="40" value="4921752" />
+	
 	
 	<p>
-         Y:<br />
-         <input type=text name="y" size="20" maxlength="7" value="4921822" max="4928060" />
-    	</p>
-    
-	<p>
-        
-	<p>
-         Radius:<br />
-         	<input type=text name="radius" size="20" maxlength="4" value="1000" max="3000" />
-    	</p>
+	Radius:<br />
+	<input type=text name="radius" size="20" maxlength="4" value="1000" max="3000" />
+	</p>
 	
 	
 	<input type="submit" name = "submit" value="Go!" /> </td></tr>
-
-   
-  </table>
+	</fieldset>
  </form>
+ </div>
 </body>
 </html>
 	
