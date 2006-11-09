@@ -1,4 +1,13 @@
-pywps (1.0.0rc3-1) unstable; urgency=low
+pywps (1.0.0-1) stable; urgency=low
+
+  1.0.0 Stable
+  Changes since RC3:
+  * Fixed HTTP POST method
+  * Added longer name for PyWPS PID file
+  * Fixed small bug in BoundingBox 
+
+ -- Jachym Cepicky <jachym@les-ejk.cz>  Fri, 2 Nov 2006 15:38:00 +0200
+ pywps (1.0.0rc3-1) unstable; urgency=low
 
   * Release candidate 3
 

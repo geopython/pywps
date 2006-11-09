@@ -12,7 +12,7 @@ should be as easy as possible.
 """
 
 classifiers=[
-          'Development Status :: 1.0rc3',
+          'Development Status :: 1.0.0',
           'Environment :: CGI',
           'Environment :: Web Environment',
           'Intended Audience :: Developers',
@@ -33,14 +33,14 @@ doclines = __doc__.split("\n")
 
 setup(
         name = 'pywps',
-        version = '1.0rc3',
+        version = '1.0.0',
         maintainer="Jachym Cepicky",
-        maintainer_email = 'jachym.cepicky@centrum.cz',
+        maintainer_email = 'jachym.cepicky@les-ejk.cz',
         author = 'Jachym Cepicky',
-        author_email = 'jachym.cepicky@centrum.cz',
-        url = 'http://pywps.wald.intevation.de',
+        author_email = 'jachym.cepicky@les-ejk.cz',
+        url = 'http://pywps.wald.intevation.org',
         license = "http://www.gnu.org/licenses/gpl.html",
-        download_url="http://pywps.wald.intevation.de",
+        download_url="http://pywps.wald.intevation.org",
         description=doclines[0],
         platforms=["any"],
         classifiers= classifiers,
