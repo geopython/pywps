@@ -7,7 +7,7 @@ body {
 	padding:0;
 }
 #header {
-	background: #999 url("pywps.png") no-repeat 98% 5px ;
+	background: #999 url(img/pywps.png) no-repeat 98% 5px ;
 	height:120px;
 	color:white;
 	padding:0;
@@ -89,8 +89,8 @@ features of given type (areas must contain centroid).</li>
 <h2>Developers</h2>
 <div class="subcontent">
 <ul>
-<li><strong>doktoreas</strong></li>
-<li><strong>ominiverdi</strong></li>
+<li><strong>doktoreas</strong><img src="img/ominoverde.png" width="25" height="25"></li>
+<li><strong>ominiverdi</strong><img src="img/ominoverde.png" width="25" height="25"></li>
 <!--<li><strong>kappu</strong></li>-->
 </ul>
 </div>
