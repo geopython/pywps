@@ -158,8 +158,8 @@ function pix2geo (pX,pY){
 	//(gX-minX):pX=dX:imgW;
 	//alert(dX + ' ' + dY);
 
-	var gX = parseInt(minX) + pX * dX/imgW;
-    var gY = parseInt(minY) + pY * dY/imgH;
+  var gX = parseInt(minX) + pX * dX/imgW;
+  var gY = parseInt(minY) + pY * dY/imgH;
     gX = parseInt(gX);
     gY = parseInt(gY);
 return [gX, gY];
