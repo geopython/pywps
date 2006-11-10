@@ -109,7 +109,7 @@ elseif ($_POST['x1value']  < 589435 |  $_POST['y1value']  < 4914010 | $_POST['x1
 ?>
 <html>
 <head>
-	<title>PyWPS v.buffer example by ominiverdi.org</title>
+	<title>PyWPS v.net.path example by ominiverdi.org</title>
 	<script type="text/javascript" src="../../js/xhr.js"></script>
 	<script type="text/javascript" src="js/startUp.js"></script>
 	<link href="../../css/screen.css" rel="stylesheet" type="text/css" media="all">
@@ -118,61 +118,61 @@ elseif ($_POST['x1value']  < 589435 |  $_POST['y1value']  < 4914010 | $_POST['x1
 
  
 
-  <table width="80%" border="1">
 
-   <tr><td width="60%" rowspan="6">
-        
-	<input  name="img" type="image" src="<?php echo $image_url;?>"
-         	width=640 height=480 border=2></td>
 
-       <td width="40%" align="left" colspan="3">
-        <form method=post action="<?php echo $script_name;?>">
-
-	GRASS Shortest path module
+<div id="header">
+	<h1>GRASS Routing module (v.net.path)</h1>
 	<p>
-	For this test please input this value (javascript check are not jet implemented)
+	Find shortest path on vector network.
 	</p> 
-	<p>
-	x1=590436 y1=4927222  
-    	</p>
-	<p>
-	x2=608598 y2=4915649 
-    	</p>
-	<p>
-	Cost=0  
-    	</p>
-		<p>extent: 589435,4914010,609527,4928060</p>
-	<p>
-         X1:<br />
-         	<input type=text name="x1value" size="20" maxlength="6" value="590436" />
-    	</p>
 	
-	<p>
-         Y1:<br />
-         <input type=text name="y1value" size="20" maxlength="7" value="4927222" />
-    	</p>
-    
-	<p>
+
+	</p>
+	<p><strong>Usage:</strong> click on map to set <em>coords</em> of <strong>start</strong> and <strong>end</strong> point.<br>
+	Then click on <strong>Go!</strong> button to see overlayed output.
+	</p>
+</div>
+ 
+
+<div id="output">
+<img id="outimg" src="<?=$image_url;?>" width="640" height="480" />
+</div>
         
-	<p>
-         X2:<br />
-         	<input type=text name="x2value" size="20" maxlength="6" value="608598" />
-    	</p>
+<div  id="params">
+        <form method=post action="<?php echo $script_name;?>">
+<fieldset>
+	<legend>Params</legend>
 	
-	<p>
-         Y2:<br />
-         <input type=text name="y2value" size="20" maxlength="7" value="4915649" />
-    	</p>
+	<label>X1:</label><span id="x1value_span">0</span> 
+	<input type="hidden" name="x1value" id="x1value" size="20" maxlength="40" value="599043" />		
+	
+	<label>Y1:</label><span id="y1value_span">0</span> 
+	<input type="hidden" name="y1value" id="y1value" size="20" maxlength="40" value="4921752" />
+	
+	<label>X2:</label><span id="x2value_span">0</span> 
+	<input type="hidden" name="x2value" id="x2value" size="20" maxlength="40" value="599043" />		
+	
+	<label>Y2:</label><span id="y2value_span">0</span> 
+	<input type="hidden" name="y2value" id="y2value" size="20" maxlength="40" value="4921752" />
+	
+	
     
 	<p>
 	Cost:<br />
          	<input type=text name="cost" size="20" maxlength="1" value="0" />
     	</p>
 	
-	<input type="submit" name = "submit" value="Go!" /> </td></tr>
-
+	<input type="submit" name = "submit" id="go" value="Go!" />
+		<!-- 
+		INTERFACE PARAMS
+		this hidden fields for interface params 
+	-->
+	<input type="hidden" name="map_extent" id="map_extent" value="588913.043478,4913700.000000,610066.956522,4928010.000000">
    
-  </table>
+</fieldset>
  </form>
+  </div>
+ <div id="console">
+ </div>
 </body>
 </html>

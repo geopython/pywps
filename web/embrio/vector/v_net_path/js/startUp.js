@@ -34,13 +34,21 @@ window.onload=startUp;
 var isCSS, isW3C, isIE4, isNN4;
 
 
+//MODULE NAME
+var module_path = 'mod/mod_v_net_path.php';
+
 //MAP variables
 var outimg;
 var map_extent;
 var height_extent;
 var distance_extent;
-var input_x=null;
-var input_y=null;
+var input_x1=null;
+var input_y1=null;
+var input_x2=null;
+var input_y2=null;
+
+//clicked coords
+var click = false;
 
 //ajax call vars
 var image_url;
@@ -58,34 +66,15 @@ function startUp(){
 	//get params
 	map_extent = document.getElementById('map_extent').value;
 	map_extent = map_extent.split(',');
-	height_extent = document.getElementById('height_extent').value.split(',');
-	height_unit = parseInt((height_extent[1]-height_extent[0])/steps*100)/100;
-	distance_extent = document.getElementById('distance_extent').value.split(',');
-	distance_unit = parseInt((distance_extent[1]-distance_extent[0])/steps*100)/100;
+	//height_extent = document.getElementById('height_extent').value.split(',');
+	//height_unit = parseInt((height_extent[1]-height_extent[0])/steps*100)/100;
+	//distance_extent = document.getElementById('distance_extent').value.split(',');
+	//distance_unit = parseInt((distance_extent[1]-distance_extent[0])/steps*100)/100;
 	
 	//print ranges
-	getRawObject('observer_range').innerHTML = height_extent[0] + ' -&gt; ' + height_extent[1]; 
-	getRawObject('maxdist_range').innerHTML = distance_extent[0] + ' -&gt; ' + distance_extent[1]; 
+	//getRawObject('observer_range').innerHTML = height_extent[0] + ' -&gt; ' + height_extent[1]; 
+	//getRawObject('maxdist_range').innerHTML = distance_extent[0] + ' -&gt; ' + distance_extent[1]; 
 	
-	//update selects
-	var maxdist = getRawObject('maxdist');
-	var observer = getRawObject('observer');
-	var height = parseInt(height_extent[0]);
-	var distance = parseInt(distance_extent[0]);
-    for(i=0;i<=steps;i++) {
-        if(i==steps){
-			height = parseInt(height_extent[1]);
-			distance = parseInt(distance_extent[1]);
-			maxdist[i] = new Option(distance,distance,false,false);
-			observer[i] = new Option(height,height,false,false);
-		} else{  
-			maxdist[i] = new Option(distance,distance,false,false);
-			observer[i] = new Option(height,height,false,false);
-		}
-		
-		height = parseInt((height + height_unit)*100)/100;
-		distance = parseInt(distance + distance_unit);
-    }
 	
 	//set button event
 	getRawObject('go').onclick = runPywps;
@@ -93,15 +82,14 @@ function startUp(){
 
 
 function runPywps(){
-	if(input_x==null){
+	if(input_x1==null){
 		alert('click on map for coords first');
 		return;
 	}
-	var maxdistSel = getRawObject('maxdist');
-	var maxdist= maxdistSel.options	[maxdistSel.selectedIndex].value;
-	var observerSel = getRawObject('observer');
-	var observer = observerSel.options[observerSel.selectedIndex].value;
-	var url = 'mod/r_los.php?xvalue='+input_x+'&yvalue='+input_y+'&maxdist='+maxdist+'&observer='+observer;
+	//Find value in the form and create the request url
+	var costInput = getRawObject('cost');
+	var cost= costInput.value;
+	var url = module_path+'?x1value='+input_x1+'&y1value='+input_y1+'&x2value='+input_x2+'&y2value='+input_y2+'&cost='+cost;
 	
 	call(url, this, parsePywpsOut);
 }
@@ -136,14 +124,26 @@ function getCoords (e){
 }
 
 function setFields(pX,pY){
+	
 	var gCoords = pix2geo(pX,pY);
 	//set input objects
-	input_x = gCoords[0];
-	getRawObject('xvalue').value = input_x;
-	getRawObject('xvalue_span').innerHTML = input_x;
-	input_y = gCoords[1];	
-	getRawObject('yvalue').value = input_y;
-	getRawObject('yvalue_span').innerHTML = input_y;
+	if(!click){
+		input_x1 = gCoords[0];
+		input_y1 = gCoords[1];
+		getRawObject('x1value').value = input_x1;
+		getRawObject('x1value_span').innerHTML = input_x1;
+		getRawObject('y1value').value = input_y1;
+		getRawObject('y1value_span').innerHTML = input_y1;
+		click = true;
+	} else {
+		input_x2 = gCoords[0];
+		input_y2 = gCoords[1];
+		getRawObject('x2value').value = input_x2;
+		getRawObject('x2value_span').innerHTML = input_x2;
+		getRawObject('y2value').value = input_y2;
+		getRawObject('y2value_span').innerHTML = input_y2;
+		click = false;
+	}
 }
 
 function pix2geo (pX,pY){

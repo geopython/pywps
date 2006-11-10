@@ -45,7 +45,7 @@ $image->saveImage($img_path.$image_name);
 ?>
 <html>
 <head>
-	<title>PyWPS v.net.path example by ominiverdi.org</title>
+	<title>PyWPS v.buffer example by ominiverdi.org</title>
 	<script type="text/javascript" src="../../js/xhr.js"></script>
 	<script type="text/javascript" src="js/startUp.js"></script>
 	<link href="../../css/screen.css" rel="stylesheet" type="text/css" media="all">
