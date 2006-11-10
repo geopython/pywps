@@ -82,7 +82,7 @@ to show the development status of a<strong> Web User Interface
 <ul>
 <li><a href="embrio/vector/v_buff/v_buff.php">V.Buffer</a> - Create a buffer around 
 features of given type (areas must contain centroid).</li>
-<li><a href="embrio/raster/r_los/r_los.php">V.Buffer</a> - Generates a raster map output in which the cells that are visible from a user-specified observer location are marked with integer values that represent the vertical angle (in degrees) required to see those cells (viewshed)..</li>
+<li><a href="embrio/raster/r_los/r_los.php">R.Los</a> - Generates a raster map output in which the cells that are visible from a user-specified observer location are marked with integer values that represent the vertical angle (in degrees) required to see those cells (viewshed)..</li>
 <li><a href="embrio/vector/v_net_path/v_net_path.php">V.Net.Path</a> - Find shortest path on vector network.</li>
 </ul>
 </div>
