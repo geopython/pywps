@@ -73,20 +73,21 @@ def main():
     serverSettings = settings.ServerSettings
     inpts = inputs.Inputs() # data inputs
     pid = os.getpid()
+    method = os.getenv("REQUEST_METHOD")
     
 
     try: #  Maximal length of one input
-        if os.getenv("REQUEST_METHOD") == "GET":
+        if method == "GET":
             maxSize = int(serverSettings['maxInputParamLength'])
             maxSize = int(serverSettings['maxSize'])
     except:
-        if os.getenv("REQUEST_METHOD") == "GET":
+        if method == "GET":
             maxSize = 1024
         else:
             maxSize = 0 # will be controlled later
 
     # key values to lower case
-    if os.getenv("REQUEST_METHOD") == "GET":
+    if method == "GET":
         form = cgi.FieldStorage()  # the input values (GET method)
         for key in form.keys():
             value = form.getvalue(key)
@@ -104,7 +105,7 @@ def main():
 
     #
     # HTTP GET
-    if os.getenv("REQUEST_METHOD") == "GET":
+    if method == "GET":
         e = inpts.formvalsGet2dict(formValues)
         if e:
             print "Content-type: text/xml\n"
@@ -238,7 +239,7 @@ def main():
                 (inpts.values['identifier'][0]))
         executeProc = None
         try:
-            executeProc =  execute.Execute(settings,grass.grassenv,process,inpts.values)
+            executeProc = execute.Execute(settings,grass.grassenv,process,inpts.values,method)
         except Exception,e:
             # error reporting
             sys.stderr.write("PyWPS ERROR in execute.Execute(): "+str(e)+"\n")

@@ -63,7 +63,7 @@ class Process:
                     {
                         'Identifier':'input',
                         'Title': 'Input raster map',
-                        'ComplexValueReference': {
+                        'ComplexValue': {
                             'Formats': [ "image/tiff" ]
                         },
                     },

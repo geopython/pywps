@@ -64,9 +64,17 @@ class processExecuteXML(xml.sax.handler.ContentHandler):
         if name[1] == "ComplexValueReference":
             self.inValue = True
             self.inComplexValueReference = True
-            self.value = attrs[(None,'reference')]
+            self.value = {
+                "type":"ComplexValueReference",
+                "data": attrs[(None,'reference')]
+            }
         if name[1] == "ComplexValue":
             self.inComplexValue = True
+            self.value = {
+                "type":"ComplexValue",
+                "data": None,
+            }
+
         if name[1] == "LiteralValue":
             self.inValue = True
             self.inLiteralValue = True
@@ -89,7 +97,7 @@ class processExecuteXML(xml.sax.handler.ContentHandler):
         if name[1] == "Identifier":
             self.inIdentifier = False
         if name[1] == "ComplexValue":
-            self.value = "!complexvalue!"
+            self.value["data"] = "!complexvalue!"
         if name[1] == "BoundingBoxValue":
             self.value = "!bboxvalue!"
 
@@ -235,14 +243,19 @@ class Inputs:
             self.values['request'] = "Execute"
             pass
 
-            # complexvalues
             for input in self.values['datainputs'].keys():
+                # complexvalues
                 if self.values['datainputs'][input] == "!complexvalue!":
+                    # for each Input in XML
                     for Input in formDocument.getElementsByTagName("Input"):
                         cmplxval = Input.getElementsByTagName("ComplexValue")
                         identifier = Input.getElementsByTagName("ows:Identifier")[0].firstChild.data
+                        # if there is at least one <ComplexValue> Element
+                        # in input xml 
                         if len(cmplxval) and identifier == input:
-                            self.values['datainputs'][input] = cmplxval[0].getElementsByTagNameNS(eh.valueFirstChild[0],eh.valueFirstChild[1])[0].toprettyxml()
+                            # store to ["data"], ["type"] = "ComplexValue"
+                            # allready
+                            self.values['datainputs'][input]["data"] = cmplxval[0].getElementsByTagNameNS(eh.valueFirstChild[0],eh.valueFirstChild[1])[0].toprettyxml()
 
                 elif self.values['datainputs'][input] == "!bboxvalue!":
                     for Input in formDocument.getElementsByTagName("Input"):

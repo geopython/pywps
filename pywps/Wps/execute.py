@@ -98,7 +98,7 @@ class Execute:
     teporary directory and chdir in it.
     """
 
-    def __init__(self, serverSettings, grassSettings, process, formvalues,):
+    def __init__(self, serverSettings, grassSettings, process,formvalues,method):
         """
         Initialization of the Execute request
 
@@ -111,6 +111,7 @@ class Execute:
                                 "execute" function
             formvalues      -   input comma separated string in form
                                 "arg1,value1,arg2,value2,arg3,value3,..."
+            method          -   "POST" or "GET"
         """
 
         self.settings = serverSettings  # etc/settings.py
@@ -137,6 +138,7 @@ class Execute:
         self.statusSupported = None   # Default -> everything will be printed
                                     # to STDOUT and what more, no fork is
                                     # needed
+        self.method = method        # "POST" or "GET"
  
         self.document = Document()
         self.status = "ProcessAccepted" # default: everything is all right 
@@ -269,13 +271,39 @@ class Execute:
         #
         for procInput in self.process.Inputs:
             # only Complex Input Data will try to download
+            # TODO: Usage of ComplexValueReference input type in process
+            # definition is depredecated
             if "ComplexValueReference" in procInput.keys() or \
                "ComplexValue" in procInput.keys(): 
 
 
-                valtype = 'ComplexValueReference'
                 if "ComplexValue" in procInput.keys():
                     valtype = "ComplexValue"
+
+                    # convert ComplexValue to ComplexValueReference, if HTTP GET
+                    # or inputs are of type ComplexValueReference
+                    if self.method == "GET":
+                        procInput['ComplexValueReference'] = procInput.pop("ComplexValue")
+                        valtype = "ComplexValueReference"
+
+                    # POST method
+                    else:
+                        # self.formvalues['datainputs'][<Identifier>]= {
+                        #           "type": "ComplexValue"||"ComplexValueReference"
+                        #           "data": "<xml..."||"http://..."
+                        #                   }
+                        if self.formvalues['datainputs'][procInput['Identifier']]["type"] ==\
+                                "ComplexValueReference":
+                            # creating new structure ComplexValueReference
+                            procInput['ComplexValueReference'] = procInput.pop("ComplexValue")
+                            # setting the value type
+                            valtype = "ComplexValueReference"
+                            # restructurising formvalues['datainputs'][Identifier] structure
+                            self.formvalues['datainputs'][procInput['Identifier']] =\
+                                self.formvalues['datainputs'][procInput['Identifier']]['data']
+
+                else:
+                    valtype = 'ComplexValueReference'
 
                 # download
                 newFileName = \
