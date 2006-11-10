@@ -159,10 +159,10 @@ elseif ($_POST['x1value']  < 589435 |  $_POST['y1value']  < 4914010 | $_POST['x1
     
 	<p>
 	Cost:<br />
-         	<input type=text name="cost" id="cost" size="20" maxlength="1" value="0" />
+         	<input type="text" name="cost" id="cost" size="20" maxlength="1" value="0" />
     	</p>
 	
-	<input type="submit" name = "submit" id="go" value="Go!" />
+	<input type="button" name = "submit" id="go" value="Go!" />
 		<!-- 
 		INTERFACE PARAMS
 		this hidden fields for interface params 
