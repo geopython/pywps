@@ -105,6 +105,7 @@ function runPywps(){
 	var observer = observerSel.options[observerSel.selectedIndex].value;
 	//var url = 'mod/r_los.php?xvalue='+input_x+'&yvalue='+input_y+'&maxdist='+maxdist+'&observer='+observer;
 	var url = module_path+'?xvalue='+input_x+'&yvalue='+input_y+'&maxdist='+maxdist+'&observer='+observer;
+	waitStart();
 	call(url, this, parsePywpsOut);
 }
 
@@ -118,6 +119,7 @@ function parsePywpsOut (szInit){
     eval(szInit);
 	getRawObject('console').innerHTML = xml_dump.replace(/\+/g," ");
 	getRawObject('outimg').src = image_url;
+	getRawObject('outimg').onload = waitEnd;
 }
 function getCoords (e){
 	e = (e)?e:((event)?event:null);
@@ -226,4 +228,22 @@ function getRawObject(obj) {
         theObj = obj;
     }
     return theObj;
+}
+
+
+//trasform coords from image pixel space to map geo space
+function waitStart  (){
+	var parent = getRawObject('output');
+	var wait = getRawObject('wait');
+	if( wait)wait.parentNode.removeChild(wait);
+	var div = document.createElement('div');
+	div.id = 'wait';
+	div.innerHTML ='Processing... please wait';
+	parent.insertBefore(div,parent.firstChild);
+}
+
+//trasform coords from image pixel space to map geo space
+function waitEnd(){
+	var wait = getRawObject('wait');
+	if( wait)wait.parentNode.removeChild(wait);
 }

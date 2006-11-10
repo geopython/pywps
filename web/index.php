@@ -95,7 +95,7 @@ features of given type (areas must contain centroid).</li>
 </ul>
 </div>
 <h2>Used technologies</h2>
-<div class=subcontent">
+<div class="subcontent">
 <ul>
 <li>AJAX</li>
 <li>PHP/MAPSCRIPT</li>
@@ -106,6 +106,8 @@ features of given type (areas must contain centroid).</li>
 <h2>Links</h2>
 <div class="subcontent">
 <ul>
+
+<li><a href="http://pywps.ominiverdi.org/">Embrio &amp; Wuiw home page</a></li>
 <li><a href="https://wald.intevation.org/projects/pywps/" target="_blank">PyWPS community site</a></li>
 <li><a href="http://grass.itc.it/" target="_blank">GRASS official Site</a></li>
 <li><a href="http://www.maptools.org/php_mapscript/" target="_blank">PHP/Mapscript</a></li>
