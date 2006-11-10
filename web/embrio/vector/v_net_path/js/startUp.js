@@ -90,7 +90,7 @@ function runPywps(){
 	var costInput = getRawObject('cost');
 	var cost= costInput.value;
 	var url = module_path+'?x1value='+input_x1+'&y1value='+input_y1+'&x2value='+input_x2+'&y2value='+input_y2+'&cost='+cost;
-	
+	waitStart();
 	call(url, this, parsePywpsOut);
 }
 
@@ -104,6 +104,7 @@ function parsePywpsOut (szInit){
     eval(szInit);
 	getRawObject('console').innerHTML = xml_dump.replace(/\+/g," ");
 	getRawObject('outimg').src = image_url;
+	getRawObject('outimg').onload = waitEnd;
 }
 function getCoords (e){
 	e = (e)?e:((event)?event:null);
@@ -224,4 +225,21 @@ function getRawObject(obj) {
         theObj = obj;
     }
     return theObj;
+}
+
+//trasform coords from image pixel space to map geo space
+function waitStart  (){
+	var parent = getRawObject('output');
+	var wait = getRawObject('wait');
+	if( wait)wait.parentNode.removeChild(wait);
+	var div = document.createElement('div');
+	div.id = 'wait';
+	div.innerHTML ='Processing... please wait';
+	parent.insertBefore(div,parent.firstChild);
+}
+
+//trasform coords from image pixel space to map geo space
+function waitEnd(){
+	var wait = getRawObject('wait');
+	if( wait)wait.parentNode.removeChild(wait);
 }
