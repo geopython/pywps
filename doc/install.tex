@@ -4,7 +4,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{indentfirst}
 \usepackage{a4wide}
-\author{Jáchym Čepický}
+\author{Jachym Cepicky}
 
 \title{Implementation of OGC's WPS standard: PyWPS}
 \usepackage{longtable}
@@ -20,7 +20,7 @@
 
 \bigskip
 \begin{quote}
-    Copyright \copyright  2006 Jáchym Čepický
+    Copyright \copyright  2006 Jachym Cepicky
     Permission is granted to copy, distribute and/or modify this document
     under the terms of the GNU Free Documentation License, Version 1.2
     or any later version published by the Free Software Foundation;
@@ -328,7 +328,7 @@ XY.
     BoundingBoxValue}) \textbf{must} be a Python's dictionary
     ("\texttt{\{\}}") structure, which \emph{can} be filled with aditional
     attributes.
-     
+
 
     \begin{itemize}
         \item Example of \texttt{LiteralInput}:
@@ -365,21 +365,17 @@ XY.
          
 
         \item Example of \texttt{ComplexValueReference} input:
+
         \texttt{ComplexValueReference} is URL to some raster/vector/text
         file, which can be later imported (e.g. to GRASS) and processed.
         PyWPS will be dowload the file for you and store it's name to
-        \texttt{self.Inputs[NUMBER]['value']} variable.
+        \texttt{self.DataInputs["<Identifier>"]} variable.
 
-    \begin{verbatim}
-    {
-        'Identifier':'input_map_file',
-        'Title': 'Input raster map',
-        'ComplexValueReference': {
-                'Formats': [ "image/tiff" ]
-            },
-    },
-    \end{verbatim}
-         
+        \paragraph{NOTE:} \texttt{ComplexValueReference} input is depredecated and
+        should not be used. Use \texttt{ComplexValue} structure instead.
+        PyWPS will recognise if the input is of type ComplexValue or
+        ComplexValueReference and handle the input accordingly.
+     
 
         \item Example of \texttt{ComplexValue} input:
         \texttt{ComplexValue} provides possibility to embed input (XML)
@@ -398,6 +394,9 @@ XY.
         },
     },
     \end{verbatim}
+
+    For \texttt{Formats} attribute use MIME/TYPE encoding, like
+    \texttt{text/xml, image/tiff} and similar.
 
         \item Example of \texttt{BoundingBoxValue} input:
         \texttt{BoundingBoxValue} provides possibility define your region

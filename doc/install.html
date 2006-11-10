@@ -37,7 +37,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <H1 ALIGN="CENTER">Implementation of OGC's WPS standard: PyWPS</H1>
 <DIV CLASS="author_info">
 
-<P ALIGN="CENTER"><STRONG>J&#195;&#161;chym &#196;&#140;epick&#195;&#189;</STRONG></P>
+<P ALIGN="CENTER"><STRONG>Jachym Cepicky</STRONG></P>
 </DIV>
 
 <P>
@@ -45,7 +45,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <P><P>
 <BR>
 <BLOCKQUOTE>
-Copyright &#169;2006 J&#195;&#161;chym &#196;&#140;epick&#195;&#189;
+Copyright &#169;2006 Jachym Cepicky
     Permission is granted to copy, distribute and/or modify this document
     under the terms of the GNU Free Documentation License, Version 1.2
     or any later version published by the Free Software Foundation;
@@ -76,59 +76,59 @@ Contents</A>
 <!--Table of Contents-->
 
 <UL CLASS="TofC">
-<LI><A NAME="tex2html28"
-  HREF="install.html#SECTION00020000000000000000">Bugs</A>
 <LI><A NAME="tex2html29"
+  HREF="install.html#SECTION00020000000000000000">Bugs</A>
+<LI><A NAME="tex2html30"
   HREF="install.html#SECTION00030000000000000000">Installation</A>
 <UL>
-<LI><A NAME="tex2html30"
-  HREF="install.html#SECTION00031000000000000000">Installation the quick 'n' dirty way</A>
 <LI><A NAME="tex2html31"
-  HREF="install.html#SECTION00032000000000000000">Installation the 'clean' way</A>
+  HREF="install.html#SECTION00031000000000000000">Installation the quick 'n' dirty way</A>
 <LI><A NAME="tex2html32"
+  HREF="install.html#SECTION00032000000000000000">Installation the 'clean' way</A>
+<LI><A NAME="tex2html33"
   HREF="install.html#SECTION00033000000000000000">Testing after installation</A>
 </UL>
 <BR>
-<LI><A NAME="tex2html33"
+<LI><A NAME="tex2html34"
   HREF="install.html#SECTION00040000000000000000">Configuration</A>
 <UL>
-<LI><A NAME="tex2html34"
-  HREF="install.html#SECTION00041000000000000000">etc/settings.py</A>
 <LI><A NAME="tex2html35"
+  HREF="install.html#SECTION00041000000000000000">etc/settings.py</A>
+<LI><A NAME="tex2html36"
   HREF="install.html#SECTION00042000000000000000">etc/grass.py</A>
 </UL>
 <BR>
-<LI><A NAME="tex2html36"
+<LI><A NAME="tex2html37"
   HREF="install.html#SECTION00050000000000000000">Add your own processes</A>
 <UL>
-<LI><A NAME="tex2html37"
-  HREF="install.html#SECTION00051000000000000000">Process Configuration</A>
 <LI><A NAME="tex2html38"
+  HREF="install.html#SECTION00051000000000000000">Process Configuration</A>
+<LI><A NAME="tex2html39"
   HREF="install.html#SECTION00052000000000000000">Process Programming</A>
 </UL>
 <BR>
-<LI><A NAME="tex2html39"
-  HREF="install.html#SECTION00060000000000000000">Note to grass programming</A>
 <LI><A NAME="tex2html40"
-  HREF="install.html#SECTION00070000000000000000">Testing your new process</A>
+  HREF="install.html#SECTION00060000000000000000">Note to grass programming</A>
 <LI><A NAME="tex2html41"
+  HREF="install.html#SECTION00070000000000000000">Testing your new process</A>
+<LI><A NAME="tex2html42"
   HREF="install.html#SECTION00080000000000000000">Using the PyWPS</A>
 <UL>
-<LI><A NAME="tex2html42"
-  HREF="install.html#SECTION00081000000000000000">Input</A>
 <LI><A NAME="tex2html43"
+  HREF="install.html#SECTION00081000000000000000">Input</A>
+<LI><A NAME="tex2html44"
   HREF="install.html#SECTION00082000000000000000">Output</A>
 </UL>
 <BR>
-<LI><A NAME="tex2html44"
-  HREF="install.html#SECTION00090000000000000000">Sample process: addvalue</A>
 <LI><A NAME="tex2html45"
-  HREF="install.html#SECTION000100000000000000000">KVP request encoding of addvalue</A>
+  HREF="install.html#SECTION00090000000000000000">Sample process: addvalue</A>
 <LI><A NAME="tex2html46"
-  HREF="install.html#SECTION000110000000000000000">XML request encoding addvalue</A>
+  HREF="install.html#SECTION000100000000000000000">KVP request encoding of addvalue</A>
 <LI><A NAME="tex2html47"
-  HREF="install.html#SECTION000120000000000000000">Licence of PyWPS</A>
+  HREF="install.html#SECTION000110000000000000000">XML request encoding addvalue</A>
 <LI><A NAME="tex2html48"
+  HREF="install.html#SECTION000120000000000000000">Licence of PyWPS</A>
+<LI><A NAME="tex2html49"
   HREF="install.html#SECTION000130000000000000000">Licence of this document</A>
 </UL>
 <!--End of Table of Contents-->
@@ -510,25 +510,25 @@ Allowed values are set by array of values. If there is no
 <P>
 </LI>
 <LI>Example of <TT>ComplexValueReference</TT> input:
-        <TT>ComplexValueReference</TT> is URL to some raster/vector/text
-        file, which can be later imported (e.g. to GRASS) and processed.
-        PyWPS will be dowload the file for you and store it's name to
-        <TT>self.Inputs[NUMBER]['value']</TT> variable.
 
 <P>
-<PRE>
-    {
-        'Identifier':'input_map_file',
-        'Title': 'Input raster map',
-        'ComplexValueReference': {
-                'Formats': [ "image/tiff" ]
-            },
-    },
-</PRE>
+<TT>ComplexValueReference</TT> is URL to some raster/vector/text
+        file, which can be later imported (e.g. to GRASS) and processed.
+        PyWPS will be dowload the file for you and store it's name to
+        <TT>self.DataInputs["&lt;Identifier&gt;"]</TT> variable.
 
 <P>
 </LI>
-<LI>Example of <TT>ComplexValue</TT> input:
+</UL>
+<H4><A NAME="SECTION00051110000000000000">
+NOTE:</A>
+</H4> <TT>ComplexValueReference</TT> input is depredecated and
+        should not be used. Use <TT>ComplexValue</TT> structure instead.
+        PyWPS will recognise if the input is of type ComplexValue or
+        ComplexValueReference and handle the input accordingly.
+
+<P>
+Example of <TT>ComplexValue</TT> input:
         <TT>ComplexValue</TT> provides possibility to embed input (XML)
         file (e.g. GML) to input <TT>ExecuteResponce</TT> XML file. PyWPS
         will store this input in file on server's harddisk, so you can
@@ -548,8 +548,11 @@ Allowed values are set by array of values. If there is no
 </PRE>
 
 <P>
-</LI>
-<LI>Example of <TT>BoundingBoxValue</TT> input:
+For <TT>Formats</TT> attribute use MIME/TYPE encoding, like
+    <TT>text/xml, image/tiff</TT> and similar.
+
+<P>
+Example of <TT>BoundingBoxValue</TT> input:
         <TT>BoundingBoxValue</TT> provides possibility define your region
         borders. You can input this only to your Execute responce XML file.
 
@@ -570,8 +573,6 @@ Resulting value in your <TT>self.Input[NUMBER]['value']</TT> will be
     East, Upper North]</TT>.
 
 <P>
-</LI>
-</UL>
 
 <P>
 Default values can be set like follows: <TT>'value':"Default value",</TT>
@@ -2133,7 +2134,7 @@ Mathematics Department, Macquarie University, Sydney.
 The command line arguments were: <BR>
  <STRONG>latex2html</STRONG> <TT>-split 0 install.tex</TT>
 <P>
-The translation was initiated by Jachym Cepicky on 2006-10-11
+The translation was initiated by Jachym Cepicky on 2006-11-10
 <DIV CLASS="navigation"><HR>
 <!--Navigation Panel-->
 <IMG WIDTH="81" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next_inactive"
@@ -2146,7 +2147,7 @@ The translation was initiated by Jachym Cepicky on 2006-10-11
 <!--End of Navigation Panel-->
 <ADDRESS>
 Jachym Cepicky
-2006-10-11
+2006-11-10
 </ADDRESS>
 </BODY>
 </HTML>

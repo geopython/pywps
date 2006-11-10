@@ -3,11 +3,11 @@
 
                 Implementation of OGC's WPS standard: PyWPS
 
-                           JÃ¡chym Ä&#140;epickÃ½
+                               Jachym Cepicky
 
-     Copyright ©2006 JÃ¡chym Ä&#140;epickÃ½ Permission is granted to
-     copy, distribute and/or modify this document under the terms of the
-     GNU Free Documentation License, Version 1.2 or any later version
+     Copyright ©2006 Jachym Cepicky Permission is granted to copy,
+     distribute and/or modify this document under the terms of the GNU
+     Free Documentation License, Version 1.2 or any later version
      published by the Free Software Foundation; with no Invariant
      Sections, no Front-Cover Texts, and no Back-Cover Texts. A copy of
      the license is included in the section entitled "GNU Free
@@ -305,21 +305,24 @@ grassLocation="/var/grassdata/spearfish57/"
         # the default value:
         'value': 250,
     },
-     * Example of ComplexValueReference input: ComplexValueReference is
-       URL to some raster/vector/text file, which can be later imported
-       (e.g. to GRASS) and processed. PyWPS will be dowload the file for
-       you and store it's name to self.Inputs[NUMBER]['value'] variable.
-    {
-        'Identifier':'input_map_file',
-        'Title': 'Input raster map',
-        'ComplexValueReference': {
-                'Formats': [ "image/tiff" ]
-            },
-    },
-     * Example of ComplexValue input: ComplexValue provides possibility
-       to embed input (XML) file (e.g. GML) to input ExecuteResponce XML
-       file. PyWPS will store this input in file on server's harddisk, so
-       you can later handle it just like ComplexValueReference.
+     * Example of ComplexValueReference input:
+       ComplexValueReference is URL to some raster/vector/text file,
+       which can be later imported (e.g. to GRASS) and processed. PyWPS
+       will be dowload the file for you and store it's name to
+       self.DataInputs["<Identifier>"] variable.
+
+    NOTE:
+
+   ComplexValueReference input is depredecated and should not be used.
+   Use ComplexValue structure instead. PyWPS will recognise if the input
+   is of type ComplexValue or ComplexValueReference and handle the input
+   accordingly.
+
+   Example of ComplexValue input: ComplexValue provides possibility to
+   embed input (XML) file (e.g. GML) to input ExecuteResponce XML file.
+   PyWPS will store this input in file on server's harddisk, so you can
+   later handle it just like ComplexValueReference.
+
     {
         'Identifier':'vector',
         'Title': 'Input vector map',
@@ -329,9 +332,14 @@ grassLocation="/var/grassdata/spearfish57/"
             'Formats': [ "text/xml" ]
         },
     },
-     * Example of BoundingBoxValue input: BoundingBoxValue provides
-       possibility define your region borders. You can input this only to
-       your Execute responce XML file.
+
+   For Formats attribute use MIME/TYPE encoding, like text/xml,
+   image/tiff and similar.
+
+   Example of BoundingBoxValue input: BoundingBoxValue provides
+   possibility define your region borders. You can input this only to
+   your Execute responce XML file.
+
     {
         'Identifier':'bbox',
         'Title': 'Bounding box',
@@ -339,9 +347,10 @@ grassLocation="/var/grassdata/spearfish57/"
             "Bounding box",
         'BoundingBoxValue': {},
     },
-       Resulting value in your self.Input[NUMBER]['value'] will be array
-       of four values in form [Lower East, Lower North, Upper East, Upper
-       North].
+
+   Resulting value in your self.Input[NUMBER]['value'] will be array of
+   four values in form [Lower East, Lower North, Upper East, Upper
+   North].
 
    Default values can be set like follows: 'value':"Default value",
 
@@ -1508,13 +1517,13 @@ request=<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
    The command line arguments were:
    latex2html -split 0 install.tex
 
-   The translation was initiated by Jachym Cepicky on 2006-10-11
+   The translation was initiated by Jachym Cepicky on 2006-11-10
      _________________________________________________________________
 
    next_inactive up previous
 
 
-    Jachym Cepicky 2006-10-11
+    Jachym Cepicky 2006-11-10
 
 Reference
 
