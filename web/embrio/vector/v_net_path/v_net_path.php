@@ -167,7 +167,7 @@ elseif ($_POST['x1value']  < 589435 |  $_POST['y1value']  < 4914010 | $_POST['x1
 		INTERFACE PARAMS
 		this hidden fields for interface params 
 	-->
-	<input type="hidden" name="map_extent" id="map_extent" value="588913.043478,4913700.000000,610066.956522,4928010.000000">
+	<input type="hidden" name="map_extent" id="map_extent" value="588913.043478,4915200.000000,610066.956522,4928010.000000">
    
 </fieldset>
  </form>

@@ -100,7 +100,7 @@ else die('create your include/config.php using include/config.php.dist as templa
 		INTERFACE PARAMS
 		this hidden fields for interface params 
 	-->
-	<input type="hidden" name="map_extent" id="map_extent" value="588913.043478,4913700.000000,610066.956522,4928010.000000">
+	<input type="hidden" name="map_extent" id="map_extent" value="588913.043478,4915200.000000,610066.956522,4928010.000000">
 	<input type="hidden" name="distance_extent" id="distance_extent" value="500,1500">
 	<input type="hidden" name="height_extent" id="height_extent" value="1,3">
 	
