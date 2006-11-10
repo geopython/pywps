@@ -76,7 +76,7 @@ $stringa_query = $cgi_executable."?service=wps&version=0.4.0&request=Execute&Ide
         $class = ms_newClassObj($layer);
 	$style = ms_newStyleObj($class);
         $style=$class->getStyle(0);
-	$style->color->setRGB( 255,0,0);
+	$style->color->setRGB( 255,255,0);
         
 // Creo l'immagine
     
