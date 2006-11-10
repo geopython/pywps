@@ -36,7 +36,7 @@
     
 	$maxradius = 3000;
 
-if ($_POST['cost'] != 0) {
+if ($_REQUEST['cost'] != 0) {
       die ("Sorry in this example, the path can't be selected using a cost parameter.Please assign 0 to the cost form");
 
    /*} 
@@ -48,7 +48,7 @@ if ($_POST['cost'] != 0) {
       
 $stringa_query = $cgi_executable."?service=wps&version=0.4.0&request=Execute&Identifier=shortestpath2&";
     #$stringa_query = "http://localhost/cgi-bin/wps.py?service=wps&version=0.4.0&request=Execute&Identifier=shortestpath2&";
-    $array = array('x1', $_POST['x1value'],'y1',$_POST['y1value'],'x2', $_POST['x2value'],'y2',$_POST['y2value'],'cost',$_POST['cost']);
+    $array = array('x1', $_REQUEST['x1value'],'y1',$_REQUEST['y1value'],'x2', $_REQUEST['x2value'],'y2',$_REQUEST['y2value'],'cost',$_REQUEST['cost']);
     $comma_separated = implode(",", $array);
     $stringa_query .= "datainputs=";
     $stringa_query .= $comma_separated;
