@@ -66,7 +66,7 @@ if ($_REQUEST['radius'] > $maxradius) {
     $stringa_query .= $comma_separated;
     $stringa_query .= "&status=true&store=true";
 
-//L'indirizzo completo Ã¨ terminato, estraggo il nome del file    
+//L'indirizzo completo Ã terminato, estraggo il nome del file    
 //TODO: questa parte va debuggata cos“ com' fa un po' acqua
     $dom = new DOMDocument();
     $dom->load($stringa_query);
