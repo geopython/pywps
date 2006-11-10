@@ -36,26 +36,20 @@
  *
  **********************************************************************/
 
-//CONFIG VALUES
-//application related parameters. please edit this file
 if(file_exists('include/config.php')) include('include/config.php');
 else die('create your include/config.php using include/config.php.dist as template');
 
 // Crea l'oggetto map per il mapfile specificato
 
-if(extension_loaded('MapScript'))
 	$map = ms_newMapObj($map_path.$map_file);
 
-// Crea la prima immagine
+// Crete first image
     
 	$map_id = sprintf("%0.6d",rand(0,999999));
-        $init_image_name = "pywps".$map_id.".png";
-        $init_image_url="tmp/".$init_image_name;
-        $image=$map->draw();
-        $image->saveImage($img_path.$init_image_name);
-
-//init image url aaa
-	//$init_image_url= 'tmp/'.$init_image_name;
+	$image_name = "pywps".$map_id.".png";
+	$image_url=$img_rel_path.$image_name;
+	$image=$map->draw();
+	$image->saveImage($img_path.$image_name);
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -65,7 +59,7 @@ if(extension_loaded('MapScript'))
 		<title>PyQPS r.los  by ominiverdi.org</title>
 		<script type="text/javascript" src="../../js/xhr.js"></script>
 		<script type="text/javascript" src="js/startUp.js"></script>
-		<link href="css/screen.css" rel="stylesheet" type="text/css" media="all">
+		<link href="../../css/screen.css" rel="stylesheet" type="text/css" media="all">
 	</head>
 	<body>
         
@@ -86,7 +80,7 @@ if(extension_loaded('MapScript'))
 	</p>
 </div>
 <div id="output">
-<img id="outimg" src="<?=$init_image_url;?>" width="640" height="480" />
+<img id="outimg" src="<?=$image_url;?>" width="640" height="480" />
 </div>
 
 <div  id="params">

@@ -46,6 +46,8 @@ var input_y=null;
 var image_url;
 var xml_dump;
 
+//MODULE NAME
+var module_path = 'mod/mod_r_los.php';
 
 //interface vars
 var steps = 6;
@@ -101,8 +103,8 @@ function runPywps(){
 	var maxdist= maxdistSel.options	[maxdistSel.selectedIndex].value;
 	var observerSel = getRawObject('observer');
 	var observer = observerSel.options[observerSel.selectedIndex].value;
-	var url = 'mod/r_los.php?xvalue='+input_x+'&yvalue='+input_y+'&maxdist='+maxdist+'&observer='+observer;
-	
+	//var url = 'mod/r_los.php?xvalue='+input_x+'&yvalue='+input_y+'&maxdist='+maxdist+'&observer='+observer;
+	var url = module_path+'?xvalue='+input_x+'&yvalue='+input_y+'&maxdist='+maxdist+'&observer='+observer;
 	call(url, this, parsePywpsOut);
 }
 

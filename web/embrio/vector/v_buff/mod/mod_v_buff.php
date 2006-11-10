@@ -1,7 +1,7 @@
 <?php  
  /**********************************************************************
  *
- * purpose: a connector r.los GRASS function
+ * purpose: a connector v.buff GRASS function
  *
  * authors: Luca Casagrande (...) and Lorenzo Becchi (lorenzo@ominiverdi.com)
  *
