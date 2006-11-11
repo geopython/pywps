@@ -95,8 +95,20 @@ class Describe:
                         ProcessDescription.appendChild(processOutputs)
                     except AttributeError, e:
                         if e == "Outputs":
-                            processOutputs.appendChild(document.createComment(
+                            processOutputs.appendChild(self.document.createComment(
                                 "===== This process defined no outputs ====="
+                                ))
+                elif key == "Metadata":
+                    # does input have any metadata?
+                    try:
+                        for metadata in process.Metadata:
+                            Metadata = self.document.createElement("%s%s" %\
+                                    (self.pd['elements']['Metadata']['ns'],"Metadata"))
+                            Metadata.setAttribute("xlink:title",metadata)
+                            ProcessDescription.appendChild(Metadata)
+                    except AttributeError,e:
+                        ProcessDescription.appendChild(self.document.createComment(
+                                "===== This process defined no Metadata =====" 
                                 ))
                 else: # key != ProcessInputs or != ProcessOutputs -> key is something "normal"
                     self.Append.Node(

@@ -80,7 +80,7 @@ class WPS:
                     }
                 },
             'response': {
-                'order': ['Identifier','Title','Abstract','DataInputs',
+                'order': ['Identifier','Title','Abstract',"Metadata",'DataInputs',
                          'ProcessOutputs',],
                 'elements':{
                     'Identifier' :{
