@@ -104,7 +104,13 @@ class Describe:
                         for metadata in process.Metadata:
                             Metadata = self.document.createElement("%s%s" %\
                                     (self.pd['elements']['Metadata']['ns'],"Metadata"))
-                            Metadata.setAttribute("xlink:title",metadata)
+                            for metattr in metadata.keys():
+                                if metattr.lower() == "textcontent":
+                                    pass
+                                else:
+                                    Metadata.setAttribute(metattr,metadata[metattr])
+                            if metadata.has_key("textContent"):
+                                Metadata.appendChild(self.document.createTextNode(metadata["textContent"]))
                             ProcessDescription.appendChild(Metadata)
                     except AttributeError,e:
                         ProcessDescription.appendChild(self.document.createComment(

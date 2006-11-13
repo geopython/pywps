@@ -13,7 +13,14 @@ class Process:
         self.Title="Create a buffer around a point "
         self.Abstract="Create a buffer around point"
         self.grassLocation="/var/www/wps/spearfish61/"
-        self.Metadata = ["point"]
+
+        self.Metadata = [
+                {
+                    "Identifier":"point",
+                    "type":"point",
+                    "textContent":"Click in the map"},
+                ]
+
         self.Inputs = [
                     # 0
                     {
