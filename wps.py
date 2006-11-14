@@ -245,6 +245,8 @@ def main():
             sys.stderr.write("PyWPS ERROR in execute.Execute(): "+str(e)+"\n")
             # cleaning
             os.remove(PIDFile[1])
+            print "Content-type: text/xml\n"
+            print wpsExceptions.make_exception("ServerError",e)
             return 1
 
 

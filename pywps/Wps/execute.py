@@ -298,12 +298,14 @@ class Execute:
                             procInput['ComplexValueReference'] = procInput.pop("ComplexValue")
                             # setting the value type
                             valtype = "ComplexValueReference"
-                            # restructurising formvalues['datainputs'][Identifier] structure
-                            self.formvalues['datainputs'][procInput['Identifier']] =\
-                                self.formvalues['datainputs'][procInput['Identifier']]['data']
 
                 else:
                     valtype = 'ComplexValueReference'
+                
+                # restructurising, so we have only data, type is allready
+                # separated
+                self.formvalues['datainputs'][procInput['Identifier']] =\
+                    self.formvalues['datainputs'][procInput['Identifier']]['data']
 
                 # download
                 newFileName = \
@@ -491,15 +493,15 @@ class Execute:
         #
         # Create the root node in XML document
         #
-        self.Execute = self.document.createElementNS(self.WPS.namespaces['ows'],"ExecuteResponse")
-        self.Execute.setAttribute("xmlns",self.WPS.namespaces['wps'])
-        self.Execute.setAttribute("xmlns:ows",self.WPS.namespaces['ows'])
-        self.Execute.setAttribute("xmlns:xlink",self.WPS.namespaces['xlink'])
-        self.Execute.setAttribute("xmlns:xsi",self.WPS.namespaces['xsi'])
-        self.Execute.setAttribute("xsi:schemaLocation",self.WPS.namespaces['wps']+' '+self.WPS.schemalocation['wps'])
+        self.ExecuteResponce = self.document.createElementNS(self.WPS.namespaces['ows'],"ExecuteResponse")
+        self.ExecuteResponce.setAttribute("xmlns",self.WPS.namespaces['wps'])
+        self.ExecuteResponce.setAttribute("xmlns:ows",self.WPS.namespaces['ows'])
+        self.ExecuteResponce.setAttribute("xmlns:xlink",self.WPS.namespaces['xlink'])
+        self.ExecuteResponce.setAttribute("xmlns:xsi",self.WPS.namespaces['xsi'])
+        self.ExecuteResponce.setAttribute("xsi:schemaLocation",self.WPS.namespaces['wps']+' '+self.WPS.schemalocation['wps'])
         if self.statusLocation:
-            self.Execute.setAttribute("statusLocation",self.statusLocation)
-        self.document.appendChild(self.Execute)
+            self.ExecuteResponce.setAttribute("statusLocation",self.statusLocation)
+        self.document.appendChild(self.ExecuteResponce)
 
         
 
@@ -512,7 +514,7 @@ class Execute:
                 self.Append.Attribute(
                         document=self.document,
                         attributeName = attribute,
-                        Node = self.Execute,
+                        Node = self.ExecuteResponce,
                         Attributes = self.ex['attributes'],
                         Values = self.settings.WPS
                         )
@@ -526,9 +528,9 @@ class Execute:
                         self.ex['elements']['Identifier']['ns']+"Identifier")
                 identifier.appendChild(
                         self.document.createTextNode(self.process.Identifier))
-                self.Execute.appendChild(identifier)
+                self.ExecuteResponce.appendChild(identifier)
             elif element == 'Status':
-                self.statusNode(self.Execute)
+                self.statusNode(self.ExecuteResponce)
             elif element == "DataInputs":
                 # this structure is ommited
                 pass
@@ -537,7 +539,7 @@ class Execute:
                 pass
             elif element == "ProcessOutputs":
                 if self.status == "ProcessSucceeded":
-                    self.process_outputsNode(self.Execute)
+                    self.process_outputsNode(self.ExecuteResponce)
         return
 
     def statusNode(self,parent):
@@ -688,6 +690,7 @@ class Execute:
 
                         except IndexError,e:
                             lower = upper = "%s: not enough output values for bounding box"
+
                         bboxNode.appendChild(lower)
                         bboxNode.appendChild(upper)
 
@@ -737,7 +740,6 @@ class Execute:
         if type=="ComplexValueReference":
             if data:
                 inputUrl = urllib.urlopen(data)
-                
                 try:
                     fout=open(output,'wb')
                 except IOError, what:

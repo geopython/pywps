@@ -62,7 +62,6 @@ class processExecuteXML(xml.sax.handler.ContentHandler):
         if name[1] == "Identifier":
             self.inIdentifier = True
         if name[1] == "ComplexValueReference":
-            self.inValue = True
             self.inComplexValueReference = True
             self.value = {
                 "type":"ComplexValueReference",
@@ -72,7 +71,7 @@ class processExecuteXML(xml.sax.handler.ContentHandler):
             self.inComplexValue = True
             self.value = {
                 "type":"ComplexValue",
-                "data": None,
+                "data":"!complexvalue!",
             }
 
         if name[1] == "LiteralValue":
@@ -96,10 +95,10 @@ class processExecuteXML(xml.sax.handler.ContentHandler):
             self.inDataInputs = False
         if name[1] == "Identifier":
             self.inIdentifier = False
-        if name[1] == "ComplexValue":
-            self.value["data"] = "!complexvalue!"
-        if name[1] == "BoundingBoxValue":
-            self.value = "!bboxvalue!"
+        #if name[1] == "ComplexValue":
+        #    self.value["data"] = "!complexvalue!"
+        #if name[1] == "BoundingBoxValue":
+        #    self.value = "!bboxvalue!"
 
         if self.value and self.ident:
             
@@ -135,10 +134,13 @@ class processExecuteXML(xml.sax.handler.ContentHandler):
 
         characters = characters.strip()
 
+        # process identifier
         if self.inIdentifier and not self.inDataInputs:
             self.values['identifier'] = characters
+        # identifier of the input
         elif self.inIdentifier and self.inDataInputs:
             self.ident = characters
+        # value of the input
         elif self.inValue and self.inDataInputs:
             self.value = characters
 
@@ -245,7 +247,8 @@ class Inputs:
 
             for input in self.values['datainputs'].keys():
                 # complexvalues
-                if self.values['datainputs'][input] == "!complexvalue!":
+                if type(self.values['datainputs'][input]) == type({}) and \
+                        self.values['datainputs'][input]["data"] == "!complexvalue!":
                     # for each Input in XML
                     for Input in formDocument.getElementsByTagName("Input"):
                         cmplxval = Input.getElementsByTagName("ComplexValue")
