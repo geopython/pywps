@@ -25,7 +25,6 @@ This module generates XML file with Execute response of WPS and executes the pro
 from ogc import execute
 from xml.dom.minidom import Document
 from xml.dom.minidom import parse
-import grass
 import wpsexceptions
 import append
 
@@ -146,6 +145,8 @@ class Execute:
         self.errorCode = 0
         self.pid = os.getpid()
 
+
+
         # 
         # storing the data in self.process.Inputs[input]['value']
         #
@@ -249,6 +250,23 @@ class Execute:
             return
         else:
             self.dirsToRemove.append(self.tempdir)
+
+        # creating grass location, if needed,
+        try:
+            if self.processes.grassLocation:
+                pass
+            import grass
+
+            grassEnv = grass.GRASS(self.grassSettings)
+            try:
+                self.mapset = grassEnv.mkmapset(self.process.grassLocation)
+                self.dirsToRemove.append(os.path.join(self.process.grassLocation,self.mapset))
+                self.process.grassenv=grassEnv.grassenv
+            except AttributeError:
+                self.mapset = grassEnv.mkmapset()
+        except:
+            pass
+
         
         #
         # make GRASS MAPSET.
@@ -258,13 +276,7 @@ class Execute:
         # Set 
         #     *self.process.grassEnv
         # variables
-        grassEnv = grass.GRASS(self.grassSettings)
-        try:
-            self.mapset = grassEnv.mkmapset(self.process.grassLocation)
-            self.dirsToRemove.append(os.path.join(self.process.grassLocation,self.mapset))
-            self.process.grassenv=grassEnv.grassenv
-        except AttributeError:
-            self.mapset = grassEnv.mkmapset()
+
  
         #
         # downloading the data
@@ -340,7 +352,7 @@ class Execute:
                     (grassEnv.grassenv['MAPSET']))
 
         except Exception,e:
-            sys.stderr.write("PyWPS ERROR: %s in self.process.execute()\n" % (e))
+            ays.stderr.write("PyWPS ERROR: %s in self.process.execute()\n" % (e))
             if sys.stdout == sys.__stderr__:
                 sys.stdout = sys.__stdout__
             self.status = "ProcessFailed"
@@ -828,10 +840,10 @@ class Execute:
         # in /tmp else
         try:
             if directory:
-                    tempdir = tempfile.mkdtemp(prefix="tmpgrass",dir=directory)
+                    tempdir = tempfile.mkdtemp(prefix="tmppywps",dir=directory)
             else:
                 try:
-                    tempdir = tempfile.mkdtemp(prefix="tmpgrass",dir=self.settings.ServerSettings['tempPath'])
+                    tempdir = tempfile.mkdtemp(prefix="tmppywps",dir=self.settings.ServerSettings['tempPath'])
                 except KeyError:
                     tempdir = tempfile.mkdtemp()
         except (IOError,OSError), what:
