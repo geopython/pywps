@@ -72,7 +72,6 @@ class GRASS:
                             /tmp/grasstmpSOMEHTIN/
                             will be created
         """
-        sys.stderr.write("##################### creating\n")
         self.grassenv = {}
         tempdir = os.path.abspath(os.path.curdir)# suppose, he has a
 
