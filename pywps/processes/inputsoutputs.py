@@ -5,6 +5,7 @@ class Process:
         self.Title="Test input and output structures"
         self.statusSupported="false"
         self.storeSupported="false"
+        #self.grassLocation = None
         self.Inputs = [
                 # 0
                  {
