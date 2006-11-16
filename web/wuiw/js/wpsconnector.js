@@ -262,6 +262,10 @@ function wpsConnector(console) {
 	  //draw form for this function
 
 	  var hr = document.createElement('hr');
+	  
+	  //here I have to put a function to create the form dom object 
+	  //keep informations from metadata inside XML object
+	  var processForm = self.buildFormFromMetadata( xml );
 	  self.formObj.appendChild(hr);
 	  var input = document.createElement('input');
 		input.type='button';
@@ -272,6 +276,26 @@ function wpsConnector(console) {
 	  //
    };
 
+   wpsConnector.prototype.buildFormFromMetadata = function( xml ){
+	   //create object container
+	   var domObj = document.createElement('div');
+	   domObj.id='formContainer';
+	   
+	   var self = wpsConnector;
+	   //get Metadata
+	   var aMetadata = xml.getElementsByTagName('metadata');
+	   //select metatada with interface="formInput"
+	   for(i=0;i<aMetadata.length;i++){
+		   var metadata = aMetadata[i];
+		   var metaType = metadata.getAttribute('type');
+		   if(metaType=='formInput'){
+			   //set all values
+		 	  var description = metadata.textContent;
+		   }
+	   }
+	   return domObj;
+   };
+   
    wpsConnector.prototype.wpsExecute = function(){
 	   var self = wpsConnector;
 	  var select = getRawObject('processlist');
