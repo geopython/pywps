@@ -1,66 +1,37 @@
 <?php
-/**********************************************************************
+ /**********************************************************************
  *
- * purpose: an AJAX interface to Pywps
+ * purpose: config file for EMBRIO of PyWPS
  *
- * authors: Luca Casagrande (...) and Lorenzo Becchi (lorenzo@ominiverdi.com)
+ * authors: Luca Casagrande (luca.casagrande@gmail.com) and Lorenzo Becchi (lorenzo@ominiverdi.com)
  *
- *   - it should work like this (jachym suggestion): 
- *		1) user will set the server address 
- *		2) webinterface would getcapabilities - all the processes offered by the server 
- * 		3) user would choose some process 
- * 		4) web interface would describe process and create input form for the user
- * 
- *   TODO:
- * 		- tranlate all comments in english
- * 		- stick to the planned interface
- * 
+ * TODO:
+ *   - a lot...
+ *
  **********************************************************************
  *
  * Copyright (C) 2006 ominiverdi.org
- *  
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- *  
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **********************************************************************/
-
- session_start();
-  //ERROR HANDLING
-  if(isset($_REQUEST['debug'])) error_reporting ( E_ALL );
-  else error_reporting( E_ERROR );
-  
-    //check if the session is on
-  if (isset($_GET['sessionId'])){
-  	 $sessionId=trim($_GET['sessionId']);
-  	   session_id($sessionId);
-  }
-  else  $sessionId=session_id(); 
-  
-// Parametri di default
-
-//$script_name = "template_pywps.php";
-$map_path = "/path_to_my_mapfile_dir/";
-$map_file = "spearfish.map";
-$img_path = "/var/www/localhost/htdocs/tmp/";
-$pywps_path = "/var/www/localhost/htdocs/wps/wpsoutputs/";
-$cgi_executable= "http://localhost/cgi-bin/wps.py";
-// Crea l'oggetto map per il mapfile specificato
-
-if(extension_loaded('MapScript')){
-	$map = ms_newMapObj($map_path.$map_file);
-}else {
-        echo "no mapscript available";
-        die;
-}
-
+$script_name = "name of your script";
+$map_path = "path/to/your/mapfile";
+$map_file = "yourmapfile.map";
+$img_path = "path/to/your/image/tmp_dir/";# write enabled, web server visible
+$img_rel_path = "../rel/path/to/your/img_path";
+$pywps_outputPath = "path/to/your/pywps/temp_dir"; #same outputPath as in settings.py
+$cgi_executable = "http://myserver.org/cgi-bin/pywps.py";
+?>
