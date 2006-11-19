@@ -48,6 +48,7 @@ from pywps.etc import grass
 from pywps.etc import settings
 from pywps import Wps
 from pywps.Wps import wpsexceptions
+from pywps.Wps.wpsexceptions import *
 from pywps.Wps import capabilities
 from pywps.Wps import describe
 from pywps.Wps import execute
@@ -68,219 +69,185 @@ def main():
     and everything should happen in this directory.
     """
     
-    wpsExceptions = wpsexceptions.WPSExceptions() # class for exceptions
-    formValues = {}  # input values
-    serverSettings = settings.ServerSettings
-    inpts = inputs.Inputs() # data inputs
-    pid = os.getpid()
-    method = os.getenv("REQUEST_METHOD")
-    
+    try:
+        formValues = {}  # input values
+        serverSettings = settings.ServerSettings
+        inpts = inputs.Inputs() # data inputs
+        pid = os.getpid()
+        method = os.getenv("REQUEST_METHOD")
+        
 
-    try: #  Maximal length of one input
-        if method == "GET":
-            maxSize = int(serverSettings['maxInputParamLength'])
-            maxSize = int(serverSettings['maxSize'])
-    except:
-        if method == "GET":
-            maxSize = 1024
-        else:
-            maxSize = 0 # will be controlled later
+        try: #  Maximal length of one input
+            if method == "GET" or not method:
+                maxSize = int(serverSettings['maxInputParamLength'])
+                maxSize = int(serverSettings['maxSize'])
+        except:
+            if method == "GET" or not method:
+                maxSize = 1024
+            else:
+                maxSize = 0 # will be controlled later
 
-    # key values to lower case
-    if method == "GET":
-        form = cgi.FieldStorage()  # the input values (GET method)
-        for key in form.keys():
-            value = form.getvalue(key)
-            # to avoid problems with more then one inputs
-            if type(form.getvalue(key)) == type([]):
-                value = value[-1].strip()
+        # key values to lower case
+        if method == "GET" or not method:
+            form = cgi.FieldStorage()  # the input values (GET method)
+            for key in form.keys():
+                value = form.getvalue(key)
+                # to avoid problems with more then one inputs
+                if type(form.getvalue(key)) == type([]):
+                    value = value[-1].strip()
 
-            value = value.strip()
+                value = value.strip()
 
-            if len(value) > maxSize and maxSize > 0:
-                print "Content-type: text/xml\n"
-                print wpsExceptions.make_exception("FileSizeExceeded",key)
-                return
-            formValues[key.lower()] = value
-
-    #
-    # HTTP GET
-    if method == "GET":
-        e = inpts.formvalsGet2dict(formValues)
-        if e:
-            print "Content-type: text/xml\n"
-            print wpsExceptions.make_exception(e,"")
-            return
-
-        # request 
-        if not 'request' in inpts.values.keys():
-            print "Content-type: text/xml\n"
-            print wpsExceptions.make_exception("MissingParameterValue","request")
-            return
+                if len(value) > maxSize and maxSize > 0:
+                    raise FileSizeExceeded(key)
+                    return
+                formValues[key.lower()] = value
 
         #
-        # Check inputs again
-        if not 'service' in inpts.values.keys(): 
-            print "Content-type: text/xml\n"
-            print wpsExceptions.make_exception("MissingParameterValue",'service')
-            return
-
-        elif not 'version' in inpts.values.keys() and \
-            inpts.values['request'].lower() != "getcapabilities":
-            print "Content-type: text/xml\n"
-            print wpsExceptions.make_exception("MissingParameterValue",'version')
-            return
-        
-        # service == wps
-        if inpts.values['service'].lower() != 'wps':
-            print "Content-type: text/xml\n"
-            print wpsExceptions.make_exception("InvalidParameterValue",
-                    'service')
-            return
-        # version == 0.4.0
-        elif inpts.values['request'].lower() != "getcapabilities" \
-            and inpts.values['version'].lower() != '0.4.0':
-            print "Content-type: text/xml\n"
-            print wpsExceptions.make_exception("InvalidParameterValue",
-                    'version')
-            return
-
-
-    #
-    # HTTP POST
-    else:
-        try:
-            size = serverSettings['maxSize']
-        except:
-            size = 0
-        e = inpts.formvalsPost2dict(sys.stdin,size)
-        if e:
-            print "Content-type: text/xml\n"
-            print wpsExceptions.make_exception(str(e))
-            return
-
-
-
-    # Controll of all 'identifier' values - if wrongprocess is
-    # set, exception, nothing otherwice
-    wrongprocess = inpts.controllProcesses(
-            processes.__all__,inpts.values)
-    if wrongprocess:
-        if wrongprocess != "identifier":
-            print "Content-type: text/xml\n"
-            print wpsExceptions.make_exception(
-                    "InvalidParameterValue",wrongprocess
-                    )
-        else:
-            print "Content-type: text/xml\n"
-            print wpsExceptions.make_exception(
-                    "MissingParameterValue",wrongprocess
-                    )
-
-        return
-
-    #---------------------------------------------------------------------
-
-    #
-    # Request  handeling
-    #
-    
-    #
-    # GetCapabilities
-    if inpts.values['request'].lower() == "getcapabilities":
-        getCapabilities = capabilities.Capabilities(settings,processes)
-        print "Content-type: text/xml\n"
-        print getCapabilities.document.toprettyxml()
-    #
-    # DescribeProcess
-    elif inpts.values["request"].lower() == "describeprocess":
-        describeProc = describe.Describe(settings,processes,inpts.values)
-        if describeProc.document != None:
-            print "Content-type: text/xml\n"
-            print describeProc.document.toprettyxml()
-    #
-    # Execute
-    elif inpts.values["request"].lower() == "execute":
-
-        # Create PID file, temp directory etc.
-        # check for number of running operations
-        try:
-            nPIDFiles = len(glob.glob(
-                os.path.join(settings.ServerSettings['tempPath'],"pywps-pidfile-*")))
-            # cleaning if something goes wrong
-            # for file in glob.glob(
-            #         os.path.join(settings.ServerSettings['tempPath'],"pywps*")):
-            #     sys.stderr.write(file+"\n")
-            #     os.remove(file)
-        except (IOError, OSError), what:
-            print "Content-type: text/xml\n"
-            print wpsExceptions.make_exception(
-                    "ServerError","IOError,OSError: %s" % what)
-            return
-
-        try:
-            maxPIDFiles = settings.ServerSettings['maxOperations']
-        except KeyError:
-            maxPIDFiles = 1
-
-        # too many processes ?
-        if nPIDFiles >=  maxPIDFiles:
-            print "Content-type: text/xml\n"
-            print wpsExceptions.make_exception("ServerBusy")
-            #os.remove(PIDFile[1])
-            return
-        else:
-            PIDFile = tempfile.mkstemp(prefix="pywps-pidfile-")
-            pass
-
-
-        # MAKE
-        process = eval("processes.%s.Process()" %
-                (inpts.values['identifier'][0]))
-        executeProc = None
-        try:
-            executeProc = execute.Execute(settings,grass.grassenv,process,inpts.values,method)
-        except Exception,e:
-            # error reporting
-            sys.stderr.write("PyWPS ERROR in execute.Execute(): "+str(e)+"\n")
-            # cleaning
-            os.remove(PIDFile[1])
-            print "Content-type: text/xml\n"
-            print wpsExceptions.make_exception("ServerError",e)
-            return 1
-
-
-        # asynchronous?
-        # only, if this is child process:
-        if not executeProc.pid:
-            file = open(
-                os.path.join(settings.ServerSettings['outputPath'],executeProc.executeresponseXmlName),"w")
-            sys.stdout = file
-
-        # clean the PID file        
-        if not (executeProc.status.lower() == "processaccepted" or \
-                executeProc.status.lower() == "processstarted"):
-                os.remove(PIDFile[1])
-
-        if executeProc.document:
-            if sys.stdout == sys.__stdout__:
-                print "Content-type: text/xml\n"
-            print executeProc.document.toprettyxml(indent='\t', newl='\n')
-        else:
-            # clean the PID file        
+        # HTTP POST
+        if method == "POST":
             try:
-                os.remove(PIDFile[1])
+                size = serverSettings['maxSize']
             except:
+                size = 0
+            inpts.formvalsPost2dict(sys.stdin,size)
+
+
+        #
+        # HTTP GET
+        else:
+            inpts.formvalsGet2dict(formValues)
+
+            # request 
+            if not 'request' in inpts.values.keys():
+                raise MissingParameterValue("request")
+
+            #
+            # Check inputs again
+            if not 'service' in inpts.values.keys(): 
+                raise MissingParameterValue("service")
+
+            elif not 'version' in inpts.values.keys() and \
+                inpts.values['request'].lower() != "getcapabilities":
+                raise MissingParameterValue(version)
+            
+            # service == wps
+            if inpts.values['service'].lower() != 'wps':
+                raise InvalidParameterValue('service')
+            # version == 0.4.0
+            elif inpts.values['request'].lower() != "getcapabilities" \
+                and inpts.values['version'].lower() != '0.4.0':
+                raise InvalidParameterValue('version')
+
+
+
+
+        # Controll of all 'identifier' values - if wrongprocess is
+        # set, exception, nothing otherwice
+        wrongprocess = inpts.controllProcesses(
+                processes.__all__,inpts.values)
+        if wrongprocess:
+            if wrongprocess != "identifier":
+                raise InvalidParameterValue(wrongprocess)
+            else:
+                raise MissingParameterValue(wrongprocess)
+            return
+
+        #---------------------------------------------------------------------
+
+        #
+        # Request  handeling
+        #
+        
+        #
+        # GetCapabilities
+        if inpts.values['request'].lower() == "getcapabilities":
+            getCapabilities = capabilities.Capabilities(settings,processes)
+            print "Content-type: text/xml\n"
+            print getCapabilities.document.toprettyxml()
+        #
+        # DescribeProcess
+        elif inpts.values["request"].lower() == "describeprocess":
+            describeProc = describe.Describe(settings,processes,inpts.values)
+            if describeProc.document != None:
+                print "Content-type: text/xml\n"
+                print describeProc.document.toprettyxml()
+        #
+        # Execute
+        elif inpts.values["request"].lower() == "execute":
+
+            # Create PID file, temp directory etc.
+            # check for number of running operations
+            try:
+                nPIDFiles = len(glob.glob(
+                    os.path.join(settings.ServerSettings['tempPath'],"pywps-pidfile-*")))
+                # cleaning if something goes wrong
+                # for file in glob.glob(
+                #         os.path.join(settings.ServerSettings['tempPath'],"pywps*")):
+                #     sys.stderr.write(file+"\n")
+                #     os.remove(file)
+            except (IOError, OSError), what:
+                raise ServerError("IOError,OSError: %s" % what)
+            try:
+                maxPIDFiles = settings.ServerSettings['maxOperations']
+            except KeyError:
+                maxPIDFiles = 1
+
+            # too many processes ?
+            if nPIDFiles >=  maxPIDFiles:
+                raise ServerBusy()
+            else:
+                PIDFile = tempfile.mkstemp(prefix="pywps-pidfile-")
                 pass
 
-        # only, if this is child process:
-        if not executeProc.pid:
-            file.close()
-    else:
-        print "Content-type: text/xml\n"
-        print wpsExceptions.make_exception("InvalidParameterValue","request")
+
+            # MAKE
+            process = eval("processes.%s.Process()" %
+                    (inpts.values['identifier'][0]))
+            executeProc = None
+            try:
+                executeProc = execute.Execute(settings,grass.grassenv,process,inpts.values,method)
+            except Exception,e:
+                # cleaning
+                os.remove(PIDFile[1])
+                raise ServerError(e)
+
+
+            # asynchronous?
+            # only, if this is child process:
+            if not executeProc.pid:
+                file = open(
+                    os.path.join(settings.ServerSettings['outputPath'],executeProc.executeresponseXmlName),"w")
+                sys.stdout = file
+
+            # clean the PID file        
+            if not (executeProc.status.lower() == "processaccepted" or \
+                    executeProc.status.lower() == "processstarted"):
+                    os.remove(PIDFile[1])
+
+            if executeProc.document:
+                if sys.stdout == sys.__stdout__:
+                    print "Content-type: text/xml\n"
+                print executeProc.document.toprettyxml(indent='\t', newl='\n')
+            else:
+                # clean the PID file        
+                try:
+                    os.remove(PIDFile[1])
+                except:
+                    pass
+
+            # only, if this is child process:
+            if not executeProc.pid:
+                file.close()
+        else:
+            raise InvalidParameterValue("request")
+    # catch all exceptions
+    except Exception, e:
+        print e
         return
+
 
         
 if __name__ == "__main__":
     main()
+

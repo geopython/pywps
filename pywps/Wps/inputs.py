@@ -170,12 +170,12 @@ class Inputs:
 
         # maximum size exceeded
         if file.read():
-            return "FileSizeExceeded"
+            raise FileSizeExceeded()
 
         try:
             formDocument = xml.dom.minidom.parseString(inputxml)
         except xml.parsers.expat.ExpatError,e:
-            return e
+            raise NoApplicableCode(e)
 
         #
         # decribe process request
@@ -281,7 +281,7 @@ class Inputs:
 
         # not describeprocess and not execute: exception
         else:
-            return formDocument.firstChild.tagName
+            raise InvalidParameterValue(formDocument.firstChild.tagName)
         return
 
     def formvalsGet2dict(self,formValues):
@@ -303,7 +303,7 @@ class Inputs:
             # DataInputs must be even number
             #
             if len(datainputs) % 2 != 0:
-                return "DataInputs"
+                raise InvalidParameterValue("DataInputs")
             #
             # Array -> Dictionary
             #

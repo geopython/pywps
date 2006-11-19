@@ -248,6 +248,8 @@ class Capabilities:
                 
             # append defined nodes to process
             for opt in POff['Process']['order']:
+                if opt == "Metadata":
+                    continue
                 self.Append.Node(
                     document=self.document, 
                     childNode=opt, 

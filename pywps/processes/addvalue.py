@@ -49,6 +49,9 @@ class Process:
         # Title = "Add some value to the raster map"
         self.Title="Add some value to raster map"
 
+        # define GRASS location
+        self.grassLocation = None
+
         #
         # Inputs
         # Inputs is an array of input structure
