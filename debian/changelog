@@ -5,6 +5,8 @@ pywps (1.1.0-1) stable; urgency=low
   * ComplexValueReference input type definition is depredecated, 
     use only ComplexValue - PyWPS will recognise the input type and handle
     it according to it.
+  * GRASS location not created automaticly any more. 
+  * Rewritten exception handeling
 
  -- Jachym Cepicky <jachym@les-ejk.cz>  Fri, 2 Nov 2006 15:38:00 +0200
  pywps (1.0.0rc3-1) unstable; urgency=low
