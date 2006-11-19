@@ -45,7 +45,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <P><P>
 <BR>
 <BLOCKQUOTE>
-Copyright &#169;2006 Jachym Cepicky
+Copyright &#169;2006 PyWPS Development Team
     Permission is granted to copy, distribute and/or modify this document
     under the terms of the GNU Free Documentation License, Version 1.2
     or any later version published by the Free Software Foundation;
@@ -76,59 +76,59 @@ Contents</A>
 <!--Table of Contents-->
 
 <UL CLASS="TofC">
-<LI><A NAME="tex2html29"
-  HREF="install.html#SECTION00020000000000000000">Bugs</A>
 <LI><A NAME="tex2html30"
+  HREF="install.html#SECTION00020000000000000000">Bugs</A>
+<LI><A NAME="tex2html31"
   HREF="install.html#SECTION00030000000000000000">Installation</A>
 <UL>
-<LI><A NAME="tex2html31"
-  HREF="install.html#SECTION00031000000000000000">Installation the quick 'n' dirty way</A>
 <LI><A NAME="tex2html32"
-  HREF="install.html#SECTION00032000000000000000">Installation the 'clean' way</A>
+  HREF="install.html#SECTION00031000000000000000">Installation the quick 'n' dirty way</A>
 <LI><A NAME="tex2html33"
+  HREF="install.html#SECTION00032000000000000000">Installation the 'clean' way</A>
+<LI><A NAME="tex2html34"
   HREF="install.html#SECTION00033000000000000000">Testing after installation</A>
 </UL>
 <BR>
-<LI><A NAME="tex2html34"
+<LI><A NAME="tex2html35"
   HREF="install.html#SECTION00040000000000000000">Configuration</A>
 <UL>
-<LI><A NAME="tex2html35"
-  HREF="install.html#SECTION00041000000000000000">etc/settings.py</A>
 <LI><A NAME="tex2html36"
+  HREF="install.html#SECTION00041000000000000000">etc/settings.py</A>
+<LI><A NAME="tex2html37"
   HREF="install.html#SECTION00042000000000000000">etc/grass.py</A>
 </UL>
 <BR>
-<LI><A NAME="tex2html37"
+<LI><A NAME="tex2html38"
   HREF="install.html#SECTION00050000000000000000">Add your own processes</A>
 <UL>
-<LI><A NAME="tex2html38"
-  HREF="install.html#SECTION00051000000000000000">Process Configuration</A>
 <LI><A NAME="tex2html39"
+  HREF="install.html#SECTION00051000000000000000">Process Configuration</A>
+<LI><A NAME="tex2html40"
   HREF="install.html#SECTION00052000000000000000">Process Programming</A>
 </UL>
 <BR>
-<LI><A NAME="tex2html40"
-  HREF="install.html#SECTION00060000000000000000">Note to grass programming</A>
 <LI><A NAME="tex2html41"
-  HREF="install.html#SECTION00070000000000000000">Testing your new process</A>
+  HREF="install.html#SECTION00060000000000000000">Note to grass programming</A>
 <LI><A NAME="tex2html42"
+  HREF="install.html#SECTION00070000000000000000">Testing your new process</A>
+<LI><A NAME="tex2html43"
   HREF="install.html#SECTION00080000000000000000">Using the PyWPS</A>
 <UL>
-<LI><A NAME="tex2html43"
-  HREF="install.html#SECTION00081000000000000000">Input</A>
 <LI><A NAME="tex2html44"
+  HREF="install.html#SECTION00081000000000000000">Input</A>
+<LI><A NAME="tex2html45"
   HREF="install.html#SECTION00082000000000000000">Output</A>
 </UL>
 <BR>
-<LI><A NAME="tex2html45"
-  HREF="install.html#SECTION00090000000000000000">Sample process: addvalue</A>
 <LI><A NAME="tex2html46"
-  HREF="install.html#SECTION000100000000000000000">KVP request encoding of addvalue</A>
+  HREF="install.html#SECTION00090000000000000000">Sample process: addvalue</A>
 <LI><A NAME="tex2html47"
-  HREF="install.html#SECTION000110000000000000000">XML request encoding addvalue</A>
+  HREF="install.html#SECTION000100000000000000000">KVP request encoding of addvalue</A>
 <LI><A NAME="tex2html48"
-  HREF="install.html#SECTION000120000000000000000">Licence of PyWPS</A>
+  HREF="install.html#SECTION000110000000000000000">XML request encoding addvalue</A>
 <LI><A NAME="tex2html49"
+  HREF="install.html#SECTION000120000000000000000">Licence of PyWPS</A>
+<LI><A NAME="tex2html50"
   HREF="install.html#SECTION000130000000000000000">Licence of this document</A>
 </UL>
 <!--End of Table of Contents-->
@@ -139,12 +139,14 @@ Contents</A>
 <H1><A NAME="SECTION00020000000000000000">
 Bugs</A>
 </H1>
-    Known bugs and limitations to 14.8.2006
-    
-<UL>
+    Known bugs and limitations to UL>
 <LI>Process Inputs definition is made on very primitive way. But it works.
 </LI>
 <LI>Sometimes, when there is e.g. SyntaxError in the process, teporary file <TT>/tmp/pywps*</TT> is not deleted, which ledts to <TT>ServerBussy</TT> exception and the files have to be removed by hand.
+</LI>
+<LI>If inputs are of type <TT>LiteralValue</TT> and it's type is
+    string, it is not controlled properly. Take care on your inputs and do
+    not use it directly in scripts to avoid your server to be hacked.
     
 </LI>
 </UL>
@@ -270,7 +272,8 @@ Pywps configuration takes places in two files. The files are actually python
 
 <P>
 The first file is in <TT>etcsettings.py</TT> and (optional) the second file is
-    <TT>etcgrass.py</TT>. Some special "tuning" can be done in <TT>processes/__init__.py</TT>
+    <TT>etcgrass.py</TT> which has to be setuped if you do want to use
+    GRASS GIS modules in your scripts. Some special "tuning" can be done in <TT>processes/__init__.py</TT>
     file
 
 <P>
@@ -453,9 +456,36 @@ grassLocation="/var/grassdata/spearfish57/"
 </PRE>
 
 <P>
-If this variable is not set, new temporary GRASS Location &amp;&amp; mapset will be
+If this variable is  set to <TT>None</TT>, new temporary GRASS Location &amp;&amp; mapset will be
 generated and you can work in there. The projection of the location will be
-XY.
+XY. If this variable is not set, GRASS will not be stared.
+
+<P>
+
+<H4><A NAME="SECTION00051010000000000000">
+Metadata defition</A>
+</H4> is stored in array <TT>self.Metadata</TT> in
+<TT>__init__</TT> function:
+<PRE>
+# Metadata definition
+self.Metadata = [
+    {   "Identifier":"point",
+        "type":"point",
+        "textContent":"Click in the map"
+        },
+    ]
+</PRE>
+
+<P>
+This code will produce in DescribeProcess responce document following
+element:
+<PRE>
+...
+&lt;ows:Metadata Identifier="point" type="point"&gt;
+    Click in the map
+&lt;/ows:Metadata&gt;
+...
+</PRE>
 
 <P>
 
@@ -2134,7 +2164,7 @@ Mathematics Department, Macquarie University, Sydney.
 The command line arguments were: <BR>
  <STRONG>latex2html</STRONG> <TT>-split 0 install.tex</TT>
 <P>
-The translation was initiated by Jachym Cepicky on 2006-11-10
+The translation was initiated by Jachym Cepicky on 2006-11-19
 <DIV CLASS="navigation"><HR>
 <!--Navigation Panel-->
 <IMG WIDTH="81" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next_inactive"
@@ -2147,7 +2177,7 @@ The translation was initiated by Jachym Cepicky on 2006-11-10
 <!--End of Navigation Panel-->
 <ADDRESS>
 Jachym Cepicky
-2006-11-10
+2006-11-19
 </ADDRESS>
 </BODY>
 </HTML>

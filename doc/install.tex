@@ -20,7 +20,7 @@
 
 \bigskip
 \begin{quote}
-    Copyright \copyright  2006 Jachym Cepicky
+    Copyright \copyright  2006 PyWPS Development Team
     Permission is granted to copy, distribute and/or modify this document
     under the terms of the GNU Free Documentation License, Version 1.2
     or any later version published by the Free Software Foundation;
@@ -44,10 +44,13 @@
      
     %---------------------------------------------------------------------
     \section{Bugs}
-    Known bugs and limitations to 14.8.2006
+    Known bugs and limitations to \date
     \begin{itemize}
     \item  Process Inputs definition is made on very primitive way. But it works.
     \item Sometimes, when there is e.g. SyntaxError in the process, teporary file \texttt{/tmp/pywps*} is not deleted, which ledts to \texttt{ServerBussy} exception and the files have to be removed by hand.
+    \item  If inputs are of type \texttt{LiteralValue} and it's type is
+    string, it is not controlled properly. Take care on your inputs and do
+    not use it directly in scripts to avoid your server to be hacked.
     \end{itemize}
 
     Please report all problems or unexpected handeling.
@@ -142,7 +145,8 @@ ImportError: No module named xml.dom.minidom
 
      
     The first file is in \texttt{etc\/settings.py} and (optional) the second file is
-    \texttt{etc\/grass.py}. Some special "tuning" can be done in \texttt{processes/\_\_init\_\_.py}
+    \texttt{etc\/grass.py} which has to be setuped if you do want to use
+    GRASS GIS modules in your scripts. Some special "tuning" can be done in \texttt{processes/\_\_init\_\_.py}
     file
      
 
@@ -314,11 +318,31 @@ grassLocation="/var/grassdata/spearfish57/"
     \end{verbatim}
 
      
-If this variable is not set, new temporary GRASS Location \&\& mapset will be
+If this variable is  set to \texttt{None}, new temporary GRASS Location \&\& mapset will be
 generated and you can work in there. The projection of the location will be
-XY.
-     
+XY. If this variable is not set, GRASS will not be stared.
 
+\paragraph{Metadata defition} is stored in array \texttt{self.Metadata} in
+\texttt{\_\_init\_\_} function:
+\begin{verbatim}
+# Metadata definition
+self.Metadata = [
+    {   "Identifier":"point",
+        "type":"point",
+        "textContent":"Click in the map"
+        },
+    ]
+\end{verbatim}
+
+This code will produce in DescribeProcess responce document following
+element:
+\begin{verbatim}
+...
+<ows:Metadata Identifier="point" type="point">
+    Click in the map
+</ows:Metadata>
+...
+\end{verbatim}
 
     \subsubsection{Data Inputs}
      

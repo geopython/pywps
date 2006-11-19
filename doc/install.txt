@@ -5,9 +5,9 @@
 
                                Jachym Cepicky
 
-     Copyright ©2006 Jachym Cepicky Permission is granted to copy,
-     distribute and/or modify this document under the terms of the GNU
-     Free Documentation License, Version 1.2 or any later version
+     Copyright ©2006 PyWPS Development Team Permission is granted to
+     copy, distribute and/or modify this document under the terms of the
+     GNU Free Documentation License, Version 1.2 or any later version
      published by the Free Software Foundation; with no Invariant
      Sections, no Front-Cover Texts, and no Back-Cover Texts. A copy of
      the license is included in the section entitled "GNU Free
@@ -50,12 +50,18 @@ Contents
 
                                      Bugs
 
-   Known bugs and limitations to 14.8.2006
-     * Process Inputs definition is made on very primitive way. But it
-       works.
-     * Sometimes, when there is e.g. SyntaxError in the process, teporary
-       file /tmp/pywps* is not deleted, which ledts to ServerBussy
-       exception and the files have to be removed by hand.
+   Known bugs and limitations to UL>
+
+     Process Inputs definition is made on very primitive way. But it
+   works.
+
+     Sometimes, when there is e.g. SyntaxError in the process, teporary
+   file /tmp/pywps* is not deleted, which ledts to ServerBussy exception
+   and the files have to be removed by hand.
+
+     If inputs are of type LiteralValue and it's type is string, it is
+   not controlled properly. Take care on your inputs and do not use it
+   directly in scripts to avoid your server to be hacked.
 
    Please report all problems or unexpected handeling.
 
@@ -126,7 +132,8 @@ ImportError: No module named xml.dom.minidom
    program without any python knowledge.
 
    The first file is in etcsettings.py and (optional) the second file is
-   etcgrass.py. Some special "tuning" can be done in
+   etcgrass.py which has to be setuped if you do want to use GRASS GIS
+   modules in your scripts. Some special "tuning" can be done in
    processes/__init__.py file
 
 etc/settings.py
@@ -269,9 +276,29 @@ self.Title="Find the shortest path on the roads map on Spearfish dataset"
 
 grassLocation="/var/grassdata/spearfish57/"
 
-   If this variable is not set, new temporary GRASS Location && mapset
-   will be generated and you can work in there. The projection of the
-   location will be XY.
+   If this variable is set to None, new temporary GRASS Location &&
+   mapset will be generated and you can work in there. The projection of
+   the location will be XY. If this variable is not set, GRASS will not
+   be stared.
+
+    Metadata defition
+
+   is stored in array self.Metadata in __init__ function:
+# Metadata definition
+self.Metadata = [
+    {   "Identifier":"point",
+        "type":"point",
+        "textContent":"Click in the map"
+        },
+    ]
+
+   This code will produce in DescribeProcess responce document following
+   element:
+...
+<ows:Metadata Identifier="point" type="point">
+    Click in the map
+</ows:Metadata>
+...
 
   Data Inputs
 
@@ -1517,13 +1544,13 @@ request=<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
    The command line arguments were:
    latex2html -split 0 install.tex
 
-   The translation was initiated by Jachym Cepicky on 2006-11-10
+   The translation was initiated by Jachym Cepicky on 2006-11-19
      _________________________________________________________________
 
    next_inactive up previous
 
 
-    Jachym Cepicky 2006-11-10
+    Jachym Cepicky 2006-11-19
 
 Reference
 
