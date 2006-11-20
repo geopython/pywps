@@ -216,7 +216,8 @@ def main():
             except WPSException,e:
                 os.remove(PIDFile[1])
                 print e
-            else:
+                return 1
+            except Exception,e :
                 os.remove(PIDFile[1])
                 raise ServerError(e)
 

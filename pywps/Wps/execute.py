@@ -912,7 +912,7 @@ class Execute:
                 if input['dataType'] == type(0.0):
                     value = float(value)
                 elif input['dataType'] == type(1):
-                    value =  int(value)
+                    value =  int(float(value))
                 elif input['dataType'] == type(''):
                     value = str(value)
             except (KeyError),e:
@@ -932,8 +932,6 @@ class Execute:
                         if value in input['LiteralValue']['values']:
                             isin = True
                     else:
-                        sys.stderr.write("####### %s %s %s"%\
-                                (min(values),value,max(values)))
                         for range in input["LiteralValue"]["values"]:
                             if min(range) <= value <= max(range):
                                 isin = True

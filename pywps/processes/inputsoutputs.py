@@ -13,9 +13,10 @@ class Process:
                     'Title': 'Literal Value',
                     'Abstract': ' "literal value" ',
                     'LiteralValue': {'UOMs':["cm"],
-                                     "values":[[1,10],[20,40]]},
+                                     "values":[[1,10],[20,40],100]},
                     'MinimumOccurs': "3",
-                    'value': "",
+                    "dataType":type(0),
+                    'value': 0,
                  },
                 # 1
                  {
