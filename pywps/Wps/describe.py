@@ -337,10 +337,27 @@ class Describe:
                             (inputStruct['elements']['LiteralValues']['elements']['AllowedValues']['ns'],
                             "AllowedValues"))
                         literaldata.appendChild(valueNode)
-                        for val in processInput['values']:
-                            value = self.document.createElement("Value")
-                            value.appendChild(self.document.createTextNode(str(val)))
-                            valueNode.appendChild(value)
+                        # allowed values
+                        if not type(processInput['values'][0]) == type([]):
+                            for val in processInput['values']:
+                                value = self.document.createElement("Value")
+                                value.appendChild(self.document.createTextNode(str(val)))
+                                valueNode.appendChild(value)
+                        # ranges
+                        # NOTE: only basic suport - just min and max values
+                        else:
+                            for vals in processInput['values']:
+                                rangenode = self.document.createElement("Range")
+                                minnode = self.document.createElement("MinimumValue")
+                                minnode.appendChild(self.document.createTextNode(str(min(vals))))
+                                maxnode = self.document.createElement("MaximumValue")
+                                maxnode.appendChild(self.document.createTextNode(str(max(vals))))
+                                rangenode.appendChild(minnode)
+                                rangenode.appendChild(maxnode)
+                                valueNode.appendChild(rangenode)
+
+
+
                     continue
 
                 # append supported values

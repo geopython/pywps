@@ -58,7 +58,6 @@ from pywps.processes import *
 
 
 import string, sys, os, tempfile, glob, shutil, time, cgi
-#import cgitb; cgitb.enable()
 
 def main():
     """
@@ -75,6 +74,13 @@ def main():
         inpts = inputs.Inputs() # data inputs
         pid = os.getpid()
         method = os.getenv("REQUEST_METHOD")
+
+        # debuging
+        try:
+            if serverSettings["debuging"]:
+                import cgitb; cgitb.enable()
+        except:
+            pass
         
 
         try: #  Maximal length of one input
@@ -207,8 +213,10 @@ def main():
             executeProc = None
             try:
                 executeProc = execute.Execute(settings,grass.grassenv,process,inpts.values,method)
-            except Exception,e:
-                # cleaning
+            except WPSException,e:
+                os.remove(PIDFile[1])
+                print e
+            else:
                 os.remove(PIDFile[1])
                 raise ServerError(e)
 

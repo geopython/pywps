@@ -38,6 +38,10 @@ WPS = {
     # 'version':"0.4.0"
     'version': "0.4.0",
 
+    # debuging 
+    # "debug": False
+    "debug": False,
+
     #
     # This are mandatory and optional conf. parameters
     #
