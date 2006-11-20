@@ -366,6 +366,8 @@ element:
         \texttt{values} arry or it contains \texttt{"*"}
         in the array, \texttt{AnyValue} is assumed:
 
+        Array of defined values can be defined too:
+
     \begin{verbatim}
     {   # example of "AnyValue" case with centimeters as default unit
 
@@ -376,11 +378,21 @@ element:
         # 'LiteralValue': {'values':["*"]},
         'dataType': type(0.0)
     },
-    {   # example of "AllowedValues case with default units (meters)
+    {   # example of "AllowedValues" case with default units (meters)
 
         'Identifier': 'my_input_value',
         'Title': 'This is my input value',
         'LiteralValue': {values:[250, "300", '40', "a"]},
+        # the default value:
+        'value': 250,
+    },
+
+    {   # example of "Range" case with default units (meters)
+        # allowed values are only <250;300> and <350;400>
+
+        'Identifier': 'my_input_value',
+        'Title': 'This is my input value',
+        'LiteralValue': {values:[[250,300],[350,400]]},
         # the default value:
         'value': 250,
     },

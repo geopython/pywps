@@ -517,6 +517,9 @@ Allowed values are set by array of values. If there is no
         in the array, <TT>AnyValue</TT> is assumed:
 
 <P>
+Array of defined values can be defined too:
+
+<P>
 <PRE>
     {   # example of "AnyValue" case with centimeters as default unit
 
@@ -527,11 +530,21 @@ Allowed values are set by array of values. If there is no
         # 'LiteralValue': {'values':["*"]},
         'dataType': type(0.0)
     },
-    {   # example of "AllowedValues case with default units (meters)
+    {   # example of "AllowedValues" case with default units (meters)
 
         'Identifier': 'my_input_value',
         'Title': 'This is my input value',
         'LiteralValue': {values:[250, "300", '40', "a"]},
+        # the default value:
+        'value': 250,
+    },
+
+    {   # example of "Range" case with default units (meters)
+        # allowed values are only &lt;250;300&gt; and &lt;350;400&gt;
+
+        'Identifier': 'my_input_value',
+        'Title': 'This is my input value',
+        'LiteralValue': {values:[[250,300],[350,400]]},
         # the default value:
         'value': 250,
     },
@@ -2164,7 +2177,7 @@ Mathematics Department, Macquarie University, Sydney.
 The command line arguments were: <BR>
  <STRONG>latex2html</STRONG> <TT>-split 0 install.tex</TT>
 <P>
-The translation was initiated by Jachym Cepicky on 2006-11-19
+The translation was initiated by Jachym Cepicky on 2006-11-20
 <DIV CLASS="navigation"><HR>
 <!--Navigation Panel-->
 <IMG WIDTH="81" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next_inactive"
@@ -2177,7 +2190,7 @@ The translation was initiated by Jachym Cepicky on 2006-11-19
 <!--End of Navigation Panel-->
 <ADDRESS>
 Jachym Cepicky
-2006-11-19
+2006-11-20
 </ADDRESS>
 </BODY>
 </HTML>
