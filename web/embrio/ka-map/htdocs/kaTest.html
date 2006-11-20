@@ -1,0 +1,274 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>ka-Map! tests</title>
+<script type="text/javascript" src="wz_jsgraphics.js"></script>
+<script type="text/javascript" src="getcjs.php?name=DHTMLapi"></script>
+<script type="text/javascript" src="getcjs.php?name=xhr"></script>
+<script type="text/javascript" src="getcjs.php?name=jsExpander"></script>
+<script type="text/javascript" src="getcjs.php?name=kaMap&compress=no"></script>
+<script type="text/javascript" src="getcjs.php?name=kaKeymap"></script>
+<script type="text/javascript" src="getcjs.php?name=kaScalebar"></script>
+<script type="text/javascript" src="getcjs.php?name=kaLegend"></script>
+<script type="text/javascript" src="getcjs.php?name=kaTool&compress=no"></script>
+<script type="text/javascript">
+var myKaMap = null;
+var myNavTool = null
+var myQueryTool = null;
+
+function myOnLoad()
+{
+    initDHTMLAPI();
+    myKaMap = new kaMap( 'myMap' );
+    myKaMap.initialize();
+    var myKaScalebar = new kaScalebar( myKaMap, 'myScalebar' );
+    var myKaLegend = new kaLegend( myKaMap, 'myLegend', true );
+    var myKaKeymap = new kaKeymap( myKaMap, 'myKeymap' );
+    myKaMap.registerForEvent( KAMAP_INITIALIZED, null, testInitialized );
+    myKaMap.registerForEvent( KAMAP_MAP_INITIALIZED, null, testMapInitialized );
+    myKaMap.registerForEvent( KAMAP_EXTENTS_CHANGED, null, testExtentsChanged );
+    myKaMap.registerForEvent( KAMAP_NOTICE, null, myErrorHandler );
+    myKaMap.registerForEvent( KAMAP_WARNING, null, myErrorHandler );
+    myKaMap.registerForEvent( KAMAP_ERROR, null, myErrorHandler );
+    
+    myNavTool = new kaNavigator(myKaMap);
+    myNavTool.activate();
+}
+
+/**
+ * event handler for KAMAP_INITIALIZED.
+ *
+ * at this point, ka-Map! knows what map files are available and we have
+ * access to them.  This demonstrates how to access the map files and populate
+ * a select element appropriately
+ */
+function testInitialized()
+{
+    //alert( 'ka-Map! initialized' );
+    
+    //get list of maps and populate the maps select box
+    var aMaps = myKaMap.getMaps();
+    var oSelect = document.forms[0].maps;
+    var j = 0;
+    var opt = new Option( 'select a map', '', true, true );
+    oSelect[j++] = opt;
+    for(var i in aMaps)
+    {
+        oSelect[j++] = new Option(aMaps[i].title,aMaps[i].name,false,false);
+    }
+}
+
+/**
+ * event handler for KAMAP_MAP_INITIALIZED
+ *
+ * make sure that the right map is selected in the list and then
+ * update the groups - can't really use the groups for much in this demo but
+ * but this illustrates how it would be done.
+ * 
+ * the scales are also put into a select ... this will be used for zooming
+ * to an arbitrary scale which is a much more useful demo :)
+ */ 
+function testMapInitialized( eventID, mapName )
+{
+    //alert( 'ka-Map! initialized a new map: ' + mapName );
+    //make sure the map is selected ... 
+    var oSelect = document.forms[0].maps;
+    if (oSelect.options[oSelect.selectedIndex].value != mapName)
+    {
+        for(var i in oSelect.options)
+        {
+            if (oSelect.options[i].value == mapName)
+            {
+                oSelect.options[i].selected = true;
+                break;
+            }
+        }
+    }
+    
+    //update the groups select
+    var currentMap = myKaMap.getCurrentMap();
+    var layers = currentMap.getLayers();
+    oSelect = document.forms[0].groups;
+    while( oSelect.options[0] ) oSelect.options[0] = null;
+    var j=0;
+    for(var i in layers)
+    {
+        oSelect.options[j++] = new Option( layers[i].name );
+    }
+    
+    //update the scales select
+    var scales = currentMap.getScales();
+    oSelect = document.forms[0].scales;
+    while( oSelect.options[0] ) oSelect.options[0] = null;
+    j=0;
+    for(var i in scales)
+    {
+        oSelect.options[j++] = new Option("1:"+scales[i],scales[i],false,false);
+    }
+    
+    updateInfoPanel();
+}
+
+function updateInfoPanel()
+{ 
+    var obj = getRawObject( 'info' );
+    var aExtents = myKaMap.getGeoExtents();
+    var til = myKaMap.theInsideLayer.style;
+    obj.innerHTML = 'server='+myKaMap.server+
+                    '<BR>minx='+aExtents[0]+
+                    '<BR>miny='+aExtents[1]+
+                    '<BR>maxx='+aExtents[2]+
+                    '<BR>maxy='+aExtents[3];
+}
+
+function myErrorHandler( eventID, text )
+{
+    var obj = getRawObject( 'errors' );
+    obj.innerHTML = obj.innerHTML + "<p>"+eventID+":"+text+"</p>";
+}
+
+/**
+ * called when the map selection changes due to the user selecting a new map.  
+ * By calling myKaMap.selectMap, this triggers the KAMAP_MAP_INITIALIZED event 
+ * after the new map is initialized which, in turn, causes testMapInitialized 
+ * to be called
+ */
+function testMapChanged( name )
+{
+    myKaMap.selectMap( name );
+    
+}
+
+/**
+ * called when the group selection changes.
+ * not doing anything useful with this yet
+ */
+function testGroupChanged( name )
+{
+}
+
+/**
+ * called when the user changes scales.  This will cause the map to zoom to
+ * the new scale and trigger a bunch of events, including:
+ * KAMAP_SCALE_CHANGED
+ * KAMAP_EXTENTS_CHANGED
+ */
+function testScaleChanged( scale )
+{
+    myKaMap.zoomToScale( scale );
+}
+
+/**
+ * called when the current extents change.
+ */
+function testExtentsChanged(eventID, aExtents )
+{
+    updateInfoPanel();
+}
+</script>
+<style type="text/css">
+#myMap {
+position: relative;
+width: 400px;
+height: 400px;
+background-color: #eeeeee;
+-moz-box-sizing: border-box;
+}
+
+#myKeymap {
+position: relative;
+width: 250px;
+height: 150px;
+background-color: #eeeeee;
+-moz-box-sizing: border-box;
+}
+
+#myLegend {
+position: relative;
+width: 250px;
+height: 100%;
+background-color: #eeeeee;
+-moz-box-sizing: border-box;
+overflow: scroll;
+}
+
+#myScalebar {
+position: relative;
+width: 400px;
+height: 30px;
+background-color: #eeeeee;
+-moz-box-sizing: border-box;
+}
+
+#info {
+position: relative;
+width: 400px;
+height: 119px;
+font-family: verdana, arial, sans;
+font-weight: normal;
+font-size: 12px;
+background-color: #eeeeee;
+-moz-box-sizing: border-box;
+}
+
+#errors {
+position: relative;
+width: 200px;
+height: 400px;
+font-family: verdana, arial, sans;
+font-weight: normal;
+font-size: 12px;
+background-color: #eeeeee;
+-moz-box-sizing: border-box;
+}
+
+.label {
+font-family: verdana, arial, sans;
+font-weight: bold;
+font-size: 12px;
+}
+
+.title {
+font-family: verdana, arial, sans;
+font-weight: bold;
+font-size: 14px;
+}
+
+select {
+font-family: verdana, arial, sans;
+font-weight: normal;
+font-size: 12px;
+border: 1px solid #000000;
+}
+</style>
+</head>
+<body onload="myOnLoad()">
+<form>
+<table border="0" cellpadding="0" cellspacing="1" bgcolor="#999999">
+  <tr>
+    <td colspan="2">
+      <table border="0" width="100%" cellspacing="0" cellpadding="0" bgcolor="#eeeeee">
+        <tr>
+          <td><span class="title">ka-Map! test page</span></td>
+          <td><span class="label">maps:</span><br/><select name="maps" onchange="testMapChanged(this.options[this.selectedIndex].value)"></select></td>
+          <td><span class="label">groups:</span><br/><select name="groups" onchange="testGroupChanged(this.options[this.selectedIndex].value)"></select></td>
+          <td><span class="label">scales:</span><br/><select name="scales" onchange="testScaleChanged(this.options[this.selectedIndex].value)"></select></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td><div id="myMap"></div></td>
+    <td><div id="myLegend"></div></td>
+  </tr>
+  <tr>
+    <td align="center" valign="top" height="30"><div id="myScalebar"></div></td>
+    <td rowspan="2"><div id="myKeymap"></div></td>
+  </tr>
+  <tr>
+    <td valign="top"><div id="info">info panel</div></td>
+  </tr>
+</table>
+</form>
+</body>
+</html>

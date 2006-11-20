@@ -1,0 +1,46 @@
+.sbWrapper {
+    position: absolute;
+    margin: 25px 50% 0 50%;
+    font-family: "Lucida Grande", Georgia, "Times New Roman", Times, serif;
+}
+
+.sbBar {
+    top: -5px;
+    border: 1px solid #8C8675;
+    background: url('fancy-bar.gif');
+    height: 8px;
+}
+
+.sbBarAlt {
+    top: -5px;
+    border: 1px solid #8C8675;
+    background: url('fancy-bar-alt.gif');
+    height: 8px;
+}
+
+.sbMarkerMajor {
+    width: 0px;
+}
+
+.sbMarkerMinor {
+    width: 0px;
+}
+
+.sbNumbersBox {
+    top: 6px;
+    font-size: 0.8em;
+    color: #333333;
+}
+
+.sbLabelBox {
+    top: -23px;
+    font-size: 0.9em;
+    color: #333333;
+}
+
+.sbLabelBoxSingleLine {
+    top: -0.8em;
+    font-size: 0.8em;
+    color: #333333;
+    font-variant: small-caps;
+}

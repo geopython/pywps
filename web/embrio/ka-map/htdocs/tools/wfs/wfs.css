@@ -1,0 +1,111 @@
+ /*
+ * purpose: WFS client style sheet
+ *         
+ *
+ * author: Lorenzo Becchi & Andrea Cappugi
+ *
+ * TODO:
+ *   - 
+ * 
+ **********************************************************************
+ *
+ * Copyright (c)  2006, ominiverdi.org
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * DEALINGS IN THE SOFTWARE.
+ *
+ **********************************************************************/
+ 
+ 
+ 
+ #wfsDiv{
+ 	 position:absolute;	
+    width: 250px;
+    height: 50px;
+    bottom: 3px;
+    top:70px;
+text-align:center;
+	left:5px;
+    z-index: 2;
+
+ }
+ 
+ #wfsDiv fieldset{
+ background-color: #ccc;
+ margin:3px;
+ }
+ #wfsDiv legend{
+ background-color: #fff;
+ border:1px solid black;
+ padding:3px;
+ font-size:0.8em;
+ }
+#wfsMessage {
+
+color:red;
+
+}
+#wfsDiv div {
+ display:inline;
+}
+ #wfsInfo{
+ 	
+    width: 250px;
+    height: 200px;
+    bottom: 3px;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    overflow:auto;
+    
+    display:none;
+  }
+  
+  
+  #toolTip {
+  	width:250px;
+	color:rgb(50,50,50);
+	width:250px;
+	border-right:1px solid rgb(50,50,50);
+	border-bottom:1px solid rgb(50,50,50);
+	background-color:rgb(236,200,90);
+	color:rgb(50,50,50);	
+    padding:5px;	
+  }
+    #toolTip table{
+ 	width:100%;
+ }
+  #toolTip th{
+  	width:30%;
+ 	border-right:1px solid black;
+	font-size:0.9em;
+	text-align:left;
+	padding:4px;
+ 	
+ }
+
+#toolTip td{
+ 	/*border-bottom:1px solid black;*/
+	font-size:0.8em;
+	text-align:left;
+ 	
+ }
+
+/*
+wfsFeature
+wfsServer
+*/

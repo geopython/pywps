@@ -1,0 +1,145 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!--
+/**********************************************************************
+ *
+ * $Id: index_winman.html,v 1.6 2006/08/08 22:00:30 lbecchi Exp $
+ *
+ * purpose: This is the sample ka-Map interface.  Feel free to use it 
+ *          as the basis for your own applications or just to find out
+ *          how ka-Map works.
+ *
+ * author: Paul Spencer (pspencer@dmsolutions.ca)
+ *
+ **********************************************************************
+ *
+ * Copyright (c) 2005, DM Solutions Group Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * DEALINGS IN THE SOFTWARE.
+ *
+ **********************************************************************/
+-->
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>ka-Map!</title>
+<!-- use this to load a compressed version of the api - up to 8 times smaller -->
+<!-- -->
+<script type="text/javascript" src="getcjs.php?name=DHTMLapi.js,xhr.js,kaMap.js,kaKeymap.js,kaLegend.js,kaTool.js,kaQuery.js,scalebar/scalebar.js,tools/rubberzoom/kaRubberZoom.js"></script>
+<!-- -->
+
+<!-- window manager related scripts -->
+<script type="text/javascript" src="tools/winman/dom-drag.js"></script>
+<script type="text/javascript" src="tools/winman/kaWinManager.js"></script>
+<script type="text/javascript" src="tools/winman/startUp_winman.js"></script>
+
+
+
+<link rel="stylesheet" type="text/css" href="scalebar/scalebar-fat.css">
+<link href="tools/kaAqua/screen.css" rel="stylesheet" type="text/css" media="all">
+<link href="tools/kaAqua/tools.css" rel="stylesheet" type="text/css" media="all">
+
+<link href="tools/winman/winman.css" rel="stylesheet" type="text/css" media="all">
+
+</head>
+<body onload="myOnLoad();">
+<div id="viewport">
+<div id="map">
+</div>
+
+<!-- top toolbar, title and navigation -->
+
+<div id="toolbar">
+<form action="">
+    <!--<div id="toolbarBackground" class="transparentBackground"></div>-->
+    <!--<div class="kmTitle">ka-Map! Sample Application</div>-->
+    <div style="text-align:center">
+    <select name="maps" id="maps" onchange="mySetMap(this.options[this.selectedIndex].value)">
+        <option value=''>Choose your kaMap!</option>
+        <option value=''>------------------</option>
+    </select>
+    <img id="toolQuery" onclick="switchMode(this.id)" title="Click and drag or double click to query the Map" alt="Click and drag or double click to query the Map" src="images/a_pixel.gif" >
+    <img id="toolPan" onclick="switchMode(this.id)" title="Click and drag to Navigate the Map" alt="Click and drag to Navigate the Map" src="images/a_pixel.gif">
+
+	<div id="kaLogo"><a href="http://ka-map.maptools.org/" target="_blank"><img alt="powered by ka-Map!" src="images/powered_by_kamap_lt.png" border="0" width="60" height="19"></a></div>
+	
+
+    </div>
+</form>
+</div>
+
+
+<div id="keymap"></div>
+
+<div id="blackboard">This window, as the viewport, is resizable. 
+Click on the bottom right button and drag to resize.<br /><br />
+
+You can drag & drop any windows clicking on the top bar.<br /><br />
+
+All windows may be rolled up. <br />
+Click on the top right button and drag to roll up the window.<br />
+Same button to restore window dimensions.
+<br /><br />
+
+<strong>Blackboard</strong> is a space where you can redirect your outputs.<br /> 
+Try the identify function or  "link to this view" function.
+</div>
+
+
+    <span id="zoomTools">
+		<img id="toolZoomOut" onclick="myZoomOut();" title="zoom Out" alt="zoom Out" src="images/a_pixel.gif">
+		<span id="zoomer"></span>
+		<img id="toolZoomIn" onclick="myZoomIn()" title="zoom in" alt="zoom in" src="images/a_pixel.gif" >
+		<img id="toolZoomRubber" onclick="switchMode(this.id)" title="rubber zoom" alt="rubber zoom" src="images/a_pixel.gif" >
+    		<img id="toolZoomFull" onclick="getFullExtent()" title="zoom to full extents" alt="zoom to full extents" src="images/a_pixel.gif" >
+		<a id='linkToView' href='#'>link to this view</a>
+		<a id='help' href='#'>help</a>
+    </span>
+<!-- reference information -->
+<div id="reference">
+    <div id="scaleReference">
+        <div id="scaleBackground" class="transparentBackground"></div>
+        <div id="scalebar"></div>
+        <div id="scale">current scale</div>
+    </div>
+    <div id="legend"></div>
+</div>
+
+
+
+<div id="contributors">
+<p>ka-Map is developed and maintained by the following folks:</p>
+<ul>
+  <li>Paul Spencer</li>
+  <li>Zak James</li>
+  <li>Jason Fournier</li>
+  <li>Fred Warnock</li>
+  <li>Andrea Cappugi</li>
+  <li>Lorenzo Becchi</li>
+</ul>
+<p>Special thanks to the following folks ...</p>
+<ul>
+  <li>Tim Schaub, for his Scalebar implementation included under the LGPL license.</li>
+  <li>Piergiorgio Navone, for contributing his dynamic overlay code</li>
+  <li>Tyler Mitchel, for testing, feedback and advocacy</li>
+</ul>
+</div>
+</div>
+</body>
+</html>
+

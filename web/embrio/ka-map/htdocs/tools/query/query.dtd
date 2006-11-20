@@ -1,0 +1,11 @@
+<!ELEMENT query (id+,layer+)>
+<!ELEMENT id (#PCDATA)>
+<!ELEMENT layer (name+,group+,type+,fields,records)>
+<!ELEMENT name (#PCDATA)>
+<!ELEMENT group (#PCDATA)>
+<!ELEMENT type (#PCDATA)>
+<!ELEMENT fields (field+) >
+<!ELEMENT field (name,alias,type)>
+<!ELEMENT name (#PCDATA)>
+<!ELEMENT alias (#PCDATA)>
+<!ELEMENT type (#PCDATA)>

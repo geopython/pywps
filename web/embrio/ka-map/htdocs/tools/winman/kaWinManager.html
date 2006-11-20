@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>ka-Map!</title>
+<script type="text/javascript" src="../../DHTMLapi.js"></script>
+<script type="text/javascript" src="dom-drag.js"></script>
+<script type="text/javascript" src="kaWinManager.js"></script>
+<!--<script type="text/javascript" src="../DHTMLapi.js"></script>
+<script type="text/javascript" src="kaWinManager.js"></script>-->
+<style type="text/css">
+#uno {
+	position:absolute;	top:100px;	left:10px;	width:50px;	height:50px;	border:1px solid red;
+}
+#due {
+	position:absolute;	top:300px;	left:10px;	width:50px;	height:50px;	border:1px solid green;
+}
+#tre {
+	position:absolute;	top:200px;	left:10px;	width:50px;	height:50px;	border:1px solid blue;
+}
+#quattro {
+	position:absolute;	top:45px;	left:100px;	width:700px;	height:500px;	border:1px solid black;
+}
+.kaWinHeader{
+	border:1px solid rgb(60,60,60);
+	background-color:rgb(60,60,60);
+	margin:0;
+	padding:0;
+}
+.kaWinHeaderTitle{
+	padding:2px;
+	color:white;
+	padding-left:12px;
+	letter-spacing:0.15em;
+	margin:0;
+	/*margin-right:12px;*/
+}
+.kaWinHeaderExpanderToggler{
+	border:1px solid rgb(60,60,60);
+	background-color:white;
+	margin:0;
+}
+.kaWinBody{
+	border:1px solid rgb(60,60,60);
+	background-color:rgb(220,220,220);
+	margin:0;
+}
+.kaWinFooter{
+	border:1px solid rgb(60,60,60);
+	background-color:rgb(220,220,220);
+}
+.kaWinFooterResizer{
+	border:1px solid rgb(100,100,100);
+	background-color:rgb(220,220,220);
+	margin:0px;
+}
+</style>
+<body>
+
+<div id="uno" onclick="win1.pushContent(this);">io sono uno</div>
+<div id="due"  onclick="win2.pushContent(this);">io sono due</div>
+<div id="tre" onclick="win3.pushContent(this);">io sono tre</div>
+
+<div id="quattro"></div>
+
+<script type="text/javascript">
+initDHTMLAPI();
+var kaWinMan = new kaWinManager('quattro');
+var win1 = kaWinMan.createWin('cinque');
+win1.setValues('Blackboard',100,100,370,150,true,true);
+
+
+var win2 = kaWinMan.createWin('sei');
+win2.setValues('Toolbar',10,200,150,250);
+
+
+var win3 = kaWinMan.createWin('sette');
+win3.setValues('Legend',200,200,150,150);
+
+
+var win4 = kaWinMan.createWin('otto').setValues('Search',500,200,150,150,false,false);
+var win5 = kaWinMan.createWin('nove').setValues('Keymap',500,300,150,150);
+var win5 = kaWinMan.createWin('dieci').setValues('Zoom Bar',300,300,150,150);
+
+
+//kaWin.setContent('prova');
+
+</script>
+</body>
+</html>

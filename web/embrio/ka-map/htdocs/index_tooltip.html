@@ -1,0 +1,194 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!--
+/**********************************************************************
+ *
+ * $Id: index_tooltip.html,v 1.8 2006/09/09 12:01:13 lbecchi Exp $
+ *
+ * purpose: This is the sample ka-Map interface to use with tooltips
+ *
+ * author: Lorenzo Becchi & Andrea Cappugi (ominiverdi.org) (bug 1374)
+ *
+ **********************************************************************
+ *
+ * Copyright (c) 2005, DM Solutions Group Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * DEALINGS IN THE SOFTWARE.
+ *
+ **********************************************************************/
+-->
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>ka-Map!</title>
+<!-- use this to load a compressed version of the api - up to 8 times smaller -->
+<!-- -->
+<!--<script type="text/javascript" src="getcjs.php?name=DHTMLapi.js,xhr.js,kaMap.js,kaKeymap.js,kaLegend.js,kaTool.js,kaQuery.js,startUp.js,scalebar/scalebar.js"></script>-->
+<!-- -->
+<!-- use this to load individual scripts without compression -->
+
+<script type="text/javascript" src="DHTMLapi.js"></script>
+<script type="text/javascript" src="xhr.js"></script>
+<script type="text/javascript" src="kaMap.js"></script>
+<script type="text/javascript" src="kaKeymap.js"></script>
+<script type="text/javascript" src="kaLegend.js"></script>
+<script type="text/javascript" src="kaTool.js"></script>
+<script type="text/javascript" src="kaQuery.js"></script>
+<script type="text/javascript" src="kaMouseTracker.js"></script>
+<script type="text/javascript" src="tools/kaAqua/startUp.js"></script>
+<script type="text/javascript" src="scalebar/scalebar.js"></script>
+
+<!-- added code -->
+<script type="text/javascript" src="tools/tooltip/kaToolTip.js"></script>
+<script type="text/javascript" src="tools/rubberzoom/kaRubberZoom.js"></script>
+<script type="text/javascript" src="tools/search/kaSearch.js"></script>
+<script type="text/javascript">
+
+/* this code is just for this example application */
+var toolTip = null;
+function setTooltip(){
+	 if(!toolTip){
+		toolTip = new kaToolTip( myKaMap);
+		var offsetX=-6;//offset to move the image left-right
+	 	var offsetY=-19;//offset to move the image top-bottom
+		toolTip.setTipImage('images/tip-red.png',offsetX,offsetY);
+	 }
+	 var f = document.forms[0];
+	 var x = f.tooltipX.value;
+	 var y = f.tooltipY.value;
+	 var text = f.tooltipText.value;
+	 
+	 var radioB = '';
+	 if(f.radioB[0].checked) radioB = f.radioB[0].value;
+	 if(f.radioB[1].checked) radioB = f.radioB[1].value;
+	 toolTip.setText(text);
+	 if(radioB == 'geo') toolTip.moveGeo(x,y);
+	 else toolTip.move(x,y);
+}
+
+function hideTooltip(){
+	 toolTip.move();
+}
+</script>
+
+<!-- end added code -->
+
+
+<link rel="stylesheet" type="text/css" href="scalebar/scalebar-fat.css">
+<link href="tools/kaAqua/screen.css" rel="stylesheet" type="text/css" media="all">
+<link href="tools/kaAqua/tools.css" rel="stylesheet" type="text/css" media="all">
+<link href="tools/tooltip/tooltip.css" rel="stylesheet" type="text/css" media="all">
+
+<style type="text/css">
+#tooltipBox {
+ position: absolute;
+ top:100px;
+ left:10px;
+ width:250px;
+ background:rgb(200,200,200);
+ text-align:left;
+ border:1px solid white;
+ font-size:0.9em;
+}
+#tooltipBox  legend {
+ background-color:rgb(100,100,100);
+ color:white;
+ border:1px solid red;
+}
+</style>
+</head>
+<body onload="myOnLoad();">
+<div id="viewport">
+<!-- top toolbar, title and navigation -->
+<form action="">
+<div id="toolbar">
+    <div id="toolbarBackground" class="transparentBackground"></div>
+    <div class="kmTitle">ka-Map! Sample Application</div>
+    <div style="text-align:center">
+    <select name="maps" onchange="mySetMap(this.options[this.selectedIndex].value)">
+        <option value=''>Choose your kaMap!</option>
+        <option value=''>------------------</option>
+    </select>
+    <img id="toolQuery" onclick="switchMode(this.id)" title="Click and drag or double click to query the Map" alt="Click and drag or double click to query the Map" src="images/a_pixel.gif" >
+    <img id="toolPan" onclick="switchMode(this.id)" title="Click and drag to Navigate the Map" alt="Click and drag to Navigate the Map" src="images/a_pixel.gif">
+    <img id="toolZoomOut" onclick="myZoomOut();" title="zoom Out" alt="zoom Out" src="images/a_pixel.gif">
+    <span id="zoomer"></span>
+    <img id="toolZoomIn" onclick="myZoomIn()" title="zoom in" alt="zoom in" src="images/a_pixel.gif" >
+    <img id="toolZoomRubber" onclick="switchMode(this.id)" title="rubber zoom" alt="rubber zoom" src="images/a_pixel.gif" >
+    <img id="toolZoomFull" onclick="getFullExtent()" title="zoom to full extents" alt="zoom to full extents" src="images/a_pixel.gif" >
+    <a id='linkToView' href='#'>link to this view</a>
+	<div id="tooltipBox">
+		<fieldset>
+		<legend>Tooltip</legend>
+		<label>geo coords</label><input type="radio" value="geo" name="radioB" />
+		<label>pixel coords</label> <input type="radio" value="pix" name="radioB" checked />
+		
+		<br /><label>x</label> <input type="text" value="400" name="tooltipX" />
+		<br /><label>y</label> <input type="text" value="400" name="tooltipY" />
+		<textarea name="tooltipText">Some <b>html</b> text inside the tooltip</textarea>
+		<input type="button" value="show Tooltip" onclick="setTooltip();" />
+		<input type="button" value="hide Tooltip" onclick="hideTooltip();" />
+		</fieldset>
+		<p>Some infos:</p>
+		<ul>
+			<li>Set X,Y values to place to tooltip</li>
+			<li>Fill the textarea box with your text or HTML code and than click on "show Tooltip" to see it.</li>
+			<li>Click on the tooltip to hide it. Otherwise you can use "hide Tooltip"</li>
+			<li>Try to center the tip close to a margin to see the vieport recentered (naturally the map extent has to be bigger than viewport extent).</li>
+		</ul>
+		
+	</div>
+    <div id="kaLogo"><a href="http://ka-map.maptools.org/" target="_blank"><img alt="powered by ka-Map!" src="images/powered_by_kamap_lt.png" border="0" width="85" height="23"></a></div>
+</div>
+</div>
+</form>
+<img id="toolbarToggler" onclick="toggleToolbar(this);" alt="toggle toolbar" src="images/a_pixel.gif">
+<img id="keymapToggler" onclick="toggleKeymap(this);" alt="toggle keymap" src="images/a_pixel.gif">
+<div id="keymap"></div>
+
+<!-- reference information -->
+<img id="refToggler" onclick="toggleReference(this);" alt="toggle reference" src="images/a_pixel.gif">
+<div id="reference">
+    <div id="scaleReference">
+        <div id="scaleBackground" class="transparentBackground"></div>
+        <div id="scalebar"></div>
+        <div id="scale">current scale</div>
+    </div>
+    <div id="legend"></div>
+</div>
+
+<div id="contributors">
+<p>ka-Map is developed and maintained by the following folks:</p>
+<ul>
+  <li>Paul Spencer</li>
+  <li>Zak James</li>
+  <li>Jason Fournier</li>
+  <li>Fred Warnock</li>
+  <li>Andrea Cappugi</li>
+  <li>Lorenzo Becchi</li>
+</ul>
+<p>Special thanks to the following folks ...</p>
+<ul>
+  <li>Tim Schaub, for his Scalebar implementation included under the LGPL license.</li>
+  <li>Piergiorgio Navone, for contributing his dynamic overlay code</li>
+  <li>Tyler Mitchel, for testing, feedback and advocacy</li>
+</ul>
+</div>
+</div>
+</body>
+</html>

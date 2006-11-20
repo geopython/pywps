@@ -1,0 +1,28 @@
+[leg_group_html]
+<!-- comment on leg_group_html block -->
+</table>
+</div>
+<div id="group_[leg_group_name]" name="group_[leg_group_name]" class="legendGroup">
+<table cellspacing="2" cellpadding="0" border="0" width="100%">
+  <tr>
+    <td width="17" valign="center" align="center"><a href="javascript:void(0)" onclick="document.getElementById( 'group_[leg_group_name]' ).expander.toggle(); return false;"><img name="img_[leg_group_name]" id="img_[leg_group_name]" src="./images/expand.png" border="0"></a></td>
+    <td width="22" valign="top">[if name=hide_checkbox oper=isset]&nbsp;[/if][if name=hide_checkbox oper=isnull]<input type="checkbox" name="grp_checkbox" 
+value="[leg_group_name]" onchange="__kaMap__.setLayerVisibility(this.value, this.checked)"
+  [if name=layer_status value=1]CHECKED[/if]
+  [if name=layer_status value=2]CHECKED[/if]>[/if]</td>
+    <td><span class="legendGroupLabel"><b>[metadata name="group_title"]</b></span></td>
+    <td align="right">[if name=hide_checkbox oper=isset]&nbsp;[/if][if name=hide_checkbox oper=isnull]<a href="javascript:void(0)" onclick="__kaMap__.setLayerOpacity( '[leg_group_name]', 25)"><img src="images/opacity25.png" width="25" height="15" border="0" alt="25%"></a><a href="javascript:void(0)" onclick="__kaMap__.setLayerOpacity( '[leg_group_name]', 50)"><img src="images/opacity50.png" width="25" height="15" border="0"  alt="50%"></a><a href="javascript:void(0)" onclick="__kaMap__.setLayerOpacity( '[leg_group_name]', 75)"><img src="images/opacity75.png" width="25" height="15" border="0" alt="55%"></a><a href="javascript:void(0)" onclick="__kaMap__.setLayerOpacity( '[leg_group_name]', 100)"><img src="images/opacity100.png" width="25" height="15" border="0" alt="100%"></a>[/if]</td>
+  </tr>
+</table>
+</div>
+<div id="group_class_[leg_group_name]" style="display:none;" class="legendClass">
+<table cellspacing="2" cellpadding="0" border="0" width="100%">
+[/leg_group_html]
+[leg_layer_html order=ascending opt_flag=15][/leg_layer_html]
+[leg_class_html opt_flag=15]
+<tr>
+  <td width="17">&nbsp;</td>
+  <td width="20"><img alt="test" src="[leg_icon width=20 height=16]" width="20" height="16"></td>
+  <td><span class="legendClassLabel">[leg_class_name]</span></td>
+</tr>
+[/leg_class_html]

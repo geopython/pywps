@@ -1,0 +1,46 @@
+.sbWrapper {
+    position: absolute;
+    margin: 25px 50% 0 50%;
+    font-family: Verdana, sans-serif;
+}
+
+.sbBar {
+    top: -4px;
+    border: 1px solid #999999;
+    background-color: #cccccc;
+    height: 7px;
+}
+
+.sbBarAlt {
+    top: -4px;
+    border: 1px solid #999999;
+    background-color: #ffffff;
+    height: 7px;
+}
+
+.sbMarkerMajor {
+    width: 0px;
+}
+
+.sbMarkerMinor {
+    width: 0px;
+}
+
+.sbNumbersBox {
+    top: -19px;
+    font-size: 0.65em;
+    color: #333333;
+}
+
+.sbLabelBox {
+    top: 6px;
+    font-size: 0.8em;
+    color: #333333;
+    font-variant: small-caps;
+}
+
+.sbLabelBoxSingleLine {
+    top: -0.7em;
+    font-size: 0.7em;
+    color: #333333;
+}

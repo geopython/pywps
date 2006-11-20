@@ -1,0 +1,257 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<!--
+/**********************************************************************
+ *
+ * $Id: iframe_XMLOverlay_polygon.html,v 1.2 2006/09/10 18:55:28 lbecchi Exp $
+ *
+ * purpose: use as the source of an iframe to embed a ka-Map application
+ *          inside another page.  The intention is that you would copy
+ *          this page and then add more javascript functions and user
+ *          interface to it.
+ *
+ * author: Paul Spencer (pspencer@dmsolutions.ca)
+ *
+ **********************************************************************
+ *
+ * Copyright (c) 2005, DM Solutions Group Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * DEALINGS IN THE SOFTWARE.
+ *
+ **********************************************************************/
+  
+-->
+<meta http-equiv="imagetoolbar" content="no">
+<title>ka-Map!</title>
+<script type="text/javascript" src="DHTMLapi.js"></script>
+<script type="text/javascript" src="xhr.js"></script>
+<script type="text/javascript" src="kaMap.js"></script>
+<script type="text/javascript" src="kaTool.js"></script>
+<script type="text/javascript" src="wz_dragdrop.js"></script>
+<script type="text/javascript" src="kaZoomer.js"></script>
+
+<!-- added for XMLOverlay -->
+<script type="text/javascript" src="xhr.js"></script>
+<script type="text/javascript" src="excanvas.js"></script>
+<script type="text/javascript" src="wz_jsgraphics.js"></script>
+<script type="text/javascript" src="XMLOverlay/kaXmlOverlay.js"></script>
+<!-- end added for XMLOverlay -->
+
+<script type="text/javascript">
+var myKaMap = null;
+var queryParams = null;
+SET_DHTML();
+
+/**
+ * parse the query string sent to this window into a global array of key = value pairs
+ * this function should only be called once
+ */
+function parseQueryString()
+{
+    queryParams = [];
+    var s=window.location.search;
+    if (s!='')
+    {
+        s=s.substring( 1 );
+        var p=s.split('&');
+        for (var i=0;i<p.length;i++)
+        {
+            var q=p[i].split('=');
+            queryParams[q[0]]=q[1];
+        }
+    }
+}
+
+/**
+ * get a query value by key.  If the query string hasn't been parsed yet, parse it first.
+ * Return an empty string if not found
+ */
+function getQueryParam(p)
+{
+    if (!queryParams)
+    {
+        parseQueryString();
+    }
+    if (queryParams[p])
+        return queryParams[p];
+    else 
+        return '';
+}
+
+function myOnLoad()
+{
+    initDHTMLAPI();
+    
+    var map = getQueryParam('map');
+    var extents = getQueryParam('extents');
+    var cps = getQueryParam('cps');
+    
+    
+    myKaMap = new kaMap( 'viewport' );
+    
+    myKaMap.registerForEvent( KAMAP_MAP_INITIALIZED, null, myMapInitialized );
+    
+    var kaNav = new kaNavigator( myKaMap );
+    kaNav.activate();
+    myKaZoomer = new kaZoomer(myKaMap); 
+    drawPage();
+    myKaMap.initialize( map, extents, cps );
+    
+     
+	
+	 
+}
+
+function myMapInitialized(){
+		printMyOverlay(); 
+}
+
+
+function drawPage()
+{
+    var browserWidth = getInsideWindowWidth();
+    var browserHeight = getInsideWindowHeight();
+    
+    var viewport = getRawObject('viewport');
+    
+    viewport.style.width = browserWidth + "px";
+    viewport.style.height = browserHeight + "px";
+    
+    myKaMap.resize();
+}
+</script>
+
+<script type="text/javascript">
+/*
+*  ADDED PART OF CODE FOR OBJECT OVERLAY EXAMPLE
+*/
+//my point array
+
+
+var aPoints = new Array();
+aPoints[0] = new Array(34.01,-6.50,'Rabat');
+aPoints[1] = new Array(41.23,2.11,'Barcelona');
+aPoints[2] = new Array(48.52,2.19,'Paris');
+aPoints[3] = new Array(41.53,12.29,'Rome');
+aPoints[4] = new Array(43.47,11.15,'Florence');
+aPoints[5] = new Array(41.11,29.08,'Istanbul');
+aPoints[6] = new Array(18.35,-70.26,'Santo Domingo');
+aPoints[7] = new Array(46.31,6.38,'Lausanne');
+
+//the function
+var canvas = null;
+function printMyOverlay () {
+
+                myXmlOverlay = new kaXmlOverlay( myKaMap, 250 );
+             
+                var line =null;
+                var coordinates = "";
+                
+                //xmlOverlayUseCanvas = false;//disable canvas use for any compatibility problem
+
+                for(i=0;i<aPoints.length;i++){
+                        var  latitude = aPoints[i][0];
+                        var longuitude = aPoints[i][1];
+                        
+                        var pointId = i;
+                        var my_point =myXmlOverlay.addNewPoint(pointId, longuitude, latitude);
+                        var my_symbol = new kaXmlSymbol();
+                        my_symbol.size = 12;
+                        my_symbol.color = '#ff0000';
+                        //my_point.setInnerHtml(aPoints[i][2]);
+                        my_point.onmouseover = myPointClicked;
+
+                        my_point.addGraphic(my_symbol);
+						
+                        if (i>0) coordinates += ",";
+                        coordinates += longuitude + " " + latitude;
+                }
+                my_point = myXmlOverlay.addNewPoint("Line",longuitude, latitude);
+                line = new kaXmlLinestring(my_point);
+                line.readCoordinates(my_point, coordinates);
+                line.color = 'yellow';
+                line.stroke = 2;
+                my_point.addGraphic(line);
+                
+                my_point = myXmlOverlay.addNewPoint("myPoly",longuitude, latitude);
+               poly = new kaXmlPolygon(my_point);
+               poly.readCoordinates(my_point, coordinates);
+                poly.color = 'green';
+                my_point.addGraphic(poly);
+}
+
+
+function myPointClicked(){
+	alert(this.mylabel);
+}
+
+/*
+*  END OF ADDED CODE
+*/
+</script>
+
+<style type="text/css">
+body {
+  margin: 0px;
+  padding: 0px;
+  background-color: #d9d9d9;
+  overflow: hidden;
+}
+
+#viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #f0f0f0;
+  overflow: hidden;
+  border: 1px solid #000000;
+  cursor: move;
+  -moz-box-sizing: border-box;
+}
+
+a { 
+  text-decoration: none; 
+  font-family: arial;
+  font-size: 10px;
+  color: #000033;
+}
+
+a:link {}
+a:hover {}
+a:active {}
+a:visited {}
+
+#kaLogo {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  z-index: 2;
+}
+
+</style>
+</head>
+<body onload="myOnLoad();" onresize="drawPage();">
+<div id="viewport">
+<div id="kaLogo"><a target="_blank" href="http://www.maptools.org/"><img src="images/powered_by_kamap_lt.png" width="85"
+height="23" border="0"></a></div>
+</div>
+</body>
+</html>
+

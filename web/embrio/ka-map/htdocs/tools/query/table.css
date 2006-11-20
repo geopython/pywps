@@ -1,0 +1,49 @@
+
+
+
+
+body {
+font-family:Arial,helvetica,sans-serif;
+font-size:12pt;
+background-color:#EEEEEE"
+}
+
+#main {
+width:800px;
+
+
+}
+
+.layer {
+background-color:teal;
+color:white;
+padding:4px;
+border:1px solid balck;
+text-align:center;
+width:auto;
+margin:10px;
+}
+table{
+width:90%;
+
+
+
+}
+
+th {
+    border:1px solid black;
+    font-size:0.9em;
+    padding:0.2em;
+    background: rgb(170,170,170);
+    color: white; 
+    font-weight:bold;  
+}
+td {
+    border-bottom:1px solid black;
+    font-size:0.9em;
+    padding:0.2em;
+}td {
+    border-bottom:1px solid black;
+    font-size:0.9em;
+    padding:0.2em;
+}

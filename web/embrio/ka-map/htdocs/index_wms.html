@@ -1,0 +1,423 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>ka-Map!</title>
+
+<script type="text/javascript" src="DHTMLapi.js"></script>
+<script type="text/javascript" src="xhr.js"></script>
+<script type="text/javascript" src="jsExpander.js"></script>
+<script type="text/javascript" src="kaMap.js"></script>
+<script type="text/javascript" src="kaKeymap.js"></script>
+<script type="text/javascript" src="kaScalebar.js"></script>
+<script type="text/javascript" src="kaLegend.js"></script>
+<script type="text/javascript" src="kaTool.js"></script>
+<script type="text/javascript" src="kaQuery.js"></script>
+<script type="text/javascript" src="wmsLayer.js"></script>
+<script type="text/javascript">
+var myKaMap = myKaNavigator = myKaQuery = null;
+function myOnLoad()
+{
+    initDHTMLAPI();
+    myKaMap = new kaMap( 'viewport' );
+    myKaMap.initialize('gmap75');
+    var myKaScalebar = new kaScalebar( myKaMap, 'scalebar' );
+    var myKaLegend = new kaLegend( myKaMap, 'legend', false );
+    var myKaKeymap = new kaKeymap( myKaMap, 'keymap' );
+    myKaMap.registerForEvent( KAMAP_INITIALIZED, null, myInitialized );
+    myKaMap.registerForEvent( KAMAP_MAP_INITIALIZED, null, myMapInitialized );
+    myKaMap.registerForEvent( KAMAP_SCALE_CHANGED, null, myScaleChanged );
+    myKaMap.registerForEvent( KAMAP_QUERY, null, myQuery );
+    
+    myKaNavigator = new kaNavigator( myKaMap );
+    myKaNavigator.activate();
+    
+    myKaQuery = new kaQuery( myKaMap, KAMAP_POINT_QUERY );
+    
+    drawPage();
+    
+}
+
+/**
+ * event handler for KAMAP_INITIALIZED.
+ *
+ * at this point, ka-Map! knows what map files are available and we have
+ * access to them.
+ */
+function myInitialized()
+{
+    //get list of maps and populate the maps select box
+    var aMaps = myKaMap.getMaps();
+    var oSelect = document.forms[0].maps;
+    var j = 0;
+    var opt = new Option( 'select a map', '', true, true );
+    oSelect[j++] = opt;
+    for(var i in aMaps)
+    {
+        oSelect[j++] = new Option(aMaps[i].title,aMaps[i].name,false,false);
+    }
+}
+
+/**
+ * event handler for KAMAP_MAP_INITIALIZED
+ *
+ * the scales are put into a select ... this will be used for zooming
+ */ 
+function myMapInitialized( eventID, mapName )
+{
+    //alert( 'ka-Map! initialized a new map: ' + mapName );
+    //make sure the map is selected ... 
+    var oSelect = document.forms[0].maps;
+    if (oSelect.options[oSelect.selectedIndex].value != mapName)
+    {
+        for(var i = 0; i < oSelect.options.length; i++ )
+        {
+            if (oSelect.options[i].value == mapName)
+            {
+                oSelect.options[i].selected = true;
+                break;
+            }
+        }
+    }
+    
+    //update the scales select
+    var currentMap = myKaMap.getCurrentMap();
+    var scales = currentMap.getScales();
+    oSelect = document.forms[0].scales;
+    while( oSelect.options[0] ) oSelect.options[0] = null;
+    j=0;
+    for(var i in scales)
+    {
+        oSelect.options[j++] = new Option("1:"+scales[i],scales[i],false,false);
+    }
+}
+
+/**
+ * called when kaMap tells us the scale has changed
+ */
+function myScaleChanged( eventID, scale )
+{
+    //todo: update scale select and enable/disable zoomin/zoomout
+    var oSelect = document.forms[0].scales;
+    for (var i=0; i<oSelect.options.length; i++)
+    {
+        if (oSelect.options[i].value == scale)
+        {
+            oSelect.options[i].selected = true;
+            document.forms[0].zoomout.disabled = (i==0);
+            document.forms[0].zoomin.disabled = (i==oSelect.options.length - 1);
+        }
+    }
+}
+
+/**
+ * called when the user changes scales.  This will cause the map to zoom to
+ * the new scale and trigger a bunch of events, including:
+ * KAMAP_SCALE_CHANGED
+ * KAMAP_EXTENTS_CHANGED
+ */function mySetScale( scale )
+{
+    myKaMap.zoomToScale( scale );
+}
+
+/**
+ * called when the map selection changes due to the user selecting a new map.  
+ * By calling myKaMap.selectMap, this triggers the KAMAP_MAP_INITIALIZED event 
+ * after the new map is initialized which, in turn, causes testMapInitialized 
+ * to be called
+ */
+function mySetMap( name )
+{
+    myKaMap.selectMap( name );
+}
+
+function myQuery( eventID, queryType, coords )
+{
+    var szLayers = '';
+    var layers = myKaMap.getCurrentMap().getQueryableLayers();
+    for (var i=0;i<layers.length;i++)
+    {
+        szLayers = szLayers + "," + layers[i].name;
+    }
+    alert( "QUERY: " + queryType + " " + coords + " on layers " + szLayers );
+}
+
+function myZoomIn()
+{
+    myKaMap.zoomIn();
+}
+
+function myZoomOut()
+{
+    myKaMap.zoomOut();
+}
+
+function toggleReference(obj)
+{
+    if (obj.innerHTML == 'hide reference')
+    {
+        obj.innerHTML = 'show reference';
+        var d = getObject('reference');
+        d.top = "-356px";
+    }
+    else
+    {
+        obj.innerHTML = 'hide reference';
+        var d = getObject('reference');
+        d.top = "0px";
+    }
+}
+
+function dialogToggle( href, szObj )
+{
+    var obj = getObject(szObj);
+    if (obj.display == 'none')
+    {
+        obj.display = 'block';
+        href.childNodes[0].src = 'images/dialog_shut.png';
+        
+    }
+    else
+    {
+        obj.display = 'none';
+        href.childNodes[0].src = 'images/dialog_open.png';
+    }
+}
+function drawPage()
+{
+    var browserWidth = getInsideWindowWidth();
+    var browserHeight = getInsideWindowHeight();
+    
+    var viewport = getRawObject('viewport');
+    
+    viewport.style.width = browserWidth + "px";
+    viewport.style.height = browserHeight + "px";
+    
+    myKaMap.resize();
+}
+
+function addWMSLayer()
+{
+    var f = document.forms.wms;
+    var szName = f.wmsName.value;
+    var bVisible = true;
+    var opacity = 100;
+    var imageformat = "image/png";
+    var bQueryable = true;
+    var server = f.wmsServer.value;
+    var version = "1.1.1";
+    var layers = f.wmsLayers.value;
+    var srs = f.wmsSRS.value;
+    var l = new _wmsLayer( szName, bVisible, opacity, imageformat, bQueryable, 
+                     server, version, layers, srs);
+    myKaMap.addMapLayer( l );
+}
+</script>
+<style type="text/css">
+body {
+  margin: 0px;
+  padding: 0px;
+  background-color: #d9d9d9;
+  overflow: hidden;
+}
+
+#viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #f0f0f0;
+  overflow: hidden;
+  border: 1px solid #000000;
+  cursor: move;
+  -moz-box-sizing: border-box;
+}
+
+#toolbar {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  height: 27px;
+  width: 100%;
+  z-index:3;
+  cursor: auto;
+  font-family: arial;
+  font-size: 14px;
+  font-weight: bold;
+  -moz-box-sizing: border-box;
+  background-color: #d9d9d9;
+}
+
+#reference {
+  position: absolute;
+  width: 262px;
+  top: 27px;
+  right: 0px;
+  z-index: 2;
+  background-color: #d9d9d9;
+  cursor: auto;
+}
+
+#legend {
+  position: relative;
+  width: 250px;
+  height: 150px;
+  border: 1px solid #000000;
+  overflow: auto;
+}
+
+#keymap {
+  position: relative;
+  width: 250px;
+  height: 150px;
+  border: 1px solid #000000;
+  overflow: hidden;
+}
+
+#scalebar {
+  position: relative;
+  width: 250px;
+  height: 33px;
+  border: 1px solid #000000;
+}
+
+
+.bevelInset {
+  border-top: 1px solid #666666;
+  border-left: 1px solid #666666;
+  border-right: 1px solid #ffffff;
+  border-bottom: 1px solid #ffffff;
+}
+
+.bevelOutset {
+  border-top: 1px solid #ffffff;
+  border-left: 1px solid #ffffff;
+  border-right: 1px solid #666666;
+  border-bottom: 1px solid #666666;
+}
+
+
+.label {
+  font-family: arial;
+  font-size: 11px;
+  font-weight: normal;
+}
+
+
+.value {
+  font-family: arial;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+input {
+  font-family: arial;
+  font-size: 12px;
+  font-weight: normal;
+}
+
+select {
+  font-family: arial;
+  font-size: 12px;
+  font-weight: normal;
+  width: 150px;
+}
+
+a { 
+  text-decoration: none; 
+  font-family: arial;
+  font-size: 10px;
+  color: #000033;
+}
+
+a:link {}
+a:hover {}
+a:active {}
+a:visited {}
+
+#copyright {
+  position: absolute;
+  left: 3px;
+  bottom: 3px;
+  z-index: 2;
+
+}
+
+#kaLogo {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  z-index: 2;
+
+}
+
+.kaLegendTitle {
+  border-top: 1px solid #ffffff;
+  border-left: 1px solid #ffffff;
+  border-bottom: 1px solid #666666;
+  border-right: 1px solid #666666;
+  padding: 2px;
+  font-family: arial;
+  font-size: 12px;
+  font-weight: bold;
+
+}
+
+.kaLegendLayer {
+  border-top: 1px solid #ffffff;
+  border-left: 1px solid #ffffff;
+  border-bottom: 1px solid #666666;
+  border-right: 1px solid #666666;
+  padding: 2px;
+  font-family: arial;
+  font-size: 12px;
+}
+</style>
+</head>
+<body onload="myOnLoad();" onresize="drawPage();">
+<div id="viewport">
+<div id="toolbar" class="bevelOutset">
+<form>
+<table border="0" cellspacing="0" cellpadding="2" width="100%">
+<tr>
+  <td>&nbsp;</td>
+  <td width="18"><img id='bomb' src="images/kamap.gif" width="18" height="21" border="0" alt="kaMap"></td>
+  <td width="150">ka-Map! demo page</td>
+  <td><img src="images/spacer.png"></td>
+  <td><input type="button" name="zoomin" value="Zoom In" onclick="myZoomIn()"><select name="scales" onchange="mySetScale(this.options[this.selectedIndex].value)"></select>&nbsp;<input type="button" name="zoomout" value="Zoom Out" onclick="myZoomOut()"></td>
+  <td><img src="images/spacer.png"></td>
+  <td><select name="maps" onchange="mySetMap(this.options[this.selectedIndex].value)">
+        <option value=''>Choose your kaMap!</option>
+        <option value=''>------------------</option>
+      </select></td>
+  <td>&nbsp;</td>
+  <td><input type="button" name="navigate" value="Navigate" onclick="myKaNavigator.activate()"></td>
+  <td><input type="button" name="query" value="Query" onclick="myKaQuery.activate()"></td>
+</tr>
+</table>
+</form>
+</div>
+
+<div id="reference" class="bevelOutset">
+        <table cellspacing="4" cellpadding="0" border="0" width="100%">
+<tr><td class="bevelInset" colspan="2"><div id="keymap"></div></td></tr>
+          <tr><td class="bevelInset" colspan="2"><div id="legend"></div></td></tr>
+          <tr><td class="bevelInset" colspan="2"> </td></tr>
+          <tr><td class="bevelInset" colspan="2"><div id="scalebar"></div></td></tr>
+          <tr><td class="bevelInset" colspan="2">
+          <form name="wms">
+              <table>
+                  <tr><td>name:</td><td><input type="text" name="wmsName" value="Parks"></td></tr>
+                  <tr><td>server:</td><td><input type="text" name="wmsServer" value="http://localhost/cgi-bin/mapserv?map=/ms4w/apps/chameleon/samples/map/chameleon_wms.map"></td></tr>
+                  <tr><td>layers:</td><td><input type="text" name="wmsLayers" value="park"></td></tr>
+                  <tr><td>srs:</td><td><input type="text" name="wmsSRS" value="epsg:42304"></td></tr>
+                  <tr><td colspan="2"><input type="button" value="add layer" onclick="addWMSLayer()"></td></tr>
+          </form></td></tr>
+        </table>
+      </div>
+<div id="copyright"><a target="_blank" href="http://www.dmsolutions.ca/"> &copy;2005 DM Solutions Group Inc.</a></div>
+<div id="kaLogo"><a href="http://ka-map.maptools.org/" target="_blank"><img alt="powered by ka-Map!" src="images/powered_by_kamap_lt.png" border="0" width="85" height="23"></a></div>
+
+
+</div>
+</body>
+</html>
+

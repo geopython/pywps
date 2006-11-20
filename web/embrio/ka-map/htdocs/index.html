@@ -1,0 +1,276 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!--
+/**********************************************************************
+ *
+ * $Id: index.html,v 1.83 2006/09/25 10:37:28 lbecchi Exp $
+ *
+  * purpose: This is the sample ka-Map interface.  Feel free to use it 
+ *          as the basis for your own applications or just to find out
+ *          how ka-Map works.
+ *
+ * author: Lorenzo Becchi and Andrea Cappugi (www.ominiverdi.org)
+ *
+ * ka-Explorer interface has been developer for Food and Agriculture 
+ * Organization of the United Nations (FAO-UN)
+ * 
+ * original code: Paul Spencer (pspencer@dmsolutions.ca)
+ *
+ **********************************************************************
+ *
+ * Copyright (c) 2006 Food and Agriculture Organization of the United Nations (FAO-UN)
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * DEALINGS IN THE SOFTWARE.
+ *
+ **********************************************************************/
+-->
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>ka-Map!</title>
+<!-- use this to load a compressed version of the api - up to 8 times smaller -->
+
+<script type="text/javascript" src="getcjs.php?name=DHTMLapi.js,xhr.js,kaLegend.js,kaMap.js,kaKeymap.js,kaTool.js,kaQuery.js,scalebar/scalebar.js,tools/rubberzoom/kaRubberZoom.js,kaMouseTracker.js,tools/search/kaSearch.js,tools/kaExplorer/startUp.js,tools/tooltip/kaToolTip.js"></script>
+<!-- -->
+
+<!-- use this to load individual scripts without compression -->
+<!--
+<script type="text/javascript" src="DHTMLapi.js"></script>
+<script type="text/javascript" src="xhr.js"></script>
+<script type="text/javascript" src="kaMap.js"></script>
+<script type="text/javascript" src="kaKeymap.js"></script>
+<script type="text/javascript" src="kaLegend.js"></script>
+<script type="text/javascript" src="kaTool.js"></script>
+<script type="text/javascript" src="kaQuery.js"></script>
+<script type="text/javascript" src="tools/rubberzoom/kaRubberZoom.js"></script>
+<script type="text/javascript" src="kaMouseTracker.js"></script>
+<script type="text/javascript" src="scalebar/scalebar.js"></script>
+<script type="text/javascript" src="tools/search/kaSearch.js"></script>
+<script type="text/javascript" src="tools/kaExplorer/startUp.js"></script>
+<script type="text/javascript" src="tools/tooltip/kaToolTip.js"></script>
+ -->
+ 
+
+
+
+<link rel="stylesheet" type="text/css" href="scalebar/scalebar-thinner.css">
+<link href="tools/kaExplorer/screen.css" rel="stylesheet" type="text/css" media="all">
+<link href="tools/kaExplorer/tools.css" rel="stylesheet" type="text/css" media="all">
+<link href="tools/tooltip/tooltip.css" rel="stylesheet" type="text/css" media="all">
+</head>
+<body onload="myOnLoad();">
+<div id="page">
+
+<div id="explorer">
+	<div class="kmTitle">ka-Explorer!</div>
+	<div class="kmSubtitle">a ka-Map! Sample Interface</div>
+	<div class="minimenu"><a href="#" onClick="showContent('info_no_html.html');"><span>info</span></a> <a href="#" onClick="showContent('help_no_html.html');"><span>help</span></a></div>
+	<div id="kaLogo"><a href="http://ka-map.maptools.org/"  title="powered by ka-Map!" target="_blank"><img alt="powered by ka-Map!" src="images/kamap.gif" border="0" width="40" height="40"></a></div>
+		
+	<form name="toolbar">
+	
+	<div id="toolbar">
+   	 
+   	 
+   	 <select name="maps" onchange="mySetMap(this.options[this.selectedIndex].value)">
+    	    <option value=''>Choose your kaMap!</option>
+    	    <option value=''>------------------</option>
+   	 </select>
+   	 	<img  alt="Separator" class="separator" src="images/icon_set_explorer/separator.png">
+	    
+	    <img id="toolMapinfo" onclick="switchService(this.id)" title="Click to see the Map Info" alt="Click to see Map Info" src="images/a_pixel.gif">
+	    <img id="toolLegend" onclick="switchService(this.id)" title="Click to see the Legend" alt="Click to see the Legend" src="images/a_pixel.gif">
+	    
+   	 	<img id="toolPrint" onclick="switchService(this.id)" title="Click to Print this View" alt="Print" src="images/a_pixel.gif">
+	    
+	    <img  alt="Separator" class="separator" src="images/icon_set_explorer/separator.png">
+	    
+	    <img id="toolPan" onclick="switchMode(this.id)" title="Click and drag to Navigate the Map" alt="Click and drag to Navigate the Map" src="images/a_pixel.gif">
+	    <img id="toolZoomRubber" onclick="switchMode(this.id)" title="rubber zoom" alt="rubber zoom" src="images/a_pixel.gif" >
+	    <img id="toolZoomIn" onclick="myZoomIn()" title="zoom in" alt="zoom in" src="images/a_pixel.gif" onMouseDown="this.id='toolZoomInDown';"  onMouseUp="this.id='toolZoomIn';">
+	    <img id="toolZoomOut" onclick="myZoomOut()" title="zoom Out" alt="zoom Out" src="images/a_pixel.gif" onMouseDown="this.id='toolZoomOutDown';"  onMouseUp="this.id='toolZoomOut';">
+	    <img id="toolZoomFull" onclick="getFullExtent()" title="zoom to full extents" alt="zoom to full extents" src="images/a_pixel.gif"  onMouseDown="this.id='toolZoomFullDown';"  onMouseUp="this.id='toolZoomFull';">
+	    
+		<select name="scales" onchange="mySetScale(this.options[this.selectedIndex].value)"></select>
+	    
+	    <img  alt="Separator" class="separator" src="images/icon_set_explorer/separator.png">
+	    
+	    <img id="toolQuery" onclick="switchMode(this.id);switchService(this.id);" title="Click and drag or double click to query the Map" alt="Click and drag or double click to query the Map" src="images/a_pixel.gif" >
+	    <img id="toolSearch" onclick="switchService(this.id);" title="Search places in the database" alt="Search places in the database" src="images/a_pixel.gif" >
+	    
+	    <img  alt="Separator" class="separator" src="images/icon_set_explorer/separator.png">
+	    
+	    <img id="toolLink" onclick="switchService(this.id);" title="Send this view to a friend" alt="Send this view to a friend" src="images/a_pixel.gif" >
+	    
+	    <!--
+	    	
+	   	<div id="kaLogo"><a href="http://ka-map.maptools.org/" target="_blank"><img alt="powered by ka-Map!" src="images/powered_by_kamap_lt.png" border="0" width="85" height="23"></a></div>
+		
+		-->
+		
+	
+	
+	</div>
+	</form>
+</div>
+<div id="layoutFrame">
+	<div id="service">
+		<div id="print"> 
+			<h3>Print</h3>
+			<hr>
+			<h5>Download the file to print</h5>	
+			<p>Choose a file type:</p>
+			<form name="print">
+				<select name="outformat">
+					<option value="JPEG">JPEG</option>
+					<option value="PNG">PNG</option>
+					<option value="GIF">GIF</option>
+					<option value="PDF" selected="selected">PDF</option>
+					<option value="GeoTIFF">GeoTIFF</option>
+				</select> 	
+				<input type="button" value="save" onClick="myPrint(document.forms['print'].elements['outformat'].options[document.forms['print'].elements['outformat'].selectedIndex].value);">
+			</form>
+		  	<hr>
+		</div><!-- end print -->
+		
+		<div id="link">
+			<h3>Link to this view</h3>
+			<hr>
+			<h5>Copy the link below to save this view.</h5>
+			<p><a id='linkToView' href='#'>link to be copied</a></p>
+			<hr>
+			<h5>Use the form below  to send this view to a friend.</h5>
+			<p>This function requires a default e-mail client configured in your computer.</p>
+			<div id="linkOut">
+			<form name="link">
+				<!--<label for="linkfrom">Your e-mail:</label>
+				<input type="text" value="" name="linkFrom" id="linkfrom">-->
+				<label for="linkto">Destination e-mail:</label>
+				<input type="text" value="" name="linkTo" id="linkto">
+				<input type="hidden" value="" name="linkContent" id="linkContent">
+				<br>
+				<input type="button" value="submit" onClick="sendLinkToView(document.forms['link'].elements['linkTo'].value,document.forms['link'].elements['linkContent'].value)">
+			</form>
+			</div>
+			<hr>
+		</div><!-- end link -->
+		
+		<div id="identifier">
+			<h3>Identify/Query</h3>
+			<hr>
+			<h5>Single click to query a point<br>Click and drag to query an area</h5>
+			<hr>
+			<div id="queryOut"></div>
+			
+		</div><!-- end identifier -->
+		
+		<div id="search">
+			<h3>Search</h3>
+			<hr>
+			<h5>Use this form to search places in the database</h5>
+			<form name="search" action="javascript:myKaSearch.search(document.forms['search'].elements['searchstring'].value);">
+				<!--<label for="searchstring">text to search:</label>-->
+				<input type="text" name="searchstring" style="width:200px;">
+				<br>
+				<button type="button" onClick="myKaSearch.search(document.forms['search'].elements['searchstring'].value)">Search</button>
+				
+			</form>
+			<hr>
+			<div id="searchres"> </div>
+		</div><!-- end identifier -->
+		
+		<div id="mapLegend">
+			
+			<h3>Legend</h3>
+			<hr>
+			<div id="legend"></div>
+			<hr>
+		</div><!-- end mapInfo -->
+		
+		<div id="mapInfo">
+			
+			<h3>Map Info</h3>
+			<div id="mapTitle"></div>
+			<hr>
+			<h5>Keymap</h5>
+			<div id="keymap"></div>
+			<hr>
+			<h5>Coords</h5>
+			<div id="geoPositionReference">		
+				<div id="geoPosition">
+					x: 0.00<br> 
+					y: 0.00
+				</div>
+			</div>
+			<h5>Extents</h5>
+			<div id="geoExtent" style="font-size:8pt;">
+				
+			</div>
+			<hr>
+		</div><!-- end mapInfo -->
+		
+		
+		<div id="curtain">
+			<h5>The application is loading.<br> Please wait a moment...</h5>
+		</div><!-- end curtain -->
+		
+	</div><!-- end service -->
+	
+	<div id="viewport">
+		
+		<div id="scaleReference">
+        		<div id="scaleBackground" class="transparentBackground"></div>
+        		<div id="scalebar"></div>
+        		<!--<div id="scale">current scale</div>-->
+   		</div>
+   		
+	</div><!-- end viewport -->
+	
+	<div id="content" ><!-- window to show extra contents -->
+		<div id="contentBackground" class="transparentBackground"></div>
+		<div id="contentButton"><img id="winClose" onClick="hideContent()"  src="images/a_pixel.gif" ></div>
+		<div id="contentText"></div> 
+	</div><!-- end content -->
+	
+</div><!-- end layoutFrame -->
+
+</div><!-- end page -->
+
+<div id="contributors">
+<p>ka-Map is developed and maintained by the following folks:</p>
+<ul>
+  <li>Paul Spencer</li>
+  <li>Zak James</li>
+  <li>Jason Fournier</li>
+  <li>Fred Warnock</li>
+  <li>Andrea Cappugi</li>
+  <li>Lorenzo Becchi</li>
+</ul>
+<p>Special thanks to the following folks ...</p>
+<ul>
+  <li>Tim Schaub, for his Scalebar implementation included under the LGPL license.</li>
+  <li>Piergiorgio Navone, for contributing his dynamic overlay code</li>
+  <li>Tyler Mitchel, for testing, feedback and advocacy</li>
+  <li>Aleks Herzog, for her nice icons</li>
+  <li>Sabali Meschi, for usability analysis and tests</li>
+</ul>
+</div>
+</div>
+</body>
+</html>
+

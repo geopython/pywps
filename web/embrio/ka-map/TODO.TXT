@@ -1,0 +1,7 @@
+the ka-Map to-do list is maintained on the community wiki at:
+
+http://ka-map.ominiverdi.org/wiki/
+
+--------------
+$Id: TODO.TXT,v 1.1 2006/02/07 03:19:28 pspencer Exp $
+--------------

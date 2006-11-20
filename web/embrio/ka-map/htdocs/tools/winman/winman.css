@@ -1,0 +1,76 @@
+#map {
+    position: absolute;
+    background-color: #f0f0f0;
+    overflow: hidden;
+    border: 1px solid #999;
+    cursor: move;
+    -moz-box-sizing: border-box;
+}
+#toolbar{
+	border:0;
+}
+#blackboard{
+	border:0;
+	overflow: auto;
+}
+#zoomTools{
+	border:0;
+	text-align:center;
+}
+.kaWinHeader{
+	border:1px solid rgb(60,60,60);
+	background-color:rgb(60,60,60);
+	margin:0;
+	padding:0;
+}
+.kaWinHeaderTitle{
+	padding:2px;
+	color:white;
+	padding-left:12px;
+	letter-spacing:0.15em;
+	margin:0;
+	/*margin-right:12px;*/
+}
+.kaWinHeaderExpanderToggler{
+	border:1px solid rgb(60,60,60);
+	background-color:white;
+	margin:0;
+}
+.kaWinBody{
+	border:1px solid rgb(60,60,60);
+	background-color:rgb(220,220,220);
+	margin:0;
+}
+.kaWinFooter{
+	border:1px solid rgb(60,60,60);
+	background-color:rgb(220,220,220);
+}
+.kaWinFooterResizer{
+	border:1px solid rgb(100,100,100);
+	background-color:rgb(220,220,220);
+	margin:0px;
+}
+
+/*
+	FOR DATA OUTPUT
+*/
+#data h2 {
+    border:1px solid black;
+    font-size:1.2em;
+    padding:0.2em;
+    background: gray;
+    color: white;   
+}
+#data th {
+    border:1px solid black;
+    font-size:0.9em;
+    padding:0.2em;
+    background: rgb(170,170,170);
+    color: white; 
+    font-weight:bold;  
+}
+#data td {
+    border-bottom:1px solid black;
+    font-size:0.9em;
+    padding:0.2em;
+}

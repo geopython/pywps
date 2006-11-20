@@ -1,0 +1,27 @@
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>ka-Map! WFS client</title>
+<script type="text/javascript" src="../xhttp.js"></script>
+<script type="text/javascript">
+function myOnLoad(){
+
+callXML("http://kappa.gonfi.org/wfs/htdocs/XMLOverlay/xmlgetpolygon.php",null,callBack);
+
+
+
+}
+function callBack(xmlDoc){
+	
+	alert(xmlDoc.getElementsByTagName("Polygon").length);
+	
+
+}
+
+</script>
+</head>
+<body onload="myOnLoad();">
+
+
+
+</body>

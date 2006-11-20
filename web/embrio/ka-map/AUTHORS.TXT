@@ -1,0 +1,22 @@
+ka-Map is primarily authored by Paul Spencer (pspencer@dmsolutions.ca) with significant contributions and support from the following folks:
+
+Committers:
+
+Paul Spencer
+Zak James
+Jason Fournier
+Fred Warnock
+Andrea Cappugi
+Lorenzo Becchi
+
+Contributors:
+
+Piergiorgio Navone
+Tyler Mitchell
+
+Scalebar implementation courtesy of Tim Schaub and included under the LGPL
+license.
+
+--------------
+$Id: AUTHORS.TXT,v 1.1 2006/02/07 03:19:28 pspencer Exp $
+--------------

@@ -1,0 +1,83 @@
+ka-Map - Revision History
+=========================
+
+This is a human-readable revision history which will attempt to document
+required changes for users to migrate from one version of ka-Map to the
+next.  Developers are strongly encouraged to document their changes and
+their impacts on the users here.  (Please add the most recent changes to 
+the top of the list.)
+
+For a complete change history, please see the CVS log comments.
+
+Version 1.0 - unreleased
+--------------------------
+- KAMAP_MOUSE_STOPPED contributed by Sebastien Roch
+- kaExplorer has a setContent(url) function to inject long text in inside window.
+- kaExplorer is the new interface. Old interface is now index_aqua.html
+- simple search system based on queryByAttributes has been added.  tools/search/kaSearch.php to refine output
+- print system added. Default outputs: GIF,JPEG,PNG,GeoTIFF, formatted PDF.
+- rubber zoom added.
+- "link to this view" function added.
+- bug 1512: added group access control based on Apache Basic Authentication
+- bug 1374, implementation of a tooltip system
+- bug 1315, implemented new event, KAMAP_METAEXTENTS_CHANGED, and kaMap.getMetaExtents() to track extents of all loaded tiles.  This is designed to support server side overlay logic.
+- bug 1333, fixed formatting of several javascript files to work with kaMap.js
+- bug 1350, modified structure of aszMapFile array in config.php 
+- bug 1351, modified constructors for _map and _layer to be more flexible for future capabilities
+- bug 1352, implemented new event KAMAP_MAP_CLICKED for handling single clicks on the map, to allow simple queries and point overlay placement.
+- bug 1290, implemented force_redraw option
+- bug 1313, query system implemented. map_query_float.php to customize response.
+- added index_overlay.html and Overlay Functions. Alpha version 
+- bug 1297, added Link To This View capability
+- added CIABOT to ka-map cvs repository and email ka-map-dev
+- fixed bug 1285, infinite loop caused by having only one scale in config.php
+- bug 1283, added support for limiting map movement beyond max extents set via metadata in the map file.
+- bug 1284, added precache.php script back into cvs
+
+Version 0.2.0 (2006-02-07)
+--------------------------
+Its been waaay to long since the last release and the changes are very numerous.  I'm just going to cover some highlights that I remember right now ... After this version, every change is going to go through bugzilla and be referenced in here.
+
+- sample interface rewrite to table-less css layout (thanks Lorenzo and Andrea!)
+
+- improvements to legend and keymap code (thanks Lorenzo and Andrea!)
+
+- included javascript scalebar maintained by Tim Schaub (thanks Tim!)
+
+- added clickable/draggable keymap (thanks Lorenzo!)
+
+- added support for mouse scroll zooming (thanks Ed!)
+
+- added kaQuery.js for generic query support (i.e. ROI selection)
+
+- restructured directory structure for better security and ease of installation
+  which necessitated a change in config.php - everyone needs to update.
+
+- added variable image format code (thanks Jacob!)
+
+- added object placement API
+
+- added tool API and removed navigation stuff to a new tool (kaTool.js)
+
+- Bug 1049: Fixed problem with JPEG output format (szCacheFile was 
+  hardcoded to .png extension in tile.php)
+
+- removed need for initMap.php, the logic for initializing a map has been
+  into the javascript function kaMap_selectMap.
+  
+- added default extents and max extents to initialization (although max extents
+  are not yet used).
+
+- switched to a larger default tile size (300x300 instead of 200x200) because
+  it seems to improve performance
+  
+- completely rewrote kaLegend to be entirely client side
+
+Version 0.1.0 (2005-05-18)
+--------------------------
+
+- First public release. 
+
+------------
+$Id: HISTORY.TXT,v 1.20 2006/08/11 20:59:34 lbecchi Exp $
+------------

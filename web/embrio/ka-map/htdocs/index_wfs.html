@@ -1,0 +1,270 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!--
+/**********************************************************************
+ *
+ * $Id: index_wfs.html,v 1.3 2006/08/08 22:00:30 lbecchi Exp $
+ *
+ * purpose: This is the sample ka-Map interface.  Feel free to use it 
+ *          as the basis for your own applications or just to find out
+ *          how ka-Map works.
+ *
+ * author: Paul Spencer,Lorenzo Becchi & Andrea Cappugi     
+ *
+ **********************************************************************
+ *
+ * Copyright (c) 2006, ominiverdi.org
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * DEALINGS IN THE SOFTWARE.
+ *
+ **********************************************************************/
+-->
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>ka-Map! WFS client</title>
+
+
+
+<script type="text/javascript" src="getcjs.php?name=DHTMLapi.js,xhr.js,kaMap.js,kaKeymap.js,kaLegend.js,kaTool.js,kaQuery.js,scalebar/scalebar.js"></script>
+<!-- -->
+
+<script type="text/javascript" src="tools/winman/kaWinManager.js"></script>
+<script type="text/javascript" src="tools/winman/dom-drag.js"></script>
+
+<script type="text/javascript" src="tools/wfs/wfsConnector.js"></script>
+<script type="text/javascript" src="tools/tooltip/kaToolTip.js"></script>
+
+<script type="text/javascript" src="tools/wfs/startUp_wfs.js"></script>
+
+<script type="text/javascript">
+	var wfsConn = null;
+	
+
+
+function addWFSSource(input) {
+    var f = document.forms.wfs;
+    var select = f.wfsServer;
+    var index = select.selectedIndex;
+    var server = select.options[index].value;
+    var version = "1.0.0";
+    var epsg = f.epsg.value;
+ 
+    if(server == '') {
+		alert('please select at least one Server.');
+		return;
+	}
+  	if(wfsConn)wfsConn=null;
+  	getRawObject('wfsMessage').innerHTML = 'Loading capabilities. Wait a moment please.';
+   
+    wfsConn = new _wfsConnector( myKaMap, "wfsForm", server, version, epsg);
+     
+  
+   
+    disableIt(select);
+    disableIt(document.forms.wfs.wfsSelect);
+    disableIt(document.forms.wfs.wfsReset);
+}
+
+function getFeatures(input){
+	var f = document.forms.wfs;
+	var select = f.wfsSelect;
+	var index = select.selectedIndex;
+	var feature = select.options[index].value;
+//	f.wfsServer.selectedIndex=1;
+	if(feature == '') {
+		alert('please select at least one feature.');
+		return;
+	} else {
+		getRawObject('wfsMessage').innerHTML = 'Loading points. Wait a moment please';
+		wfsConn.getFeatures(this.sessionId,feature);
+		
+	}
+}
+
+function resetWfs(){
+
+	getRawObject('wfsMessage').innerHTML = '';
+	document.forms.wfs.wfsServer.disabled=false;
+	document.forms.wfs.wfsServer.selectedIndex=0;
+	var index = document.forms.wfs.wfsSelect.selectedIndex;
+	document.forms.wfs.wfsSelect.selectedIndex=0;
+	var totOpt = document.forms.wfs.wfsSelect.options.length;
+	for(var i=2;i<totOpt;i++){
+		document.forms.wfs.wfsSelect.options[i] = null;
+	}
+	document.forms.wfs.wfsSelect.disabled=true;
+	document.forms.wfs.wfsReset.disabled=true;
+	
+	wfsConn.clearPoints();
+}
+
+function disableIt(obj)
+{
+	obj.disabled = !(obj.disabled);
+	var z = (obj.disabled) ? 'disabled' : 'enabled';
+}
+
+
+</script>
+<link rel="stylesheet" type="text/css" href="scalebar/scalebar-fat.css">
+<link href="tools/kaAqua/screen.css" rel="stylesheet" type="text/css" media="all">
+<link href="tools/kaAqua/tools.css" rel="stylesheet" type="text/css" media="all">
+<link href="tools/wfs/wfs.css" rel="stylesheet" type="text/css" media="all">
+<link href="tools/winman/winman.css" rel="stylesheet" type="text/css" media="all">
+
+</head>
+<body onload="myOnLoad();">
+<div id="viewport">
+<div id="map">
+</div>
+<!-- top toolbar, title and navigation -->
+
+<div id="toolbar">
+<form action="">
+    <!--<div id="toolbarBackground" class="transparentBackground"></div>-->
+    <!--<div class="kmTitle">ka-Map! Sample Application</div>-->
+    <div style="text-align:center">
+    <select name="maps" id="maps" onchange="mySetMap(this.options[this.selectedIndex].value)">
+        <option value=''>Choose your kaMap!</option>
+        <option value=''>------------------</option>
+    </select>
+    <img id="toolQuery" onclick="switchMode(this.id)" title="Click and drag or double click to query the Map" alt="Click and drag or double click to query the Map" src="images/a_pixel.gif" >
+    <img id="toolPan" onclick="switchMode(this.id)" title="Click and drag to Navigate the Map" alt="Click and drag to Navigate the Map" src="images/a_pixel.gif">
+
+	<div id="kaLogo"><a href="http://ka-map.maptools.org/" target="_blank"><img alt="powered by ka-Map!" src="images/powered_by_kamap_lt.png" border="0" width="60" height="19"></a></div>
+	
+
+    </div>
+</form>
+</div>
+
+<!--<img id="toolbarToggler" onclick="toggleToolbar(this);" alt="toggle toolbar" src="images/a_pixel.gif">-->
+<!--<img id="keymapToggler" onclick="toggleKeymap(this);" alt="toggle keymap" src="images/a_pixel.gif">-->
+<div id="keymap"></div>
+
+<div id="blackboard">This window, as the viewport, is resizable. 
+Click on the bottom right button and drag to resize.<br /><br />
+
+You can drag & drop any windows clicking on the top bar.<br /><br />
+
+All windows may be rolled up. <br />
+Click on the top right button and drag to roll up the window.<br />
+Same button to restore window dimensions.
+<br /><br />
+
+<strong>Blackboard</strong> is a space where you can redirect your outputs.<br /> 
+Try the identify function or  "link to this view" function.
+</div>
+
+<!--<div id="kaLogo"><a href="http://ka-map.maptools.org/" target="_blank"><img alt="powered by ka-Map!" src="images/powered_by_kamap_lt.png" border="0" width="85" height="23"></a></div>-->
+
+    <span id="zoomTools">
+		<img id="toolZoomOut" onclick="myZoomOut();" title="zoom Out" alt="zoom Out" src="images/a_pixel.gif">
+		<span id="zoomer"></span>
+		<img id="toolZoomIn" onclick="myZoomIn()" title="zoom in" alt="zoom in" src="images/a_pixel.gif" >
+		<img id="toolZoomFull" onclick="getFullExtent()" title="zoom to full extents" alt="zoom to full extents" src="images/a_pixel.gif" >
+		<a id='linkToView' href='#'>link to this view</a>
+		<a id='help' href='#'>help</a>
+    </span>
+<!-- reference information -->
+<!--<img id="refToggler" onclick="toggleReference(this);" alt="toggle reference" src="images/a_pixel.gif">-->
+<div id="reference">
+    <div id="scaleReference">
+        <div id="scaleBackground" class="transparentBackground"></div>
+        <div id="scalebar"></div>
+        <div id="scale">current scale</div>
+    </div>
+    <div id="legend"></div>
+</div>
+
+
+
+<div id="wfsDiv">
+    		<form name="wfs" id="wfsForm" action="">
+              <div id="wfsServer" >
+	             <fieldset>
+				   <legend>Server</legend>
+	              <select name="wfsServer" id="wfsServer"  onchange="addWFSSource(this);">
+	              	<option value="">Select a WFS server</option>
+	              	<option value="">-------------------</option>
+	              	<!--<option value="http://mapserver.gdf-hannover.de/cgi-bin/grassuserwfs?">GRASS Users WFS</option>-->
+	              	<option value="http://wms1.ccgis.de/cgi-bin/mapserv?map=/data/umn/mapbender_user/mapbender_user.map">Mapbender Users WFS (Germany)</option>
+			        <option value="http://www.qgis.org/cgi-bin/mapserv?map=/var/www/maps/main.map">Qgis Users WFS</option>
+	                <!--<option value="http://www4.bom.gov.au/cgi-bin/mapserver/mapserv?map=/web/htdocs/mapserver/weather.map">Metar Australian service</option>-->
+	                </select>
+	               </fieldset>
+              </div>
+              <div id='wfsFeature' >
+              <fieldset>
+				<legend>Feature</legend>
+	              <select name="wfsSelect" id="wfsSelect" onchange="getFeatures(this);">
+	              	<option value="">Select a WFS feature</option>
+	              	<option value="">-------------------</option>
+	              </select>
+	              
+	             </fieldset>
+	              
+              </div>
+              <div id='wfsInfo'>
+              	<fieldset>
+				<legend>Epsg</legend>
+              	<input type="text" name="epsg" id="epsg" value="4326" />
+              	 </fieldset>
+              	<fieldset>
+				<legend>Reset WFS client</legend>
+              	<input type="button" name="wfsReset" value="reset" onclick="resetWfs();">
+              	 </fieldset>
+              	 <fieldset>
+              	 <legend>Messages</legend>
+              	<div id="wfsMessage"> </div>
+              	 </fieldset>
+              </div>
+              
+              <script language="JavaScript" type="text/javascript">
+			  disableIt(document.forms.wfs.wfsSelect);
+			  disableIt(document.forms.wfs.wfsReset);
+			document.forms.wfs.wfsServer.selectedIndex=0;
+			document.forms.wfs.wfsSelect.selectedIndex=0;
+		</script>
+  
+         </form>
+    </div>
+
+
+<div id="contributors">
+<p>ka-Map is developed and maintained by the following folks:</p>
+<ul>
+  <li>Paul Spencer</li>
+  <li>Zak James</li>
+  <li>Jason Fournier</li>
+  <li>Fred Warnock</li>
+  <li>Andrea Cappugi</li>
+  <li>Lorenzo Becchi</li>
+</ul>
+<p>Special thanks to the following folks ...</p>
+<ul>
+  <li>Tim Schaub, for his Scalebar implementation included under the LGPL license.</li>
+  <li>Piergiorgio Navone, for contributing his dynamic overlay code</li>
+  <li>Tyler Mitchel, for testing, feedback and advocacy</li>
+</ul>
+</div>
+</div>
+</body>
+</html>
+

@@ -1,0 +1,352 @@
+/**********************************************************************
+ *
+ * $Id: screen.css,v 1.1 2006/08/08 21:53:32 lbecchi Exp $
+ *
+ * purpose: css declarations for sample interface.
+ *
+ * author: Lorenzo Becchi and Andrea Cappugi (www.ominiverdi.org)
+ *
+ * additions by Paul Spencer (pspencer@dmsolutions.ca)
+ *
+ * TODO:
+ *
+ **********************************************************************
+ *
+ * Copyright (c) 2005, DM Solutions Group Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * DEALINGS IN THE SOFTWARE.
+ *
+ **********************************************************************/
+
+/* img elements with a class of png24 will have the png24 filter hack applied
+ * in IE browsers only.  To make this work, images MUST have a width and height
+ * specified.  The minimum tag required is:
+ *
+ *     <img class="png24" src="<url>" width="xx" height="xx">
+ */
+img.png24 { filter:expression(applyPNGFilter(this)) }
+
+/* this is a full screen app.  Make sure that overflow is hidden so we don't
+ * get scrollbars
+ */
+body {
+    margin: 0px;
+    padding: 0px;
+    background-color: #d9d9d9;
+    overflow: hidden;
+}
+
+/* the viewport contains the map and fills the screen.  The viewport can also
+ * contain other elements and they appear inside the viewport on top of the map
+ * which is what is done with this application.
+ */
+#viewport {
+    position: relative;
+    background-color: #f0f0f0;
+    overflow: hidden;
+    border: 1px solid #999;
+    cursor: move;
+    -moz-box-sizing: border-box;
+}
+
+/* The toolbar contains the tools for changing maps and various navigation
+ * and query options.  In this app, we put the toolbar at the top by making it
+ * the first thing in the page.
+ */
+#toolbar {
+    position: relative;
+    margin:0;
+    padding:0px;
+    width: 100%;
+    height: 60px;
+    z-index:2;
+    cursor: auto;   
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    border-bottom: 1px solid #999;
+}
+
+#toolbar img { vertical-align: middle }
+#toolbar select { vertical-align: middle }
+
+#toolbarToggler {
+    position:absolute;
+    top: 63px;
+    left: 3px;
+    z-index: 2;
+    width: 14px;
+    height: 14px;
+    background-image: url(../../images/arrow_up.png);
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+
+/* this is used to provide a semi-transparent background on divs that contain
+ * fully opaque tools.  To use, put <div class="transparentBackground"></div>
+ * inside an element that you want to have a semi-transparent background.
+ */
+#toolbarBackground {
+    width: 100%;
+    height: 60px;
+}
+
+#scaleBackground {
+    width: 100%;
+    height: 60px;
+}
+
+div .transparentBackground {
+    position:absolute;
+    top:0px;
+    left:0px;
+    background-color: #eee;
+    filter:alpha(opacity=75); 
+    -moz-opacity:0.75;
+    opacity:0.75; 
+    z-index: -1;
+}
+
+#zoomer img {
+    border:0;
+    margin-right:5px;
+    cursor: crosshair;
+}
+
+#keymap {
+    position: absolute;
+    top: 80px;
+    right: 3px;
+    padding:0px;
+    overflow: hidden;
+    filter:alpha(opacity=100);/*trick to prevent IE opacity bug*/
+    z-index: 2;
+    text-align:right;
+    border: 1px solid #999;
+}
+
+#keymap div {
+    filter:alpha(opacity=100);/*trick to prevent IE opacity bug*/
+}
+
+#keymap img {
+    filter:alpha(opacity=100);/*trick to prevent IE opacity bug*/
+}
+
+#keymapToggler {
+    position:absolute;
+    top: 63px;
+    right: 3px;
+    z-index: 2;
+    width: 14px;
+    height: 14px;
+    background-image: url(../../images/arrow_right.png);
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+
+
+/* REFERENCE */
+#reference {
+    width: 250px;
+    height: 210px;
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    z-index: 2;
+    cursor: auto;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+#geoPosition {
+    position: relative;
+    width: 250px;
+    height: 30px;
+    overflow: auto;
+    padding:0px;
+    background-color: #ccc;
+    margin: 0px;
+    border: 1px solid #999;
+    font-family: Arial;
+    font-size: 10px;
+}
+
+#legend {
+    position: relative;
+    width: 250px;
+    height: 120px;
+    overflow: auto;
+    padding:0px;
+    background-color: #ccc;
+    margin: 0px;
+    border: 1px solid #999;
+}
+
+#scale {
+    font-family: Verdana, sans-serif;
+    font-size: 10px;
+    position: relative;
+    padding:0px;
+    width: 250px;
+    height:50px;
+    text-align: center;
+    margin-top: 48px;
+}
+
+/*
+#scalebar {
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+*/
+
+#scaleReference {
+    padding:0px;
+    border: 1px solid #999;
+    height: 60px;
+}
+
+#refToggler {
+    position:absolute;
+    bottom: 213px;
+    right: 3px;
+    z-index: 2;
+    width: 14px;
+    height: 14px;
+    background-image: url(../../images/arrow_down.png);
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+
+
+/* SEARCH SYSTEM */
+
+#searchToggler {
+    position:absolute;
+    bottom: 213px;
+    left: 3px;
+    z-index: 2;
+    width: 14px;
+    height: 14px;
+    background-image: url(../../images/arrow_down.png);
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+
+#searchOut {
+    position:absolute;
+    z-index: 2;
+    width: 250px;
+    height: 208px;
+    overflow: auto;
+    padding:0px;
+    bottom:3px;
+    left:3px;
+    background-color: #ccc;
+    margin: 0px;
+    border: 1px solid #999;
+}
+
+/* CLASSES */
+
+.label {
+    font-family: arial;
+    font-size: 11px;
+    font-weight: normal;
+}
+
+
+/* HTML TAGS */
+.value {
+    font-family: arial;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+input {
+    font-family: arial;
+    font-size: 12px;
+    font-weight: normal;
+}
+
+select {
+    font-family: arial;
+    font-size: 12px;
+    font-weight: normal;
+    width: 150px;
+}
+
+a { 
+    text-decoration: none; 
+    font-family: arial;
+    font-size: 10px;
+    color: #000033;
+}
+
+.kmTitle {
+    font-family: Verdana, sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+	font-variant: small-caps;
+}
+
+a:link {}
+a:hover {}
+a:active {}
+a:visited {}
+
+
+/* OTHERS */
+
+
+#kaLogo {
+    position: absolute;
+    right: 6px;
+    top: 3px;
+    z-index: 2;
+}
+
+#kaLogo a {
+    color:rgb(0,0,0);
+}
+
+.kaLegendTitle {
+    border-top: 1px solid #ffffff;
+    border-left: 1px solid #ffffff;
+    border-bottom: 1px solid #666666;
+    border-right: 1px solid #666666;
+    padding: 2px;
+    font-family: arial;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.kaLegendLayer, #searchres div {
+    border-top: 1px solid #ffffff;
+    border-left: 1px solid #ffffff;
+    border-bottom: 1px solid #666666;
+    border-right: 1px solid #666666;
+    padding: 2px;
+    font-family: arial;
+    font-size: 12px;
+}
+
+#contributors {
+    display: none;
+}
