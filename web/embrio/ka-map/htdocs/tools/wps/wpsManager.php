@@ -154,10 +154,10 @@ $img_path = '';//the path where pywps store the image file
 	
 	
 //if(1==1){
-	$oMap->save($szQueryCacheDir."/mapfile_buffer.map")
+	$oMap->save($szQueryCacheDir."/mapfile_buffer.map");
 	//$oMap->savequery($szQueryCacheDir."query.bin");
 	
-	echo"/*output*/queryResult=1;this.sessionId='$sessionId';";
+	echo "/*output*/queryResult=1;this.sessionId='$sessionId';";
 /*	
 } else {
 	
