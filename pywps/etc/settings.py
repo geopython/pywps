@@ -53,15 +53,15 @@ WPS = {
         #
         # 'Title':"This WPS Title",
         #
-        'Title':"PyWPS 0.1",
+        'Title':"PyWPS 1.0.0",
         #
         # 'ServiceType":"WPS",
         #
         'ServiceType':"WPS",
         #
-        # 'ServiceTypeVersion':"0.1.0",
+        # 'ServiceTypeVersion':"1.0.0",
         #
-        'ServiceTypeVersion':"0.1.0",
+        'ServiceTypeVersion':"1.0.0",
 
         ####################
         # Optional options
