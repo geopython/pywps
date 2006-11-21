@@ -117,7 +117,7 @@
 }*/
 
 //PARAMS TO BE PUT OUTSIDE THIS FILE
-$cgi_executable = '/cgi-bin/wps.py';
+$cgi_executable = 'http://localhost/cgi-bin/wps.py';
 $img_path = '';//the path where pywps store the image file
 
 //Built up the request for PYWPS	
