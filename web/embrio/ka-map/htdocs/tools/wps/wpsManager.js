@@ -32,12 +32,12 @@
  **********************************************************************/
 
 /******************************************************************************
- * simple hilite
+ * wpsManager
  *
  * recive map name,layer name and extent and hilite requested shape 
  *     
  *****************************************************************************/
-function simpleHilite( oKaMap ) {
+function wpsManager( oKaMap ) {
  	
  	this.kaMap=oKaMap; 
  	this.qId=0;
@@ -45,19 +45,20 @@ function simpleHilite( oKaMap ) {
  	this.sessionId=null;
 };
 
-simpleHilite.prototype.query=function(map,layer,extents,searchString,shapeIndex,tileIndex){
-  
+wpsManager.prototype.query=function(map,extents,identifier,datainputs){
+  // old string
+  //map,extents,searchString,shapeIndex,tileIndex
   
   
    if (this.kaMap.sessionId)  szSessionIdP="&sessionId="+this.kaMap.sessionId;
     else szSessionIdP="";
     
     
-   var params="map="+map+"&layer="+layer+"&id="+this.qId +szSessionIdP;
-   params += "&extents="+extents+"&searchstring="+searchString;
-   params += "&sIndex="+shapeIndex+"&tIndex="+tileIndex;
+   var params="map="+map+szSessionIdP+"&id="+this.qId;
+   params += "&extents="+extents+"&identifier="+identifier;
+   params += "&datainputs="+datainputs;
  	//alert(params);
- 	//showContent('tools/query/simpleHilite.php?'+params);
+ 	//showContent('tools/query/wpsManager.php?'+params);
    
   if (this.qLayer==null){
       this.createLayer();
@@ -70,9 +71,13 @@ simpleHilite.prototype.query=function(map,layer,extents,searchString,shapeIndex,
    call('../../ka-map/htdocs/tools/wps/wpsManager.php?'+params, this, this.queryResult);
   
 };
-simpleHilite.prototype.queryResult=function(szResult ){
- 
+wpsManager.prototype.queryResult=function(szResult ){
+	if (szInit.substr(0, 1) != "/") {
+        alert(szInit);
+        return false;
+    }
  	eval(szResult);
+	
 	if(queryResult==0){ 
 		
        this.kaMap.sessionId  = this.sessionId;
@@ -86,13 +91,13 @@ simpleHilite.prototype.queryResult=function(szResult ){
 		alert("No results for this query!");
 	 }
  };
-simpleHilite.prototype.createLayer=function(){
+wpsManager.prototype.createLayer=function(){
  
           
-     this.qLayer= new _queryLayer("queryLayer",true,100,'PNG',false,layers,this.qId);
+     this.qLayer= new _wpsLayer("queryLayer",true,100,'PNG',false,layers,this.qId);
      this.kaMap.addMapLayer(this.qLayer);
  	 
-     var legend=this.kaMap.getRawObject("group_queryLayer");
+     var legend=this.kaMap.getRawObject("group_wpsLayer");
     /* if(legend){
  		    
      var button= document.createElement('img');
@@ -105,7 +110,7 @@ simpleHilite.prototype.createLayer=function(){
      }*/
   
 };
-simpleHilite_queryOnClick=function(){
+wpsManager_queryOnClick=function(){
   
      for (i=0;i<this.qM.qLayer.scales.length;i++)this.qM.qLayer.scales[i]=0;
      this.qM.qLayer.setVisibility( false );

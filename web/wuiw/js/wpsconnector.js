@@ -42,6 +42,9 @@ function wpsConnector(console) {
 
 	//temp XML storer
 	this.XMLcode = '';
+	
+	//proxy
+	this.ProxyHost = "";
 
  };
  
@@ -108,13 +111,11 @@ function wpsConnector(console) {
         if (this.baseURL.charAt( this.baseURL.length - 1 ) == '&')
             this.baseURL = this.baseURL.slice( 0, -1 );
     }
-	
-    this.baseURL = this.baseURL+ "&service=wps";
-    this.baseURL = this.baseURL + "&request=GetCapabilities";
-    this.baseURL = this.baseURL +  "&version="+self.version;
 
-    var connector = 'tools/proxy/proxy_xml.php?';
-    var myURL = connector + 'owsURL='+myurlencode(this.baseURL);
+	
+	var params = "&amp;service=wps&amp;request=GetCapabilities&amp;version="+self.version;
+    var myURL = self.ProxyHost  + this.baseURL +  myurlencode(params);
+	alert(myURL);
 	self.waitStart();
     self.ajax.doGet(myURL, self.parseCapabilities,'xml');
  
@@ -204,7 +205,7 @@ function wpsConnector(console) {
 	this.baseURL = this.baseURL + "&service=wps&request=DescribeProcess&version="+ self.version;
     this.baseURL = this.baseURL +  "&identifier="+process ;
     var connector = 'tools/proxy/proxy_xml.php?';
-    var myURL = connector + 'owsURL='+myurlencode(this.baseURL);
+    var myURL =  this.ProxyHost + connector + 'owsURL='+myurlencode(this.baseURL);
     //myURL = this.wpsConnector.addRequestParameter(myURL, 'com', "&com=getCapabilities" );
     self.waitStart();
 	self.ajax.doGet(myURL, self.parseProcesses,'xml');

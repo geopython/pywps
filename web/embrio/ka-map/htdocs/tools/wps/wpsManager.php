@@ -65,41 +65,41 @@
     echo $szResult;
     die;
   }
-  if(isset($_REQUEST['layer'])) $szLayer= $_REQUEST['layer'];
+  /*if(isset($_REQUEST['layer'])) $szLayer= $_REQUEST['layer'];
    else{
     $szResult= 'alert ("layer query required");';
     echo $szResult;
     die;
-  }
+  }*/
   
-  if(isset($_REQUEST['sIndex'])) $sIndex= $_REQUEST['sIndex'];
+  if(isset($_REQUEST['datainputs'])) $datainputs= $_REQUEST['datainputs'];
    else{
-    $szResult= 'alert ("sIndex required");';
+    $szResult= 'alert ("datainputs required");';
     echo $szResult;
     die;
   }
   
-  if(isset($_REQUEST['tIndex'])) $tIndex= $_REQUEST['tIndex'];
+  if(isset($_REQUEST['identifier'])) $identifier= $_REQUEST['identifier'];
    else{
-    $szResult= 'alert ("tIndex required");';
+    $szResult= 'alert ("identifier required");';
     echo $szResult;
     die;
   }
   
   
  //Destroy old query Cache
-  if (is_dir($szBaseCacheDir."/sessions/".$sessionId."/QuerySys/".$szMap."/"))
-   remove_directory($szBaseCacheDir."/sessions/".$sessionId."/QuerySys/".$szMap."/");
+  if (is_dir($szBaseCacheDir."/sessions/".$sessionId."/wpsLayer/".$szMap."/"))
+   remove_directory($szBaseCacheDir."/sessions/".$sessionId."/wpsLayer/".$szMap."/");
 
   //Build query sys cache directory!!
-  $szQueryCacheDir=$szBaseCacheDir."/sessions/".$sessionId."/QuerySys/".$szMap."/".$qId."/"; 
+  $szQueryCacheDir=$szBaseCacheDir."/sessions/".$sessionId."/wpsLayer/".$szMap."/".$qId."/"; 
  
   /* create the main sessionID cache directory if necessary */
   if (!@is_dir($szQueryCacheDir))
     makeDirs($szQueryCacheDir);
     
     //REQUEST HANDLING
-if (empty ($_REQUEST['searchstring'])) {
+/*if (empty ($_REQUEST['searchstring'])) {
 
 	$searchstring = "/Empty/";
 
@@ -114,32 +114,53 @@ if (empty ($_REQUEST['searchstring'])) {
 	$searchstring = iconv("UTF-8", "ISO-8859-13", $_REQUEST['searchstring']);
 	//$searchstring = "/" . $searchstring . "/i";
 
-}
+}*/
 
-$oMap->preparequery();
-$oLayer = $oMap->getLayerByName($szLayer); //number of layers in map
-$totResults = 0;
+//PARAMS TO BE PUT OUTSIDE THIS FILE
+$cgi_executable = '/cgi-bin/wps.py';
+$img_path = '';//the path where pywps store the image file
 
+//Built up the request for PYWPS	
+	
+	$query_string = $cgi_executable."?service=wps&version=0.4.0&request=Execute&Identifier=$identifier&";
+	$query_string .= "datainputs=". $datainputs;
+	$query_string .= "&status=true&store=true";
+	
+//Extract the file name.This part need more debugging
 
-$szSearchfield = $oLayer->getMetaData('searchfield');
+	$dom = new DOMDocument();
+	$dom->load($query_string);
+	$CVR = $dom->getElementsByTagName('ComplexValueReference');
+	$reference = $CVR->item(0)->getAttribute('reference');
+	$aReference = explode('/',$reference);
+	$filename = end($aReference);
+	$pywps_outputPath.=$filename;
+	
+	//Update the mapfile with new layer
 
-
-$szResult = $oMap->queryByIndex($oLayer->index,$tIndex,$sIndex);
-if ($szResult == MS_SUCCESS)
-{ 
+	$layer = ms_newLayerObj($oMap);
+    $layer->set('name', $identifier);//not sure about wich name to choose
+	$layer->set('status', MS_DEFAULT );
+	$layer->set('data', $img_path.$filename);
+	$layer->set('type', MS_LAYER_RASTER);
+	
+	//THIS PART SHOULD STAY ON A EXTERNAL SLD
+	$class = ms_newClassObj($layer);
+	$class->setExpression("1");
+	$style = ms_newStyleObj($class);
+	$style=$class->getStyle(0);
+	$style->color->setRGB( -1,-1,-1);
+	
+	
+if($map->save($szQueryCacheDir."/mapfile_buffer.map")){
 	
 	$oMap->savequery($szQueryCacheDir."query.bin");
 	
-	//print_r($oShape);
-	
-	
-	
-	//$szResult=0;
-	echo"queryResult= $szResult;this.sessionId='$sessionId';";
+	echo"/*output*/queryResult=1;this.sessionId='$sessionId';";
 	
 } else {
 	
-	echo"queryResult= $szResult;";
+	echo"/*output*/queryResult=0;";
 }
 
    function remove_directory($dir) {

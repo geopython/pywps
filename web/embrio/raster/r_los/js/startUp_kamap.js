@@ -43,11 +43,13 @@ var xml_dump;
 
 //MODULE NAME
 var module_path = 'mod/mod_r_los.php';
+var identifier = 'r_los';//Identifier name for WPS service
 
 //interface vars
 var steps = 6;
 
-
+//WPS manager
+var wpsManager;
 
 function runPywps(){
 	if(input_x==null){
@@ -59,9 +61,20 @@ function runPywps(){
 	var observerSel = getRawObject('observer');
 	var observer = observerSel.options[observerSel.selectedIndex].value;
 	//var url = 'mod/r_los.php?xvalue='+input_x+'&yvalue='+input_y+'&maxdist='+maxdist+'&observer='+observer;
+	
+	//WPSMANAGER part
+	wpsManager = new wpsManager(myKaMap);
+	var map = myKaMap.getCurrentMap();	
+	var extents = map.currentExtents;
+	var options = 'x,'+input_x+',y,'+input_y+',maxdist,'+maxdist+',observer,'+observer;
+	wpsManager.query(map.name,extents,identifier,options);
+	//WPSMANAGER part end
+	
+	//to be deleted once WPS MANAGER works
 	var url = module_path+'?xvalue='+input_x+'&yvalue='+input_y+'&maxdist='+maxdist+'&observer='+observer;
 	waitStart();
 	call(url, this, parsePywpsOut);
+	//to be deleted once WPS MANAGER works END
 }
 
 function parsePywpsOut (szInit){
@@ -79,13 +92,13 @@ function parsePywpsOut (szInit){
 
 
 function setFields(gX,gY){
-	//set input objects
-	input_x = gX;
-	getRawObject('xvalue').value = input_x;
-	getRawObject('xvalue_span').innerHTML = input_x;
-	input_y = gY;	
-	getRawObject('yvalue').value = input_y;
-	getRawObject('yvalue_span').innerHTML = input_y;
+        //set input objects
+        input_x = parseInt(gX);
+        //getRawObject('xvalue').value = input_x;
+        getRawObject('xvalue_span').innerHTML = input_x;
+        input_y = parseInt(gY);
+        //getRawObject('yvalue').value = input_y;
+        getRawObject('yvalue_span').innerHTML = input_y;
 }
 
 

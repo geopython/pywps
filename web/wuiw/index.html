@@ -52,17 +52,20 @@
 		<script type="text/javascript" >
 			function load(){
 				//create OWS connector object
-				//owsConnector = new owsConnector;
+				owsConnector = new owsConnector;
+				owsConnector.ProxyHost = "/cgi-bin/proxy.cgi?url=";
+
 				//add server (name,url,type)
-				//owsConnector.addServer('ominiverdi.org wcs service','http://www.ominiverdi.org/cgi-bin/mapserv?map=/home/doktoreas/data/wcs/mapfile/pywps_wcs_spearfish-r1.map','WCS');
+				owsConnector.addServer('ominiverdi.org wcs service','http://www.ominiverdi.org/cgi-bin/mapserv?map=/home/doktoreas/data/wcs/mapfile/pywps_wcs_spearfish-r1.map','WCS');
 				//create wps connector object
 				wpsConnector = new wpsConnector;
+				wpsConnector.ProxyHost = "/cgi-bin/proxy.cgi?url=";
 				//add  wps servers
 				wpsConnector.addServer('ominiverdi.org wps service','http://www.ominiverdi.org/cgi-bin/mapserv?map=/home/doktoreas/data/wcs/mapfile/pywps_wcs_spearfish-r1.map');
 				//add OWS server connector
-				wpsConnector.addOwsConnector(owsConnector);
+				//wpsConnector.addOwsConnector(owsConnector);
 				//draw wps form interface
-				wpsConnector.drawInitForm('wpsconnector');	
+				//wpsConnector.drawInitForm('wpsconnector');	
 			};
 		</script>
 		<link href="css/screen.css" rel="stylesheet" type="text/css" media="all">

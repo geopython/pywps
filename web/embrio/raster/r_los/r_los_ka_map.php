@@ -190,6 +190,11 @@ else die('create your include/config.php using include/config.php.dist as templa
 			  cursor: move;
 			  -moz-box-sizing: border-box;
 			}
+			 #outimg {
+					position:absolute;
+					top:10px;
+					left:200px;
+			}
 		</style>
 	</head>
 	<body onload="myOnLoad();">
@@ -205,7 +210,6 @@ else die('create your include/config.php using include/config.php.dist as templa
 	</p>
 </div>
 <div id="output">
-<!--<img id="outimg" src="<?=$image_url;?>" width="640" height="480" />-->
 
 </div>
 <div id="viewport">
@@ -237,7 +241,7 @@ else die('create your include/config.php using include/config.php.dist as templa
 	<input type="hidden" name="distance_extent" id="distance_extent" value="500,1500">
 	<input type="hidden" name="height_extent" id="height_extent" value="1,3">
 	
-
+	<img id="outimg" src="" width="200" height="100" />
 </form>
 </div>
 <div id="console">

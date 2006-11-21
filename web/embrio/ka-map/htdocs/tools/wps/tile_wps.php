@@ -126,7 +126,7 @@ $metaTop -= $metaBuffer;
  */
 $szGroupDir = $groups != "" ? normalizeString($groups) : "def";
 $szLayerDir = $layers != "" ? normalizeString($layers) : "def";
-$szQueryCacheDir=$szBaseCacheDir."/sessions/".$sessionId."/QuerySys/".$szMap."/".$qId."/"; 
+$szQueryCacheDir=$szBaseCacheDir."/sessions/".$sessionId."/wpsLayer/".$szMap."/".$qId."/"; 
 //echo $szQueryCacheDir."<br>";
 $szCacheDir = $szQueryCacheDir."/".$scale."/".$szGroupDir."/".$szLayerDir."/".$szMetaTileId;
 
@@ -202,12 +202,12 @@ if (!file_exists($szCacheFile) || $bForce)
         }
 
         //modified by kappu
-        $oMap = ms_newMapObj($szMapFile);
-        $check=$oMap->loadquery($szBaseCacheDir."/sessions/".$sessionId."/QuerySys/".$szMap."/".$qId."/query.bin");
-		if($check)die;//if fail to lad the saved query die!!
-		$oMap->querymap->set('width', $tileWidth * $metaWidth + 2*$metaBuffer);
-		$oMap->querymap->set('height', $tileHeight * $metaHeight + 2*$metaBuffer);
-		$oMap->querymap->set('style', 2 ); //setting to hilite syle
+        $oMap = ms_newMapObj($szQueryCacheDir."/mapfile_buffer.map");
+        //$check=$oMap->loadquery($szBaseCacheDir."/sessions/".$sessionId."/wpsLayer/".$szMap."/".$qId."/query.bin");
+		if($oMap)die('map not loaded');//if fail to lad the saved query die!!
+		//$oMap->querymap->set('width', $tileWidth * $metaWidth + 2*$metaBuffer);
+		//$oMap->querymap->set('height', $tileHeight * $metaHeight + 2*$metaBuffer);
+		//$oMap->querymap->set('style', 2 ); //setting to hilite syle
 	
         /* Metatile width/height include 2x the metaBuffer value */
         $oMap->set('width', $tileWidth * $metaWidth + 2*$metaBuffer);
@@ -252,53 +252,13 @@ if (!file_exists($szCacheFile) || $bForce)
                $totR = $oLayer->getNumResults();	
                $szColor =$oLayer->getMetaData("rgbColor");
 		
-				/*get hilite color if set in map file*/ 
-		 		if ($szColor != '') {
-			 		$Color=  explode(',',$szColor);
-			 		$aColor=array('R'=>$Color[0],'G'=>$Color[1],'B'=>$Color[2]);
-		 		}
-               else $aColor= array('R'=>0,'G'=>255,'B'=>100);
-               /*
-                if ((($aszGroups && in_array($oLayer->group,$aszGroups)) ||
-                    ($aszLayers && in_array($oLayer->name,$aszLayers)) ||
-                    ($aszGroups && $oLayer->group == '' &&
-                     in_array( "__base__", $aszGroups)))&& $oLayer->type!=3)*/
-                if ($totR>0)
-                {
-                  // echo "modifico LAyer: $oLayer->name <br>";
-                	$oLayer->set("status", MS_ON );
-                    /*modificare il colore della linea!!*/
-					
-					$nClass=$oLayer->numclasses;
-					$layerType=$oLayer->type;
-	
-	
-					if($layerType>=0 && $layerType<=2){
-				   for($n=0;$n<$nClass;$n++){
-		
-					/*da gestire i diversi tipi di classe poligoni lineee cazzi e mazzi!!*/
-						$class=$oLayer->getClass($n);
-						switch ($layerType) {
-   							case 0:
-       							point($class);
-       						break;
-   							case 1:
-   								line($class);
-   							break;
-   							case 2:
-    							polygonStyle($class);
-   							break;
-   							default:
-   							die;
-						}
-						
-					}
-					}	
-
+			   $oLayer->set("status", MS_ON );
+			   	
+			   	/*
                 }else
                 {
                     $oLayer->set("status", MS_OFF );
-                }
+                }*/
             }
             //need transparency if groups or layers are used
             $oMap->outputformat->set("transparent", MS_ON );
