@@ -79,6 +79,13 @@
     die;
   }
   
+    if(isset($_REQUEST['wpsCache'])) $wpsCache= $_REQUEST['wpsCache'];
+   else{
+    $szResult= 'alert ("wpsCache required");';
+    echo $szResult;
+    die;
+  }
+  
   if(isset($_REQUEST['identifier'])) $identifier= $_REQUEST['identifier'];
    else{
     $szResult= 'alert ("identifier required");';
@@ -142,7 +149,7 @@ $img_path = '';//the path where pywps store the image file
 	$layer = ms_newLayerObj($oMap);
     $layer->set('name', $identifier);//not sure about wich name to choose
 	$layer->set('status', MS_DEFAULT );
-	$layer->set('data', $img_path.$filename);
+	$layer->set('data', $wpsCache.$filename);
 	$layer->set('type', MS_LAYER_RASTER);
 	
 	//THIS PART SHOULD STAY ON A EXTERNAL SLD
@@ -157,14 +164,14 @@ $img_path = '';//the path where pywps store the image file
 	$oMap->save($szQueryCacheDir."/mapfile_buffer.map");
 	//$oMap->savequery($szQueryCacheDir."query.bin");
 	
-	echo "/*output*/queryResult=1;this.sessionId='$sessionId';this.datapath='$img_path $filename';";
+	echo "/*output*/queryResult=1;this.sessionId='$sessionId';this.datapath='$wpsCache $filename';";
 	
 	if(isset($_REQUEST['debug'])){
 			$map_id = sprintf("%0.6d",rand(0,999999));
 			$image_name = "pywps".$map_id.".png";
 			$image_url=$img_rel_path.$image_name;
 			$image=$map->draw();
-			$image->saveImage($img_path.$image_name);
+			$image->saveImage($wpsCache.$image_name);
 	}
 /*	
 } else {
