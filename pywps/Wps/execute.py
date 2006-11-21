@@ -350,7 +350,7 @@ class Execute:
             self.process.stopChecking = True
 
         except Exception,e:
-            ays.stderr.write("PyWPS ERROR: %s in self.process.execute()\n" % (e))
+            sys.stderr.write("PyWPS ERROR: %s in self.process.execute()\n" % (e))
             if sys.stdout == sys.__stderr__:
                 sys.stdout = sys.__stdout__
             self.status = "ProcessFailed"
