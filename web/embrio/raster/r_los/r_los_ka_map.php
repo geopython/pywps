@@ -68,6 +68,7 @@ else die('create your include/config.php using include/config.php.dist as templa
 		
 		<script type="text/javascript" src="../../ka-map/htdocs/tools/query/queryLayer.js"></script>
 		<script type="text/javascript" src="../../ka-map/htdocs/tools/wps/wpsManager.js"></script>
+		<script type="text/javascript" src="../../ka-map/htdocs/tools/wps/wpsLayer.js"></script>
 		
 		<script type="text/javascript">
 		var myKaMap = null;
