@@ -153,16 +153,16 @@ $img_path = '';//the path where pywps store the image file
 	$style->color->setRGB( -1,-1,-1);
 	
 	
-if($oMap->save($szQueryCacheDir."/mapfile_buffer.map")){
-	
-	$oMap->savequery($szQueryCacheDir."query.bin");
+//if(1==1){
+	$oMap->save($szQueryCacheDir."/mapfile_buffer.map")
+	//$oMap->savequery($szQueryCacheDir."query.bin");
 	
 	echo"/*output*/queryResult=1;this.sessionId='$sessionId';";
-	
+/*	
 } else {
 	
 	echo"/*output*/queryResult=0;";
-}
+}*/
 
    function remove_directory($dir) {
        $dir_contents = myScandir($dir);
