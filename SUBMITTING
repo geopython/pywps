@@ -37,7 +37,7 @@ care of following rules:
     License (www.gnu.org).
 
 3.  If your process is using some GRASS location, please set the
-    self.grassLocation to "/var/www/wps/spearfish61/"
+    self.grassLocation to "/var/www/wps/spearfish60/"
 
 4.  Do not fear to use "if" condition for os.system calls, so you can
     check, if some external program failed or no:

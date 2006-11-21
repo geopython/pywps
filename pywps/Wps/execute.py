@@ -806,7 +806,10 @@ class Execute:
             return 
         else:
             for dir in self.dirsToRemove:
-                shutil.rmtree(dir)
+                try:
+                    shutil.rmtree(dir)
+                except Exception,e:
+                    sys.stderr.write("PyWPS Warning: %s" % e)
     
     def mktempdir(self,directory=None):
         """
