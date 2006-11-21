@@ -43,7 +43,7 @@ var xml_dump;
 
 //MODULE NAME
 var module_path = 'mod/mod_r_los.php';
-var identifier = 'r_los';//Identifier name for WPS service
+var identifier = 'visibility2';//Identifier name for WPS service
 
 //interface vars
 var steps = 6;
@@ -66,8 +66,8 @@ function runPywps(){
 	wpsManager = new wpsManager(myKaMap);
 	var map = myKaMap.getCurrentMap();	
 	var extents = map.currentExtents;
-	var options = 'x,'+input_x+',y,'+input_y+',maxdist,'+maxdist+',observer,'+observer;
-	wpsManager.query(map.name,extents,identifier,options);
+	var datainputs = 'x,'+input_x+',y,'+input_y+',maxdist,'+maxdist+',observer,'+observer;
+	wpsManager.query(map.name,extents,identifier,datainputs);
 	//WPSMANAGER part end
 	
 	//to be deleted once WPS MANAGER works
