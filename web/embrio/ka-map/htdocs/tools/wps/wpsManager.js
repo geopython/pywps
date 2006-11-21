@@ -43,8 +43,11 @@ function wpsManager( oKaMap ) {
  	this.qId=0;
  	this.qLayer=null;
  	this.sessionId=null;
+ 	this.wpsCache='';
 };
-
+wpsManager.prototype.setWpsCache=function(dir){
+ 	this.wpsCache= dir;	
+}
 wpsManager.prototype.query=function(map,extents,identifier,datainputs){
   // old string
   //map,extents,searchString,shapeIndex,tileIndex
@@ -57,6 +60,7 @@ wpsManager.prototype.query=function(map,extents,identifier,datainputs){
    var params="map="+map+szSessionIdP+"&id="+this.qId;
    params += "&extents="+extents+"&identifier="+identifier;
    params += "&datainputs="+datainputs;
+   params += "&wpsCache="+this.wpsCache;
  	//alert(params);
  	//showContent('tools/query/wpsManager.php?'+params);
    
