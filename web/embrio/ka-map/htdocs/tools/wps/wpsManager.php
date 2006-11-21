@@ -161,7 +161,7 @@ $img_path = '';//the path where pywps store the image file
 /*	
 } else {
 	
-	echo"/*output*/queryResult=0;";
+	echo"queryResult=0;";
 }*/
 
    function remove_directory($dir) {
