@@ -131,7 +131,7 @@ $img_path = '';//the path where pywps store the image file
 	$dom = new DOMDocument();
 	$dom->load($query_string);
 	$CVR = $dom->getElementsByTagName('ComplexValueReference');
-	if($CVR)$reference = $CVR->item(0)->getAttribute('reference');
+	if($CVR->item(0))$reference = $CVR->item(0)->getAttribute('reference');
 	else die($query_string);
 	$aReference = explode('/',$reference);
 	$filename = end($aReference);
