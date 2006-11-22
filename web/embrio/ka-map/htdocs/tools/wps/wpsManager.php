@@ -164,7 +164,9 @@ $img_path = '';//the path where pywps store the image file
 	$oMap->save($szQueryCacheDir."/mapfile_buffer.map");
 	//$oMap->savequery($szQueryCacheDir."query.bin");
 	
-	echo "/*output*/queryResult=1;this.sessionId='$sessionId';this.datapath='$wpsCache $filename';";
+	echo "/*output*/queryResult=1;this.sessionId='$sessionId';";
+	
+	echo "this.datapath='$wpsCache $filename';this.mapfile=".$szQueryCacheDir."/mapfile_buffer.map;";
 	
 	if(isset($_REQUEST['debug'])){
 			$map_id = sprintf("%0.6d",rand(0,999999));
@@ -172,6 +174,7 @@ $img_path = '';//the path where pywps store the image file
 			$image_url=$img_rel_path.$image_name;
 			$image=$map->draw();
 			$image->saveImage($wpsCache.$image_name);
+			echo "this.outimg='$wpsCache $image_name';";
 	}
 /*	
 } else {
