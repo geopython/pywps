@@ -56,6 +56,9 @@ function runPywps(){
 		alert('click on map for coords first');
 		return;
 	}
+	//WPS manager
+	if(!wpsManager) var wpsManager = new wpsManager(myKaMap);
+	
 	var maxdistSel = getRawObject('maxdist');
 	var maxdist= maxdistSel.options	[maxdistSel.selectedIndex].value;
 	var observerSel = getRawObject('observer');
