@@ -44,6 +44,9 @@ function wpsManager( oKaMap ) {
  	this.qLayer=null;
  	this.sessionId=null;
  	this.wpsCache='';
+	
+	this.identifier='';
+	this.map='';
 };
 wpsManager.prototype.setWpsCache=function(dir){
  	this.wpsCache= dir;	
@@ -51,7 +54,8 @@ wpsManager.prototype.setWpsCache=function(dir){
 wpsManager.prototype.query=function(map,extents,identifier,datainputs){
   // old string
   //map,extents,searchString,shapeIndex,tileIndex
-  
+  this.identifier = identifier;
+  this.map = map;
   
    if (this.kaMap.sessionId)  szSessionIdP="&sessionId="+this.kaMap.sessionId;
     else szSessionIdP="";
