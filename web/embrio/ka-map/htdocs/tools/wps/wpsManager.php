@@ -172,7 +172,7 @@ $img_path = '';//the path where pywps store the image file
 			$map_id = sprintf("%0.6d",rand(0,999999));
 			$image_name = "pywps".$map_id.".png";
 			$image_url=$wpsCache.$image_name;
-			$image=$map->draw();
+			$image=$oMap->draw();
 			$image->saveImage($image_url);
 			echo "this.outimg='$image_url';";
 	}
