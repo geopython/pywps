@@ -105,7 +105,7 @@ wpsManager.prototype.createLayer=function(){
           
      this.qLayer= new _wpsLayer(this.identifier,true,100,'PNG',false,this.identifier,this.qId);
      this.kaMap.addMapLayer(this.qLayer);
-	 alert('layer to add:' +this.identifier);
+	 //alert('layer to add:' +this.identifier);
  	 /*
      var legend=this.kaMap.getRawObject("group_wpsLayer");
      if(legend){
