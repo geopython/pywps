@@ -51,7 +51,7 @@ var wpsCache = '/home/doktoreas/pywps.ominiverdi.org/subversion/trunk/web/tmp/';
 var steps = 6;
 
 //WPS manager
-var wpsManager;
+var wpsManager = new wpsManager(myKaMap);
 
 function runPywps(){
 	if(input_x==null){

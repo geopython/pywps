@@ -129,8 +129,6 @@ else die('create your include/config.php using include/config.php.dist as templa
 			myKaMap.registerForEvent( KAMAP_MAP_CLICKED, null, myMapClicked );
 
 			myKaMap.initialize( map, extents, cps );
-			
-			var wpsManager = new wpsManager(myKaMap);
 		}
 		function myMapInitialized(){
 			/* Embrio startup*/
