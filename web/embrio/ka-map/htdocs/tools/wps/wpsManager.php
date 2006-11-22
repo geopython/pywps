@@ -142,7 +142,7 @@ $img_path = '';//the path where pywps store the image file
 	else die($query_string);
 	$aReference = explode('/',$reference);
 	$filename = end($aReference);
-	$pywps_outputPath.=$filename;
+	//$pywps_outputPath.=$filename;
 	
 	//Update the mapfile with new layer
 
@@ -171,10 +171,10 @@ $img_path = '';//the path where pywps store the image file
 	if(isset($_REQUEST['debug'])){
 			$map_id = sprintf("%0.6d",rand(0,999999));
 			$image_name = "pywps".$map_id.".png";
-			$image_url=$img_rel_path.$image_name;
+			$image_url=$wpsCache.$image_name;
 			$image=$map->draw();
-			$image->saveImage($wpsCache.$image_name);
-			echo "this.outimg='$wpsCache $image_name';";
+			$image->saveImage($image_url);
+			echo "this.outimg='$image_url';";
 	}
 /*	
 } else {
