@@ -164,7 +164,7 @@ $img_path = '';//the path where pywps store the image file
 	$oMap->save($szQueryCacheDir."/mapfile_buffer.map");
 	//$oMap->savequery($szQueryCacheDir."query.bin");
 	
-	echo "/*output*/queryResult=1;this.sessionId='$sessionId';";
+	echo "/*output*/this.queryResult=0;this.sessionId='$sessionId';";
 	
 	//DEBUG STUFF
 	if(isset($_REQUEST['debug'])){

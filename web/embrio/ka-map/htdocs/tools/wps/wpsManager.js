@@ -80,6 +80,7 @@ wpsManager.prototype.queryResult=function(szResult ){
         alert(szResult);
         return false;
     }
+	//alert(szResult);
  	eval(szResult);
 	
 	if(queryResult==0){ 
