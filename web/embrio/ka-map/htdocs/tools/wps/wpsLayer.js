@@ -47,6 +47,7 @@ function _wpsLayer( szName, bVisible, opacity, imageformat, bQueryable,layers,id
  
  this.setGroups(layers);
  this.id=id;
+ this.identifier = layers;//should be a different param...
  for (var p in _layer.prototype) {
         if (!_wpsLayer.prototype[p])
             _wpsLayer.prototype[p]= _layer.prototype[p];
@@ -130,7 +131,7 @@ function _wpsLayer( szName, bVisible, opacity, imageformat, bQueryable,layers,id
         } else {
             var src = this._map.kaMap.server +
             "/tools/wps/tile_wps.php" +
-            q + 'map=' + this._map.name +
+            q + 'map=' + this._map.name + '&identifier=' + this.identifier +
             '&t=' + t +
             '&l=' + l +
             szScale + szForce + szGroup + szImageformat + szTimestamp + szVersion;

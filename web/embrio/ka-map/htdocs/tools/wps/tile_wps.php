@@ -85,6 +85,7 @@ $layers = isset( $_REQUEST['layers'] ) ? $_REQUEST['layers'] : "";
 $timestamp = isset($_REQUEST['ts']) ? $_REQUEST['ts'] : '';
 $interval = isset($_REQUEST['interval']) ? $_REQUEST['interval'] : 300;
 $version = isset($_REQUEST['version']) ? $_REQUEST['version'] : '';
+$identifier = isset($_REQUEST['identifier']) ? $_REQUEST['identifier'] : '';
 
 
 //echo $layers."--".$groups."<br>";
@@ -252,13 +253,13 @@ if (!file_exists($szCacheFile) || $bForce)
                $totR = $oLayer->getNumResults();	
                $szColor =$oLayer->getMetaData("rgbColor");
 			   echo "<p>name: $oLayer->name </p>";
-			   $oLayer->set("status", MS_ON );
-			   	
-			   	/*
+			   if($identifier==$oLayer->name ){
+			  	 $oLayer->set("status", MS_ON );
+				 echo "<p>name: $oLayer->name </p>";
                 }else
                 {
                     $oLayer->set("status", MS_OFF );
-                }*/
+                }
             }
             //need transparency if groups or layers are used
             $oMap->outputformat->set("transparent", MS_ON );
