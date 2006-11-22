@@ -251,7 +251,7 @@ if (!file_exists($szCacheFile) || $bForce)
                $oLayer = $oMap->getLayer($i);
                $totR = $oLayer->getNumResults();	
                $szColor =$oLayer->getMetaData("rgbColor");
-		
+			   echo "<p>name: $oLayer->name </p>";
 			   $oLayer->set("status", MS_ON );
 			   	
 			   	/*
