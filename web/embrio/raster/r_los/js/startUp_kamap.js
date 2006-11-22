@@ -51,7 +51,7 @@ var wpsCache = '/home/doktoreas/pywps.ominiverdi.org/subversion/trunk/web/tmp/';
 var steps = 6;
 
 //WPS manager
-var wpsManager=null;
+var wpsManager;
 
 function runPywps(){
 	if(input_x==null){
@@ -65,7 +65,7 @@ function runPywps(){
 	//var url = 'mod/r_los.php?xvalue='+input_x+'&yvalue='+input_y+'&maxdist='+maxdist+'&observer='+observer;
 	
 	//WPSMANAGER part
-	if(wpsManager==null)wpsManager = new wpsManager(myKaMap);
+	wpsManager = new wpsManager(myKaMap);
 	var map = myKaMap.getCurrentMap();	
 	var extents = map.currentExtents;
 	var datainputs = 'x,'+input_x+',y,'+input_y+',maxdist,'+maxdist+',observer,'+observer;
