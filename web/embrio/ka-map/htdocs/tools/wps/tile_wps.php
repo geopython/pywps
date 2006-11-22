@@ -235,6 +235,7 @@ if (!file_exists($szCacheFile) || $bForce)
         $oMap->setExtent($minx,$miny,$maxx,$maxy);
         $oMap->selectOutputFormat( 'PNG' );//changed from $szMapImageFormat 
 		$oMap->imagecolor->setRGB( -1,-1,-1);
+		$oMap->outputformat->set("transparent", MS_ON );
         $aszLayers = array();
        if ($groups || $layers)
         {
@@ -269,12 +270,9 @@ if (!file_exists($szCacheFile) || $bForce)
                 }
             }
             //need transparency if groups or layers are used
-            $oMap->outputformat->set("transparent", MS_ON );
+            
         }
-        else
-        {
-            $oMap->outputformat->set("transparent", MS_OFF );
-        }
+       
 
         //record timestamp for this metatile
         $h = fopen($szMetaDir.'/timestamp', 'w+');
