@@ -50,15 +50,14 @@ var wpsCache = '/home/doktoreas/pywps.ominiverdi.org/subversion/trunk/web/tmp/';
 //interface vars
 var steps = 6;
 
+//WPS manager
+var wpsManager=null;
 
 function runPywps(){
 	if(input_x==null){
 		alert('click on map for coords first');
 		return;
 	}
-	//WPS manager
-	if(!wpsManager) var wpsManager = new wpsManager(myKaMap);
-	
 	var maxdistSel = getRawObject('maxdist');
 	var maxdist= maxdistSel.options	[maxdistSel.selectedIndex].value;
 	var observerSel = getRawObject('observer');
@@ -66,6 +65,7 @@ function runPywps(){
 	//var url = 'mod/r_los.php?xvalue='+input_x+'&yvalue='+input_y+'&maxdist='+maxdist+'&observer='+observer;
 	
 	//WPSMANAGER part
+	if(wpsManager==null)wpsManager = new wpsManager(myKaMap);
 	var map = myKaMap.getCurrentMap();	
 	var extents = map.currentExtents;
 	var datainputs = 'x,'+input_x+',y,'+input_y+',maxdist,'+maxdist+',observer,'+observer;
