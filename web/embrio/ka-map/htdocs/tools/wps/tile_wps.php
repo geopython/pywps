@@ -260,6 +260,7 @@ if (!file_exists($szCacheFile) || $bForce)
 					$style = ms_newStyleObj($class);
 					$style=$class->getStyle(0);
 					$style->color->setRGB( -1,-1,-1);
+					$style->backgroundcolor->setRGB( -1,-1,-1);
 				 //echo "<p>name: $oLayer->name </p>";
                 }else
                 {
