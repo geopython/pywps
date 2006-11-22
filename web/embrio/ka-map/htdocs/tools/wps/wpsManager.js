@@ -70,7 +70,7 @@ wpsManager.prototype.query=function(map,extents,identifier,datainputs){
     for (i=0;i<this.qLayer.scales.length;i++)this.qLayer.scales[i]=1;
      this.qLayer.setVisibility( true );
      this.kaMap.triggerEvent( KAMAP_SCALE_CHANGED, this.kaMap.getCurrentScale()); 
-     this.qLayer.setLayer(layers,this.qId);
+     this.qLayer.setLayer(this.identifier,this.qId);
     }
    call('../../ka-map/htdocs/tools/wps/wpsManager.php?'+params, this, this.queryResult);
   
