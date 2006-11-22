@@ -76,8 +76,8 @@ wpsManager.prototype.query=function(map,extents,identifier,datainputs){
   
 };
 wpsManager.prototype.queryResult=function(szResult ){
-	if (szInit.substr(0, 1) != "/") {
-        alert(szInit);
+	if (szResult.substr(0, 1) != "/") {
+        alert(szResult);
         return false;
     }
  	eval(szResult);
