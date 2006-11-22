@@ -234,6 +234,7 @@ if (!file_exists($szCacheFile) || $bForce)
         $nLayers = $oMap->numlayers;
         $oMap->setExtent($minx,$miny,$maxx,$maxy);
         $oMap->selectOutputFormat( 'PNG' );//changed from $szMapImageFormat 
+		$oMap->imagecolor->setRGB( -1,-1,-1);
         $aszLayers = array();
        if ($groups || $layers)
         {
