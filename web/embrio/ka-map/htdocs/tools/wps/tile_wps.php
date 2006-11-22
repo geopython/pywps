@@ -279,7 +279,7 @@ if (!file_exists($szCacheFile) || $bForce)
         fclose($h);
         
         $szMetaImg = $szMetaDir."/t".$metaTop."l".$metaLeft.$szImageExtension;
-        $oImg = $oMap->drawQuery();
+        $oImg = $oMap->draw();
         $oImg->saveImage($szMetaImg);
 		$oImg->free();
 
