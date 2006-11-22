@@ -41,17 +41,12 @@ var input_y=null;
 var image_url;
 var xml_dump;
 
-//MODULE VARS
-var module_path = 'mod/mod_r_los.php';
-var identifier = 'visibility2';//Identifier name for WPS service
-var wpsCache = '/home/doktoreas/pywps.ominiverdi.org/subversion/trunk/web/tmp/';
+
 
 
 //interface vars
 var steps = 6;
 
-//WPS manager
-var wpsManager;
 
 function runPywps(){
 	if(input_x==null){
@@ -65,7 +60,7 @@ function runPywps(){
 	//var url = 'mod/r_los.php?xvalue='+input_x+'&yvalue='+input_y+'&maxdist='+maxdist+'&observer='+observer;
 	
 	//WPSMANAGER part
-	wpsManager = new wpsManager(myKaMap);
+	if(!wpsManager.setWpsCache)wpsManager = new wpsManager(myKaMap);
 	var map = myKaMap.getCurrentMap();	
 	var extents = map.currentExtents;
 	var datainputs = 'x,'+input_x+',y,'+input_y+',maxdist,'+maxdist+',observer,'+observer;

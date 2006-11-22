@@ -75,6 +75,16 @@ else die('create your include/config.php using include/config.php.dist as templa
 		var queryParams = null;
 		SET_DHTML();
 		
+		
+		//MODULE VARS
+		var module_path = 'mod/mod_r_los.php';
+		var identifier = 'visibility2';//Identifier name for WPS service
+		var wpsCache = '/home/doktoreas/pywps.ominiverdi.org/subversion/trunk/web/tmp/';
+				
+		
+		//WPS manager
+		var wpsManager;
+		
 		/**
 		 * parse the query string sent to this window into a global array of key = value pairs
 		 * this function should only be called once
