@@ -129,7 +129,7 @@ function _wpsLayer( szName, bVisible, opacity, imageformat, bQueryable,layers,id
             }
         } else {
             var src = this._map.kaMap.server +
-            "/tools/wps/wpsManager.php" +
+            "/tools/wps/tile_wps.php" +
             q + 'map=' + this._map.name +
             '&t=' + t +
             '&l=' + l +
