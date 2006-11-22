@@ -233,23 +233,14 @@ if (!file_exists($szCacheFile) || $bForce)
 
         $nLayers = $oMap->numlayers;
         $oMap->setExtent($minx,$miny,$maxx,$maxy);
-        $oMap->selectOutputFormat( 'PNG' );//changed from $szMapImageFormat 
+        $oMap->selectOutputFormat( $szMapImageFormat );//changed from $szMapImageFormat 
 		$oMap->imagecolor->setRGB( -1,-1,-1);
 		$oMap->outputformat->set("transparent", MS_ON );
         $aszLayers = array();
        if ($groups || $layers)
         {
             /* Draw only specified layers instead of default from mapfile*/
-        //    if ($layers)
-         //   {
-          //      $aszLayers = explode(",", $layers);
-           // }
-
-            //if ($groups)
-            //{
-            /*    $aszGroups = explode(",", $groups);
-            }
-           */ for($i=0;$i<$nLayers;$i++)
+			for($i=0;$i<$nLayers;$i++)
             {
                $oLayer = $oMap->getLayer($i);
                $totR = $oLayer->getNumResults();	
