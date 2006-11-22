@@ -254,6 +254,12 @@ if (!file_exists($szCacheFile) || $bForce)
                $szColor =$oLayer->getMetaData("rgbColor");
 			   if($identifier==$oLayer->name ){
 			  	 $oLayer->set("status", MS_ON );
+				 	//THIS PART SHOULD STAY ON A EXTERNAL SLD
+					$class = ms_newClassObj($oLayer);
+					$class->setExpression("1");
+					$style = ms_newStyleObj($class);
+					$style=$class->getStyle(0);
+					$style->color->setRGB( -1,-1,-1);
 				 //echo "<p>name: $oLayer->name </p>";
                 }else
                 {
