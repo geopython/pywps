@@ -60,13 +60,16 @@
 	$layer->set('type', MS_LAYER_RASTER);
     
 	
-		$oMap->imagecolor->setRGB( -1,-1,-1);
+		$map->imagecolor->setRGB( -1,-1,-1);
 
         $class = ms_newClassObj($layer);
         $class->setExpression("1");
 	$style = ms_newStyleObj($class);
         $style=$class->getStyle(0);
         $style->color->setRGB( -1,-1,-1);
+		
+		
+		
 	$map->save($img_path."/mapfile_buffer.map");
 //Create the output image
 
