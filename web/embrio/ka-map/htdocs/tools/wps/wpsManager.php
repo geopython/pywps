@@ -159,7 +159,6 @@ $img_path = '';//the path where pywps store the image file
 	$style=$class->getStyle(0);
 	$style->color->setRGB( -1,-1,-1);
 	
-	$oMap->imagecolor->setRGB( -1,-1,-1);
 	
 	
 //if(1==1){
