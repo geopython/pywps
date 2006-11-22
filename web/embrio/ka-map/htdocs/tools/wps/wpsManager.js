@@ -87,8 +87,9 @@ wpsManager.prototype.queryResult=function(szResult ){
 		
        this.kaMap.sessionId  = this.sessionId;
 	   var cMap = this.kaMap.getCurrentMap().name;
+	   
 	   this.kaMap.paintLayer(this.qLayer);
-	    	    
+	   alert(cMap); 	    
      	this.qId++;
      	
      }else{
@@ -99,11 +100,12 @@ wpsManager.prototype.queryResult=function(szResult ){
 wpsManager.prototype.createLayer=function(){
  
           
-     this.qLayer= new _wpsLayer("queryLayer",true,100,'PNG',false,layers,this.qId);
+     this.qLayer= new _wpsLayer(this.identifier,true,100,'PNG',false,this.identifier,this.qId);
      this.kaMap.addMapLayer(this.qLayer);
- 	 
+	 alert('layer to add:' +this.identifier);
+ 	 /*
      var legend=this.kaMap.getRawObject("group_wpsLayer");
-    /* if(legend){
+     if(legend){
  		    
      var button= document.createElement('img');
      button.src=this.kaMap.server+"/images/legend_x.png";
