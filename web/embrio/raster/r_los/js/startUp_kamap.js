@@ -65,7 +65,6 @@ function runPywps(){
 	//var url = 'mod/r_los.php?xvalue='+input_x+'&yvalue='+input_y+'&maxdist='+maxdist+'&observer='+observer;
 	
 	//WPSMANAGER part
-	wpsManager = new wpsManager(myKaMap);
 	var map = myKaMap.getCurrentMap();	
 	var extents = map.currentExtents;
 	var datainputs = 'x,'+input_x+',y,'+input_y+',maxdist,'+maxdist+',observer,'+observer;

@@ -92,8 +92,7 @@ wpsManager.prototype.queryResult=function(szResult ){
        this.kaMap.sessionId  = this.sessionId;
 	   var cMap = this.kaMap.getCurrentMap().name;
 	   
-	   this.kaMap.paintLayer(this.qLayer);
-	   alert(cMap); 	    
+	   this.kaMap.paintLayer(this.qLayer);	    
      	this.qId++;
      	
      }else{

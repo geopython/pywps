@@ -132,6 +132,8 @@ else die('create your include/config.php using include/config.php.dist as templa
 		}
 		function myMapInitialized(){
 			/* Embrio startup*/
+				var wpsManager = new wpsManager(myKaMap);
+				
 				//set img object
 				outimg = document.getElementById('outimg');
 				//outimg.onmousedown = getCoords;
