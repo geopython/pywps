@@ -75,6 +75,8 @@ else die('create your include/config.php using include/config.php.dist as templa
 		var queryParams = null;
 		SET_DHTML();
 		
+		//interface vars
+		var canvas; //show appended objects
 		
 		//MODULE VARS
 		var module_path = 'mod/mod_r_los.php';
@@ -84,6 +86,7 @@ else die('create your include/config.php using include/config.php.dist as templa
 		
 		//WPS manager
 		var wpsManager;
+		
 		
 		/**
 		 * parse the query string sent to this window into a global array of key = value pairs
@@ -179,12 +182,27 @@ else die('create your include/config.php using include/config.php.dist as templa
 				
 				//set button event
 				getRawObject('go').onclick = runPywps;
+				
+				//create drawing canvas
+				canvas = myKaMap.createDrawingCanvas('10');
 		}
 		function myScaleChanged(eventID, scale){
 		}
 		function myMapClicked(eventID, coords){
 			//alert(coords[0]+ ' ' + coords[1]);
 			setFields(coords[0],coords[1]);
+			
+			//empty pins
+			kaMap.removeObject();
+			//create the pin obj
+			var pinDiv = document.createElement('div');
+			var pinImg = document.createElement('img');
+			pinImg.src = '../../ka-map/htdocs/images/tip-white.png';
+			pinImg.style.position = 'absolute';
+			pinImg.style.top = '-10px';
+			pinImg.style.left = '-10px';
+			pinDiv.appendChild(pinImg);
+			kaMap.addObjectGeo( canvas, coords[1], coords[0], pinDiv );
 		}
 		</script>
 		<link href="../../css/screen.css" rel="stylesheet" type="text/css" media="all">
