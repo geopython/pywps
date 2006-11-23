@@ -60,18 +60,22 @@ function runPywps(){
 	//var url = 'mod/r_los.php?xvalue='+input_x+'&yvalue='+input_y+'&maxdist='+maxdist+'&observer='+observer;
 	
 	//WPSMANAGER part
+	myKaMap.registerForEvent( WPS_LAYER_PAINTING, null, waitEnd );
+	
+	
 	if(!wpsManager.setWpsCache)wpsManager = new wpsManager(myKaMap);
 	var map = myKaMap.getCurrentMap();	
 	var extents = map.currentExtents;
 	var datainputs = 'x,'+input_x+',y,'+input_y+',maxdist,'+maxdist+',observer,'+observer;
+	waitStart();
 	wpsManager.setWpsCache(wpsCache);
 	wpsManager.query(map.name,extents,identifier,datainputs);
 	//WPSMANAGER part end
 	
 	//to be deleted once WPS MANAGER works
-	var url = module_path+'?xvalue='+input_x+'&yvalue='+input_y+'&maxdist='+maxdist+'&observer='+observer;
-	waitStart();
-	call(url, this, parsePywpsOut);
+	//var url = module_path+'?xvalue='+input_x+'&yvalue='+input_y+'&maxdist='+maxdist+'&observer='+observer;
+	
+	//call(url, this, parsePywpsOut);
 	//to be deleted once WPS MANAGER works END
 }
 
@@ -83,9 +87,9 @@ function parsePywpsOut (szInit){
     }
 
     eval(szInit);
-	getRawObject('console').innerHTML = xml_dump.replace(/\+/g," ");
-	getRawObject('outimg').src = image_url;
-	getRawObject('outimg').onload = waitEnd;
+	//getRawObject('console').innerHTML = xml_dump.replace(/\+/g," ");
+	//getRawObject('outimg').src = image_url;
+	//getRawObject('outimg').onload = waitEnd;
 }
 
 

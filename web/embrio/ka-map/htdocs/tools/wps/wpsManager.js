@@ -92,7 +92,9 @@ wpsManager.prototype.queryResult=function(szResult ){
        this.kaMap.sessionId  = this.sessionId;
 	   var cMap = this.kaMap.getCurrentMap().name;
 	   
-	   this.kaMap.paintLayer(this.qLayer);	    
+	   this.kaMap.paintLayer(this.qLayer);	   
+	   
+	    this.kaMap.triggerEvent( WPS_LAYER_PAINTING, 'wait for layer to be displayed' ); 
      	this.qId++;
      	
      }else{
