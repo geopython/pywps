@@ -193,7 +193,7 @@ else die('create your include/config.php using include/config.php.dist as templa
 			setFields(coords[0],coords[1]);
 			
 			//empty pins
-			kaMap.removeObject();
+			myKaMap.removeObject();
 			//create the pin obj
 			var pinDiv = document.createElement('div');
 			var pinImg = document.createElement('img');
