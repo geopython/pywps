@@ -94,7 +94,7 @@ wpsManager.prototype.queryResult=function(szResult ){
 	   
 	   this.kaMap.paintLayer(this.qLayer);	   
 	   
-	    this.kaMap.triggerEvent( WPS_LAYER_PAINTING, 'wait for layer to be displayed' ); 
+	    //this.kaMap.triggerEvent( WPS_LAYER_PAINTING, 'wait for layer to be displayed' ); 
      	this.qId++;
      	
      }else{
