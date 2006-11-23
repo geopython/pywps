@@ -203,7 +203,7 @@ else die('create your include/config.php using include/config.php.dist as templa
 			pinImg.style.top = '-10px';
 			pinImg.style.left = '-10px';
 			pinDiv.appendChild(pinImg);
-			myKaMap.addObjectGeo( canvas, coords[1], coords[0], pinDiv );
+			myKaMap.addObjectGeo( canvas, coords[0], coords[1], pinDiv );
 		}
 		</script>
 		<link href="../../css/screen.css" rel="stylesheet" type="text/css" media="all">
