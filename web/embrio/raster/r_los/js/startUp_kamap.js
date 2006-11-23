@@ -68,7 +68,10 @@ function runPywps(){
 	var datainputs = 'x,'+input_x+',y,'+input_y+',maxdist,'+maxdist+',observer,'+observer;
 	waitStart();
 	wpsManager.setWpsCache(wpsCache);
-	wpsManager.query(map.name,extents,identifier,datainputs);
+	if(wpsManager.query(map.name,extents,identifier,datainputs)){
+		waitEnd();
+	}
+
 	//WPSMANAGER part end
 	
 	//to be deleted once WPS MANAGER works

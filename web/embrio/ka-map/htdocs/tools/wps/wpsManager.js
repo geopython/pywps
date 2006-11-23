@@ -96,10 +96,12 @@ wpsManager.prototype.queryResult=function(szResult ){
 	   
 	    //this.kaMap.triggerEvent( WPS_LAYER_PAINTING, 'wait for layer to be displayed' ); 
      	this.qId++;
+		return true;
      	
      }else{
 //     	if(this.kaMap.getCurrentMap().getLayer("queryLayer")) this.kaMap.removeMapLayer("queryLayer");
 		alert("No results for this query!");
+		return false;
 	 }
  };
 wpsManager.prototype.createLayer=function(){
