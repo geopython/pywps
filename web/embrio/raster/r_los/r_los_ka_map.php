@@ -140,6 +140,7 @@ else die('create your include/config.php using include/config.php.dist as templa
 			myKaMap.registerForEvent( KAMAP_MAP_INITIALIZED, null, myMapInitialized );
 			myKaMap.registerForEvent( KAMAP_SCALE_CHANGED, null, myScaleChanged );
 			myKaMap.registerForEvent( KAMAP_MAP_CLICKED, null, myMapClicked );
+			myKaMap.registerForEvent( WPS_LAYER_PAINTING, null, waitEnd );
 
 			myKaMap.initialize( map, extents, cps );
 		}

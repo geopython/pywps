@@ -62,7 +62,6 @@ function runPywps(){
 	//WPSMANAGER part
 	
 	
-	
 	if(!wpsManager.setWpsCache)wpsManager = new wpsManager(myKaMap);
 	var map = myKaMap.getCurrentMap();	
 	var extents = map.currentExtents;
