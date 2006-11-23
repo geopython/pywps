@@ -66,12 +66,9 @@ function runPywps(){
 	var map = myKaMap.getCurrentMap();	
 	var extents = map.currentExtents;
 	var datainputs = 'x,'+input_x+',y,'+input_y+',maxdist,'+maxdist+',observer,'+observer;
-	waitStart();
+	//waitStart();
 	wpsManager.setWpsCache(wpsCache);
-	if(wpsManager.query(map.name,extents,identifier,datainputs)){
-		waitEnd();
-	}
-
+	wpsManager.query(map.name,extents,identifier,datainputs);
 	//WPSMANAGER part end
 	
 	//to be deleted once WPS MANAGER works
