@@ -200,8 +200,8 @@ else die('create your include/config.php using include/config.php.dist as templa
 			var pinImg = document.createElement('img');
 			pinImg.src = '../../ka-map/htdocs/images/tip-yellow.png';
 			pinImg.style.position = 'absolute';
-			pinImg.style.top = '-10px';
-			pinImg.style.left = '-10px';
+			pinImg.style.top = '-19px';
+			pinImg.style.left = '-6px';
 			pinDiv.appendChild(pinImg);
 			myKaMap.addObjectGeo( canvas, coords[0], coords[1], pinDiv );
 		}
