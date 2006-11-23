@@ -60,7 +60,7 @@ function runPywps(){
 	//var url = 'mod/r_los.php?xvalue='+input_x+'&yvalue='+input_y+'&maxdist='+maxdist+'&observer='+observer;
 	
 	//WPSMANAGER part
-	myKaMap.registerForEvent( WPS_LAYER_PAINTING, null, waitEnd );
+	
 	
 	
 	if(!wpsManager.setWpsCache)wpsManager = new wpsManager(myKaMap);
