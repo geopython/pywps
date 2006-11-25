@@ -792,9 +792,12 @@ class Execute:
 
         # is grasslocation set?
         try:
-            # just to be shure, go back to grass mapset
-            os.system("""g.mapset mapset=%s >/dev/null >&2""" %\
-                    (self.grassEnv.grassenv['MAPSET']))
+            # are we in the same mapset, we started?
+            if os.popen("""g.gisenv get=MAPSET""").readlines()[0].strip() \
+                    != self.grassEnv.grassenv['MAPSET']:
+                # just to be shure, go back to grass mapset
+                os.system("""g.mapset mapset=%s >/dev/null >&2""" %\
+                        (self.grassEnv.grassenv['MAPSET']))
         except:
             pass
 
