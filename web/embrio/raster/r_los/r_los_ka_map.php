@@ -57,7 +57,6 @@ else die('create your include/config.php using include/config.php.dist as templa
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<title>PyQPS r.los  by ominiverdi.org</title>
-		<script type="text/javascript" src="js/startUp_kamap.js"></script>
 		<script type="text/javascript" src="../../ka-map/htdocs/DHTMLapi.js"></script>
 		<script type="text/javascript" src="../../ka-map/htdocs/xhr.js"></script>
 		<script type="text/javascript" src="../../ka-map/htdocs/kaMap.js"></script>
@@ -66,9 +65,15 @@ else die('create your include/config.php using include/config.php.dist as templa
 		<script type="text/javascript" src="../../ka-map/htdocs/kaZoomer.js"></script>
 		
 		
+
+		
 		<script type="text/javascript" src="../../ka-map/htdocs/tools/query/queryLayer.js"></script>
 		<script type="text/javascript" src="../../ka-map/htdocs/tools/wps/wpsManager.js"></script>
 		<script type="text/javascript" src="../../ka-map/htdocs/tools/wps/wpsLayer.js"></script>
+		
+		
+		<script type="text/javascript" src="js/startUp_kamap.js"></script>
+		
 		
 		<link href="../../css/screen.css" rel="stylesheet" type="text/css" media="all">
 		<style type="text/css">
