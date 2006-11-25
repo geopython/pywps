@@ -42,7 +42,7 @@ var image_url = null;//old stuff
 var xml_dump = null;//old stuff
 
 //interface vars
-var steps = 12; //number of steps for each select
+var steps = 9; //number of steps for each select
 
 
 var myKaMap = null;
