@@ -138,7 +138,7 @@ else die('create your include/config.php using include/config.php.dist as templa
 	-->
 	<input type="hidden" name="map_extent" id="map_extent" value="588913.043478,4915200.000000,610066.956522,4928010.000000">
 	<input type="hidden" name="distance_extent" id="distance_extent" value="1000,6000">
-	<input type="hidden" name="height_extent" id="height_extent" value="1,3">
+	<input type="hidden" name="height_extent" id="height_extent" value="1.5,2.1">
 	
 	<img id="outimg" src="" width="200" height="100" />
 </form>
