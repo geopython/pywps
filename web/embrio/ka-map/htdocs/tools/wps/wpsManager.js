@@ -175,7 +175,7 @@ wpsManager.prototype.createLayer=function(){
  * create a kaMap layer
  *     
  *****************************************************************************/
-wpsManager.prototype.urlEncode=function(string){
+wpsManager.prototype.urlencode=function(string){
 	encodedHtml = escape(string);
 	encodedHtml = encodedHtml.replace("/","%2F");
 	encodedHtml = encodedHtml.replace(/\?/g,"%3F");
