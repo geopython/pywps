@@ -49,8 +49,8 @@ SET_DHTML();
 //MAP variables THIS SHOULD BECOME AN ARRAY
 //var outimg = null;//old stuff
 //var map_extent = null;//old stuff
-var height_extent = null;//old stuff
-var distance_extent = null;//old stuff
+//var height_extent = null;//old stuff
+//var distance_extent = null;//old stuff
 var input_x=null;
 var input_y=null;
 
@@ -135,10 +135,10 @@ var wpsManager;
 				//get params
 				//map_extent = document.getElementById('map_extent').value;//old stuff
 				//map_extent = map_extent.split(',');//old stuff
-				//height_extent = document.getElementById('height_extent').value.split(',');//old stuff
-				//height_unit = parseInt((height_extent[1]-height_extent[0])/steps*100)/100;//old stuff
-				//distance_extent = document.getElementById('distance_extent').value.split(',');//old stuff
-				//distance_unit = parseInt((distance_extent[1]-distance_extent[0])/steps*100)/100;//old stuff
+				var height_extent = document.getElementById('height_extent').value.split(',');
+				height_unit = parseInt((height_extent[1]-height_extent[0])/steps*100)/100;
+				var distance_extent = document.getElementById('distance_extent').value.split(',');
+				distance_unit = parseInt((distance_extent[1]-distance_extent[0])/steps*100)/100;
 				
 				//print ranges
 				getRawObject('observer_range').innerHTML = height_extent[0] + ' -&gt; ' + height_extent[1]; 
