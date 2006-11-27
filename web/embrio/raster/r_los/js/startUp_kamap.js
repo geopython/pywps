@@ -49,8 +49,8 @@ SET_DHTML();
 //MAP variables THIS SHOULD BECOME AN ARRAY
 //var outimg = null;//old stuff
 //var map_extent = null;//old stuff
-//var height_extent = null;//old stuff
-//var distance_extent = null;//old stuff
+var height_extent = null;//old stuff
+var distance_extent = null;//old stuff
 var input_x=null;
 var input_y=null;
 
