@@ -203,9 +203,9 @@ if (!file_exists($szCacheFile) || $bForce)
         }
 
         //modified by kappu
-        $oMap = ms_newMapObj($szQueryCacheDir."/mapfile_buffer.map");
+        $oMap = ms_newMapObj($szQueryCacheDir."/embrio.map");
         //$check=$oMap->loadquery($szBaseCacheDir."/sessions/".$sessionId."/wpsLayer/".$szMap."/".$qId."/query.bin");
-		if(!$oMap)die('map not loaded:' .$szQueryCacheDir."/mapfile_buffer.map");//if fail to lad the saved query die!!
+		if(!$oMap)die('map not loaded:' .$szQueryCacheDir."/embrio.map");//if fail to lad the saved query die!!
 		//$oMap->querymap->set('width', $tileWidth * $metaWidth + 2*$metaBuffer);
 		//$oMap->querymap->set('height', $tileHeight * $metaHeight + 2*$metaBuffer);
 		//$oMap->querymap->set('style', 2 ); //setting to hilite syle

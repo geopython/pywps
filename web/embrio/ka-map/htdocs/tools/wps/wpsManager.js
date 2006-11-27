@@ -1,6 +1,6 @@
 /**********************************************************************
  * 
- * purpose: build a simple hilite system for serach end query systems          
+ * purpose: print a layer on the fly that  shows wps outputs          
  *
  * author:  Andrea Cappugi & Lorenzo Becchi 
  *
@@ -34,7 +34,7 @@
 /******************************************************************************
  * wpsManager
  *
- * recive map name,layer name and extent and hilite requested shape 
+ * needs kaMap object
  *     
  *****************************************************************************/
 function wpsManager( oKaMap ) {
@@ -44,16 +44,47 @@ function wpsManager( oKaMap ) {
  	this.qLayer=null;
  	this.sessionId=null;
  	this.wpsCache='';
+	this.wpsUrl = '';
+	this.sldUrl = '';
 	
 	this.identifier='';
 	this.map='';
 };
+/******************************************************************************
+ * setWpsCache
+ *
+ * require path to wps cache dir
+ *     
+ *****************************************************************************/
 wpsManager.prototype.setWpsCache=function(dir){
  	this.wpsCache= dir;	
-}
+};
+/******************************************************************************
+ * setWpsURL
+ *
+ * require URL to WPS cgi executable
+ *     
+ *****************************************************************************/
+wpsManager.prototype.setWpsURL=function(url){
+ 	this.wpsUrl= url;	
+};
+/******************************************************************************
+ * setWpsURL
+ *
+ * require URL to WPS cgi executable
+ *     
+ *****************************************************************************/
+wpsManager.prototype.setSldURL=function(url){
+ 	this.sldUrl= url;	
+};
+/******************************************************************************
+ * query
+ *
+ * needs map name,extents,identifier,datainputs. Then it prepares the call
+ * to wpsManager.php
+ *****************************************************************************/
 wpsManager.prototype.query=function(map,extents,identifier,datainputs){
-  // old string
-  //map,extents,searchString,shapeIndex,tileIndex
+
   this.identifier = identifier;
   this.map = map;
   
@@ -65,6 +96,8 @@ wpsManager.prototype.query=function(map,extents,identifier,datainputs){
    params += "&extents="+extents+"&identifier="+identifier;
    params += "&datainputs="+datainputs;
    params += "&wpsCache="+this.wpsCache;
+   params += "&wpsUrl="+this.urlencode(this.wpsUrl);
+   params += "&sldUrl="+this.urlencode(this.sldUrl);
  	//alert(params);
  	//showContent('tools/query/wpsManager.php?'+params);
    
@@ -76,9 +109,15 @@ wpsManager.prototype.query=function(map,extents,identifier,datainputs){
      this.kaMap.triggerEvent( KAMAP_SCALE_CHANGED, this.kaMap.getCurrentScale()); 
      this.qLayer.setLayer(this.identifier,this.qId);
     }
-   call('../../ka-map/htdocs/tools/wps/wpsManager.php?'+params, this, this.queryResult);
+   call(this.kaMap.server + '/tools/wps/wpsManager.php?'+params, this, this.queryResult);
   
 };
+/******************************************************************************
+ * queryResult
+ *
+ * manage the ajax call output from query
+ *     
+ *****************************************************************************/
 wpsManager.prototype.queryResult=function(szResult ){
 	if (szResult.substr(0, 1) != "/") {
         alert(szResult);
@@ -104,6 +143,12 @@ wpsManager.prototype.queryResult=function(szResult ){
 		return false;
 	 }
  };
+ /******************************************************************************
+ * createLayer
+ *
+ * create a kaMap layer
+ *     
+ *****************************************************************************/
 wpsManager.prototype.createLayer=function(){
  
           
@@ -124,11 +169,18 @@ wpsManager.prototype.createLayer=function(){
      }*/
   
 };
-wpsManager_queryOnClick=function(){
-  
-     for (i=0;i<this.qM.qLayer.scales.length;i++)this.qM.qLayer.scales[i]=0;
-     this.qM.qLayer.setVisibility( false );
-     this.qM.kaMap.triggerEvent( KAMAP_SCALE_CHANGED, this.qM.kaMap.getCurrentScale() ); 
-       if(this.qM.resultDiv )  this.qM.injectResult('');
- };
- 
+ /******************************************************************************
+ * createLayer
+ *
+ * create a kaMap layer
+ *     
+ *****************************************************************************/
+wpsManager.prototype.urlEncode=function(string){
+	encodedHtml = escape(string);
+	encodedHtml = encodedHtml.replace("/","%2F");
+	encodedHtml = encodedHtml.replace(/\?/g,"%3F");
+	encodedHtml = encodedHtml.replace(/=/g,"%3D");
+	encodedHtml = encodedHtml.replace(/&/g,"%26");
+	encodedHtml = encodedHtml.replace(/@/g,"%40");
+	return encodedHtml;
+}

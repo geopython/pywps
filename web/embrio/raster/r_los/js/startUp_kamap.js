@@ -27,13 +27,30 @@
  *
  **********************************************************************/
 
+ 
+ //PART TO BE EDITED
+ 		//MODULE VARS
+		//var module_path = 'mod/mod_r_los.php';//old stuff
+		var identifier = 'visibility2';//Identifier name for WPS service
+		var wpsCache = '/home/doktoreas/pywps.ominiverdi.org/subversion/trunk/web/tmp/';
+		var wpsURL = 'http://pywps.ominiverdi.org/cgi-bin/wps.py';
+		//the style for the output layer /
+		//inside the XML file the style layer name have to the same of the identifier
+		var sldURL = '';
+		
+		//Tip image infos -
+		var tipUrl = '../../ka-map/htdocs/images/tip-yellow.png';
+		var tipOffsetX = '-19px';// the negative left position of the pointer in the image
+		var tipOffsetY = '-6px';// the negative top position of the pointer in the image
+//END PART TO BE EDITED
 
+SET_DHTML();
 
-//MAP variables
-var outimg = null;//old stuff
-var map_extent = null;//old stuff
-var height_extent = null;//old stuff
-var distance_extent = null;//old stuff
+//MAP variables THIS SHOULD BECOME AN ARRAY
+//var outimg = null;//old stuff
+//var map_extent = null;//old stuff
+//var height_extent = null;//old stuff
+//var distance_extent = null;//old stuff
 var input_x=null;
 var input_y=null;
 
@@ -44,22 +61,14 @@ var xml_dump = null;//old stuff
 //interface vars
 var steps = 9; //number of steps for each select
 
-
+//KA_MAP vars
 var myKaMap = null;
 var queryParams = null;
-		SET_DHTML();
-		
-		//interface vars
-		var canvas; //show appended objects
-		
-		//MODULE VARS
-		var module_path = 'mod/mod_r_los.php';
-		var identifier = 'visibility2';//Identifier name for WPS service
-		var wpsCache = '/home/doktoreas/pywps.ominiverdi.org/subversion/trunk/web/tmp/';
-				
-		
-		//WPS manager
-		var wpsManager;
+
+//interface vars
+var canvas; //show appended objects
+//WPS manager
+var wpsManager;
 		
 		
 		/**
@@ -120,16 +129,16 @@ var queryParams = null;
 		}
 		function myMapInitialized(){
 			/* Embrio startup*/
-				//set img object
+				//set img object  - this is for other outputs
 				outimg = document.getElementById('outimg');
-				//outimg.onmousedown = getCoords;
+				
 				//get params
-				map_extent = document.getElementById('map_extent').value;
-				map_extent = map_extent.split(',');
-				height_extent = document.getElementById('height_extent').value.split(',');
-				height_unit = parseInt((height_extent[1]-height_extent[0])/steps*100)/100;
-				distance_extent = document.getElementById('distance_extent').value.split(',');
-				distance_unit = parseInt((distance_extent[1]-distance_extent[0])/steps*100)/100;
+				//map_extent = document.getElementById('map_extent').value;//old stuff
+				//map_extent = map_extent.split(',');//old stuff
+				//height_extent = document.getElementById('height_extent').value.split(',');//old stuff
+				//height_unit = parseInt((height_extent[1]-height_extent[0])/steps*100)/100;//old stuff
+				//distance_extent = document.getElementById('distance_extent').value.split(',');//old stuff
+				//distance_unit = parseInt((distance_extent[1]-distance_extent[0])/steps*100)/100;//old stuff
 				
 				//print ranges
 				getRawObject('observer_range').innerHTML = height_extent[0] + ' -&gt; ' + height_extent[1]; 
@@ -158,7 +167,7 @@ var queryParams = null;
 				//set button event
 				getRawObject('go').onclick = runPywps;
 				
-				//create drawing canvas
+				//create drawing canvas  for objects overlays
 				canvas = myKaMap.createDrawingCanvas('10');
 		}
 		function myScaleChanged(eventID, scale){
@@ -173,10 +182,10 @@ var queryParams = null;
 			var pinDiv = document.createElement('div');
 			pinDiv.id = 'pinDiv';
 			var pinImg = document.createElement('img');
-			pinImg.src = '../../ka-map/htdocs/images/tip-yellow.png';
+			pinImg.src = tipUrl;
 			pinImg.style.position = 'absolute';
-			pinImg.style.top = '-19px';
-			pinImg.style.left = '-6px';
+			pinImg.style.top = tipOffsetX;
+			pinImg.style.left = tipOffsetY;
 			pinDiv.appendChild(pinImg);
 			myKaMap.addObjectGeo( canvas, coords[0], coords[1], pinDiv );
 		}
@@ -193,22 +202,18 @@ function runPywps(){
 	//var url = 'mod/r_los.php?xvalue='+input_x+'&yvalue='+input_y+'&maxdist='+maxdist+'&observer='+observer;
 	
 	//WPSMANAGER part
-	
-	
 	if(!wpsManager.setWpsCache)wpsManager = new wpsManager(myKaMap);
 	var map = myKaMap.getCurrentMap();	
 	var extents = map.currentExtents;
+	//datainputs string depends on the module inputs needings
 	var datainputs = 'x,'+input_x+',y,'+input_y+',maxdist,'+maxdist+',observer,'+observer;
-	//waitStart();
+	//set cache path
 	wpsManager.setWpsCache(wpsCache);
+	//set cgi executable URL
+	wpsManager.setWpsURL(wpsURL);	
+	wpsManager.setSldURL(sldURL);	
 	wpsManager.query(map.name,extents,identifier,datainputs);
 	//WPSMANAGER part end
-	
-	//to be deleted once WPS MANAGER works
-	//var url = module_path+'?xvalue='+input_x+'&yvalue='+input_y+'&maxdist='+maxdist+'&observer='+observer;
-	
-	//call(url, this, parsePywpsOut);
-	//to be deleted once WPS MANAGER works END
 }
 
 function parsePywpsOut (szInit){
@@ -235,9 +240,7 @@ function setFields(gX,gY){
         getRawObject('yvalue_span').innerHTML = input_y;
 }
 
-
-
-//trasform coords from image pixel space to map geo space
+//show a wait message
 function waitStart  (){
 	var parent = getRawObject('output');
 	var wait = getRawObject('wait');
@@ -248,7 +251,7 @@ function waitStart  (){
 	parent.insertBefore(div,parent.firstChild);
 }
 
-//trasform coords from image pixel space to map geo space
+//hide the wait message
 function waitEnd(){
 	var wait = getRawObject('wait');
 	if( wait)wait.parentNode.removeChild(wait);

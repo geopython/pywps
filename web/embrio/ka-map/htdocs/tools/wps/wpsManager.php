@@ -93,6 +93,19 @@
     die;
   }
   
+  if(isset($_REQUEST['wpsUrl'])) $wpsUrl= $_REQUEST['wpsUrl'];
+   else{
+    $szResult= 'alert ("wpsUrl required");';
+    echo $szResult;
+    die;
+  }
+  if(isset($_REQUEST['sldUrl'])) $sldUrl= $_REQUEST['sldUrl'];
+   else{
+    $szResult= 'alert ("sldUrl required");';
+    echo $szResult;
+    die;
+  }
+  
   
  //Destroy old query Cache
   if (is_dir($szBaseCacheDir."/sessions/".$sessionId."/wpsLayer/".$szMap."/"))
@@ -123,13 +136,10 @@
 
 }*/
 
-//PARAMS TO BE PUT OUTSIDE THIS FILE
-$cgi_executable = 'http://'.$_SERVER['SERVER_NAME'].'/cgi-bin/wps.py';
-$img_path = '';//the path where pywps store the image file
 
 //Built up the request for PYWPS	
 	
-	$query_string = $cgi_executable."?service=wps&version=0.4.0&request=Execute&Identifier=$identifier&";
+	$query_string = $wpsUrl."?service=wps&version=0.4.0&request=Execute&Identifier=$identifier&";
 	$query_string .= "datainputs=". $datainputs;
 	$query_string .= "&status=true&store=true";
 	
@@ -147,12 +157,13 @@ $img_path = '';//the path where pywps store the image file
 	//Update the mapfile with new layer
 
 	$layer = ms_newLayerObj($oMap);
-    $layer->set('name', $identifier);//not sure about wich name to choose
+    $layer->set('name', $identifier);//not sure about which name to choose
 	$layer->set('status', MS_DEFAULT );
 	$layer->set('data', $wpsCache.$filename);
 	$layer->set('type', MS_LAYER_RASTER);
 	
 	//THIS PART SHOULD STAY ON A EXTERNAL SLD
+	//var sldUrl already available
 	$class = ms_newClassObj($layer);
 	$class->setExpression("1");
 	$style = ms_newStyleObj($class);
@@ -162,14 +173,14 @@ $img_path = '';//the path where pywps store the image file
 	
 	
 //if(1==1){
-	$oMap->save($szQueryCacheDir."/mapfile_buffer.map");
+	$oMap->save($szQueryCacheDir."/embrio.map");
 	//$oMap->savequery($szQueryCacheDir."query.bin");
 	
 	echo "/*output*/queryResult=0;this.sessionId='$sessionId';";
 	
 	//DEBUG STUFF
 	if(isset($_REQUEST['debug'])){
-	echo "this.datapath='$wpsCache $filename';this.mapfile=".$szQueryCacheDir."/mapfile_buffer.map;";		
+	echo "this.datapath='".$wpsCache.$filename."';this.mapfile=".$szQueryCacheDir."/embrio.map;";		
 		
 			$map_id = sprintf("%0.6d",rand(0,999999));
 			$image_name = "pywps".$map_id.".png";
