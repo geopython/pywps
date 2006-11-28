@@ -193,7 +193,7 @@
 			$image=$oMap->draw();
 			$image->saveImage($image_url);
 			echo "this.outimg='$image_url';";
-			echo "<img src='$image_url'>";
+			echo "<img src='../$image_url'>";
 	}
 	
 /*	
