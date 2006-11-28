@@ -71,7 +71,8 @@ if ($_REQUEST['radius'] > $maxradius) {
     $dom = new DOMDocument();
     $dom->load($stringa_query);
     $CVR = $dom->getElementsByTagName('ComplexValueReference');
-    $nodo = $CVR->item(0)->getAttribute('reference');
+    if($CVR->item(0))$nodo = $CVR->item(0)->getAttribute('reference');
+	else die($query_string);
     
 // Estrae il nome del file
     $aNodo = explode('/',$nodo);
@@ -107,4 +108,11 @@ if ($_REQUEST['radius'] > $maxradius) {
 	echo "image_url='$image_url';";
 	echo "xml_dump='".urlencode($dom->saveXML())."';";
 	//echo "mapfile='/tmp/".$sessionId.".map';";
+	
+	//DEBUG STUFF
+	if(isset($_REQUEST['debug'])){
+			echo "<br>filename = $filename";
+			echo "<br>outimg = $image_url";
+			echo "<br>".$img_path."/mapfile_buffer.map";
+	}
 ?>

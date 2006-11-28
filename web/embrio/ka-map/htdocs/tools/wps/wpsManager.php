@@ -65,12 +65,6 @@
     echo $szResult;
     die;
   }
-  /*if(isset($_REQUEST['layer'])) $szLayer= $_REQUEST['layer'];
-   else{
-    $szResult= 'alert ("layer query required");';
-    echo $szResult;
-    die;
-  }*/
   
   if(isset($_REQUEST['datainputs'])) $datainputs= $_REQUEST['datainputs'];
    else{
