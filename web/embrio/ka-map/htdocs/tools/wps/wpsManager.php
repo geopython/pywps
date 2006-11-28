@@ -171,6 +171,7 @@
 		$style=$class->getStyle(0);
 		$style->color->setRGB( -1,-1,-1);
 	} else {
+		echo"<p>sld $sldUrl,$identifier</p>";
 		$layer->applySLDURL($sldUrl,$identifier);
 	}
 	
