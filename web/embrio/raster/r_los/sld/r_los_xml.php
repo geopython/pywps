@@ -5,11 +5,9 @@
   <NamedLayer>
     <Name>visibility2</Name>
     <UserStyle>
-      <Title>xxx</Title>
       <FeatureTypeStyle>
         <Rule>
         <RasterSymbolizer>
-			<Opacity>1.0</Opacity>
            <ColorMap>
 			  <ColorMapEntry color="#00ff00" quantity="22"/> 
 			  <ColorMapEntry color="#00bf3f" quantity="30"/> 
