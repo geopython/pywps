@@ -171,6 +171,7 @@
 		$style=$class->getStyle(0);
 		$style->color->setRGB( -1,-1,-1);
 	} else {
+		$sldUrl = 'http://pywps.ominiverdi.org/subversion/trunk/web/embrio/raster/r_los/'.$sldUrl;
 		echo"<p>sld $sldUrl,$identifier</p>";
 		$layer->applySLDURL($sldUrl,$identifier);
 	}
