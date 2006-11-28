@@ -1,4 +1,3 @@
-
 <?php
 	header("Content-type: application/xhtml+xml");
 ?>
