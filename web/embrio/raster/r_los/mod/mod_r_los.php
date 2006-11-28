@@ -80,8 +80,12 @@
 	$image->saveImage($img_path.$image_name);
 	echo "/*r los output*/";
 	echo "image_url='$image_url';";
-	echo "xml_dump='".urlencode($dom->saveXML())."';";
+	//echo "xml_dump='".urlencode($dom->saveXML())."';";
 	echo "mapfile='/tmp/".$sessionId.".map';";
 	//echo "mapfile='$img_path."/mapfile_buffer.map"
-
+	if(isset($_REQUEST['debug'])){
+			echo "<br>filename = $filename";
+			echo "<br>outimg = $image_url";
+			echo "<br>".$img_path."/mapfile_buffer.map";
+	}
 ?>	
