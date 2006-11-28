@@ -73,9 +73,10 @@ $stringa_query = $cgi_executable."?service=wps&version=0.4.0&request=Execute&Ide
 	$layer->set('connection', $pywps_outputPath);
 	$layer->set('type', MS_LAYER_LINE);
   	$layer->set('connectiontype',MS_OGR);  
-        $class = ms_newClassObj($layer);
+	
+	$class = ms_newClassObj($layer);
 	$style = ms_newStyleObj($class);
-        $style=$class->getStyle(0);
+	$style=$class->getStyle(0);
 	$style->color->setRGB( 255,255,0);
         
 // Creo l'immagine

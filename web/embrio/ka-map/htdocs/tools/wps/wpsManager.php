@@ -119,22 +119,6 @@
     makeDirs($szQueryCacheDir);
     
     //REQUEST HANDLING
-/*if (empty ($_REQUEST['searchstring'])) {
-
-	$searchstring = "/Empty/";
-
-	echo "Input string";
-
-	die;
-
-} else {
-
-	// icnv is used only if your page encoding is different from data source encoding
-	// in ISO-8859-13 encoding place your code
-	$searchstring = iconv("UTF-8", "ISO-8859-13", $_REQUEST['searchstring']);
-	//$searchstring = "/" . $searchstring . "/i";
-
-}*/
 
 
 //Built up the request for PYWPS	
@@ -148,34 +132,65 @@
 	$dom = new DOMDocument();
 	$dom->load($query_string);
 	$CVR = $dom->getElementsByTagName('ComplexValueReference');
-	if($CVR->item(0))$reference = $CVR->item(0)->getAttribute('reference');
+	if($CVR->item(0)){
+		$reference = $CVR->item(0)->getAttribute('reference');
+		$outFormat = $CVR->item(0)->getAttribute('format');
+	}
 	else die($query_string);
+	
+	//parsing reference value
 	$aReference = explode('/',$reference);
 	$filename = end($aReference);
 	//$pywps_outputPath.=$filename;
 	
 	//Update the mapfile with new layer
-
 	$layer = ms_newLayerObj($oMap);
     $layer->set('name', $identifier);
 	$layer->set('status', MS_DEFAULT );
 	$layer->set('data', $wpsCache.$filename);
-	$layer->set('type', MS_LAYER_RASTER);//layer tipe should depend on WPS output type
 	
-	//APPLYING EXTERNAL SLD or forcing values
-	if(!$layer->applySLDURL($sldUrl,$identifier)){
-		$class = ms_newClassObj($layer);
-		$class->setExpression("1");
-		$style = ms_newStyleObj($class);
-		$style=$class->getStyle(0);
-		$style->color->setRGB( -1,-1,-1);
-	} 
-	
-	
-//if(1==1){
+	//SWITCHING on outFormat - still basic implementation
+	if($outFormat=='text/xml'){
+		//supposed to be GML
+		$layer->set('connectiontype',MS_OGR);
+		//Parsing GML to detect which datatype
+		$domGML = new DOMDocument();
+		$domGML->load($wpsCache.$filename);
+		$point = $domGML->getElementsByTagName('gml:Point');
+		$line = $domGML->getElementsByTagName('gml:LineString');
+		$polygon = $domGML->getElementsByTagName('gml:Polygon');
+		//<gml:LineString> <gml:Point> <gml:Polygon>
+		if($point){
+			$layer->set('type', MS_LAYER_POINT);
+		}
+		if($line){
+			$layer->set('type', MS_LAYER_LINE);
+		}
+		if($polygon){
+			$layer->set('type', MS_LAYER_POLYGON);
+		}
+		//APPLYING EXTERNAL SLD or forcing values
+		if(!$layer->applySLDURL($sldUrl,$identifier)){
+			$class = ms_newClassObj($layer);
+			$style = ms_newStyleObj($class);
+			$style=$class->getStyle(0);
+			$style->color->setRGB( 255,255,0);
+		}
+	} else {
+		//supposed to be Raster
+		$layer->set('type', MS_LAYER_RASTER);
+		//APPLYING EXTERNAL SLD or forcing values
+		if(!$layer->applySLDURL($sldUrl,$identifier)){
+			$class = ms_newClassObj($layer);
+			$class->setExpression("1");
+			$style = ms_newStyleObj($class);
+			$style=$class->getStyle(0);
+			$style->color->setRGB( -1,-1,-1);
+		} 
+	}
 	$oMap->save($szQueryCacheDir."/embrio.map");
-	//$oMap->savequery($szQueryCacheDir."query.bin");
 	
+	//this output confirms to ka-map that the request has been completed properly
 	echo "/*output*/queryResult=0;this.sessionId='$sessionId';";
 	
 	//DEBUG STUFF
@@ -191,6 +206,7 @@
 			$image->saveImage($image_url);
 			echo "<br>this.outimg='$image_url';";
 			echo "<br>this.query_string='$query_string';";
+			echo "<br>this.outFormat='$outFormat';";
 			echo "<img src='../../../../../../tmp/$image_name'>";
 	}
 	
