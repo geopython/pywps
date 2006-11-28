@@ -207,7 +207,7 @@
 			echo "<br>this.outimg='$image_url';";
 			echo "<br>this.query_string='$query_string';";
 			echo "<br>this.outFormat='$outFormat';";
-			echo "<img src='../../../../../../tmp/$image_name'>";
+			echo "<br><img src='../../../../../../tmp/$image_name'>";
 	}
 	
 /*	
