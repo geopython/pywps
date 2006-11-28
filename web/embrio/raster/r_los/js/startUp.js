@@ -117,7 +117,7 @@ function parsePywpsOut (szInit){
     }
 
     eval(szInit);
-	getRawObject('console').innerHTML = xml_dump.replace(/\+/g," ");
+	//getRawObject('console').innerHTML = xml_dump.replace(/\+/g," ");
 	getRawObject('outimg').src = image_url;
 	getRawObject('outimg').onload = waitEnd;
 }
