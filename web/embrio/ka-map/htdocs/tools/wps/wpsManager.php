@@ -157,13 +157,12 @@
 	//Update the mapfile with new layer
 
 	$layer = ms_newLayerObj($oMap);
-    $layer->set('name', $identifier);//not sure about which name to choose
+    $layer->set('name', $identifier);
 	$layer->set('status', MS_DEFAULT );
 	$layer->set('data', $wpsCache.$filename);
-	$layer->set('type', MS_LAYER_RASTER);
+	$layer->set('type', MS_LAYER_RASTER);//layer tipe should depend on WPS output type
 	
-	//THIS PART SHOULD STAY ON A EXTERNAL SLD
-	//var sldUrl already available
+	//APPLYING EXTERNAL SLD or forcing values
 	if(!$layer->applySLDURL($sldUrl,$identifier)){
 		$class = ms_newClassObj($layer);
 		$class->setExpression("1");

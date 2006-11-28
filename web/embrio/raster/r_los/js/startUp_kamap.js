@@ -36,7 +36,7 @@
 		var wpsURL = 'http://pywps.ominiverdi.org/cgi-bin/wps.py';
 		//the style for the output layer /
 		//inside the XML file the style layer name have to the same of the identifier
-		var sldURL = 'http://pywps.ominiverdi.org/subversion/trunk/web/embrio/raster/r_los/sld/r_los_xml.php2';
+		var sldURL = 'http://pywps.ominiverdi.org/subversion/trunk/web/embrio/raster/r_los/sld/r_los_xml.php';
 		
 		//Tip image infos -
 		var tipUrl = '../../ka-map/htdocs/images/tip-yellow.png';
