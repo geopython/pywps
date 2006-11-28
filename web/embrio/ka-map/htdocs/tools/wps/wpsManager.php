@@ -184,7 +184,8 @@
 	//DEBUG STUFF
 	if(isset($_REQUEST['debug'])){
 	echo "this.datapath='".$wpsCache.$filename."';this.mapfile=".$szQueryCacheDir."/embrio.map;";		
-		
+	
+	echo "this.sldURL=$sldURL;";
 			$map_id = sprintf("%0.6d",rand(0,999999));
 			$image_name = "pywps".$map_id.".png";
 			$image_url=$wpsCache.$image_name;
