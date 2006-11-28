@@ -164,7 +164,7 @@
 	
 	//THIS PART SHOULD STAY ON A EXTERNAL SLD
 	//var sldUrl already available
-	if($sldUrl!=''){
+	if($sldUrl=='' || !isset($_REQUEST['debug'])){
 		$class = ms_newClassObj($layer);
 		$class->setExpression("1");
 		$style = ms_newStyleObj($class);
