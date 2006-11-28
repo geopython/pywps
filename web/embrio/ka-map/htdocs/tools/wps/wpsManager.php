@@ -164,17 +164,13 @@
 	
 	//THIS PART SHOULD STAY ON A EXTERNAL SLD
 	//var sldUrl already available
-	if($sldUrl=='' || !isset($_REQUEST['debug'])){
+	if(!$layer->applySLDURL($sldUrl,$identifier)){
 		$class = ms_newClassObj($layer);
 		$class->setExpression("1");
 		$style = ms_newStyleObj($class);
 		$style=$class->getStyle(0);
 		$style->color->setRGB( -1,-1,-1);
-	} else {
-		$sldUrl = 'http://pywps.ominiverdi.org/subversion/trunk/web/embrio/raster/r_los/'.$sldUrl;
-		echo"<p>sld $sldUrl,$identifier</p>";
-		$layer->applySLDURL($sldUrl,$identifier);
-	}
+	} 
 	
 	
 //if(1==1){
