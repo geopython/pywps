@@ -1,3 +1,6 @@
+<?php
+	header("Content-type: application/xhtml+xml");
+?>
 <StyledLayerDescriptor version="1.0.0">
   <NamedLayer>
     <Name>visibility2</Name>
@@ -6,10 +9,7 @@
       <FeatureTypeStyle>
         <Rule>
         <RasterSymbolizer>
-         <Geometry>
-           <PropertyName>center-line</PropertyName>
-         </Geometry>
-         <Stroke>
+			<Opacity>1.0</Opacity>
            <ColorMap>
 			  <ColorMapEntry color="#00ff00" quantity="22"/> 
 			  <ColorMapEntry color="#00bf3f" quantity="30"/> 
@@ -18,7 +18,6 @@
 			  <ColorMapEntry color="#0000ff" quantity="52"/>
 			  <ColorMapEntry color="#000000" quantity="60"/>
 			</ColorMap>
-         </Stroke>
         </RasterSymbolizer>
         </Rule>
       </FeatureTypeStyle>
