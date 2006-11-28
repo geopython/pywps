@@ -189,7 +189,8 @@
 			$image_url=$wpsCache.$image_name;
 			$image=$oMap->draw();
 			$image->saveImage($image_url);
-			echo "this.outimg='$image_url';";
+			echo "<br>this.outimg='$image_url';";
+			echo "<br>this.query_string='$query_string';";
 			echo "<img src='../../../../../../tmp/$image_name'>";
 	}
 	
