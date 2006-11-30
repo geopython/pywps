@@ -11,8 +11,11 @@
 					<RasterSymbolizer>
 						<ColorMap>
 							<ColorMapEntry color="#ee0000" quantity="1"/>
-							<ColorMapEntry color="#ff0000" quantity="10"/>
-							<ColorMapEntry color="#gg0000" quantity="20"/>
+							<ColorMapEntry color="#ff00BB" quantity="10"/>
+							<ColorMapEntry color="#gg00CC" quantity="30"/>
+							<ColorMapEntry color="#gg0000" quantity="50"/>
+							<ColorMapEntry color="#990099" quantity="70"/>
+							<ColorMapEntry color="#gg6699" quantity="90"/>
 						</ColorMap>
 					</RasterSymbolizer>
 				</Rule>
