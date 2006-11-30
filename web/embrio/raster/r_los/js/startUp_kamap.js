@@ -201,7 +201,7 @@ var wpsManager;
 		function setSldLink(){
 			var sldsel = getRawObject('sld');
 			var ciccio =  sldsel.options[sldsel.selectedIndex].value;
-			getRawObject.('sldLink').href = ciccio;
+			getRawObject('sldLink').href = ciccio;
 		}
 		
 				
