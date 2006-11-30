@@ -32,11 +32,11 @@
  		//MODULE VARS
 		//var module_path = 'mod/mod_r_los.php';//old stuff
 		var identifier = 'visibility2';//Identifier name for WPS service
-		var wpsCache = '/home/doktoreas/pywps.ominiverdi.org/subversion/trunk/web/tmp/';
-		var wpsURL = 'http://pywps.ominiverdi.org/cgi-bin/wps.py';
+		var wpsCache = '/home/doktoreas/devpywps.ominiverdi.org/trunk/web/tmp/';
+		var wpsURL = 'http://devpywps.ominiverdi.org/cgi-bin/wps.py';
 		//the style for the output layer /
 		//inside the XML file the style layer name have to the same of the identifier
-		var sldURL = 'http://pywps.ominiverdi.org/subversion/trunk/web/embrio/raster/r_los/sld/r_los_xml.php';
+		//var sldURL = 'http://pywps.ominiverdi.org/subversion/trunk/web/embrio/raster/r_los/sld/r_los_xml.php';
 		
 		var aSldURL = new Array();
 		addSldURL('Red color table','http://devpywps.ominiverdi.org/trunk/web/embrio/raster/r_los/sld/sld_red_table.php');
