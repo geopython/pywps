@@ -10,11 +10,9 @@
 				<Rule>
 					<RasterSymbolizer>
 						<ColorMap>
-							<ColorMapEntry color="#aa0000" quantity="0.1"/>
-							<ColorMapEntry color="#cc0000" quantity="0.5"/>
 							<ColorMapEntry color="#ee0000" quantity="1"/>
-							<ColorMapEntry color="#ff0000" quantity="2"/>
-							<ColorMapEntry color="#gg0000" quantity="10"/>
+							<ColorMapEntry color="#ff0000" quantity="10"/>
+							<ColorMapEntry color="#gg0000" quantity="20"/>
 						</ColorMap>
 					</RasterSymbolizer>
 				</Rule>
