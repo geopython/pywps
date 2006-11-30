@@ -56,7 +56,7 @@ else die('create your include/config.php using include/config.php.dist as templa
 <html lang="en">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<title>PyQPS r.los  by ominiverdi.org</title>
+		<title>PyWPS r.los  by ominiverdi.org</title>
 		<script type="text/javascript" src="../../ka-map/htdocs/DHTMLapi.js"></script>
 		<script type="text/javascript" src="../../ka-map/htdocs/xhr.js"></script>
 		<script type="text/javascript" src="../../ka-map/htdocs/kaMap.js"></script>
@@ -105,19 +105,19 @@ else die('create your include/config.php using include/config.php.dist as templa
 				position: relative;
 			}
 			.kaLegendTitle {  
-    padding: 2px;
-    padding-bottom:10px;
-    font-size: 13px;
-    font-weight: bold;
-}
+				padding: 2px;
+				padding-bottom:10px;
+				font-size: 13px;
+				font-weight: bold;
+			}
 
-.kaLegendLayer  {
-    border-top: 1px solid rgb(212,208,200); 
-    padding: 2px;
-    padding-top:7px;
-    padding-bottom:7px;
-    font-size: 12px;
-}
+			.kaLegendLayer  {
+				border-top: 1px solid rgb(212,208,200); 
+				padding: 2px;
+				padding-top:7px;
+				padding-bottom:7px;
+				font-size: 12px;
+			}
 		</style>
 	</head>
 	<body onload="myOnLoad();">
