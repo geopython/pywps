@@ -11,19 +11,19 @@
 					<RasterSymbolizer>
 						<ColorMap>
 							<ColorMapEntry color="#11ffff" quantity="1"/>
-							<ColorMapEntry color="#22ffff" quantity="15"/>
-							<ColorMapEntry color="#33ffff" quantity="30"/>
-							<ColorMapEntry color="#55ffff" quantity="45"/>
-							<ColorMapEntry color="#77ffff" quantity="60"/>
-							<ColorMapEntry color="#99ffff" quantity="75"/>
-							<ColorMapEntry color="#aaffff" quantity="82"/>
+							<ColorMapEntry color="#22ffff" quantity="30"/>
+							<ColorMapEntry color="#33ffff" quantity="55"/>
+							<ColorMapEntry color="#55ffff" quantity="75"/>
+							<ColorMapEntry color="#77ffff" quantity="80"/>
+							<ColorMapEntry color="#99ffff" quantity="85"/>
+							<ColorMapEntry color="#aaffff" quantity="87"/>
 							<ColorMapEntry color="#ccffff" quantity="90"/>
-							<ColorMapEntry color="#aaffff" quantity="97"/>
-							<ColorMapEntry color="#99ffff" quantity="105"/>
-							<ColorMapEntry color="#77ffff" quantity="120"/>
-							<ColorMapEntry color="#55ffff" quantity="135"/>
-							<ColorMapEntry color="#33ffff" quantity="150"/>
-							<ColorMapEntry color="#22ffff" quantity="165"/>
+							<ColorMapEntry color="#aaffff" quantity="93"/>
+							<ColorMapEntry color="#99ffff" quantity="95"/>
+							<ColorMapEntry color="#77ffff" quantity="100"/>
+							<ColorMapEntry color="#55ffff" quantity="115"/>
+							<ColorMapEntry color="#33ffff" quantity="125"/>
+							<ColorMapEntry color="#22ffff" quantity="150"/>
 							<ColorMapEntry color="#11ffff" quantity="180"/>
 						</ColorMap>
 					</RasterSymbolizer>
