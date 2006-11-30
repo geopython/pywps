@@ -178,18 +178,21 @@ var wpsManager;
 					distance = parseInt(distance + distance_unit);
 				}
 				//sld select
-				var sldsel = getRawObject('sld');
-				sldsel.onchange = function(){
+				this.options[this.selectedIndex].value
 					var sldSel = getRawObject('sld');
-					getRawObject.('sldLink').href = this.options[this.selectedIndex].value;
+					
 				}
+				
+				var sldsel = getRawObject('sld');
+				sldsel.onchange = setSldLink(sldsel.options[sldsel.selectedIndex].value);
+				
 	//var sld = sldSel.options[sldSel.selectedIndex].value;	
 	//wpsManager.setSldURL(sld);	
 	
 				var opt = new Option( 'select a sld', '', true, true );
 				for(i=0;i<this.aSldURL.length;i++) {
 					sldsel[i] = new Option(this.aSldURL[i][0],this.aSldURL[i][1],false,false);
-					//if(i==0)getRawObject.('sldLink').href = this.aSldURL[i][1];
+					if(i==0)setSldLink(this.aSldURL[i][1]);
 				}
 				
 				
@@ -199,6 +202,12 @@ var wpsManager;
 				//create drawing canvas  for objects overlays
 				canvas = myKaMap.createDrawingCanvas('10');
 		}
+		function setSldLink(url){
+			getRawObject.('sldLink').href = url;
+		}
+		
+				
+		
 		function myScaleChanged(eventID, scale){
 		}
 		function myMapClicked(eventID, coords){
