@@ -178,7 +178,7 @@ var wpsManager;
 				var opt = new Option( 'select a sld', '', true, true );
 				for(i=0;i<this.aSldURL.length;i++) {
 					sldsel[i] = new Option(this.aSldURL[i][0],this.aSldURL[i][1],false,false);
-					if(i==0)getRawObject.('sldLink').href = this.aSldURL[i][0];
+					if(i==0)getRawObject.('sldLink').href = this.aSldURL[i][1];
 				}
 				
 				
