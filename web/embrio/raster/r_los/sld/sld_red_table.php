@@ -10,12 +10,21 @@
 				<Rule>
 					<RasterSymbolizer>
 						<ColorMap>
-							<ColorMapEntry color="#ee0000" quantity="1"/>
-							<ColorMapEntry color="#ff00BB" quantity="10"/>
-							<ColorMapEntry color="#gg00CC" quantity="30"/>
-							<ColorMapEntry color="#gg0000" quantity="50"/>
-							<ColorMapEntry color="#990099" quantity="70"/>
-							<ColorMapEntry color="#gg6699" quantity="90"/>
+							<ColorMapEntry color="#110000" quantity="1"/>
+							<ColorMapEntry color="#220000" quantity="5"/>
+							<ColorMapEntry color="#330000" quantity="10"/>
+							<ColorMapEntry color="#440000" quantity="15"/>
+							<ColorMapEntry color="#550000" quantity="20"/>
+							<ColorMapEntry color="#660000" quantity="25"/>
+							<ColorMapEntry color="#770000" quantity="30"/>
+							<ColorMapEntry color="#880000" quantity="35"/>
+							<ColorMapEntry color="#990000" quantity="40"/>
+							<ColorMapEntry color="#aa0000" quantity="45"/>
+							<ColorMapEntry color="#bb0000" quantity="50"/>
+							<ColorMapEntry color="#cc0000" quantity="55"/>
+							<ColorMapEntry color="#dd0000" quantity="60"/>
+							<ColorMapEntry color="#ee0000" quantity="65"/>
+							<ColorMapEntry color="#ff0000" quantity="90"/>
 						</ColorMap>
 					</RasterSymbolizer>
 				</Rule>
