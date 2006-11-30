@@ -179,7 +179,7 @@ var wpsManager;
 				}
 				//sld select
 				var sldsel = getRawObject('sld');
-				sldsel.onchange = setSldLink(sldsel.options[sldsel.selectedIndex].value);
+				sldsel.onchange = setSldLink;
 				
 	//var sld = sldSel.options[sldSel.selectedIndex].value;	
 	//wpsManager.setSldURL(sld);	
@@ -198,8 +198,9 @@ var wpsManager;
 				canvas = myKaMap.createDrawingCanvas('10');
 		}
 		
-		function setSldLink(url){
-			getRawObject.('sldLink').href = url;
+		function setSldLink(){
+			var sldsel = getRawObject('sld');
+			getRawObject.('sldLink').href = sldsel.options[sldsel.selectedIndex].value;
 		}
 		
 				
