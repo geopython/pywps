@@ -122,6 +122,17 @@ var wpsManager;
 			var kaNav = new kaNavigator( myKaMap );
 			kaNav.activate();
 			myKaZoomer = new kaZoomer(myKaMap); 
+			
+			//legend
+			var legendOptions = {};
+			legendOptions.visibility = typeof gbLegendVisibilityControl != 'undefined' ? gbLegendVisibilityControl : true;
+			legendOptions.opacity = typeof gbLegendOpacityControl != 'undefined' ? gbLegendOpacityControl : true;
+			legendOptions.order = typeof gbLegendOrderControl != 'undefined' ? gbLegendOrderControl : false;
+			legendOptions.query = typeof gbLegendQueryControl != 'undefined' ? gbLegendQueryControl : false;
+			
+			var myKaLegend = new kaLegend( myKaMap, 'legend', false, legendOptions);
+			
+			
 			//myKaMap.resize();//??? maybe not needed
 			myKaMap.registerForEvent( KAMAP_MAP_INITIALIZED, null, myMapInitialized );
 			myKaMap.registerForEvent( KAMAP_SCALE_CHANGED, null, myScaleChanged );

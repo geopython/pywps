@@ -94,6 +94,11 @@ else die('create your include/config.php using include/config.php.dist as templa
 					top:10px;
 					left:200px;
 			}
+			#legend {
+				position: absolute;
+				left:800px;
+				top:20px;
+			}
 		</style>
 	</head>
 	<body onload="myOnLoad();">
@@ -150,6 +155,8 @@ else die('create your include/config.php using include/config.php.dist as templa
 	
 	<img id="outimg" src="" width="200" height="100" />
 </form>
+</div>
+<div id="legend">
 </div>
 <div id="console">
 <textarea name="console" id="consolearea">
