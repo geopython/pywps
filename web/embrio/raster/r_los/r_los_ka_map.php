@@ -97,9 +97,23 @@ else die('create your include/config.php using include/config.php.dist as templa
 			}
 			#legend {
 				position: absolute;
-				left:800px;
+				left:900px;
 				top:20px;
 			}
+			.kaLegendTitle {  
+    padding: 2px;
+    padding-bottom:10px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.kaLegendLayer  {
+    border-top: 1px solid rgb(212,208,200); 
+    padding: 2px;
+    padding-top:7px;
+    padding-bottom:7px;
+    font-size: 12px;
+}
 		</style>
 	</head>
 	<body onload="myOnLoad();">
