@@ -166,12 +166,21 @@ var wpsManager;
 					height = parseInt((height + height_unit)*100)/100;
 					distance = parseInt(distance + distance_unit);
 				}
-				
+				//sld select
 				var sldsel = getRawObject('sld');
+				sldsel.onchange = function(){
+					var sldSel = getRawObject('sld');
+					getRawObject.('sldLink').href = this.options[this.selectedIndex].value;
+				}
+	//var sld = sldSel.options[sldSel.selectedIndex].value;	
+	//wpsManager.setSldURL(sld);	
+	
 				var opt = new Option( 'select a sld', '', true, true );
 				for(i=0;i<this.aSldURL.length;i++) {
 					sldsel[i] = new Option(this.aSldURL[i][0],this.aSldURL[i][1],false,false);
+					if(i==0)getRawObject.('sldLink').href = this.aSldURL[i][0];
 				}
+				
 				
 				//set button event
 				getRawObject('go').onclick = runPywps;
@@ -225,7 +234,6 @@ function runPywps(){
 	var sldSel = getRawObject('sld');
 	var sld = sldSel.options[sldSel.selectedIndex].value;	
 	wpsManager.setSldURL(sld);	
-	getRawObject.('sldLink').href = sld;
 	wpsManager.query(map.name,extents,identifier,datainputs);
 	//WPSMANAGER part end
 }
