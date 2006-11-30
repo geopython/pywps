@@ -167,6 +167,12 @@ var wpsManager;
 					distance = parseInt(distance + distance_unit);
 				}
 				
+				var sldsel = getRawObject('sld');
+				var opt = new Option( 'select a sld', '', true, true );
+				for(i=0;i<this.aSldURL.length;i++) {
+					sldsel[i] = new Option(this.aSldURL[i][0],this.aSldURL[i][1],false,false);
+				}
+				
 				//set button event
 				getRawObject('go').onclick = runPywps;
 				
@@ -202,6 +208,7 @@ function runPywps(){
 	var maxdist= maxdistSel.options	[maxdistSel.selectedIndex].value;
 	var observerSel = getRawObject('observer');
 	var observer = observerSel.options[observerSel.selectedIndex].value;
+	
 	//var url = 'mod/r_los.php?xvalue='+input_x+'&yvalue='+input_y+'&maxdist='+maxdist+'&observer='+observer;
 	
 	//WPSMANAGER part
@@ -213,8 +220,11 @@ function runPywps(){
 	//set cache path
 	wpsManager.setWpsCache(wpsCache);
 	//set cgi executable URL
-	wpsManager.setWpsURL(wpsURL);	
-	wpsManager.setSldURL(sldURL);	
+	wpsManager.setWpsURL(wpsURL);
+	//set sld value 
+	var sldSel = getRawObject('sld');
+	var sld = sldSel.options[sldSel.selectedIndex].value;	
+	wpsManager.setSldURL(sld);	
 	wpsManager.query(map.name,extents,identifier,datainputs);
 	//WPSMANAGER part end
 }

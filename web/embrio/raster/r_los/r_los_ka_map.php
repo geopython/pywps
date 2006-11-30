@@ -131,7 +131,13 @@ else die('create your include/config.php using include/config.php.dist as templa
 		</select></p>
 		<input type="button" name="submit" id="go" value="Go!" />
 	</fieldset>
-	
+	<fieldset>
+	<legend>Style</legend>
+		<p><label>Choose a color scheme:</label>
+		<!--<input type="text" name="observer" size="20" maxlength="40" value="" />-->
+		<select name="sld" id="sld">
+		</select></p>
+	</fieldset>
 	<!-- 
 		INTERFACE PARAMS
 		this hidden fields for interface params 

@@ -10,7 +10,7 @@
 				<Rule>
 					<RasterSymbolizer>
 						<ColorMap>
-							<ColorMapEntry color="#ff33cc" quantity="1"/>
+							<ColorMapEntry color="#ff3300" quantity="1"/>
 						</ColorMap>
 					</RasterSymbolizer>
 				</Rule>
