@@ -219,7 +219,7 @@ kaLegend.prototype.createHeaderHTML = function() {
     td = document.createElement( 'td' );
     td.style.width='26px';
     img = document.createElement( 'img' );
-    img.src = 'images/expand.png';
+    img.src = '../../ka-map/htdocs/images/expand.png';
     img.alt = 'expand all';
     img.title = 'expand all';
     img.kaLegend = this;
@@ -227,7 +227,7 @@ kaLegend.prototype.createHeaderHTML = function() {
     td.appendChild( img );
     
     img = document.createElement( 'img' );
-    img.src = 'images/collapse.png';
+    img.src = '../../ka-map/htdocs/images/collapse.png';
     img.alt = 'collapse all';
     img.title = 'collapse all';
     img.kaLegend = this;
@@ -270,7 +270,7 @@ kaLegend.prototype.createLayerHTML = function( oLayer ) {
     td.setAttribute( "width", "9");
     
     expander = document.createElement( 'img' );
-    expander.src = 'images/collapse.png';
+    expander.src = '../../ka-map/htdocs/images/collapse.png';
     expander.layerName = oLayer.name;
     expander.id = 'expander_'+oLayer.name;
     expander.onclick = kaLegend_expander;
@@ -318,7 +318,7 @@ kaLegend.prototype.createLayerHTML = function( oLayer ) {
             td = document.createElement('td');
             td.width = '19';
             img = document.createElement( 'img' );
-            img.src = 'images/sun_white.png';
+            img.src = '../../ka-map/htdocs/images/sun_white.png';
             img.width = '7';
             img.alt = "Decrease layer opacity";
             img.title = "Decrease layer opacity";
@@ -328,7 +328,7 @@ kaLegend.prototype.createLayerHTML = function( oLayer ) {
             img.onclick = kaLegend_opacityDown;
             td.appendChild( img );
             img = document.createElement( 'img' );
-            img.src = 'images/sun_grey.png';
+            img.src = '../../ka-map/htdocs/images/sun_grey.png';
             img.width = '7';
             img.style.marginLeft = '2px';
             img.alt = "Increase layer opacity";
@@ -347,7 +347,7 @@ kaLegend.prototype.createLayerHTML = function( oLayer ) {
             td.style.padding = '1px';
         
             img = document.createElement( 'img' );
-            img.src = 'images/arrow_up.png';
+            img.src = '../../ka-map/htdocs/images/arrow_up.png';
             img.width = '10';
             img.height = '8';
             img.style.marginBottom = '2px';
@@ -361,7 +361,7 @@ kaLegend.prototype.createLayerHTML = function( oLayer ) {
             td.appendChild( img );
         
             img = document.createElement( 'img' );
-            img.src = 'images/arrow_down.png';
+            img.src = '../../ka-map/htdocs/images/arrow_down.png';
             img.width = '10';
             img.height = '8';
             img.alt = "Shift Layer Down";
@@ -387,16 +387,16 @@ kaLegend.prototype.createLayerHTML = function( oLayer ) {
         img.height = '14';
         if (oLayer.queryable) {
             if (oLayer.isQueryable()) {
-                img.src = 'images/icon_query_on.png';
+                img.src = '../../ka-map/htdocs/images/icon_query_on.png';
             } else {
-                img.src = 'images/icon_query_off.png';
+                img.src = '../../ka-map/htdocs/images/icon_query_off.png';
             }
             img.onmouseover = kaLegend_queryOnMouseOver;
             img.onmouseout = kaLegend_queryOnMouseOut;
             img.onclick = kaLegend_queryOnClick;
             img.oLayer = oLayer;
         } else {
-            img.src = 'images/icon_query_x.png';
+            img.src = '../../ka-map/htdocs/images/icon_query_x.png';
         }
         
         td = document.createElement( 'td' );
@@ -430,16 +430,16 @@ function kaLegend_toggleLayerQueryable() {
 
 function kaLegend_queryOnMouseOver() {
     if (this.oLayer.queryable) {
-        this.src = 'images/icon_query_over.png';
+        this.src = '../../ka-map/htdocs/images/icon_query_over.png';
     }
 };
 
 function kaLegend_queryOnMouseOut() {
     if (this.oLayer.queryable) {
         if (this.oLayer.isQueryable()) {
-            this.src = 'images/icon_query_on.png';
+            this.src = '../../ka-map/htdocs/images/icon_query_on.png';
         } else {
-            this.src = 'images/icon_query_off.png';
+            this.src = '../../ka-map/htdocs/images/icon_query_off.png';
         }
     }
 };
@@ -448,10 +448,10 @@ function kaLegend_queryOnClick() {
     if (this.oLayer.queryable) {
         if (this.oLayer.isQueryable()) {
             this.oLayer.setQueryable( false );
-            this.src = 'images/icon_query_off.png';
+            this.src = '../../ka-map/htdocs/images/icon_query_off.png';
         } else {
             this.oLayer.setQueryable( true );
-            this.src = 'images/icon_query_on.png';
+            this.src = '../../ka-map/htdocs/images/icon_query_on.png';
         }
     }
 };
@@ -463,7 +463,7 @@ function kaLegend_toggleLayerVisibility() {
 function kaLegend_expander() {
     this.expanded = !this.expanded;
     
-    this.src = (this.expanded)?'images/collapse.png':'images/expand.png';
+    this.src = (this.expanded)?'../../ka-map/htdocs/images/collapse.png':'../../ka-map/htdocs/images/expand.png';
     this.expandable.style.display = (this.expanded)?'block':'none';
 };
 
