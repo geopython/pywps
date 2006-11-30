@@ -95,10 +95,13 @@ else die('create your include/config.php using include/config.php.dist as templa
 					top:10px;
 					left:200px;
 			}
-			#legend {
+			#legendDiv {
 				position: absolute;
 				left:900px;
 				top:20px;
+			}
+			#legend {
+				position: relative;
 			}
 			.kaLegendTitle {  
     padding: 2px;
@@ -171,7 +174,12 @@ else die('create your include/config.php using include/config.php.dist as templa
 	<img id="outimg" src="" width="200" height="100" />
 </form>
 </div>
-<div id="legend">
+<div id="legendDiv">
+	<fieldset>
+		<legend>Legend</legend>
+	<div id="legend">
+	</div>
+	</fieldset>
 </div>
 <div id="console">
 <textarea name="console" id="consolearea">
