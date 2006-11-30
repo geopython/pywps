@@ -178,11 +178,6 @@ var wpsManager;
 					distance = parseInt(distance + distance_unit);
 				}
 				//sld select
-				this.options[this.selectedIndex].value
-					var sldSel = getRawObject('sld');
-					
-				}
-				
 				var sldsel = getRawObject('sld');
 				sldsel.onchange = setSldLink(sldsel.options[sldsel.selectedIndex].value);
 				
@@ -202,6 +197,7 @@ var wpsManager;
 				//create drawing canvas  for objects overlays
 				canvas = myKaMap.createDrawingCanvas('10');
 		}
+		
 		function setSldLink(url){
 			getRawObject.('sldLink').href = url;
 		}
