@@ -63,6 +63,7 @@ else die('create your include/config.php using include/config.php.dist as templa
 		<script type="text/javascript" src="../../ka-map/htdocs/kaTool.js"></script>
 		<script type="text/javascript" src="../../ka-map/htdocs/wz_dragdrop.js"></script>
 		<script type="text/javascript" src="../../ka-map/htdocs/kaZoomer.js"></script>
+		<script type="text/javascript" src="../../ka-map/htdocs/kaLegend.js"></script>
 		
 		
 
