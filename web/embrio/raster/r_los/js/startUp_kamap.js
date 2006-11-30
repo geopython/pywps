@@ -39,8 +39,8 @@
 		var sldURL = 'http://pywps.ominiverdi.org/subversion/trunk/web/embrio/raster/r_los/sld/r_los_xml.php';
 		
 		var aSldURL = new Array();
-		addSldURL('Red color table','http://pywps.ominiverdi.org/subversion/trunk/web/embrio/raster/r_los/sld/sld_red_table.php');
-		addSldURL('Blue color table','http://pywps.ominiverdi.org/subversion/trunk/web/embrio/raster/r_los/sld/sld_blue_table.php');
+		addSldURL('Red color table','http://devpywps.ominiverdi.org/trunk/web/embrio/raster/r_los/sld/sld_red_table.php');
+		addSldURL('Blue color table','http://devpywps.ominiverdi.org/trunk/web/embrio/raster/r_los/sld/sld_blue_table.php');
 		//Tip image infos -
 		var tipUrl = '../../ka-map/htdocs/images/tip-yellow.png';
 		var tipOffsetX = '-19px';// the negative left position of the pointer in the image
