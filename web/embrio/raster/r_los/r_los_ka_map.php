@@ -97,8 +97,9 @@ else die('create your include/config.php using include/config.php.dist as templa
 			}
 			#legendDiv {
 				position: absolute;
-				left:900px;
+				left:880px;
 				top:20px;
+				width:200px;
 			}
 			#legend {
 				position: relative;
