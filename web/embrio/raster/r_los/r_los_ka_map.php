@@ -136,7 +136,9 @@ else die('create your include/config.php using include/config.php.dist as templa
 		<p><label>Choose a color scheme:</label>
 		<!--<input type="text" name="observer" size="20" maxlength="40" value="" />-->
 		<select name="sld" id="sld">
-		</select></p>
+		</select>
+		<br> <a href="#" target="_blank" id="sldLink">link to sld file</a> 
+		</p>
 	</fieldset>
 	<!-- 
 		INTERFACE PARAMS

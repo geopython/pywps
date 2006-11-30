@@ -225,6 +225,7 @@ function runPywps(){
 	var sldSel = getRawObject('sld');
 	var sld = sldSel.options[sldSel.selectedIndex].value;	
 	wpsManager.setSldURL(sld);	
+	getRawObject.('sldLink').href = sld;
 	wpsManager.query(map.name,extents,identifier,datainputs);
 	//WPSMANAGER part end
 }
