@@ -364,7 +364,8 @@ class Execute:
         for procOutput in self.process.Outputs:
             try:
                 if type(procOutput['value']) == type(None) or \
-                    procOutput['value'] == []:
+                    procOutput['value'] == [] or \
+                    procOutput['value'] not self.process.DataOutputs[procOutput['Identifier']]:
                      try:
                         procOutput['value'] = self.process.DataOutputs[procOutput['Identifier']]
                      except:
