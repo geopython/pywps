@@ -18,5 +18,4 @@ __all__ = [
         "visibility",
         "inputsoutputs",
         "buffer",
-        "convert",
 	]
