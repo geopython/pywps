@@ -1,4 +1,3 @@
-#!/usr/bin/python
 """
 pywps process example:
 
@@ -8,7 +7,7 @@ flow:   analysis of flowing water
 # Lince: 
 # 
 # Web Processing Service implementation
-# Copyright (C) 2006 Jachym Cepicky
+# Copyright (C) 2006 Stepan Kafka
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -46,7 +45,7 @@ class Process:
         # Title - title for this process
         self.Title="Flow analysis"
         self.Abstract="GRASS processed r.flow analysis."
-        self.grassLocation="/var/www/wps/spearfish61/"
+        self.grassLocation="/var/www/wps/spearfish60/"
         
         #
         # Inputs
@@ -131,14 +130,18 @@ class Process:
     #####################################################################
     def execute(self):
         os.system("g.region -d")
-        os.system("g.region w=%s s=%s e=%s n=%s align=dem_cr" % \
+        if os.system("g.region w=%s s=%s e=%s n=%s align=dem_cr" % \
                 (self.Inputs[0]['value'],
                     self.Inputs[1]['value'],
                     self.Inputs[2]['value'],
-                    self.Inputs[3]['value']))
-        os.system("r.flow elevin=dem_cr dsout=accum")
-        os.system("r.out.tiff -t input=accum output=output0")
-        os.system("/usr/local/bin/gdal_translate -of GTiff output0.tif output.tif >> /dev/null")
+                    self.Inputs[3]['value'])):
+            return "Could not set region to desired region"
+        if os.system("r.flow elevin=dem_cr dsout=accum"):
+            return "Could use r.flow"
+        if os.system("r.out.tiff -t input=accum output=output0"):
+            return "Could use export raster map"
+        if os.system("/usr/local/bin/gdal_translate -of GTiff output0.tif output.tif >> /dev/null"):
+            return "Could not use gdal_translate"
 
         # check the resulting file or any other variable, which interrests you
         if "output.tif" in os.listdir(os.curdir):
