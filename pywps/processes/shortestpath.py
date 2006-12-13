@@ -2,10 +2,11 @@ import os,time,string,sys,shutil
 
 class Process:
     def __init__(self):
-        self.Identifier = "searchpath"
+        self.Identifier = "shortestpath"
         self.processVersion = "0.1"
         self.storeSupported = "true"
         self.Title="Find the shortes path on the roads map"
+        self.grassLocation=None
         self.Inputs = [
                     {
                         'Identifier': 'streetmap',
