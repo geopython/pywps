@@ -1,4 +1,3 @@
-#!/usr/bin/python
 """
 pywps process example:
 
@@ -8,7 +7,7 @@ classify: Classify satellite image
 # Lince: 
 # 
 # Web Processing Service implementation
-# Copyright (C) 2006 Jachym Cepicky
+# Copyright (C) 2006 Stepan Kafka
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -119,17 +118,24 @@ class Process:
             4) returns the new file name or 'None' if something went wrong
         """
         
-        os.system("r.in.gdal -o -k input=%s output=input 1>&2" % (self.Inputs[0]['value']))               
-        os.system("g.region -p rast=input.1 1>&2")
-        os.system("i.group group=gr subgroup=klas input=`g.mlist type=rast sep=',' pattern='input.*'` 1>&2")
-        os.system("i.cluster group=gr subgroup=klas sigfile=sig classes=%s 1>&2" % (self.Inputs[1]['value']))
-        os.system("i.maxlik -q group=gr subgroup=klas sigfile=sig class=classif reject=rejected 1>&2")
-        os.system("r.out.tiff -t input=classif output=output0 1>&2")
-        os.system("/usr/local/bin/gdal_translate -of GTiff output0.tif output.tif  1>&2")
+        if os.system("r.in.gdal -o -k input=%s output=input 1>&2" % (self.DataInputs['input'])):
+            return "Could not import map"
+        if os.system("g.region -p rast=input.1 1>&2"):
+            return "Could not set region"
+        if os.system("i.group group=gr subgroup=klas input=`g.mlist type=rast sep=',' pattern='input.*'` 1>&2"):
+            return "i.group does not work"
+        if os.system("i.cluster group=gr subgroup=klas sigfile=sig classes=%s 1>&2" % (self.DataInputs['classes'])):
+            return "i.cluster does not work"
+        if os.system("i.maxlik -q group=gr subgroup=klas sigfile=sig class=classif reject=rejected 1>&2"):
+            return "Classification did not work"
+        if os.system("r.out.tiff -t input=classif output=output0 1>&2"):
+            return "Could not export raster map"
+        if os.system("/usr/local/bin/gdal_translate -of GTiff output0.tif output.tif  1>&2"):
+            return "Could not run gdal_translate"
         
         # check the resulting file or any other variable, which interrests you
         if "output.tif" in os.listdir(os.curdir):
-            self.Outputs[0]['value'] = "output.tif"
+            self.DataOutputs['output'] = "output.tif"
             return
         else:
             return "Output file not created"
