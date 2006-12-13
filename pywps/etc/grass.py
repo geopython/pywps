@@ -43,8 +43,8 @@ grassenv = {
     'GRASS_ADDON_PATH': "",
 
     # Version of GRASS, you are using
-    # 'GRASS_VERSION': "6.1.cvs",
-    'GRASS_VERSION': "6.1.cvs",
+    # 'GRASS_VERSION': "6.2.0",
+    'GRASS_VERSION': "6.2.1",
 
     # GRASS_PERL, where is your PERL bin installed
     # 'GRASS_PERL': "/usr/bin/perl",
