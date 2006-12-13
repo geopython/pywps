@@ -1,4 +1,3 @@
-#!/usr/bin/python
 """
 pywps process example:
 
@@ -47,6 +46,7 @@ class Process:
         NDVI =(nir - red) / (nir + red)"
 
         """
+        self.grassLocation=None
         
         #
         # Inputs
