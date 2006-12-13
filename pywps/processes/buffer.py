@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 # Author: Luca Casagrande ( luca.casagrande@gmail.com )
 
 import os,time,string,sys
@@ -12,7 +10,7 @@ class Process:
         self.storeSupport = "true"
         self.Title="Create a buffer around a point "
         self.Abstract="Create a buffer around point"
-        self.grassLocation="/var/www/wps/spearfish61/"
+        self.grassLocation="/var/www/wps/spearfish60/"
 
         self.Metadata = [
                 {
@@ -57,15 +55,15 @@ class Process:
         os.system("g.region -d")
 	    	
 	os.system("v.in.ascii input=%s output=punto format=point fs=, skip=0 x=1 y=2 z=0 cat=0 -t 1>&2" %\
-			(self.Inputs[0]['value'])) 
+			(self.DataInputs['point'])) 
             
 	os.system("v.buffer input=punto output=punto_buff type=point layer=1 buffer=%s scale=1.0 tolerance=0.01 1>&2" %\
-			(self.Inputs[1]['value']))
+			(self.DataInputs['radius']))
             	
 	os.system("v.out.ogr type=area format=GML input=punto_buff dsn=out.xml  olayer=path.xml 1>&2")
         
         if "out.xml" in os.listdir(os.curdir):
-            self.Outputs[0]['value'] = "out.xml"
+            self.DataOutputs['output'] = "out.xml"
             return
         else:
             return "Output file not created"
