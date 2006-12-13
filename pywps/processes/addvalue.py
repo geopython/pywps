@@ -166,31 +166,38 @@ class Process:
             4) returns the new file name or 'None' if something went wrong
         """
 
+        # import of the data
         os.system("r.in.gdal -o in=%s out=input >&2" %\
                 (self.DataInputs['input']))
 
-        self.status = ["Ahoj, svete", 10]
+        self.status = ["Data  imported", 10]
 
+        # compositing 3 bands to one raster file
         for gdalinfoln in os.popen("gdalinfo %s" % \
                 (self.DataInputs['input'])):
             if gdalinfoln.split()[0] == "Band" and gdalinfoln.split()[1] == "3":
                 os.system("""g.region rast=input.red >&2""")
                 os.system("r.composite r=input.red b=input.blue g=input.green out=input >&2")
+
+        # region setting
         os.system("""g.region rast=input >&2""")
+
+        # adding the value
         os.system("r.mapcalc output=input+%f >&2" % \
                 (float(self.DataInputs['value'])))
-        os.system("r.out.gdal type=Int32 in=output out=%s 1>&2" % "output.tif")
-        self.status = ["Ahoj, svete", 90]
 
-        # boundingbox
+        # output
+        self.status = ["Raster file export", 90]
+        os.system("r.out.gdal type=Int32 in=output out=%s 1>&2" % "output.tif")
+
+        # boundingbox of current region
         region = {}
         for b in os.popen("g.region -g"):
             b = b.strip()
             key,val = b.split("=")
             region[key] = val
 
-        #time.sleep(10)
-        #os.system("r.out.tiff in=output out=output >&2")
+        # setting output values
         if "output.tif" in os.listdir(os.curdir):
             shutil.copy("output.tif","output2.tif")
             self.DataOutputs['outputVal'] = "output.tif"
