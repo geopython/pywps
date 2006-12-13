@@ -46,7 +46,7 @@ if ($_REQUEST['cost'] != 0) {
      }else
    {
       
-$stringa_query = $cgi_executable."?service=wps&version=0.4.0&request=Execute&Identifier=shortestpath&";
+$stringa_query = $cgi_executable."?service=wps&version=0.4.0&request=Execute&Identifier=shortestpath2&";
     #$stringa_query = "http://localhost/cgi-bin/wps.py?service=wps&version=0.4.0&request=Execute&Identifier=shortestpath2&";
     $array = array('x1', $_REQUEST['x1value'],'y1',$_REQUEST['y1value'],'x2', $_REQUEST['x2value'],'y2',$_REQUEST['y2value'],'cost',$_REQUEST['cost']);
     $comma_separated = implode(",", $array);
