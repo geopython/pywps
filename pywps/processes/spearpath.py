@@ -71,20 +71,16 @@ class Process:
         """
 
         os.system("g.region -d")
-        # FIXME: the program does print "Building topology to STDOUT!!
-        print  "echo '0 %s %s %s %s' | v.net.path in=roads out=path 1>&2" % \
-                (self.Inputs[0]['value'],
-                self.Inputs[1]['value'],
-                self.Inputs[2]['value'],
-                self.Inputs[3]['value'])
-
-        os.system(
+        if os.system(
             "echo '0 %s %s %s %s' | v.net.path in=roads out=path 1>&2" % \
             (self.Inputs[0]['value'],
                 self.Inputs[1]['value'],
                 self.Inputs[2]['value'],
-                self.Inputs[3]['value']))
-        os.system("v.out.ogr format=GML input=path dsn=out.xml  olayer=path.xml 1>&2")
+                self.Inputs[3]['value'])):
+            return "Could not proceed v.net.path"
+
+        if os.system("v.out.ogr format=GML input=path dsn=out.xml olayer=path.xml 1>&2"):
+            return "Could not export vector file"
 
         if "out.xml" in os.listdir(os.curdir):
             shutil.copy("out.xml","out2.xml")
