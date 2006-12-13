@@ -1,4 +1,3 @@
-#!/usr/bin/python
 """
 This module generates XML file with DescribeProcess response of WPS
 """

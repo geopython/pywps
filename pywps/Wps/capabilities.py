@@ -1,4 +1,3 @@
-#!/usr/bin/python
 """
 This module generates XML file with GetCapabilities response of WPS
 """
