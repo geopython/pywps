@@ -86,7 +86,7 @@ class Process:
             (self.Inputs['x1'],
                 self.Inputs['y1'],
                 self.Inputs['x2'],
-                self.Inputs['y2']))
+                self.Inputs['y2'])):
             return "Could not determine shortest path"
 
         if os.system("v.out.ogr format=GML input=path dsn=out.xml olayer=path.xml 1>&2"):
