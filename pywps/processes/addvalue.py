@@ -167,8 +167,9 @@ class Process:
         """
 
         # import of the data
-        os.system("r.in.gdal -o in=%s out=input >&2" %\
-                (self.DataInputs['input']))
+        if os.system("r.in.gdal -o in=%s out=input >&2" %\
+                (self.DataInputs['input'])):
+            return "Could not import raster file"
 
         self.status = ["Data  imported", 10]
 
@@ -183,12 +184,16 @@ class Process:
         os.system("""g.region rast=input >&2""")
 
         # adding the value
-        os.system("r.mapcalc output=input+%f >&2" % \
-                (float(self.DataInputs['value'])))
+        if  os.system("r.mapcalc output=input+%f >&2" % \
+                (float(self.DataInputs['value']))):
+            return "Could not perform map calulator"
 
         # output
         self.status = ["Raster file export", 90]
-        os.system("r.out.gdal type=Int32 in=output out=%s 1>&2" % "output.tif")
+        if os.system("r.out.gdal type=Int32 in=output out=%s 1>&2" %\
+                "output.tif"):
+            return "Could not export raster file"
+
 
         # boundingbox of current region
         region = {}

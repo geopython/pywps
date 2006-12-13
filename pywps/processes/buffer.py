@@ -52,15 +52,21 @@ class Process:
         ]
         
     def execute(self):
-        os.system("g.region -d")
+
+        if os.system("g.region -d"):
+            return "Could not set region to default"
 	    	
-	os.system("v.in.ascii input=%s output=punto format=point fs=, skip=0 x=1 y=2 z=0 cat=0 -t 1>&2" %\
-			(self.DataInputs['point'])) 
+	if os.system("v.in.ascii input=%s output=punto format=point fs=, skip=0 x=1 y=2 z=0 cat=0 -t 1>&2" %\
+                (self.DataInputs['point'])) :
+            return "Could run v.in.ascii"
             
-	os.system("v.buffer input=punto output=punto_buff type=point layer=1 buffer=%s scale=1.0 tolerance=0.01 1>&2" %\
-			(self.DataInputs['radius']))
+	if os.system("v.buffer input=punto output=punto_buff type=point layer=1 buffer=%s scale=1.0 tolerance=0.01 1>&2" %\
+                (self.DataInputs['radius'])):
+            return "Could not run v.buffer"
             	
-	os.system("v.out.ogr type=area format=GML input=punto_buff dsn=out.xml  olayer=path.xml 1>&2")
+	if os.system("v.out.ogr type=area format=GML input=punto_buff dsn=out.xml  olayer=path.xml 1>&2"):
+            return "Could not export vector map"
+
         
         if "out.xml" in os.listdir(os.curdir):
             self.DataOutputs['output'] = "out.xml"
