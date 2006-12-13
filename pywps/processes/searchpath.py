@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import os,time,string,sys,shutil
 
 class Process:
@@ -76,23 +74,22 @@ class Process:
 
         It returns None, if process succeed or String if process failed
         """
-        os.system("v.in.ogr dsn=%s out=roads 1>&2" %
-                (self.DataInputs['value']))
+        if os.system("v.in.ogr dsn=%s out=roads 1>&2" %
+                (self.DataInputs['value'])):
+            return "Could not import vector file"
         os.system("g.region -d")
-        # FIXME: the program does print "Building topology to STDOUT!!
-        # print  "echo '0 %s %s %s %s' | v.net.path in=roads out=path 1>&2" % \
-        #         (self.DataInputs['x1'],
-        #         self.DataInputs['y1'],
-        #         self.DataInputs['x2'],
-        #         self.DataInputs['y2'])
 
-        os.system(
+
+        if os.system(
             "echo '0 %s %s %s %s' | v.net.path in=roads out=path 1>&2" % \
             (self.Inputs['x1'],
                 self.Inputs['y1'],
                 self.Inputs['x2'],
                 self.Inputs['y2']))
-        os.system("v.out.ogr format=GML input=path dsn=out.xml olayer=path.xml 1>&2")
+            return "Could not determine shortest path"
+
+        if os.system("v.out.ogr format=GML input=path dsn=out.xml olayer=path.xml 1>&2"):
+            return "Could not export vector file"
 
         if "out.xml" in os.listdir(os.curdir):
             shutil.copy("out.xml","out2.xml")
