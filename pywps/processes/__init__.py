@@ -5,7 +5,6 @@ __all__ = [
         "addvalue",
         "classify" ,
         "flow",
-        "justadd",
         "ndvi",
         "searchpath",
         "shortestpath", 
