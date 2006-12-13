@@ -81,15 +81,15 @@ WPS = {
     # Service provider identification
     #
     'ServiceProvider': {
-            'ProviderName' : "Help-Service",
-            'IndividualName':"Jachym Cepicky",
-            'PositionName':"Student",
-            'Role':"author",
-            'DeliveryPoint': "Mengendamm 16d",
-            'City': "Hannover",
-            'PostalCode':"30177",
-            'Country': "Germany",
-            'ElectronicMailAddress':"cepicky@gdf-hannover.de",
+            'ProviderName' : "Your Company Name",
+            'IndividualName':"Your Name",
+            'PositionName':"Your Position",
+            'Role':"Your role",
+            'DeliveryPoint': "Street ",
+            'City': "City",
+            'PostalCode':"000000",
+            'Country': "Your Country",
+            'ElectronicMailAddress':"your@email.address.org",
     },
 
     # 
@@ -154,6 +154,6 @@ ServerSettings = {
     # maxInputParamLength: maximal length of input values
     # NOTE: maximal length of input parameters is 256, no mather, how height
     #       is this number
-    # 'maxInputParamLength':256,
+    # 'maxInputParamLength':1024,
     'maxInputParamLength':1024,
 }
