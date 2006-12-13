@@ -6,7 +6,6 @@ __all__ = [
         "classify" ,
         "flow",
         "ndvi",
-        "searchpath",
         "shortestpath", 
         "spearpath", 
         "visibility",
