@@ -94,6 +94,7 @@ foreach ($dom->getElementsByTagName('ComplexValueReference') as $CVR) {
         $style = ms_newStyleObj($class);
         $style=$class->getStyle(0);
         $style->color->setRGB(102,228,73);
+	$style->outlinecolor->setRGB(0,0,0);
 
 //This is for the layer top (point)
 
