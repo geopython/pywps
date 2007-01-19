@@ -52,7 +52,7 @@
 	$stringa_query .= $comma_separated;
 	$stringa_query .= "&status=false&store=true";
 	
-	if(isset($_REQUEST['debug'])) "stringa query= $stringa_query;";
+	if(isset($_REQUEST['debug'])) echo "stringa query= $stringa_query;";
 	
 	$dom = new DOMDocument();
 	$dom->load($stringa_query);
