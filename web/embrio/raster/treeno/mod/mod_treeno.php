@@ -68,7 +68,7 @@ foreach ($dom->getElementsByTagName('ComplexValueReference') as $CVR) {
         }
 
 //Extract the value of the constant (to be finished)
-	 if(isset($_REQUEST['debug']))print_r($dom);
+	 if(isset($_REQUEST['debug']))$dom->saveHTML();
 
 //	$number_trees=$dom->getElementsByTagName('LiteralValue');
 foreach ($dom->getElementsByTagName('LiteralValue') as $LV) {
