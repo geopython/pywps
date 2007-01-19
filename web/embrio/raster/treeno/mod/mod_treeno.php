@@ -74,7 +74,7 @@ foreach ($dom->getElementsByTagName('ComplexValueReference') as $CVR) {
 //	$number_trees=$dom->getElementsByTagName('LiteralValue');
 foreach ($dom->getElementsByTagName('LiteralValue') as $LV) {
 		//$nodo = $LV->nodeValue();
-		//echo "arberi=$nodo;";
+		echo "arberi=$LV;";
         /*$aNodo = explode('/',$nodo);
         $filename = end($aNodo);
         $output[$value]=$pywps_outputPath.$filename;
