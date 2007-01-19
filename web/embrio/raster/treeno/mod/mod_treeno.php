@@ -71,7 +71,7 @@ foreach ($dom->getElementsByTagName('ComplexValueReference') as $CVR) {
 
 //	$number_trees=$dom->getElementsByTagName('LiteralValue');
 foreach ($dom->getElementsByTagName('LiteralValue') as $LV) {
-		$nodo = $CVR->nodeValue();
+		$nodo = $LV->nodeValue();
 		echo "arberi=$nodo;";
         /*$aNodo = explode('/',$nodo);
         $filename = end($aNodo);
