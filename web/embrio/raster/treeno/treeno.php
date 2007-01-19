@@ -80,19 +80,17 @@ else die('create your include/config.php using include/config.php.dist as templa
 <div  id="params">
 <form method="post" action="<?php echo $PHP_SELF; ?>">
 	<fieldset>
-	<legend>Params</legend>
-        <label>X:</label><span id="xvalue_span">0</span> 
+	<legend>Process</legend>
+       <!-- <label>X:</label><span id="xvalue_span">0</span> 
 		<input type="hidden" name="xvalue" id="xvalue" size="20" maxlength="40" value="599043" />		
         <label>Y:</label><span id="yvalue_span">0</span> 
 		<input type="hidden" name="yvalue" id="yvalue" size="20" maxlength="40" value="4921752" />
 		<p><label>Max distance where check visibility:<br> (range <span id="maxdist_range"></span>)</label>
-		<!--<input type="text" name="maxdist" size="20" maxlength="40" value="" />-->
 		<select name="maxdist" id="maxdist">
 		</select></p>
 		<p><label>Height of the observer:<br> (range <span id="observer_range"></span>)</label>
-		<!--<input type="text" name="observer" size="20" maxlength="40" value="" />-->
 		<select name="observer" id="observer">
-		</select></p>
+		</select></p>-->
 		<input type="button" name="submit" id="go" value="Go!" />
 	</fieldset>
 	
@@ -100,16 +98,12 @@ else die('create your include/config.php using include/config.php.dist as templa
 		INTERFACE PARAMS
 		this hidden fields for interface params 
 	-->
-	<input type="hidden" name="map_extent" id="map_extent" value="588913.043478,4915200.000000,610066.956522,4928010.000000">
-	<input type="hidden" name="distance_extent" id="distance_extent" value="1500,5500">
-	<input type="hidden" name="height_extent" id="height_extent" value="1,45">
+	<input type="hidden" name="map_extent" id="map_extent" value="-639507,-997283.5,-639221,-997112.5">
 	
 
 </form>
 </div>
 <div id="console">
-<textarea name="console" id="consolearea">
-</textarea>
 </div>
 </body>
 </html>
