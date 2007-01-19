@@ -56,7 +56,7 @@ else die('create your include/config.php using include/config.php.dist as templa
 <html lang="en">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<title>PyQPS r.los  by ominiverdi.org</title>
+		<title>PyWPS application  by ominiverdi.org</title>
 		<script type="text/javascript" src="../../js/xhr.js"></script>
 		<script type="text/javascript" src="js/startUp.js"></script>
 		<link href="../../css/screen.css" rel="stylesheet" type="text/css" media="all">
@@ -64,13 +64,13 @@ else die('create your include/config.php using include/config.php.dist as templa
 	<body>
         
 <div id="header">
-	<h1>GRASS Buffer module</h1>
+	<h1>PYWPS Raster Application</h1>
 	<p>
-	<strong>r.los</strong> generates a raster map output in which the cells that are visible from a user-specified observer location are marked with integer values that represent the vertical angle (in degrees) required to see those cells (viewshed).
+	This process is used to found the number of trees in an input raster map.You'll get the number of trees detected and a point for each one.
+	Future version, will allow to upload raster on the server.
     	</p>
-	<p><strong>Usage:</strong> click on map to set <em>coords</em>. Use selects to change <em>distance</em> and
-	<em>height</em> params.<br>
-	Then click on <strong>Go!</strong> button to see overlayed output.
+	<p>
+	Press <strong>Go!</strong> to begin the process.
 	</p>
 </div>
 <div id="output">
