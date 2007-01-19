@@ -73,8 +73,7 @@ foreach ($dom->getElementsByTagName('ComplexValueReference') as $CVR) {
 
 //	$number_trees=$dom->getElementsByTagName('LiteralValue');
 foreach ($dom->getElementsByTagName('LiteralValue') as $LV) {
-		//$nodo = $LV->nodeValue();
-		echo "arberi=".$LV->textContent.";";
+		$nodoArbero = $LV->textContent;
         /*$aNodo = explode('/',$nodo);
         $filename = end($aNodo);
         $output[$value]=$pywps_outputPath.$filename;
@@ -137,6 +136,7 @@ foreach ($dom->getElementsByTagName('LiteralValue') as $LV) {
 	echo "image_url='$image_url';";
 	//echo "xml_dump='".urlencode($dom->saveXML())."';";
 	echo "mapfile='/tmp/".$sessionId.".map';";
+		echo "arberi=$nodoArbero;";
 	//echo "mapfile='$img_path."/mapfile_tree.map"
 	if(isset($_REQUEST['debug'])){
 		echo "xml_dump='".urlencode($dom->saveXML())."';";
