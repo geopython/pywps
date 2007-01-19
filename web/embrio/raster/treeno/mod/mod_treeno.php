@@ -70,6 +70,15 @@ foreach ($dom->getElementsByTagName('ComplexValueReference') as $CVR) {
 //Extract the value of the constant (to be finished)
 
 //	$number_trees=$dom->getElementsByTagName('LiteralValue');
+foreach ($dom->getElementsByTagName('LiteralValue') as $LV) {
+		$nodo = $CVR->getAttribute('reference');
+        $aNodo = explode('/',$nodo);
+        $filename = end($aNodo);
+        $output[$value]=$pywps_outputPath.$filename;
+        $value++;
+	 if(isset($_REQUEST['debug']))print_r($LV);
+}
+
 		
 
 
