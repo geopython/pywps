@@ -27,18 +27,26 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  **********************************************************************/
- 
+
+
+// This file is created to use stromy.tif 
+
 	include('../include/config.php');
  
-//Initialize some var for the output parsing
+//Initialize some var for parsing output
+	
 	$value=0;
 	$output=array();	
         $map = ms_newMapObj($map_path.$map_file);
+
+//This one is used if user can select more then a raster
 	
+	$input_raster="/home/doktoreas/data/treeno/stromy.tif";	
+
 //Built up the request for PYWPS	
 	
 	$stringa_query = $cgi_executable."?service=wps&version=0.4.0&request=Execute&Identifier=trees&";
-	$array = array('input', $_REQUEST['input']);
+	$array = array('input', $input_raster);
 	$comma_separated = implode(",", $array);
 	$stringa_query .= "datainputs=";
 	$stringa_query .= $comma_separated;
@@ -47,9 +55,9 @@
 	$dom = new DOMDocument();
 	$dom->load($stringa_query);
 	
-//Output are 2 vector files (one area and one point) and 1 costant
+//Output are 2 vector files (one area and one point) and 1 costant (number of trees)
 
-//Extract the path of the vector files
+//Extract the path of the vectors
 
 foreach ($dom->getElementsByTagName('ComplexValueReference') as $CVR) {
         $nodo = $CVR->getAttribute('reference');
@@ -59,8 +67,9 @@ foreach ($dom->getElementsByTagName('ComplexValueReference') as $CVR) {
         $value++;
         }
 
-//Extract the value of the constant
-	$trees=$dom->getElementsByTagName('LiteralValue');
+//Extract the value of the constant (to be finished)
+
+	$number_trees=$dom->getElementsByTagName('LiteralValue');
 		
 
 
@@ -71,6 +80,7 @@ foreach ($dom->getElementsByTagName('ComplexValueReference') as $CVR) {
 	$pywps_outputPath.=$filename;
 */	
 
+
 //Update the mapfile with first layer voronoi (area)
 	 
 	$layer = ms_newLayerObj($map);
@@ -78,12 +88,12 @@ foreach ($dom->getElementsByTagName('ComplexValueReference') as $CVR) {
    	$layer->set('status', MS_DEFAULT );
    	$layer->set('connection', $output[0]);
    	$layer->set('type', MS_LAYER_POLYGON);
-   	$layer->set('transparency',"50");
+   	$layer->set('transparency',"64");
    	$layer->set('connectiontype',MS_OGR);
         $class = ms_newClassObj($layer);
         $style = ms_newStyleObj($class);
         $style=$class->getStyle(0);
-        $style->color->setRGB( 255,255,0);
+        $style->color->setRGB(102,228,73);
 
 //This is for the layer top (point)
 
@@ -96,10 +106,12 @@ foreach ($dom->getElementsByTagName('ComplexValueReference') as $CVR) {
         $class= ms_newClassObj($layer);
         $style= ms_newStyleObj($class);
         $style=$class->getStyle(0);
-        $style->color->setRGB( 255,0,0);
+        $style->color->setRGB(108,88,220);
 		
+//The mapfile is saved for debugging purpose
 		
 	$map->save($img_path."/mapfile_tree.map");
+
 //Create the output image
 
 	$map_id = sprintf("%0.6d",rand(0,999999));
