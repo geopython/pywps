@@ -63,7 +63,7 @@ foreach ($dom->getElementsByTagName('ComplexValueReference') as $CVR) {
         $nodo = $CVR->getAttribute('reference');
         $aNodo = explode('/',$nodo);
         $filename = end($aNodo);
-        $output[$value]=$pywps_outputPat.$filename;
+        $output[$value]=$pywps_outputPath.$filename;
         $value++;
         }
 
