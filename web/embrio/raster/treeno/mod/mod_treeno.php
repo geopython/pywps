@@ -139,6 +139,7 @@ foreach ($dom->getElementsByTagName('LiteralValue') as $LV) {
 	echo "mapfile='/tmp/".$sessionId.".map';";
 	//echo "mapfile='$img_path."/mapfile_tree.map"
 	if(isset($_REQUEST['debug'])){
+		echo "xml_dump='".urlencode($dom->saveXML())."';";
 	echo "<br>filename = $filename";
 	echo "<br>outimg = $image_url";
 	echo "<br>".$img_path."/mapfile_treeno.map";
