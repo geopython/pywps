@@ -80,6 +80,7 @@ function parsePywpsOut (szInit){
     eval(szInit);
 	//getRawObject('console').innerHTML = xml_dump.replace(/\+/g," ");
 	getRawObject('outimg').src = image_url;
+	getRawObject('arberi').innerHTML = 'tot trees: ' + arberi;
 	getRawObject('outimg').onload = waitEnd;
 }
 function getCoords (e){

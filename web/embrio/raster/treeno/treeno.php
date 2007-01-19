@@ -93,7 +93,7 @@ else die('create your include/config.php using include/config.php.dist as templa
 		</select></p>-->
 		<input type="button" name="submit" id="go" value="Go!" />
 	</fieldset>
-	
+	<p id="arberi"></p>
 	<!-- 
 		INTERFACE PARAMS
 		this hidden fields for interface params 
