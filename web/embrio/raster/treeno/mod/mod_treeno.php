@@ -52,6 +52,8 @@
 	$stringa_query .= $comma_separated;
 	$stringa_query .= "&status=false&store=true";
 	
+	if(isset($_REQUEST['debug'])) "stringa query= $stringa_query;";
+	
 	$dom = new DOMDocument();
 	$dom->load($stringa_query);
 	
@@ -71,8 +73,8 @@ foreach ($dom->getElementsByTagName('ComplexValueReference') as $CVR) {
 
 //	$number_trees=$dom->getElementsByTagName('LiteralValue');
 foreach ($dom->getElementsByTagName('LiteralValue') as $LV) {
-		$nodo = $LV->nodeValue();
-		echo "arberi=$nodo;";
+		//$nodo = $LV->nodeValue();
+		//echo "arberi=$nodo;";
         /*$aNodo = explode('/',$nodo);
         $filename = end($aNodo);
         $output[$value]=$pywps_outputPath.$filename;
