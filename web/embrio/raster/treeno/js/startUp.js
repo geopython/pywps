@@ -37,17 +37,14 @@ var isCSS, isW3C, isIE4, isNN4;
 //MAP variables
 var outimg;
 var map_extent;
-var height_extent;
-var distance_extent;
-var input_x=null;
-var input_y=null;
+var raster = 'luca.buho';
 
 //ajax call vars
 var image_url;
 var xml_dump;
 
 //MODULE NAME
-var module_path = 'mod/mod_r_los.php';
+var module_path = 'mod/mod_treeno.php';
 
 //interface vars
 var steps = 6;
@@ -60,34 +57,6 @@ function startUp(){
 	//get params
 	map_extent = document.getElementById('map_extent').value;
 	map_extent = map_extent.split(',');
-	height_extent = document.getElementById('height_extent').value.split(',');
-	height_unit = parseInt((height_extent[1]-height_extent[0])/steps*100)/100;
-	distance_extent = document.getElementById('distance_extent').value.split(',');
-	distance_unit = parseInt((distance_extent[1]-distance_extent[0])/steps*100)/100;
-	
-	//print ranges
-	getRawObject('observer_range').innerHTML = height_extent[0] + ' -&gt; ' + height_extent[1]; 
-	getRawObject('maxdist_range').innerHTML = distance_extent[0] + ' -&gt; ' + distance_extent[1]; 
-	
-	//update selects
-	var maxdist = getRawObject('maxdist');
-	var observer = getRawObject('observer');
-	var height = parseInt(height_extent[0]);
-	var distance = parseInt(distance_extent[0]);
-    for(i=0;i<=steps;i++) {
-        if(i==steps){
-			height = parseInt(height_extent[1]);
-			distance = parseInt(distance_extent[1]);
-			maxdist[i] = new Option(distance,distance,false,false);
-			observer[i] = new Option(height,height,false,false);
-		} else{  
-			maxdist[i] = new Option(distance,distance,false,false);
-			observer[i] = new Option(height,height,false,false);
-		}
-		
-		height = parseInt((height + height_unit)*100)/100;
-		distance = parseInt(distance + distance_unit);
-    }
 	
 	//set button event
 	getRawObject('go').onclick = runPywps;
@@ -95,16 +64,8 @@ function startUp(){
 
 
 function runPywps(){
-	if(input_x==null){
-		alert('click on map for coords first');
-		return;
-	}
-	var maxdistSel = getRawObject('maxdist');
-	var maxdist= maxdistSel.options	[maxdistSel.selectedIndex].value;
-	var observerSel = getRawObject('observer');
-	var observer = observerSel.options[observerSel.selectedIndex].value;
 	//var url = 'mod/r_los.php?xvalue='+input_x+'&yvalue='+input_y+'&maxdist='+maxdist+'&observer='+observer;
-	var url = module_path+'?xvalue='+input_x+'&yvalue='+input_y+'&maxdist='+maxdist+'&observer='+observer;
+	var url = module_path+'?raster='+raster;
 	waitStart();
 	call(url, this, parsePywpsOut);
 }
