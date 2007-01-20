@@ -119,8 +119,10 @@ foreach ($dom->getElementsByTagName('LiteralValue') as $LV) {
         $class= ms_newClassObj($layer);
         $style= ms_newStyleObj($class);
         $style=$class->getStyle(0);
+        $style->set("symbolname", "circle");
+        $style->set("size","5");
         $style->color->setRGB(108,88,220);
-		
+
 //The mapfile is saved for debugging purpose
 		
 	$map->save($img_path."/mapfile_tree.map");
