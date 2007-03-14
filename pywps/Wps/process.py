@@ -4,15 +4,26 @@
 #         http://les-ejk.cz
 
 
+import os
+
 class WPSProcess:
-    def __init__(self, Identifier = '', processVersion="1.0", Title="",
+    def __init__(self, Identifier, Title, processVersion="1.0", 
             Abstract="", statusSupported="false", storeSupported="false"):
         self.Identifier = Identifier
         self.processVersion = processVersion
         self.Title = Title
         self.Abstract = Abstract
-        self.statusSupported=statusSupported
-        self.storeSupported=statusSupported
+
+        if statusSupported.lower() == "true" or\
+           statusSupported == True or \
+           statusSupported.lower() == "t":
+            self.statusSupported="true"
+
+        if storeSupported.lower() == "false" or\
+           storeSupported == False or \
+           storeSupported.lower() == "f":
+            self.storeSupported="false"
+
         self.Inputs = []
         self.Outputs = []
 
@@ -233,7 +244,7 @@ class WPSProcess:
                 retoupt = oupt
         return retoupt
 
-    def GCmd(self,cmd,stdin=None):
+    def Gcmd(self,cmd,stdin=None):
         """Runs GRASS command, fetches all GRASS_MESSAGE and
         GRASS_PERCENT messages and sets self.status according to them, so
         the client application can track the progress information, when
@@ -243,9 +254,9 @@ class WPSProcess:
         running GRASS modules
         
         Example Usage:
-            self.GCmd("r.los in=elevation.dem out=los coord=1000,1000")
+            self.Gcmd("r.los in=elevation.dem out=los coord=1000,1000")
 
-            self.GCmd("v.net.path network afcol=forward abcol=backward \
+            self.Gcmd("v.net.path network afcol=forward abcol=backward \
             out=mypath nlayer=1","1 9 12")
             """
 
@@ -261,6 +272,11 @@ class WPSProcess:
         module_stdin.close()
 
         line = module_stderr.readline()
+
+        # error?
+        if line.lower().find("not found") > -1:
+            return False
+
         while 1:
             if not line:
                 break
@@ -276,7 +292,7 @@ class WPSProcess:
                 self.SetStatus(line)
             #-----
             line = module_stderr.readline()
-        return
+        return True
     
     def SetStatus(self,message="",percent=""):
         """Sets self.status variable according to given message and
