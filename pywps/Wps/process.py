@@ -277,3 +277,16 @@ class WPSProcess:
             #-----
             line = module_stderr.readline()
         return
+    
+    def SetStatus(self,message="",percent=""):
+        """Sets self.status variable according to given message and
+        percents"""
+
+        if self.status[0] and not message:
+            message = self.status[0]
+        if self.status[1] and not percent:
+            percent = self.status[1]
+
+        self.status = [message, percent]
+
+        return self.status
