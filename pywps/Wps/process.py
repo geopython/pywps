@@ -4,7 +4,7 @@
 #         http://les-ejk.cz
 
 
-import os
+import os,sys
 
 class WPSProcess:
     def __init__(self, Identifier, Title, processVersion="1.0", 
@@ -24,7 +24,7 @@ class WPSProcess:
            storeSupported.lower() == "f":
             self.storeSupported="false"
 
-        self.status = []
+        self.status = ["Process started",0]
         self.Inputs = []
         self.Outputs = []
 
@@ -264,6 +264,7 @@ class WPSProcess:
         
         os.environ["GRASS_MESSAGE_FORMAT"] = "gui"
 
+        sys.stderr.write("PyWPS Gcmd: %s\n" % (cmd.strip()))
         (module_stdin, module_stdout, module_stderr) = os.popen3(cmd)
 
         os.environ["GRASS_MESSAGE_FORMAT"] = "text"
@@ -276,38 +277,47 @@ class WPSProcess:
 
         # error?
         if line.lower().find("not found") > -1:
+            module_stderr.close()
+            module_stdout.close()
             return False
 
         while 1:
-            if not line:
+            if line == '':
                 break
             line = line.strip()
             #-----
             try:
                 format,content = line.split(":")
-                if format =="GRASS_PERCENT":
+                if format =="GRASS_INFO_PERCENT":
                     try:
-                        percent = percent.replace("%","")
-                        precent = int(percent)
+                        content = content.replace("%","")
+                        content = int(content)
+                        self.SetStatus(percent=content)
                     except (AttributeError, ValueError):
                         pass
 
-                    self.SetStatus(percent=percent)
                 else:
                     self.SetStatus(content)
             except:
                 pass
             #-----
+            sys.stderr.write("PyWPS Gcmd:\t %s\n" % str(self.status))
             line = module_stderr.readline()
+        module_stderr.close()
+        module_stdout.close()
         return True
     
-    def SetStatus(self,message="",percent=""):
+    def SetStatus(self,message=None,percent=None):
         """Sets self.status variable according to given message and
         percents"""
 
-        if self.status[0] and not message:
+        if self.status[1] == None:
+            self.status[1] = 0
+
+        if not message:
             message = self.status[0]
-        if self.status[1] and not percent:
+
+        if not percent:
             percent = self.status[1]
 
         try:
