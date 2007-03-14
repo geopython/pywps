@@ -135,7 +135,7 @@ def main():
 
             elif not 'version' in inpts.values.keys() and \
                 inpts.values['request'].lower() != "getcapabilities":
-                raise MissingParameterValue(version)
+                raise MissingParameterValue("version")
             
             # service == wps
             if inpts.values['service'].lower() != 'wps':
