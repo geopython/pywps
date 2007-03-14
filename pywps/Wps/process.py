@@ -232,3 +232,48 @@ class WPSProcess:
             if oupt["Identifier"] == Identifier:
                 retoupt = oupt
         return retoupt
+
+    def GCmd(self,cmd,stdin=None):
+        """Runs GRASS command, fetches all GRASS_MESSAGE and
+        GRASS_PERCENT messages and sets self.status according to them, so
+        the client application can track the progress information, when
+        runing with Status=True
+
+        This module is supposed to be used instead of 'os.system()', while
+        running GRASS modules
+        
+        Example Usage:
+            self.GCmd("r.los in=elevation.dem out=los coord=1000,1000")
+
+            self.GCmd("v.net.path network afcol=forward abcol=backward \
+            out=mypath nlayer=1","1 9 12")
+            """
+
+        
+        os.environ["GRASS_MESSAGE_FORMAT"] = "gui"
+
+        (module_stdin, module_stdout, module_stderr) = os.popen3(cmd)
+
+        os.environ["GRASS_MESSAGE_FORMAT"] = "text"
+       
+        if stdin:
+            module_stdin.write(stdin)
+        module_stdin.close()
+
+        line = module_stderr.readline()
+        while 1:
+            if not line:
+                break
+            line = line.strip()
+            #-----
+            try:
+                format,content = line.split(":")
+                if format =="GRASS_PERCENT":
+                    self.SetStatus(percent=percent)
+                else:
+                    self.SetStatus(content)
+            except:
+                self.SetStatus(line)
+            #-----
+            line = module_stderr.readline()
+        return
