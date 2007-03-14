@@ -18,6 +18,7 @@ class WPSProcess:
 
     def AddLiteralInput(self, Identifier, Title=None, Abstract=None,
             UOMs="m", MinimumOccurs=1, allowedvalues=("*"), type=type(""), value=None):
+        """Add new input item of type LiteralValue to this process"""
 
         if not Title: 
             Title = ""
@@ -55,6 +56,7 @@ class WPSProcess:
 
     def AddComplexInput(self, Identifier, Title=None, Abstract=None,
             Formats=["text/xml"], value=None):
+        """Add new input item of type ComplexValue to this process"""
 
         if not Title: 
             Title = ""
@@ -80,6 +82,7 @@ class WPSProcess:
         return self.Inputs[-1]
 
     def AddBBoxInput(self, Identifier, Title=None, Abstract=None, value=[]):
+        """Add new input item of type BoundingBox to this process"""
 
         if not Title: 
             Title = ""
@@ -111,6 +114,8 @@ class WPSProcess:
 
     def AddLiteralOutput(self, Identifier, Title=None, Abstract=None,
             UOMs="m", value=None):
+        """Add new output item of type LiteralValue to this process"""
+
 
         if not Title: 
             Title = ""
@@ -136,6 +141,7 @@ class WPSProcess:
 
     def AddComplexValueOutput(self, Identifier, Title=None, Abstract=None,
             Formats=["text/xml"], value=None):
+        """Add new output item of type ComplexValue to this process"""
 
         if not Title: 
             Title = ""
@@ -160,28 +166,30 @@ class WPSProcess:
 
         return self.Outputs[-1]
 
-#    def AddComplexValueReferenceOutput(self, Identifier, Title=None, Abstract=None,
-#            Formats=["text/xml"], value=None):
-#
-#        if not Title: 
-#            Title = ""
-#
-#        if not Abstract: 
-#            Abstract = ""
-#
-#        while 1:
-#            if self.GetOutput(Identifier):
-#                Identifier += "-1"
-#            else:
-#                break
-#        self.Outputs.append({"Identifier":Identifier,"Title":Title,
-#                            "Abstract":Abstract,
-#                            "ComplexValueReference": {"Formats":Formats},
-#                            "value": value
-#                            })
-#
+    def AddComplexValueReferenceOutput(self, Identifier, Title=None, Abstract=None,
+            Formats=["text/xml"], value=None):
+        """Add new output item of type ComplexValueValueReference to this process"""
+
+        if not Title: 
+            Title = ""
+
+        if not Abstract: 
+            Abstract = ""
+
+        while 1:
+            if self.GetOutput(Identifier):
+                Identifier += "-1"
+            else:
+                break
+        self.Outputs.append({"Identifier":Identifier,"Title":Title,
+                            "Abstract":Abstract,
+                            "ComplexValueReference": {"Formats":Formats},
+                            "value": value
+                            })
+
 
     def AddBBoxOutput(self, Identifier, Title=None, Abstract=None, value=[]):
+        """Add new output item of type BoundingBoxOutput to this process"""
 
         if not Title: 
             Title = ""
@@ -208,6 +216,7 @@ class WPSProcess:
         return self.Outputs[-1]
 
     def GetInput(self,Identifier):
+        """Returns input of defined identifier"""
         retinpt = None
 
         for inpt in self.Inputs:
@@ -216,6 +225,7 @@ class WPSProcess:
         return retinpt
 
     def GetOutput(self,Identifier):
+        """Returns output of defined identifier"""
         retoupt = None
 
         for oupt in self.Outputs:
