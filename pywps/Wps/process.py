@@ -306,3 +306,15 @@ class WPSProcess:
         self.status = [message, percent]
 
         return self.status
+
+    def GetInputValue(self,Identifier):
+        """Get value of selected input"""
+        return self.GetInput(Identifier)["value"]
+
+    def GetOutputValue(self,Identifier):
+        """Get value of selected output"""
+        return self.GetOutput(Identifier)["value"]
+
+    def SetOutputValue(self,Identifier,value):
+        """Set value of selected output"""
+        self.GetInput(Identifier)["value"] = value
