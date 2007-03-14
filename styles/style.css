@@ -1,0 +1,85 @@
+body
+{
+	font: Verdana,Tahoma,Arial,sans-serif;
+}
+
+a
+{
+	color: #559900;
+	font-weight: bold;
+	text-decoration: none;
+	background-color: inherit;
+}
+
+a:hover
+{
+	color: #336600;
+	text-decoration: none;
+	background-color: inherit;
+}
+
+a img
+{
+	border: none;
+}
+
+div#container {
+    margin:20px;
+    padding:10px;
+}
+
+div#header {
+    color: #fff;
+    background: #999 url("../images/pywps.png") no-repeat 98% 5px ;
+    padding: 20px;
+    height: 90px;
+}
+div#content {
+    margin: 20px;
+    margin-left:200px;
+    border-left: solid #ccc 3px;
+    padding-left: 20px;
+}
+
+div#sitenavigation ul{
+    list-style-type: none;
+    margin: 20px;
+}
+div#sitenavigation li{
+    display: inline;
+    margin-left: 20px;
+}
+div#bar {
+    width: 180px;
+    float:left;
+    padding: 20px;
+}
+h3 {
+    margin-top: 20px;
+}
+h4 {
+    margin-top: 15px;
+}
+
+div#bar li {
+    padding: 2px;
+    margin-bottom: 2px;
+    list-style: none;
+}
+
+div#footer {
+    padding: 5px;
+    margin-top: 20px;
+    color: #fff;
+    background: #999;
+}
+div#footer a{
+    color: #99Ff33;
+}
+div#footer a:hover {
+	color: #99ff66;
+}
+
+div.archive {
+    margin-top: 20px
+}

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US" lang="en-US">
+<head>
+	<meta name="keywords" content="web services, ogc, wps, web processing service" />
+	<meta http-equiv="Content-Type" content="text/xhtml; charset=utf-8" />
+	<meta name="description" content="PyWPS - Implementation of Web Processing Service (WPS) standard defined by Open Geospatial Consortium (OGC)" />
+        <link rel="stylesheet" type="text/css" href="../styles/style.css" />
+	<title>PyWPS: Docs</title>
+</head>
+<body>
+    <div id="container">
+        <div id="header">
+            <h1>Welcome to PyWPS</h1>
+            <h2>Implementation of OGC Web Processing Service standard</h2>
+        </div><!-- /header -->
+        <div id="bar">
+            <%@ include file="../bar.html"%>
+        </div><!-- /bar -->
+
+        <div id="content">
+            <!-- ====================== content ============================== -->
+            <div id="sitenavigation">
+                <ul>
+                    <li><a href="#requirements">Requirements</a></li>
+                    <li><a href="#install">Installation</a></li>
+                    <li><a href="#pdf">Other documentation</a></li>
+                </ul>
+            </div>
+
+            <hr />
+            <a name="requirements"><h3>Requirements</h3></a>
+            <p>
+                Current version of PyWPS does require following programms/libs:
+                <ul>
+                    <li>Web Server (e.g. <a href="http://httpd.apache.org">Apache</a>)</li>
+                    <li><a href="http://python.org">Python programming language</a></li>
+                    <li><a href="http://pyxml.sourceforge.net/">Python-xml package</a></li>
+                </ul>
+            </p>
+            <p>
+                Suggested programs:
+                <ul>
+                    <li><a href="http://grass.itc.it">GRASS GIS</a></li>
+                    <li><a href="http://proj.maptools.org/">PROJ.4</a></li>
+                    <li><a href="http://remotesensing.org/gdal/">GDAL/OGR</a></li>
+                    <li><a href="http://r-project.org">R</a></li>
+                </ul>
+            </p>
+
+            <hr />
+            <a name="install"><h3>Installation</h3></a>
+            <p>
+                Before installing, read <a href="https://wald.intevation.org/plugins/scmsvn/viewcvs.php/trunk/INSTALL?rev=1&root=pywps&view=markup">INSTALL</a> file.
+            </p>
+            <p>
+                <ol>
+                    <li> You can <a href="/download/">download</a> PyWPS as DEB, RPM or TAR.GZ package. For <code>tar.gz</code>, unpac the package to server's code <code>cgi-bin</code> directory.</li>
+                    <li> Adjust your settings in <code>etc/settings.py</code> and eventually <code>etc/grass.py</cocde> files.</li>
+                    <li> Point your browser to <code>wps.py</code> file (e.g. <code><a href="http://localhost/cgi-bin/wps.py">http://localhost/cgi-bin/wps.py</a></code>), and you should get something like this:
+                        <pre>
+&lt;?xml version="1.0" ?&gt;
+&lt;ExceptionReport version="1.0.0" xmlns="http://www.opengis.net/ows" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+        &lt;Exception exceptionCode="MissingParameterValue" locator="request"/&gt;
+&lt;/ExceptionReport&gt;
+                        </pre>
+                    </li>
+                </ol>
+
+            </p>
+            <p>
+                <strong>Troubleshooting</strong> <br />
+    If you got some other message, like e.g.:
+     
+
+    <pre>
+Traceback (most recent call last):
+  File "trunk/index.py", line 53, in ?
+    from Wps import wpsexceptions
+  File "/home/jachym/prog/pywps/trunk/Wps/wpsexceptions.py", line 8, in ?
+    from xml.dom.minidom import Document
+ImportError: No module named xml.dom.minidom
+</pre>
+
+     
+    Than something is wrong with your Python installation or with the program.
+    This message means, that the <code>xml.dom.minidom</code> package is not installed in
+    your system.
+            </p>
+            <hr />
+            <a name="pdf"><h3>Other documents</h3></a>
+            <p>
+                Most completed document about installation, setup and usage of PyWPS can be dowloaded in <a href="https://wald.intevation.org/docman/view.php/22/71/install.pdf">PDF form</a>. LaTeX sources are <a href="https://wald.intevation.org/plugins/scmsvn/viewcvs.php/*checkout*/trunk/doc/install.tex?rev=1&root=pywps">also avaliable</a> and are part of the distribution packages.
+                
+            </p>
+            <p>
+                This document is also avaliable in <a href="https://wald.intevation.org/plugins/scmsvn/viewcvs.php/*checkout*/trunk/doc/install.html?&root=pywps">HTML</a> and in <a href="https://wald.intevation.org/plugins/scmsvn/viewcvs.php/*checkout*/trunk/doc/install.txt?&root=pywps">text</a> form.
+            </p>
+                <div class="archive"><a href="https://wald.intevation.org/docman/index.php?group_id=22">Docs archive</a>
+            <!-- ====================== /content ============================== -->
+
+        </div><!-- /content -->
+
+        <div id="footer">
+            &copy; PyWPS Development Team | Hosted by <a href="http://wald.intevation.org">wald.intevation.org</a>
+        </div><!-- /footer -->
+    </div><!-- /container -->
+</body>
+</html>
