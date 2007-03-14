@@ -24,6 +24,7 @@ class WPSProcess:
            storeSupported.lower() == "f":
             self.storeSupported="false"
 
+        self.status = []
         self.Inputs = []
         self.Outputs = []
 
@@ -285,11 +286,17 @@ class WPSProcess:
             try:
                 format,content = line.split(":")
                 if format =="GRASS_PERCENT":
+                    try:
+                        percent = percent.replace("%","")
+                        precent = int(percent)
+                    except (AttributeError, ValueError):
+                        pass
+
                     self.SetStatus(percent=percent)
                 else:
                     self.SetStatus(content)
             except:
-                self.SetStatus(line)
+                pass
             #-----
             line = module_stderr.readline()
         return True
@@ -302,6 +309,12 @@ class WPSProcess:
             message = self.status[0]
         if self.status[1] and not percent:
             percent = self.status[1]
+
+        try:
+            percent = percent.replace("%","")
+            precent = int(percent)
+        except (AttributeError, ValueError):
+            pass
 
         self.status = [message, percent]
 
