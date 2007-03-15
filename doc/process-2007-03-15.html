@@ -1,0 +1,139 @@
+
+<!doctype html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module process</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>process</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/jachym/src/pywps/trunk/pywps/Wps/process.py">/home/jachym/src/pywps/trunk/pywps/Wps/process.py</a></font></td></tr></table>
+    <p><tt>#&nbsp;Licence:&nbsp;GNU/GPL<br>
+#&nbsp;Author:&nbsp;Jachym&nbsp;Cepicky&nbsp;2007<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;jachym.cepicky&nbsp;gmail&nbsp;com<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://les-ejk.cz">http://les-ejk.cz</a></tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#fffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="process.html#WPSProcess">WPSProcess</a>
+</font></dt></dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="WPSProcess">class <strong>WPSProcess</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;class&nbsp;is&nbsp;to&nbsp;be&nbsp;used&nbsp;as&nbsp;base&nbsp;class&nbsp;for&nbsp;WPS&nbsp;processes&nbsp;in&nbsp;PyWPS<br>
+script.&nbsp;To&nbsp;be&nbsp;able&nbsp;to&nbsp;use&nbsp;it's&nbsp;methods&nbsp;(functions),&nbsp;you&nbsp;have&nbsp;to&nbsp;start<br>
+your&nbsp;process&nbsp;with&nbsp;following&nbsp;lines:<br>
+&nbsp;<br>
+from&nbsp;pywps.Wps.process&nbsp;import&nbsp;<a href="#WPSProcess">WPSProcess</a><br>
+&nbsp;<br>
+class&nbsp;Process(<a href="#WPSProcess">WPSProcess</a>):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;def&nbsp;<a href="#WPSProcess-__init__">__init__</a>(self):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#WPSProcess">WPSProcess</a>.<a href="#WPSProcess-__init__">__init__</a>(self,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Identifier="your_process_identifier",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Title="Your&nbsp;process&nbsp;title",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Abstract="Add&nbsp;optional&nbsp;abstract",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;storeSupported="true",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...)<br>
+&nbsp;<br>
+Than&nbsp;you&nbsp;can&nbsp;add&nbsp;cusom&nbsp;process&nbsp;inputs&nbsp;and&nbsp;outputs:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#WPSProcess-AddLiteralInput">AddLiteralInput</a>(Identifier="your_input_identifier",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Title="Your&nbsp;input&nbsp;title",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type=type(0),&nbsp;#&nbsp;integers&nbsp;only,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...)<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#WPSProcess-AddComplexInput">AddComplexInput</a>(Identifier="your_gml",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Title="Your&nbsp;gml&nbsp;input&nbsp;title",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...)<br>
+&nbsp;<br>
+&nbsp;<br>
+And&nbsp;you&nbsp;can&nbsp;ofcourse&nbsp;define&nbsp;your&nbsp;process&nbsp;outputs&nbsp;too:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#WPSProcess-AddLiteralOutput">AddLiteralOutput</a>(Identifier="output1",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Title="First&nbsp;output",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#WPSProcess-AddComplexValueOutput">AddComplexValueOutput</a>(Identifier="gmlout",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Title="Embed&nbsp;GML",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...)<br>
+&nbsp;<br>
+At&nbsp;the&nbsp;and,&nbsp;you&nbsp;can&nbsp;access&nbsp;the&nbsp;values&nbsp;of&nbsp;in-&nbsp;and&nbsp;outputs&nbsp;with&nbsp;help&nbsp;of<br>
+GetInputValue&nbsp;and&nbsp;SetOutputValue&nbsp;methods:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;def&nbsp;execute(self):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inputvalue&nbsp;=&nbsp;<a href="#WPSProcess-GetInputValue">GetInputValue</a>("your_input_identifier")<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inputGMLFile&nbsp;=&nbsp;<a href="#WPSProcess-GetInputValue">GetInputValue</a>("your_gml")<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#WPSProcess-SetOutputValue">SetOutputValue</a>("output1",&nbsp;inputvalue)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#WPSProcess-SetOutputValue">SetOutputValue</a>("gmlout",&nbsp;inputGMLFile)<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return<br>
+&nbsp;<br>
+NOTE:&nbsp;Try&nbsp;to&nbsp;use&nbsp;<a href="#WPSProcess-Gcmd">Gcmd</a>("shell&nbsp;command")&nbsp;instead&nbsp;of&nbsp;os.system&nbsp;for<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GRASS&nbsp;modules.&nbsp;It&nbsp;will&nbsp;update&nbsp;your&nbsp;self.<strong>status</strong>&nbsp;report<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;automatically,&nbsp;based&nbsp;on&nbsp;percentage&nbsp;output&nbsp;from&nbsp;GRASS&nbsp;modules.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="WPSProcess-AddBBoxInput"><strong>AddBBoxInput</strong></a>(self, Identifier, Title<font color="#909090">=None</font>, Abstract<font color="#909090">=None</font>, value<font color="#909090">=[]</font>)</dt><dd><tt>Add&nbsp;new&nbsp;input&nbsp;item&nbsp;of&nbsp;type&nbsp;BoundingBox&nbsp;to&nbsp;this&nbsp;process</tt></dd></dl>
+
+<dl><dt><a name="WPSProcess-AddBBoxOutput"><strong>AddBBoxOutput</strong></a>(self, Identifier, Title<font color="#909090">=None</font>, Abstract<font color="#909090">=None</font>, value<font color="#909090">=[]</font>)</dt><dd><tt>Add&nbsp;new&nbsp;output&nbsp;item&nbsp;of&nbsp;type&nbsp;BoundingBoxOutput&nbsp;to&nbsp;this&nbsp;process</tt></dd></dl>
+
+<dl><dt><a name="WPSProcess-AddComplexInput"><strong>AddComplexInput</strong></a>(self, Identifier, Title<font color="#909090">=None</font>, Abstract<font color="#909090">=None</font>, Formats<font color="#909090">=['text/xml']</font>, value<font color="#909090">=None</font>)</dt><dd><tt>Add&nbsp;new&nbsp;input&nbsp;item&nbsp;of&nbsp;type&nbsp;ComplexValue&nbsp;to&nbsp;this&nbsp;process</tt></dd></dl>
+
+<dl><dt><a name="WPSProcess-AddComplexValueOutput"><strong>AddComplexValueOutput</strong></a>(self, Identifier, Title<font color="#909090">=None</font>, Abstract<font color="#909090">=None</font>, Formats<font color="#909090">=['text/xml']</font>, value<font color="#909090">=None</font>)</dt><dd><tt>Add&nbsp;new&nbsp;output&nbsp;item&nbsp;of&nbsp;type&nbsp;ComplexValue&nbsp;to&nbsp;this&nbsp;process</tt></dd></dl>
+
+<dl><dt><a name="WPSProcess-AddComplexValueReferenceOutput"><strong>AddComplexValueReferenceOutput</strong></a>(self, Identifier, Title<font color="#909090">=None</font>, Abstract<font color="#909090">=None</font>, Formats<font color="#909090">=['text/xml']</font>, value<font color="#909090">=None</font>)</dt><dd><tt>Add&nbsp;new&nbsp;output&nbsp;item&nbsp;of&nbsp;type&nbsp;ComplexValueValueReference&nbsp;to&nbsp;this&nbsp;process</tt></dd></dl>
+
+<dl><dt><a name="WPSProcess-AddLiteralInput"><strong>AddLiteralInput</strong></a>(self, Identifier, Title<font color="#909090">=None</font>, Abstract<font color="#909090">=None</font>, UOMs<font color="#909090">='m'</font>, MinimumOccurs<font color="#909090">=1</font>, allowedvalues<font color="#909090">='*'</font>, type<font color="#909090">=&lt;type 'str'&gt;</font>, value<font color="#909090">=None</font>)</dt><dd><tt>Add&nbsp;new&nbsp;input&nbsp;item&nbsp;of&nbsp;type&nbsp;LiteralValue&nbsp;to&nbsp;this&nbsp;process</tt></dd></dl>
+
+<dl><dt><a name="WPSProcess-AddLiteralOutput"><strong>AddLiteralOutput</strong></a>(self, Identifier, Title<font color="#909090">=None</font>, Abstract<font color="#909090">=None</font>, UOMs<font color="#909090">='m'</font>, value<font color="#909090">=None</font>)</dt><dd><tt>Add&nbsp;new&nbsp;output&nbsp;item&nbsp;of&nbsp;type&nbsp;LiteralValue&nbsp;to&nbsp;this&nbsp;process</tt></dd></dl>
+
+<dl><dt><a name="WPSProcess-Gcmd"><strong>Gcmd</strong></a>(self, cmd, stdin<font color="#909090">=None</font>)</dt><dd><tt>Runs&nbsp;GRASS&nbsp;command,&nbsp;fetches&nbsp;all&nbsp;GRASS_MESSAGE&nbsp;and<br>
+GRASS_PERCENT&nbsp;messages&nbsp;and&nbsp;sets&nbsp;self.<strong>status</strong>&nbsp;according&nbsp;to&nbsp;them,&nbsp;so<br>
+the&nbsp;client&nbsp;application&nbsp;can&nbsp;track&nbsp;the&nbsp;progress&nbsp;information,&nbsp;when<br>
+runing&nbsp;with&nbsp;Status=True<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;is&nbsp;supposed&nbsp;to&nbsp;be&nbsp;used&nbsp;instead&nbsp;of&nbsp;'os.system()',&nbsp;while<br>
+running&nbsp;GRASS&nbsp;modules<br>
+&nbsp;<br>
+Example&nbsp;Usage:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#WPSProcess-Gcmd">Gcmd</a>("r.los&nbsp;in=elevation.dem&nbsp;out=los&nbsp;coord=1000,1000")<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#WPSProcess-Gcmd">Gcmd</a>("v.net.path&nbsp;network&nbsp;afcol=forward&nbsp;abcol=backward&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;out=mypath&nbsp;nlayer=1","1&nbsp;9&nbsp;12")</tt></dd></dl>
+
+<dl><dt><a name="WPSProcess-GetInput"><strong>GetInput</strong></a>(self, Identifier)</dt><dd><tt>Returns&nbsp;input&nbsp;of&nbsp;defined&nbsp;identifier</tt></dd></dl>
+
+<dl><dt><a name="WPSProcess-GetInputValue"><strong>GetInputValue</strong></a>(self, Identifier)</dt><dd><tt>Get&nbsp;value&nbsp;of&nbsp;selected&nbsp;input</tt></dd></dl>
+
+<dl><dt><a name="WPSProcess-GetOutput"><strong>GetOutput</strong></a>(self, Identifier)</dt><dd><tt>Returns&nbsp;output&nbsp;of&nbsp;defined&nbsp;identifier</tt></dd></dl>
+
+<dl><dt><a name="WPSProcess-GetOutputValue"><strong>GetOutputValue</strong></a>(self, Identifier)</dt><dd><tt>Get&nbsp;value&nbsp;of&nbsp;selected&nbsp;output</tt></dd></dl>
+
+<dl><dt><a name="WPSProcess-SetOutputValue"><strong>SetOutputValue</strong></a>(self, Identifier, value)</dt><dd><tt>Set&nbsp;value&nbsp;of&nbsp;selected&nbsp;output</tt></dd></dl>
+
+<dl><dt><a name="WPSProcess-SetStatus"><strong>SetStatus</strong></a>(self, message<font color="#909090">=None</font>, percent<font color="#909090">=None</font>)</dt><dd><tt>Sets&nbsp;self.<strong>status</strong>&nbsp;variable&nbsp;according&nbsp;to&nbsp;given&nbsp;message&nbsp;and<br>
+percents</tt></dd></dl>
+
+<dl><dt><a name="WPSProcess-__init__"><strong>__init__</strong></a>(self, Identifier, Title, processVersion<font color="#909090">='1.0'</font>, Abstract<font color="#909090">=''</font>, statusSupported<font color="#909090">='false'</font>, storeSupported<font color="#909090">='false'</font>)</dt></dl>
+
+</td></tr></table></td></tr></table>
+</body></html>

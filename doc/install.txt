@@ -15,45 +15,64 @@
 
    In this file, you can found the description of installation and
    configuration of PyWPS script. At the and, you can learn, how to add
-   your own process to the list of processes.
+   your own process to the list of processes. The file describes most
+   recent version of PyWPS (SVN), available in subversion respository.
 
    PyPWS project has been started on April 2006 with support of DBU -
-   Deutsche Bundesstiftung Umwelt (http://dbu.de) and with help of
-   GDF-Hannover (http://gdf-hannover.de) and Help Service Remote Sensing
-   (http:/bnhelp.cz) companies.
-
-   Source code can be found at http://Les-e(2,11)[t]35j315k?cat=pywps
+   Deutsche Bundesstiftung Umwelt ([1]http://dbu.de) and with help of
+   GDF-Hannover ([2]http://gdf-hannover.de) and Help Service Remote
+   Sensing ([3]http:/bnhelp.cz) companies. Initial author is Jachym
+   Cepicky ([4]http://les-ejk.cz).
 
 Contents
 
-     * [1]Bugs
-     * [2]Installation
-          + [3]Installation the quick 'n' dirty way
-          + [4]Installation the 'clean' way
-          + [5]Testing after installation
-     * [6]Configuration
-          + [7]etc/settings.py
-          + [8]etc/grass.py
-     * [9]Add your own processes
-          + [10]Process Configuration
-          + [11]Process Programming
-     * [12]Note to grass programming
-     * [13]Testing your new process
-     * [14]Using the PyWPS
-          + [15]Input
-          + [16]Output
-     * [17]Sample process: addvalue
-     * [18]KVP request encoding of addvalue
-     * [19]XML request encoding addvalue
-     * [20]Licence of PyWPS
-     * [21]Licence of this document
+     * [5]Introduction
+     * [6]Bugs
+     * [7]Installation
+          + [8]Installation the quick 'n' dirty way
+          + [9]Installation the 'clean' way
+          + [10]Testing after installation
+     * [11]Configuration
+          + [12]etc/settings.py
+          + [13]etc/grass.py
+     * [14]Add your own processes
+          + [15]Process Initialization and Configuration
+          + [16]Running in GRASS session
+          + [17]Process Programming
+     * [18]Note to grass programming
+     * [19]Testing your new process
+     * [20]Using PyWPS
+          + [21]Input
+          + [22]Output
+     * [23]Sample process: addvalue
+     * [24]KVP request encoding of addvalue
+     * [25]XML request encoding addvalue
+     * [26]Licence of PyWPS
+     * [27]Licence of this document
+
+                                 Introduction
+
+   PyWPS (Python Web Processing Service) is implementation of Web
+   Processing Service standard from Open Geospatial Consortium.
+
+   It has been started on Mai 2006 as project supported by DBU. It offers
+   environment for programming own process (geofunctions or models) which
+   can be accessed from the public. The main advantage of PyWPS is, that
+   it has been written with native support for GRASS. Access GRASS
+   modules via web interace should be as easy as possible.
+
+   Processes can be written using GRASS GIS, but usage of other programs
+   is also possible. Usage together with R package or GDAL or PROJ tools.
+
+   PyWPS is written in Python programming language, your processes must
+   use this language too.
+
+   PyWPS Homepage can be found at [28]http://pywps.wald.intevation.org.
+   PyWPS Wiki is hosted on [29]http://pywps.ominiverdi.org.
 
                                      Bugs
 
    Known bugs and limitations to UL>
-
-     Process Inputs definition is made on very primitive way. But it
-   works.
 
      Sometimes, when there is e.g. SyntaxError in the process, teporary
    file /tmp/pywps* is not deleted, which ledts to ServerBussy exception
@@ -75,9 +94,21 @@ Contents
 
    Recommended packages:
 
-     * GIS GRASS
-     * PROJ.4
-     * GDAL/OGR
+     * GIS GRASS - [30]http://grass.itc.it - Geographical Resources
+       Analysis Support System (GRASS) is Open Source GIS, which provides
+       more then 350 modules for raster and vector (2D, 3D) data
+       analysis. PyWPS is written with native support for GRASS and it's
+       functions.
+     * PROJ.4 - [31]http://proj.maptools.org - Cartographic Projections
+       library used in various Open Source projects, such as GRASS, UMN
+       MapServer, QGIS and others. It can be used e.g. for data
+       transformation.
+     * GDAL/OGR - [32]http://gdal.org - translator library for raster
+       geospatial data formats, is used in various projects for
+       importing, exporting and transformation between various raster and
+       vector data formats.
+     * R - [33]http://www.r-project.org - is a language and environment
+       for statistical computing and graphics.
 
 Installation the quick 'n' dirty way
 
@@ -86,17 +117,20 @@ Installation the quick 'n' dirty way
 
 Installation the 'clean' way
 
-   Unzip the package
- $ tar -xzf pywps-VERSION.tar.gz
+   Unzip the package gray!25
+$ tar -xzf pywps-VERSION.tar.gz
 
    and run
 $ python setup.py install
+
+   Several binary packages for Linux distributios are also avaliable on
+   PyWPS site[34]^1.
 
 Testing after installation
 
    For test, just run wps.py in your command line:
 
-\$ ./wps.py
+$ ./wps.py
 Content-type: text/xml
 
 <?xml version="1.0" ?>
@@ -122,7 +156,8 @@ ImportError: No module named xml.dom.minidom
 
    Before you start to tune your pywps program, you should get your copy
    of OpenGIS(R) Web Processing Service document (OGC 05-007r4) version
-   0.4.0 from http://www.opengeospatial.org/specs/?page=specs
+   0.4.0 from
+   [35]http://www.opengeospatial.org/specs/?page=specs
 
    NOTE: Note, that the configuration option are CASE SENSITIVE
 
@@ -144,29 +179,29 @@ etc/settings.py
    mostly in GetCapabilities request. The mandatory parameters, which
    should be set up are (with default/recommend values):
 
-    'version': "0.4.0",
-    'ServiceIdentification': {
-        'Title':"Jachym's WPS server",
-        'ServiceType':"WPS",
-        'ServiceTypeVersion':"0.1.0",
-        'Abstract':'Abstract to this WPS',
-    },
-    'ServiceProvider': {
-            'ProviderName' : "Your Company",
-            'IndividualName':"Your Name",
-            'PositionName':"Your Position",
-            'Role':"your role",
-            'DeliveryPoint': "Street",
-            'City': "City",
-            'PostalCode':"00000",
-            'Country': "Your country",
-            'ElectronicMailAddress':"your.email@address",
-    },
+'version': "0.4.0",
+'ServiceIdentification': {
+    'Title':"Jachym's WPS server",
+    'ServiceType':"WPS",
+    'ServiceTypeVersion':"0.1.0",
+    'Abstract':'Abstract to this WPS',
+},
+'ServiceProvider': {
+        'ProviderName' : "Your Company",
+        'IndividualName':"Your Name",
+        'PositionName':"Your Position",
+        'Role':"your role",
+        'DeliveryPoint': "Street",
+        'City': "City",
+        'PostalCode':"00000",
+        'Country': "Your country",
+        'ElectronicMailAddress':"your.email@address",
+},
 
-    'OperationsMetadata': {
-        'ServerAddress' : "http://localhost/cgi-bin/wps/wps.py",
-    },
-    'Keywords' : ['GRASS','GIS','WPS'],
+'OperationsMetadata': {
+    'ServerAddress' : "http://localhost/cgi-bin/wps/wps.py",
+},
+'Keywords' : ['GRASS','GIS','WPS'],
 
    In the ServerSettings section, the variables are set, which have
    impact on the whole server.
@@ -235,62 +270,71 @@ etc/grass.py
 
                             Add your own processes
 
+   NOTE: This section has changed from previous stable 1.0.0 version. The
+   processes, you defined for 1.0.0 branch should work for 2.0.0 branch
+   too.
+
    All processes are stored in the processes directory. Put your file
-   e.g. myprocess.py in there.
+   e.g. myprocess.py in there. Several example processes are distributed
+   along with PyWPS source code.
 
-   Process is python class with two functions: __init__(self) and
-   execute(self). In the __init__(self) function, inputs, outputs and
-   other configuration values are set. The GIS operations are called in
-   execute(self) function. It is possible also to add as many your
-   functions, as you wish.
+   Process is python class derived from prepared WPSProcess class in
+   pywps.Wps package. In it __init__(self) method, process metadata,
+   inputs and outpus are defined and in execute(self) method, own
+   computation is performed.
 
-Process Configuration
+   It is possible also to add as many your functions, as you wish.
 
-   The configuration part belongs to the __init__ function of the Process
-   class.
+Process Initialization and Configuration
 
-   Mandatory variables are
+01 # importing necessary files
+02 import pywps.Wps.WPSProcess
+03
+04 class Process(WPSProcess):
+05      def __init__(self):
+06          WPSProcess.__init__(self,
+07                Identifier="spearpath",
+18                Title="Spearfish path searching",
+19                Abstract="Find the shortest path on the roads map on Spearfis
+h dataset",
+10                processVersion = "0.2",
+11                statusSupported="true",
+12                storeSupported="true")
 
-# Myprocess name
-self.Identifier = "spearpath"
-
-# Myprocess version
-self.processVersion = "0.1"
-
-# Is it allowed, store the data on the server?
-self.storeSupported = "true"
-
-# Do not wait, till the calculation is done -> return XML with status
-# immediately
-self.statusSupported = "true"
-
-# Myprocess Title
-self.Title="Find the shortest path on the roads map on Spearfish dataset"
+   We defined new process called spearpath. The process is allowed to
+   store it's output data on the server (storeSupported) and it is also
+   possible to run it in asynchronous mode (statusSupported).
 
    Eventually optional attributes can be found in the table 38 - "Parts
-   of ExecuteResponse data structure"
+   of ExecuteResponse data structure". It is also possible to redefine
+   some variable later, after initialization:
 
-   If your process should happen in existing GRASS-Location, and you just
-   need the input parameters for GRASS modules, you can specify it's name
-   by grassLocation variable:
+13
+14          self.Title="South Dacota path searching"
+15
 
-grassLocation="/var/grassdata/spearfish57/"
+Running in GRASS session
+
+   You have to define GRASS Locatio[36]^2 If your process should happen
+   in existing GRASS-Location, and you just need the input parameters for
+   GRASS modules, you can specify it's name by grassLocation variable.
+
+16          # use existing GRASS Location
+17          self.grassLocation="/var/grassdata/spearfish60/"
+18          # use temporary GRASS Location
+19          #self.grassLocation=None
 
    If this variable is set to None, new temporary GRASS Location &&
-   mapset will be generated and you can work in there. The projection of
-   the location will be XY. If this variable is not set, GRASS will not
-   be stared.
+   mapset will be generated (using XY coordinate system) and you can work
+   in there. The projection of the location will be XY. If this variable
+   is not set, GRASS will not be stared.
 
     Metadata defition
 
-   is stored in array self.Metadata in __init__ function:
-# Metadata definition
-self.Metadata = [
-    {   "Identifier":"point",
-        "type":"point",
-        "textContent":"Click in the map"
-        },
-    ]
+   is stored in array self.Metadata in __init__ method. You can add new
+   Medatada using self.AddMetadata() method:
+            self.AddMetadata(Identifier="point",type="point",
+                            textContent="Click in the map")
 
    This code will produce in DescribeProcess responce document following
    element:
@@ -302,173 +346,178 @@ self.Metadata = [
 
   Data Inputs
 
-   Data inputs are defined in self.Inputs array. Each input is an
-   dictionary with several (mostly mandatory) parameters. Each input type
-   (LiteralValue, ComplexValue, ComplexValueReference, BoundingBoxValue)
-   must be a Python's dictionary ("{}") structure, which can be filled
-   with aditional attributes.
+   Data inputs are stored in self.Inputs array. To add inputs to your
+   process, you should use methods defined in WPSProcess class.
 
-     * Example of LiteralInput: LiteralValues are used for individual
-       text entry. Your process can either support any text entry or the
-       entry must be from list of allowed values. LiteralValues of types
-       AnyValue and AllowedValues are supported. Range of values is not
-       yet implemented.
-       Allowed values are set by array of values. If there is no values
-       arry or it contains "*" in the array, AnyValue is assumed:
-       Array of defined values can be defined too:
-    {   # example of "AnyValue" case with centimeters as default unit
+   Four types of data inputs are defined:
 
-        'Identifier': 'my_input_value',
-        'Title': 'This is my input value',
-        'LiteralValue': {'UOMs':["cm"]},
-        # alternative for any value:
-        # 'LiteralValue': {'values':["*"]},
-        'dataType': type(0.0)
-    },
-    {   # example of "AllowedValues" case with default units (meters)
+    LiteralInput
 
-        'Identifier': 'my_input_value',
-        'Title': 'This is my input value',
-        'LiteralValue': {values:[250, "300", '40', "a"]},
-        # the default value:
-        'value': 250,
-    },
+   Basic type of data input is LiteralInput type. To define LiteralInput
+   the easy way, you should use AddLiteralInput method:
 
-    {   # example of "Range" case with default units (meters)
-        # allowed values are only <250;300> and <350;400>
+20
+21          self.AddLiteralInput(Identifier="value",
+                                 Title="Value to be added",
+                                 type=type(0))
 
-        'Identifier': 'my_input_value',
-        'Title': 'This is my input value',
-        'LiteralValue': {values:[[250,300],[350,400]]},
-        # the default value:
-        'value': 250,
-    },
-     * Example of ComplexValueReference input:
-       ComplexValueReference is URL to some raster/vector/text file,
-       which can be later imported (e.g. to GRASS) and processed. PyWPS
-       will be dowload the file for you and store it's name to
-       self.DataInputs["<Identifier>"] variable.
+   Above example will add new input with identifier value of type
+   integer. Examples of other possibilities of LiteralInputs and
+   resulting part of XML are folowing:
 
-    NOTE:
+      Example of any allowed input value (default)
 
-   ComplexValueReference input is depredecated and should not be used.
-   Use ComplexValue structure instead. PyWPS will recognise if the input
-   is of type ComplexValue or ComplexValueReference and handle the input
-   accordingly.
+self.AddLiteralInput(Identifier="someinput",
+                     Title="Some Input",
+                     allowedvalues='*')
 
-   Example of ComplexValue input: ComplexValue provides possibility to
-   embed input (XML) file (e.g. GML) to input ExecuteResponce XML file.
-   PyWPS will store this input in file on server's harddisk, so you can
-   later handle it just like ComplexValueReference.
+...
+  <Input>
+    <ows:Identifier>someinput</ows:Identifier>
+    <ows:Title>Some Input</ows:Title>
+    <ows:Abstract/>
+        <LiteralData>
+            <SupportedUOMs defaultUOM="m">
+                <ows:UOM>m</ows:UOM>
+            </SupportedUOMs>
+            <ows:AnyValue/>
+        </LiteralData>
+    <MinimumOccurs>1</MinimumOccurs>
+  </Input>
+...
 
-    {
-        'Identifier':'vector',
-        'Title': 'Input vector map',
-        'Abstract':
-            "This vector map must be part of the input XML document",
-        'ComplexValue': {
-            'Formats': [ "text/xml" ]
-        },
-    },
+      Example of specified list (with range) of allowed inputs
 
-   For Formats attribute use MIME/TYPE encoding, like text/xml,
-   image/tiff and similar.
+   Following example will define input with specified list of values:
+   Only values 20, 30, everything between 40-100 and 110 will be
+   accepted:
+self.AddLiteralInput(Identifier="someinput",
+                     Title="Some Input",
+                     allowedvalues=[20,30,[40,100],110])
 
-   Example of BoundingBoxValue input: BoundingBoxValue provides
-   possibility define your region borders. You can input this only to
-   your Execute responce XML file.
+...
+  <Input>
+    <ows:Identifier>someinput</ows:Identifier>
+    <ows:Title>Some Input</ows:Title>
+    <ows:Abstract/>
+    <LiteralData>
+        <SupportedUOMs defaultUOM="m">
+        <ows:UOM>m</ows:UOM>
+        </SupportedUOMs>
+        <AllowedValues>
+            <Value>20</Value>
+            <Value>30</Value>
+            <Range>
+                <MinimumValue>40</MinimumValue>
+                <MaximumValue>100</MaximumValue>
+            </Range>
+            <Value>110</Value>
+        </AllowedValues>
+    </LiteralData>
+    <MinimumOccurs>1</MinimumOccurs>
+  </Input>
+...
 
-    {
-        'Identifier':'bbox',
-        'Title': 'Bounding box',
-        'Abstract':
-            "Bounding box",
-        'BoundingBoxValue': {},
-    },
-
-   Resulting value in your self.Input[NUMBER]['value'] will be array of
-   four values in form [Lower East, Lower North, Upper East, Upper
-   North].
-
-   Default values can be set like follows: 'value':"Default value",
-
-   NOTE: If the 'dataType' attribute is not set, control of the input
-   value will not be possible, which could endanger your system
-
-   For more details look in the table 33 "Parts of ValueFormChoice data
-   structure"
+   For further documentation, refere example processes distributed with
+   the source code as well as pydoc pywps/wps/process.py.
 
   Data Outputs
 
-   The self.Outputs structure defines the look of the outputs from your
-   process. The definition is not much different from the Input
-   structure:
+   Data outputs can be defined on similar way, using similar methods:
 
-    {
-        'Identifier': 'output',
-        'Title': 'Resulting output map',
-        'ComplexValue': {
-            'Formats':["text/xml"],
-            }
-    },
-    {
-        'Identifier': 'text',
-        'Title': 'Some text',
-        'Abstract': 'Some informative text',
-        'LiteralValue': {
-             {'UOMs':["none"]},
-        }
-    }
+    LiteralOutput
 
-    BoundingBox Output
+self.AddLiteralOutput(Identifier="litoutput",
+                     Title="Resulting output value")
 
-   BoundingBoxValue is defined by two coordinates pairs: LowerCorner and
-   UpperCorner. For creating BoundingBoxValue output, you have to make
-   output array with this values:
-    {
-        'Identifier': 'mybbox',
-        'Title': 'Bounding Box of resulting map',
-        'BoundingBoxValue': {},
-         'value' : [0, 0, 10, 10],
-    },
+...
+  <Output>
+    <ows:Identifier>litoutput</ows:Identifier>
+    <ows:Title>Resulting output value</ows:Title>
+    <ows:Abstract/>
+    <LiteralOutput>
+      <SupportedUOMs defaultUOM="m">
+        <ows:UOM>m</ows:UOM>
+      </SupportedUOMs>
+    </LiteralOutput>
+  </Output>
+...
+
+   To the oposite of data Inputs, Outputs can distinguish between
+   ComplexValue output and ComplexValueReference. ComplexValue is
+   directly embed into the output XML document and ComplexValueReference
+   is stored on the server and only URL pointing the the file is refering
+   to it. In general, vector files in GML format can be easy embed to the
+   output XML, TIFF raster files is better to leave on the server.
+
+self.AddComplexValueReferenceOutput(Identifier="output",
+                Title="Resulting output map",
+                Formats=["image/tiff"])
+
+...
+  <Output>
+    <ows:Identifier>output</ows:Identifier>
+    <ows:Title>Resulting output map</ows:Title>
+    <ows:Abstract/>
+    <ComplexOutput defaultFormat="image/tiff">
+      <SupportedComplexData>
+        <Format>image/tiff</Format>
+      </SupportedComplexData>
+    </ComplexOutput>
+  </Output>
+...
+
+   Beside LiteralValue and ComplexValue, BoundingBoxValue is also
+   defined. The coordinates are stored in array of four members:
+
+self.GetInputValue("bboxinput")
+[0,0,100,100]
 
 Process Programming
 
-   The process must be defined in the execute(self) function. To each
-   element in self.Inputs array, 'value' option will be added. Input
-   variables are accessible via 'value' attribute of each element of the
-   self.Inputs array.
+   The process must be defined in the execute(self) function. You can
+   access the input values via self.GetInputValue(Identifier) method.
 
-   Another way, how to access input values it to do so via new hash
-   self.DataInputs. This way is more intiutive and less confusing. If
-   order of Inputs will change, their identificators in DataInputs
-   structure remain same.
+   NOTE: Usage of the old method, accessing the values via
+   self.Inputs[index]['value'] or via self.DataInputs array is possible,
+   but should not be used.
 
-   Also new variable self.grassenv will be in your process at your
-   service.
+   Also variable self.grassenv will be in your process at your service.
+   This dictionary stores environment variables used by GRASS GIS, such
+   se LOCATION_NAME or MAPSET.
 
-   Output values can be stored either directly to
+   Output values should be set using self.SetOutputValue(Identifier,
+   value) method.
+
+   NOTE: Usage of the old methods of output values setting, directly to
    self.Outputs[index]['value'] variable or to
-   self.DataOutputs['identifier'] hash on similar way, how DataInputs are
-   used. This makes the usage again more intuitive.
+   self.DataOutputs['identifier'] dictionary, is possible, but should
+   better not be used.
 
-    def execute(self):
-        if os.system("""g.region -d >&2"""):
-            return "Could not set region to default"
+22      def execute(self):
+23          if os.system("""g.region -d >&2"""):
 
-        os.system("r.in.gdal -o in=%s out=my_map >&2" %\
-                                    (self.Inputs[0]['value']))
-        os.system("r.mapcalc my_output=my_map+%d >&2" %\
-                                    (self.DataInputs['value']))
+24              return "Could not set region to default"
 
-        if os.system("r.out.gdal type=Float32 out=map.tif in=my_output >&2"):
-            return "Could not export resulting raster map [map.tif]"
+25
 
-        self.Outputs[0]['value'] = "map.tif"
-        self.DataOutputs['location'] = self.grassenv['LOCATION_NAME']
-        return
+26          os.system("r.in.gdal -o in=%s out=my_map >&2" %\
 
-   That is all, folks!
+27                                      (self.Inputs[0]['value']))
+
+28          os.system("r.mapcalc my_output=my_map+%d >&2" %\
+
+29                                      (self.DataInputs['value']))
+
+31
+32          if os.system("r.out.gdal type=Float32 out=map.tif in=my_output >&2"
+):
+33              return "Could not export resulting raster map [map.tif]"
+34
+
+35          self.Outputs[0]['value'] = "map.tif"
+36          self.DataOutputs['location'] = self.grassenv['LOCATION_NAME']
+37          return
 
   Error handling
 
@@ -478,38 +527,61 @@ Process Programming
 
                            Note to grass programming
 
-   The simplest way, how to call GRASS's (and other shell) commands is
-   via python's os.system() or os.popen() function. Before you do so, it
-   is important to import the os python package (usually one of the first
-   lines in the file). This approach might not be the best, but it is the
-   simplest one. Feel free to use any other low-end functions.
+   WMSProcess class provides special method self.Gcmd(command_string),
+   which tryes to catch output from GRASS modules, especially progress
+   information inidcated by percent done. Method Gcmd() stores the output
+   of GRASS modules to self.status variable, so if the process is running
+   assynchronously, client application can track the progress of each
+   module directly.
+
+   It is also possible to run GRASS modules using python's os.system() or
+   os.popen() function. Before you do so, it is important to import the
+   os python package (usually one of the first lines in the file). This
+   approach might not be the best, but it is the simplest one. Feel free
+   to use any other low-end functions.
 
    Unfortunately, the GRASS modules are very verbose. Some messages are
    written to STDOUT, some to STDERR. The STDERR will be stored in the
    error file of your web server. But you have to "catch" the messages,
-   sent to STDOUT. This can be done e.g. by using "1>&2" statement
+   sent to STDOUT. This can be done e.g. by using " $1>\&2$ " statement
    (redirecting STDOUT to STDERR in shell):
 
-    os.system("""
-        echo "Rekni jim drazi, tatko, za to nic nedas."  >&2
-    """)
+os.system("""
+    echo "Rekni jim drazi, tatko, za to nic nedas."  >&2
+""")
+
+   You can avoid this problem using formentioned self.Gcmd() method.
 
                            Testing your new process
 
-     * GetCapabilities request:
-    wget -nv -q -O - --post-data="version=0.4.0&service=Wps&\
-        request=getcapabilities" "http://localhost/cgi-bin/wps.py"
-     * DescribeProcess request:
-    wget -nv -q -O - --post-data="version=0.4.0&service=Wps&\
-        request=DescribeProcess&Identifier=your_process" \
-        "http://localhost/cgi-bin/wps.py"
-     * Execute request:
-    wget -nv -q -O - --post-data="version=0.4.0&service=Wps&\
-        request=Execute&Identifier=your_process&\
-        datainputs=input1,value1,input2,value2" \
-        "http://localhost/cgi-bin/wps.py"
+   To test your PyWPS installation, you run it either as Webserver
+   cgi-application or in the command line directly. It is always good to
+   start with the command line test, so do not have to check error.log of
+   the web server.
 
-                                Using the PyWPS
+     * GetCapabilities request (webserver)
+./wps.py "service=wps&request=getcapabilities"
+
+wget -nv -q -O - "http://localhost/cgi-bin/wps.py?\
+    service=Wps&request=getcapabilities"
+     * DescribeProcess request:
+./wps.py "version=0.4.0&service=Wps&request=DescribeProcess&\
+    Identifier=your_process"
+
+wget -nv -q -O - "http://localhost/cgi-bin/wps.py?\
+    version=0.4.0&service=Wps&request=DescribeProcess&\
+    Identifier=your_process"
+     * Execute request:
+./wps.py "version=0.4.0&service=Wps&\
+    request=Execute&Identifier=your_process&\
+    datainputs=input1,value1,input2,value2"
+
+wget -nv -q -O - "http://localhost/cgi-bin/wps.py?\
+    version=0.4.0&service=Wps&\
+    request=Execute&Identifier=your_process&\
+    datainputs=input1,value1,input2,value2" \
+
+                                  Using PyWPS
 
 Input
 
@@ -520,17 +592,17 @@ Input
    can not set any ComplexValue data in your process via HTTP GET.
    Example:
 
-    wget -nv -q -O - --post-data="version=0.4.0&service=Wps&\
-            request=Execute&Identifier=your_process&\
-            datainputs=input1,value1,input2,value2"\
-            "http://localhost/cgi-bin/wps.py"
+wget -nv -q -O - --post-data="version=0.4.0&service=Wps&\
+        request=Execute&Identifier=your_process&\
+        datainputs=input1,value1,input2,value2"\
+        "http://localhost/cgi-bin/wps.py"
 
    In HTTP POST style, you send one "request" parameter, which contains
    XML input. The XML file can contain also included ComplexValue data,
    e.g. GML file. Example:
 
-    wget --post-file=execute-post.txt \
-            "http://localhost/pywps/wps.py" -O - -nv -q
+wget --post-file=execute-post.txt \
+        "http://localhost/pywps/wps.py" -O - -nv -q
 
    The execute-post.txt file can look like follows:
 request=<?xml version="1.0" encoding="utf-8"?>
@@ -648,12 +720,14 @@ xsi:schemaLocation="http://www.opengeospatial.net/wps/wpsDescribeProcess.xsd">
 
    will become
 
-    ...
-     <Status>
-                <ProcessStarted message="Generating raster map" percentComplete
-d="50"/>
+...
+    <Status>
+            <ProcessStarted message="Generating raster map" percentCompleted="5
+0"/>
     </Status>
-    ...
+...
+
+   You can set also self.status variable using self.SetStatus() method.
 
                            Sample process: addvalue
 
@@ -667,183 +741,96 @@ d="50"/>
        ot output XML file.
 
 """
+
 pywps process example:
 
 addvalue: Adds some value to raster map
 """
 # Author:       Jachym Cepicky
 #               http://les-ejk.cz
+# Lince:        GNU/GPL
+#
+# Copyright (C) 2006 Jachym Cepicky
 
-import os,time,string,sys
+import os,time,string,sys,shutil
+from pywps.Wps.process import WPSProcess
 
-class Process:
+class Process (WPSProcess):
+    #
+    # Initialization
+    #
     def __init__(self):
+        WPSProcess.__init__(self,
+                            Identifier="Addvalue",
+                    Title="Add some value to input raster map",
+                            processVersion = "0.2",
+                            statusSupported="true",
+                            storeSupported="true")
 
-        #
-        # Mandatory parameters
-        #
-
-        # Identifier - name of this process
-        self.Identifier = "addvalue"
-
-        # processVersion - version of this process
-        self.processVersion = "0.1"
-
-        # Title - title for this process
-        self.Title="Add some value to raster map"
+        # define GRASS location -- use temporary one
+        self.grassLocation = None
 
         #
         # Inputs
-        # Inputs = [ {input1},{input2},{...} ]
-        #
-        self.Inputs = [
-                # This module has 2 inputs:
-                # 1) Input raster map
-                # 2) Value to be added
-
-                # 0
-                    {
-                        'Identifier':'input',
-                        'Title': 'Input raster map',
-                        'ComplexValueReference': {
-                            'Formats': [ "image/tiff" ]
-                        },
-                        'value':None
-                    },
-
-                # 1
-                    {
-                        'Identifier': 'value',
-                        'Title': 'Value to be added',
-                        'LiteralValue': {"values":["*"]}, # will cause "AnyValu
-e"
-                        'dataType' : type(0.0),
-                        'value':None
-                    },
-                ]
+        self.AddComplexInput(Identifier="input",
+                            Title="Input raster map",
+                            Formats=["image/tiff"])
+        self.AddLiteralInput(Identifier="value",
+                            Title="Value to be added",
+                            type=type(0))
 
         #
-        # Output
-        # The structure is not much different from the input structure
-        #
-        self.Outputs = [
-                # 0
-                {
-                    'Identifier': 'vector',
-                    'Title': 'Resulting vector map',
-                    'ComplexValue': {
-                        'Formats':["text/xml"],
-                        },
-                    'value':None
-                },
-                # 1
-                {
-                    'Identifier': 'raster',
-                    'Title': 'Resulting raster map',
-                    'ComplexValueReference': {
-                        'Formats':["image/tiff"],
-                        },
-                    'value':None
-                }
-                # 2
-                {
-                    'Identifier': 'bbox',
-                    'Title': 'Resulting map bbox',
-                    'BoundingBoxValue': {}
-                }
-
-
-            ]
-
-        #
-        # Optional attributes
-        #
-        #
-        # storeSupported = "true" or "false"
-        # should the resulting map be stored on our disk?
-        self.storeSupported = "true"
-
-        #
-        # statusSupported = "true" or "false" - run asynchronous
-        self.statusSupported = "true"
-
-    ##############################################################
+        # Outputs
+        self.AddComplexValueReferenceOutput(Identifier="output",
+                            Title="Resulting output map",
+                            Formats=["image/tiff"])
+    #
     # Execute part of the process
+    #
     def execute(self):
         """
         This function
             1) Imports the raster map
             2) runs r.mapcalc out=in+value
             3) Exports the raster map
-            4) Sets the bounding box of resulting map
-            5) runs r.to.vect
-            6) Exports the vector map
+            4) returns the new file name or 'None' if something went wrong
         """
 
-        # for asynchronous process:
-        self.status=["Importing the raster map", 5]
+        # import of the data
+        self.SetStatus("Importing data")
+        if not self.Gcmd("r.in.gdal -o in=%s out=input" %\
+                (self.GetInputValue("input"))):
+            return "Could not import raster file"
+        self.SetStatus("Importing data",10)
 
-        # 1) import
-        if os.system("r.in.gdal -o in=%s out=input >&2" %\
-                (self.DataInputs['input'])):
-            return "Could not import raster map
-
-        # check for more than one channel
-        for gdalinfoln in os.popen("gdalinfo %s" % \
-                (self.DataInputs['input'])):
+        # compositing 3 bands to one raster file
+        for gdalinfoln in os.popen("gdalinfo %s" %\
+                (self.GetInputValue("input"))):
             if gdalinfoln.split()[0] == "Band" and gdalinfoln.split()[1] == "3"
 :
-                return "This module can work only with ONE channel raster maps"
+                self.Gcmd("""g.region rast=input.red """)
+                self.Gcmd("r.composite r=input.red b=input.blue g=input.green o
+ut=input")
 
-        # set right region
-        os.system("""g.region rast=input >&2""")
+        # region setting
+        self.Gcmd("""g.region rast=input""")
 
-        # for asynchronous process:
-        self.status=["Adding input value to raster map", 30]
+        # adding the value
+        self.SetStatus("Adding new value to raster map",50)
+        self.Gcmd("r.mapcalc output='input+%f'" % float(self.GetInputValue('val
+ue')))
 
-        # 2) add the value, convert to int
-        os.system("""r.mapcalc output="int(input+%f)" """ % \
-                (float(self.DataInputs['value'])))
+        # output
+        self.SetStatus("Raster file export", 90)
+        self.Gcmd("r.out.gdal type=Int32 in=output out=%s" % "output.tif")
 
-        # for asynchronous process:
-        self.status=["Exporting TIFF image", 50]
-
-        # 3) export the tiff
-        if os.system("r.out.gdal type=Int32 in=output out=%s 1>&2" %\
-            "output.tif"):
-            return "Could not export raster map"
-
-        # for asynchronous process:
-        self.status=["Converting raster to vector", 75]
-
-        # 4) seting the bounding box
-        region = {}
-        for b in os.popen("g.region -g"):
-            b = b.strip()
-            key,val = b.split("=")
-            region[key] = val
-        self.DataOutputs['bbox'] = [region['s'],region['e'],region['n'],region[
-'w']]
-
-        # 5) convert to vector
-        if os.system("r.to.vect in=output out=output feature=area >&2"):
-            return "Could not convert raster to vector"
-
-        # for asynchronous process:
-        self.status=["Exporting GML file", 95]
-
-        # 6) export of vector map to GML
-        if os.system(
-            """v.out.ogr format=GML  in=output dsn=output.gml olayer=output >&2
-"""):
-            return "Could not export vector to GML"
-
-        # setting output variables
-        self.DataOutputs['vector'] = "output.gml"
-        self.DataOutputs['raster'] = "output.tif"
-
-        # end
-        return
+        # setting output values
+        self.SetOutputValue("output","output.tif")
+        if "output.tif" in os.listdir(os.curdir):
+            return  # OK
+        else:
+            return "Output file not created!" # FAILED
+        """
 
                        KVP request encoding of addvalue
 
@@ -1544,48 +1531,78 @@ request=<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
 
    Implementation of OGC's WPS standard: PyWPS
 
-   This document was generated using the [22]LaTeX2HTML translator
+   This document was generated using the [37]LaTeX2HTML translator
    Version 2002-2-1 (1.71)
 
-   Copyright © 1993, 1994, 1995, 1996, [23]Nikos Drakos, Computer Based
+   Copyright © 1993, 1994, 1995, 1996, [38]Nikos Drakos, Computer Based
    Learning Unit, University of Leeds.
-   Copyright © 1997, 1998, 1999, [24]Ross Moore, Mathematics Department,
+   Copyright © 1997, 1998, 1999, [39]Ross Moore, Mathematics Department,
    Macquarie University, Sydney.
 
    The command line arguments were:
    latex2html -split 0 install.tex
 
-   The translation was initiated by Jachym Cepicky on 2006-11-20
+   The translation was initiated by Jachym Cepicky on 2007-03-15
+     _________________________________________________________________
+
+    Footnotes
+
+   ... site[40]^1
+          [41]http://pywps.wald.intevation.org
+
+   ... Locatio[42]^2
+          see e.g.
+          [43]http://grass.itc.it/grass63/manuals/html63_user/helptext.ht
+          ml for details
      _________________________________________________________________
 
    next_inactive up previous
 
 
-    Jachym Cepicky 2006-11-20
+    Jachym Cepicky 2007-03-15
 
 Reference
 
-   1. file://localhost/home/jachym/prog/pywps/trunk/doc/install.html#SECTION00020000000000000000
-   2. file://localhost/home/jachym/prog/pywps/trunk/doc/install.html#SECTION00030000000000000000
-   3. file://localhost/home/jachym/prog/pywps/trunk/doc/install.html#SECTION00031000000000000000
-   4. file://localhost/home/jachym/prog/pywps/trunk/doc/install.html#SECTION00032000000000000000
-   5. file://localhost/home/jachym/prog/pywps/trunk/doc/install.html#SECTION00033000000000000000
-   6. file://localhost/home/jachym/prog/pywps/trunk/doc/install.html#SECTION00040000000000000000
-   7. file://localhost/home/jachym/prog/pywps/trunk/doc/install.html#SECTION00041000000000000000
-   8. file://localhost/home/jachym/prog/pywps/trunk/doc/install.html#SECTION00042000000000000000
-   9. file://localhost/home/jachym/prog/pywps/trunk/doc/install.html#SECTION00050000000000000000
-  10. file://localhost/home/jachym/prog/pywps/trunk/doc/install.html#SECTION00051000000000000000
-  11. file://localhost/home/jachym/prog/pywps/trunk/doc/install.html#SECTION00052000000000000000
-  12. file://localhost/home/jachym/prog/pywps/trunk/doc/install.html#SECTION00060000000000000000
-  13. file://localhost/home/jachym/prog/pywps/trunk/doc/install.html#SECTION00070000000000000000
-  14. file://localhost/home/jachym/prog/pywps/trunk/doc/install.html#SECTION00080000000000000000
-  15. file://localhost/home/jachym/prog/pywps/trunk/doc/install.html#SECTION00081000000000000000
-  16. file://localhost/home/jachym/prog/pywps/trunk/doc/install.html#SECTION00082000000000000000
-  17. file://localhost/home/jachym/prog/pywps/trunk/doc/install.html#SECTION00090000000000000000
-  18. file://localhost/home/jachym/prog/pywps/trunk/doc/install.html#SECTION000100000000000000000
-  19. file://localhost/home/jachym/prog/pywps/trunk/doc/install.html#SECTION000110000000000000000
-  20. file://localhost/home/jachym/prog/pywps/trunk/doc/install.html#SECTION000120000000000000000
-  21. file://localhost/home/jachym/prog/pywps/trunk/doc/install.html#SECTION000130000000000000000
-  22. http://www.latex2html.org/
-  23. http://cbl.leeds.ac.uk/nikos/personal.html
-  24. http://www.maths.mq.edu.au/~ross/
+   1. http://dbu.de/
+   2. http://gdf-hannover.de/
+   3. http:/bnhelp.cz
+   4. http://les-ejk.cz/
+   5. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00020000000000000000
+   6. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00030000000000000000
+   7. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00040000000000000000
+   8. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00041000000000000000
+   9. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00042000000000000000
+  10. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00043000000000000000
+  11. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00050000000000000000
+  12. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00051000000000000000
+  13. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00052000000000000000
+  14. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00060000000000000000
+  15. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00061000000000000000
+  16. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00062000000000000000
+  17. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00063000000000000000
+  18. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00070000000000000000
+  19. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00080000000000000000
+  20. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00090000000000000000
+  21. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00091000000000000000
+  22. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00092000000000000000
+  23. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION000100000000000000000
+  24. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION000110000000000000000
+  25. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION000120000000000000000
+  26. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION000130000000000000000
+  27. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION000140000000000000000
+  28. http://pywps.wald.intevation.org/
+  29. http://pywps.ominiverdi.org/
+  30. http://grass.itc.it/
+  31. http://proj.maptools.org/
+  32. http://gdal.org/
+  33. http://www.r-project.org/
+  34. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#foot60
+  35. http://www.opengeospatial.org/specs/?page=specs
+  36. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#foot305
+  37. http://www.latex2html.org/
+  38. http://cbl.leeds.ac.uk/nikos/personal.html
+  39. http://www.maths.mq.edu.au/~ross/
+  40. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#tex2html11
+  41. http://pywps.wald.intevation.org/
+  42. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#tex2html14
+  43. http://grass.itc.it/grass63/manuals/html63_user/helptext.html
