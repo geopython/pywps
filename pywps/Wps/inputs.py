@@ -30,6 +30,8 @@ import xml
 from xml.sax import make_parser
 from xml.sax.handler import feature_namespaces
 import sys
+import wpsexceptions
+from wpsexceptions import *
 
 #--------------------------------------------------------------------#
 # processExecuteXML - for parsing the input xml document using sax   #

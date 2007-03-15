@@ -54,7 +54,8 @@ class WPSException(Exception):
         str = "Content-type: text/xml\n\n"
         str += self.document.toprettyxml(indent='\t', newl='\n', encoding="utf-8")
         sys.stderr.write("PyWPS %s: %s" % (self.code, self.locator))
-        return str
+        #return str
+        print str
 
 class MissingParameterValue(WPSException):
     def __init__(self, value):

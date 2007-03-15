@@ -282,6 +282,7 @@ class Describe:
         inputtype           one of 'LiteralData', 'BoundingBoxData', 'ComplexData' text string
         input               the whole intpu structure
         """
+
         # <ComplexData>
         if inputtype == "ComplexValue" or \
                 inputtype == "ComplexValueReference":
@@ -312,8 +313,8 @@ class Describe:
                 supportedComData.appendChild(node)
             complexdata.appendChild(supportedComData)
 
-        # <LiteralData>
-        elif inputtype == "LiteralValue":
+        # <LiteralData> 
+        elif inputtype == "LiteralValue" or inputtype == "LiteralData":
             literaldata = self.document.createElement("%s%s" %\
                     (inputStruct['ns'],"LiteralData"))
 
