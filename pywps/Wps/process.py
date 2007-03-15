@@ -18,11 +18,16 @@ class WPSProcess:
            statusSupported == True or \
            statusSupported.lower() == "t":
             self.statusSupported="true"
+        else:
+            self.statusSupported="false"
+
 
         if storeSupported.lower() == "false" or\
            storeSupported == False or \
            storeSupported.lower() == "f":
             self.storeSupported="false"
+        else:
+            self.storeSupported="true"
 
         self.status = ["Process started",0]
         self.Inputs = []
@@ -274,35 +279,23 @@ class WPSProcess:
         module_stdin.close()
 
         line = module_stderr.readline()
-
-        # error?
-        if line.lower().find("not found") > -1:
-            module_stderr.close()
-            module_stdout.close()
-            return False
+        #stdoutln = module_stdout.readline()
 
         while 1:
             if line == '':
                 break
             line = line.strip()
-            #-----
             try:
                 format,content = line.split(":")
-                if format =="GRASS_INFO_PERCENT":
-                    try:
-                        content = content.replace("%","")
-                        content = int(content)
-                        self.SetStatus(percent=content)
-                    except (AttributeError, ValueError):
-                        pass
-
+                if format == "GRASS_INFO_PERCENT":
+                    self.SetStatus(percent=int(content.replace("%","")))
                 else:
                     self.SetStatus(content)
             except:
-                pass
-            #-----
-            sys.stderr.write("PyWPS Gcmd:\t %s\n" % str(self.status))
+                self.SetStatus(line)
+                
             line = module_stderr.readline()
+
         module_stderr.close()
         module_stdout.close()
         return True
@@ -340,4 +333,5 @@ class WPSProcess:
 
     def SetOutputValue(self,Identifier,value):
         """Set value of selected output"""
-        self.GetInput(Identifier)["value"] = value
+        out = self.GetOutput(Identifier)
+        out["value"] = value
