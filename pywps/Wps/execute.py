@@ -79,7 +79,8 @@ class Status(Thread):
                 status.appendChild(node)
 
                 file = open(self.filename,"w")
-                file.write(self.document.toprettyxml())
+                #file.write(self.document.toprettyxml())
+                file.write(self.document.toxml())
                 file.close()
 
                 oldmessage = newmessage
@@ -142,8 +143,6 @@ class Execute:
         self.statusMessage = None
         self.errorCode = 0
         self.pid = os.getpid()
-
-
 
         # 
         # storing the data in self.process.Inputs[input]['value']
@@ -247,11 +246,11 @@ class Execute:
             self.mapset = self.grassEnv.mkmapset(self.process.grassLocation)
             try:
                 self.dirsToRemove.append(os.path.join(self.process.grassLocation,self.mapset))
-                self.process.grassenv=self.grassEnv.grassenv
             except AttributeError:
                 pass
         except :
             pass
+        self.process.grassenv=self.grassEnv.grassenv
 
  
         #
@@ -362,16 +361,12 @@ class Execute:
         # is there stored map?
         outputMap = False
         for procOutput in self.process.Outputs:
-            try:
-                if type(procOutput['value']) == type(None) or \
-                    procOutput['value'] == [] or \
-                    procOutput['value'] != self.process.DataOutputs[procOutput['Identifier']]:
-                     try:
-                        procOutput['value'] = self.process.DataOutputs[procOutput['Identifier']]
-                     except:
-                         raise KeyError, "Output value not set"
-            except KeyError,e:
-                    procOutput['value'] = e
+            if type(procOutput['value']) == type(None) or \
+                    procOutput['value'] == []:
+                try:
+                    procOutput['value'] = self.process.DataOutputs[procOutput['Identifier']]
+                except:
+                    raise ServerError, "Output value for output '%s' not set" % (procOutput['Identifier'])
                 
             if 'ComplexValueReference' in procOutput.keys():
                     outputMap = True
