@@ -1,12 +1,83 @@
-# Licence: GNU/GPL
-# Author: Jachym Cepicky 2007
-#         jachym.cepicky gmail com
-#         http://les-ejk.cz
+# Author:	Jachym Cepicky
+#        	http://les-ejk.cz
+# Lince: 
+# 
+# Web Processing Service implementation
+# Copyright (C) 2006 Jachym Cepicky
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 
 import os,sys
 
 class WPSProcess:
+    """
+    This class is to be used as base class for WPS processes in PyWPS
+    script. To be able to use it's methods (functions), you have to start
+    your process with following lines:
+
+    from pywps.Wps.process import WPSProcess
+
+    class Process(WPSProcess):
+        def __init__(self):
+            WPSProcess.__init__(self,
+            Identifier="your_process_identifier",
+            Title="Your process title",
+            Abstract="Add optional abstract",
+            storeSupported="true",
+            ...)
+
+    Than you can add cusom process inputs and outputs:
+            
+            self.AddLiteralInput(Identifier="your_input_identifier",
+                        Title="Your input title",
+                        type=type(0), # integers only,
+                        ...)
+
+            self.AddComplexInput(Identifier="your_gml",
+                        Title="Your gml input title",
+                        ...)
+
+
+    And you can ofcourse define your process outputs too:
+
+            self.AddLiteralOutput(Identifier="output1",
+                            Title="First output",
+                            ...)
+            self.AddComplexValueOutput(Identifier="gmlout",
+                            Title="Embed GML",
+                            ...)
+
+    At the and, you can access the values of in- and outputs with help of
+    GetInputValue and SetOutputValue methods:
+
+        def execute(self):
+            
+            inputvalue = self.GetInputValue("your_input_identifier")
+            inputGMLFile = self.GetInputValue("your_gml")
+
+            self.SetOutputValue("output1", inputvalue)
+            self.SetOutputValue("gmlout", inputGMLFile)
+
+            return
+
+    NOTE: Try to use self.Gcmd("shell command") instead of os.system for
+          GRASS modules. It will update your self.status report
+          automatically, based on percentage output from GRASS modules.
+
+
+    """
     def __init__(self, Identifier, Title, processVersion="1.0", 
             Abstract="", statusSupported="false", storeSupported="false"):
         self.Identifier = Identifier
@@ -32,6 +103,14 @@ class WPSProcess:
         self.status = ["Process started",0]
         self.Inputs = []
         self.Outputs = []
+        self.Metadata = []
+
+    def AddMetadata(self,Identifier, type, textContent):
+        """Add new metadata to this process"""
+        self.Metadata.append({
+            "Identifier": Identifier,
+            "type":type,
+            "textContent":textContent})
 
     def AddLiteralInput(self, Identifier, Title=None, Abstract=None,
             UOMs="m", MinimumOccurs=1, allowedvalues=("*"), type=type(""), value=None):
