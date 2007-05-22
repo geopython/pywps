@@ -37,7 +37,7 @@ class Describe:
         By initalization creates ProcessDescriptions XML response.
 
         Inputs:
-            serverSettings      - file with server settings structure (etc/settings.py)
+            serverSettings      - file with server settings structure
             describeProcesses   - array of processes, which should be described
         """
 

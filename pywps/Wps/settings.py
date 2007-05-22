@@ -24,30 +24,54 @@ Custom vs. default settings for PyWPS
 
 
 import default_settings
+import default_grass
+import wpsexceptions
+from wpsexceptions import ServerError
+
+import os
 
 
-def ConsolidateSettings(settings):
+def ConsolidateSettings(settings, grass=False):
     """
     This function merges custom settings together with default settings
     """
 
-    if settings:
-        try:
-            default_settings.WPS = _fillSetting(
-                                    default_settings.WPS,settings.WPS)
-            default_settings.ServerSettings = _fillSetting(
-                                    default_settings.ServerSettings,
-                                    settings.ServerSettings)
-            
-        except AttributeError,e:
-            if str(e) == "'module' object has no attribute 'WPS'"\
-                or str(e) == "'module' object has no attribute 'ServerSettings'":
-                pass
-            else:
-                raise AttributeError(e)
+    if not grass:
+        default = default_settings
+        if settings:
+            try:
+                default.WPS = _fillSetting(
+                               default.WPS,settings.WPS)
+                default.ServerSettings = _fillSetting(
+                                        default.ServerSettings,
+                                        settings.ServerSettings)
+                
+            except AttributeError,e:
+                if str(e) == "'module' object has no attribute 'WPS'"\
+                    or str(e) == "'module' object has no attribute 'ServerSettings'":
+                    pass
+                else:
+                    raise AttributeError(e)
 
-    return default_settings
+        ret = _checkPaths(default,grass)
+    else:
+        default = default_grass
+        if settings:
+            try:
+                default.grassenv = _fillSetting(
+                                        default.grassenv,grass.grassenv)
+            except AttributeError,e:
+                if str(e) == "'module' object has no attribute 'grassenv'":
+                    pass
+                else:
+                    raise AttributeError(e)
+        ret = _checkPaths(default,grass)
 
+
+    if ret:
+        raise ServerError(ret)
+    else:
+        return default
 
 
 def _fillSetting(default,custom):
@@ -78,6 +102,31 @@ def _FillRecursive(key,default, custom):
                 _FillRecursive(dkey, default[key],custom[key])
         except:
             pass
+
+def _checkPaths(default,grass):
+    """
+    Checks, if paths are read(write)able
+    """
+
+    if grass:
+        if default.grassenv["GRASS_ADDON_PATH"] and\
+            not os.path.isdir(default.grassenv['GRASS_ADDON_PATH']):
+                pass
+        if not os.path.isdir(default.grassenv['GISBASE']):
+            return "Could not locate GISBASE directory (pywps/etc/grass.py)"
+        if not os.path.isdir(default.grassenv['LD_LIBRARY_PATH']):
+            return "Could not locate LD_LIBRARY_PATH directory (pywps/etc/grass.py)"
+        if not os.path.isdir(default.grassenv['HOME']):
+            return "Could not locate HOME directory (pywps/etc/grass.py)"
+    else:
+        if not os.path.isdir(default.ServerSettings['outputPath']):
+            return "Could not locate 'outputPath' directory (pywps/etc/settings.py): %s" % (default.ServerSettings['outputPath'])
+        if not os.access(default.ServerSettings['outputPath'],os.W_OK):
+            return "Could not write to 'outputPath' directory (pywps/etc/settings.py): %s. Please, setup permissions" % (default.ServerSettings['outputPath'])
+        if not isdir(default.ServerSettings['tempPath']):
+            return "Could not locate 'tempPath' directory (pywps/etc/settings.py): %s" % (default.ServerSettings['tempPath'])
+        if not os.access(default.ServerSettings['tempPath'],os.W_OK):
+            return "Could not write to 'tempPath' directory (pywps/etc/settings.py): %s. Please, setup permissions" % (default.ServerSettings['tempPath'])
 
 if __name__ == "__main__":
     try:
