@@ -73,8 +73,11 @@ def _FillRecursive(key,default, custom):
             pass
     # recurse
     else:
-        for dkey in default[key].keys():
-            _FillRecursive(dkey, default[key],custom[key])
+        try:
+            for dkey in default[key].keys():
+                _FillRecursive(dkey, default[key],custom[key])
+        except:
+            pass
 
 if __name__ == "__main__":
     try:
