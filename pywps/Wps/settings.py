@@ -113,18 +113,18 @@ def _checkPaths(default,grass):
             not os.path.isdir(default.grassenv['GRASS_ADDON_PATH']):
                 pass
         if not os.path.isdir(default.grassenv['GISBASE']):
-            return "Could not locate GISBASE directory (pywps/etc/grass.py)"
+            return """Could not locate GISBASE directory (pywps/etc/grass.py), create directory first!"""
         if not os.path.isdir(default.grassenv['LD_LIBRARY_PATH']):
             return "Could not locate LD_LIBRARY_PATH directory (pywps/etc/grass.py)"
         if not os.path.isdir(default.grassenv['HOME']):
             return "Could not locate HOME directory (pywps/etc/grass.py)"
     else:
         if not os.path.isdir(default.ServerSettings['outputPath']):
-            return "Could not locate 'outputPath' directory (pywps/etc/settings.py): %s" % (default.ServerSettings['outputPath'])
+            return "Could not locate 'outputPath' directory (pywps/etc/settings.py): %s. Create directory first!" % (default.ServerSettings['outputPath'])
         if not os.access(default.ServerSettings['outputPath'],os.W_OK):
             return "Could not write to 'outputPath' directory (pywps/etc/settings.py): %s. Please, setup permissions" % (default.ServerSettings['outputPath'])
-        if not isdir(default.ServerSettings['tempPath']):
-            return "Could not locate 'tempPath' directory (pywps/etc/settings.py): %s" % (default.ServerSettings['tempPath'])
+        if not os.path.isdir(default.ServerSettings['tempPath']):
+            return "Could not locate 'tempPath' directory (pywps/etc/settings.py): %s. Create directory first!" % (default.ServerSettings['tempPath'])
         if not os.access(default.ServerSettings['tempPath'],os.W_OK):
             return "Could not write to 'tempPath' directory (pywps/etc/settings.py): %s. Please, setup permissions" % (default.ServerSettings['tempPath'])
 
