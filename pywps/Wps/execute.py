@@ -753,7 +753,7 @@ class Execute:
 
                     # something is wrong
                     if re.search("not found",chunk,re.IGNORECASE):
-                        raise InvalidParameterValue("server says: %s not found" % (data))
+                        raise InvalidParameterValue("Remote server says: %s not found" % (data))
 
                     # everything is here, break
                     if not chunk: 
