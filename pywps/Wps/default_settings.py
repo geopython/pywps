@@ -139,7 +139,7 @@ ServerSettings = {
     # NOTE: the pywps has to have rights, to create directories and files
     #       in this directory
     # 'tempPath':'/tmp',
-    'tempPath': '/home/jachym/tmp/pywps',
+    'tempPath': '/tmp',
 
     #
     # maxOperations - maximum number of operations, which is allowed to low
