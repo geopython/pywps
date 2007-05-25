@@ -365,9 +365,17 @@ class WPSProcess:
             self.SetStatus(line.strip())
             line = module_stderr.readline()
 
+        cmdoutput = []
+        line = module_stdout.readline()
+        while 1:
+            if line == '':
+                break
+           cmdoutput.append(line.strip())  
+           line = module_stdout.readline()
+
         module_stderr.close()
         module_stdout.close()
-        return True
+        return cmdoutput
     
     def SetStatus(self,message=None,percent=None):
         """Sets self.status variable according to given message and
@@ -411,9 +419,9 @@ class GRASSWPSProcess(WPSProcess):
     script. To be able to use it's methods (functions), you have to start
     your process with following lines:
 
-    from pywps.Wps.process import WPSProcess
+    from pywps.Wps.process import GRASSWPSProcess
 
-    class Process(WPSProcess):
+    class Process(GRASSWPSProcess):
         def __init__(self):
             WPSProcess.__init__(self,
             Identifier="your_process_identifier",
