@@ -530,7 +530,16 @@ class GRASSWPSProcess(WPSProcess):
                 
             line = module_stderr.readline()
 
+        cmdoutput = []
+        line = module_stdout.readline()
+        while 1:
+            if line == '':
+                break
+           cmdoutput.append(line.strip())  
+           line = module_stdout.readline()
+
         module_stderr.close()
         module_stdout.close()
-        return True
+
+        return cmdoutput
 
