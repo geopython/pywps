@@ -329,30 +329,29 @@ class WPSProcess:
                 retoupt = oupt
         return retoupt
 
-    def Gcmd(self,cmd,stdin=None):
-        """Runs GRASS command, fetches all GRASS_MESSAGE and
-        GRASS_PERCENT messages and sets self.status according to them, so
+    def Cmd(self,cmd,stdin=None):
+        """Runs command, fetches all messages and
+        and sets self.status according to them, so
         the client application can track the progress information, when
         runing with Status=True
 
         This module is supposed to be used instead of 'os.system()', while
-        running GRASS modules
+        running unix commands
+        
+        For GRASS modules, use GCmd(cmd)
         
         Example Usage:
-            self.Gcmd("r.los in=elevation.dem out=los coord=1000,1000")
+            self.Cmd("gdalwarp -s_srs +init="epsg:4326" -t_srs \
+            +init="esri:102067")
 
-            self.Gcmd("v.net.path network afcol=forward abcol=backward \
-            out=mypath nlayer=1","1 9 12")
+            self.Cmd("cs2cs  +proj=latlong +datum=NAD83\
+                   +to  +proj=utm +zone=10 +datum=NAD27",
+                    "45d15.551666667N   -111d30")
             """
 
-        
-        os.environ["GRASS_MESSAGE_FORMAT"] = "gui"
-
-        sys.stderr.write("PyWPS Gcmd: %s\n" % (cmd.strip()))
+        sys.stderr.write("PyWPS Cmd: %s\n" % (cmd.strip()))
         (module_stdin, module_stdout, module_stderr) = os.popen3(cmd)
 
-        os.environ["GRASS_MESSAGE_FORMAT"] = "text"
-       
         if stdin:
             module_stdin.write(stdin)
         module_stdin.close()
@@ -363,16 +362,7 @@ class WPSProcess:
         while 1:
             if line == '':
                 break
-            line = line.strip()
-            try:
-                format,content = line.split(":")
-                if format == "GRASS_INFO_PERCENT":
-                    self.SetStatus(percent=int(content.replace("%","")))
-                else:
-                    self.SetStatus(content)
-            except:
-                self.SetStatus(line)
-                
+            self.SetStatus(line.strip())
             line = module_stderr.readline()
 
         module_stderr.close()
@@ -414,3 +404,125 @@ class WPSProcess:
         """Set value of selected output"""
         out = self.GetOutput(Identifier)
         out["value"] = value
+
+class GRASSWPSProcess(WPSProcess):
+    """
+    This class is to be used as base class for WPS processes in PyWPS
+    script. To be able to use it's methods (functions), you have to start
+    your process with following lines:
+
+    from pywps.Wps.process import WPSProcess
+
+    class Process(WPSProcess):
+        def __init__(self):
+            WPSProcess.__init__(self,
+            Identifier="your_process_identifier",
+            Title="Your process title",
+            Abstract="Add optional abstract",
+            storeSupported="true",
+            grassLocation="/home/grass/spearfish60/",
+            ...)
+
+    Than you can add cusom process inputs and outputs:
+            
+            self.AddLiteralInput(Identifier="your_input_identifier",
+                        Title="Your input title",
+                        type=type(0), # integers only,
+                        ...)
+
+            self.AddComplexInput(Identifier="your_gml",
+                        Title="Your gml input title",
+                        ...)
+
+
+    And you can ofcourse define your process outputs too:
+
+            self.AddLiteralOutput(Identifier="output1",
+                            Title="First output",
+                            ...)
+            self.AddComplexValueOutput(Identifier="gmlout",
+                            Title="Embed GML",
+                            ...)
+
+    At the and, you can access the values of in- and outputs with help of
+    GetInputValue and SetOutputValue methods:
+
+        def execute(self):
+            
+            inputvalue = self.GetInputValue("your_input_identifier")
+            inputGMLFile = self.GetInputValue("your_gml")
+
+            self.SetOutputValue("output1", inputvalue)
+            self.SetOutputValue("gmlout", inputGMLFile)
+
+            return
+
+    NOTE: Try to use self.Cmd("shell command") instead of os.system for
+          GRASS modules. It will update your self.status report
+          automatically.
+          
+          Try to use self.GCmd("g.module") as well, it will update
+          self.status report based on percentage output from GRASS modules.
+
+
+    """
+    
+    def __init__(self, Identifier, Title, processVersion="1.0", 
+            Abstract="", statusSupported="false",
+            storeSupported="false",grassLocation=None):
+
+        UserDict.__init__(self,Identifier, Title,
+                processVersion,Abstract,statusSupported,storeSupported)
+
+        self.grassLocation = grassLocation
+
+    def GCmd(self,cmd,stdin=None):
+        """Runs GRASS command, fetches all GRASS_MESSAGE and
+        GRASS_PERCENT messages and sets self.status according to them, so
+        the client application can track the progress information, when
+        runing with Status=True
+
+        This module is supposed to be used instead of 'os.system()', while
+        running GRASS modules
+        
+        Example Usage:
+            self.Gcmd("r.los in=elevation.dem out=los coord=1000,1000")
+
+            self.Gcmd("v.net.path network afcol=forward abcol=backward \
+            out=mypath nlayer=1","1 9 12")
+            """
+
+        
+        os.environ["GRASS_MESSAGE_FORMAT"] = "gui"
+
+        sys.stderr.write("PyWPS Gcmd: %s\n" % (cmd.strip()))
+        cmd += " --verbose"
+        (module_stdin, module_stdout, module_stderr) = os.popen3(cmd)
+
+        os.environ["GRASS_MESSAGE_FORMAT"] = "text"
+       
+        if stdin:
+            module_stdin.write(stdin)
+        module_stdin.close()
+
+        line = module_stderr.readline()
+
+        while 1:
+            if line == '':
+                break
+            line = line.strip()
+            try:
+                format,content = line.split(":")
+                if format == "GRASS_INFO_PERCENT":
+                    self.SetStatus(percent=int(content.replace("%","")))
+                else:
+                    self.SetStatus(content)
+            except:
+                self.SetStatus(line)
+                
+            line = module_stderr.readline()
+
+        module_stderr.close()
+        module_stdout.close()
+        return True
+

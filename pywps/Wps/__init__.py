@@ -9,4 +9,5 @@ __all__ = [ "wpsexceptions",
         "settings",
         "default_settings",
         "default_grass",
+        "process"
         ]
