@@ -85,17 +85,17 @@ class WPSProcess:
         self.Title = Title
         self.Abstract = Abstract
 
-        if statusSupported.lower() == "true" or\
-           statusSupported == True or \
-           statusSupported.lower() == "t":
+        if type(statusSupported) == type('t') and (statusSupported.lower() == "true" or\
+           statusSupported.lower() == "t") or \
+           statusSupported == True:
             self.statusSupported="true"
         else:
             self.statusSupported="false"
 
 
-        if storeSupported.lower() == "false" or\
-           storeSupported == False or \
-           storeSupported.lower() == "f":
+        if type(storeSupported) == type('t') and (storeSupported.lower() == "false" or\
+           storeSupported.lower() == "f") or \
+           storeSupported == False:
             self.storeSupported="false"
         else:
             self.storeSupported="true"
@@ -344,7 +344,7 @@ class WPSProcess:
             self.Cmd("gdalwarp -s_srs +init="epsg:4326" -t_srs \
             +init="esri:102067")
 
-            self.Cmd("cs2cs  +proj=latlong +datum=NAD83\
+            output = self.Cmd("cs2cs  +proj=latlong +datum=NAD83\
                    +to  +proj=utm +zone=10 +datum=NAD27",
                     "45d15.551666667N   -111d30")
             """
@@ -370,8 +370,8 @@ class WPSProcess:
         while 1:
             if line == '':
                 break
-           cmdoutput.append(line.strip())  
-           line = module_stdout.readline()
+            cmdoutput.append(line.strip())  
+            line = module_stdout.readline()
 
         module_stderr.close()
         module_stdout.close()
@@ -397,6 +397,7 @@ class WPSProcess:
             pass
 
         self.status = [message, percent]
+        sys.stderr.write("PyWPS Status: %s\n" %message)
 
         return self.status
 
@@ -479,7 +480,7 @@ class GRASSWPSProcess(WPSProcess):
             Abstract="", statusSupported="false",
             storeSupported="false",grassLocation=None):
 
-        UserDict.__init__(self,Identifier, Title,
+        WPSProcess.__init__(self,Identifier, Title,
                 processVersion,Abstract,statusSupported,storeSupported)
 
         self.grassLocation = grassLocation
@@ -504,7 +505,7 @@ class GRASSWPSProcess(WPSProcess):
         os.environ["GRASS_MESSAGE_FORMAT"] = "gui"
 
         sys.stderr.write("PyWPS Gcmd: %s\n" % (cmd.strip()))
-        cmd += " --verbose"
+        # cmd += " --verbose"
         (module_stdin, module_stdout, module_stderr) = os.popen3(cmd)
 
         os.environ["GRASS_MESSAGE_FORMAT"] = "text"
@@ -535,8 +536,8 @@ class GRASSWPSProcess(WPSProcess):
         while 1:
             if line == '':
                 break
-           cmdoutput.append(line.strip())  
-           line = module_stdout.readline()
+            cmdoutput.append(line.strip())  
+            line = module_stdout.readline()
 
         module_stderr.close()
         module_stdout.close()
