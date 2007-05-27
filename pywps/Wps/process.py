@@ -19,7 +19,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 
-import os,sys
+import os,sys,string
+import subprocess
+import wpsexceptions
+from wpsexceptions import *
 
 class WPSProcess:
     """
@@ -349,34 +352,28 @@ class WPSProcess:
                     "45d15.551666667N   -111d30")
             """
 
-        sys.stderr.write("PyWPS Cmd: %s\n" % (cmd.strip()))
-        (module_stdin, module_stdout, module_stderr) = os.popen3(cmd)
-
-        if stdin:
-            module_stdin.write(stdin)
-        module_stdin.close()
-
-        line = module_stderr.readline()
-        #stdoutln = module_stdout.readline()
-
-        while 1:
-            if line == '':
-                break
-            self.SetStatus(line.strip())
-            line = module_stderr.readline()
-
-        cmdoutput = []
-        line = module_stdout.readline()
-        while 1:
-            if line == '':
-                break
-            cmdoutput.append(line.strip())  
-            line = module_stdout.readline()
-
-        module_stderr.close()
-        module_stdout.close()
-        return cmdoutput
     
+        sys.stderr.write("PyWPS Cmd: %s\n" % (cmd.strip()))
+
+        cmd = string.split(cmd)
+        try:
+            p = subprocess.Popen(cmd,
+                stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,close_fds=True)
+        except BaseException,e :
+            raise ServerError("Could not perform command [%s]: %s" % (cmd,e))
+
+        (stdout, stderr) = p.communicate(stdin)
+
+        self.SetStatus(stderr)
+
+        retcode = p.wait()
+
+        if retcode != 0:
+             raise ServerError("Could not perform command: %s" % cmd)
+
+        return stdout.splitlines()
+
     def SetStatus(self,message=None,percent=None):
         """Sets self.status variable according to given message and
         percents"""
@@ -500,47 +497,23 @@ class GRASSWPSProcess(WPSProcess):
             self.Gcmd("v.net.path network afcol=forward abcol=backward \
             out=mypath nlayer=1","1 9 12")
             """
+        sys.stderr.write("PyWPS GCmd: %s\n" % (cmd.strip()))
 
-        
-        os.environ["GRASS_MESSAGE_FORMAT"] = "gui"
+        #cmd = string.split(cmd)
+        try:
+            p = subprocess.Popen(cmd,shell=True,
+                stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,)
+        except BaseException,e :
+            raise Exception("Could not perform command [%s]: %s" % (cmd,e))
 
-        sys.stderr.write("PyWPS Gcmd: %s\n" % (cmd.strip()))
-        # cmd += " --verbose"
-        (module_stdin, module_stdout, module_stderr) = os.popen3(cmd)
+        (stdout, stderr) = p.communicate(stdin)
 
-        os.environ["GRASS_MESSAGE_FORMAT"] = "text"
-       
-        if stdin:
-            module_stdin.write(stdin)
-        module_stdin.close()
+        self.SetStatus(stderr)
 
-        line = module_stderr.readline()
+        retcode = p.wait()
 
-        while 1:
-            if line == '':
-                break
-            line = line.strip()
-            try:
-                format,content = line.split(":")
-                if format == "GRASS_INFO_PERCENT":
-                    self.SetStatus(percent=int(content.replace("%","")))
-                else:
-                    self.SetStatus(content)
-            except:
-                self.SetStatus(line)
-                
-            line = module_stderr.readline()
+        if retcode != 0:
+             raise Exception("Could not perform command: %s" % cmd)
 
-        cmdoutput = []
-        line = module_stdout.readline()
-        while 1:
-            if line == '':
-                break
-            cmdoutput.append(line.strip())  
-            line = module_stdout.readline()
-
-        module_stderr.close()
-        module_stdout.close()
-
-        return cmdoutput
-
+        return stdout.splitlines()
