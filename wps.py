@@ -51,18 +51,34 @@ Enjoy and happy GISing!
 # 3) Code cleaning, making things easier
 # 4) Implemente self.debug here and also for requests
 
+pywpscomment = [] # Comment, which should be added to the XML
 import pywps
-from pywps.etc import grass
-from pywps.etc import settings
+try:
+    from pywps.etc import grass as customgrass
+except ImportError:
+    pywpscomment.append("""Could not load GRASS settings file (pywps/etc/grass.py).
+    Please check if the file is created and its permissions.""")
+
+try:
+    from pywps.etc import settings as customsettings
+except ImportError:
+    pywpscomment.append("""Could not load PyWPS settings file (pywps/etc/settings.py).
+    Please check if the file is created and its permissions.""")
+
 from pywps import Wps
 from pywps.Wps import wpsexceptions
 from pywps.Wps.wpsexceptions import *
+from pywps.Wps import settings 
 from pywps.Wps import capabilities
 from pywps.Wps import describe
 from pywps.Wps import execute
 from pywps.Wps import inputs
 from pywps import processes
-from pywps.processes import *
+
+try:
+    from pywps.processes import *
+except BaseException,e :
+    raise ServerError(e)
 
 
 import string, sys, os, tempfile, glob, shutil, time, cgi
@@ -72,7 +88,15 @@ class WPS:
         """
         WPS Initialization
         """
-        self.serverSettings = settings.ServerSettings
+        # consolidate settings - custom vs. default
+        try:
+            self.settings = settings.ConsolidateSettings(customsettings)
+            self.grass = settings.ConsolidateSettings(customgrass,
+                    grass=True)
+        except NameError:
+            self.settings = settings.ConsolidateSettings(None)
+            self.grass = settings.ConsolidateSettings(None,grass=True)
+
         self.inputs = inputs.Inputs()
         self.method = os.getenv("REQUEST_METHOD")
         self.debug = False # TODO: not used yet
@@ -212,7 +236,7 @@ class WPS:
         Inputs: printres    - print resulting xml
         """
 
-        self.wpsrequest =  capabilities.Capabilities(settings,processes)
+        self.wpsrequest =  capabilities.Capabilities(self.settings,processes)
         if printres:
             wps.PrintXmlDocument()
 
@@ -221,7 +245,7 @@ class WPS:
         Inputs: printres    - print resulting xml
         """
 
-        self.wpsrequest = describe.Describe(settings,processes,self.inputs.values)
+        self.wpsrequest = describe.Describe(self.settings,processes,self.inputs.values)
         if printres:
             wps.PrintXmlDocument()
 
@@ -229,6 +253,9 @@ class WPS:
         """Perform Execute request
         Inputs: printres    - print resulting xml
         """
+
+        # all grass directories existing?
+        settings.GRASSSettings(process)
 
         # 
         # PID file(s) management
@@ -238,12 +265,12 @@ class WPS:
         # check for number of running operations
         try:
             nPIDFiles = len(glob.glob(
-                os.path.join(settings.ServerSettings['tempPath'],self.pidFilePref+"*")))
+                os.path.join(self.settings.ServerSettings['tempPath'],self.pidFilePref+"*")))
         except (IOError, OSError), what:
             raise ServerError("IOError,OSError: %s" % what)
 
         try:
-            maxPIDFiles = self.serverSettings['maxOperations']
+            maxPIDFiles = self.settings.ServerSettings['maxOperations']
         except KeyError:
             maxPIDFiles = 1
 
@@ -257,9 +284,9 @@ class WPS:
         #
         # Executing process
         #
-        process = eval("processes.%s.Process()" % (self.inputs.values['identifier'][0]))
         try:
-            self.wpsrequest = execute.Execute(settings,grass.grassenv,
+            process = eval("processes.%s.Process()" % (self.inputs.values['identifier'][0]))
+            self.wpsrequest = execute.Execute(self.settings,self.grass.grassenv,
                                               process,self.inputs.values,
                                               self.method)
         except Exception,e :
@@ -273,7 +300,7 @@ class WPS:
         # running asynchronously, print to file
         if not self.wpsrequest.pid:
             file = open(os.path.join(
-                    settings.ServerSettings['outputPath'],
+                    self.settings.ServerSettings['outputPath'],
                     self.wpsrequest.executeresponseXmlName),"w")
             sys.stdout = file
         else:
@@ -297,6 +324,10 @@ class WPS:
 
     def PrintXmlDocument(self):
         if self.wpsrequest.document: #FIXME: document should be returned directly
+            global pywpscomment
+            for com in pywpscomment:
+                pywpscommentNode = self.wpsrequest.document.createComment(com)
+                self.wpsrequest.document.importNode(pywpscommentNode, 0)
             if sys.stdout == sys.__stdout__:
                 print "Content-type: text/xml\n"
             print self.wpsrequest.document.toxml()
