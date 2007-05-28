@@ -31,7 +31,7 @@ from wpsexceptions import ServerError
 import os
 
 
-def ConsolidateSettings(settings, grass=False):
+def ConsolidateSettings(settings, grass=False,process):
     """
     This function merges custom settings together with default settings
     """
@@ -53,7 +53,7 @@ def ConsolidateSettings(settings, grass=False):
                 else:
                     raise AttributeError(e)
 
-        ret = _checkPaths(default,grass)
+        ret = _checkPaths(default,grass,process)
     else:
         default = default_grass
         if settings:
@@ -65,7 +65,7 @@ def ConsolidateSettings(settings, grass=False):
                     pass
                 else:
                     raise AttributeError(e)
-        ret = _checkPaths(default,grass)
+        ret = _checkPaths(default,grass,process)
 
 
     if ret:
@@ -103,7 +103,7 @@ def _FillRecursive(key,default, custom):
         except:
             pass
 
-def _checkPaths(default,grass):
+def _checkPaths(default,grass,process):
     """
     Checks, if paths are read(write)able
     """
@@ -127,6 +127,17 @@ def _checkPaths(default,grass):
             return "Could not locate 'tempPath' directory (pywps/etc/settings.py): %s. Create directory first!" % (default.ServerSettings['tempPath'])
         if not os.access(default.ServerSettings['tempPath'],os.W_OK):
             return "Could not write to 'tempPath' directory (pywps/etc/settings.py): %s. Please, setup permissions" % (default.ServerSettings['tempPath'])
+
+def GRASSSettings(process):
+    try:
+        if grassLocation != None:
+            if not (os.path.isdir(process.grassLocation)):
+                raise ServerError("Could not locate grassLocation directory: %s" % (process.grassLocation))
+            if not os.access(process.grassLocation):
+                raise ServerError("Not write access to grassLocation directory: %s" % (process.grassLocation))
+    except AttributeError:
+        return
+    return
 
 if __name__ == "__main__":
     try:
