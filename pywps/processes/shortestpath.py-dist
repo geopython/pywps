@@ -1,73 +1,69 @@
+"""
+pywps process example:
+
+shortestpath:   calculate shortest path on vector network
+"""
+# Author:	Jachym Cepicky
+# Lince: 
+# 
+# Web Processing Service implementation
+# Copyright (C) 2006 Stepan Kafka
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+
 import os,time,string,sys,shutil
+from pywps.Wps.process import GRASSWPSProcess
 
-class Process:
+class Process(GRASSWPSProcess):
     def __init__(self):
-        self.Identifier = "shortestpath"
-        self.processVersion = "0.1"
-        self.storeSupported = "true"
-        self.Title="Find the shortes path on the roads map"
-        self.grassLocation=None
-        self.Inputs = [
-                    {
-                        'Identifier': 'streetmap',
-                        'Title': """Street map""",
-                        'Abstract': """Street map on which the shortest path
-                        operation should be performed""",
-                        'ComplexValue': {'Formats':["text/xml"]},
-                        'value': None
-                    },
-                    {
-                        'Identifier': 'x1',
-                        'Title': 'Start x coordinate',
-                        'LiteralData': {
-                            'values':["*"],
-                            },
-                        'dataType': type(0.0),
-                        'value': None
-                    },
-                    {
-                        'Identifier': 'y1',
-                        'Title': 'Start y coordinate',
-                        'LiteralData': {
-                            'values':["*"],
-                        },
-                        'dataType': type(0.0),
-                        'value': None
-                    },
-                    {
-                        'Identifier': 'x2',
-                        'Title': 'End x coordinate',
-                        'LiteralData': {
-                            'values':["*"],
-                        },
-                        'dataType': type(0.0),
-                        'value': None
-                    },
-                    {
-                        'Identifier': 'y2',
-                        'Title': 'End y coordinate',
-                        'LiteralData': {
-                            'values':["*"],
-                        },
-                        'dataType': type(0.0),
-                        'value': None
-                    }
-                ]
-        self.Outputs = [
-                    {
-                        'Identifier': 'outputReference',
-                        'Title': 'Resulting output map',
-                        'ComplexValueReference': {'Formats':["text/xml"]},
-                        'value': None
-                    },
-                    {
-                        'Identifier': 'outputData',
-                        'Title': 'Resulting output map',
-                        'ComplexValue': {'Formats':["text/xml"]},
-                        'value': None
-                    },
-                ]
+        GRASSWPSProcess.__init__(self,
+                Identifier="shortestpath",
+                processVersion = "0.2",
+                storeSupported = "true",
+                Title="Find the shortes path on the roads map",
+                )
+        self.AddComplexInput(Identifier= "streetmap",
+                            Title="Street map",
+                            Abstract = """Street map on which the shortest path operation should be performed""",
+                            Formats = ["text/xml"])
+        self.AddLiteralInput(Identifier = "x1",
+                            Title = "Start x coordinate",
+                            type = type(0.0)
+                            )
+        self.AddLiteralInput(Identifier = "y1",
+                            Title = "Start y coordinate",
+                            type = type(0.0)
+                            )
+        self.AddLiteralInput(Identifier = "x2",
+                            Title = "Stop x coordinate",
+                            type = type(0.0)
+                            )
+        self.AddLiteralInput(Identifier = "y2",
+                            Title = "Stop y coordinate",
+                            type = type(0.0)
+                            )
+        self.AddComplexValueReferenceOutput(
+                Identifier= "outputReference",
+                Title = "Resulting output map",
+                Formats = ["text/xml"])
 
+        self.AddComplexValueOutput(
+                Identifier= "outputData",
+                Title = "Resulting output map",
+                Formats = ["text/xml"])
+                
     # --------------------------------------------------------------------
     def execute(self):
         """
@@ -75,27 +71,22 @@ class Process:
 
         It returns None, if process succeed or String if process failed
         """
-        if os.system("v.in.ogr dsn=%s out=roads 1>&2" %
-                (self.DataInputs['value'])):
-            return "Could not import vector file"
-        os.system("g.region -d")
+        self.GCmd("v.in.ogr dsn=%s out=roads" % \
+                (self.GetInputValue('streetmap')))
+        self.GCmd("g.region -d")
 
 
-        if os.system(
-            "echo '0 %s %s %s %s' | v.net.path in=roads out=path 1>&2" % \
-            (self.Inputs['x1'],
-                self.Inputs['y1'],
-                self.Inputs['x2'],
-                self.Inputs['y2'])):
-            return "Could not determine shortest path"
+        self.GCmd("v.net.path in=roads out=path","0 %s %s %s %s" % (self.GetInputValue('x1'),
+                self.GetInputValue('y1'),
+                self.GetInputValue('x2'),
+                self.GetInputValue('y2')))
 
-        if os.system("v.out.ogr format=GML input=path dsn=out.xml olayer=path.xml 1>&2"):
-            return "Could not export vector file"
+        self.GCmd("v.out.ogr format=GML input=path dsn=out.xml olayer=path.xml")
 
         if "out.xml" in os.listdir(os.curdir):
             shutil.copy("out.xml","out2.xml")
-            self.Outputs[0]['value'] = "out.xml"
-            self.Outputs[1]['value'] = "out2.xml"
+            self.SetOutputValue('outputReference',"out.xml")
+            self.SetOutputValue('outputData',"out2.xml")
             return
         else:
             return "Ouput file not created!"
