@@ -55,7 +55,6 @@ class Process(GRASSWPSProcess):
         self.AddComplexValueReferenceOutput(Identifier = "output",
                 Title="Resulting output map",
                 Formats = ["image/tiff"])
-        self.grassLocation="/"
     #####################################################################
     #
     # Execute part of the process
