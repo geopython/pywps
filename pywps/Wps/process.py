@@ -514,6 +514,6 @@ class GRASSWPSProcess(WPSProcess):
         retcode = p.wait()
 
         if retcode != 0:
-             raise Exception("Could not perform command: %s" % cmd)
+           raise Exception("Could not perform command: %s" % cmd)
 
         return stdout.splitlines()

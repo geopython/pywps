@@ -31,7 +31,7 @@ from wpsexceptions import ServerError
 import os
 
 
-def ConsolidateSettings(settings, grass=False,process):
+def ConsolidateSettings(settings, grass=False):
     """
     This function merges custom settings together with default settings
     """
@@ -53,7 +53,7 @@ def ConsolidateSettings(settings, grass=False,process):
                 else:
                     raise AttributeError(e)
 
-        ret = _checkPaths(default,grass,process)
+        ret = _checkPaths(default,grass)
     else:
         default = default_grass
         if settings:
@@ -65,7 +65,7 @@ def ConsolidateSettings(settings, grass=False,process):
                     pass
                 else:
                     raise AttributeError(e)
-        ret = _checkPaths(default,grass,process)
+        ret = _checkPaths(default,grass)
 
 
     if ret:
@@ -103,7 +103,7 @@ def _FillRecursive(key,default, custom):
         except:
             pass
 
-def _checkPaths(default,grass,process):
+def _checkPaths(default,grass):
     """
     Checks, if paths are read(write)able
     """
@@ -130,10 +130,10 @@ def _checkPaths(default,grass,process):
 
 def GRASSSettings(process):
     try:
-        if grassLocation != None:
+        if process.grassLocation != None:
             if not (os.path.isdir(process.grassLocation)):
                 raise ServerError("Could not locate grassLocation directory: %s" % (process.grassLocation))
-            if not os.access(process.grassLocation):
+            if not os.access(process.grassLocation,os.W_OK):
                 raise ServerError("Not write access to grassLocation directory: %s" % (process.grassLocation))
     except AttributeError:
         return
