@@ -37,7 +37,7 @@ class Process(GRASSWPSProcess):
         GRASSWPSProcess.__init__(self,
                 Identifier = "addvalue",
                 Title= "Add some value to some raster map",
-                processVersion = "0.1",
+                processVersion = "0.2",
                 storeSupported = True,
                 statusSupported = True)
 

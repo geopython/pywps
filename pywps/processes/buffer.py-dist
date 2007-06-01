@@ -9,7 +9,7 @@ class Process(GRASSWPSProcess):
     def __init__(self):
         GRASSWPSProcess.__init__(self,
             Identifier = "buffer",
-            processVersion = "0.1",
+            processVersion = "0.2",
             storeSupported = "true",
             Title="Create a buffer around a point ",
             Abstract="Create a buffer around point",
