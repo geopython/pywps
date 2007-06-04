@@ -360,7 +360,7 @@ class WPSProcess:
             p = subprocess.Popen(cmd,
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,close_fds=True)
-        except BaseException,e :
+        except Exception,e :
             raise ServerError("Could not perform command [%s]: %s" % (cmd,e))
 
         (stdout, stderr) = p.communicate(stdin)
@@ -504,7 +504,7 @@ class GRASSWPSProcess(WPSProcess):
             p = subprocess.Popen(cmd,shell=True,
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,)
-        except BaseException,e :
+        except Exception,e :
             raise Exception("Could not perform command [%s]: %s" % (cmd,e))
 
         (stdout, stderr) = p.communicate(stdin)

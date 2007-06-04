@@ -77,7 +77,7 @@ from pywps import processes
 
 try:
     from pywps.processes import *
-except BaseException,e :
+except Exception,e :
     raise ServerError(e)
 
 
@@ -254,8 +254,6 @@ class WPS:
         Inputs: printres    - print resulting xml
         """
 
-        # all grass directories existing?
-        settings.GRASSSettings(process)
 
         # 
         # PID file(s) management
@@ -286,6 +284,9 @@ class WPS:
         #
         try:
             process = eval("processes.%s.Process()" % (self.inputs.values['identifier'][0]))
+            # all grass directories existing?
+            settings.GRASSSettings(process)
+            # execute
             self.wpsrequest = execute.Execute(self.settings,self.grass.grassenv,
                                               process,self.inputs.values,
                                               self.method)
