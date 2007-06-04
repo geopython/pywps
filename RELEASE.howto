@@ -1,0 +1,4 @@
+1 - Edit setup.py
+2 - run setup.py
+
+python setup.py sdist
