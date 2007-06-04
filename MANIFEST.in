@@ -14,8 +14,11 @@ global-exclude *.dvi
 global-exclude *.log
 global-exclude *.aux
 
-exclude processes/pf_*
+exclude pywps/processes/pf_*
+exclude pywps/processes/*.py
+exclude pywps/etc/*.py
 
 global-include README
 global-include AUTHORS
 global-include INSTALL
+global-include *.py-dist
