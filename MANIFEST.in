@@ -18,6 +18,8 @@ exclude pywps/processes/pf_*
 exclude pywps/processes/*.py
 exclude pywps/etc/*.py
 
+include pywps/etc/__init__.py
+
 global-include README
 global-include AUTHORS
 global-include INSTALL
