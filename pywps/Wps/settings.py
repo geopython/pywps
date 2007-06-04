@@ -63,6 +63,8 @@ def ConsolidateSettings(settings, grass=False):
             except AttributeError,e:
                 if str(e) == "'module' object has no attribute 'grassenv'":
                     pass
+                else if str(e) == "'bool' object has no attribute 'grassenv'"
+                    pass
                 else:
                     raise AttributeError(e)
         ret = _checkPaths(default,grass)
