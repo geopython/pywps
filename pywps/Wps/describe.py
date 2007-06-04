@@ -374,7 +374,7 @@ class Describe:
                             (inputStruct['elements']['DefaultValue']['ns'],
                             "DefaultValue"))
                 # FIXME: This look like
-                # <ows:DefaultValue>
+                # <ows:DefaultValue>
                 #       <ows:MinimumValue>20</ows:MinimumValue>
                 # </ows:DefaultValue>
                         defaultValue.appendChild(
