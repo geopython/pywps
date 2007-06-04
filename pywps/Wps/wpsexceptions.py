@@ -56,7 +56,7 @@ class WPSException(Exception):
 
         str = "Content-type: text/xml\n\n"
         str += self.document.toprettyxml(indent='\t', newl='\n', encoding="utf-8")
-        sys.stderr.write("PyWPS %s: %s" % (self.code, self.locator))
+        sys.stderr.write("PyWPS %s: %s\n" % (self.code, self.locator))
 
         # FIXME: To avoid multiple printing, this hack works
         #        however, I do not know, why it is printed two times :-(
@@ -99,6 +99,9 @@ class FileSizeExceeded(WPSException):
 class ServerError(WPSException):
     def __init__(self,value=None):
         self.code = "ServerError"
-        self.locator = str(value)
+        try:
+            self.locator = str(value)
+        except:
+            self.locator = None
         self.make_xml()
         self.ExceptionReport.appendChild(self.document.createComment("General server error"))

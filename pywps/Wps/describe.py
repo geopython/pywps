@@ -373,6 +373,10 @@ class Describe:
                         defaultValue = self.document.createElement("%s%s" %\
                             (inputStruct['elements']['DefaultValue']['ns'],
                             "DefaultValue"))
+                # FIXME: This look like
+                # <ows:DefaultValue>
+                #       <ows:MinimumValue>20</ows:MinimumValue>
+                # </ows:DefaultValue>
                         defaultValue.appendChild(
                                 self.document.createTextNode(str(input['value'])))
                         literaldata.appendChild(defaultValue)
