@@ -82,7 +82,8 @@ class NoApplicableCode(WPSException):
         self.code = "NoApplicableCode"
         self.locator = value
         self.make_xml()
-        self.ExceptionReport.appendChild(self.document.createComment(repr(locator)))
+        self.ExceptionReport.appendChild(self.document.createComment(
+            repr(self.locator)))
 
 class ServerBusy(WPSException):
     def __init__(self,value=None):
