@@ -115,7 +115,7 @@ def _checkPaths(default,grass):
             not os.path.isdir(default.grassenv['GRASS_ADDON_PATH']):
                 pass
         if not os.path.isdir(default.grassenv['GISBASE']):
-            return """Could not locate GISBASE directory (pywps/etc/grass.py), create directory first!"""
+            return """Could not locate GISBASE directory (%s in pywps/etc/grass.py), create directory first!""" % default.grassenv['GISBASE']
         if not os.path.isdir(default.grassenv['LD_LIBRARY_PATH']):
             return "Could not locate LD_LIBRARY_PATH directory (pywps/etc/grass.py)"
         if not os.path.isdir(default.grassenv['HOME']):
