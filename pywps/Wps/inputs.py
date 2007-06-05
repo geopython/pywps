@@ -32,6 +32,7 @@ from xml.sax.handler import feature_namespaces
 import sys
 import wpsexceptions
 from wpsexceptions import *
+from debug import PyWPSdebug
 
 #--------------------------------------------------------------------#
 # processExecuteXML - for parsing the input xml document using sax   #
@@ -177,6 +178,7 @@ class Inputs:
         try:
             formDocument = xml.dom.minidom.parseString(inputxml)
         except xml.parsers.expat.ExpatError,e:
+            PyWPSdebug(inputxml)
             raise NoApplicableCode(e)
 
         #

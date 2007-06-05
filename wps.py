@@ -99,7 +99,6 @@ class WPS:
 
         self.inputs = inputs.Inputs()
         self.method = os.getenv("REQUEST_METHOD")
-        self.debug = False # TODO: not used yet
 
         self.maxInputLength = 0  # maximal length of one input item
         self.maxFileSize = 0 # maximal input XML or other file size
@@ -109,8 +108,8 @@ class WPS:
 
         # (re) setting of variables
         try:
-            self.debug = self.serverSettings["debuging"]
-            if self.debug:
+            os.setenv("PyWPS_DEBUG",self.serverSettings["debuglevel"])
+            if int(self.serverSettings["debuglevel"]) >= 3:
                 import cgitb
                 cgitb.enable()
         except:
