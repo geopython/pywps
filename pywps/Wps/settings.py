@@ -59,11 +59,11 @@ def ConsolidateSettings(settings, grass=False):
         if settings:
             try:
                 default.grassenv = _fillSetting(
-                                        default.grassenv,grass.grassenv)
+                                        default.grassenv,settings.grassenv)
             except AttributeError,e:
                 if str(e) == "'module' object has no attribute 'grassenv'":
                     pass
-                elif str(e) == "'bool' object has no attribute 'grassenv'"
+                elif str(e) == "'bool' object has no attribute 'grassenv'":
                     pass
                 else:
                     raise AttributeError(e)
@@ -82,10 +82,10 @@ def _fillSetting(default,custom):
     """
     
     for key in default.keys():
-        _FillRecursive(key,default,custom)
+        _fillRecursive(key,default,custom)
     return default
 
-def _FillRecursive(key,default, custom):
+def _fillRecursive(key,default, custom):
     """
     Goes through default settings and tryes to replace default settings
     with custom ones.
@@ -101,7 +101,7 @@ def _FillRecursive(key,default, custom):
     else:
         try:
             for dkey in default[key].keys():
-                _FillRecursive(dkey, default[key],custom[key])
+                _fillRecursive(dkey, default[key],custom[key])
         except:
             pass
 
