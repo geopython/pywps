@@ -80,7 +80,10 @@ class InvalidParameterValue(WPSException):
 class NoApplicableCode(WPSException):
     def __init__(self,value=None):
         self.code = "NoApplicableCode"
-        self.locator = value
+        try:
+            self.locator = str(value)
+        except:
+            self.locator = None
         self.make_xml()
         self.ExceptionReport.appendChild(self.document.createComment(
             repr(self.locator)))
