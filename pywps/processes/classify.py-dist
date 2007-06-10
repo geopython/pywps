@@ -52,7 +52,7 @@ class Process(GRASSWPSProcess):
                 value = 20)
 
 
-        self.AddComplexValueReferenceOutput(Identifier = "output",
+        self.AddComplexReferenceOutput(Identifier = "output",
                 Title="Resulting output map",
                 Formats = ["image/tiff"])
     #####################################################################

@@ -51,12 +51,12 @@ class Process(GRASSWPSProcess) :
                             Title = "Stop y coordinate",
                             type = type(0.0)
                             )
-        self.AddComplexValueReferenceOutput(
+        self.AddComplexReferenceOutput(
                 Identifier= "outputReference",
                 Title = "Resulting output map",
                 Formats = ["text/xml"])
 
-        self.AddComplexValueOutput(
+        self.AddComplexOutput(
                 Identifier= "outputData",
                 Title = "Resulting output map",
                 Formats = ["text/xml"])

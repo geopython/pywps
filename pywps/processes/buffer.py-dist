@@ -30,7 +30,7 @@ class Process(GRASSWPSProcess):
                              type = type(0.0))
 
 
-	self.AddComplexValueReferenceOutput(
+	self.AddComplexReferenceOutput(
                 Identifier = "output",
                 Title = 'Resulting output map',
                 Formats = ["text/xml"])

@@ -63,7 +63,7 @@ class Process(GRASSWPSProcess):
                             Abstract = 'The height of observer eye over the terrain (meters)',
                             )
         
-        self.AddComplexValueReferenceOutput(Identifier = "output",
+        self.AddComplexReferenceOutput(Identifier = "output",
                 Title =   'Resulting output map',
                 Formats = ["image/tiff"],)
         

@@ -41,7 +41,7 @@ class Process(WPSProcess):
         self.AddComplexInput("xml")
 
         self.AddLiteralOutput("literal", UOMs=["cm"])
-        self.AddComplexValueOutput("complexref", Formats="image/jpeg")
+        self.AddComplexOutput("complexref", Formats="image/jpeg")
         self.AddBBoxOutput("bbox", value=[11,11,14,14.4])
         
     def execute(self):
