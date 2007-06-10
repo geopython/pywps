@@ -58,7 +58,7 @@ class WPSProcess:
             self.AddLiteralOutput(Identifier="output1",
                             Title="First output",
                             ...)
-            self.AddComplexValueOutput(Identifier="gmlout",
+            self.AddComplexOutput(Identifier="gmlout",
                             Title="Embed GML",
                             ...)
 
@@ -238,7 +238,7 @@ class WPSProcess:
         return self.Outputs[-1]
 
 
-    def AddComplexValueOutput(self, Identifier, Title=None, Abstract=None,
+    def AddComplexOutput(self, Identifier, Title=None, Abstract=None,
             Formats=["text/xml"], value=None):
         """Add new output item of type ComplexValue to this process"""
 
@@ -265,7 +265,7 @@ class WPSProcess:
 
         return self.Outputs[-1]
 
-    def AddComplexValueReferenceOutput(self, Identifier, Title=None, Abstract=None,
+    def AddComplexReferenceOutput(self, Identifier, Title=None, Abstract=None,
             Formats=["text/xml"], value=None):
         """Add new output item of type ComplexValueValueReference to this process"""
 
@@ -446,7 +446,7 @@ class GRASSWPSProcess(WPSProcess):
             self.AddLiteralOutput(Identifier="output1",
                             Title="First output",
                             ...)
-            self.AddComplexValueOutput(Identifier="gmlout",
+            self.AddComplexOutput(Identifier="gmlout",
                             Title="Embed GML",
                             ...)
 
