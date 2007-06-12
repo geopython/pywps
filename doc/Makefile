@@ -1,4 +1,4 @@
-FILE=install
+FILE=pywps-howto
 SRC=${FILE}.tex
 PDFLATEX=pdflatex
 

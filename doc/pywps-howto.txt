@@ -880,7 +880,7 @@ xsi:schemaLocation="http://www.opengeospatial.net/wps/wpsDescribeProcess.xsd">
     self.status = ["Generating raster map", 50]
 
    or better
-    self.SetStatus("Generarting raster map", 50_Done)
+    self.SetStatus("Generarting raster map", 50)
 
    will become
 
@@ -1701,7 +1701,7 @@ request=<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
    Macquarie University, Sydney.
 
    The command line arguments were:
-   latex2html -split 0 install.tex
+   latex2html -split 0 pywps-howto.tex
 
    The translation was initiated by Jachym Cepicky on 2007-06-12
      _________________________________________________________________
@@ -1747,52 +1747,52 @@ Reference
    2. http://gdf-hannover.de/
    3. http://www.bnhelp.cz/
    4. http://les-ejk.cz/
-   5. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00020000000000000000
-   6. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00021000000000000000
-   7. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00030000000000000000
-   8. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00040000000000000000
-   9. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00041000000000000000
-  10. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00042000000000000000
-  11. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00043000000000000000
-  12. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00050000000000000000
-  13. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00051000000000000000
-  14. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00052000000000000000
-  15. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00060000000000000000
-  16. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00061000000000000000
-  17. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00062000000000000000
-  18. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00063000000000000000
-  19. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00070000000000000000
-  20. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00080000000000000000
-  21. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00081000000000000000
-  22. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00082000000000000000
-  23. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION00090000000000000000
-  24. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION000100000000000000000
-  25. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION000110000000000000000
-  26. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION000120000000000000000
-  27. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#SECTION000130000000000000000
+   5. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00020000000000000000
+   6. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00021000000000000000
+   7. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00030000000000000000
+   8. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00040000000000000000
+   9. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00041000000000000000
+  10. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00042000000000000000
+  11. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00043000000000000000
+  12. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00050000000000000000
+  13. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00051000000000000000
+  14. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00052000000000000000
+  15. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00060000000000000000
+  16. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00061000000000000000
+  17. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00062000000000000000
+  18. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00063000000000000000
+  19. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00070000000000000000
+  20. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00080000000000000000
+  21. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00081000000000000000
+  22. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00082000000000000000
+  23. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00090000000000000000
+  24. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION000100000000000000000
+  25. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION000110000000000000000
+  26. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION000120000000000000000
+  27. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION000130000000000000000
   28. http://pywps.wald.intevation.org/
   29. http://pywps.ominiverdi.org/
-  30. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#foot357
-  31. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#foot358
+  30. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#foot357
+  31. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#foot358
   32. http://httpd.apache.org/
   33. http://grass.itc.it/
   34. http://proj.maptools.org/
   35. http://gdal.org/
   36. http://www.r-project.org/
-  37. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#foot75
+  37. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#foot75
   38. http://www.opengeospatial.org/specs/?page=specs
-  39. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#foot361
-  40. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#foot362
-  41. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#foot365
-  42. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#foot366
+  39. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#foot361
+  40. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#foot362
+  41. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#foot365
+  42. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#foot366
   43. http://www.latex2html.org/
   44. http://www.maths.mq.edu.au/~ross/
-  45. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#tex2html8
-  46. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#tex2html9
-  47. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#tex2html15
+  45. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#tex2html8
+  46. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#tex2html9
+  47. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#tex2html15
   48. http://pywps.wald.intevation.org/
-  49. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#tex2html18
+  49. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#tex2html18
   50. http://www.opengeospatial.org/standards/requests/28
-  51. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#tex2html20
-  52. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#tex2html21
-  53. file://localhost/home/jachym/src/pywps/trunk/doc/install.html#tex2html22
+  51. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#tex2html20
+  52. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#tex2html21
+  53. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#tex2html22
