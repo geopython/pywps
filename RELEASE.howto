@@ -1,4 +1,20 @@
+SOURCE
+======
 1 - Edit setup.py
 2 - run setup.py
 
+python setup.py sdist --manifest-only
 python setup.py sdist
+
+DEBIAN PACKAGE
+==============
+1 - Edit debian/control - fix new dependences
+2 - Edit debian/changelog
+3 - generate debian package
+
+dpkg-buildpackage -r fakeroot
+
+RPM PACKAGE
+===========
+
+python setup.py bdist_rpm
