@@ -92,9 +92,27 @@ and other programs can be used.
 \label{pic:pywps}
 \end{center}
 \end{figure}
+
+%---------------------------------------------------------------------
+\section{Quick install}
+\begin{enumerate}
+    \item Install PyWPS, see page~\pageref{install} for details
+    \item NOTE: Copy original files (process examples, configuration files)
+    with \texttt{.py-dist} suffix to \texttt{.py}, when you see them.
+    \item Edit configuration files in \texttt{pywps/etc/} directory. See
+    page~\pageref{configuration} for details.
+    \item Create or edit \texttt{\_\_init\_\_.py} file in
+    \texttt{pywps/processes} directory. Add available process names to
+    \texttt{\_\_all\_\_} structure.
+    \item Add your processes to \texttt{pywps/processes} directory. See
+    page~\pageref{processes} for details.
+    \item Run PyWPS with \texttt{./wps.py} command, see
+    page~\pageref{testing} for details.
+\end{enumerate}
+
     
 %---------------------------------------------------------------------
-\section{Bugs}
+\section{Know issues}
 Known bugs and limitations to \date
 \begin{itemize}
 \item Sometimes, when there is e.g. SyntaxError in the process, teporary file \texttt{/tmp/pywps*} is not deleted, which ledts to \texttt{ServerBussy} exception and the files have to be removed by hand.
@@ -112,7 +130,7 @@ Bug tracker}}.
 
 %---------------------------------------------------------------------
 \section{Installation}
-    
+\label{install}   
 Required packages:
     
 \begin{itemize}
@@ -171,44 +189,9 @@ $ python setup.py install
 Several binary packages for Linux distributios are also avaliable on PyWPS
 site\footnote{\pywpssite}.
 
-\subsection{Testing after installation}
-For test, just run
-\texttt{wps.py} in your command line:
-    
-\begin{verbatim}
-$ ./wps.py
-Content-type: text/xml
-
-<?xml version="1.0" ?>
-<ExceptionReport version="1.0.0" xmlns="http://www.opengis.net/ows" 
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-        <Exception exceptionCode="MissingParameterValue" locator="request"/>
-</ExceptionReport>
-    \end{verbatim}
-
-     
-If you got some other message, like e.g.:
-     
-
-    \begin{verbatim}
-Traceback (most recent call last):
-  File "trunk/index.py", line 53, in ?
-    from Wps import wpsexceptions
-  File "/home/jachym/prog/pywps/trunk/Wps/wpsexceptions.py", line 8, in ?
-    from xml.dom.minidom import Document
-ImportError: No module named xml.dom.minidom
-    \end{verbatim}
-
-     
-Than something is wrong with your Python installation or with the program.
-This message means, that the xml.dom.minidom package is not installed in
-your system.
-     
-
-
-    
 %---------------------------------------------------------------------
 \section{Configuration}
+\label{configuration}
     
 Before you start to tune your pywps program, you should get your copy of
 OpenGIS(R) Web Processing Service document (OGC 05-007r4) version 0.4.0
@@ -342,8 +325,47 @@ grassenv = {
 \end{verbatim}
 
 
+
+\subsection{Testing after installation}
+\label{testing}
+For test, just run
+\texttt{wps.py} in your command line:
+    
+\begin{verbatim}
+$ ./wps.py
+Content-type: text/xml
+
+<?xml version="1.0" ?>
+<ExceptionReport version="1.0.0" xmlns="http://www.opengis.net/ows" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <Exception exceptionCode="MissingParameterValue" locator="request"/>
+</ExceptionReport>
+    \end{verbatim}
+
+     
+If you got some other message, like e.g.:
+     
+
+    \begin{verbatim}
+Traceback (most recent call last):
+  File "trunk/index.py", line 53, in ?
+    from Wps import wpsexceptions
+  File "/home/jachym/prog/pywps/trunk/Wps/wpsexceptions.py", line 8, in ?
+    from xml.dom.minidom import Document
+ImportError: No module named xml.dom.minidom
+    \end{verbatim}
+
+     
+Than something is wrong with your Python installation or with the program.
+This message means, that the xml.dom.minidom package is not installed in
+your system.
+     
+
+
+    
 %---------------------------------------------------------------------
 \section{Add your own processes}
+\label{processes}
 \note{This section has changed from previous stable 1.0.0 version. The
 processes, you defined for 1.0.0 branch should work for 2.0.0 branch too.}
     
@@ -359,7 +381,10 @@ process metadata, inputs and outpus are defined and in
 
 It is possible also to add as many your functions, as you wish.
     
-\subsection{Process Initialization and Configuration}
+\subsection{Process initialization and configuration}
+First of all, you have to add name of your process to
+\texttt{pywps/processes/\_\_init\_\_.py} file. Then you can start to edit
+the process file it's self.
 
 \begin{verbatim}
 01 # importing necessary files

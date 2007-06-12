@@ -28,27 +28,28 @@ Contents
 
      * [5]Introduction
           + [6]How it works
-     * [7]Bugs
-     * [8]Installation
-          + [9]Installation the quick 'n' dirty way
-          + [10]Installation the 'clean' way
-          + [11]Testing after installation
+     * [7]Quick install
+     * [8]Know issues
+     * [9]Installation
+          + [10]Installation the quick 'n' dirty way
+          + [11]Installation the 'clean' way
      * [12]Configuration
           + [13]etc/settings.py
           + [14]etc/grass.py
-     * [15]Add your own processes
-          + [16]Process Initialization and Configuration
-          + [17]Process Programming
-          + [18]GRASS specific notes
-     * [19]Testing your new process
-     * [20]Using PyWPS
-          + [21]Input
-          + [22]Output
-     * [23]Example process: addvalue
-     * [24]KVP request encoding of addvalue
-     * [25]XML request encoding addvalue
-     * [26]Licence of PyWPS
-     * [27]Licence of this document
+          + [15]Testing after installation
+     * [16]Add your own processes
+          + [17]Process initialization and configuration
+          + [18]Process Programming
+          + [19]GRASS specific notes
+     * [20]Testing your new process
+     * [21]Using PyWPS
+          + [22]Input
+          + [23]Output
+     * [24]Example process: addvalue
+     * [25]KVP request encoding of addvalue
+     * [26]XML request encoding addvalue
+     * [27]Licence of PyWPS
+     * [28]Licence of this document
 
                                  Introduction
 
@@ -67,8 +68,8 @@ Contents
    PyWPS is written in Python programming language, your processes must
    use this language too.
 
-   PyWPS Homepage can be found at [28]http://pywps.wald.intevation.org.
-   PyWPS Wiki is hosted on [29]http://pywps.ominiverdi.org.
+   PyWPS Homepage can be found at [29]http://pywps.wald.intevation.org.
+   PyWPS Wiki is hosted on [30]http://pywps.ominiverdi.org.
 
 How it works
 
@@ -82,7 +83,20 @@ How it works
 
                              Image pywps-schema
 
-                                     Bugs
+                                 Quick install
+
+    1. Install PyWPS, see page [31] [*] for details
+    2. NOTE: Copy original files (process examples, configuration files)
+       with .py-dist suffix to .py, when you see them.
+    3. Edit configuration files in pywps/etc/ directory. See page [32]
+       [*] for details.
+    4. Create or edit __init__.py file in pywps/processes directory. Add
+       available process names to __all__ structure.
+    5. Add your processes to pywps/processes directory. See page [33] [*]
+       for details.
+    6. Run PyWPS with ./wps.py command, see page [34] [*] for details.
+
+                                  Know issues
 
    Known bugs and limitations to UL>
 
@@ -95,7 +109,7 @@ How it works
    directly in scripts to avoid your server to be hacked.
 
    Please report all problems or unexpected handeling either via pywps
-   mailing list[30]^1or using PyWPS bugtracker[31]^2.
+   mailing list[35]^1or using PyWPS bugtracker[36]^2.
 
                                  Installation
 
@@ -106,23 +120,23 @@ How it works
 
    Recommended packages:
 
-     * Web Server (e.g. Apache) - [32]http://httpd.apache.org - You will
+     * Web Server (e.g. Apache) - [37]http://httpd.apache.org - You will
        need an web server, to be able to execute processes from remote
        computers.
-     * GIS GRASS - [33]http://grass.itc.it - Geographical Resources
+     * GIS GRASS - [38]http://grass.itc.it - Geographical Resources
        Analysis Support System (GRASS) is Open Source GIS, which provides
        more then 350 modules for raster and vector (2D, 3D) data
        analysis. PyWPS is written with native support for GRASS and it's
        functions.
-     * PROJ.4 - [34]http://proj.maptools.org - Cartographic Projections
+     * PROJ.4 - [39]http://proj.maptools.org - Cartographic Projections
        library used in various Open Source projects, such as GRASS, UMN
        MapServer, QGIS and others. It can be used e.g. for data
        transformation.
-     * GDAL/OGR - [35]http://gdal.org - translator library for raster
+     * GDAL/OGR - [40]http://gdal.org - translator library for raster
        geospatial data formats, is used in various projects for
        importing, exporting and transformation between various raster and
        vector data formats.
-     * R - [36]http://www.r-project.org - is a language and environment
+     * R - [41]http://www.r-project.org - is a language and environment
        for statistical computing and graphics.
 
 Installation the quick 'n' dirty way
@@ -144,40 +158,14 @@ $ tar -xzf pywps-VERSION.tar.gz
 $ python setup.py install
 
    Several binary packages for Linux distributios are also avaliable on
-   PyWPS site[37]^3.
-
-Testing after installation
-
-   For test, just run wps.py in your command line:
-
-$ ./wps.py
-Content-type: text/xml
-
-<?xml version="1.0" ?>
-<ExceptionReport version="1.0.0" xmlns="http://www.opengis.net/ows"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-        <Exception exceptionCode="MissingParameterValue" locator="request"/>
-</ExceptionReport>
-
-   If you got some other message, like e.g.:
-
-Traceback (most recent call last):
-  File "trunk/index.py", line 53, in ?
-    from Wps import wpsexceptions
-  File "/home/jachym/prog/pywps/trunk/Wps/wpsexceptions.py", line 8, in ?
-    from xml.dom.minidom import Document
-ImportError: No module named xml.dom.minidom
-
-   Than something is wrong with your Python installation or with the
-   program. This message means, that the xml.dom.minidom package is not
-   installed in your system.
+   PyWPS site[42]^3.
 
                                  Configuration
 
    Before you start to tune your pywps program, you should get your copy
    of OpenGIS(R) Web Processing Service document (OGC 05-007r4) version
    0.4.0 from
-   [38]http://www.opengeospatial.org/specs/?page=specs
+   [43]http://www.opengeospatial.org/specs/?page=specs
 
    NOTE: Note, that the configuration option are CASE SENSITIVE
 
@@ -297,6 +285,32 @@ grassenv = {
     'HOME':"/var/www",
 }
 
+Testing after installation
+
+   For test, just run wps.py in your command line:
+
+$ ./wps.py
+Content-type: text/xml
+
+<?xml version="1.0" ?>
+<ExceptionReport version="1.0.0" xmlns="http://www.opengis.net/ows"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <Exception exceptionCode="MissingParameterValue" locator="request"/>
+</ExceptionReport>
+
+   If you got some other message, like e.g.:
+
+Traceback (most recent call last):
+  File "trunk/index.py", line 53, in ?
+    from Wps import wpsexceptions
+  File "/home/jachym/prog/pywps/trunk/Wps/wpsexceptions.py", line 8, in ?
+    from xml.dom.minidom import Document
+ImportError: No module named xml.dom.minidom
+
+   Than something is wrong with your Python installation or with the
+   program. This message means, that the xml.dom.minidom package is not
+   installed in your system.
+
                             Add your own processes
 
    NOTE: This section has changed from previous stable 1.0.0 version. The
@@ -314,7 +328,11 @@ grassenv = {
 
    It is possible also to add as many your functions, as you wish.
 
-Process Initialization and Configuration
+Process initialization and configuration
+
+   First of all, you have to add name of your process to
+   pywps/processes/__init__.py file. Then you can start to edit the
+   process file it's self.
 
 01 # importing necessary files
 02 import pywps.Wps.WPSProcess
@@ -335,7 +353,7 @@ Process Initialization and Configuration
 
    Eventually optional attributes can be found in the table 38 - "Parts
    of ExecuteResponse data structure" in the WPS reference
-   document[39]^4. It is also possible to redefine some variable later,
+   document[44]^4. It is also possible to redefine some variable later,
    after initialization:
 
 13
@@ -444,7 +462,7 @@ self.AddLiteralInput(Identifier="someinput",
 
    For further documentation, refere example processes distributed with
    the source code as well as pydoc pywps/wps/process.py. This help is
-   also available in process.html[40]^5 file distributed along with PyWPS
+   also available in process.html[45]^5 file distributed along with PyWPS
    source code.
 
     ComplexInput
@@ -655,10 +673,10 @@ ataset",
                # grassLocation="/var/www/spearfish60/" # work on existing locat
 ion)
 
-   By default, self.grassLocation[41]^6 variable is set to None, which
+   By default, self.grassLocation[46]^6 variable is set to None, which
    means, that temporary location will be created and after the
    calculation is done, it will be deleted again. You can set this while
-   process initialization or later[42]^7.
+   process initialization or later[47]^7.
 
    WPSProcess class provides special method self.GCmd(command_string),
    which tryes to catch output from GRASS modules, especially progress
@@ -1692,12 +1710,12 @@ request=<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
 
    Implementation of OGC's WPS standard: PyWPS
 
-   This document was generated using the [43]LaTeX2HTML translator
+   This document was generated using the [48]LaTeX2HTML translator
    Version 2002-2-1 (1.71)
 
    Copyright © 1993, 1994, 1995, 1996, Nikos Drakos, Computer Based
    Learning Unit, University of Leeds.
-   Copyright © 1997, 1998, 1999, [44]Ross Moore, Mathematics Department,
+   Copyright © 1997, 1998, 1999, [49]Ross Moore, Mathematics Department,
    Macquarie University, Sydney.
 
    The command line arguments were:
@@ -1708,31 +1726,31 @@ request=<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
 
     Footnotes
 
-   ... list[45]^1
+   ... list[50]^1
           http://wald.intevation.org/mailman/listinfo/pywps-develPyWPS -
           development list
 
-   ... bugtracker[46]^2
+   ... bugtracker[51]^2
           http://wald.intevation.org/tracker/?atid=174&group_id=22&func=b
           rowsePyWPS Bug tracker
 
-   ... site[47]^3
-          [48]http://pywps.wald.intevation.org
+   ... site[52]^3
+          [53]http://pywps.wald.intevation.org
 
-   ... document[49]^4
-          [50]http://www.opengeospatial.org/standards/requests/28
+   ... document[54]^4
+          [55]http://www.opengeospatial.org/standards/requests/28
 
-   ...process.html[51]^5
+   ...process.html[56]^5
           http://wald.intevation.org/plugins/scmsvn/viewcvs.php/*checkout
           */trunk/doc/process.html?rev=369&root=pywpsDocumentation to
           process.py module
 
-   ...self.grassLocation[52]^6
+   ...self.grassLocation[57]^6
           See e.g.
           http://grass.itc.it/grass63/manuals/html63_user/helptext.htmlGR
           ASS manual for details
 
-   ... later[53]^7
+   ... later[58]^7
           self.grassLocation="/path/to/location"
      _________________________________________________________________
 
@@ -1751,48 +1769,53 @@ Reference
    6. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00021000000000000000
    7. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00030000000000000000
    8. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00040000000000000000
-   9. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00041000000000000000
-  10. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00042000000000000000
-  11. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00043000000000000000
-  12. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00050000000000000000
-  13. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00051000000000000000
-  14. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00052000000000000000
-  15. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00060000000000000000
-  16. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00061000000000000000
-  17. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00062000000000000000
-  18. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00063000000000000000
-  19. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00070000000000000000
+   9. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00050000000000000000
+  10. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00051000000000000000
+  11. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00052000000000000000
+  12. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00060000000000000000
+  13. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00061000000000000000
+  14. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00062000000000000000
+  15. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00063000000000000000
+  16. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00070000000000000000
+  17. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00071000000000000000
+  18. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00072000000000000000
+  19. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00073000000000000000
   20. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00080000000000000000
-  21. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00081000000000000000
-  22. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00082000000000000000
-  23. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00090000000000000000
+  21. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00090000000000000000
+  22. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00091000000000000000
+  23. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION00092000000000000000
   24. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION000100000000000000000
   25. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION000110000000000000000
   26. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION000120000000000000000
   27. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION000130000000000000000
-  28. http://pywps.wald.intevation.org/
-  29. http://pywps.ominiverdi.org/
-  30. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#foot357
-  31. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#foot358
-  32. http://httpd.apache.org/
-  33. http://grass.itc.it/
-  34. http://proj.maptools.org/
-  35. http://gdal.org/
-  36. http://www.r-project.org/
-  37. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#foot75
-  38. http://www.opengeospatial.org/specs/?page=specs
-  39. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#foot361
-  40. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#foot362
-  41. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#foot365
-  42. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#foot366
-  43. http://www.latex2html.org/
-  44. http://www.maths.mq.edu.au/~ross/
-  45. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#tex2html8
-  46. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#tex2html9
-  47. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#tex2html15
-  48. http://pywps.wald.intevation.org/
-  49. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#tex2html18
-  50. http://www.opengeospatial.org/standards/requests/28
-  51. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#tex2html20
-  52. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#tex2html21
-  53. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#tex2html22
+  28. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#SECTION000140000000000000000
+  29. http://pywps.wald.intevation.org/
+  30. http://pywps.ominiverdi.org/
+  31. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#install
+  32. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#configuration
+  33. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#processes
+  34. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#testing
+  35. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#foot377
+  36. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#foot378
+  37. http://httpd.apache.org/
+  38. http://grass.itc.it/
+  39. http://proj.maptools.org/
+  40. http://gdal.org/
+  41. http://www.r-project.org/
+  42. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#foot91
+  43. http://www.opengeospatial.org/specs/?page=specs
+  44. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#foot381
+  45. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#foot382
+  46. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#foot385
+  47. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#foot386
+  48. http://www.latex2html.org/
+  49. http://www.maths.mq.edu.au/~ross/
+  50. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#tex2html8
+  51. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#tex2html9
+  52. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#tex2html15
+  53. http://pywps.wald.intevation.org/
+  54. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#tex2html18
+  55. http://www.opengeospatial.org/standards/requests/28
+  56. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#tex2html20
+  57. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#tex2html21
+  58. file://localhost/home/jachym/src/pywps/trunk/doc/pywps-howto.html#tex2html22
