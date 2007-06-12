@@ -4,11 +4,10 @@ if [ "$1" = configure ] && which install-docs >/dev/null 2>&1; then
 fi
 # End automatically added section
 # Automatically added by dh_python
-PYTHON=python2.4
+PYTHON=python2.5
 if which $PYTHON >/dev/null 2>&1 && [ -e /usr/lib/$PYTHON/compileall.py ]; then
-	DIRLIST=" /usr/lib/python2.4/site-packages"
+	DIRLIST=" /usr/lib/python2.5/site-packages"
 	for i in $DIRLIST ; do
-		$PYTHON -O /usr/lib/$PYTHON/compileall.py -q $i
 		$PYTHON /usr/lib/$PYTHON/compileall.py -q $i
 	done
 fi
