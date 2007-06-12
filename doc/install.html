@@ -62,7 +62,7 @@ Copyright &#169;2006 PyWPS Development Team
 In this file, you can found the description of installation and
 configuration of PyWPS script. At the and, you can learn, how to add
 your own process to the list of processes. The file describes most recent
-version of PyWPS (<SPAN  CLASS="textit">SVN</SPAN>), available in subversion respository.
+version of PyWPS (<SPAN  CLASS="textit">2.0.0</SPAN>), available in subversion respository.
 
 <P>
 PyPWS project has been started on April 2006 with support of DBU -
@@ -71,7 +71,7 @@ Deutsche Bundesstiftung Umwelt (<TT><A NAME="tex2html1"
 GDF-Hannover (<TT><A NAME="tex2html2"
   HREF="http://gdf-hannover.de">http://gdf-hannover.de</A></TT>) and Help Service Remote
 Sensing (<TT><A NAME="tex2html3"
-  HREF="http:/bnhelp.cz">http:/bnhelp.cz</A></TT>) companies. Initial author is Jachym
+  HREF="http://www.bnhelp.cz">http://www.bnhelp.cz</A></TT>) companies. Initial author is Jachym
 Cepicky (<TT><A NAME="tex2html4"
   HREF="http://les-ejk.cz">http://les-ejk.cz</A></TT>).
 
@@ -84,64 +84,67 @@ Contents</A>
 <!--Table of Contents-->
 
 <UL CLASS="TofC">
-<LI><A NAME="tex2html47"
+<LI><A NAME="tex2html59"
   HREF="install.html#SECTION00020000000000000000">Introduction</A>
-<LI><A NAME="tex2html48"
+<UL>
+<LI><A NAME="tex2html60"
+  HREF="install.html#SECTION00021000000000000000">How it works</A>
+</UL>
+<BR>
+<LI><A NAME="tex2html61"
   HREF="install.html#SECTION00030000000000000000">Bugs</A>
-<LI><A NAME="tex2html49"
+<LI><A NAME="tex2html62"
   HREF="install.html#SECTION00040000000000000000">Installation</A>
 <UL>
-<LI><A NAME="tex2html50"
+<LI><A NAME="tex2html63"
   HREF="install.html#SECTION00041000000000000000">Installation the quick 'n' dirty way</A>
-<LI><A NAME="tex2html51"
+<LI><A NAME="tex2html64"
   HREF="install.html#SECTION00042000000000000000">Installation the 'clean' way</A>
-<LI><A NAME="tex2html52"
+<LI><A NAME="tex2html65"
   HREF="install.html#SECTION00043000000000000000">Testing after installation</A>
 </UL>
 <BR>
-<LI><A NAME="tex2html53"
+<LI><A NAME="tex2html66"
   HREF="install.html#SECTION00050000000000000000">Configuration</A>
 <UL>
-<LI><A NAME="tex2html54"
+<LI><A NAME="tex2html67"
   HREF="install.html#SECTION00051000000000000000">etc/settings.py</A>
-<LI><A NAME="tex2html55"
+<LI><A NAME="tex2html68"
   HREF="install.html#SECTION00052000000000000000">etc/grass.py</A>
 </UL>
 <BR>
-<LI><A NAME="tex2html56"
+<LI><A NAME="tex2html69"
   HREF="install.html#SECTION00060000000000000000">Add your own processes</A>
 <UL>
-<LI><A NAME="tex2html57"
+<LI><A NAME="tex2html70"
   HREF="install.html#SECTION00061000000000000000">Process Initialization and Configuration</A>
-<LI><A NAME="tex2html58"
-  HREF="install.html#SECTION00062000000000000000">Running in GRASS session</A>
-<LI><A NAME="tex2html59"
-  HREF="install.html#SECTION00063000000000000000">Process Programming</A>
+<LI><A NAME="tex2html71"
+  HREF="install.html#SECTION00062000000000000000">Process Programming</A>
+<LI><A NAME="tex2html72"
+  HREF="install.html#SECTION00063000000000000000">GRASS specific notes</A>
 </UL>
 <BR>
-<LI><A NAME="tex2html60"
-  HREF="install.html#SECTION00070000000000000000">Note to grass programming</A>
-<LI><A NAME="tex2html61"
-  HREF="install.html#SECTION00080000000000000000">Testing your new process</A>
-<LI><A NAME="tex2html62"
-  HREF="install.html#SECTION00090000000000000000">Using PyWPS</A>
+<LI><A NAME="tex2html73"
+  HREF="install.html#SECTION00070000000000000000">Testing your new process</A>
+<LI><A NAME="tex2html74"
+  HREF="install.html#SECTION00080000000000000000">Using PyWPS</A>
 <UL>
-<LI><A NAME="tex2html63"
-  HREF="install.html#SECTION00091000000000000000">Input</A>
-<LI><A NAME="tex2html64"
-  HREF="install.html#SECTION00092000000000000000">Output</A>
+<LI><A NAME="tex2html75"
+  HREF="install.html#SECTION00081000000000000000">Input</A>
+<LI><A NAME="tex2html76"
+  HREF="install.html#SECTION00082000000000000000">Output</A>
 </UL>
 <BR>
-<LI><A NAME="tex2html65"
-  HREF="install.html#SECTION000100000000000000000">Sample process: addvalue</A>
-<LI><A NAME="tex2html66"
-  HREF="install.html#SECTION000110000000000000000">KVP request encoding of addvalue</A>
-<LI><A NAME="tex2html67"
-  HREF="install.html#SECTION000120000000000000000">XML request encoding addvalue</A>
-<LI><A NAME="tex2html68"
-  HREF="install.html#SECTION000130000000000000000">Licence of PyWPS</A>
-<LI><A NAME="tex2html69"
-  HREF="install.html#SECTION000140000000000000000">Licence of this document</A>
+<LI><A NAME="tex2html77"
+  HREF="install.html#SECTION00090000000000000000">Example process: addvalue</A>
+<LI><A NAME="tex2html78"
+  HREF="install.html#SECTION000100000000000000000">KVP request encoding of addvalue</A>
+<LI><A NAME="tex2html79"
+  HREF="install.html#SECTION000110000000000000000">XML request encoding addvalue</A>
+<LI><A NAME="tex2html80"
+  HREF="install.html#SECTION000120000000000000000">Licence of PyWPS</A>
+<LI><A NAME="tex2html81"
+  HREF="install.html#SECTION000130000000000000000">Licence of this document</A>
 </UL>
 <!--End of Table of Contents-->
 <P>
@@ -177,6 +180,33 @@ PyWPS Wiki is hosted on <TT><A NAME="tex2html6"
 
 <P>
 
+<H2><A NAME="SECTION00021000000000000000">
+How it works</A>
+</H2>
+PyWPS is an translator application between client (Web Browser, Desktop
+GIS, command line tool, ...) and working tool installed on the server.
+PyWPS does no work by it self. As working tool, GRASS GIS, GDAL, PROJ, R
+and other programs can be used.
+
+<P>
+
+<DIV ALIGN="CENTER"><A NAME="pic:pywps"></A><A NAME="43"></A>
+<TABLE>
+<CAPTION ALIGN="BOTTOM"><STRONG>Figure 1:</STRONG>
+How does PyWPS work: GRASS GIS is in this case working tool</CAPTION>
+<TR><TD>
+<DIV ALIGN="CENTER">
+<IMG
+  WIDTH="827" HEIGHT="273" ALIGN="BOTTOM" BORDER="0"
+ SRC="./pywps-schema.png"
+ ALT="Image pywps-schema">
+
+</DIV></TD></TR>
+</TABLE>
+</DIV>
+
+<P>
+
 <H1><A NAME="SECTION00030000000000000000">
 Bugs</A>
 </H1>
@@ -190,7 +220,11 @@ not use it directly in scripts to avoid your server to be hacked.
 </UL>
 
 <P>
-Please report all problems or unexpected handeling.
+Please report all problems or unexpected handeling either via pywps mailing
+list<A NAME="tex2html8"
+  HREF="#foot357"><SUP><SPAN CLASS="arabic">1</SPAN></SUP></A>or using PyWPS
+bugtracker<A NAME="tex2html9"
+  HREF="#foot358"><SUP><SPAN CLASS="arabic">2</SPAN></SUP></A>.
 
 <P>
 
@@ -204,8 +238,6 @@ Required packages:
 <P>
 
 <UL>
-<LI>Web Server (e.g. Apache) 
-</LI>
 <LI>python 
 </LI>
 <LI>python-xml 
@@ -218,7 +250,14 @@ Recommended packages:
 <P>
 
 <UL>
-<LI>GIS GRASS  - <TT><A NAME="tex2html7"
+<LI>Web Server (e.g. Apache) - <TT><A NAME="tex2html10"
+  HREF="http://httpd.apache.org">http://httpd.apache.org</A></TT> -  You
+    will need an web server, to be able to execute processes from remote
+    computers.
+
+<P>
+</LI>
+<LI>GIS GRASS  - <TT><A NAME="tex2html11"
   HREF="http://grass.itc.it">http://grass.itc.it</A></TT> - Geographical Resources
     Analysis Support System (GRASS) is Open Source GIS, which provides more
     then 350 modules for raster and vector (2D, 3D) data analysis. PyWPS is
@@ -226,7 +265,7 @@ Recommended packages:
 
 <P>
 </LI>
-<LI>PROJ.4  - <TT><A NAME="tex2html8"
+<LI>PROJ.4  - <TT><A NAME="tex2html12"
   HREF="http://proj.maptools.org">http://proj.maptools.org</A></TT> - Cartographic
     Projections library used in various Open Source projects, such as
     GRASS, UMN MapServer, QGIS and others. It can be used e.g. for data
@@ -234,7 +273,7 @@ Recommended packages:
 
 <P>
 </LI>
-<LI>GDAL/OGR  - <TT><A NAME="tex2html9"
+<LI>GDAL/OGR  - <TT><A NAME="tex2html13"
   HREF="http://gdal.org">http://gdal.org</A></TT> - translator library for
     raster geospatial data formats, is used in various projects for
     importing, exporting and transformation between various raster and vector
@@ -242,7 +281,7 @@ Recommended packages:
 
 <P>
 </LI>
-<LI>R  - <TT><A NAME="tex2html10"
+<LI>R  - <TT><A NAME="tex2html14"
   HREF="http://www.r-project.org">http://www.r-project.org</A></TT> - is a language and environment
     for statistical computing and graphics.
 
@@ -256,7 +295,15 @@ Recommended packages:
 Installation the quick 'n' dirty way</A>
 </H2>
 For installing pywps to your server simply unzip the archive to the
-directory, where cgi programs are allowed to run. 
+directory, where cgi programs are allowed to run. You can also use current
+repository version.
+
+<P>
+<PRE>
+$ cd /usr/lib/cgi-bin/
+$ tar xvzf /tmp/pywps-VERSION.tar.gz
+$ pywps/wps.py
+</PRE>
 
 <P>
 
@@ -264,19 +311,18 @@ directory, where cgi programs are allowed to run.
 Installation the 'clean' way</A>
 </H2>
 Unzip the package 
-gray!25
 <PRE>
 $ tar -xzf pywps-VERSION.tar.gz
 </PRE>
 and run 
 <PRE>
 $ python setup.py install
-</PRE>
+</PRE> 
 
 <P>
 Several binary packages for Linux distributios are also avaliable on PyWPS
-site<A NAME="tex2html11"
-  HREF="#foot60"><SUP><SPAN CLASS="arabic">1</SPAN></SUP></A>.
+site<A NAME="tex2html15"
+  HREF="#foot75"><SUP><SPAN CLASS="arabic">3</SPAN></SUP></A>.
 
 <P>
 
@@ -326,7 +372,7 @@ Configuration</A>
 Before you start to tune your pywps program, you should get your copy of
 OpenGIS(R) Web Processing Service document (OGC 05-007r4) version 0.4.0
 from
-<BR><TT><A NAME="tex2html13"
+<BR><TT><A NAME="tex2html17"
   HREF="http://www.opengeospatial.org/specs/?page=specs">http://www.opengeospatial.org/specs/?page=specs</A></TT>
 <P>
 
@@ -344,10 +390,11 @@ programming language. But you should be able to setup the program without
 any python knowledge.
 
 <P>
-The first file is in <TT>etcsettings.py</TT> and (optional) the second file is
-<TT>etcgrass.py</TT> which has to be setuped if you do want to use
+The first file is in <TT>etc/settings.py</TT> and (optional) the second file is
+<TT>etc/grass.py</TT> which has to be setuped if you do want to use
 GRASS GIS modules in your scripts. Some special "tuning" can be done in <TT>processes/__init__.py</TT>
-file
+file. You can allways obtain original configuration files from
+<TT>Wps/default_settings.py</TT> and <TT>Wps/default_grass.py</TT>.
 
 <P>
 
@@ -365,29 +412,31 @@ are (with default/recommend values):
 
 <P>
 <PRE>
-'version': "0.4.0",
-'ServiceIdentification': {
-    'Title':"Jachym's WPS server",
-    'ServiceType':"WPS",
-    'ServiceTypeVersion':"0.1.0",
-    'Abstract':'Abstract to this WPS',
-},
-'ServiceProvider': {
-        'ProviderName' : "Your Company",
-        'IndividualName':"Your Name",
-        'PositionName':"Your Position",
-        'Role':"your role",
-        'DeliveryPoint': "Street",
-        'City': "City",
-        'PostalCode':"00000",
-        'Country': "Your country",
-        'ElectronicMailAddress':"your.email@address",
-},
+WPS = {
+    'version': "0.4.0",
+    'ServiceIdentification': {
+        'Title':"Jachym's WPS server",
+        'ServiceType':"WPS",
+        'ServiceTypeVersion':"0.1.0",
+        'Abstract':'Abstract to this WPS',
+    },
+    'ServiceProvider': {
+            'ProviderName' : "Your Company",
+            'IndividualName':"Your Name",
+            'PositionName':"Your Position",
+            'Role':"your role",
+            'DeliveryPoint': "Street",
+            'City': "City",
+            'PostalCode':"00000",
+            'Country': "Your country",
+            'ElectronicMailAddress':"your.email@address",
+    },
 
-'OperationsMetadata': {
-    'ServerAddress' : "http://localhost/cgi-bin/wps/wps.py",
-},
-'Keywords' : ['GRASS','GIS','WPS'],
+    'OperationsMetadata': {
+        'ServerAddress' : "http://localhost/cgi-bin/wps/wps.py",
+    },
+    'Keywords' : ['GRASS','GIS','WPS'],
+}
 </PRE>
 
 <P>
@@ -396,36 +445,38 @@ the whole server.
 
 <P>
 <PRE>
-# NOTE: You have to create this directory manually and set rights, so
-#       the program is able to store data in there 
-'outputPath': '/var/www/wpsoutputs',
-
-#
-# 'outputUrl' - URL of the directory, where the outputs will be stored
-'outputUrl':  'http://192.168.1.31/wpsoutputs',
-
-#
-# tempPath - path to directory, where temporary data will be stored.
-# NOTE: the pywps has to have rights, to create directories and files
-#       in this directory
-'tempPath': '/tmp',
-
-#
-# maxOperations - maximum number of operations, which is allowed to low
-# on this server at ones 
-# default = 1
-'maxOperations':1,
-
-#
-# maxSize: maximum input file size in bytes
-# NOTE: maximum file size is 5MB, no care, if this number is higher
-'maxSize':5242880, # 5 MB
-
-#
-# maxInputParamLength: maximal length of input values
-# NOTE: maximum length of input parameters is 256, no matter, how height
-#       is this number
-'maxInputParamLength':256,
+ServerSettings = {
+        # NOTE: You have to create this directory manually and set rights, so
+        #       the program is able to store data in there 
+        'outputPath': '/var/www/wpsoutputs',
+        
+        #
+        # 'outputUrl' - URL of the directory, where the outputs will be stored
+        'outputUrl':  'http://192.168.1.31/wpsoutputs',
+        
+        #
+        # tempPath - path to directory, where temporary data will be stored.
+        # NOTE: the pywps has to have rights, to create directories and files
+        #       in this directory
+        'tempPath': '/tmp',
+        
+        #
+        # maxOperations - maximum number of operations, which is allowed to low
+        # on this server at ones 
+        # default = 1
+        'maxOperations':1,
+        
+        #
+        # maxSize: maximum input file size in bytes
+        # NOTE: maximum file size is 5MB, no care, if this number is higher
+        'maxSize':5242880, # 5 MB
+        
+        #
+        # maxInputParamLength: maximal length of input values
+        # NOTE: maximum length of input parameters is 256, no matter, how height
+        #       is this number
+        'maxInputParamLength':256,
+}
 </PRE>
 
 <P>
@@ -440,31 +491,33 @@ processes need one). Everything is stored in <TT>grassenv</TT> structure.
 
 <P>
 <PRE>
-# PATH in which your modules (processes) should be able the search.
-# Default value:
-'PATH': "/usr/local/grass-6.1.cvs/bin/:/usr/local/grass-6.1.cvs/scripts/:\
-/usr/bin/:/bin/:",
-
-# Add eventually some other path, in which should GRASS search for modules
-'GRASS_ADDON_PATH': "",
-
-# Version of GRASS, you are using
-'GRASS_VERSION': "6.1.cvs",
-
-# GRASS_PERL, where is your PERL bin installed
-'GRASS_PERL': "/usr/bin/perl",
-
-# GRASS_GUI should be always "text" unless you know, what you are doing
-'GRASS_GUI': "text",
-
-# GISBASE is place, where your GRASS installation is
-'GISBASE': "/usr/local/grass-6.1.cvs",
-
-# LD_LIBRARY_PATH
-'LD_LIBRARY_PATH':"/usr/local/grass-6.1.cvs/lib",
-
-# HOME has to be set
-'HOME':"/var/www",
+grassenv = {
+    # PATH in which your modules (processes) should be able the search.
+    # Default value:
+    'PATH': "/usr/local/grass-6.1.cvs/bin/:/usr/local/grass-6.1.cvs/scripts/:\
+    /usr/bin/:/bin/:",
+    
+    # Add eventually some other path, in which should GRASS search for modules
+    'GRASS_ADDON_PATH': "",
+    
+    # Version of GRASS, you are using
+    'GRASS_VERSION': "6.1.cvs",
+    
+    # GRASS_PERL, where is your PERL bin installed
+    'GRASS_PERL': "/usr/bin/perl",
+    
+    # GRASS_GUI should be always "text" unless you know, what you are doing
+    'GRASS_GUI': "text",
+    
+    # GISBASE is place, where your GRASS installation is
+    'GISBASE': "/usr/local/grass-6.1.cvs",
+    
+    # LD_LIBRARY_PATH
+    'LD_LIBRARY_PATH':"/usr/local/grass-6.1.cvs/lib",
+    
+    # HOME has to be set
+    'HOME':"/var/www",
+}
 </PRE>
 
 <P>
@@ -482,7 +535,7 @@ processes, you defined for 1.0.0 branch should work for 2.0.0 branch too.
 
 
 <P>
-All processes are stored in the processes directory. Put your file
+All processes are stored in the <TT>processes</TT> directory. Put your file
 e.g. <TT>myprocess.py</TT> in there. Several example processes are
 distributed along with PyWPS source code.
 
@@ -509,58 +562,36 @@ Process Initialization and Configuration</A>
 04 class Process(WPSProcess):
 05      def __init__(self):
 06          WPSProcess.__init__(self,
-07                Identifier="spearpath",
-18                Title="Spearfish path searching",
-19                Abstract="Find the shortest path on the roads map on Spearfish dataset",
+07                Identifier="ogr2ogr",
+18                Title="ogr2ogr interface",
+19                Abstract="Convert vector file to another format",
 10                processVersion = "0.2",
 11                statusSupported="true",
 12                storeSupported="true")
 </PRE>
 
 <P>
-We defined new process called <TT>spearpath</TT>. The process is allowed to
+We defined new process called <TT>ogr2ogr</TT>. The process is allowed to
 store it's output data on the server (<TT>storeSupported</TT>) and it is also possible to run it in
 asynchronous mode (<TT>statusSupported</TT>).
 
 <P>
 Eventually optional attributes can be found in the table 38 - "Parts of
-ExecuteResponse data structure". It is also possible to redefine some
+ExecuteResponse data structure" in the WPS reference
+document<A NAME="tex2html18"
+  HREF="#foot361"><SUP><SPAN CLASS="arabic">4</SPAN></SUP></A>. It is also possible to redefine some
 variable later, after initialization:
 
 <P>
 <PRE>
 13
-14          self.Title="South Dacota path searching"
+14          self.Title="ogr2ogr interface"
 15
 </PRE>
 
 <P>
 
-<H2><A NAME="SECTION00062000000000000000">
-Running in GRASS session</A>
-</H2>
-You have to define GRASS Locatio<A NAME="tex2html14"
-  HREF="#foot305"><SUP><SPAN CLASS="arabic">2</SPAN></SUP></A> 
-If your process should happen in existing GRASS-Location, and you just need
-the input parameters for GRASS modules, you can specify it's name by
-<TT>grassLocation</TT> variable. 
-
-<P>
-<PRE>
-16          # use existing GRASS Location
-17          self.grassLocation="/var/grassdata/spearfish60/"
-18          # use temporary GRASS Location
-19          #self.grassLocation=None
-</PRE>
-
-<P>
-If this variable is  set to <TT>None</TT>, new temporary GRASS Location &amp;&amp; mapset will be
-generated (using XY coordinate system) and you can work in there. The projection of the location will be
-XY. If this variable is not set, GRASS will not be stared.
-
-<P>
-
-<H4><A NAME="SECTION00062010000000000000">
+<H4><A NAME="SECTION00061010000000000000">
 Metadata defition</A>
 </H4> is stored in array <TT>self.Metadata</TT> in
 <TT>__init__</TT> method. You can add new Medatada using
@@ -583,7 +614,7 @@ element:
 
 <P>
 
-<H3><A NAME="SECTION00062100000000000000">
+<H3><A NAME="SECTION00061100000000000000">
 Data Inputs</A>
 </H3>
 Data inputs are stored in <TT>self.Inputs</TT> array. To add inputs to
@@ -592,9 +623,29 @@ your process, you should use methods defined in <TT>WPSProcess</TT> class.
 <P>
 Four types of data inputs are defined:
 
+<UL>
+<LI>Literal Input - Basic literal input - single number or text
+    value
+</LI>
+<LI>ComplexValue Input  - Mostly vector file embded in input XML
+    request
+</LI>
+<LI>ComplexValueReference Input - URL to location, where the process
+    is supposed to get the input data.
+</LI>
+<LI>BoundingBox Input - Coordinates for lower-left and upper-right
+    corner.
+</LI>
+</UL>
+
+<P>
+ComplexValue and ComplexValueReference defined on the same way - PyWPS is
+able to guess, if the input data are reference (link) to some map or raw
+data directly.
+
 <P>
 
-<H4><A NAME="SECTION00062110000000000000">
+<H4><A NAME="SECTION00061110000000000000">
 LiteralInput</A>
 </H4>
 
@@ -617,7 +668,7 @@ part of XML are folowing:
 
 <P>
 
-<H5><A NAME="SECTION00062111000000000000">
+<H5><A NAME="SECTION00061111000000000000">
 Example of any allowed input value (default)</A>
 </H5>
 <PRE>
@@ -643,7 +694,7 @@ self.AddLiteralInput(Identifier="someinput",
 
 <P>
 
-<H5><A NAME="SECTION00062112000000000000">
+<H5><A NAME="SECTION00061112000000000000">
 Example of specified list (with range) of allowed inputs</A>
 </H5>
 
@@ -681,20 +732,80 @@ self.AddLiteralInput(Identifier="someinput",
 
 <P>
 For further documentation, refere example processes distributed with the
-source code as well as <TT>pydoc&nbsp;pywps/wps/process.py</TT>. 
+source code as well as <TT>pydoc&nbsp;pywps/wps/process.py</TT>. This help is
+also available in
+<TT>process.html</TT><A NAME="tex2html20"
+  HREF="#foot362"><SUP><SPAN CLASS="arabic">5</SPAN></SUP></A> file distributed along with PyWPS
+source code.
 
 <P>
 
-<H3><A NAME="SECTION00062200000000000000">
+<H4><A NAME="SECTION00061120000000000000">
+ComplexInput</A>
+</H4>
+If the request comes as HTTP GET, it is assumed, that the input is only
+reference to some map. If it comes as HTTP POST, PyWPS tryes to guess, if
+the client is sending URL to source of the data or if the input data are
+part of input XML request (e.g. as GML file). So, you, as a process coder
+do not have to take care on this:
+
+<P>
+<PRE>
+self.AddComplexInput(Indentifier="inputmap",
+      Title="Input map, which should be processed",
+      Formats=["text/xml","image/tiff"])
+...
+    &lt;Input&gt;
+        &lt;ows:Identifier&gt;input&lt;/ows:Identifier&gt;
+        &lt;ows:Title&gt;Input raster map&lt;/ows:Title&gt;
+        &lt;ows:Abstract/&gt;
+        &lt;ComplexData defaultFormat="image/tiff"&gt;
+            &lt;SupportedComplexData&gt;
+                &lt;Format&gt;image/tiff&lt;/Format&gt;
+                &lt;Format&gt;text/xml&lt;/Format&gt;
+            &lt;/SupportedComplexData&gt;
+        &lt;/ComplexData&gt;
+        &lt;MinimumOccurs&gt;1&lt;/MinimumOccurs&gt;
+    &lt;/Input&gt;
+</PRE>
+
+<P>
+
+<H4><A NAME="SECTION00061130000000000000">
+BoundingBox Input</A>
+</H4>
+With bounding box, you can define two coordinate pairs, if you have to.
+
+<P>
+<PRE>
+self.AddBondingBoxInput(Identifier="bbox",
+        Title="BBox input")
+</PRE>
+
+<P>
+
+<H3><A NAME="SECTION00061200000000000000">
 Data Outputs</A>
 </H3>
+Again four types of output are defined:
+
+<UL>
+<LI>Literal Output
+</LI>
+<LI>ComplexValue Output
+</LI>
+<LI>ComplexValue Reference
+</LI>
+<LI>BoundingBox Output
+</LI>
+</UL>
 
 <P>
 Data outputs can be defined on similar way, using similar methods:
 
 <P>
 
-<H4><A NAME="SECTION00062210000000000000">
+<H4><A NAME="SECTION00061210000000000000">
 LiteralOutput</A>
 </H4>
 <PRE>
@@ -716,6 +827,10 @@ self.AddLiteralOutput(Identifier="litoutput",
 </PRE>
 
 <P>
+
+<H4><A NAME="SECTION00061220000000000000">
+ComplexValue and ComplexValueReference Output</A>
+</H4>
 To the oposite of data Inputs, Outputs can distinguish between ComplexValue
 output and ComplexValueReference. ComplexValue is directly embed into the
 output XML document and ComplexValueReference is stored on the server and
@@ -725,7 +840,7 @@ better to leave on the server.
 
 <P>
 <PRE>
-self.AddComplexValueReferenceOutput(Identifier="output",
+self.AddComplexReferenceOutput(Identifier="output",
                 Title="Resulting output map",
                 Formats=["image/tiff"])
 
@@ -744,8 +859,12 @@ self.AddComplexValueReferenceOutput(Identifier="output",
 </PRE>
 
 <P>
-Beside LiteralValue and ComplexValue, BoundingBoxValue is also defined. The
-coordinates are stored in array of four members:
+
+<H4><A NAME="SECTION00061230000000000000">
+BoundingBox Output</A>
+</H4>
+Beside LiteralValue and ComplexValue, BoundingBoxValue is also defined. 
+The coordinates are stored in array of four members:
 
 <P>
 <PRE>
@@ -755,7 +874,46 @@ self.GetInputValue("bboxinput")
 
 <P>
 
-<H2><A NAME="SECTION00063000000000000000">
+<P><P>
+<BR>
+
+<P>
+So on our <TT>ogr2ogr</TT> process, we have to define three types of input:
+<TT>ComplexValue</TT> of input vector file and EPSG codes of target and
+source files:
+
+<P>
+<PRE>
+16      self.AddComplexInput(Identifier="inputmap",
+17          Title ="Input vector file",
+18          Abstract = "Input vector file to be converted",
+19          Formats=["text/xml"])
+20
+21      self.AddLiteralInput(Identifier="sepsg",
+22          Title="Source EPSG",
+23          Abstract="Source EPSG code",
+24          value=4326)
+</PRE>
+
+<P>
+And we also define two outputs: ComplexValueReference and ComplexValue
+type.
+
+<P>
+<PRE>
+25      self.AddComplexOutput(Identifier="outputmap",
+26          Title ="Input vector file",
+27          Abstract = "Input vector file to be converted",
+28
+29      self.LiteralOutput(Identifier="sepsg",
+30          Title="Source EPSG",
+31          Abstract="Source EPSG code",
+32          value=4326)
+</PRE>
+
+<P>
+
+<H2><A NAME="SECTION00062000000000000000">
 Process Programming</A>
 </H2>
 
@@ -796,27 +954,32 @@ better not be used.
 
 
 <P>
+If you need to execute some shell command, you should use
+<TT>self.Cmd(command,["string for standard input"])</TT> instead of e.g.
+<TT>os.system()</TT> or <TT>os.popen()</TT> functions.
+
+<P>
 <PRE>
-22      def execute(self):
-23          if os.system("""g.region -d &gt;&amp;2"""):                                         
-24              return "Could not set region to default"                                 
-25                                                                                        
-26          os.system("r.in.gdal -o in=%s out=my_map &gt;&amp;2" %\                             
-27                                      (self.Inputs[0]['value']))                       
-28          os.system("r.mapcalc my_output=my_map+%d &gt;&amp;2" %\                             
-29                                      (self.DataInputs['value']))                      
-31           
-32          if os.system("r.out.gdal type=Float32 out=map.tif in=my_output &gt;&amp;2"):
-33              return "Could not export resulting raster map [map.tif]"
-34                                                                                
-35          self.Outputs[0]['value'] = "map.tif"
-36          self.DataOutputs['location'] = self.grassenv['LOCATION_NAME']
-37          return
+33
+35      def execute(self):
+36          
+37          #
+38          # calculation
+39          #
+30          self.Cmd("""ogr2ogr -s_srs "+init=epsg:4326" -t_srs \
+31          "+init=epsg:2065" %s output.file""" % (self.GetInputValue("inputmap")))
+32         #
+43         # setting results
+44         #
+45         self.SetOutputValue("outputmap","output.file")
+46         self.SetOutputValue("sepsg","4326")
+47
+48         return
 </PRE>
 
 <P>
 
-<H3><A NAME="SECTION00063100000000000000">
+<H3><A NAME="SECTION00062100000000000000">
 Error handling</A>
 </H3>
 
@@ -826,17 +989,104 @@ value means, that the calculation will be stopped and error report will be retur
 
 <P>
 
-<H1><A NAME="SECTION00070000000000000000">
-Note to grass programming</A>
-</H1>
+<H3><A NAME="SECTION00062200000000000000">
+Using standard in- and output with external commands</A>
+</H3>
+The <TT>self.Cmd()</TT> accepts <TT>input</TT> parameter, wich is a text
+string, which is directred to standard input of the command:
 
 <P>
-<TT>WMSProcess</TT> class provides special method
-<TT>self.Gcmd(command_string)</TT>, which tryes to catch output from GRASS
+<PRE>
+    result = self.Cmd(cmd="wc -c",
+             input="calculate number of characters for this sentence")
+
+    # result[0].split()
+</PRE>
+
+<P>
+<TT>self.Cmd()</TT> returns list of lines from the programms standard
+output to the process:
+
+<P>
+<PRE>
+    for line in self.Cmd("ls -l"):
+        # do some operations of list of files
+        pass
+</PRE>
+
+<P>
+
+<H2><A NAME="SECTION00063000000000000000">
+GRASS specific notes</A>
+</H2>
+
+<P>
+Special class for GRASS GIS is defined too, which has functions and
+variables specific to this program. The process, in which should use GRASS
+modules should be defined as follows:
+
+<P>
+<PRE>
+# importing necessary files
+import pywps.Wps.GRASSWPSProcess
+
+class Process(GRASSWPSProcess):
+     def __init__(self):
+         GRASSWPSProcess.__init__(self,
+               Identifier="spearpath",
+               Title="Spearfish path searching",
+               Abstract="Find the shortest path on the roads map on Spearfish dataset",
+               processVersion = "0.2",
+               statusSupported="true",
+               storeSupported="true",
+               # grassLocation="/var/www/spearfish60/" # work on existing location)
+</PRE>
+
+<P>
+By default, <TT>self.grassLocation</TT><A NAME="tex2html21"
+  HREF="#foot365"><SUP><SPAN CLASS="arabic">6</SPAN></SUP></A> 
+ variable is set to <TT>None</TT>,
+which means, that temporary location will be created and after the
+calculation is done, it will be deleted again. You can set this while
+process initialization or
+later<A NAME="tex2html22"
+  HREF="#foot366"><SUP><SPAN CLASS="arabic">7</SPAN></SUP></A>.
+
+<P>
+<TT>WPSProcess</TT> class provides special method
+<TT>self.GCmd(command_string)</TT>, which tryes to catch output from GRASS
 modules, especially progress information inidcated by percent done. Method
-<TT>Gcmd()</TT> stores the output of GRASS modules to <TT>self.status</TT>
+<TT>GCmd()</TT> stores the output of GRASS modules to <TT>self.status</TT>
 variable, so if the process is running assynchronously, client application
 can track the progress of each module directly.
+
+<P>
+<PRE>
+    def execute(self):
+        """
+        This function serves like simple GRASS - python script
+
+        It returns None, if process succeed or String if process failed
+        """
+        self.GCmd("g.region -d")
+
+
+        # v.net.path reads from standard input
+        self.GCmd("v.net.path in=roads out=path","0 %s %s %s %s" % (self.GetInputValue('x1'),
+                self.GetInputValue('y1'),
+                self.GetInputValue('x2'),
+                self.GetInputValue('y2')))
+
+        self.GCmd("v.out.ogr format=GML input=path dsn=out.xml olayer=path.xml")
+
+        if "out.xml" in os.listdir(os.curdir):
+            shutil.copy("out.xml","out2.xml")
+            self.SetOutputValue('outputReference',"out.xml")
+            self.SetOutputValue('outputData',"out2.xml")
+            return
+        else:
+            return "Ouput file not created!"
+</PRE>
 
 <P>
 It is also possible to run GRASS modules using python's
@@ -863,11 +1113,11 @@ os.system("""
 </PRE>
 
 <P>
-You can avoid this problem using formentioned <TT>self.Gcmd()</TT> method.
+You can avoid this problem using formentioned <TT>self.GCmd()</TT> method.
 
 <P>
 
-<H1><A NAME="SECTION00080000000000000000">
+<H1><A NAME="SECTION00070000000000000000">
 Testing your new process</A>
 </H1>
 
@@ -920,11 +1170,11 @@ wget -nv -q -O - "http://localhost/cgi-bin/wps.py?\
 
 <P>
 
-<H1><A NAME="SECTION00090000000000000000">
+<H1><A NAME="SECTION00080000000000000000">
 Using PyWPS</A>
 </H1>
 
-<H2><A NAME="SECTION00091000000000000000">
+<H2><A NAME="SECTION00081000000000000000">
 Input</A>
 </H2>
 
@@ -954,7 +1204,7 @@ wget --post-file=execute-post.txt \
 <P>
 The <TT>execute-post.txt</TT> file can look like follows:
 <PRE>
-request=&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;Execute service="WPS" version="0.4.0" store="false" status="false"
 xmlns="http://www.opengeospatial.net/wps"
 xmlns:ows="http://www.opengeospatial.net/ows"
@@ -1043,7 +1293,7 @@ You can see, that there are 4 inputs in this process:
     
 </LI>
 </OL>
-<H2><A NAME="SECTION00092000000000000000">
+<H2><A NAME="SECTION00082000000000000000">
 Output</A>
 </H2>
 
@@ -1089,9 +1339,17 @@ This will cause PyWPS to look after <TT>self.status</TT> array in your process i
     self.status = ["Message", Percent_Done]
 </PRE>
 and generate XML file in statusLocation with this embed message. E.g.
+
+<P>
 <PRE>
     self.status = ["Generating raster map", 50]
 </PRE>
+or better
+<PRE>
+    self.SetStatus("Generarting raster map", 50_Done)
+</PRE>
+
+<P>
 will become
 
 <P>
@@ -1104,15 +1362,11 @@ will become
 </PRE>
 
 <P>
-You can set also <TT>self.status</TT> variable using
-<TT>self.SetStatus()</TT> method.
 
 <P>
 
-<P>
-
-<H1><A NAME="SECTION000100000000000000000">
-Sample process: <TT>addvalue</TT></A>
+<H1><A NAME="SECTION00090000000000000000">
+Example process: <TT>addvalue</TT></A>
 </H1>
     This sample process describes how to made your own WPS processes. Purpose of this process is:
     
@@ -1143,22 +1397,21 @@ addvalue: Adds some value to raster map
 # Copyright (C) 2006 Jachym Cepicky
 
 import os,time,string,sys,shutil
-from pywps.Wps.process import WPSProcess
+from pywps.Wps.process import GRASSWPSProcess
 
-class Process (WPSProcess):
+class Process (GRASSWPSProcess):
     #
     # Initialization
     #
     def __init__(self):
-        WPSProcess.__init__(self,
+        GRASSWPSProcess.__init__(self,
                             Identifier="Addvalue",
                     Title="Add some value to input raster map",
                             processVersion = "0.2",
                             statusSupported="true",
-                            storeSupported="true")
+                            storeSupported="true",
+                            grassLocation = None)
 
-        # define GRASS location -- use temporary one
-        self.grassLocation = None
 
         #
         # Inputs
@@ -1171,7 +1424,7 @@ class Process (WPSProcess):
 
         #
         # Outputs
-        self.AddComplexValueReferenceOutput(Identifier="output",
+        self.AddComplexReferenceOutput(Identifier="output",
                             Title="Resulting output map",
                             Formats=["image/tiff"])
     #
@@ -1188,7 +1441,7 @@ class Process (WPSProcess):
 
         # import of the data
         self.SetStatus("Importing data")
-        if not self.Gcmd("r.in.gdal -o in=%s out=input" %\
+        if not self.GCmd("r.in.gdal -o in=%s out=input" %\
                 (self.GetInputValue("input"))):
             return "Could not import raster file"
         self.SetStatus("Importing data",10)
@@ -1197,19 +1450,19 @@ class Process (WPSProcess):
         for gdalinfoln in os.popen("gdalinfo %s" %\
                 (self.GetInputValue("input"))):
             if gdalinfoln.split()[0] == "Band" and gdalinfoln.split()[1] == "3":
-                self.Gcmd("""g.region rast=input.red """)
-                self.Gcmd("r.composite r=input.red b=input.blue g=input.green out=input")
+                self.GCmd("""g.region rast=input.red """)
+                self.GCmd("r.composite r=input.red b=input.blue g=input.green out=input")
 
         # region setting
-        self.Gcmd("""g.region rast=input""")    
+        self.GCmd("""g.region rast=input""")    
 
         # adding the value
         self.SetStatus("Adding new value to raster map",50)
-        self.Gcmd("r.mapcalc output='input+%f'" % float(self.GetInputValue('value')))
+        self.GCmd("r.mapcalc output='input+%f'" % float(self.GetInputValue('value')))
 
         # output
         self.SetStatus("Raster file export", 90)
-        self.Gcmd("r.out.gdal type=Int32 in=output out=%s" % "output.tif")
+        self.GCmd("r.out.gdal type=Int32 in=output out=%s" % "output.tif")
 
         # setting output values
         self.SetOutputValue("output","output.tif")
@@ -1222,7 +1475,7 @@ class Process (WPSProcess):
 
 <P>
 
-<H1><A NAME="SECTION000110000000000000000">
+<H1><A NAME="SECTION000100000000000000000">
 KVP request encoding of <TT>addvalue</TT></A>
 </H1>
     This process can be lunched with URL:
@@ -1236,7 +1489,7 @@ datainputs=input,http://localhost/data/raster.tif,value,250&amp;status=true&amp;
 
 <P>
 
-<H1><A NAME="SECTION000120000000000000000">
+<H1><A NAME="SECTION000110000000000000000">
 XML request encoding <TT>addvalue</TT></A>
 </H1>
 <PRE>
@@ -1271,7 +1524,7 @@ request=&lt;?xml version='1.0' encoding='UTF-8' standalone='yes'?&gt;
 
 <P>
 
-<H1><A NAME="SECTION000130000000000000000">
+<H1><A NAME="SECTION000120000000000000000">
 Licence of PyWPS</A>
 </H1>
 
@@ -1678,7 +1931,7 @@ POSSIBILITY OF SUCH DAMAGES.</SMALL>
 
 <P>
 
-<H1><A NAME="SECTION000140000000000000000">
+<H1><A NAME="SECTION000130000000000000000">
 Licence of this document</A>
 </H1>
 
@@ -2205,7 +2458,7 @@ as a draft) by the Free Software Foundation.
 
 <P>
 
-<H1><A NAME="SECTION000150000000000000000">
+<H1><A NAME="SECTION000140000000000000000">
 About this document ...</A>
 </H1>
  <STRONG>Implementation of OGC's WPS standard: PyWPS</STRONG><P>
@@ -2213,7 +2466,7 @@ This document was generated using the
 <A HREF="http://www.latex2html.org/"><STRONG>LaTeX</STRONG>2<tt>HTML</tt></A> translator Version 2002-2-1 (1.71)
 <P>
 Copyright &#169; 1993, 1994, 1995, 1996,
-<A HREF="http://cbl.leeds.ac.uk/nikos/personal.html">Nikos Drakos</A>, 
+Nikos Drakos, 
 Computer Based Learning Unit, University of Leeds.
 <BR>
 Copyright &#169; 1997, 1998, 1999,
@@ -2223,21 +2476,54 @@ Mathematics Department, Macquarie University, Sydney.
 The command line arguments were: <BR>
  <STRONG>latex2html</STRONG> <TT>-split 0 install.tex</TT>
 <P>
-The translation was initiated by Jachym Cepicky on 2007-03-15
+The translation was initiated by Jachym Cepicky on 2007-06-12
 <BR><HR><H4>Footnotes</H4>
 <DL>
-<DT><A NAME="foot60">...
+<DT><A NAME="foot357">...
+list</A><A
+ HREF="install.html#tex2html8"><SUP><SPAN CLASS="arabic">1</SPAN></SUP></A></DT>
+<DD>http://wald.intevation.org/mailman/listinfo/pywps-develPyWPS
+- development list
+
+</DD>
+<DT><A NAME="foot358">...
+bugtracker</A><A
+ HREF="install.html#tex2html9"><SUP><SPAN CLASS="arabic">2</SPAN></SUP></A></DT>
+<DD>http://wald.intevation.org/tracker/?atid=174&amp;group_id=22&amp;func=browsePyWPS
+Bug tracker
+
+</DD>
+<DT><A NAME="foot75">...
 site</A><A
- HREF="install.html#tex2html11"><SUP><SPAN CLASS="arabic">1</SPAN></SUP></A></DT>
-<DD><TT><A NAME="tex2html12"
+ HREF="install.html#tex2html15"><SUP><SPAN CLASS="arabic">3</SPAN></SUP></A></DT>
+<DD><TT><A NAME="tex2html16"
   HREF="http://pywps.wald.intevation.org">http://pywps.wald.intevation.org</A></TT>
 
 </DD>
-<DT><A NAME="foot305">... Locatio</A><A
- HREF="install.html#tex2html14"><SUP><SPAN CLASS="arabic">2</SPAN></SUP></A></DT>
-<DD>see e.g.
-<TT><A NAME="tex2html15"
-  HREF="http://grass.itc.it/grass63/manuals/html63_user/helptext.html">http://grass.itc.it/grass63/manuals/html63_user/helptext.html</A></TT> for details
+<DT><A NAME="foot361">...
+document</A><A
+ HREF="install.html#tex2html18"><SUP><SPAN CLASS="arabic">4</SPAN></SUP></A></DT>
+<DD><TT><A NAME="tex2html19"
+  HREF="http://www.opengeospatial.org/standards/requests/28">http://www.opengeospatial.org/standards/requests/28</A></TT>
+
+</DD>
+<DT><A NAME="foot362">...process.html</A><A
+ HREF="install.html#tex2html20"><SUP><SPAN CLASS="arabic">5</SPAN></SUP></A></DT>
+<DD>http://wald.intevation.org/plugins/scmsvn/viewcvs.php/*checkout*/trunk/doc/process.html?rev=369&amp;root=pywpsDocumentation
+to process.py module
+
+</DD>
+<DT><A NAME="foot365">...self.grassLocation</A><A
+ HREF="install.html#tex2html21"><SUP><SPAN CLASS="arabic">6</SPAN></SUP></A></DT>
+<DD>See e.g.
+http://grass.itc.it/grass63/manuals/html63_user/helptext.htmlGRASS
+manual for details
+
+</DD>
+<DT><A NAME="foot366">...
+later</A><A
+ HREF="install.html#tex2html22"><SUP><SPAN CLASS="arabic">7</SPAN></SUP></A></DT>
+<DD><TT>self.grassLocation="/path/to/location"</TT>
 
 </DD>
 </DL>
@@ -2253,7 +2539,7 @@ site</A><A
 <!--End of Navigation Panel-->
 <ADDRESS>
 Jachym Cepicky
-2007-03-15
+2007-06-12
 </ADDRESS>
 </BODY>
 </HTML>

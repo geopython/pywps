@@ -3,7 +3,9 @@
 \usepackage{lscape}
 \usepackage[utf8]{inputenc}
 \usepackage{a4wide}
-\usepackage[pdftitle={PyWPS Manual},colorlinks=true,bookmarks,dvips]{hyperref}
+\usepackage[dvips]{graphicx}
+\usepackage{url}
+\usepackage[colorlinks=true]{hyperref}
 \usepackage[table,dvipsnames]{xcolor}[2004/07/04]
 
 \author{Jachym Cepicky}
@@ -19,7 +21,7 @@
 \newcommand{\pywpssite}{\url{http://pywps.wald.intevation.org}}
 \newcommand{\pywpswiki}{\url{http://pywps.ominiverdi.org}}
 \newcommand{\note}[1]{\medskip{}\noindent{}NOTE: #1\medskip{}}
-\newcommand{\version}{\emph{SVN}}
+\newcommand{\version}{\emph{2.0.0}}
 \makeatother
 
 
@@ -49,7 +51,7 @@ version of PyWPS (\version), available in subversion respository.
 PyPWS project has been started on April 2006 with support of DBU --
 Deutsche Bundesstiftung Umwelt (\url{http://dbu.de}) and with help of
 GDF-Hannover (\url{http://gdf-hannover.de}) and Help Service Remote
-Sensing (\url{http:/bnhelp.cz}) companies. Initial author is Jachym
+Sensing (\url{http://www.bnhelp.cz}) companies. Initial author is Jachym
 Cepicky (\url{http://les-ejk.cz}).
     
 
@@ -76,6 +78,20 @@ this language too.
 
 PyWPS Homepage can be found at \pywpssite.
 PyWPS Wiki is hosted on \pywpswiki. 
+
+\subsection{How it works}
+PyWPS is an translator application between client (Web Browser, Desktop
+GIS, command line tool, \dots) and working tool installed on the server.
+PyWPS does no work by it self. As working tool, GRASS GIS, GDAL, PROJ, R
+and other programs can be used.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=1\textwidth]{pic/pywps-schema}
+\caption{How does PyWPS work: GRASS GIS is in this case working tool}
+\label{pic:pywps}
+\end{center}
+\end{figure}
     
 %---------------------------------------------------------------------
 \section{Bugs}
@@ -87,7 +103,12 @@ string, it is not controlled properly. Take care on your inputs and do
 not use it directly in scripts to avoid your server to be hacked.
 \end{itemize}
 
-Please report all problems or unexpected handeling.
+Please report all problems or unexpected handeling either via pywps mailing
+list\footnote{\href{http://wald.intevation.org/mailman/listinfo/pywps-devel}{PyWPS
+- development list}}
+or using PyWPS
+bugtracker\footnote{\href{http://wald.intevation.org/tracker/?atid=174&group\_id=22&func=browse}{PyWPS
+Bug tracker}}.
 
 %---------------------------------------------------------------------
 \section{Installation}
@@ -95,7 +116,6 @@ Please report all problems or unexpected handeling.
 Required packages:
     
 \begin{itemize}
-    \item Web Server (e.g. Apache) 
     \item python 
     \item python-xml 
 \end{itemize}
@@ -103,6 +123,10 @@ Required packages:
 Recommended packages:
     
 \begin{itemize}
+    \item Web Server (e.g. Apache) -- \url{http://httpd.apache.org} -  You
+    will need an web server, to be able to execute processes from remote
+    computers.
+
     \item GIS GRASS  -- \url{http://grass.itc.it} - Geographical Resources
     Analysis Support System (GRASS) is Open Source GIS, which provides more
     then 350 modules for raster and vector (2D, 3D) data analysis. PyWPS is
@@ -125,18 +149,24 @@ Recommended packages:
     
 \subsection{Installation the quick 'n' dirty way}
 For installing pywps to your server simply unzip the archive to the
-directory, where cgi programs are allowed to run. 
+directory, where cgi programs are allowed to run. You can also use current
+repository version.
+
+\begin{verbatim}
+$ cd /usr/lib/cgi-bin/
+$ tar xvzf /tmp/pywps-VERSION.tar.gz
+$ pywps/wps.py
+\end{verbatim}
 
 \subsection{Installation the 'clean' way}
 Unzip the package 
-\color{gray!25}
 \begin{verbatim}
 $ tar -xzf pywps-VERSION.tar.gz
 \end{verbatim}
 and run 
 \begin{verbatim}
 $ python setup.py install
-\end{verbatim}
+\end{verbatim} 
 
 Several binary packages for Linux distributios are also avaliable on PyWPS
 site\footnote{\pywpssite}.
@@ -191,10 +221,11 @@ scripts, so it does not harm, if you have some experience in python
 programming language. But you should be able to setup the program without
 any python knowledge.
 
-The first file is in \texttt{etc\/settings.py} and (optional) the second file is
-\texttt{etc\/grass.py} which has to be setuped if you do want to use
+The first file is in \texttt{etc/settings.py} and (optional) the second file is
+\texttt{etc/grass.py} which has to be setuped if you do want to use
 GRASS GIS modules in your scripts. Some special "tuning" can be done in \texttt{processes/\_\_init\_\_.py}
-file
+file. You can allways obtain original configuration files from
+\texttt{Wps/default\_settings.py} and \texttt{Wps/default\_grass.py}.
     
 \subsection{\texttt{etc/settings.py}}
     
@@ -206,29 +237,31 @@ are (with default/recommend values):
     
 
 \begin{verbatim}
-'version': "0.4.0",
-'ServiceIdentification': {
-    'Title':"Jachym's WPS server",
-    'ServiceType':"WPS",
-    'ServiceTypeVersion':"0.1.0",
-    'Abstract':'Abstract to this WPS',
-},
-'ServiceProvider': {
-        'ProviderName' : "Your Company",
-        'IndividualName':"Your Name",
-        'PositionName':"Your Position",
-        'Role':"your role",
-        'DeliveryPoint': "Street",
-        'City': "City",
-        'PostalCode':"00000",
-        'Country': "Your country",
-        'ElectronicMailAddress':"your.email@address",
-},
+WPS = {
+    'version': "0.4.0",
+    'ServiceIdentification': {
+        'Title':"Jachym's WPS server",
+        'ServiceType':"WPS",
+        'ServiceTypeVersion':"0.1.0",
+        'Abstract':'Abstract to this WPS',
+    },
+    'ServiceProvider': {
+            'ProviderName' : "Your Company",
+            'IndividualName':"Your Name",
+            'PositionName':"Your Position",
+            'Role':"your role",
+            'DeliveryPoint': "Street",
+            'City': "City",
+            'PostalCode':"00000",
+            'Country': "Your country",
+            'ElectronicMailAddress':"your.email@address",
+    },
 
-'OperationsMetadata': {
-    'ServerAddress' : "http://localhost/cgi-bin/wps/wps.py",
-},
-'Keywords' : ['GRASS','GIS','WPS'],
+    'OperationsMetadata': {
+        'ServerAddress' : "http://localhost/cgi-bin/wps/wps.py",
+    },
+    'Keywords' : ['GRASS','GIS','WPS'],
+}
 \end{verbatim}
 
     
@@ -237,36 +270,38 @@ the whole server.
     
 
 \begin{verbatim}
-# NOTE: You have to create this directory manually and set rights, so
-#       the program is able to store data in there 
-'outputPath': '/var/www/wpsoutputs',
-
-#
-# 'outputUrl' - URL of the directory, where the outputs will be stored
-'outputUrl':  'http://192.168.1.31/wpsoutputs',
-
-#
-# tempPath - path to directory, where temporary data will be stored.
-# NOTE: the pywps has to have rights, to create directories and files
-#       in this directory
-'tempPath': '/tmp',
-
-#
-# maxOperations - maximum number of operations, which is allowed to low
-# on this server at ones 
-# default = 1
-'maxOperations':1,
-
-#
-# maxSize: maximum input file size in bytes
-# NOTE: maximum file size is 5MB, no care, if this number is higher
-'maxSize':5242880, # 5 MB
-
-#
-# maxInputParamLength: maximal length of input values
-# NOTE: maximum length of input parameters is 256, no matter, how height
-#       is this number
-'maxInputParamLength':256,
+ServerSettings = {
+        # NOTE: You have to create this directory manually and set rights, so
+        #       the program is able to store data in there 
+        'outputPath': '/var/www/wpsoutputs',
+        
+        #
+        # 'outputUrl' - URL of the directory, where the outputs will be stored
+        'outputUrl':  'http://192.168.1.31/wpsoutputs',
+        
+        #
+        # tempPath - path to directory, where temporary data will be stored.
+        # NOTE: the pywps has to have rights, to create directories and files
+        #       in this directory
+        'tempPath': '/tmp',
+        
+        #
+        # maxOperations - maximum number of operations, which is allowed to low
+        # on this server at ones 
+        # default = 1
+        'maxOperations':1,
+        
+        #
+        # maxSize: maximum input file size in bytes
+        # NOTE: maximum file size is 5MB, no care, if this number is higher
+        'maxSize':5242880, # 5 MB
+        
+        #
+        # maxInputParamLength: maximal length of input values
+        # NOTE: maximum length of input parameters is 256, no matter, how height
+        #       is this number
+        'maxInputParamLength':256,
+}
 \end{verbatim}
 
 
@@ -277,31 +312,33 @@ processes need one). Everything is stored in \texttt{grassenv} structure.
     
 
 \begin{verbatim}
-# PATH in which your modules (processes) should be able the search.
-# Default value:
-'PATH': "/usr/local/grass-6.1.cvs/bin/:/usr/local/grass-6.1.cvs/scripts/:\
-/usr/bin/:/bin/:",
-
-# Add eventually some other path, in which should GRASS search for modules
-'GRASS_ADDON_PATH': "",
-
-# Version of GRASS, you are using
-'GRASS_VERSION': "6.1.cvs",
-
-# GRASS_PERL, where is your PERL bin installed
-'GRASS_PERL': "/usr/bin/perl",
-
-# GRASS_GUI should be always "text" unless you know, what you are doing
-'GRASS_GUI': "text",
-
-# GISBASE is place, where your GRASS installation is
-'GISBASE': "/usr/local/grass-6.1.cvs",
-
-# LD_LIBRARY_PATH
-'LD_LIBRARY_PATH':"/usr/local/grass-6.1.cvs/lib",
-
-# HOME has to be set
-'HOME':"/var/www",
+grassenv = {
+    # PATH in which your modules (processes) should be able the search.
+    # Default value:
+    'PATH': "/usr/local/grass-6.1.cvs/bin/:/usr/local/grass-6.1.cvs/scripts/:\
+    /usr/bin/:/bin/:",
+    
+    # Add eventually some other path, in which should GRASS search for modules
+    'GRASS_ADDON_PATH': "",
+    
+    # Version of GRASS, you are using
+    'GRASS_VERSION': "6.1.cvs",
+    
+    # GRASS_PERL, where is your PERL bin installed
+    'GRASS_PERL': "/usr/bin/perl",
+    
+    # GRASS_GUI should be always "text" unless you know, what you are doing
+    'GRASS_GUI': "text",
+    
+    # GISBASE is place, where your GRASS installation is
+    'GISBASE': "/usr/local/grass-6.1.cvs",
+    
+    # LD_LIBRARY_PATH
+    'LD_LIBRARY_PATH':"/usr/local/grass-6.1.cvs/lib",
+    
+    # HOME has to be set
+    'HOME':"/var/www",
+}
 \end{verbatim}
 
 
@@ -310,7 +347,7 @@ processes need one). Everything is stored in \texttt{grassenv} structure.
 \note{This section has changed from previous stable 1.0.0 version. The
 processes, you defined for 1.0.0 branch should work for 2.0.0 branch too.}
     
-All processes are stored in the processes directory. Put your file
+All processes are stored in the \texttt{processes} directory. Put your file
 e.g. \texttt{myprocess.py} in there. Several example processes are
 distributed along with PyWPS source code.
     
@@ -319,11 +356,10 @@ Process is python class derived from prepared \texttt{WPSProcess} class in
 process metadata, inputs and outpus are defined and in
 \texttt{execute(self)} method, own computation is performed.
 
+
 It is possible also to add as many your functions, as you wish.
     
-
 \subsection{Process Initialization and Configuration}
-    
 
 \begin{verbatim}
 01 # importing necessary files
@@ -332,46 +368,29 @@ It is possible also to add as many your functions, as you wish.
 04 class Process(WPSProcess):
 05      def __init__(self):
 06          WPSProcess.__init__(self,
-07                Identifier="spearpath",
-18                Title="Spearfish path searching",
-19                Abstract="Find the shortest path on the roads map on Spearfish dataset",
+07                Identifier="ogr2ogr",
+18                Title="ogr2ogr interface",
+19                Abstract="Convert vector file to another format",
 10                processVersion = "0.2",
 11                statusSupported="true",
 12                storeSupported="true")
 \end{verbatim}
 
-We defined new process called \texttt{spearpath}. The process is allowed to
+We defined new process called \texttt{ogr2ogr}. The process is allowed to
 store it's output data on the server (\texttt{storeSupported}) and it is also possible to run it in
 asynchronous mode (\texttt{statusSupported}).
      
 Eventually optional attributes can be found in the table 38 - "Parts of
-ExecuteResponse data structure". It is also possible to redefine some
+ExecuteResponse data structure" in the WPS reference
+document\footnote{\url{http://www.opengeospatial.org/standards/requests/28}}. It is also possible to redefine some
 variable later, after initialization:
 
 \begin{verbatim}
 13
-14          self.Title="South Dacota path searching"
+14          self.Title="ogr2ogr interface"
 15
 \end{verbatim}
 
-\subsection{Running in GRASS session}
-You have to define GRASS Locatio\footnote{see e.g.
-\url{http://grass.itc.it/grass63/manuals/html63\_user/helptext.html} for details} 
-If your process should happen in existing GRASS-Location, and you just need
-the input parameters for GRASS modules, you can specify it's name by
-\texttt{grassLocation} variable. 
-     
-\begin{verbatim}
-16          # use existing GRASS Location
-17          self.grassLocation="/var/grassdata/spearfish60/"
-18          # use temporary GRASS Location
-19          #self.grassLocation=None
-\end{verbatim}
-
-     
-If this variable is  set to \texttt{None}, new temporary GRASS Location \&\& mapset will be
-generated (using XY coordinate system) and you can work in there. The projection of the location will be
-XY. If this variable is not set, GRASS will not be stared.
 
 \paragraph{Metadata defition} is stored in array \texttt{self.Metadata} in
 \texttt{\_\_init\_\_} method. You can add new Medatada using
@@ -396,6 +415,20 @@ Data inputs are stored in \texttt{self.Inputs} array. To add inputs to
 your process, you should use methods defined in \texttt{WPSProcess} class.
 
 Four types of data inputs are defined:
+\begin{itemize}
+    \item Literal Input -- Basic literal input -- single number or text
+    value
+    \item ComplexValue Input  -- Mostly vector file embded in input XML
+    request
+    \item ComplexValueReference Input -- URL to location, where the process
+    is supposed to get the input data.
+    \item BoundingBox Input -- Coordinates for lower-left and upper-right
+    corner.
+\end{itemize}
+
+ComplexValue and ComplexValueReference defined on the same way -- PyWPS is
+able to guess, if the input data are reference (link) to some map or raw
+data directly.
 
 \paragraph{LiteralInput}
 
@@ -469,11 +502,54 @@ self.AddLiteralInput(Identifier="someinput",
 \end{verbatim}
 
 For further documentation, refere example processes distributed with the
-source code as well as \texttt{pydoc~pywps/wps/process.py}. 
+source code as well as \texttt{pydoc~pywps/wps/process.py}. This help is
+also available in
+\texttt{process.html}\footnote{\href{http://wald.intevation.org/plugins/scmsvn/viewcvs.php/*checkout*/trunk/doc/process.html?rev=369&root=pywps}{Documentation
+to process.py module}} file distributed along with PyWPS
+source code.
 
-%FIXME this should be outstanding documentation
+\paragraph{ComplexInput}
+If the request comes as HTTP GET, it is assumed, that the input is only
+reference to some map. If it comes as HTTP POST, PyWPS tryes to guess, if
+the client is sending URL to source of the data or if the input data are
+part of input XML request (e.g. as GML file). So, you, as a process coder
+do not have to take care on this:
+
+\begin{verbatim}
+self.AddComplexInput(Indentifier="inputmap",
+      Title="Input map, which should be processed",
+      Formats=["text/xml","image/tiff"])
+...
+    <Input>
+        <ows:Identifier>input</ows:Identifier>
+        <ows:Title>Input raster map</ows:Title>
+        <ows:Abstract/>
+        <ComplexData defaultFormat="image/tiff">
+            <SupportedComplexData>
+                <Format>image/tiff</Format>
+                <Format>text/xml</Format>
+            </SupportedComplexData>
+        </ComplexData>
+        <MinimumOccurs>1</MinimumOccurs>
+    </Input>
+\end{verbatim}
+
+\paragraph{BoundingBox Input}
+With bounding box, you can define two coordinate pairs, if you have to.
+
+\begin{verbatim}
+self.AddBondingBoxInput(Identifier="bbox",
+        Title="BBox input")
+\end{verbatim}
 
 \subsubsection{Data Outputs}
+Again four types of output are defined:
+\begin{itemize}
+    \item Literal Output
+    \item ComplexValue Output
+    \item ComplexValue Reference
+    \item BoundingBox Output
+\end{itemize}
     
 Data outputs can be defined on similar way, using similar methods:
 
@@ -496,6 +572,7 @@ self.AddLiteralOutput(Identifier="litoutput",
 ...
 \end{verbatim}
 
+\paragraph{ComplexValue and ComplexValueReference Output}
 To the oposite of data Inputs, Outputs can distinguish between ComplexValue
 output and ComplexValueReference. ComplexValue is directly embed into the
 output XML document and ComplexValueReference is stored on the server and
@@ -504,7 +581,7 @@ in GML format can be easy embed to the output XML, TIFF raster files is
 better to leave on the server.
 
 \begin{verbatim}
-self.AddComplexValueReferenceOutput(Identifier="output",
+self.AddComplexReferenceOutput(Identifier="output",
                 Title="Resulting output map",
                 Formats=["image/tiff"])
 
@@ -522,12 +599,47 @@ self.AddComplexValueReferenceOutput(Identifier="output",
 ...
 \end{verbatim}
 
-Beside LiteralValue and ComplexValue, BoundingBoxValue is also defined. The
-coordinates are stored in array of four members:
+\paragraph{BoundingBox Output}
+Beside LiteralValue and ComplexValue, BoundingBoxValue is also defined. 
+The coordinates are stored in array of four members:
 
 \begin{verbatim}
 self.GetInputValue("bboxinput")
 [0,0,100,100]
+\end{verbatim}
+
+\bigskip
+
+So on our \texttt{ogr2ogr} process, we have to define three types of input:
+\texttt{ComplexValue} of input vector file and EPSG codes of target and
+source files:
+
+\begin{verbatim}
+16      self.AddComplexInput(Identifier="inputmap",
+17          Title ="Input vector file",
+18          Abstract = "Input vector file to be converted",
+19          Formats=["text/xml"])
+20
+21      self.AddLiteralInput(Identifier="sepsg",
+22          Title="Source EPSG",
+23          Abstract="Source EPSG code",
+24          value=4326) 
+\end{verbatim}
+
+
+And we also define two outputs: ComplexValueReference and ComplexValue
+type.
+
+
+\begin{verbatim}
+25      self.AddComplexOutput(Identifier="outputmap",
+26          Title ="Input vector file",
+27          Abstract = "Input vector file to be converted",
+28
+29      self.LiteralOutput(Identifier="sepsg",
+30          Title="Source EPSG",
+31          Abstract="Source EPSG code",
+32          value=4326) 
 \end{verbatim}
 
 
@@ -552,22 +664,27 @@ value)} method.
 \texttt{self.DataOutputs['identifier']} dictionary, is possible, but should
 better not be used.}
 
+If you need to execute some shell command, you should use
+\texttt{self.Cmd(command,["string for standard input"])} instead of e.g.
+\texttt{os.system()} or \texttt{os.popen()} functions.
+
+
 \begin{verbatim}
-22      def execute(self):
-23          if os.system("""g.region -d >&2"""):                                         
-24              return "Could not set region to default"                                 
-25                                                                                        
-26          os.system("r.in.gdal -o in=%s out=my_map >&2" %\                             
-27                                      (self.Inputs[0]['value']))                       
-28          os.system("r.mapcalc my_output=my_map+%d >&2" %\                             
-29                                      (self.DataInputs['value']))                      
-31           
-32          if os.system("r.out.gdal type=Float32 out=map.tif in=my_output >&2"):
-33              return "Could not export resulting raster map [map.tif]"
-34                                                                                
-35          self.Outputs[0]['value'] = "map.tif"
-36          self.DataOutputs['location'] = self.grassenv['LOCATION_NAME']
-37          return
+33
+35      def execute(self):
+36          
+37          #
+38          # calculation
+39          #
+30          self.Cmd("""ogr2ogr -s_srs "+init=epsg:4326" -t_srs \
+31          "+init=epsg:2065" %s output.file""" % (self.GetInputValue("inputmap")))
+32         #
+43         # setting results
+44         #
+45         self.SetOutputValue("outputmap","output.file")
+46         self.SetOutputValue("sepsg","4326")
+47
+48         return
 \end{verbatim}
 
 \subsubsection{Error handling}
@@ -576,16 +693,95 @@ At the end of the \texttt{execute} function, \texttt{None} value should be retur
 value means, that the calculation will be stopped and error report will be returned back to the client.
     
 
+\subsubsection{Using standard in- and output with external commands}
+The \texttt{self.Cmd()} accepts \texttt{input} parameter, wich is a text
+string, which is directred to standard input of the command:
 
-%---------------------------------------------------------------------
-\section{Note to grass programming}
+\begin{verbatim}
+    result = self.Cmd(cmd="wc -c",
+             input="calculate number of characters for this sentence")
+
+    # result[0].split()
+\end{verbatim}
+
+\texttt{self.Cmd()} returns list of lines from the programms standard
+output to the process:
+
+\begin{verbatim}
+
+    for line in self.Cmd("ls -l"):
+        # do some operations of list of files
+        pass
+\end{verbatim}
+
+
+\subsection{GRASS specific notes}
+
+Special class for GRASS GIS is defined too, which has functions and
+variables specific to this program. The process, in which should use GRASS
+modules should be defined as follows:
+
+\begin{verbatim}
+# importing necessary files
+import pywps.Wps.GRASSWPSProcess
+
+class Process(GRASSWPSProcess):
+     def __init__(self):
+         GRASSWPSProcess.__init__(self,
+               Identifier="spearpath",
+               Title="Spearfish path searching",
+               Abstract="Find the shortest path on the roads map on Spearfish dataset",
+               processVersion = "0.2",
+               statusSupported="true",
+               storeSupported="true",
+               # grassLocation="/var/www/spearfish60/" # work on existing location)
+\end{verbatim}
+
+By default, \texttt{self.grassLocation}\footnote{See e.g.
+\href{http://grass.itc.it/grass63/manuals/html63\_user/helptext.html}{GRASS
+manual} for details} 
+ variable is set to \texttt{None},
+which means, that temporary location will be created and after the
+calculation is done, it will be deleted again. You can set this while
+process initialization or
+later\footnote{\texttt{self.grassLocation="/path/to/location"}}.
+
     
-\texttt{WMSProcess} class provides special method
-\texttt{self.Gcmd(command\_string)}, which tryes to catch output from GRASS
+\texttt{WPSProcess} class provides special method
+\texttt{self.GCmd(command\_string)}, which tryes to catch output from GRASS
 modules, especially progress information inidcated by percent done. Method
-\texttt{Gcmd()} stores the output of GRASS modules to \texttt{self.status}
+\texttt{GCmd()} stores the output of GRASS modules to \texttt{self.status}
 variable, so if the process is running assynchronously, client application
 can track the progress of each module directly.
+
+\begin{verbatim}
+    def execute(self):
+        """
+        This function serves like simple GRASS - python script
+
+        It returns None, if process succeed or String if process failed
+        """
+        self.GCmd("g.region -d")
+
+
+        # v.net.path reads from standard input
+        self.GCmd("v.net.path in=roads out=path","0 %s %s %s %s" % (self.GetInputValue('x1'),
+                self.GetInputValue('y1'),
+                self.GetInputValue('x2'),
+                self.GetInputValue('y2')))
+
+        self.GCmd("v.out.ogr format=GML input=path dsn=out.xml olayer=path.xml")
+
+        if "out.xml" in os.listdir(os.curdir):
+            shutil.copy("out.xml","out2.xml")
+            self.SetOutputValue('outputReference',"out.xml")
+            self.SetOutputValue('outputData',"out2.xml")
+            return
+        else:
+            return "Ouput file not created!"
+\end{verbatim}
+
+%---------------------------------------------------------------------
 
 It is also possible to run GRASS modules using python's
 \texttt{os.system()} or \texttt{os.popen()} function.  Before you do so, it
@@ -606,7 +802,8 @@ os.system("""
 """)
 \end{verbatim}
 
-You can avoid this problem using formentioned \texttt{self.Gcmd()} method.
+You can avoid this problem using formentioned \texttt{self.GCmd()} method.
+
 
 %---------------------------------------------------------------------
 \section{Testing your new process}
@@ -675,7 +872,7 @@ wget --post-file=execute-post.txt \
     
 The \texttt{execute-post.txt} file can look like follows:
 \begin{verbatim}
-request=<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Execute service="WPS" version="0.4.0" store="false" status="false"
 xmlns="http://www.opengeospatial.net/wps"
 xmlns:ows="http://www.opengeospatial.net/ows"
@@ -792,9 +989,15 @@ This will cause PyWPS to look after \texttt{self.status} array in your process i
     self.status = ["Message", Percent_Done]
 \end{verbatim}
 and generate XML file in statusLocation with this embed message. E.g.
+
 \begin{verbatim}
     self.status = ["Generating raster map", 50]
 \end{verbatim}
+or better
+\begin{verbatim}
+    self.SetStatus("Generarting raster map", 50_Done)
+\end{verbatim}
+
 will become
 
 \begin{verbatim}
@@ -805,12 +1008,9 @@ will become
 ...
 \end{verbatim}
 
-You can set also \texttt{self.status} variable using
-\texttt{self.SetStatus()} method.
-
 \appendix
 
-    \section{Sample process: \texttt{addvalue}}
+    \section{Example process: \texttt{addvalue}}
     This sample process describes how to made your own WPS processes. Purpose of this process is:
     \begin{itemize}
     \item  Download input raster map from some server
@@ -833,22 +1033,21 @@ addvalue: Adds some value to raster map
 # Copyright (C) 2006 Jachym Cepicky
 
 import os,time,string,sys,shutil
-from pywps.Wps.process import WPSProcess
+from pywps.Wps.process import GRASSWPSProcess
 
-class Process (WPSProcess):
+class Process (GRASSWPSProcess):
     #
     # Initialization
     #
     def __init__(self):
-        WPSProcess.__init__(self,
+        GRASSWPSProcess.__init__(self,
                             Identifier="Addvalue",
                     Title="Add some value to input raster map",
                             processVersion = "0.2",
                             statusSupported="true",
-                            storeSupported="true")
+                            storeSupported="true",
+                            grassLocation = None)
 
-        # define GRASS location -- use temporary one
-        self.grassLocation = None
 
         #
         # Inputs
@@ -861,7 +1060,7 @@ class Process (WPSProcess):
 
         #
         # Outputs
-        self.AddComplexValueReferenceOutput(Identifier="output",
+        self.AddComplexReferenceOutput(Identifier="output",
                             Title="Resulting output map",
                             Formats=["image/tiff"])
     #
@@ -878,7 +1077,7 @@ class Process (WPSProcess):
 
         # import of the data
         self.SetStatus("Importing data")
-        if not self.Gcmd("r.in.gdal -o in=%s out=input" %\
+        if not self.GCmd("r.in.gdal -o in=%s out=input" %\
                 (self.GetInputValue("input"))):
             return "Could not import raster file"
         self.SetStatus("Importing data",10)
@@ -887,19 +1086,19 @@ class Process (WPSProcess):
         for gdalinfoln in os.popen("gdalinfo %s" %\
                 (self.GetInputValue("input"))):
             if gdalinfoln.split()[0] == "Band" and gdalinfoln.split()[1] == "3":
-                self.Gcmd("""g.region rast=input.red """)
-                self.Gcmd("r.composite r=input.red b=input.blue g=input.green out=input")
+                self.GCmd("""g.region rast=input.red """)
+                self.GCmd("r.composite r=input.red b=input.blue g=input.green out=input")
 
         # region setting
-        self.Gcmd("""g.region rast=input""")    
+        self.GCmd("""g.region rast=input""")    
 
         # adding the value
         self.SetStatus("Adding new value to raster map",50)
-        self.Gcmd("r.mapcalc output='input+%f'" % float(self.GetInputValue('value')))
+        self.GCmd("r.mapcalc output='input+%f'" % float(self.GetInputValue('value')))
 
         # output
         self.SetStatus("Raster file export", 90)
-        self.Gcmd("r.out.gdal type=Int32 in=output out=%s" % "output.tif")
+        self.GCmd("r.out.gdal type=Int32 in=output out=%s" % "output.tif")
 
         # setting output values
         self.SetOutputValue("output","output.tif")
