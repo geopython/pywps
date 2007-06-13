@@ -29,6 +29,10 @@ def PyWPSdebug(d,level=0,pref=""):
     try:
         if Env["PyWPS_DEBUG"] and\
             int(Env["PyWPS_DEBUG"]) >= level:
+                pass
+        else:
+            return
+
     except (KeyError, ValueError):
         PyWPS_DEBUG = 0
 

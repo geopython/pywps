@@ -922,6 +922,9 @@ class Execute:
             except TypeError,e:
                 return True
 
+            # retype input values
+            input['value'] = value
+
             # list of allowed literal values in
             if input.has_key("LiteralValue"):
                 isin = False
