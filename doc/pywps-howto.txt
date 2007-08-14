@@ -1721,7 +1721,7 @@ request=<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
    The command line arguments were:
    latex2html -split 0 pywps-howto.tex
 
-   The translation was initiated by Jachym Cepicky on 2007-06-12
+   The translation was initiated by Jachym Cepicky on 2007-08-14
      _________________________________________________________________
 
     Footnotes
@@ -1757,7 +1757,7 @@ request=<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
    next_inactive up previous
 
 
-    Jachym Cepicky 2007-06-12
+    Jachym Cepicky 2007-08-14
 
 Reference
 
