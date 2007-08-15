@@ -92,6 +92,8 @@ def _fillRecursive(key,default, custom):
     """
         
     # replace, if no recursion is needed
+    if (not default.has_key(key)):
+        default[key] = custom[key]
     if type(default[key]) != type({}):
         try:
             default[key] = custom[key]
@@ -99,11 +101,17 @@ def _fillRecursive(key,default, custom):
             pass
     # recurse
     else:
-        try:
+            # fill attributes, which are defined in default settings file
             for dkey in default[key].keys():
-                _fillRecursive(dkey, default[key],custom[key])
-        except:
-            pass
+                try:
+                    _fillRecursive(dkey, default[key],custom[key])
+                except:
+                    pass
+            for ckey in custom[key].keys():
+                try:
+                    _fillRecursive(ckey, default[key],custom[key])
+                except:
+                    pass
 
 def _checkPaths(default,grass):
     """

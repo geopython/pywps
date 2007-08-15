@@ -888,7 +888,7 @@ class Execute:
                                     str(formvalues['datainputs'][input['Identifier']])))
 
                 if input.has_key('LiteralValue') and \
-                    len(input['value']) == 1:
+                        type(input['value']) == type([]):
                         input['value'] = input['value'][0]
                 elif input.has_key("BoundingBoxValue"):
                     if input['value'][0] > input['value'][2]:
