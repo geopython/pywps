@@ -244,13 +244,13 @@ class Execute:
 
             self.grassEnv = grass.GRASS(self.grassSettings)
             self.mapset = self.grassEnv.mkmapset(self.process.grassLocation)
+            self.process.grassenv=self.grassEnv.grassenv
             try:
                 self.dirsToRemove.append(os.path.join(self.process.grassLocation,self.mapset))
             except AttributeError:
                 pass
         except :
             pass
-        self.process.grassenv=self.grassEnv.grassenv
 
  
         #
@@ -349,7 +349,7 @@ class Execute:
             self.process.stopChecking = True
 
         except Exception,e:
-            sys.stderr.write("PyWPS ERROR: %s in self.process.execute()\n" % (e))
+            sys.stderr.write("PyWPS ERROR: %s in process %s, method execute()\n" % (e,self.process.Title))
             if sys.stdout == sys.__stderr__:
                 sys.stdout = sys.__stdout__
             self.status = "ProcessFailed"
