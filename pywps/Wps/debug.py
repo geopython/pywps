@@ -25,7 +25,6 @@ from sys import stderr as Stderr
 from os import environ as Env
 
 def PyWPSdebug(d,level=0,pref=""):
-
     try:
         if Env["PyWPS_DEBUG"] and\
             int(Env["PyWPS_DEBUG"]) >= level:

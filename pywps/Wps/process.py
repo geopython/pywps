@@ -148,13 +148,13 @@ class WPSProcess:
                             "LiteralValue": {"UOMs":UOMs,
                                              "values":allowedvalues},
                             "MinimumOccurs": MinimumOccurs,
-                            "dataType":type,
+                            "DataType":type,
                             "value": value
                             })
         return self.Inputs[-1]
 
     def AddComplexInput(self, Identifier, Title=None, Abstract=None,
-            Formats=["text/xml"], value=None):
+            Formats=["text/xml"], Schemas=["http://schemas.opengis.net/gml/2.1.2/feature.xsd"], value=None):
         """Add new input item of type ComplexValue to this process"""
 
         if not Title: 
@@ -172,9 +172,15 @@ class WPSProcess:
         if type(Formats) != type([]):
             Formats = [Formats]
 
+        if type(Schemas) != type([]):
+            Schemas = [Schemas]
+
+        if (len(Formats) != len(Schemas)):
+             raise ServerError("Number of Formats and Schemas does not match in process: %s" % self.Title)
+
         self.Inputs.append({"Identifier":Identifier,"Title":Title,
                             "Abstract":Abstract,
-                            "ComplexValue": {"Formats":Formats},
+                            "ComplexValue": {"Formats":Formats,"Schemas":Schemas},
                             "value": value
                             })
 
@@ -239,7 +245,7 @@ class WPSProcess:
 
 
     def AddComplexOutput(self, Identifier, Title=None, Abstract=None,
-            Formats=["text/xml"], value=None):
+            Formats=["text/xml"], Schemas=["http://schemas.opengis.net/gml/2.1.2/feature.xsd"], value=None):
         """Add new output item of type ComplexValue to this process"""
 
         if not Title: 
@@ -257,16 +263,22 @@ class WPSProcess:
         if type(Formats) != type([]):
             Formats = [Formats]
 
+        if type(Schemas) != type([]):
+            Schemas = [Schemas]
+
+        if (len(Formats) != len(Schemas)):
+             raise ServerError("Number of Formats and Schemas does not match in process: %s" % self.Title)
+
         self.Outputs.append({"Identifier":Identifier,"Title":Title,
                             "Abstract":Abstract,
-                            "ComplexValue": {"Formats":Formats},
+                            "ComplexValue": {"Formats":Formats,"Schemas":Schemas},
                             "value": value
                             })
 
         return self.Outputs[-1]
 
     def AddComplexReferenceOutput(self, Identifier, Title=None, Abstract=None,
-            Formats=["text/xml"], value=None):
+            Formats=["text/xml"], Schemas=["http://schemas.opengis.net/gml/2.1.2/feature.xsd"],value=None):
         """Add new output item of type ComplexValueValueReference to this process"""
 
         if not Title: 
@@ -280,9 +292,19 @@ class WPSProcess:
                 Identifier += "-1"
             else:
                 break
+
+        if type(Formats) != type([]):
+            Formats = [Formats]
+
+        if type(Schemas) != type([]):
+            Schemas = [Schemas]
+
+        if (len(Formats) != len(Schemas)):
+             raise ServerError("Number of Formats and Schemas does not match in process: %s" % self.Title)
+
         self.Outputs.append({"Identifier":Identifier,"Title":Title,
                             "Abstract":Abstract,
-                            "ComplexValueReference": {"Formats":Formats},
+                            "ComplexValueReference": {"Formats":Formats,"Schemas":Schemas},
                             "value": value
                             })
 

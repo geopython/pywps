@@ -62,22 +62,25 @@ class processExecuteXML(xml.sax.handler.ContentHandler):
     def startElementNS(self,name, qname, attrs):
         if name[1] == "DataInputs":
             self.inDataInputs = True
-        if name[1] == "Identifier":
+        elif name[1] == "Identifier":
             self.inIdentifier = True
-        if name[1] == "ComplexValueReference":
+        elif name[1] == "ComplexValueReference":
             self.inComplexValueReference = True
-            self.value = {
-                "type":"ComplexValueReference",
-                "data": attrs[(None,'reference')]
-            }
-        if name[1] == "ComplexValue":
+            # get reference namespace
+            for attr in attrs.keys():
+                if attr[1] == "reference":
+                    self.value = {
+                        "type":"ComplexValueReference",
+                        "data": attrs[attr]
+                    }
+        elif name[1] == "ComplexValue":
             self.inComplexValue = True
             self.value = {
                 "type":"ComplexValue",
                 "data":"!complexvalue!",
             }
 
-        if name[1] == "LiteralValue":
+        elif name[1] == "LiteralValue":
             self.inValue = True
             self.inLiteralValue = True
 
@@ -139,7 +142,7 @@ class processExecuteXML(xml.sax.handler.ContentHandler):
 
         # process identifier
         if self.inIdentifier and not self.inDataInputs:
-            self.values['identifier'] = characters
+            self.values['identifier'] = [characters]
         # identifier of the input
         elif self.inIdentifier and self.inDataInputs:
             self.ident = characters
@@ -181,10 +184,11 @@ class Inputs:
             PyWPSdebug(inputxml)
             raise NoApplicableCode(e)
 
+
         #
         # decribe process request
         #
-        if formDocument.firstChild.tagName == "DescribeProcess":
+        if formDocument.firstChild.tagName.find("DescribeProcess")>-1:
             self.values['request'] = "DescribeProcess"
             from ogc import processdescription
 
@@ -196,9 +200,12 @@ class Inputs:
                     self.values['identifier'] = []
                 self.values['identifier'].append(identifier.firstChild.data)
 
+            # namespace
+            ns = formDocument.firstChild.namespaceURI
+
             for attribute in requestAttrs['attributes']:
                 value = None
-                value = formDocument.firstChild.getAttribute(attribute)
+                value = formDocument.firstChild.getAttributeNS(ns,attribute)
                 # if there is no such attribute, exception
                 if not value:
                     if attribute.lower() == "request":
@@ -211,12 +218,11 @@ class Inputs:
         #
         # execute request
         #
-        elif formDocument.firstChild.tagName == "Execute":
+        elif formDocument.firstChild.tagName.find("Execute") > -1:
 
             from ogc import execute
             exEps = execute.WPS()
             requestExec = exEps.e['request']
-
 
             parser=make_parser()
 
@@ -232,21 +238,20 @@ class Inputs:
             # Parse the input
             parser.feed(inputxml)
             self.values = eh.values
-
+            
+            # namespace
+            ns = formDocument.firstChild.namespaceURI
 
             # attributes
-            for attribute in requestExec['attributes']:
-                value = formDocument.firstChild.getAttribute(attribute)
-                # if there is no such attribute, exception
-                if not value:
-                    if attribute.lower() == "request":
-                        continue
-                    if requestExec[attribute]['oblig'] == "m":
-                        return "DescribeProcess"
-                else:
-                    self.values[attribute] =  value
+            for attribute in requestExec['attributes'].keys():
+                value = formDocument.firstChild.getAttributeNS(ns,attribute)
+                    #if requestExec["attributes"][attribute]['oblig'] == "m":
+                    #    print >>sys.stderr, "#### tadxx"
+                    #    return "Execute"
+                self.values[attribute] =  value
 
             self.values['request'] = "Execute"
+            self.values['service'] = "Wps"
             pass
 
             for input in self.values['datainputs'].keys():
@@ -281,7 +286,7 @@ class Inputs:
                             self.values['datainputs'][input].append(geom[1])
 
             # identifier is array
-            self.values['identifier'] = [self.values['identifier']]
+            self.values['identifier'] = self.values['identifier']
 
         # not describeprocess and not execute: exception
         else:
@@ -318,6 +323,7 @@ class Inputs:
         """
         controlls, if there is such process in processes array
         """
+
         if formValues.has_key('request') and \
            formValues['request'].lower() == "describeprocess" or \
            formValues['request'].lower() == "execute":

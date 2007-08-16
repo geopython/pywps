@@ -295,20 +295,45 @@ class Describe:
                         processInput['Formats'][0])
             except IndexError:
                 complexdata.setAttribute("%s%s" %\
-                        (inputStruct['ns'],"defaultFormat",
+                        (inputStruct['ns'],"defaultFormat"),
                         inputStruct['attributes']['defaultFormat']['default']
-                        ))
+                        )
+            # <ComplexData defaultScheme="?" >
+            try:
+                #!!! complexdata.setAttribute("%s%s" %\
+                #!!!         (inputStruct['ns'],"defaultSchema"), \
+                #!!!         processInput['Schemas'][0])
+
+                complexdata.setAttribute("%s%s" %\
+                        (inputStruct['ns'],"defaultSchema"), \
+                        "http://geoserver.itc.nl:8080/wps/schemas/gml/2.1.2/gmlpacket.xsd")
+            except IndexError:
+                complexdata.setAttribute("%s%s" %\
+                        (inputStruct['ns'],"defaultSchema"),
+                        inputStruct['attributes']['defaultSchema']['default']
+                        )
             parent.appendChild(complexdata)
 
             # compile every format in configuration structure, append
-            for format in processInput['Formats']:
+            for i in range(len(processInput['Formats'])):
+                format = processInput['Formats'][i]
+                schema = processInput['Schemas'][i]
+
                 supportedComData = self.document.createElement("%s%s" %\
                         (inputStruct['elements']['SupportedComplexData']['ns'],
                         "SupportedComplexData"))
+                # <Format></Format>
                 node = self.document.createElement("%s%s" %\
                         (inputStruct['elements']['SupportedComplexData']['elements']['Format']['ns'],\
                         "Format"))
                 text = self.document.createTextNode(format)
+                node.appendChild(text)
+                supportedComData.appendChild(node)
+                # <Schema></Schema>
+                node = self.document.createElement("%s%s" %\
+                        (inputStruct['elements']['SupportedComplexData']['elements']['Schema']['ns'],\
+                        "Schema"))
+                text = self.document.createTextNode(schema.strip())
                 node.appendChild(text)
                 supportedComData.appendChild(node)
             complexdata.appendChild(supportedComData)
@@ -326,9 +351,13 @@ class Describe:
 
                     # anyvalue
                     if not processInput.has_key('values') or "*" in processInput['values']:
+                        #!!! valueNode = self.document.createElement("%s%s" %\
+                        #!!!     (inputStruct['elements']['LiteralValues']['elements']['AnyValue']['ns'],
+                        #!!!     "AnyValue"))
                         valueNode = self.document.createElement("%s%s" %\
-                            (inputStruct['elements']['LiteralValues']['elements']['AnyValue']['ns'],
-                            "AnyValue"))
+                             (inputStruct['elements']['LiteralValues']['elements']['AllowedValues']['ns'],
+                             "AllowedValues"))
+                        valueNode.appendChild(self.document.createElement("ows:Value"))
                         literaldata.appendChild(valueNode)
 
                     # allowed values
@@ -366,7 +395,7 @@ class Describe:
                     continue
 
                 # default values
-                if litData == "DefaultValue":
+                elif litData == "DefaultValue":
                     if input.has_key('value') and \
                             input['value'] != None:
 
@@ -380,7 +409,23 @@ class Describe:
                         defaultValue.appendChild(
                                 self.document.createTextNode(str(input['value'])))
                         literaldata.appendChild(defaultValue)
-                    continue
+                    #continue
+
+                # default values
+                elif litData == "DataType":
+                    if input.has_key('DataType') and \
+                            input['DataType'] != None:
+
+                        nodeDataType = self.document.createElement("%s%s" %\
+                            (inputStruct['elements']['DataType']['ns'],
+                            "DataType"))
+
+                        if (input['DataType'] == type(0.0)):
+                            nodeDataType.setAttribute("%s%s" %\
+                            (inputStruct['elements']['DataType']['attributes']["reference"]['ns'],"reference"),
+                            "xs:double")
+
+                        literaldata.appendChild(nodeDataType)
 
                 else: # other 'normal' node will be appended
                     self.Append.Node(
@@ -429,15 +474,35 @@ class Describe:
                         (outputStructure['ns'],"defaultFormat"), processOutput['Formats'][0])
             except (IndexError,AttributeError):
                 complexdata.setAttribute("defaultFormat", "text/XML")
+            
+            # <ComplexData defaultSchema="?" >
+            try:
+                #!!! complexdata.setAttribute("%s%s" %\
+                #!!!        (outputStructure['ns'],"defaultSchema"), processOutput['Schemas'][0])
+                complexdata.setAttribute("%s%s" %\
+                        (outputStructure['ns'],"defaultSchema"), "http://geoserver.itc.nl:8080/wps/schemas/gml/2.1.2/gmlpacket.xsd")
+            except (IndexError,AttributeError):
+                complexdata.setAttribute("defaultSchema", "http://schemas.opengis.net/gml/2.1.2/feature.xsd")
 
             # compile every format in configuration structure, append
             supportedComData = self.document.createElement("SupportedComplexData")
-            for format in processOutput['Formats']:
+            for i in range(len(processOutput['Formats'])):
+                format = processOutput["Formats"][i]
+                schema = processOutput["Schemas"][i]
+                # <Format></Format>
                 node = self.document.createElement("Format")
                 text = self.document.createTextNode(format)
                 node.appendChild(text)
                 supportedComData.appendChild(node)
+
+                # <Schema></Schema>
+                node = self.document.createElement("Schema")
+                text = self.document.createTextNode(schema.strip())
+                node.appendChild(text)
+                supportedComData.appendChild(node)
+
             complexdata.appendChild(supportedComData)
+
 
         ## LiteralData
         elif outputtype == "LiteralValue":

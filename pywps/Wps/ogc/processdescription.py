@@ -190,8 +190,14 @@ class WPS:
                                     'order':["DataType","SupportedUOMs","LiteralValues","DefaultValue"],
                                     'elements': {
                                         'DataType': {
-                                            'oblig':'o',
+                                            'oblig': 'o',
                                             'ns':'',
+                                            'attributes':{
+                                                'reference':{
+                                                    'oblig':'o',
+                                                    'ns':'ows:',
+                                                    },
+                                                },
                                             },
                                         'SupportedUOMs': {
                                             'oblig': 'o',
@@ -365,7 +371,7 @@ class WPS:
                                             'attributes':{
                                                 'reference':{
                                                     'oblig':'o',
-                                                    'ns':'',
+                                                    'ns':'ows:',
                                                     },
                                                 },
                                             },
