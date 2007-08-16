@@ -66,6 +66,7 @@ except ImportError:
     Please check if the file is created and its permissions.""")
 
 from pywps import Wps
+from pywps import processes
 from pywps.Wps import wpsexceptions
 from pywps.Wps.wpsexceptions import *
 from pywps.Wps import settings 
@@ -73,7 +74,6 @@ from pywps.Wps import capabilities
 from pywps.Wps import describe
 from pywps.Wps import execute
 from pywps.Wps import inputs
-from pywps import processes
 
 try:
     from pywps.processes import *
@@ -91,10 +91,12 @@ class WPS:
         # consolidate settings - custom vs. default
         try:
             self.settings = settings.ConsolidateSettings(customsettings)
+        except NameError, error:
+            self.settings = settings.ConsolidateSettings(None)
+        try:
             self.grass = settings.ConsolidateSettings(customgrass,
                     grass=True)
-        except NameError:
-            self.settings = settings.ConsolidateSettings(None)
+        except NameError, error:
             self.grass = settings.ConsolidateSettings(None,grass=True)
 
         self.inputs = inputs.Inputs()
@@ -196,13 +198,13 @@ class WPS:
                 raise InvalidParameterValue("request")
 
         # version == "0.4.0"
-        if not 'version' in self.inputs.values.keys() and \
-            self.inputs.values['request'].lower() != "getcapabilities":
-            raise MissingParameterValue("version")
+        #!!! if not 'version' in self.inputs.values.keys() and \
+        #!!!     self.inputs.values['request'].lower() != "getcapabilities":
+        #!!!     raise MissingParameterValue("version")
 
-        elif self.inputs.values['request'].lower() != "getcapabilities" \
-            and self.inputs.values['version'].lower() != '0.4.0':
-            raise InvalidParameterValue('version')
+        #!!! elif self.inputs.values['request'].lower() != "getcapabilities" \
+        #!!!     and self.inputs.values['version'].lower() != '0.4.0':
+        #!!!     raise InvalidParameterValue('version')
 
         # Controll of all 'identifier' values - if wrongprocess is
         # set, exception, nothing otherwice
@@ -341,7 +343,8 @@ if __name__ == "__main__":
     If Execute request is called, the temporary directory will be created
     and everything should happen in this directory.
     """
+    # import pycallgraph
+    # pycallgraph.start_trace()
     wps = WPS()
     wps.PerformRequest()
-    
-
+    # pycallgraph.make_dot_graph('graf-execute.png')
