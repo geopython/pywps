@@ -176,6 +176,7 @@ class WPSProcess:
             Schemas = [Schemas]
 
         if (len(Formats) != len(Schemas)):
+             self.failed = True
              raise ServerError("Number of Formats and Schemas does not match in process: %s" % self.Title)
 
         self.Inputs.append({"Identifier":Identifier,"Title":Title,
@@ -267,6 +268,7 @@ class WPSProcess:
             Schemas = [Schemas]
 
         if (len(Formats) != len(Schemas)):
+             self.failed = True
              raise ServerError("Number of Formats and Schemas does not match in process: %s" % self.Title)
 
         self.Outputs.append({"Identifier":Identifier,"Title":Title,
@@ -300,6 +302,7 @@ class WPSProcess:
             Schemas = [Schemas]
 
         if (len(Formats) != len(Schemas)):
+             self.failed = True
              raise ServerError("Number of Formats and Schemas does not match in process: %s" % self.Title)
 
         self.Outputs.append({"Identifier":Identifier,"Title":Title,
@@ -383,6 +386,7 @@ class WPSProcess:
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,close_fds=True)
         except Exception,e :
+            self.failed = True
             raise ServerError("Could not perform command [%s]: %s" % (cmd,e))
 
         (stdout, stderr) = p.communicate(stdin)
@@ -392,7 +396,8 @@ class WPSProcess:
         retcode = p.wait()
 
         if retcode != 0:
-             raise ServerError("Could not perform command: %s" % cmd)
+            self.failed = True
+            raise ServerError("Could not perform command: %s" % cmd)
 
         return stdout.splitlines()
 
@@ -527,6 +532,7 @@ class GRASSWPSProcess(WPSProcess):
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,)
         except Exception,e :
+            self.failed = True
             raise Exception("Could not perform command [%s]: %s" % (cmd,e))
 
         (stdout, stderr) = p.communicate(stdin)
@@ -536,6 +542,7 @@ class GRASSWPSProcess(WPSProcess):
         retcode = p.wait()
 
         if retcode != 0:
+           self.failed = True
            raise Exception("Could not perform command: %s" % cmd)
 
         return stdout.splitlines()
