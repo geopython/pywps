@@ -35,13 +35,14 @@ class Status(Thread):
     """
     Make thread for watching at process.status array
     """
-    def __init__ (self,document=None, filename=None,interval=1,process=None):
+    def __init__ (self,parent,document=None, filename=None,interval=1,process=None):
       Thread.__init__(self)
 
       self.document = document # xml document
       self.filename = filename # name of input file
       self.interval = interval # interval for checking
       self.process = process   # process
+      self.parent = parent
 
     def run(self):
         """
@@ -71,11 +72,24 @@ class Status(Thread):
                 status = self.document.getElementsByTagName('Status')[0].firstChild
                 self.document.getElementsByTagName('Status')[0].removeChild(status)
                 status = self.document.getElementsByTagName('Status')[0]
-                node = self.document.createElement("ProcessStarted")
-                messnode = self.document.createTextNode(newmessage)
-                node.setAttribute("message",newmessage)
-                node.setAttribute("percentCompleted",str(newpercent))
-                node.appendChild(messnode)
+
+                try:
+                    if self.process.failed:
+                        node = self.document.createElement("ProcessFailed")
+                        report = self.document.createElement("ows:ExceptionReport")
+                        exception = \
+                                self.document.createElement("ows:Exception")
+                        exception.setAttribute("exceptionCode","NoApplicableCode")
+                        exception.appendChild(self.document.createTextNode(newmessage))
+                        node.appendChild(report)
+                        report.appendChild(exception)
+
+                except AttributeError:
+                    node = self.document.createElement("ProcessStarted")
+                    messnode = self.document.createTextNode(newmessage)
+                    node.setAttribute("message",newmessage)
+                    node.setAttribute("percentCompleted",str(newpercent))
+                    node.appendChild(messnode)
                 status.appendChild(node)
 
                 file = open(self.filename,"w")
@@ -202,7 +216,7 @@ class Execute:
                         self.process.stopChecking = False
 
                         # define thread
-                        status = Status(document=self.document, 
+                        status = Status(self,document=self.document, 
                                     filename=os.path.join(
                                         self.settings.ServerSettings['outputPath'],
                                         self.executeresponseXmlName),
@@ -275,9 +289,6 @@ class Execute:
         fork of the process.
         """
         
-       
-
- 
         #
         # downloading the data
         #
@@ -343,6 +354,7 @@ class Execute:
 
             if error:
                 self.errorCode = 1
+                self.process.failed = True
                 raise StandardError, error
 
             else:
@@ -353,6 +365,7 @@ class Execute:
             sys.stderr.write("PyWPS ERROR: %s in process %s, method execute()\n" % (e,self.process.Title))
             if sys.stdout == sys.__stderr__:
                 sys.stdout = sys.__stdout__
+            self.process.failed = True
             self.status = "ProcessFailed"
             self.statusMessage = e
             self.make_response_xml()
