@@ -11,39 +11,35 @@ class Process(GRASSWPSProcess):
             Identifier = "buffer",
             processVersion = "0.2",
             storeSupported = "true",
-            Title="Create a buffer around a point ",
-            Abstract="Create a buffer around point",
-            grassLocation="/var/www/wps/spearfish60/",
+            statusSupported = "true",
+            Title="Buffer",
+            Abstract="Create a buffer around an input vector file"
             )
 
-        self.AddMetadata(
-                    Identifier="point",
-                    type="point",
-                    textContent="Click in the map")
-        
-        self.AddComplexInput(Identifier="point",
-                             Title = "Input points",
-                             Formats = ["text/plain"])
+        self.AddComplexInput(Identifier="data",
+                             Title = "Input data",
+                             Formats = ["text/xml"])
 
-        self.AddLiteralInput(Identifier = "radius",
-                             Title = "Value of the buffer",
+        self.AddLiteralInput(Identifier = "width",
+                             Title = "Width",
+                             Abstract = "Reasonable buffer width, e.g. 0.01  for WGS84",
                              type = type(0.0))
 
 
 	self.AddComplexReferenceOutput(
-                Identifier = "output",
-                Title = 'Resulting output map',
+                Identifier = "buffer",
+                Title = 'Buffer',
                 Formats = ["text/xml"])
         
     def execute(self):
 
         self.GCmd("g.region -d")
 	    	
-	self.GCmd("v.in.ascii input=%s output=punto format=point fs=, skip=0 x=1 y=2 z=0 cat=0 -t" %\
-                (self.GetInputValue('point')))
+	self.GCmd("v.in.ogr input=%s output=data" %\
+                (self.GetInputValue('data')))
             
-	self.GCmd("v.buffer input=punto output=punto_buff type=point layer=1 buffer=%s scale=1.0 tolerance=0.01" %\
-                (self.GetInputValue('radius')))
+	self.GCmd("v.buffer input=data output=data_buff buffer=%s scale=1.0 tolerance=0.01" %\
+                (self.GetInputValue('width')))
             	
 	self.GCmd("v.out.ogr type=area format=GML input=punto_buff dsn=out.xml  olayer=path.xml")
         
