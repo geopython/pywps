@@ -102,6 +102,7 @@ class FileSizeExceeded(WPSException):
 
 class ServerError(WPSException):
     def __init__(self,value=None):
+        raise NoApplicableCode(value)
         self.code = "ServerError"
         try:
             self.locator = str(value)
