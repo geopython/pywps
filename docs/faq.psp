@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US" lang="en-US">
+<head>
+	<meta name="keywords" content="web services, ogc, wps, web processing service" />
+	<meta http-equiv="Content-Type" content="text/xhtml; charset=utf-8" />
+	<meta name="description" content="PyWPS - Implementation of Web Processing Service (WPS) standard defined by Open Geospatial Consortium (OGC)" />
+        <link rel="stylesheet" type="text/css" href="../styles/style.css" />
+	<title>PyWPS: Docs: Faq</title>
+</head>
+<body>
+    <div id="container">
+        <div id="header">
+            <h1>Welcome to PyWPS</h1>
+            <h2>Implementation of OGC Web Processing Service standard</h2>
+        </div><!-- /header -->
+        <div id="bar">
+            <%@ include file="../bar.html"%>
+        </div><!-- /bar -->
+
+        <div id="content">
+            <!-- ====================== content ============================== -->
+            <h3>FAQ</h3>
+            <h4>General questions</h4>
+            <ul>
+                <li><a href="#version">Which version of PyWPS should I
+                    use?</a></li>
+            <li><a href="#debug">How to debug PyWPS processes?</a></li>
+            <li><a href="#commands">How run command line commands?</a></li>
+            <li><a href="#gcommands">How run GRASS commands?</a></li>
+            <li><a href="#doc">Where can I find documentation to process
+                    writing in general?</a></li>
+            </ul>
+            <h4>Error codes hints</h4>
+            <ul>
+                <li><a href="#noprocess">The process seems not to exist
+                        (<code>InvalidParametrValue</code> code).</a></li>
+                <li><a href="#gmalloc">The process returns <code>ERROR:
+                            G_malloc: out of memory</code></a>.</li>
+            </ul>
+
+            <hr />
+            <h4>General answares</h4>
+            <dl>
+                <dt><a name="version">Which version of PyWPS should I use?</a></dt>
+                <dd>Currently, you should use the trunk version from
+                    subversion repository. The version 1.0.0 is rather old
+                and should not be used. Trunk version, which is heading
+                towards 2.0.0 is more stable.</dd>
+
+                <dt><a name="debug">How to debug PyWPS processes?</a></dt>
+                <dd>You have two possibilities: 
+                    <ul>
+                        <li>Run PyWPS from command line directly from
+                            command line:
+                            <pre>
+jachym@mellon:~$ ./wps.py "&service=wps&version=0.4.0&request=execute&datainputs=input1,value1,input2,value2,..."
+                            </pre>
+                        </li>
+                        <li>See error log file from your web server. I use
+                            program <code>tail</code>:
+                            <pre>
+jachym@mellon:$ tail -f /var/log/apache/error.log |sed -e "s/\[.*\] //g"
+PyWPS GCmd: r.rescale out=kat_dop_k_2004_1188372842 in=dop_k_2004_1188372842 to=0,255
+to kat_dop_k_2004_1188372842[0,255]
+
+PyWPS GCmd: r.support map=dop_k_2004_1188372842 title="drasil2" >&2
+to kat_dop_k_2004_1188372842[0,255]
+
+PyWPS GCmd: r.support map=kat_dop_k_2004_1188372842 title="drasil2" >&2
+to kat_dop_k_2004_1188372842[0,255]
+
+PyWPS ERROR: Could not perform command: r.support map=kat_dop_k_2004_1188372842 title="drasil2" >&2 in process K2O, method execute()
+/home/bnhelp/pfwps/wps.py:79: DeprecationWarning: Non-ASCII character '\\xc2' in file /usr/home/bnhelp/pfwps/pywps/processes/pf_interpolate_grass.py on line 51, but no encoding declared; see http://www.python.org/peps/pep-0263.html for details
+  from pywps.processes import *
+PyWPS GCmd: g.region rast=mask2004@medlov res=5 1>&2
+
+....
+
+                            </pre>
+                        </li>
+                    </ul>
+                </dd>
+                <dt><a name="commands">How to run command line commands?</a></dt>
+                <dd>Use build-in method Cmd(string):
+                    <pre>
+                        self.Cmd("ogr2ogr .... ")
+                </pre>
+                </dd>
+                <dt><a name="gcommands">How to run GRASS commands?</a></dt>
+                <dd>Use build-in method GCmd(string):
+                    <pre>
+                        self.GCmd("r.surf.rst in=%s elev=dem" % (self.GetInputValue("dem")))
+                </pre>
+                </dd>
+                <dt><a name="doc">Where can I find documentation to process
+                        writing in general?</a></dt>
+                <dd>
+                    Try this sources of documentation:
+                    <ul>
+                        <li><code>doc</code> directory in PyWPS source
+                            code. The best file for you is
+                            <code>pywps-howto.pdf<code>. Also some examples
+                                are there.</li>
+                        <li><code>pydoc</code> command to <code></cocde>command.py</code> module
+                        <pre>
+                            cd pywps/Wps
+                            pydoc process.py
+                        </pre>
+                        </li>
+                        <li>There are example processes in
+                            <code>pywps/processes/</code> directory. Try to
+                            modify them to your needs.
+                    </li>
+                    </ul>
+                </dd>
+
+            </dl>
+
+            <hr />
+            <h4>Error code hints</h4>
+            <dl>
+                <dt><a name="noprocess">The process seems not to exist
+                        (<code>InvalidParametrValue</code> code).</a></dt>
+                <dd>
+                    Try this:
+                    <ul>
+                        <li>Is the project listed in GetCapabilities
+                            responce?</li>
+                        <li>Is the project registerd in
+                            <code>pywps/processes/__init__.py</code> file?</li>
+                    </ul>
+                </dd>
+                <dt><a name="gmalloc">The process returns <code>ERROR:
+                            G_malloc: out of memory</code></a>.</dt>
+                <dd>
+                    You have to setup GRASS region, while operating with
+                    raster maps.
+                    <pre>
+                        self.GCmd("g.region rast=input_map")
+                    </pre>
+                    or
+                    <pre>
+                        self.GCmd("g.region -d")
+                    </pre>
+                </dd>
+            </dl>
+
+            <!-- ====================== /content ============================== -->
+
+        </div><!-- /content -->
+
+        <div id="footer">
+            &copy; PyWPS Development Team | Hosted by <a href="http://wald.intevation.org">wald.intevation.org</a>
+        </div><!-- /footer -->
+    </div><!-- /container -->
+</body>
+</html>
