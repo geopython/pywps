@@ -43,14 +43,6 @@ Enjoy and happy GISing!
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-# TODO:
-# 2007-03-15
-# 1) Object orientation in general
-# 2) Get rid of pywps.Wps.inputs, it should be only functios, class is not
-#    necessary
-# 3) Code cleaning, making things easier
-# 4) Implemente self.debug here and also for requests
-
 pywpscomment = [] # Comment, which should be added to the XML
 import pywps
 try:
@@ -81,7 +73,7 @@ except Exception,e :
     raise ServerError(e)
 
 
-import string, sys, os, tempfile, glob, shutil, time, cgi
+import string, sys, os, tempfile, glob, shutil, cgi
 
 class WPS:
     def __init__(self):
