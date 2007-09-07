@@ -1,8 +1,8 @@
 include setup.py
 
-graft Wps
-graft processes
-graft etc
+graft pywps/Wps
+graft pywps/processes
+graft pywps/etc
 graft doc
 
 global-exclude *.pyc
