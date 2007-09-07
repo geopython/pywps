@@ -1,7 +1,14 @@
 SOURCE
 ======
-1 - Edit setup.py
-2 - run setup.py
+1 - Make new branch
+2 - Edit setup.py
+3 - run setup.py
+
+cd pywps/
+svn copy trunk branches/pywps-x.x
+svn ci -m"Creating new branch"
+
+cd branches/pywps-x.x
 
 python setup.py sdist --manifest-only
 python setup.py sdist
