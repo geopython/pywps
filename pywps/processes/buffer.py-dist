@@ -1,75 +1,50 @@
 # Author: Luca Casagrande ( luca.casagrande@gmail.com )
+# Rewritten by: Jachym Cepicky <jachym les-ejk cz> 
+#               According to new process definition style
 
 import os,time,string,sys
+from pywps.Wps.process import GRASSWPSProcess
 
-
-class Process:
+class Process(GRASSWPSProcess):
     def __init__(self):
-        self.Identifier = "buffer"
-        self.processVersion = "0.1"
-        self.storeSupport = "true"
-        self.Title="Create a buffer around a point "
-        self.Abstract="Create a buffer around point"
-        self.grassLocation="/var/www/wps/spearfish60/"
+        GRASSWPSProcess.__init__(self,
+            Identifier = "buffer",
+            processVersion = "0.2",
+            storeSupported = "true",
+            statusSupported = "true",
+            Title="Buffer",
+            Abstract="Create a buffer around an input vector file"
+            )
 
-        self.Metadata = [
-                {
-                    "Identifier":"point",
-                    "type":"point",
-                    "textContent":"Click in the map"},
-                ]
+        self.AddComplexInput(Identifier="data",
+                             Title = "Input data",
+                             Formats = ["text/xml"])
 
-        self.Inputs = [
-                    # 0
-                    {
-   			'Identifier': 'point',
-   			'Title': 'Input points',
-   			'ComplexValueReference': {
-       			'Formats':["text/plain"],
-       				},
-		    },
+        self.AddLiteralInput(Identifier = "width",
+                             Title = "Width",
+                             Abstract = "Reasonable buffer width, e.g. 0.01  for WGS84",
+                             type = type(0.0))
 
-                    # 1
-			{
-                        'Identifier': 'radius',
-                        'Title': 'Value of the buffer',
-                        'LiteralValue': {'values':["*"]},
-                        'dataType' : type(0.0), 
-                        'value':None
-                        },
 
-                     ]
-        
-	self.Outputs = [
-        	#0    
-		{
-                'Identifier': 'output',
-                'Title': 'Resulting output map',
-                'ComplexValueReference': {
-                'Formats':["text/xml"],
-                }
-            },
-        ]
+	self.AddComplexReferenceOutput(
+                Identifier = "buffer",
+                Title = 'Buffer',
+                Formats = ["text/xml"])
         
     def execute(self):
 
-        if os.system("g.region -d"):
-            return "Could not set region to default"
+        self.GCmd("g.region -d")
 	    	
-	if os.system("v.in.ascii input=%s output=punto format=point fs=, skip=0 x=1 y=2 z=0 cat=0 -t 1>&2" %\
-                (self.DataInputs['point'])) :
-            return "Could run v.in.ascii"
+	self.GCmd("v.in.ogr input=%s output=data" %\
+                (self.GetInputValue('data')))
             
-	if os.system("v.buffer input=punto output=punto_buff type=point layer=1 buffer=%s scale=1.0 tolerance=0.01 1>&2" %\
-                (self.DataInputs['radius'])):
-            return "Could not run v.buffer"
+	self.GCmd("v.buffer input=data output=data_buff buffer=%s scale=1.0 tolerance=0.01" %\
+                (self.GetInputValue('width')))
             	
-	if os.system("v.out.ogr type=area format=GML input=punto_buff dsn=out.xml  olayer=path.xml 1>&2"):
-            return "Could not export vector map"
-
+	self.GCmd("v.out.ogr type=area format=GML input=punto_buff dsn=out.xml  olayer=path.xml")
         
         if "out.xml" in os.listdir(os.curdir):
-            self.DataOutputs['output'] = "out.xml"
+            self.SetOutputValue('output', "out.xml")
             return
         else:
             return "Output file not created"

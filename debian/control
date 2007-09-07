@@ -6,7 +6,7 @@ Build-Depends: debhelper (>= 4.0.0)
 Standards-Version: 3.6.2
 
 Package: pywps
-Architecture: any
+Architecture: all
 Depends: python, python-xml
 Suggests: grass, apache2, apache
 Description: Implementation of OGC's Web Processing Service

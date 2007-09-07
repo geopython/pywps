@@ -28,6 +28,7 @@ This module generates XML file with GetCapabilities response of WPS
 from ogc import getcapabilities
 from xml.dom.minidom import Document
 import append
+from pywps.Wps.wpsexceptions import *
 
 class Capabilities:
     def __init__(self,serverSettings,processes):
@@ -236,7 +237,12 @@ class Capabilities:
 
         # for each process 
         for process in self.processes.__all__:
-            thisProcess = eval("self.processes."+process+".Process()")
+            try:
+                thisProcess = eval("self.processes."+process+".Process()")
+            except Exception, e:
+                raise ServerError("Process %s not initialized well: %s" % \
+                        (process, e))
+
             processNode = self.document.createElement("%s%s" % (POff['Process']['ns'],"Process"))
             try:
                 processNode.setAttribute("%s%s" % (POff['Process']['attributes']['processVersion']['ns'],\

@@ -1,4 +1,4 @@
-FILE=install
+FILE=pywps-howto
 SRC=${FILE}.tex
 PDFLATEX=pdflatex
 
@@ -20,6 +20,12 @@ txt: ${SRC} ${FILE}.html
 	pdftotext ${FILE}.pdf
 	lynx -dump ${FILE}.html > ${FILE}.txt
 
+process:
+	${SRC}
+	cd ../pywps/Wps/
+	pydoc -w ./process.py
+	mv process.html ../../doc
+	cd -
 
 clean:
 	rm -f *.aux *.log *.out *.nav *.snm *.toc *~ *.log *.bak all

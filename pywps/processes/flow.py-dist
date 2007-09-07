@@ -40,7 +40,7 @@ class Process:
         self.Identifier = "flow"
         
         # processVersion - version of this process
-        self.processVersion = "0.1"
+        self.processVersion = "0.2"
         
         # Title - title for this process
         self.Title="Flow analysis"

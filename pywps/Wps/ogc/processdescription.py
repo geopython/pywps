@@ -49,7 +49,8 @@ class WPS:
         }
         
         self.schemalocation = {
-          "wps":"http://www.bnhelp.cz/schema/wps/0.4.0/wpsDescribeProcess.xsd",
+          # "wps":"http://www.bnhelp.cz/schema/wps/0.4.0/wpsDescribeProcess.xsd",
+            "wps":"http://www.ogcnetwork.net/schemas/wps/0.4.0/wpsDescribeProcess.xsd",
         }
 
         self.pd = {
@@ -189,8 +190,14 @@ class WPS:
                                     'order':["DataType","SupportedUOMs","LiteralValues","DefaultValue"],
                                     'elements': {
                                         'DataType': {
-                                            'oblig':'o',
-                                            'ns':'',
+                                            'oblig': 'o',
+                                            'ns':'ows:',
+                                            'attributes':{
+                                                'reference':{
+                                                    'oblig':'o',
+                                                    'ns':'ows:',
+                                                    },
+                                                },
                                             },
                                         'SupportedUOMs': {
                                             'oblig': 'o',
@@ -227,12 +234,12 @@ class WPS:
                                             'ns':'',
                                             'elements':{
                                                 'AllowedValues':  {
-                                                    'ns':'',
+                                                    'ns':'ows:',
                                                     'oblig':'c',
                                                     'elements': {
                                                         'Value': {
                                                             'oblig': 'o',
-                                                            'ns':'',
+                                                            'ns':'ows:',
                                                             },
                                                         'Range': {
                                                             'oblig': 'o',
@@ -354,7 +361,7 @@ class WPS:
                                     'elements': {
                                         'DataType': {
                                             'oblig': 'o',
-                                            'ns':'',
+                                            'ns':'ows:',
                                             'elements': {
                                                 'Name': {
                                                     'oblig':'m',
@@ -364,7 +371,7 @@ class WPS:
                                             'attributes':{
                                                 'reference':{
                                                     'oblig':'o',
-                                                    'ns':'',
+                                                    'ns':'ows:',
                                                     },
                                                 },
                                             },

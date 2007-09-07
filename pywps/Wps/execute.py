@@ -35,13 +35,14 @@ class Status(Thread):
     """
     Make thread for watching at process.status array
     """
-    def __init__ (self,document=None, filename=None,interval=1,process=None):
+    def __init__ (self,parent,document=None, filename=None,interval=1,process=None):
       Thread.__init__(self)
 
       self.document = document # xml document
       self.filename = filename # name of input file
       self.interval = interval # interval for checking
       self.process = process   # process
+      self.parent = parent
 
     def run(self):
         """
@@ -71,15 +72,29 @@ class Status(Thread):
                 status = self.document.getElementsByTagName('Status')[0].firstChild
                 self.document.getElementsByTagName('Status')[0].removeChild(status)
                 status = self.document.getElementsByTagName('Status')[0]
-                node = self.document.createElement("ProcessStarted")
-                messnode = self.document.createTextNode(newmessage)
-                node.setAttribute("message",newmessage)
-                node.setAttribute("percentCompleted",str(newpercent))
-                node.appendChild(messnode)
+
+                try:
+                    if self.process.failed:
+                        node = self.document.createElement("ProcessFailed")
+                        report = self.document.createElement("ows:ExceptionReport")
+                        exception = \
+                                self.document.createElement("ows:Exception")
+                        exception.setAttribute("exceptionCode","NoApplicableCode")
+                        exception.appendChild(self.document.createTextNode(newmessage))
+                        node.appendChild(report)
+                        report.appendChild(exception)
+
+                except AttributeError:
+                    node = self.document.createElement("ProcessStarted")
+                    messnode = self.document.createTextNode(newmessage)
+                    node.setAttribute("message",newmessage)
+                    node.setAttribute("percentCompleted",str(newpercent))
+                    node.appendChild(messnode)
                 status.appendChild(node)
 
                 file = open(self.filename,"w")
-                file.write(self.document.toprettyxml())
+                #file.write(self.document.toprettyxml())
+                file.write(self.document.toxml())
                 file.close()
 
                 oldmessage = newmessage
@@ -143,8 +158,6 @@ class Execute:
         self.errorCode = 0
         self.pid = os.getpid()
 
-
-
         # 
         # storing the data in self.process.Inputs[input]['value']
         #
@@ -166,6 +179,7 @@ class Execute:
                self.process.storeSupported.lower() == "true" and \
                self.formvalues['status'].lower() == "true" and \
                self.formvalues['store'].lower() == "true":
+
 
                 # fork process
                 # It's way harder than it should be to have a CGI script 
@@ -202,7 +216,7 @@ class Execute:
                         self.process.stopChecking = False
 
                         # define thread
-                        status = Status(document=self.document, 
+                        status = Status(self,document=self.document, 
                                     filename=os.path.join(
                                         self.settings.ServerSettings['outputPath'],
                                         self.executeresponseXmlName),
@@ -245,9 +259,9 @@ class Execute:
 
             self.grassEnv = grass.GRASS(self.grassSettings)
             self.mapset = self.grassEnv.mkmapset(self.process.grassLocation)
+            self.process.grassenv=self.grassEnv.grassenv
             try:
                 self.dirsToRemove.append(os.path.join(self.process.grassLocation,self.mapset))
-                self.process.grassenv=self.grassEnv.grassenv
             except AttributeError:
                 pass
         except :
@@ -275,9 +289,6 @@ class Execute:
         fork of the process.
         """
         
-       
-
- 
         #
         # downloading the data
         #
@@ -343,6 +354,7 @@ class Execute:
 
             if error:
                 self.errorCode = 1
+                self.process.failed = True
                 raise StandardError, error
 
             else:
@@ -350,9 +362,10 @@ class Execute:
             self.process.stopChecking = True
 
         except Exception,e:
-            sys.stderr.write("PyWPS ERROR: %s in self.process.execute()\n" % (e))
+            sys.stderr.write("PyWPS ERROR: %s in process %s, method execute()\n" % (e,self.process.Title))
             if sys.stdout == sys.__stderr__:
                 sys.stdout = sys.__stdout__
+            self.process.failed = True
             self.status = "ProcessFailed"
             self.statusMessage = e
             self.make_response_xml()
@@ -362,16 +375,12 @@ class Execute:
         # is there stored map?
         outputMap = False
         for procOutput in self.process.Outputs:
-            try:
-                if type(procOutput['value']) == type(None) or \
-                    procOutput['value'] == [] or \
-                    procOutput['value'] != self.process.DataOutputs[procOutput['Identifier']]:
-                     try:
-                        procOutput['value'] = self.process.DataOutputs[procOutput['Identifier']]
-                     except:
-                         raise KeyError, "Output value not set"
-            except KeyError,e:
-                    procOutput['value'] = e
+            if type(procOutput['value']) == type(None) or \
+                    procOutput['value'] == []:
+                try:
+                    procOutput['value'] = self.process.DataOutputs[procOutput['Identifier']]
+                except:
+                    raise ServerError, "Output value for output '%s' not set" % (procOutput['Identifier'])
                 
             if 'ComplexValueReference' in procOutput.keys():
                     outputMap = True
@@ -380,7 +389,7 @@ class Execute:
         for procOutput in self.process.Outputs:
             # store support requested?
             if 'store' in self.formvalues.keys() and\
-                self.formvalues['store'].lower() == "true":  
+                self.formvalues['store'].lower() != "false":  
                 # store support setted in the conf. file
                 if 'ComplexValueReference' in procOutput.keys():
 
@@ -639,7 +648,7 @@ class Execute:
                                 ComplexValue.setAttribute("format",format)
                         for elm in outputOws['elements']['ValueFormChoice']['elements']['ComplexValue']['elements']:
                             if elm == "Value":
-                                node = self.document.createElement("Value")
+                                # node = self.document.createElement("Value")
 
                                 # if format of this element is text/xml or
                                 # similar, append xml, append text/plain
@@ -653,8 +662,9 @@ class Execute:
                                     self.data_response(outputProc,where="file")
                                     #"XML or Binary result should be here"
                                             )
-                                node.appendChild(out)
-                                ComplexValue.appendChild(node)
+                                # node.appendChild(out)
+                                # ComplexValue.appendChild(node)
+                                ComplexValue.appendChild(out)
 
                     #
                     # LiteralValue 
@@ -758,7 +768,7 @@ class Execute:
 
                     # something is wrong
                     if re.search("not found",chunk,re.IGNORECASE):
-                        raise InvalidParameterValue("server says: %s not found" % (data))
+                        raise InvalidParameterValue("Remote server says: %s not found" % (data))
 
                     # everything is here, break
                     if not chunk: 
@@ -893,7 +903,7 @@ class Execute:
                                     str(formvalues['datainputs'][input['Identifier']])))
 
                 if input.has_key('LiteralValue') and \
-                    len(input['value']) == 1:
+                        type(input['value']) == type([]):
                         input['value'] = input['value'][0]
                 elif input.has_key("BoundingBoxValue"):
                     if input['value'][0] > input['value'][2]:
@@ -926,6 +936,9 @@ class Execute:
                 pass
             except TypeError,e:
                 return True
+
+            # retype input values
+            input['value'] = value
 
             # list of allowed literal values in
             if input.has_key("LiteralValue"):

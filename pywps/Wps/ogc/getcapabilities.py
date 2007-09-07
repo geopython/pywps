@@ -49,7 +49,8 @@ class WPS:
         }
         
         self.schemalocation = {
-          "wps":"http://www.bnhelp.cz/schema/wps/0.4.0/wpsGetCapabilities.xsd",
+       #   "wps":"http://www.bnhelp.cz/schema/wps/0.4.0/wpsGetCapabilities.xsd",
+            "wps":"http://www.ogcnetwork.net/schemas/wps/0.4.0/wpsGetCapabilities.xsd",
         }
         
         self.gc = {

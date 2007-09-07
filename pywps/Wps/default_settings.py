@@ -1,5 +1,7 @@
 """
-This is main configuration file for pywps. 
+This is default main configuration file for pywps. Do NOT change this file,
+unless you do not know, what you are doing. For custom changes, copy this
+file as pywps/etc/settigs.py and change the variables there.
 
 The most importand parts are
 WPS[ServiceIdenteification]
@@ -32,15 +34,17 @@ ServerSettings
 #
 # In this WPS structure the main configuration is stored
 #
+# DO NOT CHANGE THIS
+#
 ###########################################################
 WPS = {
     # version of supported WPS
     # 'version':"0.4.0"
     'version': "0.4.0",
 
-    # debuging 0 (minimum) - 3 (maximum)
-    # "debuglevel": 0
-    "debuglevel": 0,
+    # debuging 
+    # "debug": False
+    "debug": False,
 
     #
     # This are mandatory and optional conf. parameters
@@ -157,3 +161,4 @@ ServerSettings = {
     # 'maxInputParamLength':1024,
     'maxInputParamLength':1024,
 }
+

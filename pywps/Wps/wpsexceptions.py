@@ -24,6 +24,8 @@ Exception classes of WPS
 
 from xml.dom.minidom import Document
 import sys
+        
+called = 0
 
 class WPSException(Exception):
     """
@@ -51,10 +53,17 @@ class WPSException(Exception):
 
 
     def __str__(self):
+
         str = "Content-type: text/xml\n\n"
         str += self.document.toprettyxml(indent='\t', newl='\n', encoding="utf-8")
-        sys.stderr.write("PyWPS %s: %s" % (self.code, self.locator))
-        return str
+        sys.stderr.write("PyWPS %s: %s\n" % (self.code, self.locator))
+
+        # FIXME: To avoid multiple printing, this hack works
+        #        however, I do not know, why it is printed two times :-(
+        global called
+        if not called:
+            print str
+        called += 1
 
 class MissingParameterValue(WPSException):
     def __init__(self, value):
@@ -71,9 +80,13 @@ class InvalidParameterValue(WPSException):
 class NoApplicableCode(WPSException):
     def __init__(self,value=None):
         self.code = "NoApplicableCode"
-        self.locator = value
+        try:
+            self.locator = str(value)
+        except:
+            self.locator = None
         self.make_xml()
-        self.ExceptionReport.appendChild(self.document.createComment(repr(locator)))
+        self.ExceptionReport.appendChild(self.document.createComment(
+            repr(self.locator)))
 
 class ServerBusy(WPSException):
     def __init__(self,value=None):
@@ -89,7 +102,11 @@ class FileSizeExceeded(WPSException):
 
 class ServerError(WPSException):
     def __init__(self,value=None):
+        raise NoApplicableCode(value)
         self.code = "ServerError"
-        self.locator = str(value)
+        try:
+            self.locator = str(value)
+        except:
+            self.locator = None
         self.make_xml()
         self.ExceptionReport.appendChild(self.document.createComment("General server error"))

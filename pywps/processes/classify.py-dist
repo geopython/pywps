@@ -4,6 +4,7 @@ pywps process example:
 classify: Classify satellite image
 """
 # Author:	Stepan Kafka
+# Rewritten by: Jachym Cepicky
 # Lince: 
 # 
 # Web Processing Service implementation
@@ -23,87 +24,37 @@ classify: Classify satellite image
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os,time,string,sys
+from pywps.Wps.process import GRASSWPSProcess
 
-class Process:
+class Process(GRASSWPSProcess):
 #####################################################################
 #
 # Configuration part of the process
 #
 #####################################################################
     def __init__(self):
-        # 
-        # Mandatory parameters
-        # 
-        # Identifier - name of this process
-        self.Identifier = "classify"
-        # processVersion - version of this process
-        self.processVersion = "0.1"
-        # Title - title for this process
-        self.Title="Image classification"
-        self.Abstract="GRASS processed imagery classification. Only unsupervised is supported at the moment."
-        #
-        # Inputs
-        # Inputs is an array of input structure
-        # Inputs = [ {input1},{input2},{...} ]
-        #
-        self.Inputs = [
-                # This module has 2 inputs: 
-                # 1) Input raster map
-                # 2) Value to be added
-        
-                # First input
-                    {
-                        'Identifier':'input',
-                        'Title': 'Input raster map',
-                        'ComplexValueReference': {
-                            'Formats': [ "image/tiff" ]
-                        },
-                        'value':None,
-                    },
-        
-                # Second input
-                    {
-                        'Identifier': 'classes',
-                        'Title': 'Number of classes',
-                        'Abstract':'Unsupervised classification number of classes',
-                        'LiteralData': {
-                            'values':["*"], # values
-                        },
-                        'dataType' : type(0), # you should set this for input params controll
-                        'value':20,
-                    },
-                ]
-        
-        #
-        # Output
-        # The structure is not much different from the input structure
-        #
-        self.Outputs = [
-            {
-                'Identifier': 'output',
-                'Title': 'Resulting output map',
-                'ComplexValueReference': {
-                    'Formats':["image/tiff"],
-                },
-                'value':None,
-            },
-        ]
-        
-        #
-        # Optional attributes
-        #
-        #
-        # storeSuported = "true" or "false" - should the resulting map be stored on our disk?
-        self.storeSupported = "true"
-        
-        #
-        # statusSupported = "true" or "false" - if statusLocation is set, the server 
-        # will not wait for the end of the operation and will return the 
-        # ExectuceResponce XML file immediately, without the ProcessOutput section
-        # but with the statusLocation parameter
-        self.statusSupported = "true"
-        # and many others
-        
+        GRASSWPSProcess.__init__(self,
+                Identifier = "classify",
+                processVersion = "0.1",
+                Title = "Image classification",
+                Abstract = "Unsupervised image classification",
+                storeSupported = True,
+                statusSupported = True
+                )
+
+        self.AddComplexInput(Identifier="input",
+                Title="Input raster map",
+                Formats = ["image/tiff"])
+
+        self.AddLiteralInput(Identifier="classes",
+                Title = "Number of classes",
+                Abstract = "Number of classes in unsupervised classification",
+                value = 20)
+
+
+        self.AddComplexReferenceOutput(Identifier = "output",
+                Title="Resulting output map",
+                Formats = ["image/tiff"])
     #####################################################################
     #
     # Execute part of the process
@@ -118,24 +69,16 @@ class Process:
             4) returns the new file name or 'None' if something went wrong
         """
         
-        if os.system("r.in.gdal -o -k input=%s output=input 1>&2" % (self.DataInputs['input'])):
-            return "Could not import map"
-        if os.system("g.region -p rast=input.1 1>&2"):
-            return "Could not set region"
-        if os.system("i.group group=gr subgroup=klas input=`g.mlist type=rast sep=',' pattern='input.*'` 1>&2"):
-            return "i.group does not work"
-        if os.system("i.cluster group=gr subgroup=klas sigfile=sig classes=%s 1>&2" % (self.DataInputs['classes'])):
-            return "i.cluster does not work"
-        if os.system("i.maxlik -q group=gr subgroup=klas sigfile=sig class=classif reject=rejected 1>&2"):
-            return "Classification did not work"
-        if os.system("r.out.tiff -t input=classif output=output0 1>&2"):
-            return "Could not export raster map"
-        if os.system("/usr/local/bin/gdal_translate -of GTiff output0.tif output.tif  1>&2"):
-            return "Could not run gdal_translate"
+        self.GCmd("r.in.gdal -o -k input=%s output=input 1>&2" % (self.DataInputs['input']))
+        self.GCmd("g.region -p rast=input.1")
+        self.GCmd("i.group group=gr subgroup=klas input=`g.mlist type=rast sep=',' pattern='input.*'`")
+        self.GCmd("i.cluster group=gr subgroup=klas sigfile=sig classes=%s" % (self.DataInputs['classes']))
+        self.GCmd("i.maxlik -q group=gr subgroup=klas sigfile=sig class=classif reject=rejected")
+        self.GCmd("r.out.gdal input=classif output=output.tif type=Byte")
         
         # check the resulting file or any other variable, which interrests you
         if "output.tif" in os.listdir(os.curdir):
-            self.DataOutputs['output'] = "output.tif"
+            self.SetOutputValue('output', "output.tif")
             return
         else:
             return "Output file not created"
