@@ -39,8 +39,8 @@ def PyWPSdebug(d,level=0,pref=""):
         if type(d) == type([]):
             for line in d:
                 Stderr.write("PyPWS %s: %s\n" % \
-                        pref,line.strip())
+                        (pref,line.strip()))
         else:
             Stderr.write("PyWPS %s: %s\n" %\
-                    pref,d.strip())
+                    (pref,d.strip()))
 

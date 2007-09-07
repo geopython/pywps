@@ -17,8 +17,12 @@ global-exclude *.aux
 exclude pywps/processes/pf_*
 exclude pywps/processes/*.py
 exclude pywps/etc/*.py
+exclude pywps/doc/*.out
+
 
 include pywps/etc/__init__.py
+
+include pywps/Wps/*.py
 
 global-include README
 global-include AUTHORS

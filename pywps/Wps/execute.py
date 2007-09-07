@@ -389,7 +389,7 @@ class Execute:
         for procOutput in self.process.Outputs:
             # store support requested?
             if 'store' in self.formvalues.keys() and\
-                self.formvalues['store'].lower() == "true":  
+                self.formvalues['store'].lower() != "false":  
                 # store support setted in the conf. file
                 if 'ComplexValueReference' in procOutput.keys():
 
@@ -648,7 +648,7 @@ class Execute:
                                 ComplexValue.setAttribute("format",format)
                         for elm in outputOws['elements']['ValueFormChoice']['elements']['ComplexValue']['elements']:
                             if elm == "Value":
-                                node = self.document.createElement("Value")
+                                # node = self.document.createElement("Value")
 
                                 # if format of this element is text/xml or
                                 # similar, append xml, append text/plain
@@ -662,8 +662,9 @@ class Execute:
                                     self.data_response(outputProc,where="file")
                                     #"XML or Binary result should be here"
                                             )
-                                node.appendChild(out)
-                                ComplexValue.appendChild(node)
+                                # node.appendChild(out)
+                                # ComplexValue.appendChild(node)
+                                ComplexValue.appendChild(out)
 
                     #
                     # LiteralValue 

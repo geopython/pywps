@@ -191,7 +191,7 @@ class WPS:
                                     'elements': {
                                         'DataType': {
                                             'oblig': 'o',
-                                            'ns':'',
+                                            'ns':'ows:',
                                             'attributes':{
                                                 'reference':{
                                                     'oblig':'o',
@@ -234,12 +234,12 @@ class WPS:
                                             'ns':'',
                                             'elements':{
                                                 'AllowedValues':  {
-                                                    'ns':'',
+                                                    'ns':'ows:',
                                                     'oblig':'c',
                                                     'elements': {
                                                         'Value': {
                                                             'oblig': 'o',
-                                                            'ns':'',
+                                                            'ns':'ows:',
                                                             },
                                                         'Range': {
                                                             'oblig': 'o',
@@ -361,7 +361,7 @@ class WPS:
                                     'elements': {
                                         'DataType': {
                                             'oblig': 'o',
-                                            'ns':'',
+                                            'ns':'ows:',
                                             'elements': {
                                                 'Name': {
                                                     'oblig':'m',

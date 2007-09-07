@@ -391,7 +391,7 @@ class WPSProcess:
 
         (stdout, stderr) = p.communicate(stdin)
 
-        self.SetStatus(stderr)
+        # self.SetStatus(stderr)
 
         retcode = p.wait()
 
@@ -537,7 +537,8 @@ class GRASSWPSProcess(WPSProcess):
 
         (stdout, stderr) = p.communicate(stdin)
 
-        self.SetStatus(stderr)
+        # this does not work properly 
+        # self.SetStatus(stderr)
 
         retcode = p.wait()
 

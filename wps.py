@@ -324,7 +324,15 @@ class WPS:
                 self.wpsrequest.document.importNode(pywpscommentNode, 0)
             if sys.stdout == sys.__stdout__:
                 print "Content-type: text/xml\n"
+            #!!!
             print self.wpsrequest.document.toxml()
+            # if self.GetRequestType() != "execute":
+            #     print self.wpsrequest.document.toxml()
+            # else:
+            #     f = open("/tmp/out.xml","r")
+            #     for l in f.readlines():
+            #         print l
+            #     f.close()
         return
         
 if __name__ == "__main__":

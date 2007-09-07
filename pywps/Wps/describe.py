@@ -351,13 +351,13 @@ class Describe:
 
                     # anyvalue
                     if not processInput.has_key('values') or "*" in processInput['values']:
-                        #!!! valueNode = self.document.createElement("%s%s" %\
-                        #!!!     (inputStruct['elements']['LiteralValues']['elements']['AnyValue']['ns'],
-                        #!!!     "AnyValue"))
                         valueNode = self.document.createElement("%s%s" %\
-                             (inputStruct['elements']['LiteralValues']['elements']['AllowedValues']['ns'],
-                             "AllowedValues"))
-                        valueNode.appendChild(self.document.createElement("ows:Value"))
+                             (inputStruct['elements']['LiteralValues']['elements']['AnyValue']['ns'],
+                             "AnyValue"))
+                        #!!valueNode = self.document.createElement("%s%s" %\
+                        #!!     (inputStruct['elements']['LiteralValues']['elements']['AllowedValues']['ns'],
+                        #!!     "AllowedValues"))
+                        #!! valueNode.appendChild(self.document.createElement("ows:Value"))
                         literaldata.appendChild(valueNode)
 
                     # allowed values
@@ -369,7 +369,9 @@ class Describe:
                         for val in processInput['values']:
                             # allowed values
                             if not type(val) == type([]):
-                                value = self.document.createElement("Value")
+                                value = self.document.createElement("%s%s"%\
+                                  (inputStruct['elements']['LiteralValues']['elements']['Value']['ns'],
+                             "Value"))
                                 value.appendChild(self.document.createTextNode(str(val)))
                                 valueNode.appendChild(value)
                             # ranges
@@ -477,12 +479,13 @@ class Describe:
             
             # <ComplexData defaultSchema="?" >
             try:
-                #!!! complexdata.setAttribute("%s%s" %\
-                #!!!        (outputStructure['ns'],"defaultSchema"), processOutput['Schemas'][0])
                 complexdata.setAttribute("%s%s" %\
-                        (outputStructure['ns'],"defaultSchema"), "http://geoserver.itc.nl:8080/wps/schemas/gml/2.1.2/gmlpacket.xsd")
+                        (outputStructure['ns'],"defaultSchema"), processOutput['Schemas'][0])
+                #!!! complexdata.setAttribute("%s%s" %\
+                #!!!        (outputStructure['ns'],"defaultSchema"), "http://geoserver.itc.nl:8080/wps/schemas/gml/2.1.2/gmlpacket.xsd")
             except (IndexError,AttributeError):
-                complexdata.setAttribute("defaultSchema", "http://schemas.opengis.net/gml/2.1.2/feature.xsd")
+                pass
+                #complexdata.setAttribute("defaultSchema", "http://schemas.opengis.net/gml/2.1.2/feature.xsd")
 
             # compile every format in configuration structure, append
             supportedComData = self.document.createElement("SupportedComplexData")
