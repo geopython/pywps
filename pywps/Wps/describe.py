@@ -300,13 +300,10 @@ class Describe:
                         )
             # <ComplexData defaultScheme="?" >
             try:
-                #!!! complexdata.setAttribute("%s%s" %\
-                #!!!         (inputStruct['ns'],"defaultSchema"), \
-                #!!!         processInput['Schemas'][0])
-
                 complexdata.setAttribute("%s%s" %\
-                        (inputStruct['ns'],"defaultSchema"), \
-                        "http://geoserver.itc.nl:8080/wps/schemas/gml/2.1.2/gmlpacket.xsd")
+                         (inputStruct['ns'],"defaultSchema"), \
+                         processInput['Schemas'][0])
+
             except IndexError:
                 complexdata.setAttribute("%s%s" %\
                         (inputStruct['ns'],"defaultSchema"),
@@ -481,11 +478,8 @@ class Describe:
             try:
                 complexdata.setAttribute("%s%s" %\
                         (outputStructure['ns'],"defaultSchema"), processOutput['Schemas'][0])
-                #!!! complexdata.setAttribute("%s%s" %\
-                #!!!        (outputStructure['ns'],"defaultSchema"), "http://geoserver.itc.nl:8080/wps/schemas/gml/2.1.2/gmlpacket.xsd")
             except (IndexError,AttributeError):
                 pass
-                #complexdata.setAttribute("defaultSchema", "http://schemas.opengis.net/gml/2.1.2/feature.xsd")
 
             # compile every format in configuration structure, append
             supportedComData = self.document.createElement("SupportedComplexData")

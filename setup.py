@@ -12,7 +12,7 @@ should be as easy as possible.
 """
 
 classifiers=[
-          'Development Status :: 0.1',
+          'Development Status :: 2.0',
           'Environment :: CGI',
           'Environment :: Web Environment',
           'Intended Audience :: Developers',
@@ -23,7 +23,7 @@ classifiers=[
           'Programming Language :: Python',
           'Topic :: Communications :: Email',
           'Topic :: Office/Business',
-          'Topic :: Software Development :: Bug Tracking',
+          'Topic :: Software Development ',
           ]
 
 
@@ -33,7 +33,7 @@ doclines = __doc__.split("\n")
 
 setup(
         name = 'pywps',
-        version = '2.0.0',
+        version = '2.0.0-rc1',
         maintainer="Jachym Cepicky",
         maintainer_email = 'jachym@les-ejk.cz',
         author = 'Jachym Cepicky',

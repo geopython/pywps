@@ -66,6 +66,7 @@ from pywps.Wps import capabilities
 from pywps.Wps import describe
 from pywps.Wps import execute
 from pywps.Wps import inputs
+from pywps.Wps import debug
 
 try:
     from pywps.processes import *
@@ -123,6 +124,12 @@ class WPS:
             self._storeFromPOST()
 
         self._checkRequest()
+
+        #
+        # debug
+        #
+        debug.PyWPSdebug(self.inputs.values)
+
 
     def _setMaxInputSize(self):
         """(re)set maximal length of one input item"""
@@ -324,15 +331,7 @@ class WPS:
                 self.wpsrequest.document.importNode(pywpscommentNode, 0)
             if sys.stdout == sys.__stdout__:
                 print "Content-type: text/xml\n"
-            #!!!
             print self.wpsrequest.document.toxml()
-            # if self.GetRequestType() != "execute":
-            #     print self.wpsrequest.document.toxml()
-            # else:
-            #     f = open("/tmp/out.xml","r")
-            #     for l in f.readlines():
-            #         print l
-            #     f.close()
         return
         
 if __name__ == "__main__":
