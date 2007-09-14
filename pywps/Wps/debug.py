@@ -24,7 +24,7 @@ Debuging functions
 from sys import stderr as Stderr
 from os import environ as Env
 
-def PyWPSdebug(d,level=0,pref=""):
+def PyWPSdebug(d,level=0,pref="debug"):
     try:
         if Env["PyWPS_DEBUG"] and\
             int(Env["PyWPS_DEBUG"]) >= level:
@@ -38,9 +38,9 @@ def PyWPSdebug(d,level=0,pref=""):
     # debug messages can be list
         if type(d) == type([]):
             for line in d:
-                Stderr.write("PyPWS %s: %s\n" % \
-                        (pref,line.strip()))
+                Stderr.write("PyPWS %s %d: %s\n" % \
+                        (pref,level,line.strip()))
         else:
-            Stderr.write("PyWPS %s: %s\n" %\
-                    (pref,d.strip()))
+            Stderr.write("PyWPS %s %d: %s\n" %\
+                    (pref,level,str(d).strip()))
 
