@@ -259,15 +259,20 @@ class Inputs:
                 if type(self.values['datainputs'][input]) == type({}) and \
                         self.values['datainputs'][input]["data"] == "!complexvalue!":
                     # for each Input in XML
-                    for Input in formDocument.getElementsByTagName("Input"):
-                        cmplxval = Input.getElementsByTagName("ComplexValue")
-                        identifier = Input.getElementsByTagName("ows:Identifier")[0].firstChild.data
+                    for Input in formDocument.getElementsByTagNameNS("http://www.opengeospatial.net/wps","Input"):
+                        cmplxval = Input.getElementsByTagNameNS("http://www.opengeospatial.net/wps","ComplexValue")
+                        identifier = Input.getElementsByTagNameNS("http://www.opengeospatial.net/ows","Identifier")[0].firstChild.data
                         # if there is at least one <ComplexValue> Element
                         # in input xml 
                         if len(cmplxval) and identifier == input:
                             # store to ["data"], ["type"] = "ComplexValue"
                             # allready
-                            self.values['datainputs'][input]["data"] = cmplxval[0].getElementsByTagNameNS(eh.valueFirstChild[0],eh.valueFirstChild[1])[0].toprettyxml()
+                            if cmplxval[0].firstChild.nodeType == 3:
+                                for node in cmplxval[0].childNodes:
+                                    if node.nodeType == 1:
+                                            self.values['datainputs'][input]["data"] = node.toxml()
+                            else:
+                                self.values['datainputs'][input]["data"] = cmplxval[0].firstChild.toxml()
 
                 elif self.values['datainputs'][input] == "!bboxvalue!":
                     for Input in formDocument.getElementsByTagName("Input"):
