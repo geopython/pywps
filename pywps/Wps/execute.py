@@ -936,6 +936,8 @@ class Execute:
                 pass
             except TypeError,e:
                 return True
+            except ValueError,e:
+                value = input['value']
 
             # retype input values
             input['value'] = value
