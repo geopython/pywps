@@ -391,12 +391,11 @@ class WPSProcess:
 
         (stdout, stderr) = p.communicate(stdin)
 
-        # self.SetStatus(stderr)
-
         retcode = p.wait()
 
         if retcode != 0:
             self.failed = True
+            sys.stderr.write("PyWPS stderr: %s\n" % (stderr))
             raise ServerError("Could not perform command: %s" % cmd)
 
         return stdout.splitlines()
@@ -537,13 +536,12 @@ class GRASSWPSProcess(WPSProcess):
 
         (stdout, stderr) = p.communicate(stdin)
 
-        # this does not work properly 
-        # self.SetStatus(stderr)
 
         retcode = p.wait()
 
         if retcode != 0:
            self.failed = True
+           sys.stderr.write("PyWPS stderr: %s\n" % (stderr))
            raise Exception("Could not perform command: %s" % cmd)
 
         return stdout.splitlines()
