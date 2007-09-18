@@ -155,7 +155,6 @@ class Execute:
         self.document = Document()
         self.status = "ProcessAccepted" # default: everything is all right 
         self.statusMessage = None
-        self.errorCode = 0
         self.pid = os.getpid()
 
         # 
@@ -353,7 +352,6 @@ class Execute:
                 sys.stdout = sys.__stdout__
 
             if error:
-                self.errorCode = 1
                 self.process.failed = True
                 raise StandardError, error
 
@@ -587,7 +585,7 @@ class Execute:
 
             # code: known errors do have code  1, unkown 0
             exception = self.document.createElement("ows:Exception")
-            exception.setAttribute("exceptionCode", str(self.errorCode))
+            exception.setAttribute("exceptionCode", "NoAplicableCode")
             report.appendChild(exception)
 
             text = self.document.createElement("ows:ExceptionText")
@@ -886,11 +884,11 @@ class Execute:
         #   
         for input in self.process.Inputs:
             
-            # it can happen, that dataType is not set but default value is
-            # -> get the dataType from default value
+            # it can happen, that DataType is not set but default value is
+            # -> get the DataType from default value
 
-            if (input.has_key('value') and not input.has_key('dataType')):
-                input['dataType'] = type(input['value'])
+            if (input.has_key('value') and not input.has_key('DataType')):
+                input['DataType'] = type(input['value'])
                     
             # set "value"
             if formvalues['datainputs'].has_key(input['Identifier']):
@@ -926,18 +924,18 @@ class Execute:
 
         for value in values:
             try:
-                if input['dataType'] == type(0.0):
+                if input['DataType'] == type(0.0):
                     value = float(value)
-                elif input['dataType'] == type(1):
+                elif input['DataType'] == type(1):
                     value =  int(float(value))
-                elif input['dataType'] == type(''):
+                elif input['DataType'] == type(''):
                     value = str(value)
             except (KeyError),e:
                 pass
             except TypeError,e:
-                return True
-            except ValueError,e:
                 value = input['value']
+            except ValueError,e:
+                return True
 
             # retype input values
             input['value'] = value
