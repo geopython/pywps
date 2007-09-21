@@ -42,6 +42,10 @@ WPS = {
     # 'version':"0.4.0"
     'version': "0.4.0",
 
+    # encoding of output XMLs
+    # 'encoding': "utf-8",
+    'encoding': "utf-8",
+
     # debuging 
     # "debug": False
     "debug": False,

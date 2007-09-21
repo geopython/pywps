@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<wps:Execute wps:status="true" wps:store="true" xmlns:wps="http://www.opengeospatial.net/wps">
+<wps:Execute wps:store="true" xmlns:wps="http://www.opengeospatial.net/wps">
     <ows:Identifier xmlns:ows="http://www.opengeospatial.net/ows">buffer</ows:Identifier>
     <wps:DataInputs>
         <wps:Input><ows:Identifier xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ows="http://www.opengeospatial.net/ows" xmlns:xlink="http://www.w3.org/1999/xlink">data</ows:Identifier>
