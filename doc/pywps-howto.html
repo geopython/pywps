@@ -61,19 +61,19 @@ Copyright &#169;2006 PyWPS Development Team
 <P>
 In this file, you can found the description of installation and
 configuration of PyWPS script. At the and, you can learn, how to add
-your own process to the list of processes. The file describes most recent
+your own process. This document describes most recent
 version of PyWPS (<SPAN  CLASS="textit">2.0.0</SPAN>), available in subversion respository.
 
 <P>
 PyPWS project has been started on April 2006 with support of DBU -
-Deutsche Bundesstiftung Umwelt (<TT><A NAME="tex2html1"
-  HREF="http://dbu.de">http://dbu.de</A></TT>) and with help of
-GDF-Hannover (<TT><A NAME="tex2html2"
-  HREF="http://gdf-hannover.de">http://gdf-hannover.de</A></TT>) and Help Service Remote
-Sensing (<TT><A NAME="tex2html3"
-  HREF="http://www.bnhelp.cz">http://www.bnhelp.cz</A></TT>) companies. Initial author is Jachym
-Cepicky (<TT><A NAME="tex2html4"
-  HREF="http://les-ejk.cz">http://les-ejk.cz</A></TT>).
+Deutsche Bundesstiftung Umwelt<A NAME="tex2html1"
+  HREF="#foot297"><SUP><SPAN CLASS="arabic">1</SPAN></SUP></A> and with help of
+GDF-Hannover<A NAME="tex2html3"
+  HREF="#foot298"><SUP><SPAN CLASS="arabic">2</SPAN></SUP></A> and Help Service Remote
+Sensing<A NAME="tex2html5"
+  HREF="#foot299"><SUP><SPAN CLASS="arabic">3</SPAN></SUP></A> companies. Initial author is Jachym
+Cepicky<A NAME="tex2html7"
+  HREF="#foot300"><SUP><SPAN CLASS="arabic">4</SPAN></SUP></A>.
 
 <P>
 <BR>
@@ -84,69 +84,65 @@ Contents</A>
 <!--Table of Contents-->
 
 <UL CLASS="TofC">
-<LI><A NAME="tex2html60"
+<LI><A NAME="tex2html66"
   HREF="pywps-howto.html#SECTION00020000000000000000">Introduction</A>
 <UL>
-<LI><A NAME="tex2html61"
+<LI><A NAME="tex2html67"
   HREF="pywps-howto.html#SECTION00021000000000000000">How it works</A>
 </UL>
 <BR>
-<LI><A NAME="tex2html62"
+<LI><A NAME="tex2html68"
   HREF="pywps-howto.html#SECTION00030000000000000000">Quick install</A>
-<LI><A NAME="tex2html63"
+<LI><A NAME="tex2html69"
   HREF="pywps-howto.html#SECTION00040000000000000000">Know issues</A>
-<LI><A NAME="tex2html64"
+<LI><A NAME="tex2html70"
   HREF="pywps-howto.html#SECTION00050000000000000000">Installation</A>
 <UL>
-<LI><A NAME="tex2html65"
+<LI><A NAME="tex2html71"
   HREF="pywps-howto.html#SECTION00051000000000000000">Installation the quick 'n' dirty way</A>
-<LI><A NAME="tex2html66"
+<LI><A NAME="tex2html72"
   HREF="pywps-howto.html#SECTION00052000000000000000">Installation the 'clean' way</A>
 </UL>
 <BR>
-<LI><A NAME="tex2html67"
+<LI><A NAME="tex2html73"
   HREF="pywps-howto.html#SECTION00060000000000000000">Configuration</A>
 <UL>
-<LI><A NAME="tex2html68"
-  HREF="pywps-howto.html#SECTION00061000000000000000">etc/settings.py</A>
-<LI><A NAME="tex2html69"
+<LI><A NAME="tex2html74"
+  HREF="pywps-howto.html#SECTION00061000000000000000">Main configuration file pywps/etc/settings.py</A>
+<LI><A NAME="tex2html75"
   HREF="pywps-howto.html#SECTION00062000000000000000">etc/grass.py</A>
-<LI><A NAME="tex2html70"
+<LI><A NAME="tex2html76"
   HREF="pywps-howto.html#SECTION00063000000000000000">Testing after installation</A>
 </UL>
 <BR>
-<LI><A NAME="tex2html71"
+<LI><A NAME="tex2html77"
   HREF="pywps-howto.html#SECTION00070000000000000000">Add your own processes</A>
 <UL>
-<LI><A NAME="tex2html72"
+<LI><A NAME="tex2html78"
   HREF="pywps-howto.html#SECTION00071000000000000000">Process initialization and configuration</A>
-<LI><A NAME="tex2html73"
+<LI><A NAME="tex2html79"
   HREF="pywps-howto.html#SECTION00072000000000000000">Process Programming</A>
-<LI><A NAME="tex2html74"
+<LI><A NAME="tex2html80"
   HREF="pywps-howto.html#SECTION00073000000000000000">GRASS specific notes</A>
 </UL>
 <BR>
-<LI><A NAME="tex2html75"
+<LI><A NAME="tex2html81"
   HREF="pywps-howto.html#SECTION00080000000000000000">Testing your new process</A>
-<LI><A NAME="tex2html76"
+<LI><A NAME="tex2html82"
   HREF="pywps-howto.html#SECTION00090000000000000000">Using PyWPS</A>
 <UL>
-<LI><A NAME="tex2html77"
+<LI><A NAME="tex2html83"
   HREF="pywps-howto.html#SECTION00091000000000000000">Input</A>
-<LI><A NAME="tex2html78"
+<LI><A NAME="tex2html84"
   HREF="pywps-howto.html#SECTION00092000000000000000">Output</A>
 </UL>
 <BR>
-<LI><A NAME="tex2html79"
+<LI><A NAME="tex2html85"
   HREF="pywps-howto.html#SECTION000100000000000000000">Example process: addvalue</A>
-<LI><A NAME="tex2html80"
+<LI><A NAME="tex2html86"
   HREF="pywps-howto.html#SECTION000110000000000000000">KVP request encoding of addvalue</A>
-<LI><A NAME="tex2html81"
+<LI><A NAME="tex2html87"
   HREF="pywps-howto.html#SECTION000120000000000000000">XML request encoding addvalue</A>
-<LI><A NAME="tex2html82"
-  HREF="pywps-howto.html#SECTION000130000000000000000">Licence of PyWPS</A>
-<LI><A NAME="tex2html83"
-  HREF="pywps-howto.html#SECTION000140000000000000000">Licence of this document</A>
 </UL>
 <!--End of Table of Contents-->
 <P>
@@ -157,28 +153,30 @@ Contents</A>
 Introduction</A>
 </H1>
 PyWPS (Python Web Processing Service) is implementation of Web
-Processing Service standard from Open Geospatial Consortium.
+Processing Service 0.4.0 standard from Open Geospatial
+Consortium<A NAME="tex2html9"
+  HREF="#foot301"><SUP><SPAN CLASS="arabic">5</SPAN></SUP></A>.
 
 <P>
 It has been started on Mai 2006 as project supported by DBU. It offers
 environment for programming own process (geofunctions or models) which can
 be accessed from the public. The main advantage of PyWPS is, that it has
-been written with native support for GRASS. Access GRASS modules via web
+been written with native support for GRASS
+GIS<A NAME="tex2html11"
+  HREF="#foot40"><SUP><SPAN CLASS="arabic">6</SPAN></SUP></A>. Access GRASS modules via web
 interace should be as easy as possible.
-
-<P>
-Processes can be written using GRASS GIS, but usage of other programs is
-also possible. Usage together with R package or GDAL or PROJ tools.
+However, not only GRASS GIS is supported. Usage of other programs, like
+R package or GDAL or PROJ tools is possible as well.
 
 <P>
 PyWPS is written in Python programming language, your processes must use
 this language too. 
 
 <P>
-PyWPS Homepage can be found at <TT><A NAME="tex2html5"
+PyWPS Homepage can be found at <TT><A NAME="tex2html12"
   HREF="http://pywps.wald.intevation.org">http://pywps.wald.intevation.org</A></TT>.
-PyWPS Wiki is hosted on <TT><A NAME="tex2html6"
-  HREF="http://pywps.ominiverdi.org">http://pywps.ominiverdi.org</A></TT>. 
+PyWPS Wiki is hosted on <TT><A NAME="tex2html13"
+  HREF="http://pywps.ominiverdi.org/wiki">http://pywps.ominiverdi.org/wiki</A></TT>. 
 
 <P>
 
@@ -192,14 +190,14 @@ and other programs can be used.
 
 <P>
 
-<DIV ALIGN="CENTER"><A NAME="pic:pywps"></A><A NAME="43"></A>
+<DIV ALIGN="CENTER"><A NAME="pic:pywps"></A><A NAME="45"></A>
 <TABLE>
 <CAPTION ALIGN="BOTTOM"><STRONG>Figure 1:</STRONG>
 How does PyWPS work: GRASS GIS is in this case working tool</CAPTION>
 <TR><TD>
 <DIV ALIGN="CENTER">
 <IMG
-  WIDTH="827" HEIGHT="273" ALIGN="BOTTOM" BORDER="0"
+  WIDTH="832" HEIGHT="275" ALIGN="BOTTOM" BORDER="0"
  SRC="./pywps-schema.png"
  ALT="Image pywps-schema">
 
@@ -254,10 +252,10 @@ not use it directly in scripts to avoid your server to be hacked.
 
 <P>
 Please report all problems or unexpected handeling either via pywps mailing
-list<A NAME="tex2html8"
-  HREF="#foot377"><SUP><SPAN CLASS="arabic">1</SPAN></SUP></A>or using PyWPS
-bugtracker<A NAME="tex2html9"
-  HREF="#foot378"><SUP><SPAN CLASS="arabic">2</SPAN></SUP></A>.
+list<A NAME="tex2html15"
+  HREF="#foot302"><SUP><SPAN CLASS="arabic">7</SPAN></SUP></A>or using PyWPS
+bugtracker<A NAME="tex2html16"
+  HREF="#foot303"><SUP><SPAN CLASS="arabic">8</SPAN></SUP></A>.
 
 <P>
 
@@ -283,14 +281,14 @@ Recommended packages:
 <P>
 
 <UL>
-<LI>Web Server (e.g. Apache) - <TT><A NAME="tex2html10"
+<LI>Web Server (e.g. Apache) - <TT><A NAME="tex2html17"
   HREF="http://httpd.apache.org">http://httpd.apache.org</A></TT> -  You
     will need an web server, to be able to execute processes from remote
     computers.
 
 <P>
 </LI>
-<LI>GIS GRASS  - <TT><A NAME="tex2html11"
+<LI>GIS GRASS  - <TT><A NAME="tex2html18"
   HREF="http://grass.itc.it">http://grass.itc.it</A></TT> - Geographical Resources
     Analysis Support System (GRASS) is Open Source GIS, which provides more
     then 350 modules for raster and vector (2D, 3D) data analysis. PyWPS is
@@ -298,7 +296,7 @@ Recommended packages:
 
 <P>
 </LI>
-<LI>PROJ.4  - <TT><A NAME="tex2html12"
+<LI>PROJ.4  - <TT><A NAME="tex2html19"
   HREF="http://proj.maptools.org">http://proj.maptools.org</A></TT> - Cartographic
     Projections library used in various Open Source projects, such as
     GRASS, UMN MapServer, QGIS and others. It can be used e.g. for data
@@ -306,7 +304,7 @@ Recommended packages:
 
 <P>
 </LI>
-<LI>GDAL/OGR  - <TT><A NAME="tex2html13"
+<LI>GDAL/OGR  - <TT><A NAME="tex2html20"
   HREF="http://gdal.org">http://gdal.org</A></TT> - translator library for
     raster geospatial data formats, is used in various projects for
     importing, exporting and transformation between various raster and vector
@@ -314,7 +312,7 @@ Recommended packages:
 
 <P>
 </LI>
-<LI>R  - <TT><A NAME="tex2html14"
+<LI>R  - <TT><A NAME="tex2html21"
   HREF="http://www.r-project.org">http://www.r-project.org</A></TT> - is a language and environment
     for statistical computing and graphics.
 
@@ -354,8 +352,8 @@ $ python setup.py install
 
 <P>
 Several binary packages for Linux distributios are also avaliable on PyWPS
-site<A NAME="tex2html15"
-  HREF="#foot91"><SUP><SPAN CLASS="arabic">3</SPAN></SUP></A>.
+homepage<A NAME="tex2html22"
+  HREF="#foot93"><SUP><SPAN CLASS="arabic">9</SPAN></SUP></A>.
 
 <P>
 
@@ -366,11 +364,11 @@ Configuration
 </H1>
 
 <P>
-Before you start to tune your pywps program, you should get your copy of
-OpenGIS(R) Web Processing Service document (OGC 05-007r4) version 0.4.0
-from
-<BR><TT><A NAME="tex2html17"
-  HREF="http://www.opengeospatial.org/specs/?page=specs">http://www.opengeospatial.org/specs/?page=specs</A></TT>
+Before you start to tune your PyWPS installation, you should get your copy of
+OpenGIS(R) Web Processing Service document (OGC 05-007r4) version
+0.4.0<A NAME="tex2html24"
+  HREF="#foot304"><SUP><SPAN CLASS="arabic">10</SPAN></SUP></A>.
+
 <P>
 
 <P>
@@ -387,16 +385,17 @@ programming language. But you should be able to setup the program without
 any python knowledge.
 
 <P>
-The first file is in <TT>etc/settings.py</TT> and (optional) the second file is
-<TT>etc/grass.py</TT> which has to be setuped if you do want to use
-GRASS GIS modules in your scripts. Some special "tuning" can be done in <TT>processes/__init__.py</TT>
+The first file is in <TT>pywps/etc/settings.py</TT> and (optional) the second file is
+<TT>pywps/etc/grass.py</TT> which has to be setuped if you do want to use
+GRASS GIS modules in your scripts. Some special "tuning" can be done in
+<TT>pywps/processes/__init__.py</TT>
 file. You can allways obtain original configuration files from
-<TT>Wps/default_settings.py</TT> and <TT>Wps/default_grass.py</TT>.
+<TT>pywps/Wps/default_settings.py</TT> and <TT>pywps/Wps/default_grass.py</TT>.
 
 <P>
 
 <H2><A NAME="SECTION00061000000000000000">
-<TT>etc/settings.py</TT></A>
+Main configuration file <TT>pywps/etc/settings.py</TT></A>
 </H2>
 
 <P>
@@ -411,6 +410,7 @@ are (with default/recommend values):
 <PRE>
 WPS = {
     'version': "0.4.0",
+    'encoding': "utf-8",
     'ServiceIdentification': {
         'Title':"Jachym's WPS server",
         'ServiceType':"WPS",
@@ -580,7 +580,7 @@ distributed along with PyWPS source code.
 
 <P>
 Process is python class derived from prepared <TT>WPSProcess</TT> class in
-<TT>pywps.Wps</TT> package. In it <TT>__init__(self)</TT> method,
+<TT>pywps.Wps</TT> package. In it <TT>__init__</TT> method,
 process metadata, inputs and outpus are defined and in
 <TT>execute(self)</TT> method, own computation is performed.
 
@@ -620,8 +620,8 @@ asynchronous mode (<TT>statusSupported</TT>).
 <P>
 Eventually optional attributes can be found in the table 38 - "Parts of
 ExecuteResponse data structure" in the WPS reference
-document<A NAME="tex2html18"
-  HREF="#foot381"><SUP><SPAN CLASS="arabic">4</SPAN></SUP></A>. It is also possible to redefine some
+document<A NAME="tex2html26"
+  HREF="#foot307"><SUP><SPAN CLASS="arabic">11</SPAN></SUP></A>. It is also possible to redefine some
 variable later, after initialization:
 
 <P>
@@ -776,8 +776,8 @@ self.AddLiteralInput(Identifier="someinput",
 For further documentation, refere example processes distributed with the
 source code as well as <TT>pydoc&nbsp;pywps/wps/process.py</TT>. This help is
 also available in
-<TT>process.html</TT><A NAME="tex2html20"
-  HREF="#foot382"><SUP><SPAN CLASS="arabic">5</SPAN></SUP></A> file distributed along with PyWPS
+<TT>process.html</TT><A NAME="tex2html28"
+  HREF="#foot308"><SUP><SPAN CLASS="arabic">12</SPAN></SUP></A> file distributed along with PyWPS
 source code.
 
 <P>
@@ -1085,14 +1085,14 @@ class Process(GRASSWPSProcess):
 </PRE>
 
 <P>
-By default, <TT>self.grassLocation</TT><A NAME="tex2html21"
-  HREF="#foot385"><SUP><SPAN CLASS="arabic">6</SPAN></SUP></A> 
+By default, <TT>self.grassLocation</TT><A NAME="tex2html29"
+  HREF="#foot311"><SUP><SPAN CLASS="arabic">13</SPAN></SUP></A> 
  variable is set to <TT>None</TT>,
 which means, that temporary location will be created and after the
 calculation is done, it will be deleted again. You can set this while
 process initialization or
-later<A NAME="tex2html22"
-  HREF="#foot386"><SUP><SPAN CLASS="arabic">7</SPAN></SUP></A>.
+later<A NAME="tex2html30"
+  HREF="#foot312"><SUP><SPAN CLASS="arabic">14</SPAN></SUP></A>.
 
 <P>
 <TT>WPSProcess</TT> class provides special method
@@ -1364,7 +1364,7 @@ Or in XML input:
 
 <P>
 <PRE>
-request=&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;Execute service="WPS" version="0.4.0" store="true" status="false"
 xmlns="http://www.opengeospatial.net/wps"
 xmlns:ows="http://www.opengeospatial.net/ows"
@@ -1521,8 +1521,7 @@ class Process (GRASSWPSProcess):
 KVP request encoding of <TT>addvalue</TT></A>
 </H1>
     This process can be lunched with URL:
-<BR>
-http://localhost/cgi-bin/wps.py?service=wps&amp;version=0.4.0&amp;identifier=addvalue&amp;request=execute&amp;<SPAN CLASS="MATH"><IMG
+<BR>    http://localhost/cgi-bin/wps.py?service=wps&amp;version=0.4.0&amp;identifier=addvalue&amp;request=execute&amp;<SPAN CLASS="MATH"><IMG
  WIDTH="13" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
  SRC="img2.png"
  ALT="$\backslash$"></SPAN>
@@ -1564,943 +1563,7 @@ request=&lt;?xml version='1.0' encoding='UTF-8' standalone='yes'?&gt;
 
 <P>
 
-<P>
-
 <H1><A NAME="SECTION000130000000000000000">
-Licence of PyWPS</A>
-</H1>
-
-<P>
-<DIV ALIGN="CENTER">
-<BIG CLASS="XLARGE">The GNU General Public License</BIG>
-</DIV>
-<P>
-<DIV ALIGN="CENTER"></DIV>
-<P>
-<DIV ALIGN="CENTER">Version 2, June 1991
-</DIV>
-<P>
-<DIV ALIGN="CENTER">Copyright &#169; 1989, 1991 Free Software Foundation, Inc.
-</DIV>
-<P>
-<DIV ALIGN="CENTER"></DIV>
-<P><P>
-<BR>
-<DIV ALIGN="CENTER"></DIV>
-<P>
-<DIV ALIGN="CENTER">51 Franklin St, Fifth Floor, Boston, MA  02110-1301, USA
-</DIV>
-<P>
-<DIV ALIGN="CENTER"></DIV>
-<P><P>
-<BR>
-<DIV ALIGN="CENTER"></DIV>
-<P>
-<DIV ALIGN="CENTER">Everyone is permitted to copy and distribute verbatim copies
-of this license document, but changing it is not allowed.
-
-
-</DIV>
-
-<P>
-
-<H3>Preamble:</H3>
-<DIV CLASS="ABSTRACT">
-The licenses for most software are designed to take away your freedom to
-share and change it.  By contrast, the GNU General Public License is
-intended to guarantee your freedom to share and change free software--to
-make sure the software is free for all its users.  This General Public
-License applies to most of the Free Software Foundation's software and to
-any other program whose authors commit to using it.  (Some other Free
-Software Foundation software is covered by the GNU Library General Public
-License instead.)  You can apply it to your programs, too.
-
-<P>
-When we speak of free software, we are referring to freedom, not price.
-Our General Public Licenses are designed to make sure that you have the
-freedom to distribute copies of free software (and charge for this service
-if you wish), that you receive source code or can get it if you want it,
-that you can change the software or use pieces of it in new free programs;
-and that you know you can do these things.
-
-<P>
-To protect your rights, we need to make restrictions that forbid anyone to
-deny you these rights or to ask you to surrender the rights.  These
-restrictions translate to certain responsibilities for you if you
-distribute copies of the software, or if you modify it.
-
-<P>
-For example, if you distribute copies of such a program, whether gratis or
-for a fee, you must give the recipients all the rights that you have.  You
-must make sure that they, too, receive or can get the source code.  And
-you must show them these terms so they know their rights.
-
-<P>
-We protect your rights with two steps: (1) copyright the software, and (2)
-offer you this license which gives you legal permission to copy,
-distribute and/or modify the software.
-
-<P>
-Also, for each author's protection and ours, we want to make certain that
-everyone understands that there is no warranty for this free software.  If
-the software is modified by someone else and passed on, we want its
-recipients to know that what they have is not the original, so that any
-problems introduced by others will not reflect on the original authors'
-reputations.
-
-<P>
-Finally, any free program is threatened constantly by software patents.
-We wish to avoid the danger that redistributors of a free program will
-individually obtain patent licenses, in effect making the program
-proprietary.  To prevent this, we have made it clear that any patent must
-be licensed for everyone's free use or not licensed at all.
-
-<P>
-The precise terms and conditions for copying, distribution and
-modification follow.
-</DIV>
-<P>
-
-<P>
-<DIV ALIGN="CENTER">
-<BIG CLASS="XLARGE">GNU G<SMALL>ENERAL </SMALL>P<SMALL>UBLIC </SMALL>L<SMALL>ICENSE
-
-<BR></SMALL>
-<BR>
-T<SMALL>ERMS AND </SMALL>C<SMALL>ONDITIONS </SMALL>F<SMALL>OR </SMALL>C<SMALL>OPYING, </SMALL>D<SMALL>ISTRIBUTION AND </SMALL>M<SMALL>ODIFICATION</SMALL></BIG>
-
-</DIV>
-
-<P>
-
-<OL>
-<LI><P>
-This License applies to any program or other work which contains a notice
-placed by the copyright holder saying it may be distributed under the
-terms of this General Public License.  The ``Program'', below, refers to
-any such program or work, and a ``work based on the Program'' means either
-the Program or any derivative work under copyright law: that is to say, a
-work containing the Program or a portion of it, either verbatim or with
-modifications and/or translated into another language.  (Hereinafter,
-translation is included without limitation in the term ``modification''.)
-Each licensee is addressed as ``you''.
-
-<P>
-Activities other than copying, distribution and modification are not
-covered by this License; they are outside its scope.  The act of
-running the Program is not restricted, and the output from the Program
-is covered only if its contents constitute a work based on the
-Program (independent of having been made by running the Program).
-Whether that is true depends on what the Program does.
-
-<P>
-</LI>
-<LI>You may copy and distribute verbatim copies of the Program's source
-  code as you receive it, in any medium, provided that you conspicuously
-  and appropriately publish on each copy an appropriate copyright notice
-  and disclaimer of warranty; keep intact all the notices that refer to
-  this License and to the absence of any warranty; and give any other
-  recipients of the Program a copy of this License along with the Program.
-
-<P>
-You may charge a fee for the physical act of transferring a copy, and you
-may at your option offer warranty protection in exchange for a fee.
-
-<P>
-</LI>
-<LI><P>
-You may modify your copy or copies of the Program or any portion
-of it, thus forming a work based on the Program, and copy and
-distribute such modifications or work under the terms of Section 1
-above, provided that you also meet all of these conditions:
-
-<P>
-
-<OL>
-<LI><P>
-You must cause the modified files to carry prominent notices stating that
-you changed the files and the date of any change.
-
-<P>
-</LI>
-<LI><P>
-You must cause any work that you distribute or publish, that in
-whole or in part contains or is derived from the Program or any
-part thereof, to be licensed as a whole at no charge to all third
-parties under the terms of this License.
-
-<P>
-</LI>
-<LI>If the modified program normally reads commands interactively
-when run, you must cause it, when started running for such
-interactive use in the most ordinary way, to print or display an
-announcement including an appropriate copyright notice and a
-notice that there is no warranty (or else, saying that you provide
-a warranty) and that users may redistribute the program under
-these conditions, and telling the user how to view a copy of this
-License.  (Exception: if the Program itself is interactive but
-does not normally print such an announcement, your work based on
-the Program is not required to print an announcement.)
-
-<P>
-</LI>
-</OL>
-
-<P>
-These requirements apply to the modified work as a whole.  If
-identifiable sections of that work are not derived from the Program,
-and can be reasonably considered independent and separate works in
-themselves, then this License, and its terms, do not apply to those
-sections when you distribute them as separate works.  But when you
-distribute the same sections as part of a whole which is a work based
-on the Program, the distribution of the whole must be on the terms of
-this License, whose permissions for other licensees extend to the
-entire whole, and thus to each and every part regardless of who wrote it.
-
-<P>
-Thus, it is not the intent of this section to claim rights or contest
-your rights to work written entirely by you; rather, the intent is to
-exercise the right to control the distribution of derivative or
-collective works based on the Program.
-
-<P>
-In addition, mere aggregation of another work not based on the Program
-with the Program (or with a work based on the Program) on a volume of
-a storage or distribution medium does not bring the other work under
-the scope of this License.
-
-<P>
-</LI>
-<LI>You may copy and distribute the Program (or a work based on it,
-under Section 2) in object code or executable form under the terms of
-Sections 1 and 2 above provided that you also do one of the following:
-
-<P>
-
-<OL>
-<LI><P>
-Accompany it with the complete corresponding machine-readable
-source code, which must be distributed under the terms of Sections
-1 and 2 above on a medium customarily used for software interchange; or,
-
-<P>
-</LI>
-<LI><P>
-Accompany it with a written offer, valid for at least three
-years, to give any third party, for a charge no more than your
-cost of physically performing source distribution, a complete
-machine-readable copy of the corresponding source code, to be
-distributed under the terms of Sections 1 and 2 above on a medium
-customarily used for software interchange; or,
-
-<P>
-</LI>
-<LI><P>
-Accompany it with the information you received as to the offer
-to distribute corresponding source code.  (This alternative is
-allowed only for noncommercial distribution and only if you
-received the program in object code or executable form with such
-an offer, in accord with Subsection b above.)
-
-<P>
-</LI>
-</OL>
-
-<P>
-The source code for a work means the preferred form of the work for
-making modifications to it.  For an executable work, complete source
-code means all the source code for all modules it contains, plus any
-associated interface definition files, plus the scripts used to
-control compilation and installation of the executable.  However, as a
-special exception, the source code distributed need not include
-anything that is normally distributed (in either source or binary
-form) with the major components (compiler, kernel, and so on) of the
-operating system on which the executable runs, unless that component
-itself accompanies the executable.
-
-<P>
-If distribution of executable or object code is made by offering
-access to copy from a designated place, then offering equivalent
-access to copy the source code from the same place counts as
-distribution of the source code, even though third parties are not
-compelled to copy the source along with the object code.
-
-<P>
-</LI>
-<LI>You may not copy, modify, sublicense, or distribute the Program
-except as expressly provided under this License.  Any attempt
-otherwise to copy, modify, sublicense or distribute the Program is
-void, and will automatically terminate your rights under this License.
-However, parties who have received copies, or rights, from you under
-this License will not have their licenses terminated so long as such
-parties remain in full compliance.
-
-<P>
-</LI>
-<LI>You are not required to accept this License, since you have not
-signed it.  However, nothing else grants you permission to modify or
-distribute the Program or its derivative works.  These actions are
-prohibited by law if you do not accept this License.  Therefore, by
-modifying or distributing the Program (or any work based on the
-Program), you indicate your acceptance of this License to do so, and
-all its terms and conditions for copying, distributing or modifying
-the Program or works based on it.
-
-<P>
-</LI>
-<LI>Each time you redistribute the Program (or any work based on the
-Program), the recipient automatically receives a license from the
-original licensor to copy, distribute or modify the Program subject to
-these terms and conditions.  You may not impose any further
-restrictions on the recipients' exercise of the rights granted herein.
-You are not responsible for enforcing compliance by third parties to
-this License.
-
-<P>
-</LI>
-<LI>If, as a consequence of a court judgment or allegation of patent
-infringement or for any other reason (not limited to patent issues),
-conditions are imposed on you (whether by court order, agreement or
-otherwise) that contradict the conditions of this License, they do not
-excuse you from the conditions of this License.  If you cannot
-distribute so as to satisfy simultaneously your obligations under this
-License and any other pertinent obligations, then as a consequence you
-may not distribute the Program at all.  For example, if a patent
-license would not permit royalty-free redistribution of the Program by
-all those who receive copies directly or indirectly through you, then
-the only way you could satisfy both it and this License would be to
-refrain entirely from distribution of the Program.
-
-<P>
-If any portion of this section is held invalid or unenforceable under
-any particular circumstance, the balance of the section is intended to
-apply and the section as a whole is intended to apply in other
-circumstances.
-
-<P>
-It is not the purpose of this section to induce you to infringe any
-patents or other property right claims or to contest validity of any
-such claims; this section has the sole purpose of protecting the
-integrity of the free software distribution system, which is
-implemented by public license practices.  Many people have made
-generous contributions to the wide range of software distributed
-through that system in reliance on consistent application of that
-system; it is up to the author/donor to decide if he or she is willing
-to distribute software through any other system and a licensee cannot
-impose that choice.
-
-<P>
-This section is intended to make thoroughly clear what is believed to
-be a consequence of the rest of this License.
-
-<P>
-</LI>
-<LI>If the distribution and/or use of the Program is restricted in
-certain countries either by patents or by copyrighted interfaces, the
-original copyright holder who places the Program under this License
-may add an explicit geographical distribution limitation excluding
-those countries, so that distribution is permitted only in or among
-countries not thus excluded.  In such case, this License incorporates
-the limitation as if written in the body of this License.
-
-<P>
-</LI>
-<LI>The Free Software Foundation may publish revised and/or new versions
-of the General Public License from time to time.  Such new versions will
-be similar in spirit to the present version, but may differ in detail to
-address new problems or concerns.
-
-<P>
-Each version is given a distinguishing version number.  If the Program
-specifies a version number of this License which applies to it and ``any
-later version'', you have the option of following the terms and conditions
-either of that version or of any later version published by the Free
-Software Foundation.  If the Program does not specify a version number of
-this License, you may choose any version ever published by the Free Software
-Foundation.
-
-<P>
-</LI>
-<LI>If you wish to incorporate parts of the Program into other free
-programs whose distribution conditions are different, write to the author
-to ask for permission.  For software which is copyrighted by the Free
-Software Foundation, write to the Free Software Foundation; we sometimes
-make exceptions for this.  Our decision will be guided by the two goals
-of preserving the free status of all derivatives of our free software and
-of promoting the sharing and reuse of software generally.
-
-<P>
-<DIV ALIGN="CENTER">
-<BIG CLASS="XLARGE">
-N<SMALL>O </SMALL>W<SMALL>ARRANTY
-</SMALL></BIG>
-
-</DIV>
-
-<P>
-</LI>
-<LI>B<SMALL>ECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
-FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.  </SMALL>E<SMALL>XCEPT WHEN
-OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES
-PROVIDE THE PROGRAM ``AS IS'' WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
-OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  </SMALL>T<SMALL>HE ENTIRE RISK AS
-TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.  </SMALL>S<SMALL>HOULD THE
-PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,
-REPAIR OR CORRECTION.</SMALL>
-
-<P>
-</LI>
-<LI>I<SMALL>N NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
-WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR
-REDISTRIBUTE THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES,
-INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING
-OUT OF THE USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED
-TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY
-YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER
-PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGES.</SMALL>
-
-<P>
-</LI>
-</OL>
-
-<P>
-<DIV ALIGN="CENTER">
-<BIG CLASS="XLARGE">E<SMALL>ND OF </SMALL>T<SMALL>ERMS AND </SMALL>C<SMALL>ONDITIONS</SMALL></BIG>
-
-</DIV>
-
-<P>
-
-<H1><A NAME="SECTION000140000000000000000">
-Licence of this document</A>
-</H1>
-
-<P>
-<DIV ALIGN="CENTER">
-</DIV>
-<P>
-<DIV ALIGN="CENTER"><BIG CLASS="XLARGE">GNU Free Documentation License</BIG>
-</DIV>
-<P>
-<DIV ALIGN="CENTER">Version 1.2, November 2002
-</DIV>
-<P>
-<DIV ALIGN="CENTER">Copyright &#169;2000,2001,2002  Free Software Foundation, Inc.
-</DIV>
-<P>
-<DIV ALIGN="CENTER"></DIV>
-<P><P>
-<BR>
-<DIV ALIGN="CENTER"></DIV>
-<P>
-<DIV ALIGN="CENTER">51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-</DIV>
-<P>
-<DIV ALIGN="CENTER"></DIV>
-<P><P>
-<BR>
-<DIV ALIGN="CENTER"></DIV>
-<P>
-<DIV ALIGN="CENTER">Everyone is permitted to copy and distribute verbatim copies
- of this license document, but changing it is not allowed.
-
-</DIV>
-
-<P>
-<DIV ALIGN="CENTER">
-<B><BIG CLASS="LARGE">Preamble</BIG></B>
-
-</DIV>
-
-<P>
-The purpose of this License is to make a manual, textbook, or other
-functional and useful document "free" in the sense of freedom: to
-assure everyone the effective freedom to copy and redistribute it,
-with or without modifying it, either commercially or noncommercially.
-Secondarily, this License preserves for the author and publisher a way
-to get credit for their work, while not being considered responsible
-for modifications made by others.
-
-<P>
-This License is a kind of "copyleft", which means that derivative
-works of the document must themselves be free in the same sense.  It
-complements the GNU General Public License, which is a copyleft
-license designed for free software.
-
-<P>
-We have designed this License in order to use it for manuals for free
-software, because free software needs free documentation: a free
-program should come with manuals providing the same freedoms that the
-software does.  But this License is not limited to software manuals;
-it can be used for any textual work, regardless of subject matter or
-whether it is published as a printed book.  We recommend this License
-principally for works whose purpose is instruction or reference.
-
-<P>
-<DIV ALIGN="CENTER">
-<BIG CLASS="XLARGE"><B>1. APPLICABILITY AND DEFINITIONS</B></BIG>
-
-</DIV>
-
-<P>
-This License applies to any manual or other work, in any medium, that
-contains a notice placed by the copyright holder saying it can be
-distributed under the terms of this License.  Such a notice grants a
-world-wide, royalty-free license, unlimited in duration, to use that
-work under the conditions stated herein.  The <SPAN  CLASS="textbf">"Document"</SPAN>, below,
-refers to any such manual or work.  Any member of the public is a
-licensee, and is addressed as <SPAN  CLASS="textbf">"you"</SPAN>.  You accept the license if you
-copy, modify or distribute the work in a way requiring permission
-under copyright law.
-
-<P>
-A <SPAN  CLASS="textbf">"Modified Version"</SPAN> of the Document means any work containing the
-Document or a portion of it, either copied verbatim, or with
-modifications and/or translated into another language.
-
-<P>
-A <SPAN  CLASS="textbf">"Secondary Section"</SPAN> is a named appendix or a front-matter section of
-the Document that deals exclusively with the relationship of the
-publishers or authors of the Document to the Document's overall subject
-(or to related matters) and contains nothing that could fall directly
-within that overall subject.  (Thus, if the Document is in part a
-textbook of mathematics, a Secondary Section may not explain any
-mathematics.)  The relationship could be a matter of historical
-connection with the subject or with related matters, or of legal,
-commercial, philosophical, ethical or political position regarding
-them.
-
-<P>
-The <SPAN  CLASS="textbf">"Invariant Sections"</SPAN> are certain Secondary Sections whose titles
-are designated, as being those of Invariant Sections, in the notice
-that says that the Document is released under this License.  If a
-section does not fit the above definition of Secondary then it is not
-allowed to be designated as Invariant.  The Document may contain zero
-Invariant Sections.  If the Document does not identify any Invariant
-Sections then there are none.
-
-<P>
-The <SPAN  CLASS="textbf">"Cover Texts"</SPAN> are certain short passages of text that are listed,
-as Front-Cover Texts or Back-Cover Texts, in the notice that says that
-the Document is released under this License.  A Front-Cover Text may
-be at most 5 words, and a Back-Cover Text may be at most 25 words.
-
-<P>
-A <SPAN  CLASS="textbf">"Transparent"</SPAN> copy of the Document means a machine-readable copy,
-represented in a format whose specification is available to the
-general public, that is suitable for revising the document
-straightforwardly with generic text editors or (for images composed of
-pixels) generic paint programs or (for drawings) some widely available
-drawing editor, and that is suitable for input to text formatters or
-for automatic translation to a variety of formats suitable for input
-to text formatters.  A copy made in an otherwise Transparent file
-format whose markup, or absence of markup, has been arranged to thwart
-or discourage subsequent modification by readers is not Transparent.
-An image format is not Transparent if used for any substantial amount
-of text.  A copy that is not "Transparent" is called <SPAN  CLASS="textbf">"Opaque"</SPAN>.
-
-<P>
-Examples of suitable formats for Transparent copies include plain
-ASCII without markup, Texinfo input format, LaTeX input format, SGML
-or XML using a publicly available DTD, and standard-conforming simple
-HTML, PostScript or PDF designed for human modification.  Examples of
-transparent image formats include PNG, XCF and JPG.  Opaque formats
-include proprietary formats that can be read and edited only by
-proprietary word processors, SGML or XML for which the DTD and/or
-processing tools are not generally available, and the
-machine-generated HTML, PostScript or PDF produced by some word
-processors for output purposes only.
-
-<P>
-The <SPAN  CLASS="textbf">"Title Page"</SPAN> means, for a printed book, the title page itself,
-plus such following pages as are needed to hold, legibly, the material
-this License requires to appear in the title page.  For works in
-formats which do not have any title page as such, "Title Page" means
-the text near the most prominent appearance of the work's title,
-preceding the beginning of the body of the text.
-
-<P>
-A section <SPAN  CLASS="textbf">"Entitled XYZ"</SPAN> means a named subunit of the Document whose
-title either is precisely XYZ or contains XYZ in parentheses following
-text that translates XYZ in another language.  (Here XYZ stands for a
-specific section name mentioned below, such as <SPAN  CLASS="textbf">"Acknowledgements"</SPAN>,
-<SPAN  CLASS="textbf">"Dedications"</SPAN>, <SPAN  CLASS="textbf">"Endorsements"</SPAN>, or <SPAN  CLASS="textbf">"History"</SPAN>.)  
-To <SPAN  CLASS="textbf">"Preserve the Title"</SPAN>
-of such a section when you modify the Document means that it remains a
-section "Entitled XYZ" according to this definition.
-
-<P>
-The Document may include Warranty Disclaimers next to the notice which
-states that this License applies to the Document.  These Warranty
-Disclaimers are considered to be included by reference in this
-License, but only as regards disclaiming warranties: any other
-implication that these Warranty Disclaimers may have is void and has
-no effect on the meaning of this License.
-
-<P>
-<DIV ALIGN="CENTER">
-<BIG CLASS="XLARGE"><B>2. VERBATIM COPYING</B></BIG>
-
-</DIV>
-
-<P>
-You may copy and distribute the Document in any medium, either
-commercially or noncommercially, provided that this License, the
-copyright notices, and the license notice saying this License applies
-to the Document are reproduced in all copies, and that you add no other
-conditions whatsoever to those of this License.  You may not use
-technical measures to obstruct or control the reading or further
-copying of the copies you make or distribute.  However, you may accept
-compensation in exchange for copies.  If you distribute a large enough
-number of copies you must also follow the conditions in section 3.
-
-<P>
-You may also lend copies, under the same conditions stated above, and
-you may publicly display copies.
-
-<P>
-<DIV ALIGN="CENTER">
-<BIG CLASS="XLARGE"><B>3. COPYING IN QUANTITY</B></BIG>
-
-</DIV>
-
-<P>
-If you publish printed copies (or copies in media that commonly have
-printed covers) of the Document, numbering more than 100, and the
-Document's license notice requires Cover Texts, you must enclose the
-copies in covers that carry, clearly and legibly, all these Cover
-Texts: Front-Cover Texts on the front cover, and Back-Cover Texts on
-the back cover.  Both covers must also clearly and legibly identify
-you as the publisher of these copies.  The front cover must present
-the full title with all words of the title equally prominent and
-visible.  You may add other material on the covers in addition.
-Copying with changes limited to the covers, as long as they preserve
-the title of the Document and satisfy these conditions, can be treated
-as verbatim copying in other respects.
-
-<P>
-If the required texts for either cover are too voluminous to fit
-legibly, you should put the first ones listed (as many as fit
-reasonably) on the actual cover, and continue the rest onto adjacent
-pages.
-
-<P>
-If you publish or distribute Opaque copies of the Document numbering
-more than 100, you must either include a machine-readable Transparent
-copy along with each Opaque copy, or state in or with each Opaque copy
-a computer-network location from which the general network-using
-public has access to download using public-standard network protocols
-a complete Transparent copy of the Document, free of added material.
-If you use the latter option, you must take reasonably prudent steps,
-when you begin distribution of Opaque copies in quantity, to ensure
-that this Transparent copy will remain thus accessible at the stated
-location until at least one year after the last time you distribute an
-Opaque copy (directly or through your agents or retailers) of that
-edition to the public.
-
-<P>
-It is requested, but not required, that you contact the authors of the
-Document well before redistributing any large number of copies, to give
-them a chance to provide you with an updated version of the Document.
-
-<P>
-<DIV ALIGN="CENTER">
-<BIG CLASS="XLARGE"><B>4. MODIFICATIONS</B></BIG>
-
-</DIV>
-
-<P>
-You may copy and distribute a Modified Version of the Document under
-the conditions of sections 2 and 3 above, provided that you release
-the Modified Version under precisely this License, with the Modified
-Version filling the role of the Document, thus licensing distribution
-and modification of the Modified Version to whoever possesses a copy
-of it.  In addition, you must do these things in the Modified Version:
-
-<P>
-<DL COMPACT>
-<DT>A.</DT>
-<DD>Use in the Title Page (and on the covers, if any) a title distinct
-   from that of the Document, and from those of previous versions
-   (which should, if there were any, be listed in the History section
-   of the Document).  You may use the same title as a previous version
-   if the original publisher of that version gives permission.
-
-<P>
-</DD>
-<DT>B.</DT>
-<DD>List on the Title Page, as authors, one or more persons or entities
-   responsible for authorship of the modifications in the Modified
-   Version, together with at least five of the principal authors of the
-   Document (all of its principal authors, if it has fewer than five),
-   unless they release you from this requirement.
-
-<P>
-</DD>
-<DT>C.</DT>
-<DD>State on the Title page the name of the publisher of the
-   Modified Version, as the publisher.
-
-<P>
-</DD>
-<DT>D.</DT>
-<DD>Preserve all the copyright notices of the Document.
-
-<P>
-</DD>
-<DT>E.</DT>
-<DD>Add an appropriate copyright notice for your modifications
-   adjacent to the other copyright notices.
-
-<P>
-</DD>
-<DT>F.</DT>
-<DD>Include, immediately after the copyright notices, a license notice
-   giving the public permission to use the Modified Version under the
-   terms of this License, in the form shown in the Addendum below.
-
-<P>
-</DD>
-<DT>G.</DT>
-<DD>Preserve in that license notice the full lists of Invariant Sections
-   and required Cover Texts given in the Document's license notice.
-
-<P>
-</DD>
-<DT>H.</DT>
-<DD>Include an unaltered copy of this License.
-
-<P>
-</DD>
-<DT>I.</DT>
-<DD>Preserve the section Entitled "History", Preserve its Title, and add
-   to it an item stating at least the title, year, new authors, and
-   publisher of the Modified Version as given on the Title Page.  If
-   there is no section Entitled "History" in the Document, create one
-   stating the title, year, authors, and publisher of the Document as
-   given on its Title Page, then add an item describing the Modified
-   Version as stated in the previous sentence.
-
-<P>
-</DD>
-<DT>J.</DT>
-<DD>Preserve the network location, if any, given in the Document for
-   public access to a Transparent copy of the Document, and likewise
-   the network locations given in the Document for previous versions
-   it was based on.  These may be placed in the "History" section.
-   You may omit a network location for a work that was published at
-   least four years before the Document itself, or if the original
-   publisher of the version it refers to gives permission.
-
-<P>
-</DD>
-<DT>K.</DT>
-<DD>For any section Entitled "Acknowledgements" or "Dedications",
-   Preserve the Title of the section, and preserve in the section all
-   the substance and tone of each of the contributor acknowledgements
-   and/or dedications given therein.
-
-<P>
-</DD>
-<DT>L.</DT>
-<DD>Preserve all the Invariant Sections of the Document,
-   unaltered in their text and in their titles.  Section numbers
-   or the equivalent are not considered part of the section titles.
-
-<P>
-</DD>
-<DT>M.</DT>
-<DD>Delete any section Entitled "Endorsements".  Such a section
-   may not be included in the Modified Version.
-
-<P>
-</DD>
-<DT>N.</DT>
-<DD>Do not retitle any existing section to be Entitled "Endorsements"
-   or to conflict in title with any Invariant Section.
-
-<P>
-</DD>
-<DT>O.</DT>
-<DD>Preserve any Warranty Disclaimers.
-</DD>
-</DL>
-
-<P>
-If the Modified Version includes new front-matter sections or
-appendices that qualify as Secondary Sections and contain no material
-copied from the Document, you may at your option designate some or all
-of these sections as invariant.  To do this, add their titles to the
-list of Invariant Sections in the Modified Version's license notice.
-These titles must be distinct from any other section titles.
-
-<P>
-You may add a section Entitled "Endorsements", provided it contains
-nothing but endorsements of your Modified Version by various
-parties-for example, statements of peer review or that the text has
-been approved by an organization as the authoritative definition of a
-standard.
-
-<P>
-You may add a passage of up to five words as a Front-Cover Text, and a
-passage of up to 25 words as a Back-Cover Text, to the end of the list
-of Cover Texts in the Modified Version.  Only one passage of
-Front-Cover Text and one of Back-Cover Text may be added by (or
-through arrangements made by) any one entity.  If the Document already
-includes a cover text for the same cover, previously added by you or
-by arrangement made by the same entity you are acting on behalf of,
-you may not add another; but you may replace the old one, on explicit
-permission from the previous publisher that added the old one.
-
-<P>
-The author(s) and publisher(s) of the Document do not by this License
-give permission to use their names for publicity for or to assert or
-imply endorsement of any Modified Version.
-
-<P>
-<DIV ALIGN="CENTER">
-<BIG CLASS="XLARGE"><B>5. COMBINING DOCUMENTS</B></BIG>
-
-</DIV>
-
-<P>
-You may combine the Document with other documents released under this
-License, under the terms defined in section 4 above for modified
-versions, provided that you include in the combination all of the
-Invariant Sections of all of the original documents, unmodified, and
-list them all as Invariant Sections of your combined work in its
-license notice, and that you preserve all their Warranty Disclaimers.
-
-<P>
-The combined work need only contain one copy of this License, and
-multiple identical Invariant Sections may be replaced with a single
-copy.  If there are multiple Invariant Sections with the same name but
-different contents, make the title of each such section unique by
-adding at the end of it, in parentheses, the name of the original
-author or publisher of that section if known, or else a unique number.
-Make the same adjustment to the section titles in the list of
-Invariant Sections in the license notice of the combined work.
-
-<P>
-In the combination, you must combine any sections Entitled "History"
-in the various original documents, forming one section Entitled
-"History"; likewise combine any sections Entitled "Acknowledgements",
-and any sections Entitled "Dedications".  You must delete all sections
-Entitled "Endorsements".
-
-<P>
-<DIV ALIGN="CENTER">
-<BIG CLASS="XLARGE"><B>6. COLLECTIONS OF DOCUMENTS</B></BIG>
-
-</DIV>
-
-<P>
-You may make a collection consisting of the Document and other documents
-released under this License, and replace the individual copies of this
-License in the various documents with a single copy that is included in
-the collection, provided that you follow the rules of this License for
-verbatim copying of each of the documents in all other respects.
-
-<P>
-You may extract a single document from such a collection, and distribute
-it individually under this License, provided you insert a copy of this
-License into the extracted document, and follow this License in all
-other respects regarding verbatim copying of that document.
-
-<P>
-<DIV ALIGN="CENTER">
-<BIG CLASS="XLARGE"><B>7. AGGREGATION WITH INDEPENDENT WORKS</B></BIG>
-
-</DIV>
-
-<P>
-A compilation of the Document or its derivatives with other separate
-and independent documents or works, in or on a volume of a storage or
-distribution medium, is called an "aggregate" if the copyright
-resulting from the compilation is not used to limit the legal rights
-of the compilation's users beyond what the individual works permit.
-When the Document is included in an aggregate, this License does not
-apply to the other works in the aggregate which are not themselves
-derivative works of the Document.
-
-<P>
-If the Cover Text requirement of section 3 is applicable to these
-copies of the Document, then if the Document is less than one half of
-the entire aggregate, the Document's Cover Texts may be placed on
-covers that bracket the Document within the aggregate, or the
-electronic equivalent of covers if the Document is in electronic form.
-Otherwise they must appear on printed covers that bracket the whole
-aggregate.
-
-<P>
-<DIV ALIGN="CENTER">
-<BIG CLASS="XLARGE"><B>8. TRANSLATION</B></BIG>
-
-</DIV>
-
-<P>
-Translation is considered a kind of modification, so you may
-distribute translations of the Document under the terms of section 4.
-Replacing Invariant Sections with translations requires special
-permission from their copyright holders, but you may include
-translations of some or all Invariant Sections in addition to the
-original versions of these Invariant Sections.  You may include a
-translation of this License, and all the license notices in the
-Document, and any Warranty Disclaimers, provided that you also include
-the original English version of this License and the original versions
-of those notices and disclaimers.  In case of a disagreement between
-the translation and the original version of this License or a notice
-or disclaimer, the original version will prevail.
-
-<P>
-If a section in the Document is Entitled "Acknowledgements",
-"Dedications", or "History", the requirement (section 4) to Preserve
-its Title (section 1) will typically require changing the actual
-title.
-
-<P>
-<DIV ALIGN="CENTER">
-<BIG CLASS="XLARGE"><B>9. TERMINATION</B></BIG>
-
-</DIV>
-
-<P>
-You may not copy, modify, sublicense, or distribute the Document except
-as expressly provided for under this License.  Any other attempt to
-copy, modify, sublicense or distribute the Document is void, and will
-automatically terminate your rights under this License.  However,
-parties who have received copies, or rights, from you under this
-License will not have their licenses terminated so long as such
-parties remain in full compliance.
-
-<P>
-<DIV ALIGN="CENTER">
-<BIG CLASS="XLARGE"><B>10. FUTURE REVISIONS OF THIS LICENSE</B></BIG>
-
-</DIV>
-
-<P>
-The Free Software Foundation may publish new, revised versions
-of the GNU Free Documentation License from time to time.  Such new
-versions will be similar in spirit to the present version, but may
-differ in detail to address new problems or concerns.  See
-http://www.gnu.org/copyleft/.
-
-<P>
-Each version of the License is given a distinguishing version number.
-If the Document specifies that a particular numbered version of this
-License "or any later version" applies to it, you have the option of
-following the terms and conditions either of that specified version or
-of any later version that has been published (not as a draft) by the
-Free Software Foundation.  If the Document does not specify a version
-number of this License, you may choose any version ever published (not
-as a draft) by the Free Software Foundation.
-
-<P>
-
-<H1><A NAME="SECTION000150000000000000000">
 About this document ...</A>
 </H1>
  <STRONG>Implementation of OGC's WPS standard: PyWPS</STRONG><P>
@@ -2518,53 +1581,100 @@ Mathematics Department, Macquarie University, Sydney.
 The command line arguments were: <BR>
  <STRONG>latex2html</STRONG> <TT>-split 0 pywps-howto.tex</TT>
 <P>
-The translation was initiated by Jachym Cepicky on 2007-08-14
+The translation was initiated by Jachym Cepicky on 2007-10-02
 <BR><HR><H4>Footnotes</H4>
 <DL>
-<DT><A NAME="foot377">...
+<DT><A NAME="foot297">... Umwelt</A><A
+ HREF="pywps-howto.html#tex2html1"><SUP><SPAN CLASS="arabic">1</SPAN></SUP></A></DT>
+<DD><TT><A NAME="tex2html2"
+  HREF="http://dbu.de">http://dbu.de</A></TT>
+
+</DD>
+<DT><A NAME="foot298">...
+GDF-Hannover</A><A
+ HREF="pywps-howto.html#tex2html3"><SUP><SPAN CLASS="arabic">2</SPAN></SUP></A></DT>
+<DD><TT><A NAME="tex2html4"
+  HREF="http://gdf-hannover.de">http://gdf-hannover.de</A></TT>
+
+</DD>
+<DT><A NAME="foot299">...
+Sensing</A><A
+ HREF="pywps-howto.html#tex2html5"><SUP><SPAN CLASS="arabic">3</SPAN></SUP></A></DT>
+<DD><TT><A NAME="tex2html6"
+  HREF="http://www.bnhelp.cz">http://www.bnhelp.cz</A></TT>
+
+</DD>
+<DT><A NAME="foot300">...
+Cepicky</A><A
+ HREF="pywps-howto.html#tex2html7"><SUP><SPAN CLASS="arabic">4</SPAN></SUP></A></DT>
+<DD><TT><A NAME="tex2html8"
+  HREF="http://les-ejk.cz">http://les-ejk.cz</A></TT>
+
+</DD>
+<DT><A NAME="foot301">...
+Consortium</A><A
+ HREF="pywps-howto.html#tex2html9"><SUP><SPAN CLASS="arabic">5</SPAN></SUP></A></DT>
+<DD><TT><A NAME="tex2html10"
+  HREF="http://www.opengeospatial.org/standards/requests/28">http://www.opengeospatial.org/standards/requests/28</A></TT>
+
+</DD>
+<DT><A NAME="foot40">...
+GIS</A><A
+ HREF="pywps-howto.html#tex2html11"><SUP><SPAN CLASS="arabic">6</SPAN></SUP></A></DT>
+<DD>http://grass.itc.it
+
+</DD>
+<DT><A NAME="foot302">...
 list</A><A
- HREF="pywps-howto.html#tex2html8"><SUP><SPAN CLASS="arabic">1</SPAN></SUP></A></DT>
+ HREF="pywps-howto.html#tex2html15"><SUP><SPAN CLASS="arabic">7</SPAN></SUP></A></DT>
 <DD>http://wald.intevation.org/mailman/listinfo/pywps-develPyWPS
 - development list
 
 </DD>
-<DT><A NAME="foot378">...
+<DT><A NAME="foot303">...
 bugtracker</A><A
- HREF="pywps-howto.html#tex2html9"><SUP><SPAN CLASS="arabic">2</SPAN></SUP></A></DT>
+ HREF="pywps-howto.html#tex2html16"><SUP><SPAN CLASS="arabic">8</SPAN></SUP></A></DT>
 <DD>http://wald.intevation.org/tracker/?atid=174&amp;group_id=22&amp;func=browsePyWPS
 Bug tracker
 
 </DD>
-<DT><A NAME="foot91">...
-site</A><A
- HREF="pywps-howto.html#tex2html15"><SUP><SPAN CLASS="arabic">3</SPAN></SUP></A></DT>
-<DD><TT><A NAME="tex2html16"
+<DT><A NAME="foot93">...
+homepage</A><A
+ HREF="pywps-howto.html#tex2html22"><SUP><SPAN CLASS="arabic">9</SPAN></SUP></A></DT>
+<DD><TT><A NAME="tex2html23"
   HREF="http://pywps.wald.intevation.org">http://pywps.wald.intevation.org</A></TT>
 
 </DD>
-<DT><A NAME="foot381">...
-document</A><A
- HREF="pywps-howto.html#tex2html18"><SUP><SPAN CLASS="arabic">4</SPAN></SUP></A></DT>
-<DD><TT><A NAME="tex2html19"
+<DT><A NAME="foot304">...
+0.4.0</A><A
+ HREF="pywps-howto.html#tex2html24"><SUP><SPAN CLASS="arabic">10</SPAN></SUP></A></DT>
+<DD><TT><A NAME="tex2html25"
   HREF="http://www.opengeospatial.org/standards/requests/28">http://www.opengeospatial.org/standards/requests/28</A></TT>
 
 </DD>
-<DT><A NAME="foot382">...process.html</A><A
- HREF="pywps-howto.html#tex2html20"><SUP><SPAN CLASS="arabic">5</SPAN></SUP></A></DT>
+<DT><A NAME="foot307">...
+document</A><A
+ HREF="pywps-howto.html#tex2html26"><SUP><SPAN CLASS="arabic">11</SPAN></SUP></A></DT>
+<DD><TT><A NAME="tex2html27"
+  HREF="http://www.opengeospatial.org/standards/requests/28">http://www.opengeospatial.org/standards/requests/28</A></TT>
+
+</DD>
+<DT><A NAME="foot308">...process.html</A><A
+ HREF="pywps-howto.html#tex2html28"><SUP><SPAN CLASS="arabic">12</SPAN></SUP></A></DT>
 <DD>http://wald.intevation.org/plugins/scmsvn/viewcvs.php/*checkout*/trunk/doc/process.html?rev=369&amp;root=pywpsDocumentation
 to process.py module
 
 </DD>
-<DT><A NAME="foot385">...self.grassLocation</A><A
- HREF="pywps-howto.html#tex2html21"><SUP><SPAN CLASS="arabic">6</SPAN></SUP></A></DT>
+<DT><A NAME="foot311">...self.grassLocation</A><A
+ HREF="pywps-howto.html#tex2html29"><SUP><SPAN CLASS="arabic">13</SPAN></SUP></A></DT>
 <DD>See e.g.
 http://grass.itc.it/grass63/manuals/html63_user/helptext.htmlGRASS
 manual for details
 
 </DD>
-<DT><A NAME="foot386">...
+<DT><A NAME="foot312">...
 later</A><A
- HREF="pywps-howto.html#tex2html22"><SUP><SPAN CLASS="arabic">7</SPAN></SUP></A></DT>
+ HREF="pywps-howto.html#tex2html30"><SUP><SPAN CLASS="arabic">14</SPAN></SUP></A></DT>
 <DD><TT>self.grassLocation="/path/to/location"</TT>
 
 </DD>
@@ -2581,7 +1691,7 @@ later</A><A
 <!--End of Navigation Panel-->
 <ADDRESS>
 Jachym Cepicky
-2007-08-14
+2007-10-02
 </ADDRESS>
 </BODY>
 </HTML>
