@@ -2,7 +2,7 @@ pywps (2.0.0-1) stable; urgency=low
 
   * New version
   * New code structure
-  * See change log for more details
+  * See subversion change log for more details
 
  -- Jachym Cepicky <jachym@les-ejk.cz>  Mon, 4 Jun 2007 15:38:00 +0200
 pywps (1.1.0-1) stable; urgency=low
