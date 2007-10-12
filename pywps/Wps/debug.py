@@ -42,5 +42,5 @@ def PyWPSdebug(d,level=0,pref="debug"):
                         (pref,level,line.strip()))
         else:
             Stderr.write("PyWPS %s %d: %s\n" %\
-                    (pref,level,d.strip()))
+                    (pref,level,str(d).strip()))
 
