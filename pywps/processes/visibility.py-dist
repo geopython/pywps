@@ -1,10 +1,9 @@
 """
 pywps process example:
 
-classify: Classify satellite image
+visibility: Visibility analysis
 """
-# Author:	Stepan Kafka
-# Rewritten by: Jachym Cepicky
+# Author : Jachym Cepicky
 # Lince: 
 # 
 # Web Processing Service implementation
@@ -36,63 +35,64 @@ class Process(GRASSWPSProcess):
     def __init__(self):
         GRASSWPSProcess.__init__(self,
                     Identifier = "visibility",
-                    processVersion = "0.2",
+                    processVersion = "0.3",
                     Title="Visibility analysis",
-                    Abstract="GRASS processed line of sight analysis.",
-                    grassLocation="/var/www/wps/spearfish60/",
+                    Abstract="""GRASS visibility (Lines of Sight) analysis.
+                    The analysis is performed on raster digital elevation
+                    model, which is downloaded via Web Coveradge Service or
+                    similar.""",
                     storeSupported = "true",
-                    statusSupported = "true",
-                    )
+                    statusSupported = "true")
 
-        self.AddLiteralInput(Identifier = "x",
-                            Title = "x coordinate",
-                            type = type(0.0)
-                            )
-        self.AddLiteralInput(Identifier = "y",
-                            Title = "y coordinate",
-                            type = type(0.0)
-                            )
-        self.AddLiteralInput(Identifier = "maxdist",
-                            Title = "Maximal distance",
-		            Abstract = 'Maximal distance of visibility (meters)',
-                            type = type(0.0)
-                            )
+        self.AddLiteralInput(Identifier = "lon",
+                            Title = "Longitude",
+                            Abstract = "X coordinate of the observer",
+                            type = type(0.0))
+
+        self.AddLiteralInput(Identifier = "lat",
+                            Title = "Latitude",
+                            Abstract = "Y coordinate of the observer",
+                            type = type(0.0))
+
+        self.AddComplexInput(Identifier = "dem",
+                            Title = 'Digital elevation model',
+                            Abstract = 'URL (e.g. WCS) of digital elevation model')
+
         self.AddLiteralInput(Identifier = "observer",
                             type = type(0.0),
-                            Title = 'Observer elevation',
+                            Title = 'Observer height above the DTM',
                             Abstract = 'The height of observer eye over the terrain (meters)',
-                            )
+                            value = 1.8)
+
+        self.AddLiteralInput(Identifier = "format",
+                            type = type(0.0),
+                            Title = 'Required format',
+                            Abstract = 'Required output format',
+                            allowedvalues = ("image/tiff","image/png"),
+                            value = "image/tiff")
         
-        self.AddComplexReferenceOutput(Identifier = "output",
-                Title =   'Resulting output map',
-                Formats = ["image/tiff"],)
+        self.AddComplexReferenceOutput(Identifier = "visibility",
+                Title =   'Resulting output visibility map',
+                Formats = ["image/tiff","image/png"])
         
-    #####################################################################
     #
     # Execute part of the process
     #
-    #####################################################################
     def execute(self):
-        
-        self.GCmd("g.region -d")
-        dist = float(self.GetInputValue("maxdist"))
-        if dist > 20000:
-            return "Visibility Error: maximal distance 2000 exceeded (%s)" % dist
-        xmin=float (self.GetInputValue("x")) - dist
-        ymin=float (self.GetInputValue('y')) - dist
-        xmax=float (self.GetInputValue('x')) + dist
-        ymax=float (self.GetInputValue('y')) + dist
-        self.GCmd("g.region w=%i s=%i e=%i n=%i align=elevation.dem" % (xmin,ymin,xmax,ymax))
-	self.SetStatus("Calculating visibility", 10)
-        self.GCmd("r.los input=elevation.dem output=output coordinate=%s,%s max_dist=%i obs_elev=%s" % \
-                (self.GetInputValue("x"),self.GetInputValue("y"),dist, self.GetInputValue('observer')))
-	self.SetStatus("Creating output",50)
-        self.GCmd("""r.mapcalc "output0=if(output,1,0)" """)
-        self.GCmd("r.out.gdal input=output0 output=output.tif type=Byte")
 
-        # check the resulting file or any other variable, which interrests you
-        if "output.tif" in os.listdir(os.curdir):
-            self.Outputs[0]['value'] = "output.tif"
-            return
-        else:
-            return "Output file not created"
+	self.SetStatus("Importing data", 10)
+        self.GCmd("r.in.gdal in=%s out=dem" % (self.GetInputValue("dem"))
+        self.GCmd("g.region rast=dem")
+	self.SetStatus("Calculating visibility", 30)
+        self.GCmd("r.los input=dem output=output coordinate=%s,%s obs_elev=%s" % \
+                (self.GetInputValue("lon"),self.GetInputValue("lat"), self.GetInputValue('observer')))
+	self.SetStatus("Creating output",70)
+        self.GCmd("""r.mapcalc "output0=if(output,1,0)" """)
+	self.SetStatus("Exporting output",90)
+        if self.GetInputValue("format") == "image/tiff":
+            self.GCmd("r.out.gdal input=output0 output=visibility.tif type=Byte")
+            self.SetOutputValue("visibility","visibility.tif")
+        elif self.GetInputValue("format") == "image/png":
+            self.GCmd("r.out.gdal input=output0 output=visibility.png type=Byte")
+            self.SetOutputValue("visibility","visibility.tif")
+        return
