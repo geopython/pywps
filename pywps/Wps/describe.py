@@ -30,6 +30,7 @@ This module generates XML file with DescribeProcess response of WPS
 from xml.dom.minidom import Document
 from ogc import processdescription
 import append
+import sys
 
 class Describe:
     def __init__(self,serverSettings,processes,formValues):
@@ -366,8 +367,7 @@ class Describe:
                         for val in processInput['values']:
                             # allowed values
                             if not type(val) == type([]):
-                                value = self.document.createElement("%s%s"%\
-                                  (inputStruct['elements']['LiteralValues']['elements']['Value']['ns'],
+                                value = self.document.createElement("%s%s" % (inputStruct['elements']['LiteralValues']['elements']['AllowedValues']['elements']['Value']['ns'],
                              "Value"))
                                 value.appendChild(self.document.createTextNode(str(val)))
                                 valueNode.appendChild(value)
