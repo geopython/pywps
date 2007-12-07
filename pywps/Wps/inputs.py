@@ -80,6 +80,9 @@ class processExecuteXML(xml.sax.handler.ContentHandler):
                 "data":"!complexvalue!",
             }
 
+        elif name[1] == "BoundingBoxValue":
+            self.value = "!bboxvalue!"
+
         elif name[1] == "LiteralValue":
             self.inValue = True
             self.inLiteralValue = True
@@ -243,16 +246,17 @@ class Inputs:
             ns = formDocument.firstChild.namespaceURI
 
             # attributes
-            for attribute in requestExec['attributes'].keys():
-                value = formDocument.firstChild.getAttributeNS(ns,attribute)
+            #for attribute in requestExec['attributes'].keys():
+                    #value = formDocument.firstChild.getAttributeNS(ns,attribute)
                     #if requestExec["attributes"][attribute]['oblig'] == "m":
                     #    print >>sys.stderr, "#### tadxx"
                     #    return "Execute"
-                self.values[attribute] =  value
+                    #self.values[attribute] =  value
 
             self.values['request'] = "Execute"
             self.values['service'] = "Wps"
             pass
+            
 
             for input in self.values['datainputs'].keys():
                 # complexvalues
@@ -262,6 +266,7 @@ class Inputs:
                     for Input in formDocument.getElementsByTagNameNS("http://www.opengeospatial.net/wps","Input"):
                         cmplxval = Input.getElementsByTagNameNS("http://www.opengeospatial.net/wps","ComplexValue")
                         identifier = Input.getElementsByTagNameNS("http://www.opengeospatial.net/ows","Identifier")[0].firstChild.data
+                        print >>sys.stderr, cmplxval
                         # if there is at least one <ComplexValue> Element
                         # in input xml 
                         if len(cmplxval) and identifier == input:
@@ -274,10 +279,11 @@ class Inputs:
                             else:
                                 self.values['datainputs'][input]["data"] = cmplxval[0].firstChild.toxml()
 
-                elif self.values['datainputs'][input] == "!bboxvalue!":
-                    for Input in formDocument.getElementsByTagName("Input"):
-                        cmplxval = Input.getElementsByTagName("BoundingBoxValue")
-                        identifier = Input.getElementsByTagName("ows:Identifier")[0].firstChild.data
+                # bbox values
+                if self.values['datainputs'][input] == "!bboxvalue!":
+                    for Input in formDocument.getElementsByTagNameNS("http://www.opengeospatial.net/wps","Input"):
+                        cmplxval = Input.getElementsByTagNameNS("http://www.opengeospatial.net/wps","BoundingBoxValue")
+                        identifier = Input.getElementsByTagNameNS("http://www.opengeospatial.net/ows","Identifier")[0].firstChild.data
                         if len(cmplxval) and identifier == input:
                             self.values['datainputs'][input] = []
                             geom = \
@@ -291,9 +297,15 @@ class Inputs:
                             self.values['datainputs'][input].append(geom[1])
 
             # identifier is array
-            self.values['identifier'] = self.values['identifier']
+            # self.values['identifier'] = [self.values['identifier']]
 
         # not describeprocess and not execute: exception
+            firstNode = formDocument.firstChild
+            if (firstNode.getAttributeNS(ns,"store")):
+                self.values['store'] = firstNode.getAttributeNS(ns,"store")
+                print >>sys.stderr, "######"
+            if (firstNode.getAttributeNS(ns,"status")):
+                self.values['store'] = firstNode.getAttributeNS(ns,"status")
         else:
             raise InvalidParameterValue(formDocument.firstChild.tagName)
         return
