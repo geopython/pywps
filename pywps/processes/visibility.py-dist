@@ -37,10 +37,7 @@ class Process(GRASSWPSProcess):
                     Identifier = "visibility",
                     processVersion = "0.3",
                     Title="Visibility analysis",
-                    Abstract="""GRASS visibility (Lines of Sight) analysis.
-                    The analysis is performed on raster digital elevation
-                    model, which is downloaded via Web Coveradge Service or
-                    similar.""",
+                    Abstract="GRASS visibility (Lines of Sight) analysis.",
                     storeSupported = "true",
                     statusSupported = "true")
 
@@ -65,15 +62,16 @@ class Process(GRASSWPSProcess):
                             value = 1.8)
 
         self.AddLiteralInput(Identifier = "format",
-                            type = type(0.0),
+                            type = type(''),
                             Title = 'Required format',
                             Abstract = 'Required output format',
-                            allowedvalues = ("image/tiff","image/png"),
+                            allowedvalues = ["image/tiff","image/png"],
                             value = "image/tiff")
         
         self.AddComplexReferenceOutput(Identifier = "visibility",
                 Title =   'Resulting output visibility map',
-                Formats = ["image/tiff","image/png"])
+                Formats = ["image/tiff","image/png"],
+                Schemas=[None,None])
         
     #
     # Execute part of the process
@@ -81,7 +79,8 @@ class Process(GRASSWPSProcess):
     def execute(self):
 
 	self.SetStatus("Importing data", 10)
-        self.GCmd("r.in.gdal in=%s out=dem" % (self.GetInputValue("dem"))
+        os.system("cp %s /tmp/dem" % (self.GetInputValue("dem")))
+        self.GCmd("r.in.gdal in=%s out=dem" % (self.GetInputValue("dem")))
         self.GCmd("g.region rast=dem")
 	self.SetStatus("Calculating visibility", 30)
         self.GCmd("r.los input=dem output=output coordinate=%s,%s obs_elev=%s" % \
@@ -89,10 +88,11 @@ class Process(GRASSWPSProcess):
 	self.SetStatus("Creating output",70)
         self.GCmd("""r.mapcalc "output0=if(output,1,0)" """)
 	self.SetStatus("Exporting output",90)
+
         if self.GetInputValue("format") == "image/tiff":
             self.GCmd("r.out.gdal input=output0 output=visibility.tif type=Byte")
             self.SetOutputValue("visibility","visibility.tif")
         elif self.GetInputValue("format") == "image/png":
-            self.GCmd("r.out.gdal input=output0 output=visibility.png type=Byte")
-            self.SetOutputValue("visibility","visibility.tif")
+            self.GCmd("r.out.png input=output0 output=visibility.png")
+            self.SetOutputValue("visibility","visibility.png")
         return
