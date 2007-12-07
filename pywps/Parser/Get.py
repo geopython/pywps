@@ -20,7 +20,7 @@
 
 #import wpsExceptions
 
-import types
+import types,sys
 
 class Get:
     wps = None
@@ -42,7 +42,7 @@ class Get:
         keys = fieldStorage.keys()
 
         # converting all key names to lowercase
-        for (i = 0; i < len(keys); i++):
+        for i in range(len(keys)):
             newKey = keys[i].lower()
 
             if (type(fieldStorage.getvalue(keys[i]))) == types.ListType:
@@ -53,16 +53,16 @@ class Get:
 
         try:
             self.controlInputs()
-        except Error,e: #!!! this should be done with help of WPS exeptions
-            print >>sys.stderr, "ERROR: e"
+        except Exception,e: #!!! this should be done with help of WPS exeptions
+            print >>sys.stderr, "ERROR: ",e
 
 
-    def controlInputs():
+    def controlInputs(self):
             
         key = None
         value = None
 
-        for key in self.inputValues.keys()
+        for key in self.inputValues.keys():
             value = self.inputValues(key)
 
             # check size
@@ -75,7 +75,7 @@ class Get:
         if self.inputValues[self.SERVICE].lower() != self.WPS:
             raise ValueError("Service '%s' not supported!" %\
                     (self.inputValues[self.SERVICE]))
-            # FIXME !!!! Should be InvalidInputValue or somthing like this
+            # FIXME !!!! Should be InvalidInputValue or somthing like this
 
         if self.inputValues["request"].lower() ==\
            self.GET_CAPABILITIES:
@@ -92,7 +92,8 @@ class Get:
             self.requestParser = Execute.Get(self.wps)
         else:
             raise ValueError("Request type '%s' unknown!" % \
-                    (self.inputValues["request"])
-            # FIXME !!!! Should be InvalidInputValue or somthing like this
-        self.requestParser.parse(self.inputValues)
+                    (self.inputValues["request"]))
+            # FIXME !!!! Should be InvalidInputValue or somthing like this
+        #FIXME HERE WE ARE self.requestParser.parse(self.inputValues)
+
         return
