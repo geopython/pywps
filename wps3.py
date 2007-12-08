@@ -45,7 +45,10 @@ Enjoy and happy GISing!
 
 import pywps
 from pywps import Parser 
-import sys, os, cgi
+from pywps import Exeptions
+from pywps.Exceptions import *
+
+import sys, os, cgi, ConfigParser
 
 class WPS:
 
@@ -55,36 +58,51 @@ class WPS:
     maxFileSize = 0 # maximal input XML or other file size
     maxInputSize = 0 # maximal size of HTTP Get request
     parser = None
+    config = None  # Configuration
+    workingDir = None # this working directory
 
     METHOD_GET="GET"
     METHOD_POST="POST"
+    exceptions = pywps.Exceptions
+
+    DEFAULT_WPS_VERSION = "1.0.0"
+    VERSION = "3.0-svn"
+    DEFAULT_LANGUAGE = "en"
 
     def __init__(self):
 
         # getsettings
-        # FIXME !!!!! missing
+        self.loadConfiguration()
 
         # findout the request method
         self.method = os.getenv("REQUEST_METHOD")
         if not self.method:
             self.method = self.METHOD_GET
 
-        # set maximal input size
-        # FIXME !!!! missing loading from settings
-        # self.maxInputLength = 1024
-        # self.maxFileSize = 1000000
-
         if self.method == self.METHOD_GET:
-            from pywps.Parser import Get
-            parser = pywps.Parser.Get(self)
-            parser.parse(self,cgi.FieldStorage())
+            from pywps.Parser.Get import Get
+            parser = Get(self)
+            parser.parse(cgi.FieldStorage())
         else:
-            from pywps.Parser import Post
-            parser = Post()
-            parser.parse(self,sys.stdin)
+            from pywps.Parser.Post import Post
+            parser = Post(self)
+            parser.parse(sys.stdin)
 
         return
+    
+    def loadConfiguration(self):
+
+        cfgfiles = None
+
+        if sys.platform == 'win32':
+            self.workingDir = os.path.abspath(os.path.join(os.getcwd(), os.path.dirname(sys.argv[0])))
+            cfgfiles = (os.path.join(workingDir, "pywps","etc","pywps.cfg"),
+                    os.path.join(workingDir,"pywps","etc","grass.cfg"))
+        else:
+            cfgfiles = (os.path.join("pywps","etc", "pywps.cfg"), "/etc/pywps.cfg")
+
+        self.config = ConfigParser.ConfigParser()
+        self.config.read(cfgfiles)
 
 if __name__ == "__main__":
     wps = WPS()
-    wps.PerformRequest()
