@@ -18,14 +18,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#import wpsExceptions
-
 import types,sys
 
 class Get:
     wps = None
     fieldStorage = None
-    inputValues =  {}
+    unparsedInputs =  {}
     GET_CAPABILITIES = "getcapabilities"
     DESCRIBE_PROCESS = "describeprocess"
     EXECUTE = "execute"
@@ -40,21 +38,30 @@ class Get:
         
         key = None
         keys = fieldStorage.keys()
+        maxInputLength = self.wps.config.getint("server","maxinputparamlength")
 
         # converting all key names to lowercase
         for i in range(len(keys)):
             newKey = keys[i].lower()
+            newValue = ""
 
+            # if there are multiple inputs with same key, take the last one
             if (type(fieldStorage.getvalue(keys[i]))) == types.ListType:
-                self.inputValues[newKey] = fieldStorage.getvalue(keys[i])[-1].strip()
+                newValue = fieldStorage.getvalue(keys[i])[-1].strip()
             else:
-                self.inputValues[newKey] = fieldStorage.getvalue(keys[i]).strip()
+                newValue = fieldStorage.getvalue(keys[i]).strip()
+
+            # if maxInputLength > 0, cut
+            if (maxInputLength > 0):
+                newValue = newValue[0:maxInputLength]
             keys[i] = newKey
+            self.unparsedInputs[newKey] = newValue
 
         try:
             self.controlInputs()
-        except Exception,e: #!!! this should be done with help of WPS exeptions
-            print >>sys.stderr, "ERROR: ",e
+        except KeyError,e:
+            raise self.wps.exceptions.MissingParameterValue(e.message)
+
 
 
     def controlInputs(self):
@@ -62,8 +69,8 @@ class Get:
         key = None
         value = None
 
-        for key in self.inputValues.keys():
-            value = self.inputValues(key)
+        for key in self.unparsedInputs.keys():
+            value = self.unparsedInputs[key]
 
             # check size
             if self.wps.maxInputLength > 0 and\
@@ -72,28 +79,25 @@ class Get:
                 raise FileSizeExceeded(key)
 
 
-        if self.inputValues[self.SERVICE].lower() != self.WPS:
-            raise ValueError("Service '%s' not supported!" %\
-                    (self.inputValues[self.SERVICE]))
-            # FIXME !!!! Should be InvalidInputValue or somthing like this
+        if self.unparsedInputs[self.SERVICE].lower() != self.WPS:
+            raise self.wps.exceptions.InvalidParameterValue(
+                    self.unparsedInputs[self.SERVICE])
 
-        if self.inputValues["request"].lower() ==\
+        if self.unparsedInputs["request"].lower() ==\
            self.GET_CAPABILITIES:
             import GetCapabilities 
             self.requestParser = GetCapabilities.Get(self.wps)
-
-        elif self.inputValues["request"].lower() ==\
+        elif self.unparsedInputs["request"].lower() ==\
            self.DESCRIBE_PROCESS:
             import DescribeProcess 
             self.requestParser = DescribeProcess.Get(self.wps)
-        elif self.inputValues["request"].lower() ==\
+        elif self.unparsedInputs["request"].lower() ==\
            self.EXECUTE:
             import Execute 
             self.requestParser = Execute.Get(self.wps)
         else:
-            raise ValueError("Request type '%s' unknown!" % \
-                    (self.inputValues["request"]))
-            # FIXME !!!! Should be InvalidInputValue or somthing like this
-        #FIXME HERE WE ARE self.requestParser.parse(self.inputValues)
+            raise self.wps.exceptions.InvalidParameterValue(
+                    self.unparsedInputs["request"])
 
+        self.requestParser.parse(self.unparsedInputs)
         return
