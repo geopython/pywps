@@ -68,10 +68,11 @@ class Post:
         #
             
         # acceptVersions
-        acceptedVersionsNodes = self.document.getElementsByTagNameNS(nameSpace,"AcceptVersions")
+        acceptedVersionsNodes = self.document.getElementsByTagNameNS(
+                                                nameSpace,"AcceptVersions")
         if len(acceptedVersionsNodes) > 0:
             for versionNode in\
-                    acceptedVersionsNodes[-1].getElementsByTagNameNS(nameSpace,"Version"):
+                acceptedVersionsNodes[-1].getElementsByTagNameNS(nameSpace,"Version"):
                 versions.append(versionNode.firstChild.nodeValue)
 
         if len(versions) == 0:

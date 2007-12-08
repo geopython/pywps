@@ -37,24 +37,12 @@ class Post:
         
         maxFileSize = None
         inputXml = None
-        firstChild = None
 
         # get the maximal input file size from configuration
-        maxFileSize = self.wps.config.get("server","maxFileSize").lower()
-        if maxFileSize.find("kb") > 0:
-            maxFileSize = float(maxFileSize[:maxFileSize.find("gb")])
-            maxFileSize = int(maxFileSize*1024)
-        elif maxFileSize.find("mb") > 0:
-            maxFileSize = float(maxFileSize[:maxFileSize.find("mb")])
-            maxFileSize = int(maxFileSize*1024*1024)
-        elif maxFileSize.find("gb") > 0:
-            maxFileSize = float(maxFileSize[:maxFileSize.find("gb")])
-            maxFileSize = int(maxFileSize*1024*1024*1024)
-        elif maxFileSize.find("b") > 0:
-            maxFileSize = int(maxFileSize[:maxFileSize.find("b")])
-        else:
-            maxFileSize = int(maxFileSize)
+        maxFileSize = self.getMaxFileSize(
+                self.wps.config.get("server","maxFileSize").lower())
 
+        # read the document
         if maxFileSize > 0:
             inputXml = file.read(maxFileSize)
             if file.read() != "":
@@ -68,13 +56,13 @@ class Post:
         except xml.parsers.expat.ExpatError,e:
             raise self.wps.exceptions.NoApplicableCode(e.message)
 
-        # get the first child (omit comments)
-        for node in self.document.childNodes:
-            if node.nodeType == xml.dom.minidom.Element.nodeType:
-                firstChild = node
-        if firstChild == None:
-            raise self.wps.exceptions.NoApplicableCode(
-                                        "No root Element found!")
+        self.findRequestType()
+
+        return
+
+    def findRequestType(self):
+
+        firstChild = self.getFirstChildNode()
 
         if firstChild.tagName.find(self.GET_CAPABILITIES) > -1:
             import GetCapabilities 
@@ -88,4 +76,33 @@ class Post:
         else:
             raise self.wps.Exceptions.InvalidParameterValue(firstChild.tagName)
         self.requestParser.parse(self.document)
-        return
+
+    def getFirstChildNode(self):
+
+        node = None
+
+        # get the first child (omit comments)
+        for node in self.document.childNodes:
+            if node.nodeType == xml.dom.minidom.Element.nodeType:
+                firstChild = node
+        if firstChild == None:
+            raise self.wps.exceptions.NoApplicableCode(
+                                        "No root Element found!")
+        return firstChild
+
+    def getMaxFileSize(self,maxFileSize):
+        if maxFileSize.find("kb") > 0:
+            maxFileSize = float(maxFileSize[:maxFileSize.find("gb")])
+            maxFileSize = int(maxFileSize*1024)
+        elif maxFileSize.find("mb") > 0:
+            maxFileSize = float(maxFileSize[:maxFileSize.find("mb")])
+            maxFileSize = int(maxFileSize*1024*1024)
+        elif maxFileSize.find("gb") > 0:
+            maxFileSize = float(maxFileSize[:maxFileSize.find("gb")])
+            maxFileSize = int(maxFileSize*1024*1024*1024)
+        elif maxFileSize.find("b") > 0:
+            maxFileSize = int(maxFileSize[:maxFileSize.find("b")])
+        else:
+            maxFileSize = int(maxFileSize)
+        return maxFileSize
+

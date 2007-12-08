@@ -58,13 +58,13 @@ class Get:
             self.unparsedInputs[newKey] = newValue
 
         try:
-            self.controlInputs()
+            self.parseInputs()
         except KeyError,e:
             raise self.wps.exceptions.MissingParameterValue(e.message)
 
+        self.findRequestType()
 
-
-    def controlInputs(self):
+    def parseInputs(self):
             
         key = None
         value = None
@@ -82,6 +82,8 @@ class Get:
         if self.unparsedInputs[self.SERVICE].lower() != self.WPS:
             raise self.wps.exceptions.InvalidParameterValue(
                     self.unparsedInputs[self.SERVICE])
+    
+    def findRequestType(self):
 
         if self.unparsedInputs["request"].lower() ==\
            self.GET_CAPABILITIES:
