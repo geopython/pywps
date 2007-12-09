@@ -53,9 +53,9 @@ class Post(Post):
         self.document = document  # input DOM
 
         firstChild = self.getFirstChildNode(self.document)
-        self.nameSpace = self.document.firstChild.namespaceURI
+        self.nameSpace = firstChild.namespaceURI
         self.owsNameSpace = self.wps.OWS_NAMESPACE
-        self.owsNameSpace = self.wps.XLINK_NAMESPACE
+        self.xlinkNameSpace = self.wps.XLINK_NAMESPACE
         language  = None
         identifiers = []
         identifierNode = None
@@ -77,10 +77,11 @@ class Post(Post):
             raise self.wps.exceptions.MissingParameterValue("version")
 
         # identifier
-        self.inputs["identifier"] =\
-          document.getElementsByTagNameNS(self.owsNameSpace,"Identifier")[0]
-        if not self.inputs["identifier"]:
-            raise self.wps.exceptions.MissingParameterValue("identifier")
+        try:
+            self.inputs["identifier"] =\
+            firstChild.getElementsByTagNameNS(self.owsNameSpace,"Identifier")[0].firstChild.nodeValue
+        except IndexError:
+                raise self.wps.exceptions.MissingParameterValue("Identifier")
 
         #
         # Optional options
@@ -94,42 +95,143 @@ class Post(Post):
         self.inputs["language"] = language
 
         # dataInputs
-        inputsNode = \
-             document.getElementsByTagNameNS(self.nameSpace,"DataInputs")[0]
-        if inputsNode:
-            self.inputs["dataInputs"] = self.parseDataInputs(inputsNode) 
-        else:
-            self.inputs["dataInputs"] = {}
+        try:
+            inputsNode = firstChild.getElementsByTagNameNS(
+                                            self.nameSpace,"DataInputs")[0]
+            self.inputs["datainputs"] = self.parseDataInputs(inputsNode) 
+        except IndexError:
+            self.inputs["datainputs"] = None
 
         # responseForm
+        try:
+            responseFormNode = \
+                firstChild.getElementsByTagNameNS(self.nameSpace,
+                                                        "ResponseForm")[0]
+            self.inputs["responseform"] = self.parseResponseForm(
+                                                        responseFormNode) 
+        except IndexError:
+            self.inputs["responseform"] = None
 
         print self.inputs
 
-    #def parseDataInputs(self,inputsNode):
+    def parseResponseForm(self,responseFormNode):
+        form = {}
+        form["responsedocument"] = None
+        form["rawdataoutput"] = None
+
+        # ResponseDocument
+        try:
+            responseDocumentNode = responseFormNode.getElementsByTagNameNS(
+                                    self.nameSpace, "ResponseDocument")[0]
+            form["responsedocument"] = {}
+
+            # store
+            store = False
+            if responseDocumentNode.getAttributeNS(self.nameSpace,
+                    "storeExecuteResponse").lower() == "true":
+                form["responsedocument"]["storeExecuteResponse"]=True
+
+            # lineage
+            lineage = False
+            if responseDocumentNode.getAttributeNS(self.nameSpace,
+                    "lineage").lower() == "true":
+                form["responsedocument"]["lineage"]=True
+
+            # status
+            status = False
+            if responseDocumentNode.getAttributeNS(self.nameSpace,
+                    "status").lower() == "true":
+                form["responsedocument"]["status"]=True
+
+            form["responsedocument"]["outputs"] = {}
+            outputs = {}
+            for outputNode in responseDocumentNode.getElementsByTagNameNS(
+                                                self.nameSpace, "Output"):
+
+                try:
+                    # identifier
+                    identifier = outputNode.getElementsByTagNameNS(
+                                    self.owsNameSpace,
+                                    "Identifier")[0].firstChild.nodeValue
+                    outputs[identifier] = {}
+                except IndexError:
+                    raise self.wps.exceptions.MissingParameterValue("Identifier")
+                # FIXME Abstract, Title are not supported yet
+
+                outputs[identifier]["mimetype"] = \
+                    outputNode.getAttributeNS("*","mimeType") 
+                outputs[identifier]["encoding"] = \
+                    outputNode.getAttributeNS("*","encoding") 
+                outputs[identifier]["schema"] = \
+                    outputNode.getAttributeNS("*","schema") 
+                outputs[identifier]["uom"] = \
+                    outputNode.getAttributeNS(self.nameSpace,"uom") 
+
+                outputs[identifier]["asReference"] = False
+                if outputNode.getAttributeNS(
+                        self.nameSpace,"asReference").lower() == "true":
+                    outputs[identifier]["asReference"] = True
+
+            form["responsedocument"]["outputs"] = outputs
+
+        # RawDataOutput
+        except IndexError:
+            responseFormNode.getElementsByTagNameNS(self.nameSpace,
+                                                    "RawDataOutput")
+            form["rawdataoutput"] = {}
+            try:
+                # identifier
+                identifier = responseFormNode.getElementsByTagNameNS(
+                                self.owsNameSpace,
+                                "Identifier")[0].firstChild.nodeValue
+                form["rawdataoutput"][identifier] = {}
+            except IndexError:
+                raise self.wps.exceptions.MissingParameterValue("Identifier")
+            form["rawdataoutput"][identifier]["mimetype"] = \
+                    responseFormNode.getAttributeNS("*","mimeType")
+            form["rawdataoutput"][identifier]["encoding"] = \
+                    responseFormNode.getAttributeNS("*","encoding")
+            form["rawdataoutput"][identifier]["schema"] = \
+                    responseFormNode.getAttributeNS("*","schema")
+            form["rawdataoutput"][identifier]["uom"] = \
+                    responseFormNode.getAttributeNS("*","uom")
+        return form
+
+    def parseDataInputs(self,inputsNode):
 
         parsedDataInputs = {}
         
         for inputNode in inputsNode.getElementsByTagNameNS(self.nameSpace,
-                                                                "Input":
+                                                                "Input"):
             # input Identifier
-            identifier = inputNode.getElementsByTagNameNS(self.nameSpace,
-                                    "Identifier")[0].firstChild.nodeValue
-            if identifier == "":
-                raise self.wps.exeptions.NoApplicableCode(
+            try:
+                identifier = inputNode.getElementsByTagNameNS(
+                     self.owsNameSpace,"Identifier")[0].firstChild.nodeValue
+            except IndexError:
+                raise self.wps.exceptions.NoApplicableCode(
                                               "Identifer for input not set")
 
-            else:
-                parseDataInputs[identifier] = {"value":None,attributes:{}}
-            # Title and Abstract are only mandatory and not necessary
+            parsedDataInputs[identifier] = {"value":None, "attributes":{}}
+
+            # FIXME Title and Abstract are only mandatory and not necessary:
+            # skipping, not supported yet
             
             # formchoice
-            dataTypeNode = inputNode.lastChild
-            if dataTypeNode.nodeName.find("Reference") > -1:
-                self.parsedDataInputs[identifier] =\
+            try:
+                dataTypeNode = inputNode.getElementsByTagNameNS(
+                                            self.nameSpace,"Reference")[0]
+                parsedDataInputs[identifier] =\
                             self.parseReferenceDataInput(dataTypeNode)
-            elif dataTypeNode.nodeName.find("Data") > -1:
-                self.parsedDataInputs[identifier] =\
+            except IndexError:
+                dataTypeNode = inputNode.getElementsByTagNameNS(
+                                                self.nameSpace,"Data")[0]
+                parsedDataInputs[identifier] =\
                             self.parseDataDataInput(dataTypeNode)
+
+            try:
+                parsedDataInputs[identifier]
+            except KeyError:
+                raise self.wps.exceptions.InvalidParameterValue(identifier)
                 
         return parsedDataInputs
 
@@ -157,26 +259,129 @@ class Post(Post):
         if attributes["method"] == "":
             attributes["method"] = "GET"
         
-        # FIXME Header, Body, BodyReference - not yest supported
+        # header
+        try:
+            attributes["header"] = self.parseHeaderDataInput(
+                                        dataTypeNode.getElementsByTagNameNS(
+                                            self.nameSpace, "Header")[0])
+        except IndexError:
+            attributes["header"] = None
+
+        # body
+        try:
+            attributes["body"] = \
+                        dataTypeNode.getElementsByTagNameNS(self.nameSpace,
+                        "Body")[0].firstChild
+        
+            # get node value, if node type is Text or CDATA
+            if attributes["body"].nodeType == \
+                                    xml.dom.minidom.Text.nodeType or\
+            attributes["body"].nodeType ==\
+                                    xml.dom.minidom.CDATASection.nodeType:
+                attributes["body"] = attributes["body"].nodeValue
+        except IndexError:
+            attributes["body"] = None
+
+        # bodyreference
+        try:
+            bodyReferenceNode = dataTypeNode.getElementsByTagNameNS(
+                                        self.nameSpace,"BodyReference")[0]
+            attributes["bodyreference"] = bodyReferenceNode.getAttributeNS(
+                                                self.xlinkNameSpace,"href")
+        except IndexError:
+            attributes["bodyreference"] = None
+
         
         return attributes
 
+    def parseHeaderDataInput(self,headerNode):
+        header = {}
+
+        if headerNode:
+            header[headerNode.getAttributeNS(self.nameSpace,"key")] =\
+                        headerNode.getAttributeNS(self.nameSpace,"value")
+
+            if len(header.keys()) == 0:
+                raise self.wps.exeptions.MissingParameterValue("Header")
+
+        return header
+
     def parseDataDataInput(self,dataTypeNode):
-        attributes = {}
+        attributes = None
 
-        # FIXME Here I am
+        # complexData
+        if len(dataTypeNode.getElementsByTagNameNS(
+                                    self.nameSpace,"ComplexData")) > 0:
+            attributes = self.parseComplexData(
+                                dataTypeNode.getElementsByTagNameNS(
+                                           self.nameSpace,"ComplexData")[0])
+            
+        # literalData
+        elif len(dataTypeNode.getElementsByTagNameNS(
+                                    self.nameSpace,"LiteralData")) > 0:
+            attributes = self.parseLiteralData(
+                                dataTypeNode.getElementsByTagNameNS(
+                                           self.nameSpace,"LiteralData")[0])
+        # literalData
+        elif len(dataTypeNode.getElementsByTagNameNS(
+                                    self.nameSpace,"BoundingBoxData")) > 0:
+            attributes = self.parseBBoxData(
+                                dataTypeNode.getElementsByTagNameNS(
+                                       self.nameSpace,"BoundingBoxData")[0])
 
+        # if attributes are still None, exception will 
+        # be called in parent method
 
         return attributes
 
     def parseComplexData(self,complexDataNode):
-        pass
+        attributes = {}
+        attributes["mimetype"] = complexDataNode.getAttributeNS(
+                                        "*","mimeType")
+        attributes["encoding"] = complexDataNode.getAttributeNS(
+                                        "*","encoding")
+        attributes["schema"] = complexDataNode.getAttributeNS(
+                                        "*","schema")
+        for complexDataChildNode in complexDataNode.childNodes:
+            if complexDataChildNode.nodeType == \
+                xml.dom.minidom.Text.nodeType or \
+                complexDataChildNode.nodeType == \
+                xml.dom.minidom.CDATASection.nodeType:
+                attributes["value"] = complexDataChildNode.nodeValue
+            elif complexDataChildNode.nodeType == \
+                    xml.dom.minidom.Element.nodeType:
+                attributes["value"] = complexDataChildNode.toxml()
+            
+        return attributes
     
     def parseLiteralData(self,literalDataNode):
-        pass
+        attributes = {}
+        attributes["dataType"] = literalDataNode.getAttributeNS(
+                                        "*","dataType")
+        attributes["uom"] = literalDataNode.getAttributeNS(
+                                        "*","uom")
+        attributes["value"] = literalDataNode.firstChild.nodeValue
+        return attributes
 
     def parseBBoxData(self,bboxDataNode):
-        pass
+        attributes = {}
+        attributes["value"] = []
+        attributes["crs"] = bboxDataNode.getAttributeNS(self.owsNameSpace,
+                                                                    "crs")
+        attributes["dimensions"] = int(bboxDataNode.getAttributeNS(
+                                        self.owsNameSpace, "dimensions"))
+
+        for coord in bboxDataNode.getElementsByTagNameNS(
+                self.owsNameSpace,"LowerCorner")[0].nodeValue.split():
+            attributes["value"].append(coord)
+        for coord in bboxDataNode.getElementsByTagNameNS(
+                self.owsNameSpace,"UpperCorner")[0].nodeValue.split():
+            attributes["value"].append(coord)
+
+        # reset everything, if there are not 4 coordinates
+        if len(attributes["value"]) != 4:
+            attributes = None
+        return attributes
 
 
 class Get:
@@ -231,10 +436,10 @@ class Get:
 
         # dataInputs
         try:
-            self.inputs["dataInputs"] = self.parseDataInputs(
+            self.inputs["datainputs"] = self.parseDataInputs(
                         self.unparsedInputs["datainputs"])
         except KeyError:
-            self.inputs["dataInputs"] = {}
+            self.inputs["datainputs"] = {}
 
         # ResponseDocument
         try:
