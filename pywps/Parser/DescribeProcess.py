@@ -23,31 +23,120 @@ This module parses OGC Web Processing Service (WPS) DescribeProcess request.
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-from wpsexceptions import *
+import xml.dom.minidom
+from pywps.Parser.Post import Post
 
-class Post:
+class Post(Post):
     """
     Parses input request obtained via HTTP POST encoding - should be XML
     file.
     """
-    def __init__(self,dom):
+    wps = None # main WPS instance
+    document = None # input DOM object
+    inputs = {} # resulting parsed inputs
+
+
+    def __init__(self,wps):
         """
         Arguments:
-            self
-            dom - Document Object Model of input XML request encoding
+           self
+           wps   - parent WPS instance
         """
+        self.wps = wps
 
-        self.dom = dom  # input DOM
-        self.input = {} # output Object with data structure
+    def parse(self,document):
+        self.document = document  # input DOM
+
+        firstChild = self.getFirstChildNode(self.document)
+        nameSpace = self.document.firstChild.namespaceURI
+        owsNameSpace = self.wps.OWS_NAMESPACE
+        language  = None
+        identifiers = []
+        identifierNode = None
+
+        #
+        # Mandatory options
+        #
+        
+        # service
+        self.inputs["service"] = "wps"
+        
+        # request 
+        self.inputs["request"] = "describeprocess"
+
+        # version
+        self.inputs["version"] = firstChild.getAttribute("version")
+        if not self.inputs["version"]:
+            raise self.wps.exceptions.MissingParameterValue("version")
+
+        # identifiers
+        for identifierNode in self.document.getElementsByTagNameNS(
+                owsNameSpace,"Identifier"):
+            identifiers.append(identifierNode.firstChild.nodeValue)
+        self.inputs["identifier"] = identifiers
+
+        #
+        # Optional options
+        #
+            
+        # language
+        language = firstChild.getAttribute("language")
+        if not language:
+            language = self.wps.DEFAULT_LANGUAGE
+
+        self.inputs["language"] = language
+
+        print self.inputs
+                
         return
 
 class Get:
     """
     Parses input request obtained via HTTP GET encoding.
     """
-    def __init__(self,parameters):
+
+    wps = None  # main WPS instance
+    unparsedInputs = {} # input arguments
+    inputs = {} # resulting parsed inputs
+
+    def __init__(self,wps):
         """
         Arguments:
            self
-           parameters   - input values
+           wps   - parent WPS instance
         """
+        self.wps = wps
+
+    def parse(self,unparsedInputs):
+        self.unparsedInputs = unparsedInputs
+
+        #
+        # Mandatory options
+        #
+
+        # service (is allready controled)
+        if self.unparsedInputs["service"].lower() == "wps":
+            self.inputs["service"] = self.unparsedInputs["service"].lower()
+
+        # Request (is allready controled)
+        if self.unparsedInputs["request"].lower() == "describeprocess":
+            self.inputs["request"] = self.unparsedInputs["request"].lower()
+
+        # version
+        self.inputs["version"] = self.unparsedInputs["version"]
+
+        # identifier
+        self.inputs["identifier"] = self.unparsedInputs["identifier"].split(",")
+
+        # 
+        # Optional options
+        #
+
+        # Language
+        try:
+            self.inputs["language"] =\
+                                    self.unparsedInputs["language"].lower()
+        except KeyError,e:
+            self.inputs["language"] = self.wps.DEFAULT_LANGUAGE
+
+        print self.inputs

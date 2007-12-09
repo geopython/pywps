@@ -25,7 +25,9 @@ This module parses OGC Web Processing Service (WPS) GetCapabilities request.
 
 import xml.dom.minidom
 
-class Post:
+from pywps.Parser.Post import Post
+
+class Post(Post):
     """
     Parses input request obtained via HTTP POST encoding - should be XML
     file.
@@ -49,7 +51,7 @@ class Post:
         versions = []   # accepted versions
         acceptedVersionsNodes = None 
         versionNode = None
-        firstChild = self.getFirstChild(self.document)
+        firstChild = self.getFirstChildNode(self.document)
         nameSpace = self.document.firstChild.namespaceURI
         language  = None
 
@@ -90,17 +92,6 @@ class Post:
         print self.inputs
                 
         return
-
-    def getFirstChild(self,document):
-        firstChild = None
-
-        for node in document.childNodes:
-            if node.nodeType == xml.dom.minidom.Element.nodeType:
-                firstChild = node
-        if firstChild == None:
-            raise self.wps.exceptions.NoApplicableCode(
-                                        "No root Element found!")
-        return firstChild
 
 class Get:
     """

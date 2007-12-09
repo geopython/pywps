@@ -62,7 +62,7 @@ class Post:
 
     def findRequestType(self):
 
-        firstChild = self.getFirstChildNode()
+        firstChild = self.getFirstChildNode(self.document)
 
         if firstChild.tagName.find(self.GET_CAPABILITIES) > -1:
             import GetCapabilities 
@@ -77,12 +77,12 @@ class Post:
             raise self.wps.Exceptions.InvalidParameterValue(firstChild.tagName)
         self.requestParser.parse(self.document)
 
-    def getFirstChildNode(self):
+    def getFirstChildNode(self,document):
 
         node = None
 
         # get the first child (omit comments)
-        for node in self.document.childNodes:
+        for node in document.childNodes:
             if node.nodeType == xml.dom.minidom.Element.nodeType:
                 firstChild = node
         if firstChild == None:

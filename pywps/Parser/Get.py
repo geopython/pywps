@@ -59,10 +59,10 @@ class Get:
 
         try:
             self.parseInputs()
+            self.findRequestType()
         except KeyError,e:
             raise self.wps.exceptions.MissingParameterValue(e.message)
 
-        self.findRequestType()
 
     def parseInputs(self):
             
