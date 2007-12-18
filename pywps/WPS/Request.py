@@ -1,5 +1,5 @@
 """
-WPS Execute request handler
+Request handler - prototype class
 """
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
@@ -24,19 +24,11 @@ WPS Execute request handler
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import xml.dom.minidom
-from Request import Request
 
-class Execute(Request):
-    """
-    """
+class Request:
+    dom = None # Output document
+    wps = None # Parent WPS object
 
     def __init__(self,wps):
-        """
-        Arguments:
-           self
-           wps   - parent WPS instance
-        """
-        Request.__init__(self,wps)
-
-        print "Execute"
+        self.wps = wps
 
