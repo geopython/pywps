@@ -89,6 +89,7 @@ class Post(Post):
 
         self.inputs["language"] = language
 
+        print "Content-type: text/plain\n"
         print self.inputs
                 
         return

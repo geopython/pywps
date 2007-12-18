@@ -26,7 +26,7 @@ This module parses OGC Web Processing Service (WPS) Execute request.
 import xml.dom.minidom
 from pywps.Parser.Post import Post
 
-import string
+import string,re
 
 class Post(Post):
     """
@@ -69,7 +69,7 @@ class Post(Post):
         self.inputs["service"] = "wps"
         
         # request 
-        self.inputs["request"] = "describeprocess"
+        self.inputs["request"] = "execute"
 
         # version
         self.inputs["version"] = firstChild.getAttribute("version")
@@ -116,8 +116,8 @@ class Post(Post):
 
     def parseResponseForm(self,responseFormNode):
         form = {}
-        form["responsedocument"] = None
-        form["rawdataoutput"] = None
+        form["responsedocument"] = {}
+        form["rawdataoutput"] = {}
 
         # ResponseDocument
         try:
@@ -129,19 +129,25 @@ class Post(Post):
             store = False
             if responseDocumentNode.getAttributeNS(self.nameSpace,
                     "storeExecuteResponse").lower() == "true":
-                form["responsedocument"]["storeExecuteResponse"]=True
+                form["responsedocument"]["storeexecuteresponse"]=True
+            else:
+                form["responsedocument"]["storeexecuteresponse"]=False
 
             # lineage
             lineage = False
             if responseDocumentNode.getAttributeNS(self.nameSpace,
                     "lineage").lower() == "true":
                 form["responsedocument"]["lineage"]=True
+            else:
+                form["responsedocument"]["lineage"]=False
 
             # status
             status = False
             if responseDocumentNode.getAttributeNS(self.nameSpace,
                     "status").lower() == "true":
                 form["responsedocument"]["status"]=True
+            else: 
+                form["responsedocument"]["status"]=False
 
             form["responsedocument"]["outputs"] = {}
             outputs = {}
@@ -242,7 +248,7 @@ class Post(Post):
         #
         # mandatrory attributes
         #
-        attributes["href"] =\
+        attributes["xlink:href"] =\
                     dataTypeNode.getAttributeNS(self.xlinkNameSpace,"href")
         if attributes == "":
             raise self.wps.exceptions.MissingParameterValue("'href'")
@@ -441,50 +447,62 @@ class Get:
         except KeyError:
             self.inputs["datainputs"] = {}
 
+        # ResponseForm
+
+        self.inputs["responseform"] = {}
+
         # ResponseDocument
         try:
-            self.inputs["responseDocument"] = self.parseDataInputs(
-                    self.unparsedInputs["responsedocument"])
+            self.inputs["responseform"]["responsedocument"] = \
+                                self.parseDataInputs(
+                                self.unparsedInputs["responsedocument"])
         except KeyError:
-            self.inputs["responseDocument"] = {}
+            self.inputs["responseform"]["responsedocument"] = {}
 
         # RawDataOutput
         try:
-            self.inputs["rawDataOutput"] = self.parseDataInputs(
-                    self.unparsedInputs["rawdataoutput"])
+            self.inputs["responseform"]["rawdataoutput"] = \
+                                    self.parseDataInputs(
+                                    self.unparsedInputs["rawdataoutput"])
         except KeyError:
-            self.inputs["rawdataoutput"] = {}
+            self.inputs["responseform"]["rawdataoutput"] = {}
 
         # storeExecuteResponse
         try:
             if self.unparsedInputs["storeexecuteresponse"].lower() ==\
                                                                     "true":
-                self.inputs["storeExecuteResponse"] = True
+                self.inputs["storeexecutenesponse"] = True
             else:
-                self.inputs["storeExecuteResponse"] = False
+                self.inputs["storeexecuteresponse"] = False
 
         except KeyError:
-            self.inputs["storeExecuteResponse"] = False
+            self.inputs["storeexecuteresponse"] = False
 
         # lineage
         try:
             if self.unparsedInputs["lineage"].lower() == "true":
-                self.inputs["lineage"] = True
+                self.inputs["responseform"]["responsedocument"]["lineage"]=\
+                                                                        True
             else:
-                self.inputs["lineage"] = False
+                self.inputs["responseform"]["responsedocument"]["lineage"]=\
+                                                                       False
 
         except KeyError:
-            self.inputs["lineage"] = False
+            self.inputs["responseform"]["responsedocument"]["lineage"]=\
+                                                                      False
 
         # status
         try:
             if self.unparsedInputs["status"].lower() == "true":
-                self.inputs["status"] = True
+                self.inputs["responseform"]["responsedocument"]["status"]=\
+                                                                        True
             else:
-                self.inputs["status"] = False
+                self.inputs["responseform"]["responsedocument"]["status"]=\
+                                                                      False
 
         except KeyError:
-            self.inputs["status"] = False
+            self.inputs["responseform"]["responsedocument"]["status"] =\
+                                                                      False
 
         print self.inputs
 
@@ -495,13 +513,18 @@ class Get:
 
         parsedDataInputs = {}
 
+        print dataInputs
         for dataInput in dataInputs.split(";"):
             try:
                 key,value = string.split(dataInput,"=",maxsplit=1)
             except ValueError,e:
                 key = dataInput
                 value = ""
-            parsedDataInputs[key] = {"value":None,"attributes":{}}
+
+            if not key and not value:
+                continue
+
+            parsedDataInputs[key] = {"value":None}
             attributes = []
             if value.find("@") > 0:
                 parsedDataInputs[key]["value"]=value.split("@")[0]
@@ -515,7 +538,7 @@ class Get:
 
             for attribute in attributes:
                 attributeKey, attributeValue = attribute.split("=")
-                parsedDataInputs[key]["attributes"][attributeKey] =\
+                parsedDataInputs[key][attributeKey] =\
                                                             attributeValue
 
         return parsedDataInputs

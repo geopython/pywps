@@ -48,7 +48,7 @@ from pywps import Parser
 from pywps import Exeptions
 from pywps.Exceptions import *
 
-import sys, os, cgi, ConfigParser
+import sys, os, ConfigParser
 
 class WPS:
 
@@ -61,9 +61,13 @@ class WPS:
     config = None  # Configuration
     workingDir = None # this working directory
 
+    exceptions = pywps.Exceptions
+
     METHOD_GET="GET"
     METHOD_POST="POST"
-    exceptions = pywps.Exceptions
+    OWS_NAMESPACE = "http://www.opengis.net/ows/1.1"
+    WPS_NAMESPACE = "http://www.opengis.net/wps/1.0.0"
+    XLINK_NAMESPACE = "http://www.w3.org/1999/xlink"
 
     DEFAULT_WPS_VERSION = "1.0.0"
     VERSION = "3.0-svn"
@@ -82,7 +86,12 @@ class WPS:
         if self.method == self.METHOD_GET:
             from pywps.Parser.Get import Get
             parser = Get(self)
-            parser.parse(cgi.FieldStorage())
+            querystring = ""
+            try: 
+                querystring = os.environ["QUERY_STRING"]
+            except KeyError:
+                querystring = sys.argv[1]
+            parser.parse(querystring)
         else:
             from pywps.Parser.Post import Post
             parser = Post(self)

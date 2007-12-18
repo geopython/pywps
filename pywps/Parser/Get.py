@@ -19,6 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import types,sys
+from string import split
 
 class Get:
     wps = None
@@ -34,28 +35,21 @@ class Get:
     def __init__(self,wps):
         self.wps = wps
 
-    def parse(self,fieldStorage):
+    def parse(self,queryString):
         
         key = None
-        keys = fieldStorage.keys()
+        value = None
+        keys = []
         maxInputLength = self.wps.config.getint("server","maxinputparamlength")
 
-        # converting all key names to lowercase
-        for i in range(len(keys)):
-            newKey = keys[i].lower()
-            newValue = ""
-
-            # if there are multiple inputs with same key, take the last one
-            if (type(fieldStorage.getvalue(keys[i]))) == types.ListType:
-                newValue = fieldStorage.getvalue(keys[i])[-1].strip()
-            else:
-                newValue = fieldStorage.getvalue(keys[i]).strip()
-
-            # if maxInputLength > 0, cut
-            if (maxInputLength > 0):
-                newValue = newValue[0:maxInputLength]
-            keys[i] = newKey
-            self.unparsedInputs[newKey] = newValue
+        # parse query string
+        for feature in queryString.split("&"):
+            feature = feature.strip()
+            key,value = split(feature,"=",maxsplit=1)
+            if value.find("[") == 0:
+                value = value[1:-1]
+            keys.append(key)
+            self.unparsedInputs[key.lower()] = value[:maxInputLength]
 
         try:
             self.parseInputs()
