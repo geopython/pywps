@@ -380,14 +380,14 @@ class WPSProcess:
     
         sys.stderr.write("PyWPS Cmd: %s\n" % (cmd.strip()))
 
-        cmd = string.split(cmd)
+        #cmd = string.split(cmd)
         try:
             p = subprocess.Popen(cmd,
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,close_fds=True)
         except Exception,e :
             self.failed = True
-            raise ServerError("Could not perform command [%s]: %s" % (cmd,e))
+            raise Exception("Could not perform command [%s]: %s" % (cmd,e))
 
         (stdout, stderr) = p.communicate(stdin)
 

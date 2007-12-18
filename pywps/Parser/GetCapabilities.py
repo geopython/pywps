@@ -34,7 +34,6 @@ class Post(Post):
     """
     wps = None # main WPS instance
     document = None # input DOM object
-    inputs = {} # resulting parsed inputs
 
 
     def __init__(self,wps):
@@ -60,10 +59,10 @@ class Post(Post):
         #
         
         # service
-        self.inputs["service"] = "wps"
+        self.wps.inputs["service"] = "wps"
         
         # request 
-        self.inputs["request"] = "getcapabilities"
+        self.wps.inputs["request"] = "getcapabilities"
 
         #
         # Optional options
@@ -80,18 +79,15 @@ class Post(Post):
         if len(versions) == 0:
             versions = [self.wps.DEFAULT_WPS_VERSION]
 
-        self.inputs["acceptversions"] = versions
+        self.wps.inputs["acceptversions"] = versions
 
         # language
         language = firstChild.getAttribute("language")
         if not language:
             language = self.wps.DEFAULT_LANGUAGE
 
-        self.inputs["language"] = language
+        self.wps.inputs["language"] = language
 
-        print "Content-type: text/plain\n"
-        print self.inputs
-                
         return
 
 class Get:
@@ -120,11 +116,11 @@ class Get:
 
         # service (is allready controled)
         if self.unparsedInputs["service"].lower() == "wps":
-            self.inputs["service"] = self.unparsedInputs["service"]
+            self.wps.inputs["service"] = self.unparsedInputs["service"]
 
         # Request (is allready controled)
         if self.unparsedInputs["request"].lower() == "getcapabilities":
-            self.inputs["request"] = self.unparsedInputs["request"].lower()
+            self.wps.inputs["request"] = self.unparsedInputs["request"].lower()
 
         # 
         # Optional options
@@ -132,16 +128,15 @@ class Get:
 
         # AcceptVersions
         try:
-            self.inputs["acceptversions"] = \
+            self.wps.inputs["acceptversions"] = \
                                self.unparsedInputs["acceptversions"].split(",")
         except KeyError,e:
-            self.inputs["acceptversions"] = [self.wps.DEFAULT_WPS_VERSION]
+            self.wps.inputs["acceptversions"] = [self.wps.DEFAULT_WPS_VERSION]
 
         # Language
         try:
-            self.inputs["language"] =\
+            self.wps.inputs["language"] =\
                                     self.unparsedInputs["language"].lower()
         except KeyError,e:
-            self.inputs["language"] = self.wps.DEFAULT_LANGUAGE
-
-        print self.inputs
+            self.wps.inputs["language"] = self.wps.DEFAULT_LANGUAGE
+        

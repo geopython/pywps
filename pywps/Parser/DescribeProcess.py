@@ -59,21 +59,21 @@ class Post(Post):
         #
         
         # service
-        self.inputs["service"] = "wps"
+        self.wps.inputs["service"] = "wps"
         
         # request 
-        self.inputs["request"] = "describeprocess"
+        self.wps.inputs["request"] = "describeprocess"
 
         # version
-        self.inputs["version"] = firstChild.getAttribute("version")
-        if not self.inputs["version"]:
+        self.wps.inputs["version"] = firstChild.getAttribute("version")
+        if not self.wps.inputs["version"]:
             raise self.wps.exceptions.MissingParameterValue("version")
 
         # identifiers
         for identifierNode in self.document.getElementsByTagNameNS(
                 owsNameSpace,"Identifier"):
             identifiers.append(identifierNode.firstChild.nodeValue)
-        self.inputs["identifier"] = identifiers
+        self.wps.inputs["identifier"] = identifiers
 
         #
         # Optional options
@@ -84,10 +84,8 @@ class Post(Post):
         if not language:
             language = self.wps.DEFAULT_LANGUAGE
 
-        self.inputs["language"] = language
+        self.wps.inputs["language"] = language
 
-        print self.inputs
-                
         return
 
 class Get:
@@ -116,17 +114,17 @@ class Get:
 
         # service (is allready controled)
         if self.unparsedInputs["service"].lower() == "wps":
-            self.inputs["service"] = self.unparsedInputs["service"].lower()
+            self.wps.inputs["service"] = self.unparsedInputs["service"].lower()
 
         # Request (is allready controled)
         if self.unparsedInputs["request"].lower() == "describeprocess":
-            self.inputs["request"] = self.unparsedInputs["request"].lower()
+            self.wps.inputs["request"] = self.unparsedInputs["request"].lower()
 
         # version
-        self.inputs["version"] = self.unparsedInputs["version"]
+        self.wps.inputs["version"] = self.unparsedInputs["version"]
 
         # identifier
-        self.inputs["identifier"] = self.unparsedInputs["identifier"].split(",")
+        self.wps.inputs["identifier"] = self.unparsedInputs["identifier"].split(",")
 
         # 
         # Optional options
@@ -134,9 +132,8 @@ class Get:
 
         # Language
         try:
-            self.inputs["language"] =\
+            self.wps.inputs["language"] =\
                                     self.unparsedInputs["language"].lower()
         except KeyError,e:
-            self.inputs["language"] = self.wps.DEFAULT_LANGUAGE
+            self.wps.inputs["language"] = self.wps.DEFAULT_LANGUAGE
 
-        print self.inputs

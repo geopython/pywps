@@ -382,9 +382,6 @@ class Describe:
                                 rangenode.appendChild(minnode)
                                 rangenode.appendChild(maxnode)
                                 valueNode.appendChild(rangenode)
-
-
-
                     continue
 
                 # append supported values

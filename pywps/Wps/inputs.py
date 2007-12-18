@@ -299,13 +299,13 @@ class Inputs:
             # identifier is array
             # self.values['identifier'] = [self.values['identifier']]
 
-        # not describeprocess and not execute: exception
             firstNode = formDocument.firstChild
             if (firstNode.getAttributeNS(ns,"store")):
                 self.values['store'] = firstNode.getAttributeNS(ns,"store")
-                print >>sys.stderr, "######"
             if (firstNode.getAttributeNS(ns,"status")):
                 self.values['store'] = firstNode.getAttributeNS(ns,"status")
+
+        # not describeprocess and not execute: exception
         else:
             raise InvalidParameterValue(formDocument.firstChild.tagName)
         return

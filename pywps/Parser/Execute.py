@@ -66,19 +66,19 @@ class Post(Post):
         #
         
         # service
-        self.inputs["service"] = "wps"
+        self.wps.inputs["service"] = "wps"
         
         # request 
-        self.inputs["request"] = "execute"
+        self.wps.inputs["request"] = "execute"
 
         # version
-        self.inputs["version"] = firstChild.getAttribute("version")
-        if not self.inputs["version"]:
+        self.wps.inputs["version"] = firstChild.getAttribute("version")
+        if not self.wps.inputs["version"]:
             raise self.wps.exceptions.MissingParameterValue("version")
 
         # identifier
         try:
-            self.inputs["identifier"] =\
+            self.wps.inputs["identifier"] =\
             firstChild.getElementsByTagNameNS(self.owsNameSpace,"Identifier")[0].firstChild.nodeValue
         except IndexError:
                 raise self.wps.exceptions.MissingParameterValue("Identifier")
@@ -92,27 +92,26 @@ class Post(Post):
         if not language:
             language = self.wps.DEFAULT_LANGUAGE
 
-        self.inputs["language"] = language
+        self.wps.inputs["language"] = language
 
         # dataInputs
         try:
             inputsNode = firstChild.getElementsByTagNameNS(
                                             self.nameSpace,"DataInputs")[0]
-            self.inputs["datainputs"] = self.parseDataInputs(inputsNode) 
+            self.wps.inputs["datainputs"] = self.parseDataInputs(inputsNode) 
         except IndexError:
-            self.inputs["datainputs"] = None
+            self.wps.inputs["datainputs"] = None
 
         # responseForm
         try:
             responseFormNode = \
                 firstChild.getElementsByTagNameNS(self.nameSpace,
                                                         "ResponseForm")[0]
-            self.inputs["responseform"] = self.parseResponseForm(
+            self.wps.inputs["responseform"] = self.parseResponseForm(
                                                         responseFormNode) 
         except IndexError:
-            self.inputs["responseform"] = None
+            self.wps.inputs["responseform"] = None
 
-        print self.inputs
 
     def parseResponseForm(self,responseFormNode):
         form = {}
@@ -416,17 +415,17 @@ class Get:
 
         # service (is allready controled)
         if self.unparsedInputs["service"].lower() == "wps":
-            self.inputs["service"] = self.unparsedInputs["service"].lower()
+            self.wps.inputs["service"] = self.unparsedInputs["service"].lower()
 
         # Request (is allready controled)
         if self.unparsedInputs["request"].lower() == "execute":
-            self.inputs["request"] = self.unparsedInputs["request"].lower()
+            self.wps.inputs["request"] = self.unparsedInputs["request"].lower()
 
         # version
-        self.inputs["version"] = self.unparsedInputs["version"]
+        self.wps.inputs["version"] = self.unparsedInputs["version"]
 
         # identifier
-        self.inputs["identifier"] = self.unparsedInputs["identifier"]
+        self.wps.inputs["identifier"] = self.unparsedInputs["identifier"]
 
         # 
         # Optional options
@@ -434,77 +433,76 @@ class Get:
 
         # Language
         try:
-            self.inputs["language"] =\
+            self.wps.inputs["language"] =\
                                     self.unparsedInputs["language"].lower()
         except KeyError,e:
-            self.inputs["language"] = self.wps.DEFAULT_LANGUAGE
+            self.wps.inputs["language"] = self.wps.DEFAULT_LANGUAGE
 
 
         # dataInputs
         try:
-            self.inputs["datainputs"] = self.parseDataInputs(
+            self.wps.inputs["datainputs"] = self.parseDataInputs(
                         self.unparsedInputs["datainputs"])
         except KeyError:
-            self.inputs["datainputs"] = {}
+            self.wps.inputs["datainputs"] = {}
 
         # ResponseForm
 
-        self.inputs["responseform"] = {}
+        self.wps.inputs["responseform"] = {}
 
         # ResponseDocument
         try:
-            self.inputs["responseform"]["responsedocument"] = \
+            self.wps.inputs["responseform"]["responsedocument"] = \
                                 self.parseDataInputs(
                                 self.unparsedInputs["responsedocument"])
         except KeyError:
-            self.inputs["responseform"]["responsedocument"] = {}
+            self.wps.inputs["responseform"]["responsedocument"] = {}
 
         # RawDataOutput
         try:
-            self.inputs["responseform"]["rawdataoutput"] = \
+            self.wps.inputs["responseform"]["rawdataoutput"] = \
                                     self.parseDataInputs(
                                     self.unparsedInputs["rawdataoutput"])
         except KeyError:
-            self.inputs["responseform"]["rawdataoutput"] = {}
+            self.wps.inputs["responseform"]["rawdataoutput"] = {}
 
         # storeExecuteResponse
         try:
             if self.unparsedInputs["storeexecuteresponse"].lower() ==\
                                                                     "true":
-                self.inputs["storeexecutenesponse"] = True
+                self.wps.inputs["storeexecutenesponse"] = True
             else:
-                self.inputs["storeexecuteresponse"] = False
+                self.wps.inputs["storeexecuteresponse"] = False
 
         except KeyError:
-            self.inputs["storeexecuteresponse"] = False
+            self.wps.inputs["storeexecuteresponse"] = False
 
         # lineage
         try:
             if self.unparsedInputs["lineage"].lower() == "true":
-                self.inputs["responseform"]["responsedocument"]["lineage"]=\
+                self.wps.inputs["responseform"]["responsedocument"]["lineage"]=\
                                                                         True
             else:
-                self.inputs["responseform"]["responsedocument"]["lineage"]=\
+                self.wps.inputs["responseform"]["responsedocument"]["lineage"]=\
                                                                        False
 
         except KeyError:
-            self.inputs["responseform"]["responsedocument"]["lineage"]=\
+            self.wps.inputs["responseform"]["responsedocument"]["lineage"]=\
                                                                       False
 
         # status
         try:
             if self.unparsedInputs["status"].lower() == "true":
-                self.inputs["responseform"]["responsedocument"]["status"]=\
+                self.wps.inputs["responseform"]["responsedocument"]["status"]=\
                                                                         True
             else:
-                self.inputs["responseform"]["responsedocument"]["status"]=\
+                self.wps.inputs["responseform"]["responsedocument"]["status"]=\
                                                                       False
 
         except KeyError:
-            self.inputs["responseform"]["responsedocument"]["status"] =\
+            self.wps.inputs["responseform"]["responsedocument"]["status"] =\
                                                                       False
 
-        print self.inputs
 
     def parseDataInputs(self,dataInputs):
         """
@@ -513,7 +511,6 @@ class Get:
 
         parsedDataInputs = {}
 
-        print dataInputs
         for dataInput in dataInputs.split(";"):
             try:
                 key,value = string.split(dataInput,"=",maxsplit=1)
