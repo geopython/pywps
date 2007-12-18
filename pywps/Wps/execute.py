@@ -341,6 +341,7 @@ class Execute:
                 else:
                     procInput['value'] = newFileName # replace the
                     self.process.DataInputs[procInput['Identifier']] = procInput['value']
+
         #######
         # MAKE
         if sys.stdout == sys.__stdout__:
@@ -895,6 +896,9 @@ class Execute:
 
                 input['value'] = formvalues['datainputs'][input['Identifier']]
 
+                if input.has_key("BoundingBoxValue"):
+                    input["DataType"] = type(0.0)
+
                 if self._checkType(input,formvalues['datainputs'][input['Identifier']]):
                     raise InvalidParameterValue("%s: %s" % \
                                     (str(input['Identifier']), 
@@ -922,23 +926,23 @@ class Execute:
         if not type(values) == type([]):
             values = [values]
 
-        for value in values:
+        for i in range(len(values)):
             try:
                 if input['DataType'] == type(0.0):
-                    value = float(value)
+                    values[i] = float(values[i])
                 elif input['DataType'] == type(1):
-                    value =  int(float(value))
+                    values[i] =  int(float(values[i]))
                 elif input['DataType'] == type(''):
-                    value = str(value)
+                    values[i] = str(values[i])
             except (KeyError),e:
                 pass
             except TypeError,e:
-                value = input['value']
+                values[i] = input['value']
             except ValueError,e:
                 return True
 
             # retype input values
-            input['value'] = value
+            #input['value'] = value
 
             # list of allowed literal values in
             if input.has_key("LiteralValue"):
@@ -949,11 +953,11 @@ class Execute:
                 else:
                     # arrays
                     if type(input["LiteralValue"]["values"][0]) != type([]):
-                        if value in input['LiteralValue']['values']:
+                        if input['value'] in input['LiteralValue']['values']:
                             isin = True
                     else:
-                        for range in input["LiteralValue"]["values"]:
-                            if min(range) <= value <= max(range):
+                        for rng in input["LiteralValue"]["values"]:
+                            if min(rng) <= value <= max(rng):
                                 isin = True
                 if not isin:
                     return True
