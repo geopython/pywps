@@ -25,3 +25,16 @@ RPM PACKAGE
 ===========
 
 python setup.py bdist_rpm
+
+WEB PAGES
+=========
+1 - get them
+2 - modify
+3 - upload them to the server
+
+svn co svn checkout https://svn.wald.intevation.org/svn/pywps/branches/web
+pywps_web
+cd pywps_web
+$EDITOR index.psp
+rsync . $USER@wald.intevation.org:/pywps/htdocs/
+

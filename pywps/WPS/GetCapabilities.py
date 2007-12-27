@@ -23,7 +23,6 @@ WPS GetCapabilities request handler
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import xml.dom.minidom
 from Request import Request
 
 class GetCapabilities(Request):
@@ -40,5 +39,82 @@ class GetCapabilities(Request):
         """
         Request.__init__(self,wps)
 
-        print "GetCapabilities"
+        self.template = self.templateManager.prepare(self.templateFile)
 
+        #
+        # ServiceIdentification
+        #
+        self.templateProcessor.set("encoding",
+                                    self.wps.getConfigValue("wps","encoding"))
+        self.templateProcessor.set("servertitle",
+                                    self.wps.getConfigValue("wps","title"))
+        self.templateProcessor.set("serverabstract",
+                                    self.wps.getConfigValue("wps","abstract"))
+        self.templateProcessor.set("version",
+                                    self.wps.getConfigValue("wps","version"))
+        self.templateProcessor.set("fees",
+                                    self.wps.getConfigValue("wps","fees"))
+        self.templateProcessor.set("constraints",
+                                    self.wps.getConfigValue("wps","constraints"))
+
+        #
+        # ServiceProvider
+        #
+        self.templateProcessor.set("providername",
+                            self.wps.getConfigValue("provider","providerName"))
+        self.templateProcessor.set("individualname",
+                        self.wps.getConfigValue("provider","individualName"))
+        self.templateProcessor.set("positionname",
+                            self.wps.getConfigValue("provider","positionName"))
+        self.templateProcessor.set("providersite",
+                            self.wps.getConfigValue("provider","providerSite"))
+        # phone
+        self.wps.getConfigValue("provider","vvoi
+        if self.wps.getConfigValue("provider","voice") or \
+            self.wps.getConfigValue("provider","fascimile"):
+            self.templateProcessor.set("phone", 1)
+            self.templateProcessor.set("voicephone",
+                                    self.wps.getConfigValue("provider","voice"))
+            self.templateProcessor.set("fascimilephone",
+                                    self.wps.getConfigValue("provider","fascimile"))
+        else:
+            self.templateProcessor.set("phone", 0)
+
+        # address
+        if self.wps.getConfigValue("provider","deliveryPoint") or \
+           self.wps.getConfigValue("provider","city") or \
+           self.wps.getConfigValue("provider","administrativeArea") or \
+           self.wps.getConfigValue("provider","postalCode") or \
+           self.wps.getConfigValue("provider","country") or \
+           self.wps.getConfigValue("provider","electronicMailAddress"):
+
+            self.templateProcessor.set("address", 1)
+            self.templateProcessor.set("deliverypoint",
+                            self.wps.getConfigValue("provider","deliveryPoint"))
+            self.templateProcessor.set("city",
+                            self.wps.getConfigValue("provider","city"))
+            self.templateProcessor.set("administrativearea",
+                        self.wps.getConfigValue("provider","administrativeArea"))
+            self.templateProcessor.set("postalcode",
+                            self.wps.getConfigValue("provider","postalCode"))
+            self.templateProcessor.set("country",
+                            self.wps.getConfigValue("provider","country"))
+            self.templateProcessor.set("electronicmailaddress",
+                    self.wps.getConfigValue("provider","electronicMailAddress"))
+        else:
+           self.templateProcessor.set("address", 0)
+            
+        # OperationsMetadata
+        self.templateProcessor.set("url",self.wps.getConfigValue("wps","serveraddress"))
+        self.templateProcessor.set("Operations",
+                                    [{"operation":"GetCapabilities"}, 
+                                     {"operation":"DescribeProcess"},
+                                     {"operation":"Execute"}])
+
+        # Processes
+
+        # Language
+        self.templateProcessor.set("lang",self.wps.getConfigValue("wps","lang"))
+
+        self.response = self.templateProcessor.process(self.template)
+        return

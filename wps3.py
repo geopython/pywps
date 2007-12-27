@@ -50,6 +50,8 @@ from pywps.Exceptions import *
 
 import sys, os, ConfigParser
 
+__version__ = "3.0-svn"
+
 class WPS:
 
     method  =""                      # HTTP Ost or GET 
@@ -62,6 +64,10 @@ class WPS:
     workingDir = None # this working directory
 
     exceptions = pywps.Exceptions
+
+    inputs = {} # parsed input values
+    request = None # object with getcapabilities/describeprocess/execute
+                   # class
 
     METHOD_GET="GET"
     METHOD_POST="POST"
@@ -97,6 +103,13 @@ class WPS:
             parser = Post(self)
             parser.parse(sys.stdin)
 
+        if self.inputs:
+            self.performRequest()
+
+        if self.request.response:
+            print "Contet-type: text/xml\n"
+            print self.request.response
+
         return
     
     def loadConfiguration(self):
@@ -112,6 +125,34 @@ class WPS:
 
         self.config = ConfigParser.ConfigParser()
         self.config.read(cfgfiles)
+
+    def performRequest(self):
+        try:
+            if self.inputs["request"]  == "getcapabilities":
+                from pywps.WPS.GetCapabilities import GetCapabilities
+                self.request = GetCapabilities(self)
+            elif self.inputs["request"]  == "describeprocess":
+                from pywps.WPS.DescribeProcess import DescribeProcess
+                self.request = DescribeProcess(self)
+            elif self.inputs["request"]  == "execute":
+                from pywps.WPS.Execute import Execute
+                self.request = Execute(self)
+            else:
+                raise self.exceptions.InvalidParameterValue(
+                        "request: "+self.inputs["request"])
+        except KeyError:
+            raise self.exceptions.MissingParameterValue("request")
+    
+    def getConfigValue(self,*args):
+        value = self.config.get(*args)
+        if value.lower== "false":
+            value = False
+        if value.lower == "true" :
+            value = True
+        return value
+
+
+
 
 if __name__ == "__main__":
     wps = WPS()

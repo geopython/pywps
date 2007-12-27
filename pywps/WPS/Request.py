@@ -24,11 +24,33 @@ Request handler - prototype class
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import xml.dom.minidom
+from htmltmpl import TemplateManager, TemplateProcessor
+import os
+from pywps import Templates
 
 class Request:
-    dom = None # Output document
+    response = None # Output document
     wps = None # Parent WPS object
+    templateManager = None # HTML TemplateManager
+    templateProcessor = TemplateProcessor() # HTML TemplateProcessor
+    template = None # HTML Template
+    templateFile = None # File with template
 
     def __init__(self,wps):
         self.wps = wps
 
+        self.templateManager = TemplateManager(precompile = 1, 
+            debug = self.wps.config.getboolean("server","debug")) 
+
+        if self.wps.inputs["request"] == "getcapabilities":
+            self.templateFile = os.path.join(
+                                os.path.join(Templates.__path__)[0],
+                                     "GetCapabilities.tmpl")
+        elif self.wps.inputs["request"] == "describeprocess":
+            self.templateFile = os.path.join(
+                                os.path.join(Templates.__path__)[0],
+                                    "Templates","DescribeProcess.tmpl")
+        elif self.wps.inputs["request"] == "execute":
+            self.templateFile = os.path.join(
+                                os.path.join(Templates.__path__)[0],
+                                    "Templates","Execute.tmpl")
