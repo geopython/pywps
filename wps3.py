@@ -145,9 +145,9 @@ class WPS:
     
     def getConfigValue(self,*args):
         value = self.config.get(*args)
-        if value.lower== "false":
+        if value.lower() == "false":
             value = False
-        if value.lower == "true" :
+        elif value.lower() == "true" :
             value = True
         return value
 

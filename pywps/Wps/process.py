@@ -87,6 +87,8 @@ class WPSProcess:
         self.processVersion = processVersion
         self.Title = Title
         self.Abstract = Abstract
+        self.WSDL  = None
+        self.Profile = None
 
         if type(statusSupported) == type('t') and (statusSupported.lower() == "true" or\
            statusSupported.lower() == "t") or \

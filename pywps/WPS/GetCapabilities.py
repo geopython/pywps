@@ -24,6 +24,8 @@ WPS GetCapabilities request handler
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 from Request import Request
+from pywps import processes
+from pywps.processes import *
 
 class GetCapabilities(Request):
     """
@@ -69,13 +71,14 @@ class GetCapabilities(Request):
         self.templateProcessor.set("providersite",
                             self.wps.getConfigValue("provider","providerSite"))
         # phone
-        self.wps.getConfigValue("provider","vvoi
         if self.wps.getConfigValue("provider","voice") or \
             self.wps.getConfigValue("provider","fascimile"):
             self.templateProcessor.set("phone", 1)
-            self.templateProcessor.set("voicephone",
+            if self.wps.getConfigValue("provider","voicephone"):
+                self.templateProcessor.set("voicephone",
                                     self.wps.getConfigValue("provider","voice"))
-            self.templateProcessor.set("fascimilephone",
+            if self.wps.getConfigValue("provider","fascimilephone"):
+                self.templateProcessor.set("fascimilephone",
                                     self.wps.getConfigValue("provider","fascimile"))
         else:
             self.templateProcessor.set("phone", 0)
@@ -89,17 +92,23 @@ class GetCapabilities(Request):
            self.wps.getConfigValue("provider","electronicMailAddress"):
 
             self.templateProcessor.set("address", 1)
-            self.templateProcessor.set("deliverypoint",
+            if self.wps.getConfigValue("provider","deliveryPoint"):
+                self.templateProcessor.set("deliverypoint",
                             self.wps.getConfigValue("provider","deliveryPoint"))
-            self.templateProcessor.set("city",
+            if self.wps.getConfigValue("provider","city"):
+                self.templateProcessor.set("city",
                             self.wps.getConfigValue("provider","city"))
-            self.templateProcessor.set("administrativearea",
+            if self.wps.getConfigValue("provider","administrativeArea"):
+                self.templateProcessor.set("administrativearea",
                         self.wps.getConfigValue("provider","administrativeArea"))
-            self.templateProcessor.set("postalcode",
+            if self.wps.getConfigValue("provider","postalCode"):
+                self.templateProcessor.set("postalcode",
                             self.wps.getConfigValue("provider","postalCode"))
-            self.templateProcessor.set("country",
+            if self.wps.getConfigValue("provider","country"):
+                self.templateProcessor.set("country",
                             self.wps.getConfigValue("provider","country"))
-            self.templateProcessor.set("electronicmailaddress",
+            if self.wps.getConfigValue("provider","electronicMailAddress"):
+                self.templateProcessor.set("electronicmailaddress",
                     self.wps.getConfigValue("provider","electronicMailAddress"))
         else:
            self.templateProcessor.set("address", 0)
@@ -112,9 +121,29 @@ class GetCapabilities(Request):
                                      {"operation":"Execute"}])
 
         # Processes
+        processesData = []
+        for processName in processes.__all__:
+            processData = {}
+            try:
+                process = eval(processName+".Process()")
+                processData["processok"] = 1
+                processData["identifier"] = process.Identifier
+                processData["title"] = process.Title
+                processData["abstract"] = process.Abstract
+                processData["profile"] = process.Profile
+                processData["wsdl"] = process.WSDL
+                processData["metadatalen"] = 0
+            except Exception, e:
+                processData["processok",0]
+                processData["process",process]
+                processData["exception",e]
+            processesData.append(processData)
+        self.templateProcessor.set("Processes",processesData)
+
+
 
         # Language
-        self.templateProcessor.set("lang",self.wps.getConfigValue("wps","lang"))
+        self.templateProcessor.set("language",self.wps.getConfigValue("wps","lang"))
 
         self.response = self.templateProcessor.process(self.template)
         return

@@ -84,7 +84,8 @@
                 </TMPL_LOOP>
 	</ows:OperationsMetadata>
 	<wps:ProcessOfferings>
-                <TMPL_LOOP processes>
+                <TMPL_LOOP Processes>
+                <TMPL_IF processok>
                 <TMPL_IF processVersion>
 		<wps:Process wps:processVersion="<TMPL_VAR processversion>">
                 <TMPL_ELSE>
@@ -92,15 +93,24 @@
                 </TMPL_IF>
 			<ows:Identifier><TMPL_VAR identifier></ows:Identifier>
 			<ows:Title><TMPL_VAR title></ows:Title>
-                        <TMPL_IF processVersion>
+                        <TMPL_IF abstract>
 			<ows:Abstract><TMPL_VAR abstract></ows:Abstract>
                         </TMPL_IF>
-                        <TMPL_IF metadata>
+                        <TMPL_IF metadatalen>
                         <TMPL_LOOP metadata>
 			<ows:Metadata xlink:title="<TMPL_VAR metadatatitle>" />
                         </TMPL_LOOP>
                         </TMPL_IF>
+                        <TMPL_IF profile>
+			<wps:Profile><TMPL_VAR profile></ows:Profile>
+                        </TMPL_IF>
+                        <TMPL_IF wsdl>
+			<wps:WSDL><TMPL_VAR wsdl></ows:WSDL>
+                        </TMPL_IF>
 		</wps:Process>
+                <TMPL_ELSE> # Process failed
+                <!-- Process <TMPL_VAR process> failed: <TMPL_VAR exception> -->
+                </TMPL_IF>
                 </TMPL_LOOP>
 	</wps:ProcessOfferings>
 	<wps:Languages>
@@ -108,9 +118,7 @@
 			<ows:Language><TMPL_VAR language></ows:Language>
 		</wps:Default>
 		<wps:Supported>
-                        <TMPL_LOOP languages>
 			<ows:Language><TMPL_VAR language></ows:Language>
-                        </TMPL_LOOP>
 		</wps:Supported>
 	</wps:Languages> 
 	<wps:WSDL xlink:href="<TMPL_VAR url>?WSDL"/>
