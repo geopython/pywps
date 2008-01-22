@@ -1,11 +1,11 @@
                     <Default>
                         <Format>
-                            <MimeType><TMPL_VAR mimetype></MimeType>
+                            <MimeType><TMPL_VAR defaultMimetype></MimeType>
                             <TMPL_IF encoding>
-                            <Encoding><TMPL_VAR encoding></Encoding>
+                            <Encoding><TMPL_VAR defaultEncoding></Encoding>
                             </TMPL_IF>
                             <TMPL_IF schema>
-                            <Schema><TMPL_VAR schema></Schema>
+                            <Schema><TMPL_VAR defaultSchema></Schema>
                             </TMPL_IF>
                         </Format>
                     </Default>
