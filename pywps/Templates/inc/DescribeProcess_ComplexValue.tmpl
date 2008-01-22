@@ -1,0 +1,24 @@
+                    <Default>
+                        <Format>
+                            <MimeType><TMPL_VAR mimetype></MimeType>
+                            <TMPL_IF encoding>
+                            <Encoding><TMPL_VAR encoding></Encoding>
+                            </TMPL_IF>
+                            <TMPL_IF schema>
+                            <Schema><TMPL_VAR schema></Schema>
+                            </TMPL_IF>
+                        </Format>
+                    </Default>
+                    <Supported>
+                        <TMPL_LOOP Formats>
+                        <Format>
+                            <MimeType><TMPL_VAR mimetype></MimeType>
+                            <TMPL_IF encoding>
+                            <Encoding><TMPL_VAR encoding></Encoding>
+                            </TMPL_IF>
+                            <TMPL_IF schema>
+                            <Schema><TMPL_VAR schema></Schema>
+                            </TMPL_IF>
+                        </Format>
+                        </TMPL_LOOP>
+                    </Supported>
