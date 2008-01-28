@@ -1,0 +1,24 @@
+                    <wps:Default>
+                        <wps:Format>
+                            <ows:MimeType><TMPL_VAR defaultMimetype></ows:MimeType>
+                            <TMPL_IF encoding>
+                            <wps:Encoding><TMPL_VAR defaultEncoding></wps:Encoding>
+                            </TMPL_IF>
+                            <TMPL_IF schema>
+                            <wps:Schema><TMPL_VAR defaultSchema></wps:Schema>
+                            </TMPL_IF>
+                        </wps:Format>
+                    </wps:Default>
+                    <wps:Supported>
+                        <TMPL_LOOP Formats>
+                        <wps:Format>
+                            <ows:MimeType><TMPL_VAR mimetype></ows:MimeType>
+                            <TMPL_IF encoding>
+                            <wps:Encoding><TMPL_VAR encoding></wps:Encoding>
+                            </TMPL_IF>
+                            <TMPL_IF schema>
+                            <wps:Schema><TMPL_VAR schema></wps:Schema>
+                            </TMPL_IF>
+                        </wps:Format>
+                        </TMPL_LOOP>
+                    </wps:Supported>

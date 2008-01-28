@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="<TMPL_VAR encoding>"?>
 <!--This example describes a buffer command that accepts polygon coordinates in GML, and used a buffer distance in meters to produce a buffered polygon feature, which is output in GML, in either UTF-8 or base64 encoding.  The polygon can be returned directly as output, or stored by the service as a web-accessible resource.  Ongoing processing status reports are not available. -->
 <wps:ProcessDescriptions xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 ..\wpsDescribeProcess_response.xsd" service="WPS" version="1.0.0" xml:lang="<TMPL_VAR lang>">
+    <TMPL_LOOP Processes>
     <ProcessDescription wps:processVersion="<TMPL_VAR version>" storeSupported="<TMPL_VAR store>" statusSupported="<TMPL_VAR status>">
         <ows:Identifier><TMPL_VAR identifier></ows:Identifier>
         <ows:Title><TMPL_VAR title></ows:Title>
@@ -8,7 +9,7 @@
         <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
         </TMPL_IF>
         <TMPL_LOOP Metadata>
-        <ows:Metadata xlink:title="<TMPL_VAR metadata" />
+        <ows:Metadata xlink:title="<TMPL_VAR metadata>" />
         </TMPL_LOOP>
         <TMPL_LOOP Profiles>
         <wps:Profile><TMPL_VAR profile></wps:Profile>
@@ -17,48 +18,49 @@
         <wps:WSDL xlink:href="<TMPL_VAR wsdl>"/>
         </TMPL_IF>
         <TMPL_IF datainpuntslen>
-        <DataInputs>
+        <wps:DataInputs>
             <TMPL_LOOP Datainputs>
-            <Input minOccurs="<TMPL_VAR minoccurs>" maxOccurs="<TMPL_VAR maxoccurs>">
+            <wps:Input minOccurs="<TMPL_VAR minoccurs>" maxOccurs="<TMPL_VAR maxoccurs>">
                 <ows:Identifier><TMPL_VAR identifier></ows:Identifier>
                 <ows:Title><TMPL_VAR title></ows:Title>
                 <TMPL_IF abstract>
                 <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
                 </TMPL_IF>
                 <TMPL_IF complexvalue>
-                    <TMPL_INCLUDE NAME="DescribeProcess_ComplexValue_Input.tmpl">
+                    <TMPL_INCLUDE NAME="DescribeProcess_ComplexValue.tmpl">
                 </TMPL_IF>
                 <TMPL_IF literalvalue>
-                    <TMPL_INCLUDE NAME="DescribeProcess_LiteralValue_Input.tmpl">
+                    <TMPL_INCLUDE NAME="DescribeProcess_LiteralValue.tmpl">
                 </TMPL_IF>
                 <TMPL_IF boundingboxvalue>
-                    <TMPL_INCLUDE NAME="DescribeProcess_BoundingBoxValue_Input.tmpl">
+                    <TMPL_INCLUDE NAME="DescribeProcess_BoundingBoxValue.tmpl">
                 </TMPL_IF>
-            </Input>
+            </wps:Input>
             </TMPL_LOOP>
-        </DataInputs>
+        </wps:DataInputs>
         </TMPL_IF>
         <TMPL_IF dataoutputslen>
-        <ProcessOutputs>
+        <wps:ProcessOutputs>
             <TMPL_LOOP Dataoutputs>
-            <Output>
+            <wps:Output>
                 <ows:Identifier><TMPL_VAR identifier></ows:Identifier>
                 <ows:Title><TMPL_VAR title></ows:Title>
                 <TMPL_IF abstract>
                 <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
                 </TMPL_IF>
                 <TMPL_IF complexvalue>
-                            <TMPL_INCLUDE NAME="DescribeProcess_ComplexValue_Output.tmpl">
+                    <TMPL_INCLUDE NAME="DescribeProcess_ComplexValue.tmpl">
                 </TMPL_IF>
                 <TMPL_IF literalvalue>
-                            <TMPL_INCLUDE NAME="DescribeProcess_LiteralValue_Output.tmpl">
+                    <TMPL_INCLUDE NAME="DescribeProcess_LiteralValue.tmpl">
                 </TMPL_IF>
                 <TMPL_IF boundingboxvalue>
-                            <TMPL_INCLUDE NAME="DescribeProcess_BoundingBoxValue_Output.tmpl">
+                    <TMPL_INCLUDE NAME="DescribeProcess_BoundingBoxValue.tmpl">
                 </TMPL_IF>
-            </Output>
+            </wps:Output>
             </TMPL_LOOP>
-        </ProcessOutputs>
+        </wps:ProcessOutputs>
         </TMPL_IF>
-    </ProcessDescription>
+    </wps:ProcessDescription>
+    </TMPL_LOOP>
 </wps:ProcessDescriptions>

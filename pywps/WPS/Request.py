@@ -49,8 +49,8 @@ class Request:
         elif self.wps.inputs["request"] == "describeprocess":
             self.templateFile = os.path.join(
                                 os.path.join(Templates.__path__)[0],
-                                    "Templates","DescribeProcess.tmpl")
+                                    "DescribeProcess.tmpl")
         elif self.wps.inputs["request"] == "execute":
             self.templateFile = os.path.join(
                                 os.path.join(Templates.__path__)[0],
-                                    "Templates","Execute.tmpl")
+                                    "Execute.tmpl")

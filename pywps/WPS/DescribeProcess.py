@@ -23,8 +23,9 @@ WPS DescribeProcess request handler
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import xml.dom.minidom
 from Request import Request
+from pywps import processes
+from pywps.processes import *
 
 class DescribeProcess(Request):
     """
@@ -40,5 +41,61 @@ class DescribeProcess(Request):
         """
         Request.__init__(self,wps)
 
-        print "DescribeProcess"
+        self.template = self.templateManager.prepare(self.templateFile)
 
+        #
+        # HEAD
+        #
+        self.templateProcessor.set("encoding",
+                                    self.wps.getConfigValue("wps","encoding"))
+        self.templateProcessor.set("lang",
+                                    self.wps.getConfigValue("wps","lang"))
+        self.templateProcessor.set("version",
+                                    self.wps.getConfigValue("wps","version"))
+
+        #
+        # Processes
+        #
+        self.templateProcessor.set("Processes",self.processesDescription())
+
+        self.response = self.templateProcessor.process(self.template)
+
+        return
+
+    def processesDescription(self):
+        """
+        Will return Object with processes description
+        """
+
+        processesData = []
+
+        for processName in processes.__all__:
+            # skip process, if not requested
+            if self.wps.inputs.index(processName) < 0:
+                continue
+            process = eval(processName+".Process()")
+            processData = {}
+            processData["identifier"] = process.Identifier
+            processData["title"] = process.Title
+            processData["abstract"] = process.Abstract
+            processData["Metadata"] = 0 #TODO
+            processData["Profiles"] = process.Profile
+            processData["wsdl"] = process.WSDL
+            processData["store"] = process.storeSupported
+            processData["status"] = process.statusSupported
+            processData["version"] = process.processVersion
+            #try:
+            #    process = eval(processName+".Process()")
+            #    processData["processok"] = 1
+            #    processData["identifier"] = process.Identifier
+            #    processData["title"] = process.Title
+            #    processData["abstract"] = process.Abstract
+            #    processData["profile"] = process.Profile
+            #    processData["wsdl"] = process.WSDL
+            #    processData["metadatalen"] = 0
+            #except Exception, e:
+            #    processData["processok",0]
+            #    processData["process",process]
+            #    processData["exception",e]
+            processesData.append(processData)
+        return processesData
