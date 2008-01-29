@@ -71,31 +71,63 @@ class DescribeProcess(Request):
 
         for processName in processes.__all__:
             # skip process, if not requested
-            if self.wps.inputs.index(processName) < 0:
+            if not processName in self.wps.inputs["identifier"]:
                 continue
             process = eval(processName+".Process()")
             processData = {}
-            processData["identifier"] = process.Identifier
-            processData["title"] = process.Title
-            processData["abstract"] = process.Abstract
-            processData["Metadata"] = 0 #TODO
-            processData["Profiles"] = process.Profile
-            processData["wsdl"] = process.WSDL
-            processData["store"] = process.storeSupported
-            processData["status"] = process.statusSupported
-            processData["version"] = process.processVersion
-            #try:
-            #    process = eval(processName+".Process()")
-            #    processData["processok"] = 1
-            #    processData["identifier"] = process.Identifier
-            #    processData["title"] = process.Title
-            #    processData["abstract"] = process.Abstract
-            #    processData["profile"] = process.Profile
-            #    processData["wsdl"] = process.WSDL
-            #    processData["metadatalen"] = 0
-            #except Exception, e:
-            #    processData["processok",0]
-            #    processData["process",process]
-            #    processData["exception",e]
+            try:
+                processData["processok"] = 1
+                processData["identifier"] = process.Identifier
+                processData["title"] = process.Title
+                processData["abstract"] = process.Abstract
+                processData["Metadata"] = 0 #TODO
+                processData["Profiles"] = process.Profile
+                processData["wsdl"] = process.WSDL
+                processData["store"] = process.storeSupported
+                processData["status"] = process.statusSupported
+                processData["version"] = process.processVersion
+                processData["Datainputs"] = self.processInputs(process)
+                processData["datainpuntslen"] = len(processData["Datainputs"])
+            except (Exception,KeyError), e:
+                processData["processok",0]
+                processData["process",process]
+                processData["exception",e]
             processesData.append(processData)
         return processesData
+
+    def processInputs(self,process):
+        """
+        Will return Object with process inputs
+        """
+
+        processInputs = []
+        for input in process.Inputs:
+            processInput = {}
+            processInput["identifier"] = input["Identifier"]
+            processInput["title"] = input["Title"]
+            processInput["abstract"] = input["Abstract"]
+            print input
+            processInput["minoccurs"] = input["MinimumOccurs"]
+            #processInput["maxoccurs"] = input["MaximumOccurs"]
+            #if input["LiteralValue"]:
+            #    processInput["literalvalue"] = self.literalValueInput(input["LiteralValue"])
+            #if input["ComplexValue"]:
+            #    processInput["complexvalue"] = self.complexValueInput(input["ComplexValue"])
+            #if input["BoudningBoxValue"]:
+            #    processInput["boundingboxvalue"] = self.bboxValueInput(input["BoudningBoxValue"])
+            processInputs.append(processInput)
+        return processInputs
+    
+    def literalValueInput(self,literalData):
+
+        literalValue = {}
+        literalValue
+        return  literalValue
+
+    def complexValueInput(self,bboxData):
+        complexValue = {}
+        return complexValue
+
+    def bboxValueInput(self,bboxData):
+        bboxValue = {}
+        return bboxValue

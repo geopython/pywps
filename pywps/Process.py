@@ -19,210 +19,91 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 
-import os,sys,string
 import subprocess
 import wpsexceptions
 from wpsexceptions import *
+import time
+import Inputs
+import types
 
-class WPSProcess:
+class Status:
+    def __init__(self):
+        self.creationTime = time.time()
+        self.processAccepted = False
+        self.processStarted = False
+        self.processPaused = False
+        self.processSucceeded = False
+        self.processFailed = False
+
+        self.processCompleted = 0
+        self.exceptionReport = None
+
+
+class Process:
     """
-    This class is to be used as base class for WPS processes in PyWPS
-    script. To be able to use it's methods (functions), you have to start
-    your process with following lines:
-
-    from pywps.Wps.process import WPSProcess
-
-    class Process(WPSProcess):
-        def __init__(self):
-            WPSProcess.__init__(self,
-            Identifier="your_process_identifier",
-            Title="Your process title",
-            Abstract="Add optional abstract",
-            storeSupported="true",
-            ...)
-
-    Than you can add cusom process inputs and outputs:
-            
-            self.AddLiteralInput(Identifier="your_input_identifier",
-                        Title="Your input title",
-                        type=type(0), # integers only,
-                        ...)
-
-            self.AddComplexInput(Identifier="your_gml",
-                        Title="Your gml input title",
-                        ...)
-
-
-    And you can ofcourse define your process outputs too:
-
-            self.AddLiteralOutput(Identifier="output1",
-                            Title="First output",
-                            ...)
-            self.AddComplexOutput(Identifier="gmlout",
-                            Title="Embed GML",
-                            ...)
-
-    At the and, you can access the values of in- and outputs with help of
-    GetInputValue and SetOutputValue methods:
-
-        def execute(self):
-            
-            inputvalue = self.GetInputValue("your_input_identifier")
-            inputGMLFile = self.GetInputValue("your_gml")
-
-            self.SetOutputValue("output1", inputvalue)
-            self.SetOutputValue("gmlout", inputGMLFile)
-
-            return
-
-    NOTE: Try to use self.Gcmd("shell command") instead of os.system for
-          GRASS modules. It will update your self.status report
-          automatically, based on percentage output from GRASS modules.
-
-
     """
-    def __init__(self, Identifier, Title, processVersion="1.0", 
-            Abstract="", statusSupported="false", storeSupported="false"):
-        self.Identifier = Identifier
-        self.processVersion = processVersion
-        self.Title = Title
-        self.Abstract = Abstract
-        self.WSDL  = None
-        self.Profile = None
+    def __init__(self, identifier, title, abstract=None,
+            metadata=[],profile=[], version=None,
+            statusSupported=True, storeSupported=False):
 
-        if type(statusSupported) == type('t') and (statusSupported.lower() == "true" or\
-           statusSupported.lower() == "t") or \
-           statusSupported == True:
-            self.statusSupported="true"
-        else:
-            self.statusSupported="false"
+        self.identifier = identifier
+        self.version = version
+        self.metadata = metadata
+        self.title = title
+        self.abstract = abstract
+        self.wsdl  = None
+        self.profile = profile
+        self.storeSupported = storeSupported
+        self.statusSupported = statusSupported
 
+        self.status = Status()
+        self.inputs = {}
+        self.outputs = {}
 
-        if type(storeSupported) == type('t') and (storeSupported.lower() == "false" or\
-           storeSupported.lower() == "f") or \
-           storeSupported == False:
-            self.storeSupported="false"
-        else:
-            self.storeSupported="true"
-
-        self.status = ["Process started",0]
-        self.Inputs = []
-        self.Outputs = []
-        self.Metadata = []
-
-    def AddMetadata(self,Identifier, type, textContent):
+    def addMetadata(self,Identifier, type, textContent):
         """Add new metadata to this process"""
         self.Metadata.append({
             "Identifier": Identifier,
             "type":type,
             "textContent":textContent})
 
-    def AddLiteralInput(self, Identifier, Title=None, Abstract=None,
-            UOMs="m", MinimumOccurs=1, MaximumOccurs=1, allowedvalues=("*"), type=type(""), value=None):
-        """Add new input item of type LiteralValue to this process"""
+    def addLiteralInput(self, identifier, title, abstract=None,
+            uoms=None, minOccurs=1, maxOccurs=1, 
+            allowedValues=("*"), type=types.IntType ,
+            default=None, metadata= []):
+        """
+        Add new input item of type LiteralValue to this process
+        """
 
-        if not Title: 
-            Title = ""
+        self.inputs[identifier] = Inputs.LiteralValue(identifier=identifier,
+                title=title, abstract=abtract, metadata=metadata=[],
+                minOccurs=minOccurs,maxOccurs=maxOccurs,
+                type=type, uoms=uoms, values, default):
 
-        if not Abstract: 
-            Abstract = ""
+        return self.inputs[identifier]
 
-        if not UOMs: 
-            UOMs = "m"
+    def addComplexInput(self,identifier,title,abtract=None,
+                metadata=[],minOccurs=1,maxOccurs=1,
+                formats=[],maxmegabites=0.1):
 
-        if not allowedvalues: 
-            allowedvalues = ("*")
+        self.inputs[identifier] = Inputs.ComplexInput(identifier=identifier,
+                title=title,abtract=abstract,
+                metadata=[],minOccurs=minOccurs,maxOccurs=maxOccurs,
+                formats=formats, maxmegabites=maxmegabites)
 
-        if not MinimumOccurs:
-            MinimumOccurs = 1
-
-        if not MaximumOccurs:
-            MaximumOccurs = 1
-
-        if not type:
-            type = type("")
-
-        while 1:
-            if self.GetInput(Identifier):
-                Identifier += "-1"
-            else:
-                break
-
-        self.Inputs.append({"Identifier":Identifier,"Title":Title,
-                            "Abstract":Abstract,
-                            "LiteralValue": {"UOMs":UOMs,
-                                             "values":allowedvalues},
-                            "MinimumOccurs": MinimumOccurs,
-                            "MaximumOccurs": MaximumOccurs,
-                            "DataType":type,
-                            "value": value
-                            })
-        return self.Inputs[-1]
-
-    def AddComplexInput(self, Identifier, Title=None, Abstract=None,
-            Formats=["text/xml"], Schemas=["http://schemas.opengis.net/gml/2.1.2/feature.xsd"], value=None):
-        """Add new input item of type ComplexValue to this process"""
-
-        if not Title: 
-            Title = ""
-
-        if not Abstract: 
-            Abstract = ""
-
-        while 1:
-            if self.GetInput(Identifier):
-                Identifier += "-1"
-            else:
-                break
-
-        if type(Formats) != type([]):
-            Formats = [Formats]
-
-        if type(Schemas) != type([]):
-            Schemas = [Schemas]
-
-        if (len(Formats) != len(Schemas)):
-             self.failed = True
-             raise ServerError("Number of Formats and Schemas does not match in process: %s" % self.Title)
-
-        self.Inputs.append({"Identifier":Identifier,"Title":Title,
-                            "Abstract":Abstract,
-                            "ComplexValue": {"Formats":Formats,"Schemas":Schemas},
-                            "value": value
-                            })
-
-        return self.Inputs[-1]
-
-    def AddBBoxInput(self, Identifier, Title=None, Abstract=None, value=[]):
-        """Add new input item of type BoundingBox to this process"""
-
-        if not Title: 
-            Title = ""
-
-        if not Abstract: 
-            Abstract = ""
-
-        if type(value) != type([]):
-            value = str(value).split()
-
-        if len(value) < 4:
-            for i in range(4-len(value)):
-                value.append(0.0)
-
-        while 1:
-            if self.GetInput(Identifier):
-                Identifier += "-1"
-            else:
-                break
+        return self.inputs[identifier]
 
 
-        self.Inputs.append({"Identifier":Identifier,"Title":Title,
-                            "Abstract":Abstract,
-                            "BoundingBoxValue": {},
-                            "value": value
-                            })
+    def addBBoxInput(self,identifier,title,abtract=None,
+                metadata=[],minOccurs=1,maxoccurs=1,
+                crs=[]):
+        self.inputs[identifier] = Inputs.BoundingBoxInput(self,
+                identifier,title,abtract=abstract,
+                metadata=metadata,minOccurs=minOccurs,maxOccurs=maxOccurs,
+                crs=crs)
 
-        return self.Inputs[-1]
+        return self.inputs[identifier]
+ 
 
     def AddLiteralOutput(self, Identifier, Title=None, Abstract=None,
             UOMs="m", value=None):
@@ -551,3 +432,4 @@ class GRASSWPSProcess(WPSProcess):
            raise Exception("Could not perform command: %s" % cmd)
 
         return stdout.splitlines()
+

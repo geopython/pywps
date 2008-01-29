@@ -54,3 +54,14 @@ class Request:
             self.templateFile = os.path.join(
                                 os.path.join(Templates.__path__)[0],
                                     "Execute.tmpl")
+
+
+        processDir = os.getenv("PYWPS_PROCESSES")
+        import sys
+        if processDir[-1] == os.path.sep:
+            processDir = processDir[:-1]
+
+        sys.path.append(os.path.split(processDir)[0])
+        processes = __import__(os.path.split(processDir)[-1])
+        from processes import *
+

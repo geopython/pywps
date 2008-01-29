@@ -27,19 +27,21 @@ from Request import Request
 from pywps import processes
 from pywps.processes import *
 
+
+
 class GetCapabilities(Request):
     """
     Parses input request obtained via HTTP POST encoding - should be XML
     file.
     """
 
-    def __init__(self,wps):
+    def __init__(self,wps,processesDir):
         """
         Arguments:
            self
            wps   - parent WPS instance
         """
-        Request.__init__(self,wps)
+        Request.__init__(self,wps,processesDir)
 
         self.template = self.templateManager.prepare(self.templateFile)
 
@@ -122,6 +124,9 @@ class GetCapabilities(Request):
 
         # Processes
         processesData = []
+
+        # Import processes
+        
         for processName in processes.__all__:
             processData = {}
             try:
