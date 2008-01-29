@@ -91,11 +91,13 @@ ImportError: No module named xml.dom.minidom
             <hr />
             <a name="pdf"><h3>Other documents</h3></a>
             <p>
-                Most completed document about installation, setup and usage of PyWPS can be dowloaded in <a href="https://wald.intevation.org/docman/view.php/22/71/install.pdf">PDF form</a>. LaTeX sources are <a href="https://wald.intevation.org/plugins/scmsvn/viewcvs.php/*checkout*/trunk/doc/install.tex?rev=1&root=pywps">also avaliable</a> and are part of the distribution packages.
+                Most completed document about installation, setup and usage
+                of PyWPS can be dowloaded in <a href="https://wald.intevation.org/docman/view.php/22/71/pywps-howto.pdf">PDF form</a>. LaTeX sources are also avaliable and are part of the distribution packages.
                 
             </p>
             <p>
-                This document is also avaliable in <a href="https://wald.intevation.org/plugins/scmsvn/viewcvs.php/*checkout*/trunk/doc/install.html?&root=pywps">HTML</a> and in <a href="https://wald.intevation.org/plugins/scmsvn/viewcvs.php/*checkout*/trunk/doc/install.txt?&root=pywps">text</a> form.
+                This document is also avaliable in <a href="https://wald.intevation.org/plugins/scmsvn/viewcvs.php/*checkout*/trunk/doc/pywps-howto.html?&root=pywps">HTML</a>
+                and in <a href="https://wald.intevation.org/plugins/scmsvn/viewcvs.php/*checkout*/trunk/doc/pywps-howto.txt?&root=pywps">text</a> form.
             </p>
                 <div class="archive"><a href="https://wald.intevation.org/docman/index.php?group_id=22">Docs archive</a>
             <!-- ====================== /content ============================== -->

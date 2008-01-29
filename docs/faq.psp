@@ -28,8 +28,9 @@
             <li><a href="#debug">How to debug PyWPS processes?</a></li>
             <li><a href="#commands">How run command line commands?</a></li>
             <li><a href="#gcommands">How run GRASS commands?</a></li>
-            <li><a href="#doc">Where can I find documentation to process
-                    writing in general?</a></li>
+            <li><a href="#doc">Where can I find documentation to process writing in general?</a></li>
+            <li><a href="#dist">Why do I have to rename <code>processes/__init__.py-dist</code> and other files to <code>__init__.py</code>?</a></li>
+
             </ul>
             <h4>Error codes hints</h4>
             <ul>
@@ -43,10 +44,10 @@
             <h4>General answares</h4>
             <dl>
                 <dt><a name="version">Which version of PyWPS should I use?</a></dt>
-                <dd>Currently, you should use the trunk version from
-                    subversion repository. The version 1.0.0 is rather old
-                and should not be used. Trunk version, which is heading
-                towards 2.0.0 is more stable.</dd>
+                <dd>Currently, you should use the <a
+                        href="http://pywps.wald.intevation.org/download/index.psp">latest stable version</a>.
+                Older versions (1.0.0) are really outdated and you should
+                better not use them.</dd>
 
                 <dt><a name="debug">How to debug PyWPS processes?</a></dt>
                 <dd>You have two possibilities: 
@@ -113,6 +114,30 @@ PyWPS GCmd: g.region rast=mask2004@medlov res=5 1>&2
                             modify them to your needs.
                     </li>
                     </ul>
+                </dd>
+                <dt><a name="dist">Why do I have to rename <code>processes/__init__.py-dist</code> and other files to <code>__init__.py</code>?</a></dt>
+                <dd>
+                    <p>
+                        The files
+                    <ul>
+                        <li><code>processes/__init__.py</code></li>
+                        <li><code>etc/setup.py</code></li>
+                        <li><code>etc/grass.py</code></li>
+                    </ul>
+                    do have <code>-dist</code> suffix. You have to rename
+                    them and remove this suffix from the file name
+                    (e.g. <code>processes/__init__.py-dist -&gt;
+                        processes/__init__.py</code>) in order to get PyWPS
+                    running and configured.
+                    </p>
+                    <p>
+                        Why this? If you make some change to this
+                        files (by tuning PyWPS), and later you would update
+                        your installation of PyWPS, this original files
+                        will be overwritten. In this case, only the
+                        "<code>-dist</code>" will be overwritten and your
+                        changes should be save.
+                    </p>
                 </dd>
 
             </dl>

@@ -89,6 +89,17 @@
             <p>
                 During November 2006, Lorenzo Becchi and Luca Casagrande started their work on Web User Interface for WPS. They lunched two projects: <a href="http://pywps.ominiverdi.org">WUIW and Embrio</a>. WUIW should be general web interace able to handle any WPS server. Embrio is bringing functionality of <a href="http://grass.itc.it">GRASS GIS</a> to the Internet. WUIW and Embrio are part of PyWPS's subversion repository.
             </p>
+
+            <p>
+                <strong>2007-10-08</strong> version 2.0.0 has been released.
+            </p>
+            <p>
+               New version improved stability, approached in the standard
+               implementation and introduces python Class
+               <code>Process</code>, which's methods can be used in process
+               coding. New WPS client project was lounched, plugin for
+               <a href="http://openlayers.org">OpenLayers</a>.
+            </p>
             <!-- ====================== /content ============================== -->
 
         </div><!-- /content -->

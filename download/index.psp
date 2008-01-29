@@ -29,7 +29,28 @@
             </div>
 
             <a name="download"><h3>Download</h3></a>
-            <h4>Stable: 2.0.0</h4>
+            <h4>Stable: 2.0.1</h4>
+            <p>
+                4.11.2007
+            </p>
+            <p>
+                <a href="http://wald.intevation.org/frs/download.php/400/pywps-2.0.1.tar.gz">Source TAR.GZ</a>
+            |
+            <a href="http://wald.intevation.org/frs/download.php/401/pywps_2.0.1-1_all.deb">DEB</a>
+            |
+            <a href="http://wald.intevation.org/frs/download.php/402/pywps-2.0.1-1.noarch.rpm">RPM</a>
+            </p>
+            <p>
+            <strong>Anonymous Subversion Access</strong><br />
+            svn checkout https://svn.wald.intevation.org/svn/pywps/branches/pywps-2.0
+            </p>
+
+            <hr/>
+            <h4>Old Stable</h4>
+            <h5>2.0.0</h5>
+            <p>
+                8.10.2007
+            </p>
             <p>
                 <a href="http://wald.intevation.org/frs/download.php/389/pywps-2.0.0.tar.gz">Source TAR.GZ</a>
             |
@@ -41,8 +62,10 @@
             <strong>Anonymous Subversion Access</strong><br />
             svn checkout https://svn.wald.intevation.org/svn/pywps/branches/pywps-2.0
             </p>
-            <h4>Old Stable</h4>
             <h5>1.0.0</h5>
+            <p>
+                26.11.2006
+            </p>
             <p>
                 <a href="http://wald.intevation.org/frs/download.php/289/pywps-1.0.0.tar.gz">TAR.GZ</a>
             |
