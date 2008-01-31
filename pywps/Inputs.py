@@ -21,8 +21,8 @@
 import types
 
 class Input:
-    def __init__(self,identifier,title,abtract=None,
-                metadata=[],minOccurs=1,maxoccurs=1):
+    def __init__(self,identifier,title,abstract=None,
+                metadata=[],minOccurs=1,maxOccurs=1,type=None):
         self.identifier = identifier
         self.title = title
         self.abstract = abstract
@@ -30,38 +30,40 @@ class Input:
 
         self.minOccurs = minOccurs
         self.maxOccurs = maxOccurs
+        self.type = type
         return
 
 class LiteralInput(Input):
-    def __init__(self,identifier,title,abtract=None,
-                metadata=[],minOccurs=1,maxoccurs=1,type=types.StringType,
-                uoms=[],values,default):
-        Input.__init__(self,identifier,title,abtract=None,
-                metadata=[],minOccurs=1,maxOccurs=1)
+    def __init__(self,identifier,title,abstract=None,
+                metadata=[],minOccurs=1,maxOccurs=1,dataType=types.StringType,
+                uoms=(),values=("*"),spacing=None,default=None):
+        Input.__init__(self,identifier,title,abstract=None,
+                metadata=[],minOccurs=1,maxOccurs=1,type="LiteralValue")
         
-        self.type = type
+        self.dataType = dataType
         self.uoms = uoms
         self.values = values
         self.default = default
+        self.spacing = spacing
         return
 
 class ComplexInput(Input):
-    def __init__(self,identifier,title,abtract=None,
-                metadata=[],minOccurs=1,maxoccurs=1,
+    def __init__(self,identifier,title,abstract=None,
+                metadata=[],minOccurs=1,maxOccurs=1,
                 formats=[],maxmegabites=0.1):
-        Input.__init__(self,identifier,title,abtract=None,
-                metadata=[],minOccurs=1,maxOccurs=1)
+        Input.__init__(self,identifier,title,abstract=None,
+                metadata=[],minOccurs=1,maxOccurs=1,type="CompexValue")
         
         self.formats = formats
         self.maxmegabites = maxmegabites
         return
 
 class BoundingBoxInput(Input):
-    def __init__(self,identifier,title,abtract=None,
-                metadata=[],minOccurs=1,maxoccurs=1,
+    def __init__(self,identifier,title,abstract=None,
+                metadata=[],minOccurs=1,maxOccurs=1,
                 crs=[]):
-        Input.__init__(self,identifier,title,abtract=None,
-                metadata=[],minOccurs=1,maxOccurs=1)
+        Input.__init__(self,identifier,title,abstract=None,
+                metadata=[],minOccurs=1,maxOccurs=1,type="BoundingBoxValue")
         
         self.crs = formats
         return

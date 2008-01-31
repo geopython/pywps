@@ -24,8 +24,8 @@ WPS DescribeProcess request handler
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 from Request import Request
-from pywps import processes
-from pywps.processes import *
+import os
+import types
 
 class DescribeProcess(Request):
     """
@@ -56,6 +56,7 @@ class DescribeProcess(Request):
         #
         # Processes
         #
+
         self.templateProcessor.set("Processes",self.processesDescription())
 
         self.response = self.templateProcessor.process(self.template)
@@ -69,29 +70,32 @@ class DescribeProcess(Request):
 
         processesData = []
 
-        for processName in processes.__all__:
+        for processName in self.processes.__all__:
             # skip process, if not requested
             if not processName in self.wps.inputs["identifier"]:
                 continue
-            process = eval(processName+".Process()")
+
             processData = {}
             try:
+                module = __import__(self.processes.__name__,fromlist=[processName])
+                process = eval("module."+processName+".Process()")
+
                 processData["processok"] = 1
-                processData["identifier"] = process.Identifier
-                processData["title"] = process.Title
-                processData["abstract"] = process.Abstract
+                processData["identifier"] = process.identifier
+                processData["title"] = process.title
+                processData["abstract"] = process.abstract
                 processData["Metadata"] = 0 #TODO
-                processData["Profiles"] = process.Profile
-                processData["wsdl"] = process.WSDL
+                processData["Profiles"] = process.profile
+                processData["wsdl"] = process.wsdl
                 processData["store"] = process.storeSupported
                 processData["status"] = process.statusSupported
-                processData["version"] = process.processVersion
+                processData["version"] = process.version
                 processData["Datainputs"] = self.processInputs(process)
                 processData["datainpuntslen"] = len(processData["Datainputs"])
-            except (Exception,KeyError), e:
-                processData["processok",0]
-                processData["process",process]
-                processData["exception",e]
+            except Exception, e:
+                processData["processok"] = 0
+                processData["process"] = process
+                processData["exception"] = e
             processesData.append(processData)
         return processesData
 
@@ -101,33 +105,86 @@ class DescribeProcess(Request):
         """
 
         processInputs = []
-        for input in process.Inputs:
+        for identifier in process.inputs:
             processInput = {}
-            processInput["identifier"] = input["Identifier"]
-            processInput["title"] = input["Title"]
-            processInput["abstract"] = input["Abstract"]
-            print input
-            processInput["minoccurs"] = input["MinimumOccurs"]
-            #processInput["maxoccurs"] = input["MaximumOccurs"]
-            #if input["LiteralValue"]:
-            #    processInput["literalvalue"] = self.literalValueInput(input["LiteralValue"])
-            #if input["ComplexValue"]:
-            #    processInput["complexvalue"] = self.complexValueInput(input["ComplexValue"])
-            #if input["BoudningBoxValue"]:
-            #    processInput["boundingboxvalue"] = self.bboxValueInput(input["BoudningBoxValue"])
+            input = process.inputs[identifier]
+            processInput["identifier"] = identifier
+            processInput["title"] =     input.title
+            processInput["abstract"] =  input.abstract
+            processInput["minoccurs"] = input.minOccurs
+            processInput["maxoccurs"] = input.maxOccurs
+            if input.type == "LiteralValue":
+                processInput["literalvalue"] = 1
+                self.literalValueInput(input,processInput)
+            if input.type == "ComplexValue":
+                processInput["complexvalue"] = 1
+                self.literalValueInput(input,processInput)
+            if input.type == "BoudningBoxValue":
+                processInput["boundingboxvalue"] = 1
+                self.literalValueInput(input,processInput)
             processInputs.append(processInput)
         return processInputs
     
-    def literalValueInput(self,literalData):
+    def literalValueInput(self,input,processInput):
 
-        literalValue = {}
-        literalValue
-        return  literalValue
 
-    def complexValueInput(self,bboxData):
+        # data types
+        if input.dataType == types.StringType:
+            processInput["dataTypeReference"] = \
+                                    "http://www.w3.org/TR/xmlschema-2/#string"
+            processInput["dataType"] = "string"
+        elif input.dataType == types.FloatType:
+            processInput["dataTypeReference"] = \
+                                    "http://www.w3.org/TR/xmlschema-2/#float"
+            processInput["dataType"] = "float"
+        elif input.dataType == types.IntType:
+            processInput["dataTypeReference"] =\
+                                    "http://www.w3.org/TR/xmlschema-2/#integer"
+            processInput["dataType"] = "integer"
+        elif input.dataType == types.BooleanType:
+            processInput["dataTypeReference"] = \
+                                    "http://www.w3.org/TR/xmlschema-2/#boolean"
+            processInput["dataType"] = "boolean"
+        else:
+            # FIXME
+            pass
+        
+        # UOMs
+        if len(input.uoms) > 0:
+            processInput["UOM"] = 1
+            processInput["defaultUOM"] = input.uoms[0]
+        if len(input.uoms) > 1:
+            supportedUOMS = []
+            for uom in input.uoms:
+                supportedUOMS.append({"uom":uom})
+            processInput["supportedUOMS"] = supportedUOMS
+            processInput["UOM"] = 1
+
+        # allowed values
+        if "*" in input.values:
+            processInput["anyvalue"] = 1
+        else:
+            processInput["allowedValueslen"] = 1
+            processInput["allowedValues"] = []
+            for val in input.values:
+                valrecord = {}
+                if type(val) == type([]):
+                    valrecord["minMax"] = 1
+                    valercord["minimumValue"] = val[0]
+                    valercord["maximumValue"] = val[-1]
+                    valercord["spacing"] = input.spacing
+                else:
+                    valrecord["discrete"] = 1
+                    valrecord["value"] = val
+        # FIXME
+        # value reference
+
+        return
+
+    def complexValueInput(self,bboxData,processInput):
         complexValue = {}
         return complexValue
 
-    def bboxValueInput(self,bboxData):
+    def bboxValueInput(self,bboxData,processInput):
         bboxValue = {}
         return bboxValue

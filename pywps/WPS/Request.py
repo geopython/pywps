@@ -35,6 +35,7 @@ class Request:
     templateProcessor = TemplateProcessor() # HTML TemplateProcessor
     template = None # HTML Template
     templateFile = None # File with template
+    processDir = None # Directory with processes
 
     def __init__(self,wps):
         self.wps = wps
@@ -56,12 +57,18 @@ class Request:
                                     "Execute.tmpl")
 
 
-        processDir = os.getenv("PYWPS_PROCESSES")
-        import sys
-        if processDir[-1] == os.path.sep:
-            processDir = processDir[:-1]
+        self.processDir = os.getenv("PYWPS_PROCESSES")
 
-        sys.path.append(os.path.split(processDir)[0])
-        processes = __import__(os.path.split(processDir)[-1])
-        from processes import *
+        if self.processDir:
+            import sys
+            if self.processDir[-1] == os.path.sep:
+                self.processDir = self.processDir[:-1]
 
+
+            sys.path.append(os.path.split(self.processDir)[0])
+            processes = __import__(os.path.split(self.processDir)[-1])
+            self.processes = processes
+        else:
+            import pywps
+            from pywps import processes
+            self.processes = pywps.processes

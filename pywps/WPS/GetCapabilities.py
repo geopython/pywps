@@ -24,10 +24,6 @@ WPS GetCapabilities request handler
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 from Request import Request
-from pywps import processes
-from pywps.processes import *
-
-
 
 class GetCapabilities(Request):
     """
@@ -35,13 +31,13 @@ class GetCapabilities(Request):
     file.
     """
 
-    def __init__(self,wps,processesDir):
+    def __init__(self,wps):
         """
         Arguments:
            self
            wps   - parent WPS instance
         """
-        Request.__init__(self,wps,processesDir)
+        Request.__init__(self,wps)
 
         self.template = self.templateManager.prepare(self.templateFile)
 
@@ -127,21 +123,24 @@ class GetCapabilities(Request):
 
         # Import processes
         
-        for processName in processes.__all__:
+        for processName in self.processes.__all__:
+
             processData = {}
             try:
-                process = eval(processName+".Process()")
+                module = __import__(self.processes.__name__,fromlist=[processName])
+                process = eval("module."+processName+".Process()")
+
                 processData["processok"] = 1
-                processData["identifier"] = process.Identifier
-                processData["title"] = process.Title
-                processData["abstract"] = process.Abstract
-                processData["profile"] = process.Profile
-                processData["wsdl"] = process.WSDL
+                processData["identifier"] = process.identifier
+                processData["title"] = process.title
+                processData["abstract"] = process.abstract
+                processData["profile"] = process.profile
+                processData["wsdl"] = process.wsdl
                 processData["metadatalen"] = 0
             except Exception, e:
-                processData["processok",0]
-                processData["process",process]
-                processData["exception",e]
+                processData["processok"] = 0
+                processData["process"] = processName
+                processData["exception"] = e
             processesData.append(processData)
         self.templateProcessor.set("Processes",processesData)
 

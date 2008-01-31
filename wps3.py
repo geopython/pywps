@@ -140,7 +140,7 @@ class WPS:
             else:
                 raise self.exceptions.InvalidParameterValue(
                         "request: "+self.inputs["request"])
-        except KeyError:
+        except KeyError,e:
             raise self.exceptions.MissingParameterValue("request")
     
     def getConfigValue(self,*args):
