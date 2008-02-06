@@ -38,11 +38,12 @@ class LiteralInput(Input):
                 metadata=[],minOccurs=1,maxOccurs=1,dataType=types.StringType,
                 uoms=(),values=("*"),spacing=None,default=None):
         Input.__init__(self,identifier,title,abstract=None,
-                metadata=[],minOccurs=1,maxOccurs=1,type="LiteralValue")
+                metadata=[],minOccurs=minOccurs,maxOccurs=maxOccurs,type="LiteralValue")
         
         self.dataType = dataType
         self.uoms = uoms
-        self.values = values
+        if type(values) == types.StringType:
+            self.values = (values)
         self.default = default
         self.spacing = spacing
         return
@@ -50,21 +51,85 @@ class LiteralInput(Input):
 class ComplexInput(Input):
     def __init__(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=1,maxOccurs=1,
-                formats=[],maxmegabites=0.1):
+                maxmegabites=0.1,formats=[{"mimetype":"text/xml"}]):
         Input.__init__(self,identifier,title,abstract=None,
-                metadata=[],minOccurs=1,maxOccurs=1,type="CompexValue")
+                metadata=[],minOccurs=minOccurs,maxOccurs=maxOccurs,type="ComplexValue")
         
-        self.formats = formats
         self.maxmegabites = maxmegabites
+
+        if type(formats) == types.StringType:
+            formats = [{"mimetype":formats,"encoding":None,"schema":None}]
+        elif type(formats) == types.DictType:
+            formats = [formats]
+
+        for format in formats:
+            if not "encoding" in format.keys():
+                format["encoding"] = None
+            if not "schema" in format.keys():
+                format["schema"] = None
+
+        self.formats = formats
         return
 
 class BoundingBoxInput(Input):
     def __init__(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=1,maxOccurs=1,
-                crs=[]):
+                crss=[]):
         Input.__init__(self,identifier,title,abstract=None,
-                metadata=[],minOccurs=1,maxOccurs=1,type="BoundingBoxValue")
+                metadata=[],minOccurs=minOccurs,maxOccurs=maxOccurs,type="BoundingBoxValue")
         
-        self.crs = formats
+        self.crss = crss
+        return
+
+class Output:
+    def __init__(self,identifier,title,abstract=None,
+                metadata=[],type=None):
+        self.identifier = identifier
+        self.title = title
+        self.abstract = abstract
+        self.metadata = metadata
+        self.type = type
+
+        return
+
+class LiteralOutput(Output):
+    def __init__(self,identifier,title,abstract=None,
+                metadata=[], uoms=(), dataType = types.StringType, 
+                default=None):
+        Output.__init__(self,identifier,title,abstract=None,
+                metadata=[],type="LiteralValue")
+        
+        self.uoms = uoms
+        self.default = default
+        self.dataType = dataType
+        return
+
+class ComplexOutput(Output):
+    def __init__(self,identifier,title,abstract=None,
+                metadata=[], formats=[{"mimetype":"text/xml"}]):
+        Output.__init__(self,identifier,title,abstract=None,
+                metadata=[],type="ComplexValue")
+        
+        if type(formats) == types.StringType:
+            formats = [{"mimetype":formats,"encoding":None,"schema":None}]
+        elif type(formats) == types.DictType:
+            formats = [formats]
+
+        for format in formats:
+            if not "encoding" in format.keys():
+                format["encoding"] = None
+            if not "schema" in format.keys():
+                format["schema"] = None
+
+        self.formats = formats
+        return
+
+class BoundingBoxOutput(Output):
+    def __init__(self,identifier,title,abstract=None,
+                metadata=[], crss=[]):
+        Output.__init__(self,identifier,title,abstract=None,
+                metadata=[],type="BoundingBoxValue")
+        
+        self.crss = crss
         return
 

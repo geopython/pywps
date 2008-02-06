@@ -28,13 +28,19 @@
                 <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
                 </TMPL_IF>
                 <TMPL_IF complexvalue>
+                <wps:ComplexData>
                     <TMPL_INCLUDE NAME="DescribeProcess_ComplexValue.tmpl">
                 </TMPL_IF>
+                </wps:ComplexData>
                 <TMPL_IF literalvalue>
+                <wps:LiteralData>
                     <TMPL_INCLUDE NAME="DescribeProcess_LiteralValue.tmpl">
+                </wps:LiteralData>
                 </TMPL_IF>
                 <TMPL_IF boundingboxvalue>
+                <wps:BoundingBoxData>
                     <TMPL_INCLUDE NAME="DescribeProcess_BoundingBoxValue.tmpl">
+                </wps:BoundingBoxData>
                 </TMPL_IF>
             </wps:Input>
             </TMPL_LOOP>
@@ -50,20 +56,26 @@
                 <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
                 </TMPL_IF>
                 <TMPL_IF complexvalue>
+                <wps:ComplexOutput>
                     <TMPL_INCLUDE NAME="DescribeProcess_ComplexValue.tmpl">
+                </wps:ComplexOutput>
                 </TMPL_IF>
                 <TMPL_IF literalvalue>
+                <wps:LiteralOutput>
                     <TMPL_INCLUDE NAME="DescribeProcess_LiteralValue.tmpl">
+                </wps:LiteralOutput>
                 </TMPL_IF>
                 <TMPL_IF boundingboxvalue>
+                <wps:BoundingBoxOutput>
                     <TMPL_INCLUDE NAME="DescribeProcess_BoundingBoxValue.tmpl">
+                </wps:BoundingBoxOutput>
                 </TMPL_IF>
             </wps:Output>
             </TMPL_LOOP>
         </wps:ProcessOutputs>
         </TMPL_IF>
     </wps:ProcessDescription>
-    <TMPL_ELSE> # Process failed
+    <TMPL_ELSE> 
     <!-- Process <TMPL_VAR process> failed: <TMPL_VAR exception> -->
     </TMPL_IF>
     </TMPL_LOOP>

@@ -78,13 +78,13 @@ class WPSProcess:
         self.inputs[identifier] = Inputs.LiteralInput(identifier=identifier,
                 title=title, abstract=abstract, metadata=[],
                 minOccurs=minOccurs,maxOccurs=maxOccurs,
-                dataType=type, uoms=uoms, values=("*"), default=None)
+                dataType=type, uoms=uoms, values=allowedValues, default=None)
 
         return self.inputs[identifier]
 
     def addComplexInput(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=1,maxOccurs=1,
-                formats=[],maxmegabites=0.1):
+                formats=[{"mimetype":"text/xml"}],maxmegabites=0.1):
 
         self.inputs[identifier] = Inputs.ComplexInput(identifier=identifier,
                 title=title,abstract=abstract,
@@ -96,11 +96,33 @@ class WPSProcess:
 
     def addBBoxInput(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=1,maxOccurs=1,
-                crs=[]):
+                crss=[""]): #FIXME some default crss
         self.inputs[identifier] = Inputs.BoundingBoxInput(self,
                 identifier,title,abtract=abstract,
                 metadata=metadata,minOccurs=minOccurs,maxOccurs=maxOccurs,
-                crs=crs)
+                crss=crss)
 
         return self.inputs[identifier]
  
+    # --------------------------------------------------------------------
+
+    def addComplexOutput(self,identifier,title,abstract=None,
+            metadata=[],formats=[{"mimetype":"text/xml"}]):
+
+        self.outputs[identifier] = Inputs.ComplexOutput(identifier=identifier,
+                title=title,abstract=abstract,
+                metadata=[], formats=formats)
+
+        return self.outputs[identifier]
+
+    def addLiteralOutput(self, identifier, title, abstract=None,
+            uoms=(), type=types.IntType, default=None):
+        """
+        Add new output item of type LiteralValue to this process
+        """
+
+        self.outputs[identifier] = Inputs.LiteralOutput(identifier=identifier,
+                title=title, abstract=abstract, dataType=type, uoms=uoms, 
+                default=None)
+
+        return self.outputs[identifier]

@@ -90,11 +90,16 @@ class DescribeProcess(Request):
                 processData["store"] = process.storeSupported
                 processData["status"] = process.statusSupported
                 processData["version"] = process.version
+
                 processData["Datainputs"] = self.processInputs(process)
                 processData["datainpuntslen"] = len(processData["Datainputs"])
+
+                processData["Dataoutputs"] = self.processOutputs(process)
+                processData["dataoutputslen"] = len(processData["Dataoutputs"])
+
             except Exception, e:
                 processData["processok"] = 0
-                processData["process"] = process
+                processData["process"] = processName
                 processData["exception"] = e
             processesData.append(processData)
         return processesData
@@ -115,76 +120,118 @@ class DescribeProcess(Request):
             processInput["maxoccurs"] = input.maxOccurs
             if input.type == "LiteralValue":
                 processInput["literalvalue"] = 1
-                self.literalValueInput(input,processInput)
+                self.literalValue(input,processInput)
             if input.type == "ComplexValue":
                 processInput["complexvalue"] = 1
-                self.literalValueInput(input,processInput)
+                self.complexValue(input,processInput)
             if input.type == "BoudningBoxValue":
                 processInput["boundingboxvalue"] = 1
-                self.literalValueInput(input,processInput)
+                self.bboxValue(input,processInput)
             processInputs.append(processInput)
         return processInputs
-    
-    def literalValueInput(self,input,processInput):
 
+    def processOutputs(self,process):
+        """
+        Will return Object with process output
+        """
+
+        processOutputs = []
+        for identifier in process.outputs:
+            processOutput = {}
+            output = process.outputs[identifier]
+            processOutput["identifier"] = identifier
+            processOutput["title"] =     output.title
+            processOutput["abstract"] =  output.abstract
+            if output.type == "LiteralValue":
+                processOutput["literalvalue"] = 1
+                self.literalValue(output,processOutput)
+            if output.type == "ComplexValue":
+                processOutput["complexvalue"] = 1
+                self.complexValue(output,processOutput)
+            if output.type == "BoudningBoxValue":
+                processOutput["boundingboxvalue"] = 1
+                self.bboxValue(output,processOutput)
+            processOutputs.append(processOutput)
+        return processOutputs
+    
+    def literalValue(self,inoutput,processInOutput):
 
         # data types
-        if input.dataType == types.StringType:
-            processInput["dataTypeReference"] = \
+        if inoutput.dataType == types.StringType:
+            processInOutput["dataTypeReference"] = \
                                     "http://www.w3.org/TR/xmlschema-2/#string"
-            processInput["dataType"] = "string"
-        elif input.dataType == types.FloatType:
-            processInput["dataTypeReference"] = \
+            processInOutput["dataType"] = "string"
+        elif inoutput.dataType == types.FloatType:
+            processInOutput["dataTypeReference"] = \
                                     "http://www.w3.org/TR/xmlschema-2/#float"
-            processInput["dataType"] = "float"
-        elif input.dataType == types.IntType:
-            processInput["dataTypeReference"] =\
+            processInOutput["dataType"] = "float"
+        elif inoutput.dataType == types.IntType:
+            processInOutput["dataTypeReference"] =\
                                     "http://www.w3.org/TR/xmlschema-2/#integer"
-            processInput["dataType"] = "integer"
-        elif input.dataType == types.BooleanType:
-            processInput["dataTypeReference"] = \
+            processInOutput["dataType"] = "integer"
+        elif inoutput.dataType == types.BooleanType:
+            processInOutput["dataTypeReference"] = \
                                     "http://www.w3.org/TR/xmlschema-2/#boolean"
-            processInput["dataType"] = "boolean"
+            processInOutput["dataType"] = "boolean"
         else:
             # FIXME
             pass
         
         # UOMs
-        if len(input.uoms) > 0:
-            processInput["UOM"] = 1
-            processInput["defaultUOM"] = input.uoms[0]
-        if len(input.uoms) > 1:
+        if len(inoutput.uoms) > 0:
+            processInOutput["UOM"] = 1
+            processInOutput["defaultUOM"] = inoutput.uoms[0]
+        if len(inoutput.uoms) > 1:
             supportedUOMS = []
-            for uom in input.uoms:
+            for uom in inoutput.uoms:
                 supportedUOMS.append({"uom":uom})
-            processInput["supportedUOMS"] = supportedUOMS
-            processInput["UOM"] = 1
+            processInOutput["supportedUOMS"] = supportedUOMS
+            processInOutput["UOM"] = 1
 
         # allowed values
-        if "*" in input.values:
-            processInput["anyvalue"] = 1
-        else:
-            processInput["allowedValueslen"] = 1
-            processInput["allowedValues"] = []
-            for val in input.values:
-                valrecord = {}
-                if type(val) == type([]):
-                    valrecord["minMax"] = 1
-                    valercord["minimumValue"] = val[0]
-                    valercord["maximumValue"] = val[-1]
-                    valercord["spacing"] = input.spacing
-                else:
-                    valrecord["discrete"] = 1
-                    valrecord["value"] = val
+        # NOTE: only for inputs, but does not matter
+        try:
+            if "*" in inoutput.values:
+                processInOutput["anyvalue"] = 1
+            else:
+                processInOutput["allowedValueslen"] = 1
+                processInOutput["allowedValues"] = []
+                for val in inoutput.values:
+                    valrecord = {}
+                    if type(val) == type([]):
+                        valrecord["minMax"] = 1
+                        valercord["minimumValue"] = val[0]
+                        valercord["maximumValue"] = val[-1]
+                        valercord["spacing"] = inoutput.spacing
+                    else:
+                        valrecord["discrete"] = 1
+                        valrecord["value"] = val
+        except AttributeError:
+            pass
         # FIXME
         # value reference
 
         return
 
-    def complexValueInput(self,bboxData,processInput):
-        complexValue = {}
-        return complexValue
+    def complexValue(self,inoutput,processInOutput):
 
-    def bboxValueInput(self,bboxData,processInput):
-        bboxValue = {}
-        return bboxValue
+        processInOutput["mimetype"] = inoutput.formats[0]["mimetype"]
+        processInOutput["encoding"] = inoutput.formats[0]["encoding"]
+        processInOutput["schema"] = inoutput.formats[0]["schema"]
+
+        processInOutput["Formats"] = []
+        for format in inoutput.formats:
+            processInOutput["Formats"].append({
+                                        "mimetype":format["mimetype"],
+                                        "encoding":format["encoding"],
+                                        "schema":format["schema"]
+                                            })
+        return
+
+    def bboxValue(self,input,processInput):
+        processInput["crs"] = input.crss[0]
+
+        processInput["CRSs"] = inputs.crss
+
+        return 
+

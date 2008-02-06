@@ -1,11 +1,11 @@
                     <wps:Default>
                         <wps:Format>
-                            <ows:MimeType><TMPL_VAR defaultMimetype></ows:MimeType>
+                            <ows:MimeType><TMPL_VAR mimetype></ows:MimeType>
                             <TMPL_IF encoding>
-                            <wps:Encoding><TMPL_VAR defaultEncoding></wps:Encoding>
+                            <wps:Encoding><TMPL_VAR encoding></wps:Encoding>
                             </TMPL_IF>
                             <TMPL_IF schema>
-                            <wps:Schema><TMPL_VAR defaultSchema></wps:Schema>
+                            <wps:Schema><TMPL_VAR schema></wps:Schema>
                             </TMPL_IF>
                         </wps:Format>
                     </wps:Default>

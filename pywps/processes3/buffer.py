@@ -23,6 +23,11 @@ class Process(WPSProcess):
         self.addLiteralInput(identifier = "width",
                              title = "Width")
 
+        self.addComplexOutput(identifier="buffer",
+                                title="Output buffer file")
+
+        self.addLiteralOutput(identifier="text",
+                                title="just some text")
         
     def execute(self):
 
