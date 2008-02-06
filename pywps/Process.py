@@ -23,7 +23,7 @@ import subprocess
 import Wps.wpsexceptions
 from Wps.wpsexceptions import *
 import time
-import Inputs
+import InAndOutputs
 import types
 
 class Status:
@@ -75,7 +75,7 @@ class WPSProcess:
         Add new input item of type LiteralValue to this process
         """
 
-        self.inputs[identifier] = Inputs.LiteralInput(identifier=identifier,
+        self.inputs[identifier] = InAndOutputs.LiteralInput(identifier=identifier,
                 title=title, abstract=abstract, metadata=[],
                 minOccurs=minOccurs,maxOccurs=maxOccurs,
                 dataType=type, uoms=uoms, values=allowedValues, default=None)
@@ -86,7 +86,7 @@ class WPSProcess:
                 metadata=[],minOccurs=1,maxOccurs=1,
                 formats=[{"mimetype":"text/xml"}],maxmegabites=0.1):
 
-        self.inputs[identifier] = Inputs.ComplexInput(identifier=identifier,
+        self.inputs[identifier] = InAndOutputs.ComplexInput(identifier=identifier,
                 title=title,abstract=abstract,
                 metadata=[],minOccurs=minOccurs,maxOccurs=maxOccurs,
                 formats=formats, maxmegabites=maxmegabites)
@@ -97,7 +97,7 @@ class WPSProcess:
     def addBBoxInput(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=1,maxOccurs=1,
                 crss=[""]): #FIXME some default crss
-        self.inputs[identifier] = Inputs.BoundingBoxInput(self,
+        self.inputs[identifier] = InAndOutputs.BoundingBoxInput(self,
                 identifier,title,abtract=abstract,
                 metadata=metadata,minOccurs=minOccurs,maxOccurs=maxOccurs,
                 crss=crss)
@@ -109,7 +109,7 @@ class WPSProcess:
     def addComplexOutput(self,identifier,title,abstract=None,
             metadata=[],formats=[{"mimetype":"text/xml"}]):
 
-        self.outputs[identifier] = Inputs.ComplexOutput(identifier=identifier,
+        self.outputs[identifier] = InAndOutputs.ComplexOutput(identifier=identifier,
                 title=title,abstract=abstract,
                 metadata=[], formats=formats)
 
@@ -121,7 +121,7 @@ class WPSProcess:
         Add new output item of type LiteralValue to this process
         """
 
-        self.outputs[identifier] = Inputs.LiteralOutput(identifier=identifier,
+        self.outputs[identifier] = InAndOutputs.LiteralOutput(identifier=identifier,
                 title=title, abstract=abstract, dataType=type, uoms=uoms, 
                 default=None)
 
