@@ -1,40 +1,105 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<wps:ExecuteResponse xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 ..\wpsExecute_response.xsd" service="WPS" version="1.0.0" xml:lang="en-CA" serviceInstance="http://foo.bar/foo" statusLocation="http://foo.bar/execute_response_url.xml">
-	<wps:Process wps:processVersion="1">
-		<ows:Identifier>Buffer</ows:Identifier>
-		<ows:Title>Create a buffer around a polygon.</ows:Title>
-		<ows:Abstract>String</ows:Abstract>
-		<wps:Profile>OGC:WPS:Buffer</wps:Profile>
-		<wps:WSDL xlink:href="http://foo.bar/foo"/>
-	</wps:Process>
-	<wps:Status creationTime="2007-04-18T12:13:14Z">
-		<wps:ProcessSucceeded/>
-	</wps:Status>
-	<wps:DataInputs>
-		<wps:Input>
-			<ows:Identifier>InputPolygon</ows:Identifier>
-			<ows:Title>Playground area</ows:Title>
-			<wps:Reference xlink:href="http://foo.bar/some_WFS_request.xml" method="GET" mimeType="text/xml" encoding="UTF-8" schema="http://foo.bar/gml_polygon_schema.xsd"/>
-		</wps:Input>
-		<wps:Input>
-			<ows:Identifier>BufferDistance</ows:Identifier>
-			<ows:Title>Distance which people will walk to get to a playground</ows:Title>
-			<wps:Data>
-				<wps:LiteralData uom="meters">400</wps:LiteralData>
-			</wps:Data>
-		</wps:Input>
-	</wps:DataInputs>
-	<wps:OutputDefinitions mimeType="text/xml" encoding="UTF-8" schema="http://foo.bar/gml_polygon_schema.xsd" asReference="true">
-			<ows:Identifier>BufferedPolygon</ows:Identifier>
-			<ows:Title>Area serviced by playground.</ows:Title>
-			<ows:Abstract>Area within which most users of this playground will live.</ows:Abstract>
-	</wps:OutputDefinitions>
-	<wps:ProcessOutputs>
-		<wps:Output>
-			<ows:Identifier>BufferedPolygon</ows:Identifier>
-			<ows:Title>Area serviced by playground.</ows:Title>
-			<ows:Abstract>Area within which most users of this playground will live.</ows:Abstract>
-			<wps:Reference href="http://foo.bar/buffered_polygon.xml" mimeType="text/xml" encoding="UTF-8" schema="http://foo.bar/gml_polygon_schema.xsd"/>
-		</wps:Output>
-	</wps:ProcessOutputs>
+<?xml version="1.0" encoding="<TMPL_VAR encoding>"?>
+<wps:ExecuteResponse xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 ..\wpsExecute_response.xsd" service="WPS" version="1.0.0" xml:lang="<TMPL_VAR lang>" serviceInstance="<TMPL_VAR serviceInstance>" statusLocation="<TMPL_VAR statusLocation>">
+    <wps:Process wps:processVersion="<TMPL_VAR version>">
+        <ows:Identifier><TMPL_VAR identifier></ows:Identifier>
+        <ows:Title><TMPL_VAR title></ows:Title>
+        <TMPL_IF abstract>
+        <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
+        </TMPL_IF>
+        <TMPL_IF profile>
+        <wps:Profile><TMPL_VAR profile></wps:Profile>
+        </TMPL_IF>
+        <TMPL_IF wsdl>
+        <wps:WSDL xlink:href="<TMPL_VAR wsdl>"/>
+        </TMPL_IF>
+    </wps:Process>
+    <wps:Status creationTime="<TMPL_VAR statusTime>">
+        <TMPL_IF processSucceeded>
+        <wps:ProcessSucceeded><TMPL_VAR processSucceeded></wps:ProcessSucceeded>
+        </TMPL_IF>
+        <TMPL_IF processAccepted>
+        <wps:ProcessAccepted><TMPL_VAR processAccepted></wps:ProcessAccepted>
+        </TMPL_IF>
+        <TMPL_IF processStarted>
+        <wps:ProcessStarted percentCompleted="<TMPL_VAR percentCompleted>"><TMPL_VAR processStarted></wps:ProcessStarted>
+        </TMPL_IF>
+        <TMPL_IF processPaused>
+        <wps:ProcessPaused percentCompleted="<TMPL_VAR percentCompleted>"><TMPL_VAR processPaused></wps:ProcessPaused>
+        </TMPL_IF>
+        <TMPL_IF processFailed>
+        <wps:ProcessFailed>
+            <wps:ExceptionReport>
+                <TMPL_IF exceptionText>
+                <ows:Exception exceptionCode="<TMPL_VAR exceptionCode>" locator="<TMPL_VAR locator>">
+                    <ows:ExceptionText><TMPL_VAR exceptionText></ows:ExceptionText>
+                <TMPL_ELSE>
+                <ows:Exception exceptionCode="<TMPL_VAR exceptionCode>" locator="<TMPL_VAR locator>" />
+                </TMPL_IF>
+            </wps.ExceptionReport>
+        </wps:ProcessFailed>
+        </TMPL_IF>
+    </wps:Status>
+    <TMPL_IF lineage>
+    <wps:DataInputs>
+        <TMPL_LOOP inputs>
+        <wps:Input>
+            <ows:Identifier>InputPolygon</ows:Identifier>
+            <ows:Title>Playground area</ows:Title>
+            <TMPL_IF abstract>
+            <ows:Abstract>
+                <TMPL_VAR abstract>
+            </ows:Abstract>
+            </TMPL_IF>
+            <TMPL_IF reference>
+            <wps:Reference xlink:href="<TMPL_VAR reference>" method="<TMPL_VAR method>" mimeType="<TMPL_VAR mimetype>" encoding="<TMPL_VAR encoding>" schema="<TMPL_VAR schema>"/>
+                <TMPL_IF header>
+                <wps:Header key="<TMPL_VAR key>" value="<TMPL_VAR value>" />
+                </TMPL_IF>
+                <TMPL_IF body>
+                <wps:Body>
+                    <TMPL_VAR body>
+                </wps:Body>
+                </TMPL_IF>
+                <TMPL_IF bodyReference>
+                <wps:BodyReference xlink:href="<TMPL_VAR bodyReference" />
+                </TMPL_IF>
+            <TMPL_ELSE>
+                <TMPL_INCLUDE NAME="Execute_Data.tmpl">
+            </TMPL_IF>
+        </wps:Input>
+        </TMPL_LOOP>
+    </wps:DataInputs>
+    <wps:OutputDefinitions mimeType="text/xml" encoding="UTF-8" schema="http://foo.bar/gml_polygon_schema.xsd" asReference="true">
+    <TMPL_LOOP outputDefinitions>
+        <wps:Output>
+            <ows:Identifier><TMPL_VAR identifier></ows:Identifier>
+            <ows:Title><TMPL_VAR title></ows:Title>
+            <TMPL_IF abstract>
+            <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
+            </TMPL_IF>
+            <TMPL_IF reference>
+            <wps:Reference format="<TMPL_VAR format>" encoding="<TMPL_VAR encoding>" schema="<TMPL_VAR schema>" xlink:href="<TMPL_VAR reference>" />
+            <TMPL_ELSE>
+                <TMPL_INCLUDE NAME="Execute_Data.tmpl">
+            </TMPL_IF>
+        </wps:Output>
+    </TMPL_LOOP>
+    </wps:OutputDefinitions>
+    </TMPL_IF>
+    <wps:ProcessOutputs>
+        <TMPL_LOOP outputs>
+        <wps:Output>
+            <ows:Identifier><TMPL_VAR identifier></ows:Identifier>
+            <ows:Title><TMPL_VAR title></ows:Title>
+            <TMPL_IF abstract>
+            <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
+            </TMPL_IF>
+            <TMPL_IF reference>
+            <wps:Reference xlink:href="<TMPL_VAR reference>" mimeType="<TMPL_VAR mimetype>" encoding="<TMPL_VAR encoding>" schema="TMPL_VAR schema>"/>
+            </TMPL_ELSE>
+                <TMPL_INCLUDE NAME="Execute_Data.tmpl">
+            </TMPL_IF>
+        </wps:Output>
+        </TMPL_LOOP>
+    </wps:ProcessOutputs>
 </wps:ExecuteResponse>
