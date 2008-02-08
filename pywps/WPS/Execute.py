@@ -23,7 +23,6 @@ WPS Execute request handler
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import xml.dom.minidom
 from Request import Request
 
 class Execute(Request):
@@ -36,7 +35,27 @@ class Execute(Request):
            self
            wps   - parent WPS instance
         """
+
         Request.__init__(self,wps)
 
-        print "Execute"
+        self.template = self.templateManager.prepare(self.templateFile)
 
+        #
+        # HEAD
+        #
+        self.templateProcessor.set("encoding",
+                                    self.wps.getConfigValue("wps","encoding"))
+        self.templateProcessor.set("lang",
+                                    self.wps.getConfigValue("wps","lang"))
+        self.templateProcessor.set("version",
+                                    self.wps.getConfigValue("wps","version"))
+
+        #
+        # Processes
+        #
+
+        #self.templateProcessor.set("Processes",self.processesDescription())
+
+        self.response = self.templateProcessor.process(self.template)
+
+        return

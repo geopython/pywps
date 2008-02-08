@@ -31,6 +31,14 @@ class Input:
         self.minOccurs = minOccurs
         self.maxOccurs = maxOccurs
         self.type = type
+        self.value = None
+        return
+    
+    def setValue(self,value):
+        """
+        Control in some way the input value
+        """
+        self.value = value
         return
 
 class LiteralInput(Input):
@@ -48,6 +56,57 @@ class LiteralInput(Input):
         self.spacing = spacing
         return
 
+    def setValue(self,value):
+        self.value = self._control(value)
+
+    def getValue(self):
+        """
+        Get the input value
+        """
+        if self.value:
+            return self.value
+        elif self.default:
+            return self.default
+        else:
+            return
+
+    def _control(self,value):
+        """
+        Control input value
+        """
+
+        # type first
+
+        try:
+            if self.dataType == types.FloatType:
+                value = float(value)
+            elif self.dataType == types.StringType:
+                value = str(value)
+            elif self.dataType == types.IntType:
+                value = int(value)
+            #FIXME other types missing
+        except (ValueError), e:
+            raise InvalidParameterValue(value,e)
+
+        # value list
+        if "*" in values:
+            return value
+        
+        for allowed in self.values:
+            if type(allowed) == types.ListType:
+                if allowed[0] <= value <= allowed[-1]:
+                    if self.spacing:
+                        if (value - allowed[0])%spacing == 0:
+                            return value
+                    else:
+                        return value
+                    
+            else:
+                if str(value) == str(allowed):
+                    return value
+            
+        raise InvalidParameterValue(value,e)
+
 class ComplexInput(Input):
     def __init__(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=1,maxOccurs=1,
@@ -55,7 +114,10 @@ class ComplexInput(Input):
         Input.__init__(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=minOccurs,maxOccurs=maxOccurs,type="ComplexValue")
         
-        self.maxmegabites = maxmegabites
+        if maxmegabites:
+            self.maxmegabites = maxmegabites
+        else:
+            self.maxmegabites = None
 
         if type(formats) == types.StringType:
             formats = [{"mimetype":formats,"encoding":None,"schema":None}]
@@ -70,6 +132,9 @@ class ComplexInput(Input):
 
         self.formats = formats
         return
+
+    def downloadData(self):
+        if !
 
 class BoundingBoxInput(Input):
     def __init__(self,identifier,title,abstract=None,
