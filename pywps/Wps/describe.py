@@ -423,6 +423,14 @@ class Describe:
                             nodeDataType.setAttribute("%s%s" %\
                             (inputStruct['elements']['DataType']['attributes']["reference"]['ns'],"reference"),
                             "xs:double")
+                        elif (input["DataType"] == type(""):
+                            nodeDataType.setAttribute("%s%s" %\
+                            (inputStruct['elements']['DataType']['attributes']["reference"]['ns'],"reference"),
+                            "xs:string")
+                        elif (input["DataType"] == type(0):
+                            nodeDataType.setAttribute("%s%s" %\
+                            (inputStruct['elements']['DataType']['attributes']["reference"]['ns'],"reference"),
+                            "xs:integer")
 
                         literaldata.appendChild(nodeDataType)
 
