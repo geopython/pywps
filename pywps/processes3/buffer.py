@@ -50,4 +50,3 @@ class Process(WPSProcess):
             return
         else:
             return "Output file not created"
-

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="<TMPL_VAR encoding>"?>
-<wps:ExecuteResponse xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 ..\wpsExecute_response.xsd" service="WPS" version="1.0.0" xml:lang="<TMPL_VAR lang>" serviceInstance="<TMPL_VAR serviceInstance>" statusLocation="<TMPL_VAR statusLocation>">
+<wps:ExecuteResponse xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 ..\wpsExecute_response.xsd" service="WPS" version="1.0.0" xml:lang="<TMPL_VAR lang>" serviceInstance="<TMPL_VAR serviceinstance>" statusLocation="<TMPL_VAR statuslocation>">
     <wps:Process wps:processVersion="<TMPL_VAR version>">
         <ows:Identifier><TMPL_VAR identifier></ows:Identifier>
         <ows:Title><TMPL_VAR title></ows:Title>
@@ -13,27 +13,27 @@
         <wps:WSDL xlink:href="<TMPL_VAR wsdl>"/>
         </TMPL_IF>
     </wps:Process>
-    <wps:Status creationTime="<TMPL_VAR statusTime>">
-        <TMPL_IF processSucceeded>
-        <wps:ProcessSucceeded><TMPL_VAR processSucceeded></wps:ProcessSucceeded>
+    <wps:Status creationTime="<TMPL_VAR statustime>">
+        <TMPL_IF processsucceeded>
+        <wps:ProcessSucceeded><TMPL_VAR processsucceeded></wps:ProcessSucceeded>
         </TMPL_IF>
-        <TMPL_IF processAccepted>
-        <wps:ProcessAccepted><TMPL_VAR processAccepted></wps:ProcessAccepted>
+        <TMPL_IF processaccepted>
+        <wps:ProcessAccepted><TMPL_VAR processaccepted></wps:ProcessAccepted>
         </TMPL_IF>
-        <TMPL_IF processStarted>
-        <wps:ProcessStarted percentCompleted="<TMPL_VAR percentCompleted>"><TMPL_VAR processStarted></wps:ProcessStarted>
+        <TMPL_IF processstarted>
+        <wps:ProcessStarted percentCompleted="<TMPL_VAR percentcompleted>"><TMPL_VAR processstarted></wps:ProcessStarted>
         </TMPL_IF>
-        <TMPL_IF processPaused>
-        <wps:ProcessPaused percentCompleted="<TMPL_VAR percentCompleted>"><TMPL_VAR processPaused></wps:ProcessPaused>
+        <TMPL_IF processpaused>
+        <wps:ProcessPaused percentCompleted="<TMPL_VAR percentcompleted>"><TMPL_VAR processpaused></wps:ProcessPaused>
         </TMPL_IF>
-        <TMPL_IF processFailed>
+        <TMPL_IF processfailed>
         <wps:ProcessFailed>
             <wps:ExceptionReport>
-                <TMPL_IF exceptionText>
-                <ows:Exception exceptionCode="<TMPL_VAR exceptionCode>" locator="<TMPL_VAR locator>">
-                    <ows:ExceptionText><TMPL_VAR exceptionText></ows:ExceptionText>
+                <TMPL_IF exceptiontext>
+                <ows:Exception exceptionCode="<TMPL_VAR exceptioncode>" locator="<TMPL_VAR locator>">
+                    <ows:ExceptionText><TMPL_VAR exceptiontext></ows:ExceptionText>
                 <TMPL_ELSE>
-                <ows:Exception exceptionCode="<TMPL_VAR exceptionCode>" locator="<TMPL_VAR locator>" />
+                <ows:Exception exceptionCode="<TMPL_VAR exceptioncode>" locator="<TMPL_VAR locator>" />
                 </TMPL_IF>
             </wps.ExceptionReport>
         </wps:ProcessFailed>
@@ -41,10 +41,10 @@
     </wps:Status>
     <TMPL_IF lineage>
     <wps:DataInputs>
-        <TMPL_LOOP inputs>
+        <TMPL_LOOP Inputs>
         <wps:Input>
-            <ows:Identifier>InputPolygon</ows:Identifier>
-            <ows:Title>Playground area</ows:Title>
+            <ows:Identifier><TMPL_VAR identifier></ows:Identifier>
+            <ows:Title><TMPL_VAR title></ows:Title>
             <TMPL_IF abstract>
             <ows:Abstract>
                 <TMPL_VAR abstract>
@@ -61,7 +61,7 @@
                 </wps:Body>
                 </TMPL_IF>
                 <TMPL_IF bodyReference>
-                <wps:BodyReference xlink:href="<TMPL_VAR bodyReference>" />
+                <wps:BodyReference xlink:href="<TMPL_VAR bodyreference>" />
                 </TMPL_IF>
             <TMPL_ELSE>
                 <TMPL_INCLUDE NAME="Execute_Data.tmpl">

@@ -56,7 +56,6 @@ class Request:
                                 os.path.join(Templates.__path__)[0],
                                     "Execute.tmpl")
 
-
         self.processDir = os.getenv("PYWPS_PROCESSES")
 
         if self.processDir:

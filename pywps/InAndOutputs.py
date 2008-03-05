@@ -54,6 +54,7 @@ class LiteralInput(Input):
             self.values = (values)
         self.default = default
         self.spacing = spacing
+        self.uom = None 
         return
 
     def setValue(self,value):
@@ -89,7 +90,7 @@ class LiteralInput(Input):
             raise InvalidParameterValue(value,e)
 
         # value list
-        if "*" in values:
+        if "*" in self.values:
             return value
         
         for allowed in self.values:
@@ -131,19 +132,22 @@ class ComplexInput(Input):
                 format["schema"] = None
 
         self.formats = formats
+        self.format = self.formats[0]
         return
 
     def downloadData(self):
-        if !
+        pass #FIXME
 
 class BoundingBoxInput(Input):
     def __init__(self,identifier,title,abstract=None,
-                metadata=[],minOccurs=1,maxOccurs=1,
+                metadata=[],minOccurs=1,maxOccurs=1,dimensions=2,
                 crss=[]):
         Input.__init__(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=minOccurs,maxOccurs=maxOccurs,type="BoundingBoxValue")
         
         self.crss = crss
+        self.dimensions = dimensions
+        self.crs = self.crss[0]
         return
 
 class Output:
