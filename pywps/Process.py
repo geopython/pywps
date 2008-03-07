@@ -38,6 +38,29 @@ class Status:
         self.processCompleted = 0
         self.exceptionReport = None
 
+    def set(msg="",percentDone=0):
+        if (type(percentDone) == types.typeStr()):
+            self.processCompleted += int(percentDone)
+        else:
+            self.processCompleted = percentDone
+        self.onStatusChanged()
+
+    def onStatusChanged(self):
+        pass
+
+    def setProcess(self,name,value):
+        if name == "processAccepted":
+            self.processAccepted = value
+        elif name == "processStarted":
+            self.processStarted = value
+        elif name == "processPaused":
+            self.processPaused = value
+        elif name == "processSucceeded":
+            self.processSucceeded = value
+        elif name == "processFailed":
+            self.processFailed = value
+
+
 
 class WPSProcess:
     """
@@ -55,6 +78,7 @@ class WPSProcess:
         self.profile = profile
         self.storeSupported = storeSupported
         self.statusSupported = statusSupported
+        self.debug = False
 
         self.status = Status()
         self.inputs = {}
@@ -126,3 +150,46 @@ class WPSProcess:
                 default=None)
 
         return self.outputs[identifier]
+
+    # --------------------------------------------------------------------
+    def cmd(self,cmd,stdin=None):
+        """Runs GRASS command, fetches all GRASS_MESSAGE and
+        GRASS_PERCENT messages and sets self.status according to them, so
+        the client application can track the progress information, when
+        runing with Status=True
+
+        This module is supposed to be used instead of 'os.system()', while
+        running GRASS modules
+        
+        Example Usage:
+            self.Gcmd("r.los in=elevation.dem out=los coord=1000,1000")
+
+            self.Gcmd("v.net.path network afcol=forward abcol=backward \
+            out=mypath nlayer=1","1 9 12")
+            """
+
+        self.message("PyWPS GCmd: %s\n" % (cmd.strip()))
+
+        try:
+            p = subprocess.Popen(cmd,shell=True,
+                stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,)
+        except Exception,e :
+            self.failed = True
+            raise Exception("Could not perform command [%s]: %s" % (cmd,e))
+
+        (stdout, stderr) = p.communicate(stdin)
+
+        retcode = p.wait()
+
+        if retcode != 0:
+           self.status.setProcess("processFailed", True)
+           self.message("PyWPS stderr: %s\n" % (stderr),True)
+           raise Exception("PyWPS could not perform command: %s" % cmd)
+
+        return stdout.splitlines()
+
+    def message(self,msg,force=False):
+        if self.debug or force:
+            sys.stderr.write(msg)
+        return

@@ -86,6 +86,7 @@
     </TMPL_LOOP>
     </wps:OutputDefinitions>
     </TMPL_IF>
+    <TMPL_IF processsucceeded>
     <wps:ProcessOutputs>
         <TMPL_LOOP outputs>
         <wps:Output>
@@ -102,4 +103,5 @@
         </wps:Output>
         </TMPL_LOOP>
     </wps:ProcessOutputs>
+    </TMPL_IF>
 </wps:ExecuteResponse>
