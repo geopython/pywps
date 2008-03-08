@@ -118,10 +118,10 @@ class WPS:
 
         if sys.platform == 'win32':
             self.workingDir = os.path.abspath(os.path.join(os.getcwd(), os.path.dirname(sys.argv[0])))
-            cfgfiles = (os.path.join(workingDir, "pywps","etc","pywps.cfg"),
-                    os.path.join(workingDir,"pywps","etc","grass.cfg"))
+            cfgfiles = (os.path.join(workingDir,"pywps","default.cfg"),
+                       os.path.join(workingDir, "pywps","etc","pywps.cfg"))
         else:
-            cfgfiles = (os.path.join("pywps","etc", "pywps.cfg"), "/etc/pywps.cfg")
+            cfgfiles = (os.path.join("pywps","default.cfg"),os.path.join("pywps","etc", "pywps.cfg"), "/etc/pywps.cfg")
 
         self.config = ConfigParser.ConfigParser()
         self.config.read(cfgfiles)

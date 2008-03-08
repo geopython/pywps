@@ -24,7 +24,8 @@ WPS Execute request handler
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 from Request import Request
-import time,os
+import time,os,tempfile
+from pywps import Grass
 
 class Execute(Request):
     """
@@ -47,6 +48,11 @@ class Execute(Request):
 
     percent = 0
     processstatus = 0
+
+    dirsToBeRemoved = []     # directories, which should be removed
+
+    workingDir = ""
+    grass = None
 
     def __init__(self,wps):
         """
@@ -133,11 +139,13 @@ class Execute(Request):
         if self.wps.inputs["responseform"]["responsedocument"]["status"]:
             pass
             #self.splitThreads()
-        self.process.execute() 
+        self.executeProcess()
 
         return
 
     def initProcess(self):
+
+        # import the right package
         if self.wps.inputs["identifier"] in self.processes.__all__:
             try:
                 module = __import__(self.processes.__name__,fromlist=[self.wps.inputs["identifier"]])
@@ -170,9 +178,24 @@ class Execute(Request):
         # set propper method for status change
         self.process.wps = self.wps
         self.process.status.onStatusChanged = self.onStatusChanged
+        self.process.debug = self.wps.getConfigValue("server","debug")
 
+        # create temporary directory
+        self.initEnv()
 
-
+        # execute process
+        try:
+            processError = None # self.process.execute()
+            if processError:
+                self.cleanEnv()
+                raise self.wps.exceptions.NoApplicableCode(
+                        "Failed to execute WPS process [%s]: %s" %\
+                                (self.process.identifier,processError))
+        except Exception,e:
+                self.cleanEnv()
+                raise self.wps.exceptions.NoApplicableCode(
+                        "Failed to execute WPS process [%s]: %s" %\
+                                (self.process.identifier,e))
 
     def processDescription(self):
 
@@ -334,4 +357,31 @@ class Execute(Request):
         return serveraddress + "service=WPS&request=GetCapabilities&version="+self.wps.DEFAULT_WPS_VERSION
 
     def onStatusChanged(self):
-        print wps
+        print wps # FIXME
+
+    def initEnv(self):
+
+        self.workingDir = tempfile.mkdtemp(prefix="pywps",
+                                dir=self.wps.getConfigValue("server","tempPath"))
+
+        self.workingDir = os.path.join(
+                self.wps.getConfigValue("server","tempPath"),self.workingDir)
+
+        os.chdir(self.workingDir)
+        self.dirsToBeRemoved.append(self.workingDir)
+
+        if self.process.grassLocation:
+            grass = Grass.Grass(self)
+            if self.process.grassLocation == True:
+                grass.mkMapset()
+            elif os.path.exists(self.process.grassLocation):
+                grass.mkMapset(self.process.grassLocation)
+            else:
+                raise self.wps.exceptions.NoApplicableCode("Location [%s] does not exist" % self.process.location)
+        
+    def cleanEnv(self):
+       
+        from shutil import rmtree
+        for dir in self.dirsToBeRemoved:
+            if os.path.isdir(dir):
+                rmtree(dir)

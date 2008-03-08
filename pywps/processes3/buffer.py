@@ -14,7 +14,8 @@ class Process(WPSProcess):
             version = "0.2",
             storeSupported = "true",
             statusSupported = "true",
-            abstract="Create a buffer around an input vector file")
+            abstract="Create a buffer around an input vector file",
+            grassLocation = True)
 
 
         self.addComplexInput(identifier="data",

@@ -67,7 +67,7 @@ class WPSProcess:
     """
     def __init__(self, identifier, title, abstract=None,
             metadata=[],profile=[], version=None,
-            statusSupported=True, storeSupported=False):
+            statusSupported=True, storeSupported=False, grassLocation=None):
 
         self.identifier = identifier
         self.version = version
@@ -83,6 +83,8 @@ class WPSProcess:
         self.status = Status()
         self.inputs = {}
         self.outputs = {}
+
+        self.grassLocation = grassLocation
 
     def addMetadata(self,Identifier, type, textContent):
         """Add new metadata to this process"""
