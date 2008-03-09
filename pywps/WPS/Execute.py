@@ -145,26 +145,34 @@ class Execute(Request):
 
     def initProcess(self):
 
+
         # import the right package
         if self.wps.inputs["identifier"] in self.processes.__all__:
             try:
-                module = __import__(self.processes.__name__,fromlist=[self.wps.inputs["identifier"]])
+                module = __import__(self.processes.__name__,
+                                        fromlist=[str(self.wps.inputs["identifier"])])
                 self.process = eval("module."+self.wps.inputs["identifier"]+".Process()")
 
             except Exception, e:
-                print e
-                pass #FIXME - process not loaded
+                raise self.wps.exceptions.NoApplicableCode(
+                "Could not import process [%s]: %s" %\
+                        (self.wps.inputs["identifier"], e))
                 return
         else:
-            print "invalid parameter valule" # FIXME
-            return
+            raise self.wps.exceptions.InvalidParameterValue(
+                    self.wps.inputs["identifier"])
+
+        # create temporary directory
+        self.initEnv()
 
         # set input values
         for identifier in self.process.inputs:
             input = self.process.inputs[identifier]
 
+            input.onProblem = self.onInputProblem
+
             try:
-                input.setValue(self.wps.inputs["datainputs"][identifier]["value"])
+                input.setValue(self.wps.inputs["datainputs"][unicode(identifier)])
             except KeyError,e:
                 pass
 
@@ -180,8 +188,16 @@ class Execute(Request):
         self.process.status.onStatusChanged = self.onStatusChanged
         self.process.debug = self.wps.getConfigValue("server","debug")
 
-        # create temporary directory
-        self.initEnv()
+    def onInputProblem(self,what,why):
+        
+        exception = None
+        if what == "FileSizeExceeded":
+            exception = self.wps.exceptions.FileSizeExceeded
+        elif what == "NoApplicableCode":
+            exception = self.wps.exceptions.NoApplicableCode
+
+        raise exception(why)
+
 
     def executeProcess(self):
         try:

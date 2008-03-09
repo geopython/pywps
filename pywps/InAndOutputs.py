@@ -34,11 +34,11 @@ class Input:
         self.value = None
         return
     
-    def setValue(self,value):
+    def setValue(self,input):
         """
         Control in some way the input value
         """
-        self.value = value
+        self.value = input["value"]
         return
 
 class LiteralInput(Input):
@@ -57,8 +57,8 @@ class LiteralInput(Input):
         self.uom = None 
         return
 
-    def setValue(self,value):
-        self.value = self._control(value)
+    def setValue(self, input):
+        self.value = self._control(input["value"])
 
     def getValue(self):
         """
@@ -135,8 +135,65 @@ class ComplexInput(Input):
         self.format = self.formats[0]
         return
 
-    def downloadData(self):
-        pass #FIXME
+    def setValue(self, input):
+        
+        if input["type"] == "ComplexValueReference":
+            self.downloadData(input["value"])
+        else:
+            self.storeData(input["value"])
+
+        return
+
+    def storeData(self,data):
+        pass
+    def downloadData(self, url):
+        import urllib, tempfile
+
+        try:
+            inputUrl = urllib.urlopen(url)
+        except IOError,e:
+            self.onProblem("NoApplicableCode",e)
+
+        outputName = tempfile.mktemp(prefix="pywpsInput")
+        try:
+            fout=open(outputName,'wb')
+        except IOError, what:
+            self.onProblem("NoApplicableCode","Could not open file for writing")
+
+        # ok, get the file!
+        size = 0
+        while 1:
+            # reading after 100kB
+            size += 100000
+            chunk = inputUrl.read(100000)
+
+            # something is wrong
+            if re.search("not found",chunk,re.IGNORECASE):
+                self.onProblem("NoApplicableCode",
+                    "Remote server says: [%s] not found" % (url))
+
+            # everything is here, break
+            if not chunk: 
+                break
+            fout.write (chunk)
+
+            # TOO BIG! STOP THIS
+            if size > maxSize: 
+                self.onProblem("FileSizeExceeded")
+
+        fout.close()
+
+        self.value = outputName
+        return
+    
+    def onProblem(self,what, why):
+        pass
+
+    def onMaxFileSizeExceeded(self, why):
+        pass
+
+    def onNotFound(self,what):
+        pass
 
 class BoundingBoxInput(Input):
     def __init__(self,identifier,title,abstract=None,

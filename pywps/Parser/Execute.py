@@ -247,7 +247,7 @@ class Post(Post):
         #
         # mandatrory attributes
         #
-        attributes["xlink:href"] =\
+        attributes["value"] =\
                     dataTypeNode.getAttributeNS(self.xlinkNameSpace,"href")
         if attributes == "":
             raise self.wps.exceptions.MissingParameterValue("'href'")
@@ -297,6 +297,8 @@ class Post(Post):
             attributes["bodyreference"] = None
 
         
+        attributes["type"] = "ComplexValueReference"
+        
         return attributes
 
     def parseHeaderDataInput(self,headerNode):
@@ -337,6 +339,7 @@ class Post(Post):
         # if attributes are still None, exception will 
         # be called in parent method
 
+
         return attributes
 
     def parseComplexData(self,complexDataNode):
@@ -356,6 +359,8 @@ class Post(Post):
             elif complexDataChildNode.nodeType == \
                     xml.dom.minidom.Element.nodeType:
                 attributes["value"] = complexDataChildNode.toxml()
+
+        attributes["type"] = "ComplexValue"
             
         return attributes
     
