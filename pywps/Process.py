@@ -38,8 +38,8 @@ class Status:
         self.processCompleted = 0
         self.exceptionReport = None
 
-    def set(msg="",percentDone=0):
-        if (type(percentDone) == types.typeStr()):
+    def set(self, msg="",percentDone=0):
+        if (type(percentDone) == types.StringType):
             self.processCompleted += int(percentDone)
         else:
             self.processCompleted = percentDone
@@ -187,7 +187,7 @@ class WPSProcess:
         if retcode != 0:
            self.status.setProcess("processFailed", True)
            self.message("PyWPS stderr: %s\n" % (stderr),True)
-           raise Exception("PyWPS could not perform command: %s" % cmd)
+           raise Exception("PyWPS could not perform command [%s]:\n%s" % (cmd,stderr))
 
         return stdout.splitlines()
 
@@ -195,3 +195,15 @@ class WPSProcess:
         if self.debug or force:
             sys.stderr.write(msg)
         return
+
+    def getInput(self,identifier):
+        try:
+            return self.inputs[identifier]
+        except:
+            return None
+
+    def getInputValue(self,identifier):
+        try:
+            return self.inputs[identifier][value]
+        except:
+            return None

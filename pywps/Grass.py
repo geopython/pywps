@@ -29,8 +29,10 @@ import sys
 
 class Grass:
 
-    location = ""
-    mapset = ""
+    locationDir = ""
+    locationName = ""
+    mapsetDir = ""
+    mapsetName = ""
     gisbase = ""
 
     def  __init__(self,executeRequest):
@@ -46,15 +48,18 @@ class Grass:
                 "gui":"GRASS_GUI",
                 "gisbase": "GISBASE",
                 "ldLibraryPath": "LD_LIBRARY_PATH",
-                "home": "HOME"
+                "##":"a"
         }
 
         # put env
         for key in self.envs.keys():
-            os.putenv(self.envs[key],self.wps.getConfigValue("grass",key))
+            try:
+                self.setEnv(self.envs[key],self.wps.getConfigValue("grass",key))
+            except :
+                pass
 
         # GIS_LOCK
-        os.putenv('GIS_LOCK',str(os.getpid()))
+        self.setEnv('GIS_LOCK',str(os.getpid()))
         
     def mkMapset(self,location=None):
         """
@@ -72,56 +77,55 @@ class Grass:
                             will be created
         """
 
-        self.location = location
+        self.locationDir = location
 
-        if not self.location:
-            self.location = self.executeRequest.workingDir
+        if not self.locationDir:
+            self.locationDir = self.executeRequest.workingDir
 
-        self.mapset = tempfile.mkdtemp(prefix="pywps",dir=self.location)
+        self.mapsetDir = tempfile.mkdtemp(prefix="pywps",dir=self.locationDir)
+        self.mapsetName = os.path.split(self.mapsetDir)[1]
+        self.locationName = os.path.split(self.locationDir)[1]
 
         if location == self.wps.workingDir:
             # create new WIND file
-            self._windFile(self.mapset)
+            self._windFile(self.mapsetName)
 
             # create mapset PERMANENT
             os.mkdir("PERMANENT")
             self._windFile("PERMANENT")
 
-            self.gisdbase = os.path.abspath(os.path.curdir)
+            self.gisdbase = os.path.split(os.path.abspath(os.path.curdir))[0]
 
         # location is here, we justhave to use it
         else:
-            self.executeRequest.dirsToBeRemoved.append(os.path.abspath(self.mapset))
+            self.executeRequest.dirsToBeRemoved.append(os.path.abspath(self.mapsetDir))
 
             # copy
             shutil.copy(os.path.join(
-                self.location,"PERMANENT","DEFAULT_WIND"),
-                os.path.join(self.mapset,"WIND"))
+                self.locationDir,"PERMANENT","DEFAULT_WIND"),
+                os.path.join(self.mapsetDir,"WIND"))
 
             # export env. vars
-            (self.gisdbase,location) = os.path.split(self.location)
+            (self.gisdbase,location) = os.path.split(self.locationDir)
              
 
-        os.putenv('MAPSET', self.mapset)
-        os.putenv('LOCATION_NAME',self.location)
-        os.putenv('GISDBASE', self.gisdbase)
+        self.setEnv('MAPSET', self.mapsetName)
+        self.setEnv('LOCATION_NAME',self.locationName)
+        self.setEnv('GISDBASE', self.gisdbase)
 
         # gisrc
-        gisrc = open(os.path.join(self.location,"grassrc"),"w")
-        gisrc.write("LOCATION_NAME: %s\n" % self.location)
-        gisrc.write("MAPSET: %s\n" % self.mapset)
+        gisrc = open(os.path.join(self.locationDir,"grassrc"),"w")
+        gisrc.write("LOCATION_NAME: %s\n" % self.locationName)
+        gisrc.write("MAPSET: %s\n" % self.mapsetName)
         gisrc.write("DIGITIZER: none\n")
         gisrc.write("GISDBASE: %s\n" % self.gisdbase)
         gisrc.write("OVERWRITE: 1\n")
         gisrc.write("GRASS_GUI: text\n")
         gisrc.close()
 
-        os.putenv("GISRC",os.path.join(self.executeRequest.workingDir,"grassrc"))
+        self.setEnv("GISRC",os.path.join(self.executeRequest.workingDir,"grassrc"))
 
-
-        print os.environ
-
-        return self.mapset
+        return self.mapsetName
 
     def _windFile(self,mapset):
         """
@@ -148,4 +152,11 @@ class Grass:
         wind.close()
         return
 
+    def setEnv(self,key,value):
 
+        origValue = os.getenv(key)
+        if origValue:
+            value  += ":"+origValue
+        os.putenv(key,value)
+        os.environ[key] = value
+        return

@@ -33,10 +33,11 @@ class Process(WPSProcess):
     def execute(self):
 
         self.cmd("g.region -d")
+
 	    	
         self.status.set("Importing data",20)
 	self.cmd("v.in.ogr dsn=%s output=data" %\
-                (self.GetInputValue('data')))
+                (self.getInputValue('data')))
             
         self.status.set("Buffering",50)
 	self.cmd("v.buffer input=data output=data_buff buffer=%s scale=1.0 tolerance=0.01" %\

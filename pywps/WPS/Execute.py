@@ -183,9 +183,9 @@ class Execute(Request):
         # create temporary directory
         self.initEnv()
 
-        # execute process
+    def executeProcess(self):
         try:
-            processError = None # self.process.execute()
+            processError = self.process.execute()
             if processError:
                 self.cleanEnv()
                 raise self.wps.exceptions.NoApplicableCode(
@@ -357,7 +357,8 @@ class Execute(Request):
         return serveraddress + "service=WPS&request=GetCapabilities&version="+self.wps.DEFAULT_WPS_VERSION
 
     def onStatusChanged(self):
-        print wps # FIXME
+        pass
+        print self.process.status
 
     def initEnv(self):
 
@@ -383,5 +384,6 @@ class Execute(Request):
        
         from shutil import rmtree
         for dir in self.dirsToBeRemoved:
-            if os.path.isdir(dir):
-                rmtree(dir)
+            if os.path.isdir(dir) and dir != "/":
+                #rmtree(dir)
+                pass
