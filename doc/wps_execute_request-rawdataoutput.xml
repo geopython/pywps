@@ -18,7 +18,7 @@
 		<wps:Input>
 			<ows:Identifier>data</ows:Identifier>
 			<ows:Title>Input</ows:Title>
-			<wps:Reference xlink:href="http://foo.bar/some_WFS_request.xml"/>
+                        <wps:Reference xlink:href="http://localhost/temp/gml.xml"/>
 		</wps:Input>
 		<wps:Input>
 			<ows:Identifier>width</ows:Identifier>

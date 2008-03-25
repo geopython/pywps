@@ -24,7 +24,7 @@ WPS Execute request handler
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 from Request import Request
-import time,os,tempfile
+import time,os,tempfile,re
 from pywps import Grass
 
 class Execute(Request):
@@ -99,6 +99,7 @@ class Execute(Request):
         #
         self.processDescription()
 
+
         #
         # Status
         #
@@ -107,9 +108,12 @@ class Execute(Request):
         #
         # lineage
         #
-        if self.wps.inputs['responseform']['responsedocument']['lineage']:
-            self.lineageInputs()
+        if self.wps.inputs['responseform'].has_key("responsedocument"):
+            if self.wps.inputs['responseform']['responsedocument'].has_key('lineage') and \
+                self.wps.inputs['responseform']['responsedocument']['lineage'] == True:
+                self.lineageInputs()
 
+        # FIXME here we are
         self.response = self.templateProcessor.process(self.template)
 
         # 
@@ -145,7 +149,6 @@ class Execute(Request):
 
     def initProcess(self):
 
-
         # import the right package
         if self.wps.inputs["identifier"] in self.processes.__all__:
             try:
@@ -165,11 +168,21 @@ class Execute(Request):
         # create temporary directory
         self.initEnv()
 
+        # calculate maximum allowed input size
+        maxFileSize = self.calculateMaxInputSize()
+
         # set input values
         for identifier in self.process.inputs:
             input = self.process.inputs[identifier]
 
+            # exceptions handler
             input.onProblem = self.onInputProblem
+
+            # maximum input file size mut not be grater, then the one,
+            # defined in the global config file
+            if input.type == "ComplexValue":
+                if not input.maxFileSize or input.maxFileSize > maxFileSize:
+                    input.maxFileSize = maxFileSize
 
             try:
                 input.setValue(self.wps.inputs["datainputs"][unicode(identifier)])
@@ -403,3 +416,21 @@ class Execute(Request):
             if os.path.isdir(dir) and dir != "/":
                 #rmtree(dir)
                 pass
+
+    def calculateMaxInputSize(self):
+        maxSize = self.wps.getConfigValue("server","maxfilesize")
+        maxSize = maxSize.lower()
+
+        units = re.compile("[gmkb].*")
+        size = float(re.sub(units,'',maxSize))
+        
+        if maxSize.find("g") > -1:
+            size *= 1024*1024*1024
+        elif maxSize.find("m") > -1:
+            size *= 1024*1024
+        elif maxSize.find("k") > -1:
+            size *= 1024
+        else:
+            size *= 1
+
+        return size

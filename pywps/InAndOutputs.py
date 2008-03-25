@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import types
+import types,re
 
 class Input:
     def __init__(self,identifier,title,abstract=None,
@@ -116,9 +116,11 @@ class ComplexInput(Input):
                 metadata=[],minOccurs=minOccurs,maxOccurs=maxOccurs,type="ComplexValue")
         
         if maxmegabites:
-            self.maxmegabites = maxmegabites
+            self.maxFileSize = float(maxmegabites)*1024*1024
         else:
-            self.maxmegabites = None
+            self.maxFileSize = None
+
+
 
         if type(formats) == types.StringType:
             formats = [{"mimetype":formats,"encoding":None,"schema":None}]
@@ -146,15 +148,18 @@ class ComplexInput(Input):
 
     def storeData(self,data):
         pass
+
     def downloadData(self, url):
         import urllib, tempfile
+        from os import curdir
 
         try:
             inputUrl = urllib.urlopen(url)
         except IOError,e:
             self.onProblem("NoApplicableCode",e)
 
-        outputName = tempfile.mktemp(prefix="pywpsInput")
+        outputName = tempfile.mktemp(prefix="pywpsInput",dir=curdir)
+
         try:
             fout=open(outputName,'wb')
         except IOError, what:
@@ -178,7 +183,7 @@ class ComplexInput(Input):
             fout.write (chunk)
 
             # TOO BIG! STOP THIS
-            if size > maxSize: 
+            if size > self.maxFileSize: 
                 self.onProblem("FileSizeExceeded")
 
         fout.close()
