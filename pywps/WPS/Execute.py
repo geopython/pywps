@@ -32,7 +32,7 @@ class Execute(Request):
     """
     accepted = "processaccepted"
     started = "processstarted"
-    succeeded = "processsucceeded"
+    succeeded = "processsucc"
     paused = "processpaused"
     failed = "processfailed"
 
@@ -45,9 +45,7 @@ class Execute(Request):
     percent = 0
     exceptioncode = 0
     locator = 0
-
     percent = 0
-    processstatus = 0
 
     dirsToBeRemoved = []     # directories, which should be removed
 
@@ -103,7 +101,8 @@ class Execute(Request):
         #
         # Status
         #
-        self.setStatus(self.accepted)
+        self.setStatus(self.accepted,"Process %s accepted" %\
+                self.process.identifier)
 
         #
         # lineage
@@ -113,38 +112,24 @@ class Execute(Request):
                 self.wps.inputs['responseform']['responsedocument']['lineage'] == True:
                 self.lineageInputs()
 
-        # FIXME here we are
-        self.response = self.templateProcessor.process(self.template)
 
         # 
         # Execute
         #
-        #
-        # Description
-        #
-        self.processDescription()
+        if  self.wps.inputs["responseform"]["responsedocument"].has_key("status"):
+            if self.wps.inputs["responseform"]["responsedocument"]["status"]:
+                pass
+                #self.splitThreads()
+        self.executeProcess()
 
         #
         # Status
         #
-        self.setStatus(self.accepted)
-
-        #
-        # lineage
-        #
-        if self.wps.inputs['responseform']['responsedocument']['lineage']:
-            self.lineageInputs()
+        self.setStatus(self.succeeded, 
+                processstatus="PyWPS Process %s successfully calculated" %\
+                self.process.identifier)
 
         self.response = self.templateProcessor.process(self.template)
-
-        # 
-        # Execute
-        #
-        if self.wps.inputs["responseform"]["responsedocument"]["status"]:
-            pass
-            #self.splitThreads()
-        self.executeProcess()
-
         return
 
     def initProcess(self):
@@ -246,22 +231,28 @@ class Execute(Request):
         if percent != 0: self.percent = percent 
         if exceptioncode != 0: self.exceptioncode = exceptioncode 
         if locator != 0: self.locator = locator 
+        
 
         # init value
-        self.templateProcessor.set("processstarted", 0)
-        self.templateProcessor.set("processsucceeded", 0)
-        self.templateProcessor.set("processpaused", 0)
-        self.templateProcessor.set("processfailed", 0)
+        self.templateProcessor.set("processstarted",0)
+        self.templateProcessor.set("processsucc",0)
+        self.templateProcessor.set("processpaused",0)
+        self.templateProcessor.set("processfailed",0)
+        self.templateProcessor.set("processaccepted",0)
+
 
         if self.status == self.accepted:
-            self.templateProcessor.set("processaccepted", "true")
+            self.templateProcessor.set("processaccepted",
+                    self.processstatus)
 
         elif self.status == self.started:
             self.templateProcessor.set("processstarted", "true")
             self.templateProcessor.set("percentcompleted", self.percent*100)
 
         elif self.status == self.succeeded:
-            self.templateProcessor.set("processstarted",
+            self.process.status.set(percentDone=100)
+            self.templateProcessor.set("percentcompleted", self.percent)
+            self.templateProcessor.set("processsucc",
                                                 self.processstatus)
 
         elif self.status == self.paused:
@@ -386,8 +377,10 @@ class Execute(Request):
         return serveraddress + "service=WPS&request=GetCapabilities&version="+self.wps.DEFAULT_WPS_VERSION
 
     def onStatusChanged(self):
-        pass
-        print self.process.status
+        """
+        This method is used for redefinition of self.process.status class
+        """
+        self.percent = self.process.status.processCompleted
 
     def initEnv(self):
 

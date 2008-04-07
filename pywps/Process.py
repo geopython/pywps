@@ -46,9 +46,12 @@ class Status:
         self.onStatusChanged()
 
     def onStatusChanged(self):
+        """
+        To be redefined by other methods
+        """
         pass
 
-    def setProcess(self,name,value):
+    def setProcessStatus(self,name,value):
         if name == "processAccepted":
             self.processAccepted = value
         elif name == "processStarted":
@@ -59,8 +62,6 @@ class Status:
             self.processSucceeded = value
         elif name == "processFailed":
             self.processFailed = value
-
-
 
 class WPSProcess:
     """
@@ -185,7 +186,7 @@ class WPSProcess:
         retcode = p.wait()
 
         if retcode != 0:
-           self.status.setProcess("processFailed", True)
+           self.status.setProcessStatus("processFailed", True)
            self.message("PyWPS stderr: %s\n" % (stderr),True)
            raise Exception("PyWPS could not perform command [%s]:\n%s" % (cmd,stderr))
 
@@ -204,6 +205,12 @@ class WPSProcess:
 
     def getInputValue(self,identifier):
         try:
-            return self.inputs[identifier][value]
+            return self.inputs[identifier].value
+        except:
+            return None
+
+    def setOutputValue(self,identifier,value):
+        try:
+            return self.outputs[identifier].setValue(value)
         except:
             return None

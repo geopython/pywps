@@ -220,8 +220,10 @@ class Output:
         self.abstract = abstract
         self.metadata = metadata
         self.type = type
-
         return
+
+    def setValue(self,value):
+        self.value = value
 
 class LiteralOutput(Output):
     def __init__(self,identifier,title,abstract=None,
@@ -254,6 +256,9 @@ class ComplexOutput(Output):
 
         self.formats = formats
         return
+
+    def setValue(self,value):
+        self.value = value
 
 class BoundingBoxOutput(Output):
     def __init__(self,identifier,title,abstract=None,

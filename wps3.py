@@ -107,7 +107,7 @@ class WPS:
             self.performRequest()
 
         if self.request.response:
-            print "Contet-type: text/xml\n"
+            print "Content-type: text/xml\n"
             print self.request.response
 
         return
