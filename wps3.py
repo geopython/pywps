@@ -54,7 +54,7 @@ __version__ = "3.0-svn"
 
 class WPS:
 
-    method  =""                      # HTTP Ost or GET 
+    method  =""                      # HTTP POST or GET 
     pidFilePrefix = "pywps-pidfile-" # pid file prefix
     maxInputLength = 0  # maximal length of one input item
     maxFileSize = 0 # maximal input XML or other file size
