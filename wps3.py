@@ -1,31 +1,31 @@
 #!/usr/bin/env python 
 #-*- coding: utf-8 -*-
 """
-This program is simple implementation of OGS's [http://opengeospatial.org]
-Web Processing Service (OpenGIS(r) Web Processing Service - OGC 05-007r4)
-version 0.4.0 from 2005-09-16
+This program is simple implementation of OGC's [http://opengeospatial.org]
+Web Processing Service (OpenGIS(r) Web Processing Service - OGC 05-007r7)
+version 1.0.0 from 2007-06-08
 
 Target of this application is to bring functionality of GIS GRASS
 [http://grass.itc.it] to the World Wide Web - it should work like
 wrapper for modules of this GIS. Though GRASS was at the first place in the
-focuse, it is not necessery to use it's modules - you can use any program
+focus, it is not necessary to use it's modules - you can use any program
 you can script in Python or other language.
 
-This first version was written with support of Deutsche Bundesstiftung
+The first version was written with support of Deutsche Bundesstiftung
 Umwelt, Osnabrueck, Germany on the spring 2006. SVN server is hosted by
 GDF-Hannover, Hannover, Germany.
 
 For setting see comments in 'etc' directory and documentation.
 
-This program is free sotware, distributed under the terms of GNU General
-Public License as bulished by the Free Software Foundation version 2 of the
+This program is free software, distributed under the terms of GNU General
+Public License as published by the Free Software Foundation version 2 of the
 License.
 
 Enjoy and happy GISing!
 """
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
-# Lince: 
+# License: 
 # 
 # Web Processing Service implementation
 # Copyright (C) 2006 Jachym Cepicky
