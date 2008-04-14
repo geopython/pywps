@@ -45,7 +45,7 @@ Enjoy and happy GISing!
 
 import pywps
 from pywps import Parser 
-from pywps import Exeptions
+from pywps import Exceptions
 from pywps.Exceptions import *
 
 import sys, os, ConfigParser
@@ -81,12 +81,12 @@ class WPS:
 
     def __init__(self):
 
-        # getsettings
+        # get settings
         self.loadConfiguration()
 
-        # findout the request method
+        # find out the request method
         self.method = os.getenv("REQUEST_METHOD")
-        if not self.method:
+        if not self.method:  # set standard method
             self.method = self.METHOD_GET
 
         if self.method == self.METHOD_GET:
@@ -96,7 +96,10 @@ class WPS:
             try: 
                 querystring = os.environ["QUERY_STRING"]
             except KeyError:
-                querystring = sys.argv[1]
+                # if QUERY_STRING isn't found in env-dictionary, try to read
+                # query from command line:
+                if len(sys.argv)>1:  # any arguments available?
+                    querystring = sys.argv[1]
             parser.parse(querystring)
         else:
             from pywps.Parser.Post import Post

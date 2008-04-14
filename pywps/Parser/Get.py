@@ -46,17 +46,18 @@ class Get:
         for feature in queryString.split("&"):
             feature = feature.strip()
             key,value = split(feature,"=",maxsplit=1)
-            if value.find("[") == 0:
-                value = value[1:-1]
+            if value.find("[") == 0:  # if value in brackets:
+                value = value[1:-1]   #    delete brackets
             keys.append(key)
             self.unparsedInputs[key.lower()] = value[:maxInputLength]
 
         try:
             self.parseInputs()
             self.findRequestType()
-        except KeyError,e:
+        except KeyError,e:  # if service or request keys not found
             raise self.wps.exceptions.MissingParameterValue(e.message)
-
+                                             # FIXME: e.message is not existing
+            
 
     def parseInputs(self):
             
@@ -72,13 +73,13 @@ class Get:
                
                 raise FileSizeExceeded(key)
 
-
+        # check service name; service name is mandatory!
         if self.unparsedInputs[self.SERVICE].lower() != self.WPS:
             raise self.wps.exceptions.InvalidParameterValue(
                     self.unparsedInputs[self.SERVICE])
     
     def findRequestType(self):
-
+        # test, if one of the mandatory WPS operation is called (via request)
         if self.unparsedInputs["request"].lower() ==\
            self.GET_CAPABILITIES:
             import GetCapabilities 
