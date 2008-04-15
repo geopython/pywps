@@ -24,6 +24,7 @@ Request handler - prototype class
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import xml.dom.minidom
+# make sure, that the package python-htmltmpl is installed on your system!
 from htmltmpl import TemplateManager, TemplateProcessor
 import os
 from pywps import Templates

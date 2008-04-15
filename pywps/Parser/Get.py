@@ -55,8 +55,7 @@ class Get:
             self.parseInputs()
             self.findRequestType()
         except KeyError,e:  # if service or request keys not found
-            raise self.wps.exceptions.MissingParameterValue(e.message)
-                                             # FIXME: e.message is not existing
+            raise self.wps.exceptions.MissingParameterValue(str(e).strip("'"))
             
 
     def parseInputs(self):
@@ -73,7 +72,7 @@ class Get:
                
                 raise FileSizeExceeded(key)
 
-        # check service name; service name is mandatory!
+        # check service name: service name is mandatory; service must be "WPS"
         if self.unparsedInputs[self.SERVICE].lower() != self.WPS:
             raise self.wps.exceptions.InvalidParameterValue(
                     self.unparsedInputs[self.SERVICE])
