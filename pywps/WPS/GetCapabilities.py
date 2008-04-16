@@ -127,7 +127,9 @@ class GetCapabilities(Request):
 
             processData = {}
             try:
-                module = __import__(self.processes.__name__,fromlist=[processName])
+                # dynamic module import from processes dir:
+                module = __import__(self.processes.__name__, globals(),\
+                                    locals(), [processName])
                 process = eval("module."+processName+".Process()")
 
                 processData["processok"] = 1
