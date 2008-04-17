@@ -93,7 +93,7 @@ class DescribeProcess(Request):
                 processData["version"] = process.version
 
                 processData["Datainputs"] = self.processInputs(process)
-                processData["datainpuntslen"] = len(processData["Datainputs"])
+                processData["datainputslen"] = len(processData["Datainputs"])
 
                 processData["Dataoutputs"] = self.processOutputs(process)
                 processData["dataoutputslen"] = len(processData["Dataoutputs"])
