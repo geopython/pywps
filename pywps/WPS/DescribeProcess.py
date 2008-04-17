@@ -77,7 +77,8 @@ class DescribeProcess(Request):
 
             processData = {}
             try:
-                module = __import__(self.processes.__name__,fromlist=[processName])
+                module = __import__(self.processes.__name__, globals(),\
+                                    locals(), [processName])
                 process = eval("module."+processName+".Process()")
 
                 processData["processok"] = 1
