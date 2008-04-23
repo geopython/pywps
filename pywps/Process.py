@@ -29,21 +29,29 @@ import types
 class Status:
     def __init__(self):
         self.creationTime = time.time()
-        self.processAccepted = False
-        self.processStarted = False
-        self.processPaused = False
-        self.processSucceeded = False
-        self.processFailed = False
-
-        self.processCompleted = 0
+        self.code = None
+        self.percentCompleted = 0
         self.exceptionReport = None
+        self.code = None
+        self.value = None
 
-    def set(self, msg="",percentDone=0):
+    def set(self, msg="",percentDone=0, propagate=True):
+        """
+        propagate - call onStatusChanged method
+        """
+        self.code = "processstarted"
         if (type(percentDone) == types.StringType):
-            self.processCompleted += int(percentDone)
+            self.percentCompleted += int(percentDone)
         else:
-            self.processCompleted = percentDone
-        self.onStatusChanged()
+            self.percentCompleted = percentDone
+
+        if not msg:
+            msg = "True"
+
+        self.value = msg
+
+        if propagate:
+            self.onStatusChanged()
 
     def onStatusChanged(self):
         """
@@ -51,17 +59,18 @@ class Status:
         """
         pass
 
-    def setProcessStatus(self,name,value):
-        if name == "processAccepted":
-            self.processAccepted = value
-        elif name == "processStarted":
-            self.processStarted = value
-        elif name == "processPaused":
-            self.processPaused = value
-        elif name == "processSucceeded":
-            self.processSucceeded = value
-        elif name == "processFailed":
-            self.processFailed = value
+    def setProcessStatus(self,code,value):
+        """
+        Sets current status of the process. Calls onStatusChanged method
+        """
+
+        self.value = value
+        self.code = code.lower()
+
+        if self.code != "processfailed":
+            self.onStatusChanged()
+        return
+
 
 class WPSProcess:
     """
@@ -77,6 +86,13 @@ class WPSProcess:
         self.abstract = abstract
         self.wsdl  = None
         self.profile = profile
+        # "true" or "True" -> True
+        if type(storeSupported) == type(""):
+            if storeSupported.find("t") == 0 or\
+                storeSupported.find("T") == 0:
+                storeSupported = True
+            else:
+                storeSupported = False
         self.storeSupported = storeSupported
         self.statusSupported = statusSupported
         self.debug = False
@@ -111,7 +127,7 @@ class WPSProcess:
 
     def addComplexInput(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=1,maxOccurs=1,
-                formats=[{"mimetype":"text/xml"}],maxmegabites=0.1):
+                formats=[{"mimeType":"text/xml"}],maxmegabites=0.1):
 
         self.inputs[identifier] = InAndOutputs.ComplexInput(identifier=identifier,
                 title=title,abstract=abstract,
@@ -134,23 +150,25 @@ class WPSProcess:
     # --------------------------------------------------------------------
 
     def addComplexOutput(self,identifier,title,abstract=None,
-            metadata=[],formats=[{"mimetype":"text/xml"}]):
+            metadata=[],formats=[{"mimeType":"text/xml"}],
+            asReference=False):
 
         self.outputs[identifier] = InAndOutputs.ComplexOutput(identifier=identifier,
                 title=title,abstract=abstract,
-                metadata=[], formats=formats)
+                metadata=[], formats=formats, asReference=asReference)
 
         return self.outputs[identifier]
 
     def addLiteralOutput(self, identifier, title, abstract=None,
-            uoms=(), type=types.IntType, default=None):
+            uoms=(), type=types.IntType, default=None,
+           asReference=False):
         """
         Add new output item of type LiteralValue to this process
         """
 
         self.outputs[identifier] = InAndOutputs.LiteralOutput(identifier=identifier,
                 title=title, abstract=abstract, dataType=type, uoms=uoms, 
-                default=None)
+                default=None, asReference=asReference)
 
         return self.outputs[identifier]
 

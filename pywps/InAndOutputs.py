@@ -111,7 +111,7 @@ class LiteralInput(Input):
 class ComplexInput(Input):
     def __init__(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=1,maxOccurs=1,
-                maxmegabites=0.1,formats=[{"mimetype":"text/xml"}]):
+                maxmegabites=0.1,formats=[{"mimeType":"text/xml"}]):
         Input.__init__(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=minOccurs,maxOccurs=maxOccurs,type="ComplexValue")
         
@@ -123,7 +123,7 @@ class ComplexInput(Input):
 
 
         if type(formats) == types.StringType:
-            formats = [{"mimetype":formats,"encoding":None,"schema":None}]
+            formats = [{"mimeType":formats,"encoding":None,"schema":None}]
         elif type(formats) == types.DictType:
             formats = [formats]
 
@@ -214,12 +214,14 @@ class BoundingBoxInput(Input):
 
 class Output:
     def __init__(self,identifier,title,abstract=None,
-                metadata=[],type=None):
+                metadata=[],type=None, asReference=False):
         self.identifier = identifier
         self.title = title
         self.abstract = abstract
         self.metadata = metadata
         self.type = type
+        self.asReference = asReference
+        self.value = None
         return
 
     def setValue(self,value):
@@ -228,23 +230,28 @@ class Output:
 class LiteralOutput(Output):
     def __init__(self,identifier,title,abstract=None,
                 metadata=[], uoms=(), dataType = types.StringType, 
-                default=None):
+                default=None, asReference=False):
         Output.__init__(self,identifier,title,abstract=None,
-                metadata=[],type="LiteralValue")
+                metadata=[],type="LiteralValue",asReference=asReference)
         
         self.uoms = uoms
+        if len(self.uoms) > 0:
+            self.uom = self.uoms[0]
+        else:
+            self.uom = None
         self.default = default
         self.dataType = dataType
         return
 
 class ComplexOutput(Output):
     def __init__(self,identifier,title,abstract=None,
-                metadata=[], formats=[{"mimetype":"text/xml"}]):
+                metadata=[], formats=[{"mimeType":"text/xml"}],
+                asReference=False):
         Output.__init__(self,identifier,title,abstract=None,
-                metadata=[],type="ComplexValue")
+                metadata=[],type="ComplexValue", asReference=asReference)
         
         if type(formats) == types.StringType:
-            formats = [{"mimetype":formats,"encoding":None,"schema":None}]
+            formats = [{"mimeType":formats,"encoding":None,"schema":None}]
         elif type(formats) == types.DictType:
             formats = [formats]
 
@@ -255,6 +262,7 @@ class ComplexOutput(Output):
                 format["schema"] = None
 
         self.formats = formats
+        self.format = formats[0]
         return
 
     def setValue(self,value):
@@ -262,9 +270,9 @@ class ComplexOutput(Output):
 
 class BoundingBoxOutput(Output):
     def __init__(self,identifier,title,abstract=None,
-                metadata=[], crss=[]):
+                metadata=[], crss=[], asReference=False):
         Output.__init__(self,identifier,title,abstract=None,
-                metadata=[],type="BoundingBoxValue")
+                metadata=[],type="BoundingBoxValue",asReference=asReference)
         
         self.crss = crss
         return

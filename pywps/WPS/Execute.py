@@ -24,64 +24,98 @@ WPS Execute request handler
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 from Request import Request
-import time,os,tempfile,re
-from pywps import Grass
+import time,os,sys,tempfile,re
+from shutil import copy as COPY
+from shutil import rmtree as RMTREE
 
 class Execute(Request):
     """
+    This class performes the Execute request of WPS specification
+
+    In the class, fork of the  processes has to be done, if the client
+    requested asynchronous request performance (status=true)
     """
+
+    statusPrinted = 0
+
+    # status variants
     accepted = "processaccepted"
     started = "processstarted"
-    succeeded = "processsucc"
+    succeeded = "processsucceeded"
     paused = "processpaused"
     failed = "processfailed"
 
+    # runnig process id
+    pid = None
+
+    # session ID
     id = ''
+
+    # status location and file
     statusLocation = ''
-    statusFile = None
+    statusFileName = None
+    statusFiles = [sys.stdout]
     
-    status = 0
-    processstatus = 0
+    # process status
+    statusRequired = False # should the request run assynchronously?
+    status = None
+    statusMessage = None
     percent = 0
-    exceptioncode = 0
+    exceptioncode = None
     locator = 0
     percent = 0
+    statusTime = None
 
-    dirsToBeRemoved = []     # directories, which should be removed
+    # directories, which should be removed
+    dirsToBeRemoved = []     
 
+    # working directory and grass
     workingDir = ""
     grass = None
 
+    parentProcess = False # Fork
+    printStatus = False
+
+    rawDataOutput = None
+
     def __init__(self,wps):
         """
-        Arguments:
-           self
-           wps   - parent WPS instance
+        wps   - parent WPS instance
         """
 
         Request.__init__(self,wps)
 
         self.wps = wps
         self.process = None
-
         self.template = self.templateManager.prepare(self.templateFile)
 
-        #
         # initialization
-        #
         self.statusTime = time.time()
+        self.pid = os.getpid()
         self.status = None
         self.id = self.makeSessionId()
-        self.statusLocation = os.path.join(self.wps.getConfigValue("server","outputPath"),self.id+".xml")
+        self.statusFileName = os.path.join(self.wps.getConfigValue("server","outputPath"),self.id+".xml")
+        self.statusLocation = self.wps.getConfigValue("server","outputUrl")+"/"+self.id+".xml"
 
-        #
+        # rawDataOutput
+        if self.wps.inputs["responseform"]["rawdataoutput"]:
+            self.rawDataOutput = self.wps.inputs["responseform"]["rawdataoutput"].keys()[0]
+
+        # is status required
+        self.statusRequired = False
+        if  self.wps.inputs["responseform"]["responsedocument"].has_key("status"):
+            if self.wps.inputs["responseform"]["responsedocument"]["status"]:
+                self.statusRequired = True
+                
+        # is store response required ?
+        if  self.wps.inputs["responseform"]["responsedocument"].has_key("storeexecuteresponse"):
+            if self.wps.inputs["responseform"]["responsedocument"]["storeexecuteresponse"]:
+                self.statusFiles.append(open(self.statusFileName,"w"))
+
         # setInput values
-        #
         self.initProcess()
 
-        #
         # HEAD
-        #
         self.templateProcessor.set("encoding",
                                     self.wps.getConfigValue("wps","encoding"))
         self.templateProcessor.set("lang",
@@ -92,47 +126,70 @@ class Execute(Request):
                                     self.statusLocation)
         self.templateProcessor.set("serviceinstance",
                                     self.serviceInstanceUrl())
-        #
         # Description
-        #
         self.processDescription()
 
+        # Status == True ?
+        if self.statusRequired:
+            # Status
+            self.promoteStatus(self.accepted,"Process %s accepted" %\
+                    self.process.identifier)
+            
+            self.printStatus = True
 
-        #
-        # Status
-        #
-        self.setStatus(self.accepted,"Process %s accepted" %\
-                self.process.identifier)
+            # fork
+            self.splitThreads()
 
-        #
-        # lineage
-        #
-        if self.wps.inputs['responseform'].has_key("responsedocument"):
-            if self.wps.inputs['responseform']['responsedocument'].has_key('lineage') and \
-                self.wps.inputs['responseform']['responsedocument']['lineage'] == True:
-                self.lineageInputs()
+        if not self.parentProcess:
 
+            # init environment variable
+            self.initEnv()
 
-        # 
-        # Execute
-        #
-        if  self.wps.inputs["responseform"]["responsedocument"].has_key("status"):
-            if self.wps.inputs["responseform"]["responsedocument"]["status"]:
-                pass
-                #self.splitThreads()
-        self.executeProcess()
+            # donwload and consolidate data
+            self.consolidateInputs()
 
-        #
-        # Status
-        #
-        self.setStatus(self.succeeded, 
-                processstatus="PyWPS Process %s successfully calculated" %\
-                self.process.identifier)
+            self.promoteStatus(self.started,"Process %s started" %\
+                    self.process.identifier)
 
-        self.response = self.templateProcessor.process(self.template)
+            # Execute
+            self.executeProcess()
+
+            # Status
+            self.promoteStatus(self.succeeded, 
+                    statusMessage="PyWPS Process %s successfully calculated" %\
+                    self.process.identifier)
+
+            # lineage in and outputs
+            if self.wps.inputs['responseform'].has_key("responsedocument"):
+                if self.wps.inputs['responseform']['responsedocument'].has_key('lineage') and \
+                    self.wps.inputs['responseform']['responsedocument']['lineage'] == True:
+                    self.templateProcessor.set("lineage",1)
+                    self.lineageInputs()
+                    self.outputDefinitions()
+
+            # fill outputs
+            self.processOutputs()
+
+            # Response document
+            self.response = self.templateProcessor.process(self.template)
+
+            if self.rawDataOutput:
+                self.response = None
+                self.printRawData()
+
+            # everything worked, remove all temporary files
+            self.cleanEnv()
+
+            if (self.statusRequired):
+                self.printResponse(self.statusFiles)
         return
 
     def initProcess(self):
+        """
+        Setting and controling input values, set by the client. Also the
+        processes from PYWPS_PROCESS directory or default directory is
+        imported.
+        """
 
         # import the right package
         if self.wps.inputs["identifier"] in self.processes.__all__:
@@ -150,14 +207,27 @@ class Execute(Request):
             raise self.wps.exceptions.InvalidParameterValue(
                     self.wps.inputs["identifier"])
 
-        # create temporary directory
-        self.initEnv()
 
+        # set propper method for status change
+        self.process.wps = self.wps
+        self.process.status.onStatusChanged = self.onStatusChanged
+        self.process.debug = self.wps.getConfigValue("server","debug")
+
+    def consolidateInputs(self):
+        """
+        Donwloads and controls input data, defined by the client
+        """
         # calculate maximum allowed input size
         maxFileSize = self.calculateMaxInputSize()
 
         # set input values
         for identifier in self.process.inputs:
+
+            # Status
+            self.promoteStatus(self.paused, 
+                    statusMessage="Getting input %s of process %s" %\
+                    (identifier, self.process.identifier))
+
             input = self.process.inputs[identifier]
 
             # exceptions handler
@@ -181,14 +251,16 @@ class Execute(Request):
             if not input.value:
                 raise self.wps.exceptions.MissingParameterValue(identifier)
 
-        # set propper method for status change
-        self.process.wps = self.wps
-        self.process.status.onStatusChanged = self.onStatusChanged
-        self.process.debug = self.wps.getConfigValue("server","debug")
-
     def onInputProblem(self,what,why):
+        """
+        This method is used for rewriting onProblem method of each input
+
+        what - locator of the problem
+        why - possible reason of the problem
+        """
         
         exception = None
+
         if what == "FileSizeExceeded":
             exception = self.wps.exceptions.FileSizeExceeded
         elif what == "NoApplicableCode":
@@ -196,8 +268,11 @@ class Execute(Request):
 
         raise exception(why)
 
-
     def executeProcess(self):
+        """
+        Calls 'execute' method of the process, catches possible exeptions
+        and raise error, if needed
+        """
         try:
             processError = self.process.execute()
             if processError:
@@ -212,6 +287,10 @@ class Execute(Request):
                                 (self.process.identifier,e))
 
     def processDescription(self):
+        """
+        Fills Identifier, Title and Abstract, eventually WSDL and Profile
+        parts of the output XML document
+        """
 
         self.templateProcessor.set("title", self.process.title)
         self.templateProcessor.set("abstract", self.process.abstract)
@@ -220,52 +299,75 @@ class Execute(Request):
         #self.templateProcessor.set("profile", self.process.profile)
         #self.templateProcessor.set("wsdl", self.process.wsdl)
 
-    def setStatus(self,status,
-                    processstatus=0, percent=0,
-                    exceptioncode=0, locator=0):
+    def promoteStatus(self,status,
+                    statusMessage=0, percent=0,
+                    exceptioncode=0, locator=0,
+                    output=None):
+        """
+        Sets status of currently performed Execute request
+
+        {String} status -  name of the status
+        {String} statusMessage - message, which should appear in output xml file
+        {Float} percent - percent done message
+        {String} exceptioncode - eventualy exception
+        {String} locator - where the problem occured
+        """
+
+        self.process.status.percentCompleted, self.process.status.value,\
+        self.printStatus
         
         self.statusTime = time.time()
         self.templateProcessor.set("statustime", time.ctime(self.statusTime))
         self.status = status
-        if processstatus != 0: self.processstatus = processstatus 
+        if statusMessage != 0: self.statusMessage = statusMessage 
         if percent != 0: self.percent = percent 
         if exceptioncode != 0: self.exceptioncode = exceptioncode 
         if locator != 0: self.locator = locator 
         
-
         # init value
         self.templateProcessor.set("processstarted",0)
-        self.templateProcessor.set("processsucc",0)
+        self.templateProcessor.set("processsucceeded",0)
         self.templateProcessor.set("processpaused",0)
         self.templateProcessor.set("processfailed",0)
         self.templateProcessor.set("processaccepted",0)
 
-
         if self.status == self.accepted:
             self.templateProcessor.set("processaccepted",
-                    self.processstatus)
+                    self.statusMessage)
 
         elif self.status == self.started:
-            self.templateProcessor.set("processstarted", "true")
-            self.templateProcessor.set("percentcompleted", self.percent*100)
+            self.templateProcessor.set("processstarted", self.statusMessage)
+            self.templateProcessor.set("percentcompleted", self.percent)
 
         elif self.status == self.succeeded:
-            self.process.status.set(percentDone=100)
+            self.process.status.set(msg=self.statusMessage, percentDone=100, propagate=False)
             self.templateProcessor.set("percentcompleted", self.percent)
-            self.templateProcessor.set("processsucc",
-                                                self.processstatus)
+            self.templateProcessor.set("processsucceeded",
+                                                self.statusMessage)
 
         elif self.status == self.paused:
-            self.templateProcessor.set("processpaused", self.processstatus)
+            self.templateProcessor.set("processpaused", self.statusMessage)
             self.templateProcessor.set("percentcompleted", self.percent)
 
         elif self.status == self.failed:
-            self.templateProcessor.set("exceptiontext", self.processstatus)
+            self.templateProcessor.set("exceptiontext", self.statusMessage)
             self.templateProcessor.set("exceptioncode", self.exceptioncode)
 
+        # update response
+        self.response = self.templateProcessor.process(self.template)
+
+        # printStatus
+        if self.printStatus and not self.rawDataOutput:
+            self.statusPrinted += 1
+            self.printResponse(self.statusFiles)
+
+
     def lineageInputs(self):
+        """
+        Called, if lineage request was set. Fills the <DataInputs> part of
+        output XML document.
+        """
         templateInputs = []
-        self.templateProcessor.set("lineage",1)
     
         for identifier in self.process.inputs.keys():
             templateInput = {}
@@ -278,27 +380,36 @@ class Execute(Request):
             templateInputs.append(templateInput);
 
             if input.type == "LiteralValue":
-                templateInput = self.lineageLiteralInput(input,templateInput)
+                templateInput = self._lineageLiteralInput(input,templateInput)
             elif input.type == "ComplexValue":
-                templateInput = self.lineageComplexInput(input,templateInput)
+                templateInput = self._lineageComplexInput(input,templateInput)
             elif input.type == "BoundingBoxValue":
-                templateInput = self.lineageBboxInput(input,templateInput)
+                templateInput = self._lineageBBoxInput(input,templateInput)
 
         self.templateProcessor.set("Inputs",templateInputs)
 
-    def lineageLiteralInput(self, input, literalInput):
+    def _lineageLiteralInput(self, input, literalInput):
+        """
+        Fill input of literal data
+        """
         literalInput["literaldata"] = input.value
         literalInput["uom"] = str(input.uom)
         return literalInput
 
-    def lineageComplexInput(self, input, complexInput):
+    def _lineageComplexInput(self, input, complexInput):
+        """
+        Fill input of complex data
+        """
         complexInput["complexdata"] = input.value
         complexInput["encoding"] = input.format["encoding"]
-        complexInput["mimetype"] = input.format["mimetype"]
+        complexInput["mimetype"] = input.format["mimeType"]
         complexInput["schema"] = input.format["schema"]
         return complexInput
 
-    def lineageBboxInput(self,input,bboxInput):
+    def _lineageBBoxInput(self,input,bboxInput):
+        """
+        Fill input of bbox data
+        """
         bboxInput["bboxdata"] = 1
         bboxInput["crs"] = input.crs
         bboxInput["dimensions"] = input.dimensions
@@ -306,57 +417,196 @@ class Execute(Request):
         bboxInput["miny"] = input.value[1]
         bboxInput["maxx"] = input.value[2]
         bboxInput["maxy"] = input.value[3]
-
         return bboxInput
 
+    def outputDefinitions(self):
+        """
+        Called, if lineage request was set. Fills the <OutputDefinitions> part of
+        output XML document.
+        """
+        templateOutputs = []
     
-    def splitThreads(self):
-        try:
-            self.statusLocation = self.settings.ServerSettings['outputUrl']+"/"+self.executeresponseXmlName
-            self.pid = os.fork() 
-            if self.pid:
-                self.make_response_xml()
-                file = open(
-                        os.path.join(self.settings.ServerSettings['outputPath'],self.executeresponseXmlName),"w")
-                file.write(self.document.toprettyxml())
-                file.close()
-                return
+        for identifier in self.process.outputs.keys():
+            templateOutput = {}
+            output = self.process.outputs[identifier]
+
+
+            templateOutput["identifier"] = output.identifier
+            templateOutput["title"] = output.title
+            templateOutput["abstract"] = output.abstract
+        
+            if self.process.storeSupported and output.asReference:
+                templateOutput["asreference"] = "true"
             else:
+                templateOutput["asreference"] = "false"
+
+            templateOutputs.append(templateOutput);
+
+            if output.type == "LiteralValue":
+                templateOutput = self._lineageLiteralOutput(output,templateOutput)
+                templateOutput["literaldata"] = 1
+            elif output.type == "ComplexValue":
+                templateOutput = self._lineageComplexOutput(output,templateOutput)
+                templateOutput["complexdata"] = 1
+            else:
+                # FIXME TO BE FIXED
+                templateOutput["bboxdata"] = 1
+
+        self.templateProcessor.set("Outputdefinitions",templateOutputs)
+
+    def _lineageLiteralOutput(self, output, literalOutput):
+        if len(output.uoms):
+                literalOutput["uom"] = str(output.uoms[0])
+        return literalOutput
+
+    def _lineageComplexOutput(self, output, complexOutput):
+
+        complexOutput["mimetype"] = output.format["mimeType"]
+        complexOutput["encoding"] = output.format["encoding"]
+        complexOutput["shema"] = output.format["schema"]
+
+
+        return complexOutput
+
+    def processOutputs(self):
+        """
+        Fill <ProcessOutputs> part in the ouput XML document
+        This method is called if, self.status == ProcessSucceeded
+        """
+
+        templateOutputs = []
+    
+        for identifier in self.process.outputs.keys():
+            templateOutput = {}
+            output = self.process.outputs[identifier]
+
+            templateOutput["identifier"] = output.identifier
+            templateOutput["title"] = output.title
+            templateOutput["abstract"] = output.abstract
+
+            # Reference
+            if output.asReference:
+                self._asReferenceOutput(templateOutput, output)
+            # Data
+            else:
+                templateOutput["reference"] = 0
+                if output.type == "LiteralValue":
+                    templateOutput = self._literalOutput(output,templateOutput)
+                elif output.type == "ComplexValue":
+                    templateOutput = self._complexOutput(output,templateOutput)
+                elif output.type == "BoundingBoxValue":
+                    templateOutput = self._bboxOutput(output,templateOutput)
+
+                templateOutputs.append(templateOutput);
+        self.templateProcessor.set("Outputs",templateOutputs)
+
+    def _literalOutput(self, output, literalOutput):
+
+        literalOutput["uom"] = str(output.uom)
+        literalOutput["dataType"]= self.getDataTypeReference(output)["type"]
+        literalOutput["literaldata"] = output.value
+
+        return literalOutput
+
+    def _complexOutput(self, output, complexOutput):
+
+        complexOutput["mimeType"] = output.format["mimeType"]
+        complexOutput["encoding"] = output.format["encoding"]
+        complexOutput["schema"] = output.format["schema"]
+
+        # CDATA section in output
+        if output.format["mimeType"].find("text") < 0:
+            complexOutput["cdata"] = 1
+        # set output value
+        complexOutput["complexdata"] = open(output.value,"r").read()
+
+        # remove <?xml version= ... part from beginning of some xml
+        # documents
+        if output.format["mimeType"].find("xml") or\
+           output.format["mimeType"].find("gml") > -1:
+            beginXml = complexOutput["complexdata"].split("\n")[0]
+            if  beginXml.find("<?xml ") > -1:
+                complexOutput["complexdata"] = complexOutput["complexdata"].replace(beginXml+"\n","")
+
+        return complexOutput
+
+    def _bboxOutput(self, output, bboxOutput):
+        # FIXME TO BE FIXED
+        return bboxOutput
+
+    def _asReferenceOutput(self,templateOutput, output):
+
+        # copy the file to output directory
+        if output.type == "LiteralValue":
+            f = open(os.path.join(
+                        self.wps.getConfigValue("server","outputPath"),
+                                output.identifier+"-"+self.pid),"w")
+            f.write(output.value)
+            f.close()
+            templateOutput["href"] = self.wps.getConfigValue("server","outputUrl")+\
+                    "/"+output.identifier+"-"+self.pid
+        else:
+            COPY(output.value, self.wps.getConfigValue("server","outputPath"))
+            templateOutput["href"] = \
+                    self.wps.getConfigValue("server","outputUrl")+"/"+output.value
+        templateOutput["reference"] = 1
+        templateOutput["mimetype"] = output.format["mimeType"]
+        templateOutput["schema"] = output.format["encoding"]
+        templateOutput["encoding"] = output.format["schema"]
+
+    def splitThreads(self):
+        """
+        Will 'try' to for currently running process. Parent process will
+        formulate resulting XML response with ProcessAccepted status, child
+        process will turn all sys.stdout and sys.stdin off, so the Web
+        Server can break the connection to the client.
+        """
+        try:
+            # this is the parent process
+            if os.fork():
+                self.parentProcess = True
+                return
+            # this is the child process
+            else:
+                self.pid = os.getpid()
+
+                # should the status be printed on each change?
+                self.irintStatus = True
+
+                self.parentProcess = False
+                self.statusFiles.remove(sys.stdout)
+                if len(self.statusFiles) == 0:
+                    self.statusFiles = [open(self.statusFileName,"w")]
+
+                self.promoteStatus(self.started,"Process %s started" %\
+                    self.process.identifier)
+
+                return
+                # time.sleep(2)
                 # Reassign stdin, stdout, stderr for child
                 # so Apache will ignore it
-                # time.sleep(2)
-                self.status = "ProcessStarted"
-                si = open('/dev/null', 'r')
-                so = open('/dev/null', 'a+')
-                se = open('/dev/null', 'a+', 0)
+                si = open(os.devnull, 'r')
+                so = open(os.devnull, 'a+')
+                se = open(os.devnull, 'a+', 0)
                 os.dup2(si.fileno(), sys.stdin.fileno())
                 os.dup2(so.fileno(), sys.stdout.fileno())
                 os.dup2(se.fileno(), sys.stderr.fileno())
-
-                # make document
-                self.make_response_xml()
-
-                # begin checking
-                self.process.stopChecking = False
-
-                # define thread
-                status = Status(self,document=self.document, 
-                            filename=os.path.join(
-                                self.settings.ServerSettings['outputPath'],
-                                self.executeresponseXmlName),
-                            interval=1,
-                            process=self.process)
-                # take care on self.process.status
-                status.start()
-
         except OSError, e: 
-            sys.stderr.write( "fork #1 failed: %d (%s)\n" % (e.errno, e.strerror) )
-            sys.exit(1)
+            raise self.wps.exceptions.NoApplicableCode("Fork failed: %d (%s)\n" % (e.errno, e.strerror) )
+        return
 
     def makeSessionId(self):
+        """
+        Returns unique Execute session ID
+        """
         return "pywps-"+str(int(time.time()*100))
 
     def getSessionIdFromStatusLocation(self,statusLocation):
+        """
+        Parses the statusLocation, and gets the unique session ID from it
+
+        NOTE: Not in use, maybe should be removed.
+        """
         begin = statusLocation.find("/pywps-")
         end = statusLocation.find(".xml")
         if begin > -1 and end > -1:
@@ -365,6 +615,9 @@ class Execute(Request):
             return None
 
     def serviceInstanceUrl(self):
+        """
+        Creates URL of GetCapabilities for this WPS
+        """
         serveraddress = self.wps.getConfigValue("wps","serveraddress")
 
         if not serveraddress.endswith("?") and \
@@ -380,7 +633,10 @@ class Execute(Request):
         """
         This method is used for redefinition of self.process.status class
         """
-        self.percent = self.process.status.processCompleted
+
+        self.promoteStatus(self.process.status.code,statusMessage =
+                self.process.status.value,
+                percent=self.process.status.percentCompleted)
 
     def initEnv(self):
 
@@ -394,6 +650,7 @@ class Execute(Request):
         self.dirsToBeRemoved.append(self.workingDir)
 
         if self.process.grassLocation:
+            from pywps import Grass
             grass = Grass.Grass(self)
             if self.process.grassLocation == True:
                 grass.mkMapset()
@@ -403,12 +660,16 @@ class Execute(Request):
                 raise self.wps.exceptions.NoApplicableCode("Location [%s] does not exist" % self.process.location)
         
     def cleanEnv(self):
-       
-        from shutil import rmtree
-        for dir in self.dirsToBeRemoved:
+        """
+        Removes temporary created files and dictionaries
+        """
+        for i in range(len(self.dirsToBeRemoved)):
+            dir = self.dirsToBeRemoved[0]
             if os.path.isdir(dir) and dir != "/":
-                #rmtree(dir)
+                RMTREE(dir)
                 pass
+            self.dirsToBeRemoved.remove(dir)
+
 
     def calculateMaxInputSize(self):
         maxSize = self.wps.getConfigValue("server","maxfilesize")
@@ -427,3 +688,19 @@ class Execute(Request):
             size *= 1
 
         return size
+    
+    def printRawData(self):
+        """
+        Prints raw data to sys.stdout with correct content-type, according
+        to mimeType attribute or output value
+        """
+
+        output = self.process.outputs[self.rawDataOutput]
+        if output.type == "LiteralValue":
+            print "Content-type: text/plain\n"
+            print output.value
+        elif output.type == "ComplexValue":
+            f = open(output.value,"r")
+            print "Content-type: %s\n" % output.format["mimeType"]
+            print f.read()
+            f.close()

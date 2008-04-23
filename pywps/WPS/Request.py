@@ -27,16 +27,21 @@ import xml.dom.minidom
 # make sure, that the package python-htmltmpl is installed on your system!
 from htmltmpl import TemplateManager, TemplateProcessor
 import os
+from sys import stdout as STDOUT
+import types
 from pywps import Templates
+import re
 
 class Request:
     response = None # Output document
     wps = None # Parent WPS object
     templateManager = None # HTML TemplateManager
-    templateProcessor = TemplateProcessor() # HTML TemplateProcessor
+    templateProcessor = TemplateProcessor(html_escape=0) # HTML TemplateProcessor
     template = None # HTML Template
     templateFile = None # File with template
     processDir = None # Directory with processes
+    statusFiles = STDOUT 
+    emptyParamRegex = re.compile('( \w+="")|( \w+="None")')
 
     def __init__(self,wps):
         self.wps = wps
@@ -69,6 +74,54 @@ class Request:
             processes = __import__(os.path.split(self.processDir)[-1])
             self.processes = processes
         else:
-            import pywps
+            import pywps 
             from pywps import processes
             self.processes = pywps.processes
+
+    def getDataTypeReference(self,inoutput):
+        """
+        Returns data type reference according to W3C 
+        """
+        
+        dataType = {"type": None, "reference": None}
+        if inoutput.dataType == types.StringType:
+            processInOutput["dataTypeReference"] = \
+            dataType["type"] = "string"
+            dataType["reference"] = "http://www.w3.org/TR/xmlschema-2/#string"
+        elif inoutput.dataType == types.FloatType:
+            dataType["type"] = "float"
+            dataType["reference"] = "http://www.w3.org/TR/xmlschema-2/#float"
+        elif inoutput.dataType == types.IntType:
+            dataType["type"] = "integer"
+            dataType["reference"] = "http://www.w3.org/TR/xmlschema-2/#integer"
+        elif inoutput.dataType == types.BooleanType:
+            dataType["type"] = "boolean"
+            dataType["reference"] = "http://www.w3.org/TR/xmlschema-2/#boolean"
+        else:
+            # FIXME To be continued...
+            dataType["type"] = "string"
+            dataType["reference"] = "http://www.w3.org/TR/xmlschema-2/#string"
+            pass
+
+        return dataType
+
+    def printResponse(self,fileDes):
+        """
+        print response to file descriptor file descriptor
+        can be of type list or file
+        """
+
+        if type(fileDes) != type([]):
+            fileDes = [fileDes]
+
+        for f in fileDes:
+
+            # open file
+            if f != STDOUT and f.closed:
+                f = open(f.name,"w")
+
+            # '""' and '"None"'s will be removed
+            f.write(re.sub(self.emptyParamRegex,"",self.response))
+
+            if (f != STDOUT):
+                f.close()

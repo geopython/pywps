@@ -43,6 +43,11 @@ Enjoy and happy GISing!
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+
+# TODO:
+# document evertyghin according to
+# http://www.python.org/doc/essays/styleguide.html
+
 import pywps
 from pywps import Parser 
 from pywps import Exceptions
@@ -110,8 +115,11 @@ class WPS:
             self.performRequest()
 
         if self.request.response:
-            print "Content-type: text/xml\n"
-            print self.request.response
+            # print only to standard out
+            if self.request.statusFiles == sys.stdout or\
+               sys.stdout in self.request.statusFiles:
+                print "Content-type: text/xml\n"
+                self.request.printResponse(self.request.statusFiles)
 
         return
     

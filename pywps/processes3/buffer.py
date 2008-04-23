@@ -18,16 +18,16 @@ class Process(WPSProcess):
             grassLocation = True)
 
 
-        self.addComplexInput(identifier="data",
+        self.dataIn = self.addComplexInput(identifier="data",
                              title = "Input data")
 
-        self.addLiteralInput(identifier = "width",
+        self.widthIn = self.addLiteralInput(identifier = "width",
                              title = "Width")
 
-        self.addComplexOutput(identifier="buffer",
-                                title="Output buffer file")
+        self.bufferOut = self.addComplexOutput(identifier="buffer",
+                                title="Output buffer file",asReference=True)
 
-        self.addLiteralOutput(identifier="text",
+        self.textOut = self.addLiteralOutput(identifier="text",
                                 title="just some text")
         
     def execute(self):
@@ -41,13 +41,14 @@ class Process(WPSProcess):
         self.status.set("Buffering",50)
 	self.cmd("v.buffer input=data output=data_buff buffer=%s scale=1.0 tolerance=0.01" %\
                 (self.getInputValue('width')))
-            	
-        self.status.set("Exporting data",90)
-	self.cmd("v.out.ogr type=area format=GML input=data_buff dsn=out.xml  olayer=path.xml")
 
+        self.status.set("Exporting data",90)
+
+	self.cmd("v.out.ogr type=area format=GML input=data_buff dsn=out.xml  olayer=path.xml")
         
         if "out.xml" in os.listdir(os.curdir):
-            self.setOutputValue('buffer', "out.xml")
+            self.bufferOut.setValue("out.xml")
+            self.textOut.setValue("ahoj, svete")
             return
         else:
             return "Output file not created"

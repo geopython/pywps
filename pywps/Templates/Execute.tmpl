@@ -14,8 +14,8 @@
         </TMPL_IF>
     </wps:Process>
     <wps:Status creationTime="<TMPL_VAR statustime>">
-        <TMPL_IF processsucc>
-        <wps:ProcessSucceeded><TMPL_VAR processsucc></wps:ProcessSucceeded>
+        <TMPL_IF processsucceeded>
+        <wps:ProcessSucceeded><TMPL_VAR processsucceeded></wps:ProcessSucceeded>
         </TMPL_IF>
         <TMPL_IF processaccepted>
         <wps:ProcessAccepted><TMPL_VAR processaccepted></wps:ProcessAccepted>
@@ -64,23 +64,26 @@
                 <wps:BodyReference xlink:href="<TMPL_VAR bodyreference>" />
                 </TMPL_IF>
             <TMPL_ELSE>
-                <TMPL_INCLUDE NAME="Execute_Data.tmpl">
+                <TMPL_INCLUDE NAME="Execute_Data_Inputs.tmpl">
             </TMPL_IF>
         </wps:Input>
         </TMPL_LOOP>
     </wps:DataInputs>
-    <wps:OutputDefinitions mimeType="text/xml" encoding="UTF-8" schema="http://foo.bar/gml_polygon_schema.xsd" asReference="true">
-    <TMPL_LOOP outputDefinitions>
+    <wps:OutputDefinitions>
+    <TMPL_LOOP Outputdefinitions>
+        <TMPL_IF complexdata>
+        <wps:Output mimeType="<TMPL_VAR mimetype>" encoding="<TMPL_VAR encoding>" schema="<TMPL_VAR schema>" asReference="<TMPL_VAR asreference>">
+        </TMPL_IF>
+        <TMPL_IF literaldata>
+        <wps:Output <TMPL_VAR uom>>
+        </TMPL_IF>
+        <TMPL_IF bboxdata>
         <wps:Output>
+        </TMPL_IF>
             <ows:Identifier><TMPL_VAR identifier></ows:Identifier>
             <ows:Title><TMPL_VAR title></ows:Title>
             <TMPL_IF abstract>
             <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
-            </TMPL_IF>
-            <TMPL_IF reference>
-            <wps:Reference format="<TMPL_VAR format>" encoding="<TMPL_VAR encoding>" schema="<TMPL_VAR schema>" xlink:href="<TMPL_VAR reference>" />
-            <TMPL_ELSE>
-                <TMPL_INCLUDE NAME="Execute_Data.tmpl">
             </TMPL_IF>
         </wps:Output>
     </TMPL_LOOP>
@@ -88,7 +91,7 @@
     </TMPL_IF>
     <TMPL_IF processsucceeded>
     <wps:ProcessOutputs>
-        <TMPL_LOOP outputs>
+        <TMPL_LOOP Outputs>
         <wps:Output>
             <ows:Identifier><TMPL_VAR identifier></ows:Identifier>
             <ows:Title><TMPL_VAR title></ows:Title>
@@ -98,7 +101,7 @@
             <TMPL_IF reference>
             <wps:Reference xlink:href="<TMPL_VAR reference>" mimeType="<TMPL_VAR mimetype>" encoding="<TMPL_VAR encoding>" schema="TMPL_VAR schema>"/>
             <TMPL_ELSE>
-                <TMPL_INCLUDE NAME="Execute_Data.tmpl">
+                <TMPL_INCLUDE NAME="Execute_Data_Outputs.tmpl">
             </TMPL_IF>
         </wps:Output>
         </TMPL_LOOP>

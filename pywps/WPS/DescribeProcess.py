@@ -25,7 +25,6 @@ WPS DescribeProcess request handler
 
 from Request import Request
 import os
-import types
 
 class DescribeProcess(Request):
     """
@@ -158,31 +157,15 @@ class DescribeProcess(Request):
     def literalValue(self,inoutput,processInOutput):
 
         # data types
-        if inoutput.dataType == types.StringType:
-            processInOutput["dataTypeReference"] = \
-                                    "http://www.w3.org/TR/xmlschema-2/#string"
-            processInOutput["dataType"] = "string"
-        elif inoutput.dataType == types.FloatType:
-            processInOutput["dataTypeReference"] = \
-                                    "http://www.w3.org/TR/xmlschema-2/#float"
-            processInOutput["dataType"] = "float"
-        elif inoutput.dataType == types.IntType:
-            processInOutput["dataTypeReference"] =\
-                                    "http://www.w3.org/TR/xmlschema-2/#integer"
-            processInOutput["dataType"] = "integer"
-        elif inoutput.dataType == types.BooleanType:
-            processInOutput["dataTypeReference"] = \
-                                    "http://www.w3.org/TR/xmlschema-2/#boolean"
-            processInOutput["dataType"] = "boolean"
-        else:
-            # FIXME
-            pass
+        dataTypeReference = self.getDataTypeReference(input)
+        processInOutput["dataType"] = dataTypeReference["type"]
+        processInOutput["dataTypeReference"] = dataTypeReference["reference"]
         
         # UOMs
-        if len(inoutput.uoms) > 0:
+        if inoutput.uom:
             processInOutput["UOM"] = 1
-            processInOutput["defaultUOM"] = inoutput.uoms[0]
-        if len(inoutput.uoms) > 1:
+            processInOutput["defaultUOM"] = inoutput.uom
+        if len(inoutput.uoms) > 0:
             supportedUOMS = []
             for uom in inoutput.uoms:
                 supportedUOMS.append({"uom":uom})
@@ -216,14 +199,14 @@ class DescribeProcess(Request):
 
     def complexValue(self,inoutput,processInOutput):
 
-        processInOutput["mimetype"] = inoutput.formats[0]["mimetype"]
+        processInOutput["mimetype"] = inoutput.formats[0]["mimeType"]
         processInOutput["encoding"] = inoutput.formats[0]["encoding"]
         processInOutput["schema"] = inoutput.formats[0]["schema"]
 
         processInOutput["Formats"] = []
         for format in inoutput.formats:
             processInOutput["Formats"].append({
-                                        "mimetype":format["mimetype"],
+                                        "mimetype":format["mimeType"],
                                         "encoding":format["encoding"],
                                         "schema":format["schema"]
                                             })
