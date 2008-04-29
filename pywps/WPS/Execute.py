@@ -404,8 +404,6 @@ class Execute(Request):
         """
         Fill input of complex data
         """
-        print dir(input)
-        print input.type, self.wps.inputs
         complexInput["complexdata"] = input.value
         complexInput["encoding"] = input.format["encoding"]
         complexInput["mimetype"] = input.format["mimeType"]
@@ -455,6 +453,7 @@ class Execute(Request):
         for identifier in self.process.outputs.keys():
             templateOutput = {}
             output = self.process.outputs[identifier]
+            pr
 
 
             templateOutput["identifier"] = output.identifier
