@@ -372,6 +372,7 @@ class Execute(Request):
         for identifier in self.process.inputs.keys():
             templateInput = {}
             input = self.process.inputs[identifier]
+            wpsInput = self.wps.inputs["datainputs"][identifier]
 
             templateInput["identifier"] = input.identifier
             templateInput["title"] = input.title
@@ -381,6 +382,9 @@ class Execute(Request):
 
             if input.type == "LiteralValue":
                 templateInput = self._lineageLiteralInput(input,templateInput)
+            elif wpsInput["type"] == "ComplexValueReference":
+                templateInput = self._lineageComplexReferenceInput(wpsInput,
+                                                            input,templateInput)
             elif input.type == "ComplexValue":
                 templateInput = self._lineageComplexInput(input,templateInput)
             elif input.type == "BoundingBoxValue":
@@ -400,11 +404,33 @@ class Execute(Request):
         """
         Fill input of complex data
         """
+        print dir(input)
+        print input.type, self.wps.inputs
         complexInput["complexdata"] = input.value
         complexInput["encoding"] = input.format["encoding"]
         complexInput["mimetype"] = input.format["mimeType"]
         complexInput["schema"] = input.format["schema"]
         return complexInput
+
+    def _lineageComplexReferenceInput(self, wpsInput, processInput, complexInput):
+        """
+        Fill reference input
+
+        wpsInput - asociative field of self.wps.inputs["datainputs"]
+        processInput - self.process.inputs
+        """
+        complexInput["reference"] = wpsInput["value"]
+        complexInput["method"] = wpsInput["method"]
+        complexInput["mimeType"] = processInput.format["mimeType"]
+        complexInput["encoding"] = processInput.format["encoding"]
+        if wpsInput["header"]:
+            complexInput["header"] = 1
+            complexInput["key"] = wpsInput["header"].keys()[0]
+            complexInput["value"] = wpsInput["header"][wpsInput["header"].keys()[0]]
+        if wpsInput["body"]:
+            complexInput["body"] = wpsInput["body"]
+        if wpsInput["bodyreference"]:
+            complexInput["bodyReference"] = wpsInput["bodyreference"]
 
     def _lineageBBoxInput(self,input,bboxInput):
         """
