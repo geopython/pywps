@@ -25,7 +25,7 @@ WPS Execute request handler
 
 from Request import Request
 import time,os,sys,tempfile,re
-from shutil import copy as COPY
+from shutil import copyfile as COPY
 from shutil import rmtree as RMTREE
 
 class Execute(Request):
@@ -453,8 +453,6 @@ class Execute(Request):
         for identifier in self.process.outputs.keys():
             templateOutput = {}
             output = self.process.outputs[identifier]
-            pr
-
 
             templateOutput["identifier"] = output.identifier
             templateOutput["title"] = output.title
@@ -511,7 +509,7 @@ class Execute(Request):
 
             # Reference
             if output.asReference:
-                self._asReferenceOutput(templateOutput, output)
+                templateOutput = self._asReferenceOutput(templateOutput, output)
             # Data
             else:
                 templateOutput["reference"] = 0
@@ -522,7 +520,7 @@ class Execute(Request):
                 elif output.type == "BoundingBoxValue":
                     templateOutput = self._bboxOutput(output,templateOutput)
 
-                templateOutputs.append(templateOutput);
+            templateOutputs.append(templateOutput);
         self.templateProcessor.set("Outputs",templateOutputs)
 
     def _literalOutput(self, output, literalOutput):
@@ -561,6 +559,7 @@ class Execute(Request):
 
     def _asReferenceOutput(self,templateOutput, output):
 
+        
         # copy the file to output directory
         if output.type == "LiteralValue":
             f = open(os.path.join(
@@ -568,16 +567,23 @@ class Execute(Request):
                                 output.identifier+"-"+self.pid),"w")
             f.write(output.value)
             f.close()
-            templateOutput["href"] = self.wps.getConfigValue("server","outputUrl")+\
-                    "/"+output.identifier+"-"+self.pid
+            templateOutput["reference"] = self.wps.getConfigValue("server","outputUrl")+\
+                    "/"+output.identifier+"-"+str(self.pid)
         else:
-            COPY(output.value, self.wps.getConfigValue("server","outputPath"))
-            templateOutput["href"] = \
-                    self.wps.getConfigValue("server","outputUrl")+"/"+output.value
-        templateOutput["reference"] = 1
+            outName = output.value
+            outSuffix = outName.split(".")[len(outName.split("."))-1]
+            outName = output.identifier+"-"+str(self.pid)+"."+outSuffix
+
+            COPY(output.value, self.wps.getConfigValue("server","outputPath")+"/"+outName)
+            templateOutput["reference"] = \
+                    self.wps.getConfigValue("server","outputUrl")+"/"+outName
         templateOutput["mimetype"] = output.format["mimeType"]
         templateOutput["schema"] = output.format["encoding"]
         templateOutput["encoding"] = output.format["schema"]
+
+        return templateOutput
+
+    # --------------------------------------------------------------------
 
     def splitThreads(self):
         """
