@@ -51,7 +51,7 @@
             </ows:Abstract>
             </TMPL_IF>
             <TMPL_IF reference>
-            <wps:Reference xlink:href="<TMPL_VAR reference>" method="<TMPL_VAR method>" mimeType="<TMPL_VAR mimetype>" encoding="<TMPL_VAR encoding>" schema="<TMPL_VAR schema>"/>
+            <wps:Reference xlink:href="<TMPL_VAR reference>" method="<TMPL_VAR method>" mimeType="<TMPL_VAR mimeType>" encoding="<TMPL_VAR encoding>" schema="<TMPL_VAR schema>"/>
                 <TMPL_IF header>
                 <wps:Header key="<TMPL_VAR key>" value="<TMPL_VAR value>" />
                 </TMPL_IF>
@@ -61,7 +61,7 @@
                 </wps:Body>
                 </TMPL_IF>
                 <TMPL_IF bodyReference>
-                <wps:BodyReference xlink:href="<TMPL_VAR bodyreference>" />
+                <wps:BodyReference xlink:href="<TMPL_VAR bodyReference>" />
                 </TMPL_IF>
             <TMPL_ELSE>
                 <TMPL_INCLUDE NAME="Execute_Data_Inputs.tmpl">
