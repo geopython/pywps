@@ -157,7 +157,7 @@ class DescribeProcess(Request):
     def literalValue(self,inoutput,processInOutput):
 
         # data types
-        dataTypeReference = self.getDataTypeReference(input)
+        dataTypeReference = self.getDataTypeReference(inoutput)
         processInOutput["dataType"] = dataTypeReference["type"]
         processInOutput["dataTypeReference"] = dataTypeReference["reference"]
         
