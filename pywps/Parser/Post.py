@@ -21,8 +21,9 @@
 import types,sys
 import xml
 from xml.dom.minidom import parseString
+from pywps.Parser.Parser import Parser
 
-class Post:
+class Post(Parser):
 
     document = None # Document Object Model
 
@@ -31,6 +32,7 @@ class Post:
     EXECUTE = "Execute"
 
     def __init__(self,wps):
+        Parser.__init__(self,wps)
         self.wps = wps
 
     def parse(self,file):
@@ -63,14 +65,15 @@ class Post:
     def findRequestType(self):
 
         firstChild = self.getFirstChildNode(self.document)
+        firstTagName = self.controll(firstChild.tagName)
 
-        if firstChild.tagName.find(self.GET_CAPABILITIES) > -1:
+        if firstTagName.find(self.GET_CAPABILITIES) > -1:
             import GetCapabilities 
             self.requestParser = GetCapabilities.Post(self.wps)
-        elif firstChild.tagName.find(self.DESCRIBE_PROCESS) > -1:
+        elif firstTagName.find(self.DESCRIBE_PROCESS) > -1:
             import DescribeProcess 
             self.requestParser = DescribeProcess.Post(self.wps)
-        elif firstChild.tagName.find(self.EXECUTE) > -1:
+        elif firstTagName.find(self.EXECUTE) > -1:
             import Execute 
             self.requestParser = Execute.Post(self.wps)
         else:

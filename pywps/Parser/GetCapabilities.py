@@ -74,7 +74,7 @@ class Post(Post):
         if len(acceptedVersionsNodes) > 0:
             for versionNode in\
                 acceptedVersionsNodes[-1].getElementsByTagNameNS(nameSpace,"Version"):
-                versions.append(versionNode.firstChild.nodeValue)
+                versions.append(self.controll(versionNode.firstChild.nodeValue))
 
         if len(versions) == 0:
             versions = [self.wps.DEFAULT_WPS_VERSION]
@@ -82,7 +82,7 @@ class Post(Post):
         self.wps.inputs["acceptversions"] = versions
 
         # language
-        language = firstChild.getAttribute("language")
+        language = self.controll(firstChild.getAttribute("language"))
         if not language:
             language = self.wps.DEFAULT_LANGUAGE
 

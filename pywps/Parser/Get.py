@@ -20,8 +20,9 @@
 
 import types,sys
 from string import split
+from pywps.Parser.Parser import Parser
 
-class Get:
+class Get(Parser):
     wps = None
     fieldStorage = None
     unparsedInputs =  {}
@@ -33,6 +34,7 @@ class Get:
     requestParser = None
 
     def __init__(self,wps):
+        Parser.__init__(self,wps)
         self.wps = wps
 
     def parse(self,queryString):
@@ -65,6 +67,7 @@ class Get:
 
         for key in self.unparsedInputs.keys():
             value = self.unparsedInputs[key]
+            value = self.controll(value)
 
             # check size
             if self.wps.maxInputLength > 0 and\
