@@ -46,12 +46,21 @@ class GetCapabilities(Request):
         #
         self.templateProcessor.set("encoding",
                                     self.wps.getConfigValue("wps","encoding"))
+        self.templateProcessor.set("lang",
+                                    self.wps.getConfigValue("wps","lang"))
         self.templateProcessor.set("servertitle",
                                     self.wps.getConfigValue("wps","title"))
         self.templateProcessor.set("serverabstract",
                                     self.wps.getConfigValue("wps","abstract"))
-        self.templateProcessor.set("version",
-                                    self.wps.getConfigValue("wps","version"))
+
+        keywordList=[]
+        for keyword in self.wps.getConfigValue("wps","keywords").split(','):
+            keywordList.append({'keyword':keyword.strip()})
+        self.templateProcessor.set("Keywords",keywordList)
+        
+        self.templateProcessor.set("Versions",
+                                    [{'version':
+                                      self.wps.getConfigValue("wps","version")}])
         self.templateProcessor.set("fees",
                                     self.wps.getConfigValue("wps","fees"))
         self.templateProcessor.set("constraints",
@@ -69,15 +78,15 @@ class GetCapabilities(Request):
         self.templateProcessor.set("providersite",
                             self.wps.getConfigValue("provider","providerSite"))
         # phone
-        if self.wps.getConfigValue("provider","voice") or \
-            self.wps.getConfigValue("provider","fascimile"):
+        if self.wps.getConfigValue("provider","phoneVoice") or \
+        self.wps.getConfigValue("provider","phoneFacsimile"):
             self.templateProcessor.set("phone", 1)
-            if self.wps.getConfigValue("provider","voicephone"):
-                self.templateProcessor.set("voicephone",
-                                    self.wps.getConfigValue("provider","voice"))
-            if self.wps.getConfigValue("provider","fascimilephone"):
-                self.templateProcessor.set("fascimilephone",
-                                    self.wps.getConfigValue("provider","fascimile"))
+            if self.wps.getConfigValue("provider","phoneVoice"):
+                self.templateProcessor.set("phonevoice",
+                                    self.wps.getConfigValue("provider","phoneVoice"))
+            if self.wps.getConfigValue("provider","phoneFacsimile"):
+                self.templateProcessor.set("phonefacsimile",
+                                    self.wps.getConfigValue("provider","phoneFacsimile"))
         else:
             self.templateProcessor.set("phone", 0)
 

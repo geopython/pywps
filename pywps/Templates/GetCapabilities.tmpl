@@ -2,18 +2,18 @@
 <wps:Capabilities service="WPS" version="1.0.0" xml:lang="<TMPL_VAR lang>" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 ..\wpsGetCapabilities_response.xsd" updateSequence="1">
 	<ows:ServiceIdentification>
 		<ows:Title><TMPL_VAR servertitle></ows:Title>
-                <TMPL_IF serverAbstract>
+                <TMPL_IF serverabstract>
 		<ows:Abstract><TMPL_VAR serverabstract></ows:Abstract>
                 </TMPL_IF>
-                <TMPL_IF keywords>
+                <TMPL_IF Keywords>
 		<ows:Keywords>
-                        <TMPL_LOOP keywords>
+                        <TMPL_LOOP Keywords>
 			<ows:Keyword><TMPL_VAR keyword></ows:Keyword>
                         </TMPL_LOOP>
 		</ows:Keywords>
                 </TMPL_IF>
 		<ows:ServiceType>WPS</ows:ServiceType>
-                <TMPL_LOOP versions>
+                <TMPL_LOOP Versions>
 		<ows:ServiceTypeVersion><TMPL_VAR version></ows:ServiceTypeVersion>
                 </TMPL_LOOP>
                 <TMPL_IF fees>
@@ -25,24 +25,24 @@
 	</ows:ServiceIdentification>
 	<ows:ServiceProvider>
 		<ows:ProviderName><TMPL_VAR providername></ows:ProviderName>
-                <TMPL_IF providerSite>
+                <TMPL_IF providersite>
 		<ows:ProviderSite xlink:href="<TMPL_VAR providersite>"/>
                 </TMPL_IF>
 		<ows:ServiceContact>
-                        <TMPL_IF individualName>
+                        <TMPL_IF individualname>
 			<ows:IndividualName><TMPL_VAR individualname></ows:IndividualName>
                         </TMPL_IF>
-                        <TMPL_IF positionName>
+                        <TMPL_IF positionname>
 			<ows:PositionName><TMPL_VAR positionname></ows:PositionName>
                         </TMPL_IF>
 			<ows:ContactInfo>
                                 <TMPL_IF phone>
 				<ows:Phone>
-                                        <TMPL_IF phoneVoice>
-					<ows:Voice><TMPL_VAR voicephone></ows:Voice>
+                                        <TMPL_IF phonevoice>
+					<ows:Voice><TMPL_VAR phonevoice></ows:Voice>
                                         </TMPL_IF>
-                                        <TMPL_IF phoneFascimile>
-					<ows:Facsimile><TMPL_VAR fascimilephone></ows:Facsimile>
+                                        <TMPL_IF phonefacsimile>
+					<ows:Facsimile><TMPL_VAR phonefacsimile></ows:Facsimile>
                                         </TMPL_IF>
 				</ows:Phone>
                                 </TMPL_IF>
