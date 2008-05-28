@@ -121,11 +121,13 @@ class GetCapabilities(Request):
            self.templateProcessor.set("address", 0)
             
         # OperationsMetadata
-        self.templateProcessor.set("url",self.wps.getConfigValue("wps","serveraddress"))
         self.templateProcessor.set("Operations",
-                                    [{"operation":"GetCapabilities"}, 
-                                     {"operation":"DescribeProcess"},
-                                     {"operation":"Execute"}])
+             [{"operation":"GetCapabilities",
+               "url":self.wps.getConfigValue("wps","serveraddress")}, 
+              {"operation":"DescribeProcess",
+               "url":self.wps.getConfigValue("wps","serveraddress")},
+              {"operation":"Execute",
+               "url":self.wps.getConfigValue("wps","serveraddress")}])
 
         # Processes
         processesData = []
