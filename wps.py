@@ -1,31 +1,31 @@
-#!/usr/bin/python 
+#!/usr/bin/env python 
 #-*- coding: utf-8 -*-
 """
-This program is simple implementation of OGS's [http://opengeospatial.org]
-Web Processing Service (OpenGIS(r) Web Processing Service - OGC 05-007r4)
-version 0.4.0 from 2005-09-16
+This program is simple implementation of OGC's [http://opengeospatial.org]
+Web Processing Service (OpenGIS(r) Web Processing Service - OGC 05-007r7)
+version 1.0.0 from 2007-06-08
 
 Target of this application is to bring functionality of GIS GRASS
 [http://grass.itc.it] to the World Wide Web - it should work like
 wrapper for modules of this GIS. Though GRASS was at the first place in the
-focuse, it is not necessery to use it's modules - you can use any program
+focus, it is not necessary to use it's modules - you can use any program
 you can script in Python or other language.
 
-This first version was written with support of Deutsche Bundesstiftung
+The first version was written with support of Deutsche Bundesstiftung
 Umwelt, Osnabrueck, Germany on the spring 2006. SVN server is hosted by
 GDF-Hannover, Hannover, Germany.
 
 For setting see comments in 'etc' directory and documentation.
 
-This program is free sotware, distributed under the terms of GNU General
-Public License as bulished by the Free Software Foundation version 2 of the
+This program is free software, distributed under the terms of GNU General
+Public License as published by the Free Software Foundation version 2 of the
 License.
 
 Enjoy and happy GISing!
 """
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
-# Lince: 
+# License: 
 # 
 # Web Processing Service implementation
 # Copyright (C) 2006 Jachym Cepicky
@@ -43,307 +43,127 @@ Enjoy and happy GISing!
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-pywpscomment = [] # Comment, which should be added to the XML
+
+# TODO:
+# document evertyghin according to
+# http://www.python.org/doc/essays/styleguide.html
+
 import pywps
-try:
-    from pywps.etc import grass as customgrass
-except ImportError:
-    pywpscomment.append("""Could not load GRASS settings file (pywps/etc/grass.py).
-    Please check if the file is created and its permissions.""")
+from pywps import Parser 
+from pywps import Exceptions
+from pywps.Exceptions import *
 
-try:
-    from pywps.etc import settings as customsettings
-except ImportError:
-    pywpscomment.append("""Could not load PyWPS settings file (pywps/etc/settings.py).
-    Please check if the file is created and its permissions.""")
+import sys, os, ConfigParser
 
-from pywps import Wps
-from pywps import processes
-from pywps.Wps import wpsexceptions
-from pywps.Wps.wpsexceptions import *
-from pywps.Wps import settings 
-from pywps.Wps import capabilities
-from pywps.Wps import describe
-from pywps.Wps import execute
-from pywps.Wps import inputs
-from pywps.Wps import debug
-
-try:
-    from pywps.processes import *
-except Exception,e :
-    raise ServerError(e)
-
-
-import string, sys, os, tempfile, glob, shutil, cgi
+__version__ = "3.0-svn"
 
 class WPS:
+
+    method  =""                      # HTTP POST or GET 
+    pidFilePrefix = "pywps-pidfile-" # pid file prefix
+    maxInputLength = 0  # maximal length of one input item
+    maxFileSize = 0 # maximal input XML or other file size
+    maxInputSize = 0 # maximal size of HTTP Get request
+    parser = None
+    config = None  # Configuration
+    workingDir = None # this working directory
+
+    exceptions = pywps.Exceptions
+
+    inputs = {} # parsed input values
+    request = None # object with getcapabilities/describeprocess/execute
+                   # class
+
+    METHOD_GET="GET"
+    METHOD_POST="POST"
+    OWS_NAMESPACE = "http://www.opengis.net/ows/1.1"
+    WPS_NAMESPACE = "http://www.opengis.net/wps/1.0.0"
+    XLINK_NAMESPACE = "http://www.w3.org/1999/xlink"
+
+    DEFAULT_WPS_VERSION = "1.0.0"
+    VERSION = "3.0-svn"
+    DEFAULT_LANGUAGE = "en"
+
     def __init__(self):
-        """
-        WPS Initialization
-        """
-        # consolidate settings - custom vs. default
-        try:
-            self.settings = settings.ConsolidateSettings(customsettings)
-        except NameError, error:
-            self.settings = settings.ConsolidateSettings(None)
-        try:
-            self.grass = settings.ConsolidateSettings(customgrass,
-                    grass=True)
-        except NameError, error:
-            self.grass = settings.ConsolidateSettings(None,grass=True)
 
-        self.inputs = inputs.Inputs()
+        # get settings
+        self.loadConfiguration()
+
+        # find out the request method
         self.method = os.getenv("REQUEST_METHOD")
+        if not self.method:  # set standard method
+            self.method = self.METHOD_GET
 
-        self.maxInputLength = 0  # maximal length of one input item
-        self.maxFileSize = 0 # maximal input XML or other file size
-        self.wpsrequest = None
-
-        self.pidFilePref = "pywps-pidfile-"
-
-        # (re) setting of variables
-        try:
-            os.setenv("PyWPS_DEBUG",self.serverSettings["debuglevel"])
-            if int(self.serverSettings["debuglevel"]) >= 3:
-                import cgitb
-                cgitb.enable()
-        except:
-            pass
-
-        if not self.method:
-            self.method = "GET"
-
-        #
-        # init, get inputs, check them
-        #
-        self._setMaxInputSize()
-
-        if self.method == "GET":
-            self._storeFromGET()
+        if self.method == self.METHOD_GET:
+            from pywps.Parser.Get import Get
+            parser = Get(self)
+            querystring = ""
+            try: 
+                querystring = os.environ["QUERY_STRING"]
+            except KeyError:
+                # if QUERY_STRING isn't found in env-dictionary, try to read
+                # query from command line:
+                if len(sys.argv)>1:  # any arguments available?
+                    querystring = sys.argv[1]
+            parser.parse(querystring)
         else:
-            self._storeFromPOST()
+            from pywps.Parser.Post import Post
+            parser = Post(self)
+            parser.parse(sys.stdin)
 
-        self._checkRequest()
+        if self.inputs:
+            self.performRequest()
 
-        #
-        # debug
-        #
-        debug.PyWPSdebug(self.inputs.values)
-
-
-    def _setMaxInputSize(self):
-        """(re)set maximal length of one input item"""
-
-        if self.method == "GET" or not self.method:
-            try:
-                self.maxInputLength = int(self.serverSettings["maxInputParamLength"])
-            except:
-                self.maxInputLength = 0
-        else:
-            try:
-                self.maxFileSize = int(self.serverSettings["maxSize"])
-            except:
-                self.maxFileSize = 0 
-        return
-
-    def _storeFromGET(self):
-        """converts input key values to lower case to avoid later
-        problems. only for GET method"""
-
-        inputValues = {}
-        
-        if self.method == "GET" or not self.method:
-            form = cgi.FieldStorage()  # the input values (GET method)
-            for key in cgi.FieldStorage().keys():
-                value = form.getvalue(key)
-                # to avoid problems with more then one inputs
-                if type(form.getvalue(key)) == type([]):
-                    value = value[-1].strip()
-                else:
-                    value = value.strip()
-
-                if len(value) > self.maxInputLength and self.maxInputLength > 0:
-                    raise FileSizeExceeded(key)
-
-                # store input into intputValues structure
-                # convert keys to lower case
-                inputValues[key.lower()] = value
-        # FIXME: should return self.inputValues
-        self.inputs.formvalsGet2dict(inputValues) 
-        
-        return
-
-    def _storeFromPOST(self):
-        """converts input key values to lower case to avoid later
-        problems. only for GET method"""
-
-        # FIXME: should return self.inputValues
-        self.inputs.formvalsPost2dict(sys.stdin,self.maxFileSize)
-
-    def _checkRequest(self):
-        """First checking of the request format"""
-
-        # service == "wps"
-        if not 'service' in self.inputs.values.keys(): 
-            raise MissingParameterValue("service")
-        elif self.inputs.values['service'].lower() != 'wps':
-            raise InvalidParameterValue('service')
-
-        # request must be set
-        if not 'request' in self.inputs.values.keys():
-            raise MissingParameterValue("request")
-        if not self.inputs.values["request"].lower() in \
-                ["getcapabilities" , "describeprocess" , "execute"]:
-                raise InvalidParameterValue("request")
-
-        # version == "0.4.0"
-        #!!! if not 'version' in self.inputs.values.keys() and \
-        #!!!     self.inputs.values['request'].lower() != "getcapabilities":
-        #!!!     raise MissingParameterValue("version")
-
-        #!!! elif self.inputs.values['request'].lower() != "getcapabilities" \
-        #!!!     and self.inputs.values['version'].lower() != '0.4.0':
-        #!!!     raise InvalidParameterValue('version')
-
-        # Controll of all 'identifier' values - if wrongprocess is
-        # set, exception, nothing otherwice
-        wrongprocess = self.inputs.controllProcesses(processes.__all__,self.inputs.values)
-        if wrongprocess:
-            if wrongprocess != "identifier":
-                raise InvalidParameterValue(wrongprocess)
-            else:
-                raise MissingParameterValue(wrongprocess)
-            return
-
-    def PerformRequest(self):
-        """Performs the request according to Request type. Resulting XML
-        will be printed"""
-
-        if self.GetRequestType() == "getcapabilities":
-            self.GetCapabilities()
-        elif self.GetRequestType() == "describeprocess":
-            self.DescribeProcess()
-        elif self.GetRequestType() == "execute":
-            self.Execute()
-
-    def GetRequestType(self):
-        """Returns request type converted to lower case"""
-        
-        return self.inputs.values["request"].lower()
-
-    def GetCapabilities(self,printres=True):
-        """Perform GetCapabilities request
-        Inputs: printres    - print resulting xml
-        """
-
-        self.wpsrequest =  capabilities.Capabilities(self.settings,processes)
-        if printres:
-            wps.PrintXmlDocument()
-
-    def DescribeProcess(self,printres=True):
-        """Perform DescribeProcess request
-        Inputs: printres    - print resulting xml
-        """
-
-        self.wpsrequest = describe.Describe(self.settings,processes,self.inputs.values)
-        if printres:
-            wps.PrintXmlDocument()
-
-    def Execute(self,printres=True):
-        """Perform Execute request
-        Inputs: printres    - print resulting xml
-        """
-
-
-        # 
-        # PID file(s) management
-        #
-
-        # Create PID file, temp directory etc.
-        # check for number of running operations
-        try:
-            nPIDFiles = len(glob.glob(
-                os.path.join(self.settings.ServerSettings['tempPath'],self.pidFilePref+"*")))
-        except (IOError, OSError), what:
-            raise ServerError("IOError,OSError: %s" % what)
-
-        try:
-            maxPIDFiles = self.settings.ServerSettings['maxOperations']
-        except KeyError:
-            maxPIDFiles = 1
-
-        # too many processes ?
-        if nPIDFiles >=  maxPIDFiles:
-            raise ServerBusy()
-        else:
-            PIDFile = tempfile.mkstemp(prefix=self.pidFilePref)
-            pass
-
-        #
-        # Executing process
-        #
-        try:
-            process = eval("processes.%s.Process()" % (self.inputs.values['identifier'][0]))
-            # all grass directories existing?
-            settings.GRASSSettings(process)
-            # execute
-            self.wpsrequest = execute.Execute(self.settings,self.grass.grassenv,
-                                              process,self.inputs.values,
-                                              self.method)
-        except Exception,e :
-            os.remove(PIDFile[1])
-            raise ServerError(e)
-
-        # 
-        # Asynchron management
-        #
-
-        # running asynchronously, print to file
-        if not self.wpsrequest.pid:
-            file = open(os.path.join(
-                    self.settings.ServerSettings['outputPath'],
-                    self.wpsrequest.executeresponseXmlName),"w")
-            sys.stdout = file
-        else:
-            sys.stdout = sys.__stdout__
-
-        #----------------------
-        if printres:
-            self.PrintXmlDocument()
-        #----------------------
-
-        # clean the PID file        
-        if not (self.wpsrequest.status.lower() == "processaccepted" or \
-                self.wpsrequest.status.lower() == "processstarted"):
-                os.remove(PIDFile[1])
-
-
-        # only, if this is child process:
-        if not self.wpsrequest.pid:
-            file.close()
-
-
-    def PrintXmlDocument(self):
-        if self.wpsrequest.document: #FIXME: document should be returned directly
-            global pywpscomment
-            for com in pywpscomment:
-                pywpscommentNode = self.wpsrequest.document.createComment(com)
-                self.wpsrequest.document.importNode(pywpscommentNode, 0)
-            if sys.stdout == sys.__stdout__:
+        if self.request.response:
+            # print only to standard out
+            if self.request.statusFiles == sys.stdout or\
+               sys.stdout in self.request.statusFiles:
                 print "Content-type: text/xml\n"
-            print self.wpsrequest.document.toxml(encoding=self.settings.WPS["encoding"])
-        return
-        
-if __name__ == "__main__":
-    """
-    This main function controlls input variables and calls either
-    GetCapabilities, DescribeProcess or Execute functions.
+                self.request.printResponse(self.request.statusFiles)
 
-    If Execute request is called, the temporary directory will be created
-    and everything should happen in this directory.
-    """
-    # import pycallgraph
-    # pycallgraph.start_trace()
+        return
+    
+    def loadConfiguration(self):
+
+        cfgfiles = None
+
+        if sys.platform == 'win32':
+            self.workingDir = os.path.abspath(os.path.join(os.getcwd(), os.path.dirname(sys.argv[0])))
+            cfgfiles = (os.path.join(workingDir,"pywps","default.cfg"),
+                       os.path.join(workingDir, "pywps","etc","pywps.cfg"))
+        else:
+            cfgfiles = (os.path.join("pywps","default.cfg"),os.path.join("pywps","etc", "pywps.cfg"), "/etc/pywps.cfg")
+
+        self.config = ConfigParser.ConfigParser()
+        self.config.read(cfgfiles)
+
+    def performRequest(self):
+        try:
+            if self.inputs["request"]  == "getcapabilities":
+                from pywps.WPS.GetCapabilities import GetCapabilities
+                self.request = GetCapabilities(self)
+            elif self.inputs["request"]  == "describeprocess":
+                from pywps.WPS.DescribeProcess import DescribeProcess
+                self.request = DescribeProcess(self)
+            elif self.inputs["request"]  == "execute":
+                from pywps.WPS.Execute import Execute
+                self.request = Execute(self)
+            else:
+                raise self.exceptions.InvalidParameterValue(
+                        "request: "+self.inputs["request"])
+        except KeyError,e:
+            raise self.exceptions.MissingParameterValue("request")
+    
+    def getConfigValue(self,*args):
+        value = self.config.get(*args)
+        if value.lower() == "false":
+            value = False
+        elif value.lower() == "true" :
+            value = True
+        return value
+
+
+
+
+if __name__ == "__main__":
     wps = WPS()
-    wps.PerformRequest()
-    # pycallgraph.make_dot_graph('graf-execute.png')
