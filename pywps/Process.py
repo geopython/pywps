@@ -20,8 +20,8 @@
 
 
 import subprocess
-import Wps.wpsexceptions
-from Wps.wpsexceptions import *
+import Exceptions
+from Exceptions import *
 import time
 import InAndOutputs
 import types

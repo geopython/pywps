@@ -1,1 +1,1 @@
-__all__ = [ "Parser","Wps", "etc", "processes","debug","Process","Grass"]
+__all__ = [ "Parser","etc", "processes", "Exceptions", "debug","Process","Grass"]
