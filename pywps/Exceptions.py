@@ -85,6 +85,14 @@ class NoApplicableCode(WPSException):
         self.ExceptionReport.appendChild(self.document.createComment(
             repr(value)))
 
+class VersionNegotiationFailed(WPSException):
+    def __init__(self,value=None):
+        self.code = "VersionNegotiationFailed"
+        self.locator = None
+        self.make_xml()
+        self.ExceptionReport.appendChild(self.document.createComment(
+            repr(value)))
+
 class ServerBusy(WPSException):
     def __init__(self,value=None):
         self.code = "ServerBusy"

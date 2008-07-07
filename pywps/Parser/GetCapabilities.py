@@ -24,6 +24,7 @@ This module parses OGC Web Processing Service (WPS) GetCapabilities request.
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import xml.dom.minidom
+import pywps.Exceptions as WPSExceptions
 
 from pywps.Parser.Post import Post
 
@@ -114,11 +115,11 @@ class Get:
         # Mandatory options
         #
 
-        # service (is allready controled)
+        # service (is already controlled)
         if self.unparsedInputs["service"].lower() == "wps":
             self.wps.inputs["service"] = self.unparsedInputs["service"]
 
-        # Request (is allready controled)
+        # Request (is already controlled)
         if self.unparsedInputs["request"].lower() == "getcapabilities":
             self.wps.inputs["request"] = self.unparsedInputs["request"].lower()
 
@@ -132,6 +133,8 @@ class Get:
                                self.unparsedInputs["acceptversions"].split(",")
         except KeyError,e:
             self.wps.inputs["acceptversions"] = [self.wps.DEFAULT_WPS_VERSION]
+        if self.wps.DEFAULT_WPS_VERSION not in self.wps.inputs["acceptversions"]:
+            raise WPSExceptions.VersionNegotiationFailed
 
         # Language
         try:
