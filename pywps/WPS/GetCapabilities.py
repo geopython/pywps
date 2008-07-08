@@ -145,6 +145,7 @@ class GetCapabilities(Request):
 
                 processData["processok"] = 1
                 processData["identifier"] = process.identifier
+                processData["processversion"] = process.version
                 processData["title"] = process.title
                 processData["abstract"] = process.abstract
                 processData["profile"] = process.profile
