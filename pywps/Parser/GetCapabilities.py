@@ -134,7 +134,9 @@ class Get:
         except KeyError,e:
             self.wps.inputs["acceptversions"] = [self.wps.DEFAULT_WPS_VERSION]
         if self.wps.DEFAULT_WPS_VERSION not in self.wps.inputs["acceptversions"]:
-            raise WPSExceptions.VersionNegotiationFailed
+            raise WPSExceptions.VersionNegotiationFailed(
+                                "There's no version in AcceptVersions parameter " +
+                                "that will be supported by this server.")
 
         # Language
         try:

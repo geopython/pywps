@@ -105,7 +105,10 @@ class WPS:
                 # query from command line:
                 if len(sys.argv)>1:  # any arguments available?
                     querystring = sys.argv[1]
-            parser.parse(querystring)
+            if querystring:
+                parser.parse(querystring)
+            else:
+                raise Exceptions.NoApplicableCode("No query string found.")
         else:
             from pywps.Parser.Post import Post
             parser = Post(self)

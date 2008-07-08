@@ -47,7 +47,6 @@ class WPSException(Exception):
 
         if self.locator:
             self.Exception.setAttribute("locator",self.locator)
-            self.ExceptionReport.appendChild(self.Exception)
 
         self.ExceptionReport.appendChild(self.Exception)
 
@@ -57,13 +56,15 @@ class WPSException(Exception):
         str = "Content-type: text/xml\n\n"
         str += self.document.toprettyxml(indent='\t', newl='\n', encoding="utf-8")
         sys.stderr.write("PyWPS %s: %s\n" % (self.code, self.locator))
+        print str
 
+        # *** omitting the following hack for testing purposes ***
         # FIXME: To avoid multiple printing, this hack works
         #        however, I do not know, why it is printed two times :-(
-        global called
-        if not called:
-            print str
-        called += 1
+        #global called
+        #if not called:
+        #print str
+        #called += 1
 
 class MissingParameterValue(WPSException):
     def __init__(self, value):
@@ -82,16 +83,20 @@ class NoApplicableCode(WPSException):
         self.code = "NoApplicableCode"
         self.locator = None
         self.make_xml()
-        self.ExceptionReport.appendChild(self.document.createComment(
-            repr(value)))
+        if value:
+            self.ExceptionText = self.document.createElement("ExceptionText")
+            self.ExceptionText.appendChild(self.document.createTextNode(value))
+            self.Exception.appendChild(self.ExceptionText)
 
 class VersionNegotiationFailed(WPSException):
     def __init__(self,value=None):
         self.code = "VersionNegotiationFailed"
         self.locator = None
         self.make_xml()
-        self.ExceptionReport.appendChild(self.document.createComment(
-            repr(value)))
+        if value:
+            self.ExceptionText = self.document.createElement("ExceptionText")
+            self.ExceptionText.appendChild(self.document.createTextNode(value))
+            self.Exception.appendChild(self.ExceptionText)
 
 class ServerBusy(WPSException):
     def __init__(self,value=None):
@@ -114,4 +119,6 @@ class ServerError(WPSException):
         except:
             self.locator = None
         self.make_xml()
-        self.ExceptionReport.appendChild(self.document.createComment("General server error"))
+        self.ExceptionText = self.document.createElement("ExceptionText")
+        self.ExceptionText.appendChild(self.document.createTextNode("General server error"))
+        self.Exception.appendChild(self.ExceptionText)
