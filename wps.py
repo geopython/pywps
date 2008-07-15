@@ -51,9 +51,12 @@ Enjoy and happy GISing!
 import pywps
 from pywps import Parser 
 from pywps import Exceptions
+from pywps import WPS
 from pywps.Exceptions import *
 
 import sys, os, ConfigParser
+
+#sys.path.append(pywps.__path__[0])
 
 __version__ = "3.0-svn"
 
@@ -135,7 +138,8 @@ class WPS:
             cfgfiles = (os.path.join(workingDir,"pywps","default.cfg"),
                        os.path.join(workingDir, "pywps","etc","pywps.cfg"))
         else:
-            cfgfiles = (os.path.join("pywps","default.cfg"),os.path.join("pywps","etc", "pywps.cfg"), "/etc/pywps.cfg")
+            cfgfiles = (os.path.join(pywps.__path__[0],"default.cfg"),
+                        os.path.join(pywps.__path__[0],"etc", "pywps.cfg"), "/etc/pywps.cfg")
 
         self.config = ConfigParser.ConfigParser()
         self.config.read(cfgfiles)
