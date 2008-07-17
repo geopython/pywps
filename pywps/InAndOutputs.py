@@ -121,7 +121,6 @@ class ComplexInput(Input):
             self.maxFileSize = None
 
 
-
         if type(formats) == types.StringType:
             formats = [{"mimeType":formats,"encoding":None,"schema":None}]
         elif type(formats) == types.DictType:
@@ -139,11 +138,16 @@ class ComplexInput(Input):
 
     def setValue(self, input):
         
+        # if HTTP GET was performed, the type does not have to be set
+        if not input.has_key("type") and\
+                input["value"].find("http://") == 0:
+            input["type"] = "ComplexValueReference"
+
+        # download data
         if input["type"] == "ComplexValueReference":
             self.downloadData(input["value"])
         else:
             self.storeData(input["value"])
-
         return
 
     def storeData(self,data):
@@ -184,7 +188,9 @@ class ComplexInput(Input):
 
             # TOO BIG! STOP THIS
             if size > self.maxFileSize: 
-                self.onProblem("FileSizeExceeded")
+                self.onProblem("FileSizeExceeded","Maximum file size is "+
+                        str(self.maxFileSize/1024/1024)+" MB for input "+
+                        url)
 
         fout.close()
 

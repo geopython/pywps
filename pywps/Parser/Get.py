@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import types,sys
+import types
 from string import split
 from pywps.Parser.Parser import Parser
 
@@ -67,7 +67,7 @@ class Get(Parser):
 
         for key in self.unparsedInputs.keys():
             value = self.unparsedInputs[key]
-            value = self.controll(value)
+            value = self.control(value)
 
             # check size
             if self.wps.maxInputLength > 0 and\

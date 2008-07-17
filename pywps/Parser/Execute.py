@@ -542,5 +542,4 @@ class Get:
                 attributeKey, attributeValue = attribute.split("=")
                 parsedDataInputs[key][attributeKey] =\
                                                             attributeValue
-
         return parsedDataInputs
