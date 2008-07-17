@@ -664,6 +664,8 @@ class Execute(Request):
         serveraddress = serveraddress.replace("<", "&lt;")
         serveraddress = serveraddress.replace(">", "&gt;")
 
+        import sys
+        print >>sys.stderr, serveraddress
         return serveraddress
 
     def onStatusChanged(self):
