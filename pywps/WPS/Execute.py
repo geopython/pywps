@@ -658,7 +658,13 @@ class Execute(Request):
             else:
                 serveraddress += "?"
 
-        return serveraddress + "service=WPS&request=GetCapabilities&version="+self.wps.DEFAULT_WPS_VERSION
+        serveraddress += "service=WPS&request=GetCapabilities&version="+self.wps.DEFAULT_WPS_VERSION
+
+        serveraddress = serveraddress.replace("&", "&amp;") # Must be done first!
+        serveraddress = serveraddress.replace("<", "&lt;")
+        serveraddress = serveraddress.replace(">", "&gt;")
+
+        return serveraddress
 
     def onStatusChanged(self):
         """
