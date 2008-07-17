@@ -67,7 +67,6 @@ class Get(Parser):
 
         for key in self.unparsedInputs.keys():
             value = self.unparsedInputs[key]
-            value = self.control(value)
 
             # check size
             if self.wps.maxInputLength > 0 and\

@@ -19,16 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 class Parser:
-    #restrictedCharacters = ['\\',"#",";", "&","!"]
-    # we need ";" for HTTP GET
-    # FIXME
-    restrictedCharacters = ['\\',"#", "&","!"]
 
     def __init__(self,wps):
         self.wps = wps
 
-    def control(self,string):
-        for char in self.restrictedCharacters:
-            if string.find(char) > -1:
-                raise self.wps.exceptions.InvalidParameterValue(string)
-        return string

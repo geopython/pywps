@@ -50,6 +50,7 @@ class LiteralInput(Input):
         
         self.dataType = dataType
         self.uoms = uoms
+        self.restrictedCharacters = ['\\',"#",";", "&","!"]
         if type(values) == types.StringType:
             self.values = (values)
         self.default = default
@@ -76,8 +77,12 @@ class LiteralInput(Input):
         Control input value
         """
 
-        # type first
+        # ugly characters
+        for char in self.restrictedCharacters:
+            if value.find(char) > -1:
+                raise self.wps.exceptions.InvalidParameterValue(value)
 
+        # type 
         try:
             if self.dataType == types.FloatType:
                 value = float(value)
