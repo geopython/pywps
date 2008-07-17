@@ -213,7 +213,6 @@ class Execute(Request):
         self.process.wps = self.wps
         self.process.status.onStatusChanged = self.onStatusChanged
         self.process.debug = self.wps.getConfigValue("server","debug")
-        self.process.lang.setCode(self.wps.inputs["language"])
 
     def consolidateInputs(self):
         """
