@@ -111,7 +111,7 @@ class LiteralInput(Input):
 class ComplexInput(Input):
     def __init__(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=1,maxOccurs=1,
-                maxmegabites=0.1,formats=[{"mimeType":"text/xml"}]):
+                maxmegabites=5,formats=[{"mimeType":"text/xml"}]):
         Input.__init__(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=minOccurs,maxOccurs=maxOccurs,type="ComplexValue")
         
@@ -153,6 +153,7 @@ class ComplexInput(Input):
     def storeData(self,data):
         pass
 
+
     def downloadData(self, url):
         import urllib, tempfile
         from os import curdir
@@ -191,7 +192,6 @@ class ComplexInput(Input):
                 self.onProblem("FileSizeExceeded","Maximum file size is "+
                         str(self.maxFileSize/1024/1024)+" MB for input "+
                         url)
-
         fout.close()
 
         self.value = outputName

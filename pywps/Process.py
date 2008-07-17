@@ -127,7 +127,7 @@ class WPSProcess:
 
     def addComplexInput(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=1,maxOccurs=1,
-                formats=[{"mimeType":"text/xml"}],maxmegabites=0.1):
+                formats=[{"mimeType":"text/xml"}],maxmegabites=5):
 
         self.inputs[identifier] = InAndOutputs.ComplexInput(identifier=identifier,
                 title=title,abstract=abstract,
