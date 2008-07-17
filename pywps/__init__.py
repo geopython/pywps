@@ -1,1 +1,1 @@
-__all__ = [ "Parser","processes", "Exceptions", "WPS", "Templates"]
+__all__ = [ "Parser","processes", "Exceptions", "WPS", "Templates", "Lang"]

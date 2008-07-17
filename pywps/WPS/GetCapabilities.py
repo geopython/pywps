@@ -161,7 +161,12 @@ class GetCapabilities(Request):
 
 
         # Language
-        self.templateProcessor.set("language",self.wps.getConfigValue("wps","lang"))
+        self.templateProcessor.set("defaultlanguage",
+                    self.wps.getConfigValue("wps","lang").split(",")[0])
+        languages = []
+        for lang in self.wps.getConfigValue("wps","lang").split(","):
+            languages.append({"language":lang})
+        self.templateProcessor.set("Languages",languages)
 
         self.response = self.templateProcessor.process(self.template)
         return

@@ -118,6 +118,9 @@ class WPS:
             parser.parse(sys.stdin)
 
         if self.inputs:
+            # HACK - wouldn't there be some better way, that to use the
+            # environment variable ?
+            os.environ["PYWPS_LANGUAGE"] = self.inputs["language"]
             self.performRequest()
 
         if self.request.response:

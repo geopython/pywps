@@ -19,11 +19,13 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 
-import subprocess
 import Exceptions
 from Exceptions import *
-import time
 import InAndOutputs
+import Lang
+
+import subprocess
+import time
 import types
 
 class Status:
@@ -75,7 +77,7 @@ class Status:
 class WPSProcess:
     """
     """
-    def __init__(self, identifier, title, abstract=None,
+    def __init__(self, identifier, title = None, abstract=None,
             metadata=[],profile=[], version=None,
             statusSupported=True, storeSupported=False, grassLocation=None):
 
@@ -100,6 +102,31 @@ class WPSProcess:
         self.status = Status()
         self.inputs = {}
         self.outputs = {}
+
+        self.lang = Lang.Lang()
+
+        self.grassLocation = grassLocation
+
+    def initProcess(self, title = None, abstract=None,
+            metadata=[],profile=[], version=None,
+            statusSupported=True, storeSupported=False, grassLocation=None):
+        """
+        Can be used for later process re-initialization
+        """
+
+        self.title = title
+        self.abstract = abstract
+        self.metadata = metadata
+        self.profile = profile
+        self.version = version
+        if type(storeSupported) == type(""):
+            if storeSupported.find("t") == 0 or\
+                storeSupported.find("T") == 0:
+                storeSupported = True
+            else:
+                storeSupported = False
+        self.storeSupported = storeSupported
+        self.statusSupported = statusSupported
 
         self.grassLocation = grassLocation
 
@@ -232,3 +259,7 @@ class WPSProcess:
             return self.outputs[identifier].setValue(value)
         except:
             return None
+
+    def i18n(self,key):
+        return self.lang.get(key)
+
