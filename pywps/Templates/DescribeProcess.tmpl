@@ -3,7 +3,7 @@
 <wps:ProcessDescriptions xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd" service="WPS" version="1.0.0" xml:lang="<TMPL_VAR lang>">
     <TMPL_LOOP Processes>
     <TMPL_IF processok>
-    <wps:ProcessDescription wps:processVersion="<TMPL_VAR version>" storeSupported="<TMPL_VAR store>" statusSupported="<TMPL_VAR status>">
+    <ProcessDescription wps:processVersion="<TMPL_VAR version>" storeSupported="<TMPL_VAR store>" statusSupported="<TMPL_VAR status>">
         <ows:Identifier><TMPL_VAR identifier></ows:Identifier>
         <ows:Title><TMPL_VAR title></ows:Title>
         <TMPL_IF abstract>
@@ -19,62 +19,62 @@
         <wps:WSDL xlink:href="<TMPL_VAR wsdl>"/>
         </TMPL_IF>
         <TMPL_IF datainputslen>
-        <wps:DataInputs>
+        <DataInputs>
             <TMPL_LOOP Datainputs>
-            <wps:Input minOccurs="<TMPL_VAR minoccurs>" maxOccurs="<TMPL_VAR maxoccurs>">
+            <Input minOccurs="<TMPL_VAR minoccurs>" maxOccurs="<TMPL_VAR maxoccurs>">
                 <ows:Identifier><TMPL_VAR identifier></ows:Identifier>
                 <ows:Title><TMPL_VAR title></ows:Title>
                 <TMPL_IF abstract>
                 <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
                 </TMPL_IF>
                 <TMPL_IF complexvalue>
-                <wps:ComplexData>
+                <ComplexData>
                     <TMPL_INCLUDE NAME="DescribeProcess_ComplexValue.tmpl">
-                </wps:ComplexData>
+                </ComplexData>
                 </TMPL_IF>
                 <TMPL_IF literalvalue>
-                <wps:LiteralData>
+                <LiteralData>
                     <TMPL_INCLUDE NAME="DescribeProcess_LiteralValue.tmpl">
-                </wps:LiteralData>
+                </LiteralData>
                 </TMPL_IF>
                 <TMPL_IF boundingboxvalue>
-                <wps:BoundingBoxData>
+                <BoundingBoxData>
                     <TMPL_INCLUDE NAME="DescribeProcess_BoundingBoxValue.tmpl">
-                </wps:BoundingBoxData>
+                </BoundingBoxData>
                 </TMPL_IF>
-            </wps:Input>
+            </Input>
             </TMPL_LOOP>
-        </wps:DataInputs>
+        </DataInputs>
         </TMPL_IF>
         <TMPL_IF dataoutputslen>
-        <wps:ProcessOutputs>
+        <ProcessOutputs>
             <TMPL_LOOP Dataoutputs>
-            <wps:Output>
+            <Output>
                 <ows:Identifier><TMPL_VAR identifier></ows:Identifier>
                 <ows:Title><TMPL_VAR title></ows:Title>
                 <TMPL_IF abstract>
                 <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
                 </TMPL_IF>
                 <TMPL_IF complexvalue>
-                <wps:ComplexOutput>
+                <ComplexOutput>
                     <TMPL_INCLUDE NAME="DescribeProcess_ComplexValue.tmpl">
-                </wps:ComplexOutput>
+                </ComplexOutput>
                 </TMPL_IF>
                 <TMPL_IF literalvalue>
-                <wps:LiteralOutput>
+                <LiteralOutput>
                     <TMPL_INCLUDE NAME="DescribeProcess_LiteralValue.tmpl">
-                </wps:LiteralOutput>
+                </LiteralOutput>
                 </TMPL_IF>
                 <TMPL_IF boundingboxvalue>
-                <wps:BoundingBoxOutput>
+                <BoundingBoxOutput>
                     <TMPL_INCLUDE NAME="DescribeProcess_BoundingBoxValue.tmpl">
-                </wps:BoundingBoxOutput>
+                </BoundingBoxOutput>
                 </TMPL_IF>
-            </wps:Output>
+            </Output>
             </TMPL_LOOP>
-        </wps:ProcessOutputs>
+        </ProcessOutputs>
         </TMPL_IF>
-    </wps:ProcessDescription>
+    </ProcessDescription>
     <TMPL_ELSE> 
     <!-- Process <TMPL_VAR process> failed: <TMPL_VAR exception> -->
     </TMPL_IF>

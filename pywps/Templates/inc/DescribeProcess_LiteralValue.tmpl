@@ -2,17 +2,17 @@
                     <ows:DataType ows:reference="<TMPL_VAR dataTypeReference>"><TMPL_VAR dataType></ows:DataType>
                     </TMPL_IF>
                     <TMPL_IF UOM>
-                    <wps:UOMs>
-                        <wps:Default>
+                    <UOMs>
+                        <Default>
                             <ows:UOM><TMPL_VAR defaultUOM></ows:UOM>
-                        </wps:Default>
-                        <wps:Supported>
+                        </Default>
+                        <Supported>
                             <TMPL_LOOP supportedUOMS>
                             <ows:UOM><TMPL_VAR uom></ows:UOM>
                             </TMPL_LOOP>
                             <ows:UOM />
-                        </wps:Supported>
-                    </wps:UOMs>
+                        </Supported>
+                    </UOMs>
                     </TMPL_IF>
                     <TMPL_IF allowedValueslen>
                     <ows:AllowedValues>
@@ -36,5 +36,5 @@
                     <ows:AnyValue />
                     </TMPL_IF>
                     <TMPL_IF valueReferencelen>
-                    <wps:ValuesReference reference="<TMPL_VAR reference>" valuesForm="<TMPL_VAR vform>"/>
+                    <ValuesReference reference="<TMPL_VAR reference>" valuesForm="<TMPL_VAR vform>"/>
                     </TMPL_IF>
