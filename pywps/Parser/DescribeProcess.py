@@ -56,7 +56,6 @@ class Post(Post):
 
         #
         # Mandatory options
-        #
         
         # service
         self.wps.inputs["service"] = "wps"
@@ -77,12 +76,11 @@ class Post(Post):
 
         #
         # Optional options
-        #
             
         # language
         language = firstChild.getAttribute("language")
         if not language:
-            language = self.wps.DEFAULT_LANGUAGE
+            language = self.wps.defaultLanguage
 
         self.wps.inputs["language"] = language
 
@@ -106,11 +104,12 @@ class Get:
         self.wps = wps
 
     def parse(self,unparsedInputs):
+        """ Parse given raw inputs"""
+
         self.unparsedInputs = unparsedInputs
 
         #
         # Mandatory options
-        #
 
         # service (is allready controled)
         if self.unparsedInputs["service"].lower() == "wps":
@@ -128,12 +127,11 @@ class Get:
 
         # 
         # Optional options
-        #
 
         # Language
         try:
             self.wps.inputs["language"] =\
                                     self.unparsedInputs["language"].lower()
         except KeyError,e:
-            self.wps.inputs["language"] = self.wps.DEFAULT_LANGUAGE
+            self.wps.inputs["language"] = self.wps.defaultLanguage
 

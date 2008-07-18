@@ -29,8 +29,7 @@ import pywps.Exceptions as WPSExceptions
 from pywps.Parser.Post import Post
 
 class Post(Post):
-    """
-    Parses input request obtained via HTTP POST encoding - should be XML
+    """ Parses input request obtained via HTTP POST encoding - should be XML
     file.
     """
     wps = None # main WPS instance
@@ -46,6 +45,7 @@ class Post(Post):
         self.wps = wps
 
     def parse(self,document):
+        """ Parse the requesed XML document"""
         self.document = document  # input DOM
 
         versions = []   # accepted versions
@@ -57,7 +57,6 @@ class Post(Post):
 
         #
         # Mandatory options
-        #
         
         # service
         self.wps.inputs["service"] = "wps"
@@ -67,7 +66,6 @@ class Post(Post):
 
         #
         # Optional options
-        #
             
         # acceptVersions
         acceptedVersionsNodes = self.document.getElementsByTagNameNS(
@@ -85,16 +83,14 @@ class Post(Post):
         # language
         language = self.controll(firstChild.getAttribute("language"))
         if not language:
-            language = self.wps.DEFAULT_LANGUAGE
+            language = self.wps.defaultLanguage
 
         self.wps.inputs["language"] = language
 
         return
 
 class Get:
-    """
-    Parses input request obtained via HTTP GET encoding.
-    """
+    """ Parses input request obtained via HTTP GET encoding.  """
 
     wps = None  # main WPS instance
     unparsedInputs = {} # input arguments
@@ -109,11 +105,12 @@ class Get:
         self.wps = wps
 
     def parse(self,unparsedInputs):
+        """ Parse rawly parsed inputs """
+        
         self.unparsedInputs = unparsedInputs
 
         #
         # Mandatory options
-        #
 
         # service (is already controlled)
         if self.unparsedInputs["service"].lower() == "wps":
@@ -125,7 +122,6 @@ class Get:
 
         # 
         # Optional options
-        #
 
         # AcceptVersions
         try:
@@ -143,5 +139,5 @@ class Get:
             self.wps.inputs["language"] =\
                                     self.unparsedInputs["language"].lower()
         except KeyError,e:
-            self.wps.inputs["language"] = self.wps.DEFAULT_LANGUAGE
+            self.wps.inputs["language"] = self.wps.defaultLanguage
         
