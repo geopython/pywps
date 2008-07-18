@@ -30,9 +30,9 @@ License.
 
 Enjoy and happy GISing!
 
-$Author:$
-$Id:$
-$Rev:$
+$Author$
+$Id$
+$Rev$
 
 """
 __version__ = "3.0-svn"
