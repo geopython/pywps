@@ -30,10 +30,7 @@ License.
 
 Enjoy and happy GISing!
 
-$Author$
 $Id$
-$Rev$
-
 """
 __version__ = "3.0-svn"
 
@@ -86,6 +83,7 @@ class WPS:
     inputs = {} # parsed input values
     request = None # object with getcapabilities/describeprocess/execute
                    # class
+    defaultLanguage = "eng"
 
     # global variables
     METHOD_GET="GET"
@@ -136,6 +134,7 @@ class WPS:
 
         # inputs parsed, perform request
         if self.inputs:
+            self.defaultLanguage = self.getConfigValue("wps","lang").split(",")[0]
             # HACK - wouldn't there be some better way, that to use the
             # environment variable ?
             os.environ["PYWPS_LANGUAGE"] = self.inputs["language"]
