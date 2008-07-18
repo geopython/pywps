@@ -29,10 +29,8 @@ from pywps.Parser.Post import Post
 import string,re
 
 class Post(Post):
-    """
-    Parses input request obtained via HTTP POST encoding - should be XML
-    file.
-    """
+    """ HTTP POST XML request encoding parser.  """
+
     wps = None # main WPS instance
     document = None # input DOM object
     inputs = {} # resulting parsed inputs
@@ -40,21 +38,18 @@ class Post(Post):
     owsNameSpace = None # OWS namespace
     xlinkNameSpace = None # OWS namespace
 
-
     def __init__(self,wps):
-        """
-        Arguments:
-           self
-           wps   - parent WPS instance
-        """
+        """ Constructor """
         self.wps = wps
 
     def parse(self,document):
+        """ Parse given XML document """
         self.document = document  # input DOM
 
-        firstChild = self.getFirstChildNode(self.document)
-        self.nameSpace = firstChild.namespaceURI
-        self.owsNameSpace = self.wps.OWS_NAMESPACE
+        firstChild = self.getFirstChildNode(self.document)  # no comments or
+                                                            # white spaces
+        self.nameSpace = firstChild.namespaceURI    # document namespace
+        self.owsNameSpace = self.wps.OWS_NAMESPACE  
         self.xlinkNameSpace = self.wps.XLINK_NAMESPACE
         language  = None
         identifiers = []
@@ -90,7 +85,7 @@ class Post(Post):
         # language
         language = firstChild.getAttribute("language")
         if not language:
-            language = self.wps.DEFAULT_LANGUAGE
+            language = self.wps.defaultLanguage
 
         self.wps.inputs["language"] = language
 
@@ -114,6 +109,8 @@ class Post(Post):
 
 
     def parseResponseForm(self,responseFormNode):
+        """ Parse requested response form node """
+        
         form = {}
         form["responsedocument"] = {}
         form["rawdataoutput"] = {}
@@ -203,6 +200,7 @@ class Post(Post):
         return form
 
     def parseDataInputs(self,inputsNode):
+        """ Parse intput data from given node """
 
         parsedDataInputs = {}
         
@@ -231,7 +229,7 @@ class Post(Post):
                 dataTypeNode = inputNode.getElementsByTagNameNS(
                                                 self.nameSpace,"Data")[0]
                 parsedDataInputs[identifier] =\
-                            self.parseDataDataInput(dataTypeNode)
+                            self.parseDataInput(dataTypeNode)
 
             try:
                 parsedDataInputs[identifier]
@@ -241,6 +239,7 @@ class Post(Post):
         return parsedDataInputs
 
     def parseReferenceDataInput(self,dataTypeNode):
+        """ Parse given complex value reference node """
         
         attributes = {}
 
@@ -302,6 +301,8 @@ class Post(Post):
         return attributes
 
     def parseHeaderDataInput(self,headerNode):
+        """ Parse hearder node """
+
         header = {}
 
         if headerNode:
@@ -313,7 +314,9 @@ class Post(Post):
 
         return header
 
-    def parseDataDataInput(self,dataTypeNode):
+    def parseDataInput(self,dataTypeNode):
+        """Parse attributes of given data type node """
+
         attributes = None
 
         # complexData
@@ -329,7 +332,7 @@ class Post(Post):
             attributes = self.parseLiteralData(
                                 dataTypeNode.getElementsByTagNameNS(
                                            self.nameSpace,"LiteralData")[0])
-        # literalData
+        # bboxData
         elif len(dataTypeNode.getElementsByTagNameNS(
                                     self.nameSpace,"BoundingBoxData")) > 0:
             attributes = self.parseBBoxData(
@@ -339,10 +342,11 @@ class Post(Post):
         # if attributes are still None, exception will 
         # be called in parent method
 
-
         return attributes
 
     def parseComplexData(self,complexDataNode):
+        """Parse complex data node"""
+
         attributes = {}
         attributes["mimetype"] = complexDataNode.getAttributeNS(
                                         "*","mimeType")
@@ -365,6 +369,8 @@ class Post(Post):
         return attributes
     
     def parseLiteralData(self,literalDataNode):
+        """Parse literal data node"""
+
         attributes = {}
         attributes["dataType"] = literalDataNode.getAttributeNS(
                                         "*","dataType")
@@ -374,6 +380,8 @@ class Post(Post):
         return attributes
 
     def parseBBoxData(self,bboxDataNode):
+        """Parse bbox data node"""
+
         attributes = {}
         attributes["value"] = []
         attributes["crs"] = bboxDataNode.getAttributeNS(self.owsNameSpace,
@@ -412,6 +420,8 @@ class Get:
         self.wps = wps
 
     def parse(self,unparsedInputs):
+        """ Parse given inputs """
+
         self.unparsedInputs = unparsedInputs
 
         #
@@ -441,8 +451,7 @@ class Get:
             self.wps.inputs["language"] =\
                                     self.unparsedInputs["language"].lower()
         except KeyError,e:
-            self.wps.inputs["language"] = self.wps.DEFAULT_LANGUAGE
-
+            self.wps.inputs["language"] = self.wps.defaultLanguage
 
         # dataInputs
         try:
@@ -495,7 +504,6 @@ class Get:
             self.wps.inputs["responseform"]["responsedocument"]["lineage"]=\
                                                                       False
 
-        # status
         try:
             if self.unparsedInputs["status"].lower() == "true":
                 self.wps.inputs["responseform"]["responsedocument"]["status"]=\
@@ -510,14 +518,18 @@ class Get:
 
 
     def parseDataInputs(self,dataInputs):
-        """
-        See OGC WPS 1.0.0,  05-007, page 38
+        """Parse DataInputs parameter
+
+        This is described in OGC WPS 1.0.0,  05-007, page 38 
+        
         """
 
         parsedDataInputs = {}
 
+        # Parameters are separated by ";"
         for dataInput in dataInputs.split(";"):
             try:
+                # key is separated by "=" from value
                 key,value = string.split(dataInput,"=",maxsplit=1)
             except ValueError,e:
                 key = dataInput
@@ -526,7 +538,10 @@ class Get:
             if not key and not value:
                 continue
 
+            # initial value
             parsedDataInputs[key] = {"value":None}
+            
+            # aditional input attributes are separated by "@"
             attributes = []
             if value.find("@") > 0:
                 parsedDataInputs[key]["value"]=value.split("@")[0]
@@ -538,6 +553,7 @@ class Get:
                 parsedDataInputs[key]["value"]=value
                 attributes = []
 
+            # aditional attribute key is separated by "=" from it's value
             for attribute in attributes:
                 attributeKey, attributeValue = attribute.split("=")
                 parsedDataInputs[key][attributeKey] =\

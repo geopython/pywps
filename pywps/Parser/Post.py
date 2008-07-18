@@ -24,6 +24,7 @@ from xml.dom.minidom import parseString
 from pywps.Parser.Parser import Parser
 
 class Post(Parser):
+    """Main class for parsing of HTTP POST request types"""
 
     document = None # Document Object Model
 
@@ -32,8 +33,8 @@ class Post(Parser):
     EXECUTE = "Execute"
 
     def __init__(self,wps):
+        """Contructor"""
         Parser.__init__(self,wps)
-        self.wps = wps
 
     def parse(self,file):
         

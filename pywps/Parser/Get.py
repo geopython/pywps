@@ -36,7 +36,6 @@ class Get(Parser):
     def __init__(self,wps):
         """Contructor"""
         Parser.__init__(self,wps)
-        self.wps = wps
 
     def parse(self,queryString):
         """Parse given string with parameters given in KVP encoding
@@ -74,7 +73,8 @@ class Get(Parser):
         """ Check for max input length, raise exception, if the input
         is too long.  """
             
-        key = None value = None
+        key = None
+        value = None
 
         for key in self.unparsedInputs.keys():
             value = self.unparsedInputs[key]
