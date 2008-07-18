@@ -23,9 +23,9 @@ from string import split
 from pywps.Parser.Parser import Parser
 
 class Get(Parser):
+    """ Main Class for parsing HTTP GET request types """
     wps = None
-    fieldStorage = None
-    unparsedInputs =  {}
+    unparsedInputs =  {}    # temporary store for later validation
     GET_CAPABILITIES = "getcapabilities"
     DESCRIBE_PROCESS = "describeprocess"
     EXECUTE = "execute"
@@ -34,10 +34,17 @@ class Get(Parser):
     requestParser = None
 
     def __init__(self,wps):
+        """Contructor"""
         Parser.__init__(self,wps)
         self.wps = wps
 
     def parse(self,queryString):
+        """Parse given string with parameters given in KVP encoding
+        
+        Keyword arguments:
+        queryString -- string of parameters taken from URL in KVP encoding
+        
+        """
         
         key = None
         value = None
@@ -45,6 +52,9 @@ class Get(Parser):
         maxInputLength = self.wps.config.getint("server","maxinputparamlength")
 
         # parse query string
+        # arguments are separated by "&" character
+        # everything is stored into unparsedInputs structure, for latter
+        # validation
         for feature in queryString.split("&"):
             feature = feature.strip()
             key,value = split(feature,"=",maxsplit=1)
@@ -54,16 +64,17 @@ class Get(Parser):
             self.unparsedInputs[key.lower()] = value[:maxInputLength]
 
         try:
-            self.parseInputs()
+            self.checkInputLength()
             self.findRequestType()
         except KeyError,e:  # if service or request keys not found
             raise self.wps.exceptions.MissingParameterValue(str(e).strip("'"))
             
 
-    def parseInputs(self):
+    def checkInputLength(self):
+        """ Check for max input length, raise exception, if the input
+        is too long.  """
             
-        key = None
-        value = None
+        key = None value = None
 
         for key in self.unparsedInputs.keys():
             value = self.unparsedInputs[key]
@@ -80,6 +91,8 @@ class Get(Parser):
                     self.unparsedInputs[self.SERVICE])
     
     def findRequestType(self):
+        """Find requested request type and import given request parser."""
+
         # test, if one of the mandatory WPS operation is called (via request)
         if self.unparsedInputs["request"].lower() ==\
            self.GET_CAPABILITIES:
@@ -97,5 +110,6 @@ class Get(Parser):
             raise self.wps.exceptions.InvalidParameterValue(
                     self.unparsedInputs["request"])
 
+        # parse the request
         self.requestParser.parse(self.unparsedInputs)
         return
