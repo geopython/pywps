@@ -15,6 +15,13 @@ The first version was written with support of Deutsche Bundesstiftung
 Umwelt, Osnabrueck, Germany on the spring 2006. SVN server is hosted by
 GDF-Hannover, Hannover, Germany.
 
+Current development is supported mainly by:
+Help Service - Remote Sensing s.r.o
+Cernoleska 1600
+256  01 - Benesov u Prahy
+Czech Republic
+Europe
+
 For setting see comments in 'etc' directory and documentation.
 
 This program is free software, distributed under the terms of GNU General
@@ -23,6 +30,11 @@ License.
 
 Enjoy and happy GISing!
 """
+__version__ = "3.0-svn"
+
+# $Source$
+__revision__ = "$Revision: 63990 $"
+
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
 # License: 
@@ -43,11 +55,6 @@ Enjoy and happy GISing!
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-
-# TODO:
-# document evertyghin according to
-# http://www.python.org/doc/essays/styleguide.html
-
 import pywps
 from pywps import Parser 
 from pywps import Exceptions
@@ -56,11 +63,11 @@ from pywps.Exceptions import *
 
 import sys, os, ConfigParser
 
-#sys.path.append(pywps.__path__[0])
-
-__version__ = "3.0-svn"
 
 class WPS:
+    """This is main PyWPS Class, which parses the request, performs the
+    desired operation and writes required response back.
+    """
 
     method  =""                      # HTTP POST or GET 
     pidFilePrefix = "pywps-pidfile-" # pid file prefix
@@ -77,6 +84,7 @@ class WPS:
     request = None # object with getcapabilities/describeprocess/execute
                    # class
 
+    # global variables
     METHOD_GET="GET"
     METHOD_POST="POST"
     OWS_NAMESPACE = "http://www.opengis.net/ows/1.1"
@@ -84,19 +92,25 @@ class WPS:
     XLINK_NAMESPACE = "http://www.w3.org/1999/xlink"
 
     DEFAULT_WPS_VERSION = "1.0.0"
-    VERSION = "3.0-svn"
-    DEFAULT_LANGUAGE = "en"
 
     def __init__(self):
+        """Class contrustor
+
+        Will load configuration files, parse the input parameters and
+        perform the request.
+
+        """
 
         # get settings
-        self.loadConfiguration()
+        self._loadConfiguration()
 
         # find out the request method
         self.method = os.getenv("REQUEST_METHOD")
         if not self.method:  # set standard method
             self.method = self.METHOD_GET
 
+        # decide, which method to use
+        # HTTP GET vs. HTTP POST
         if self.method == self.METHOD_GET:
             from pywps.Parser.Get import Get
             parser = Get(self)
@@ -117,12 +131,14 @@ class WPS:
             parser = Post(self)
             parser.parse(sys.stdin)
 
+        # inputs parsed, perform request
         if self.inputs:
             # HACK - wouldn't there be some better way, that to use the
             # environment variable ?
             os.environ["PYWPS_LANGUAGE"] = self.inputs["language"]
             self.performRequest()
 
+        # request performed, write the response back
         if self.request.response:
             # print only to standard out
             if self.request.statusFiles == sys.stdout or\
@@ -132,10 +148,25 @@ class WPS:
 
         return
     
-    def loadConfiguration(self):
+    def _loadConfiguration(self):
+        """Load PyWPS configuration from configuration files. This are
+
+        Unix/Linux:
+        pywps/default.cfg
+        /etc/pywps.cfg
+        pywps/etc/pywps.cfg
+
+        Windows:
+        pywps\\default.cfg
+        pywps\\etc\\default.cfg
+
+        The later overwrites configuration from the first
+
+        """
 
         cfgfiles = None
 
+        # Windows or Unix
         if sys.platform == 'win32':
             self.workingDir = os.path.abspath(os.path.join(os.getcwd(), os.path.dirname(sys.argv[0])))
             cfgfiles = (os.path.join(workingDir,"pywps","default.cfg"),
@@ -148,6 +179,9 @@ class WPS:
         self.config.read(cfgfiles)
 
     def performRequest(self):
+        """Performs the desired WSP Request."""
+
+        # the modules are imported first, when the request type is known
         try:
             if self.inputs["request"]  == "getcapabilities":
                 from pywps.WPS.GetCapabilities import GetCapabilities
@@ -165,15 +199,22 @@ class WPS:
             raise self.exceptions.MissingParameterValue("request")
     
     def getConfigValue(self,*args):
+        """Return desired value from the configuration files
+
+        Keyword arguments:
+        section -- section in configuration files
+        key -- key in the section
+
+        """
+
         value = self.config.get(*args)
+
+        # Convert Boolean string to real Boolean values
         if value.lower() == "false":
             value = False
         elif value.lower() == "true" :
             value = True
         return value
-
-
-
 
 if __name__ == "__main__":
     wps = WPS()
