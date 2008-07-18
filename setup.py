@@ -33,7 +33,7 @@ doclines = __doc__.split("\n")
 
 setup(
         name = 'pywps',
-        version = '2.0.0',
+        version = '3.0.0',
         maintainer="Jachym Cepicky",
         maintainer_email = 'jachym@les-ejk.cz',
         author = 'Jachym Cepicky',
@@ -46,12 +46,13 @@ setup(
         classifiers= classifiers,
         long_description = "\n".join(doclines[1:]),
 
-        packages = ['pywps','pywps.Wps','pywps.etc','pywps.processes','pywps.Wps.ogc'],
+        packages = ['pywps','pywps.WPS','pywps.etc','pywps.Parser','pywps.processes','pywps.Templates'],
         package_dir={'pywps':"pywps",
-                     'pywps.Wps':'pywps/Wps',
+                     'pywps.WPS':'pywps/WPS',
                      'pywps.etc':'pywps/etc',
+		     'pywps.Parser':'pywps/Parser',
                      'pywps.processes':'pywps/processes',
-                     'pywps.Wps.ogc':'pywps/Wps/ogc'
+                     'pywps.Templates':'pywps/Templates'
                      },
         scripts=['wps.py'],
 )

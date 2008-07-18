@@ -2,7 +2,7 @@ For installing PyWPS:
     
 1) unzip the archive with the program
 
-    $ tar xzf pywps-2.0.0.tar.gz
+    $ tar xzf pywps-3.0.0.tar.gz
 
 
 2) Run the installation script
@@ -14,6 +14,6 @@ For installing PyWPS:
 
     $ ln -s /usr/bin/wps.py /usr/lib/cgi-bin/wps.py
 
-4) Update your configuration in etc/setup.py and etc/grass.py
+4) Update your configuration in etc/pywps.cfg
 
 5) See doc/pywps-howto.[pdf|txt|html] for more details
