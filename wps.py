@@ -29,11 +29,14 @@ Public License as published by the Free Software Foundation version 2 of the
 License.
 
 Enjoy and happy GISing!
+
+$Author:$
+$Id:$
+$Rev:$
+
 """
 __version__ = "3.0-svn"
 
-# $Source$
-__revision__ = "$Revision: 63990 $"
 
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
