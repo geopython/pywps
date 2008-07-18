@@ -1,3 +1,18 @@
+""" Set and get language codes, initialize translated messages, so that the
+user scan use them directly in processes.
+
+In the process:
+
+    User has to define set of messages for all supported languages, like
+
+    self.lang["eng"]["key1"] = "Hallo, world!"
+    self.lang["eng"]["key2"] = "Foo"
+    self.lang["eng"]["key3"] = "Bar"
+
+    Than the user can use self.i18n(key) method, which returns the string
+    in preset language (given by client request)
+
+"""
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz 
 # Lince: 
@@ -35,7 +50,7 @@ class Lang:
                 ["ger","de","german"],
                 ["fre","fr","french"],
                 ["cze","cz","czech"],
-                ["ita","it","italian"],
+                ["ita","it","italian"]
                 # to be continued ...
         ]
 
@@ -57,9 +72,7 @@ class Lang:
         return self.defaultCode
 
     def setCode(self):
-        """
-        Set choosen language code
-        """
+        """ Set choosen language code """
 
         # HACK - wouldn't there be some better way, that to use the
         # environment variable ?
@@ -67,18 +80,20 @@ class Lang:
             self.code = self.getCode(os.getenv("PYWPS_LANGUAGE"))
 
     def initStrings(self):
-        """
-        Initialize self.strings object accoring to known codces from
+        """ Initialize self.strings object accoring to known codces from
         Lang.py
+
+        It can be used later like:
+            self.strings["eng"]["foo"] = "bar"
+
         """
+
         for lang in self.codes:
             self.strings[lang[0]] = {}
         return
 
     def get(self,key):
-        """
-        Will return current string in selected language
-        """
+        """ Will return desired string in selected language """
         
         for string in self.strings:
             if self.strings[self.code].has_key(key):
