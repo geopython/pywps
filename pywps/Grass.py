@@ -1,5 +1,5 @@
 """
-This module is here for work with GRASS GIS environment varibales and
+Module is here for work with GRASS GIS environment varibales and
 locations and mapsets
 """
 # Author:	Jachym Cepicky
@@ -28,6 +28,9 @@ import time, shutil, tempfile
 import sys
 
 class Grass:
+    """
+    GRASS initialization interface
+    """
 
     locationDir = ""
     locationName = ""
@@ -36,9 +39,8 @@ class Grass:
     gisbase = ""
 
     def  __init__(self,executeRequest):
-        """
-        Initalization of GRASS environment variables (except GISRC).
-        """
+        """ Initalization of GRASS environment variables (except GISRC).  """
+
         self.executeRequest = executeRequest
         self.wps = self.executeRequest.wps
         self.envs = {
@@ -47,8 +49,7 @@ class Grass:
                 "version":"GRASS_VERSION",
                 "gui":"GRASS_GUI",
                 "gisbase": "GISBASE",
-                "ldLibraryPath": "LD_LIBRARY_PATH",
-                "##":"a"
+                "ldLibraryPath": "LD_LIBRARY_PATH"
         }
 
         # put env
@@ -128,9 +129,8 @@ class Grass:
         return self.mapsetName
 
     def _windFile(self,mapset):
-        """
-        Create default WIND file
-        """
+        """ Create default WIND file """
+
         if mapset == "PERMANENT":
             windname = "DEFAULT_WIND"
         else:
@@ -153,6 +153,7 @@ class Grass:
         return
 
     def setEnv(self,key,value):
+        """Set GRASS environment variables """
 
         origValue = os.getenv(key)
         if origValue:
