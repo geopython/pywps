@@ -677,9 +677,26 @@ class Execute(Request):
                 percent=self.process.status.percentCompleted)
 
     def initEnv(self):
+        """Create process working directory, initialize GRASS environment,
+        if required.
 
-        self.workingDir = tempfile.mkdtemp(prefix="pywps",
-                                dir=self.wps.getConfigValue("server","tempPath"))
+        """
+
+        # find out number of running sessions
+        maxOperations = int(self.wps.getConfigValue("server","maxoperations"))
+        tempPath = self.wps.getConfigValue("server","tempPath")
+
+        dirs = os.listdir(tempPath)
+        pyWPSDirs = 0
+        for dir in dirs:
+            if dir.find("pywps") == 0:
+                pyWPSDirs += 1
+
+        if pyWPSDirs >= maxOperations:
+            raise self.wps.exceptions.ServerBusy()
+
+        # create temp dir
+        self.workingDir = tempfile.mkdtemp(prefix="pywps", dir=tempPath)
 
         self.workingDir = os.path.join(
                 self.wps.getConfigValue("server","tempPath"),self.workingDir)
@@ -687,6 +704,7 @@ class Execute(Request):
         os.chdir(self.workingDir)
         self.dirsToBeRemoved.append(self.workingDir)
 
+        # init GRASS
         if self.process.grassLocation:
             from pywps import Grass
             grass = Grass.Grass(self)
@@ -696,6 +714,8 @@ class Execute(Request):
                 grass.mkMapset(self.process.grassLocation)
             else:
                 raise self.wps.exceptions.NoApplicableCode("Location [%s] does not exist" % self.process.location)
+
+        return
         
     def cleanEnv(self):
         """
