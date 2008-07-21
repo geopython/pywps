@@ -70,8 +70,10 @@ class DescribeProcess(Request):
         processesData = []
 
         for processName in self.processes.__all__:
-            # skip process, if not requested
-            if not processName in self.wps.inputs["identifier"]:
+            # skip process, if not requested or 
+            # identifier != "ALL"
+            if not processName in self.wps.inputs["identifier"] and \
+                self.wps.inputs["identifier"][0].lower() != "all":
                 continue
 
             processData = {}
