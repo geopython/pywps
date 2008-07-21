@@ -70,7 +70,6 @@ class WPS:
     """
 
     method  =""                      # HTTP POST or GET 
-    pidFilePrefix = "pywps-pidfile-" # pid file prefix
     maxInputLength = 0  # maximal length of one input item
     maxFileSize = 0 # maximal input XML or other file size
     maxInputSize = 0 # maximal size of HTTP Get request
