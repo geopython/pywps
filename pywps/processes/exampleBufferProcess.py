@@ -1,3 +1,10 @@
+"""This is an example process, which calculates buffer around given vector
+file. 
+
+This process uses for its purpose GRASS GIS (http://grass.osgeo.org), and
+so it demonstrates the way, how configure GRASS with it as well.
+
+"""
 # Author: Luca Casagrande ( luca.casagrande@gmail.com )
 # Rewritten by: Jachym Cepicky <jachym les-ejk cz> 
 #               According to new process definition style
@@ -7,7 +14,11 @@ from pywps.Process.Process import WPSProcess
 
 
 class Process(WPSProcess):
+    """Main process class"""
     def __init__(self):
+        """Process initialization"""
+
+        # init process
         WPSProcess.__init__(self,
             identifier = "buffer",
             title="Buffer",
@@ -17,7 +28,7 @@ class Process(WPSProcess):
             abstract="Create a buffer around an input vector file",
             grassLocation = True)
 
-
+        # define inputs
         self.dataIn = self.addComplexInput(identifier="data",
                              title = "Input data")
 
@@ -27,13 +38,20 @@ class Process(WPSProcess):
         self.bufferOut = self.addComplexOutput(identifier="buffer",
                                 title="Output buffer file",asReference=True)
 
+        # define outputs
         self.textOut = self.addLiteralOutput(identifier="text",
                                 title="just some text")
         
     def execute(self):
+        """Execute process.
+        
+        Each command will be executed and output values will be set
+        """
 
+        # run some command from the command line
         self.cmd("g.region -d")
 
+        # set status value
         self.status.set("Importing data",20)
 	self.cmd("v.in.ogr dsn=%s output=data" %\
                 (self.getInputValue('data')))
@@ -46,9 +64,16 @@ class Process(WPSProcess):
 
 	self.cmd("v.out.ogr type=area format=GML input=data_buff dsn=out.xml  olayer=path.xml")
         
+        # controll
         if "out.xml" in os.listdir(os.curdir):
+
+            # set output values at the end
             self.bufferOut.setValue("out.xml")
             self.textOut.setValue("ahoj, svete")
+
+            # everything was all right, return None
             return
         else:
+                
+            # in case, something went wrong, return string
             return "Output file not created"
