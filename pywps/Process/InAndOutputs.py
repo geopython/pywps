@@ -221,7 +221,17 @@ class BoundingBoxInput(Input):
         self.crss = crss
         self.dimensions = dimensions
         self.crs = self.crss[0]
+        self.minx = None
+        self.minx = None
+        self.maxx = None
+        self.maxy = None
         return
+
+    def setValue(self,value):
+        self.minx = value[0]
+        self.minx = value[1]
+        self.maxx = value[2]
+        self.maxy = value[3]
 
 class Output:
     def __init__(self,identifier,title,abstract=None,
@@ -281,10 +291,22 @@ class ComplexOutput(Output):
 
 class BoundingBoxOutput(Output):
     def __init__(self,identifier,title,abstract=None,
-                metadata=[], crss=[], asReference=False):
+                metadata=[], crss=[], dimensions=2, asReference=False):
         Output.__init__(self,identifier,title,abstract=None,
                 metadata=[],type="BoundingBoxValue",asReference=asReference)
-        
         self.crss = crss
+        self.dimensions = dimensions
+        self.minx = None
+        self.miny = None
+        self.maxx = None
+        self.maxy = None
         return
 
+    def setValue(self, value):
+        if len(value) != 4:
+            raise "Bounding box value is wrong, it has to have a form: "+
+                    "[minx,miny,maxx,maxy]"
+        self.minx  = value[0]
+        self.miny  = value[1]
+        self.maxx  = value[2]
+        self.maxy  = value[3]
