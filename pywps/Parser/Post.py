@@ -70,7 +70,7 @@ class Post(Parser):
         """Find requested request type and import given request parser."""
 
         firstChild = self.getFirstChildNode(self.document)
-        firstTagName = self.controll(firstChild.tagName)
+        firstTagName = firstChild.tagName
 
         if firstTagName.find(self.GET_CAPABILITIES) > -1:
             import GetCapabilities 

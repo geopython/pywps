@@ -40,8 +40,7 @@ class Process(WPSProcess):
                              title = self.i18n("xslt"))
 
         self.gmlOut = self.addComplexOutput(identifier="gml",
-                                title=self.i18n("gmlOut"),
-				asReference=True)
+                                title=self.i18n("gmlOut"))
 
     def execute(self):
 

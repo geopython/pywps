@@ -215,9 +215,7 @@ class Execute(Response):
         self.process.debug = self.wps.getConfigValue("server","debug")
 
     def consolidateInputs(self):
-        """
-        Donwloads and controls input data, defined by the client
-        """
+        """ Donwload and control input data, defined by the client """
         # calculate maximum allowed input size
         maxFileSize = self.calculateMaxInputSize()
 
@@ -493,8 +491,7 @@ class Execute(Response):
         return complexOutput
 
     def processOutputs(self):
-        """
-        Fill <ProcessOutputs> part in the ouput XML document
+        """Fill <ProcessOutputs> part in the ouput XML document
         This method is called if, self.status == ProcessSucceeded
         """
 
