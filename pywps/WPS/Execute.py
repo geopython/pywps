@@ -430,16 +430,14 @@ class Execute(Response):
             complexInput["bodyReference"] = wpsInput["bodyreference"]
 
     def _lineageBBoxInput(self,input,bboxInput):
-        """
-        Fill input of bbox data
-        """
+        """ Fill input of bbox data """
         bboxInput["bboxdata"] = 1
         bboxInput["crs"] = input.crs
         bboxInput["dimensions"] = input.dimensions
-        bboxInput["minx"] = input.value[0]
-        bboxInput["miny"] = input.value[1]
-        bboxInput["maxx"] = input.value[2]
-        bboxInput["maxy"] = input.value[3]
+        bboxInput["minx"] = input.minx
+        bboxInput["miny"] = input.miny
+        bboxInput["maxx"] = input.maxx
+        bboxInput["maxy"] = input.maxy
         return bboxInput
 
     def outputDefinitions(self):
@@ -471,7 +469,7 @@ class Execute(Response):
                 templateOutput = self._lineageComplexOutput(output,templateOutput)
                 templateOutput["complexdata"] = 1
             else:
-                # FIXME TO BE FIXED
+                templateOutput = self._lineageBBoxOutput(output,templateOutput)
                 templateOutput["bboxdata"] = 1
 
         self.templateProcessor.set("Outputdefinitions",templateOutputs)
@@ -485,8 +483,15 @@ class Execute(Response):
 
         complexOutput["mimetype"] = output.format["mimeType"]
         complexOutput["encoding"] = output.format["encoding"]
-        complexOutput["shema"] = output.format["schema"]
+        complexOutput["schema"] = output.format["schema"]
 
+        return complexOutput
+
+    def _lineageBBoxOutput(self, output, bboxOutput):
+
+        bboxOutput["bboxdata"] = 1
+        bboxOutput["crs"] = output.crs
+        bboxOutput["dimensions"] = output.dimensions
 
         return complexOutput
 
@@ -552,7 +557,13 @@ class Execute(Response):
         return complexOutput
 
     def _bboxOutput(self, output, bboxOutput):
-        # FIXME TO BE FIXED
+        bboxOutput["bboxdata"] = 1
+        bboxOutput["crs"] = output.crs
+        bboxOutput["dimensions"] = output.dimensions
+        bboxOutput["minx"] = output.minx
+        bboxOutput["miny"] = output.miny
+        bboxOutput["maxx"] = output.maxx
+        bboxOutput["maxy"] = output.maxy
         return bboxOutput
 
     def _asReferenceOutput(self,templateOutput, output):
