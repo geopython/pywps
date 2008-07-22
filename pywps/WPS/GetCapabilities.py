@@ -65,6 +65,8 @@ class GetCapabilities(Request):
                                     self.wps.getConfigValue("wps","fees"))
         self.templateProcessor.set("constraints",
                                     self.wps.getConfigValue("wps","constraints"))
+        self.templateProcessor.set("url",
+                                    self.wps.getConfigValue("wps","serveraddress"))
 
         #
         # ServiceProvider
