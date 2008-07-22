@@ -58,14 +58,6 @@ class WPSException(Exception):
         sys.stderr.write("PyWPS %s: %s\n" % (self.code, self.locator))
         print str
 
-        # *** omitting the following hack for testing purposes ***
-        # FIXME: To avoid multiple printing, this hack works
-        #        however, I do not know, why it is printed two times :-(
-        #global called
-        #if not called:
-        #print str
-        #called += 1
-
 class MissingParameterValue(WPSException):
     def __init__(self, value):
         self.code = "MissingParameterValue"
