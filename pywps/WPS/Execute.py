@@ -432,7 +432,7 @@ class Execute(Response):
     def _lineageBBoxInput(self,input,bboxInput):
         """ Fill input of bbox data """
         bboxInput["bboxdata"] = 1
-        bboxInput["crs"] = input.crs
+        bboxInput["crss"] = [input.crs]
         bboxInput["dimensions"] = input.dimensions
         bboxInput["minx"] = input.minx
         bboxInput["miny"] = input.miny
@@ -558,7 +558,7 @@ class Execute(Response):
 
     def _bboxOutput(self, output, bboxOutput):
         bboxOutput["bboxdata"] = 1
-        bboxOutput["crs"] = output.crs
+        bboxOutput["crs"] = output.crss[0]
         bboxOutput["dimensions"] = output.dimensions
         bboxOutput["minx"] = output.minx
         bboxOutput["miny"] = output.miny

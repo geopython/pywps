@@ -193,7 +193,17 @@ class WPSProcess:
 
         self.outputs[identifier] = InAndOutputs.LiteralOutput(identifier=identifier,
                 title=title, abstract=abstract, dataType=type, uoms=uoms, 
-                default=None, asReference=asReference)
+                asReference=asReference)
+
+        return self.outputs[identifier]
+
+    def addBBoxOutput(self, identifier, title, abstract=None,
+            crs="EPSG:4326", dimensions=2, asReference=False):
+        """ Add new output item of type BoundingBoxValue to this process """
+
+        self.outputs[identifier] = InAndOutputs.BoundingBoxOutput(identifier=identifier,
+                title=title, abstract=abstract, crss=[crs], dimensions=dimensions, 
+                asReference=asReference)
 
         return self.outputs[identifier]
 

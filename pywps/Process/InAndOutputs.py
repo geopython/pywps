@@ -304,8 +304,8 @@ class BoundingBoxOutput(Output):
 
     def setValue(self, value):
         if len(value) != 4:
-            raise "Bounding box value is wrong, it has to have a form: "+
-                    "[minx,miny,maxx,maxy]"
+            raise Exception("Bounding box value is wrong, it has to have a form: "+
+                    "[minx,miny,maxx,maxy]")
         self.minx  = value[0]
         self.miny  = value[1]
         self.maxx  = value[2]
