@@ -23,12 +23,12 @@ WPS Execute request handler
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-from Request import Request
+from Response import Response
 import time,os,sys,tempfile,re
 from shutil import copyfile as COPY
 from shutil import rmtree as RMTREE
 
-class Execute(Request):
+class Execute(Response):
     """
     This class performes the Execute request of WPS specification
 

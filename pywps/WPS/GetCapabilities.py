@@ -23,9 +23,9 @@ WPS GetCapabilities request handler
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-from Request import Request
+from Response import Response
 
-class GetCapabilities(Request):
+class GetCapabilities(Response):
     """
     Parses input request obtained via HTTP POST encoding - should be XML
     file.
@@ -37,7 +37,7 @@ class GetCapabilities(Request):
            self
            wps   - parent WPS instance
         """
-        Request.__init__(self,wps)
+        Response.__init__(self,wps)
 
         self.template = self.templateManager.prepare(self.templateFile)
 

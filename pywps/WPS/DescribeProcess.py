@@ -23,10 +23,10 @@ WPS DescribeProcess request handler
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-from Request import Request
+from Response import Response
 import os
 
-class DescribeProcess(Request):
+class DescribeProcess(Response):
     """
     Parses input request obtained via HTTP POST encoding - should be XML
     file.
@@ -38,7 +38,7 @@ class DescribeProcess(Request):
            self
            wps   - parent WPS instance
         """
-        Request.__init__(self,wps)
+        Response.__init__(self,wps)
 
         self.template = self.templateManager.prepare(self.templateFile)
 
