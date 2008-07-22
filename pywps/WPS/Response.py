@@ -98,7 +98,7 @@ class Response:
             dataType["type"] = "boolean"
             dataType["reference"] = "http://www.w3.org/TR/xmlschema-2/#boolean"
         else:
-            # FIXME To be continued...
+            # TODO To be continued...
             dataType["type"] = "string"
             dataType["reference"] = "http://www.w3.org/TR/xmlschema-2/#string"
             pass

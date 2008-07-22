@@ -90,7 +90,7 @@ class LiteralInput(Input):
                 value = str(value)
             elif self.dataType == types.IntType:
                 value = int(value)
-            #FIXME other types missing
+            #TODO other types missing
         except (ValueError), e:
             raise InvalidParameterValue(value,e)
 

@@ -195,8 +195,6 @@ class DescribeProcess(Response):
                         valrecord["value"] = val
         except AttributeError:
             pass
-        # FIXME
-        # value reference
 
         return
 

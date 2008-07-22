@@ -164,7 +164,7 @@ class WPSProcess:
 
     def addBBoxInput(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=1,maxOccurs=1,
-                crss=[""]): #FIXME some default crss
+                crss=["EPSG:4326"]):
         self.inputs[identifier] = InAndOutputs.BoundingBoxInput(self,
                 identifier,title,abtract=abstract,
                 metadata=metadata,minOccurs=minOccurs,maxOccurs=maxOccurs,

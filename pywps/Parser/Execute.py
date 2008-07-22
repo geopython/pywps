@@ -158,7 +158,8 @@ class Post(Post):
                     outputs[identifier] = {}
                 except IndexError:
                     raise self.wps.exceptions.MissingParameterValue("Identifier")
-                # FIXME Abstract, Title are not supported yet
+                # Abstract, Title are not supported yet
+                # is it necessary ?
 
                 outputs[identifier]["mimetype"] = \
                     outputNode.getAttributeNS("*","mimeType") 
@@ -216,7 +217,7 @@ class Post(Post):
 
             parsedDataInputs[identifier] = {"value":None, "attributes":{}}
 
-            # FIXME Title and Abstract are only mandatory and not necessary:
+            # Title and Abstract are only mandatory and not necessary:
             # skipping, not supported yet
             
             # formchoice
@@ -255,7 +256,7 @@ class Post(Post):
         # optional attributes
         #
 
-        # FIXME mimeType, encoding, schema - not yet supported
+        # mimeType, encoding, schema - not yet supported
         
         # method
         attributes["method"] = \
