@@ -84,7 +84,7 @@ class Execute(Response):
         wps   - parent WPS instance
         """
 
-        Request.__init__(self,wps)
+        Response.__init__(self,wps)
 
         self.wps = wps
         self.process = None
@@ -509,6 +509,7 @@ class Execute(Response):
             templateOutput["abstract"] = output.abstract
 
             # Reference
+            print >>sys.stderr, "#####", output.identifier, output.asReference
             if output.asReference:
                 templateOutput = self._asReferenceOutput(templateOutput, output)
             # Data
