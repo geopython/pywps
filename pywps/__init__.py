@@ -8,4 +8,4 @@ Here is also the default package with WPS Processes.
 $Id$
 """
 
-__all__ = [ "Parser","processes", "Exceptions", "WPS", "Templates", "Lang"]
+__all__ = [ "Parser","processes", "Process", "Exceptions", "WPS", "Templates"]

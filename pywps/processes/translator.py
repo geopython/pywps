@@ -1,7 +1,7 @@
 # Author: Jachym Cepicky <jachym.cepicky@gmail.com>
 
 import os,time,string,sys
-from pywps.Process import WPSProcess
+from pywps.Process.Process import WPSProcess
 
 class Process(WPSProcess):
 

@@ -37,6 +37,9 @@ class Post(Parser):
         Parser.__init__(self,wps)
 
     def parse(self,file):
+        """
+        Parse parameters stored as XML file
+        """
         
         maxFileSize = None
         inputXml = None
@@ -64,6 +67,7 @@ class Post(Parser):
         return
 
     def findRequestType(self):
+        """Find requested request type and import given request parser."""
 
         firstChild = self.getFirstChildNode(self.document)
         firstTagName = self.controll(firstChild.tagName)
@@ -82,6 +86,7 @@ class Post(Parser):
         self.requestParser.parse(self.document)
 
     def getFirstChildNode(self,document):
+        """Find first usable child node of the document (no comments)"""
 
         node = None
 
@@ -95,6 +100,13 @@ class Post(Parser):
         return firstChild
 
     def getMaxFileSize(self,maxFileSize):
+        """ Convert given filesize string to number of bytes.
+        
+        This is used mainly for the parsing of the value from the
+        configuration file.
+        
+        """
+
         if maxFileSize.find("kb") > 0:
             maxFileSize = float(maxFileSize[:maxFileSize.find("gb")])
             maxFileSize = int(maxFileSize*1024)

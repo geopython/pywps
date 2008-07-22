@@ -28,9 +28,7 @@ import time, shutil, tempfile
 import sys
 
 class Grass:
-    """
-    GRASS initialization interface
-    """
+    """ GRASS initialization interface """
 
     locationDir = ""
     locationName = ""
