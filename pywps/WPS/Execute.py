@@ -509,7 +509,6 @@ class Execute(Response):
             templateOutput["abstract"] = output.abstract
 
             # Reference
-            print >>sys.stderr, "#####", output.identifier, output.asReference
             if output.asReference:
                 templateOutput = self._asReferenceOutput(templateOutput, output)
             # Data
