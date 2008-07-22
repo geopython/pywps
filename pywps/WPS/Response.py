@@ -32,7 +32,7 @@ import types
 from pywps import Templates
 import re
 
-class Request:
+class Response:
     response = None # Output document
     wps = None # Parent WPS object
     templateManager = None # HTML TemplateManager
