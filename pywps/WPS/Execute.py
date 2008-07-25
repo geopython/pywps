@@ -381,7 +381,8 @@ class Execute(Response):
 
             if input.type == "LiteralValue":
                 templateInput = self._lineageLiteralInput(input,templateInput)
-            elif wpsInput["type"] == "ComplexValueReference":
+            elif wpsInput["type"] == "ComplexValue" and \
+                                            wpsInput["asReference"] == True:
                 templateInput = self._lineageComplexReferenceInput(wpsInput,
                                                             input,templateInput)
             elif input.type == "ComplexValue":

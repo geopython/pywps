@@ -146,10 +146,10 @@ class ComplexInput(Input):
         # if HTTP GET was performed, the type does not have to be set
         if not input.has_key("type") and\
                 input["value"].find("http://") == 0:
-            input["type"] = "ComplexValueReference"
+            input["asReference"] = True
 
         # download data
-        if input["type"] == "ComplexValueReference":
+        if input["asReference"] == True:
             self.downloadData(input["value"])
         else:
             self.storeData(input["value"])

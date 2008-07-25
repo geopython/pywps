@@ -296,8 +296,8 @@ class Post(Post):
         except IndexError:
             attributes["bodyreference"] = None
 
-        
-        attributes["type"] = "ComplexValueReference"
+        attributes["type"] = "ComplexValue"
+        attributes["asReference"] = True
         
         return attributes
 
