@@ -46,14 +46,30 @@ setup(
         classifiers= classifiers,
         long_description = "\n".join(doclines[1:]),
 
-        packages = ['pywps','pywps.WPS','pywps.etc','pywps.Parser','pywps.processes','pywps.Templates'],
-        package_dir={'pywps':"pywps",
-                     'pywps.WPS':'pywps/WPS',
-                     'pywps.etc':'pywps/etc',
-		     'pywps.Parser':'pywps/Parser',
-                     'pywps.processes':'pywps/processes',
-                     'pywps.Templates':'pywps/Templates'
-                     },
-        scripts=['wps.py'],
+        packages = [
+            'pywps',
+            'pywps.WPS',
+            'pywps.etc',
+            'pywps.Parser',
+            'pywps.Process',
+            'pywps.Templates',
+            'pywps.Templates.inc',
+        ],
+        package_dir={
+                    'pywps':"pywps",
+                    'pywps.WPS':'pywps/WPS',
+                    'pywps.Parser':'pywps/Parser',
+                    'pywps.Process':'pywps/Process',
+                    'pywps.Templates':'pywps/Templates',
+                    'pywps.Templates.inc':'pywps/Templates/inc',
+                },
+        package_data={
+                    'pywps': ['Templates/*.tmpl','processes/*.py','default.cfg'],
+                    'pywps.Templates': ['inc/*.tmpl']
+                },
+        data_files=[
+                    ('/etc/', ['pywps/etc/pywps.cfg'])
+                ],
+        scripts=['wps.py']
 )
 

@@ -1,8 +1,11 @@
 include setup.py
 
-graft pywps/Wps
+graft pywps/WPS
 graft pywps/processes
 graft pywps/etc
+graft pywps/Parser
+graft pywps/Process
+graft pywps/Templates
 graft doc
 
 global-exclude *.pyc
@@ -13,18 +16,11 @@ global-exclude *.bak
 global-exclude *.dvi
 global-exclude *.log
 global-exclude *.aux
+global-exclude *.tmplc
 
-exclude pywps/processes/pf_*
-exclude pywps/processes/*.py
-exclude pywps/etc/*.py
-exclude pywps/doc/*.out
+exclude doc/*.out
 
-
-include pywps/etc/__init__.py
-
-include pywps/Wps/*.py
-
+global-include *.cfg
 global-include README
 global-include AUTHORS
 global-include INSTALL
-global-include *.py-dist
