@@ -12,13 +12,11 @@ pdf: ${SRC}
 	${PDFLATEX} ${SRC}
 
 html: ${SRC}
-	latex2html -split 0 ${SRC}
-	mv ${FILE}/index.html ${FILE}.html
-	rm -rf ${FILE}
+	latex2html -local_icons -split 0 ${SRC}
+	mv ${FILE} html
 
-txt: ${SRC} ${FILE}.html
-	pdftotext ${FILE}.pdf
-	lynx -dump ${FILE}.html > ${FILE}.txt
+txt: ${SRC} html/${FILE}.html
+	links2 -dump html/${FILE}.html > ${FILE}.txt
 
 process:
 	${SRC}
