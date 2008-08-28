@@ -175,35 +175,30 @@ class WPSProcess:
     # --------------------------------------------------------------------
 
     def addComplexOutput(self,identifier,title,abstract=None,
-            metadata=[],formats=[{"mimeType":"text/xml"}],
-            asReference=False):
+            metadata=[],formats=[{"mimeType":"text/xml"}]):
 
         self.outputs[identifier] = InAndOutputs.ComplexOutput(identifier=identifier,
-                title=title,abstract=abstract,
-                metadata=[], formats=formats, asReference=asReference)
+                title=title,abstract=abstract, metadata=[], formats=formats)
 
         return self.outputs[identifier]
 
     def addLiteralOutput(self, identifier, title, abstract=None,
-            uoms=(), type=types.IntType, default=None,
-           asReference=False):
+            uoms=(), type=types.IntType, default=None):
         """
         Add new output item of type LiteralValue to this process
         """
 
         self.outputs[identifier] = InAndOutputs.LiteralOutput(identifier=identifier,
-                title=title, abstract=abstract, dataType=type, uoms=uoms, 
-                asReference=asReference)
+                title=title, abstract=abstract, dataType=type, uoms=uoms)
 
         return self.outputs[identifier]
 
     def addBBoxOutput(self, identifier, title, abstract=None,
-            crs="EPSG:4326", dimensions=2, asReference=False):
+            crs="EPSG:4326", dimensions=2):
         """ Add new output item of type BoundingBoxValue to this process """
 
         self.outputs[identifier] = InAndOutputs.BoundingBoxOutput(identifier=identifier,
-                title=title, abstract=abstract, crss=[crs], dimensions=dimensions, 
-                asReference=asReference)
+                title=title, abstract=abstract, crss=[crs], dimensions=dimensions)
 
         return self.outputs[identifier]
 

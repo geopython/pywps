@@ -149,6 +149,9 @@ class Execute(Response):
             # donwload and consolidate data
             self.consolidateInputs()
 
+            # set output data attributes defined in the request
+            self.consolidateOutputs()
+
             self.promoteStatus(self.started,"Process %s started" %\
                     self.process.identifier)
 
@@ -249,6 +252,22 @@ class Execute(Response):
 
             if not input.value:
                 raise self.wps.exceptions.MissingParameterValue(identifier)
+
+    def consolidateOutputs(self):
+        """Set desired attributes (e.g. asReference) for each output"""
+        if self.wps.inputs["responseform"]["responsedocument"].has_key("outputs"):
+            respOutputs = self.wps.inputs["responseform"]["responsedocument"]["outputs"]
+            for identifier in self.process.outputs:
+                poutput = self.process.outputs[identifier]
+                respOut = None
+                try:
+                    respOut = respOutputs[identifier]
+                except:
+                    continue
+
+                # asReference
+                if respOut.has_key("asReference"):
+                    poutput.asReference = respOut["asReference"]
 
     def onInputProblem(self,what,why):
         """

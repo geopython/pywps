@@ -36,7 +36,7 @@ class Process(WPSProcess):
                              title = "Width")
 
         self.bufferOut = self.addComplexOutput(identifier="buffer",
-                                title="Output buffer file",asReference=True)
+                                title="Output buffer file")
 
         # define outputs
         self.textOut = self.addLiteralOutput(identifier="text",
