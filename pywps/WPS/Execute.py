@@ -742,8 +742,7 @@ class Execute(Response):
             grass = Grass.Grass(self)
             if self.process.grassLocation == True:
                 grass.mkMapset()
-            elif
-            os.path.exists(os.path.join(self.wps.getConfigValue("grass","gisdbase"),self.process.grassLocation):
+            elif os.path.exists(os.path.join(self.wps.getConfigValue("grass","gisdbase"),self.process.grassLocation)):
                 grass.mkMapset(self.process.grassLocation)
             else:
                 self.cleanEnv()
