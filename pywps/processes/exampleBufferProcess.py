@@ -1,15 +1,3 @@
-"""This is an example process, which calculates buffer around given vector
-file. 
-
-This process uses for its purpose GRASS GIS (http://grass.osgeo.org), and
-so it demonstrates the way, how configure GRASS with it as well.
-
-"""
-# Author: Luca Casagrande ( luca.casagrande@gmail.com )
-# Rewritten by: Jachym Cepicky <jachym les-ejk cz> 
-#               According to new process definition style
-
-import os,time,string,sys
 from pywps.Process.Process import WPSProcess
 
 
@@ -20,7 +8,7 @@ class Process(WPSProcess):
 
         # init process
         WPSProcess.__init__(self,
-            identifier = "buffer",
+            identifier = "exampleBufferProcess",
             title="Buffer",
             version = "0.2",
             storeSupported = "true",
