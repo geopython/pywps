@@ -203,11 +203,13 @@ class Execute(Response):
                 self.process = eval("module."+self.wps.inputs["identifier"]+".Process()")
 
             except Exception, e:
+                self.cleanEnv()
                 raise self.wps.exceptions.NoApplicableCode(
                 "Could not import process [%s]: %s" %\
                         (self.wps.inputs["identifier"], e))
                 return
         else:
+            self.cleanEnv()
             raise self.wps.exceptions.InvalidParameterValue(
                     self.wps.inputs["identifier"])
 
@@ -251,6 +253,7 @@ class Execute(Response):
             input = self.process.inputs[identifier]
 
             if not input.value:
+                self.cleanEnv()
                 raise self.wps.exceptions.MissingParameterValue(identifier)
 
     def consolidateOutputs(self):
@@ -284,6 +287,7 @@ class Execute(Response):
         elif what == "NoApplicableCode":
             exception = self.wps.exceptions.NoApplicableCode
 
+        self.cleanEnv()
         raise exception(why)
 
     def executeProcess(self):
@@ -738,9 +742,11 @@ class Execute(Response):
             grass = Grass.Grass(self)
             if self.process.grassLocation == True:
                 grass.mkMapset()
-            elif os.path.exists(self.process.grassLocation):
+            elif
+            os.path.exists(os.path.join(self.wps.getConfigValue("grass","gisdbase"),self.process.grassLocation):
                 grass.mkMapset(self.process.grassLocation)
             else:
+                self.cleanEnv()
                 raise self.wps.exceptions.NoApplicableCode("Location [%s] does not exist" % self.process.grassLocation)
 
         return
