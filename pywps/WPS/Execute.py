@@ -738,16 +738,20 @@ class Execute(Response):
         self.dirsToBeRemoved.append(self.workingDir)
 
         # init GRASS
-        if self.process.grassLocation:
-            from pywps import Grass
-            grass = Grass.Grass(self)
-            if self.process.grassLocation == True:
-                grass.mkMapset()
-            elif os.path.exists(os.path.join(self.wps.getConfigValue("grass","gisdbase"),self.process.grassLocation)):
-                grass.mkMapset(self.process.grassLocation)
-            else:
-                self.cleanEnv()
-                raise self.wps.exceptions.NoApplicableCode("Location [%s] does not exist" % self.process.grassLocation)
+        try:
+            if self.process.grassLocation:
+                from pywps import Grass
+                grass = Grass.Grass(self)
+                if self.process.grassLocation == True:
+                    grass.mkMapset()
+                elif os.path.exists(os.path.join(self.wps.getConfigValue("grass","gisdbase"),self.process.grassLocation)):
+                    grass.mkMapset(self.process.grassLocation)
+                else:
+                    self.cleanEnv()
+                    raise self.wps.exceptions.NoApplicableCode("Location [%s] does not exist" % self.process.grassLocation)
+        except Exception,e:
+            self.cleanEnv()
+            raise self.wps.exceptions.NoApplicableCode("Could not init GRASS: %s" % e)
 
         return
         
