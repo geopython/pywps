@@ -76,16 +76,13 @@ class Grass:
                             will be created
         """
 
-        self.locationDir = location
-
-        if not self.locationDir:
+        if location == None:
             self.locationDir = self.executeRequest.workingDir
 
-        self.mapsetDir = tempfile.mkdtemp(prefix="pywps",dir=self.locationDir)
-        self.mapsetName = os.path.split(self.mapsetDir)[1]
-        self.locationName = os.path.split(self.locationDir)[1]
+            self.mapsetDir = tempfile.mkdtemp(prefix="pywps",dir=self.locationDir)
+            self.mapsetName = os.path.split(self.mapsetDir)[1]
+            self.locationName = os.path.split(self.locationDir)[1]
 
-        if location == self.wps.workingDir:
             # create new WIND file
             self._windFile(self.mapsetName)
 
@@ -97,6 +94,11 @@ class Grass:
 
         # location is here, we justhave to use it
         else:
+            self.locationDir = os.path.join(self.wps.getConfigValue("grass","gisdbase"), location)
+            self.mapsetDir = tempfile.mkdtemp(prefix="pywps",dir=self.locationDir)
+            self.mapsetName = os.path.split(self.mapsetDir)[1]
+            self.locationName = location
+
             self.executeRequest.dirsToBeRemoved.append(os.path.abspath(self.mapsetDir))
 
             # copy
