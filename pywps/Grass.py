@@ -113,7 +113,7 @@ class Grass:
         self.setEnv('GISDBASE', self.gisdbase)
 
         # gisrc
-        gisrc = open(os.path.join(self.locationDir,"grassrc"),"w")
+        gisrc = open(os.path.join(self.executeRequest.workingDir,"grassrc"),"w")
         gisrc.write("LOCATION_NAME: %s\n" % self.locationName)
         gisrc.write("MAPSET: %s\n" % self.mapsetName)
         gisrc.write("DIGITIZER: none\n")
