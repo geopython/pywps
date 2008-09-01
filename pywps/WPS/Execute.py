@@ -741,7 +741,7 @@ class Execute(Response):
             elif os.path.exists(self.process.grassLocation):
                 grass.mkMapset(self.process.grassLocation)
             else:
-                raise self.wps.exceptions.NoApplicableCode("Location [%s] does not exist" % self.process.location)
+                raise self.wps.exceptions.NoApplicableCode("Location [%s] does not exist" % self.process.grassLocation)
 
         return
         
