@@ -203,10 +203,10 @@ class Execute(Response):
                 self.process = eval("module."+self.wps.inputs["identifier"]+".Process()")
 
                 # process identifier must be == package name 
-                if process.identifier != processName:
+                if self.process.identifier != processName:
                     raise ImportError(
                             "Process indentifier \"%s\" != package name \"%s\": File name has to be the same, as the identifier is!" %\
-                            (process.identifier, processName))
+                            (self.process.identifier, processName))
 
             except Exception, e:
                 raise self.wps.exceptions.NoApplicableCode(
