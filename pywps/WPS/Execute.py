@@ -724,7 +724,8 @@ class Execute(Response):
             if dir.find("pywps") == 0:
                 pyWPSDirs += 1
 
-        if pyWPSDirs >= maxOperations:
+        if pyWPSDirs >= maxOperations and\
+            maxOperations != 0:
             raise self.wps.exceptions.ServerBusy()
 
         # create temp dir
