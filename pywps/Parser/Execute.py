@@ -170,10 +170,10 @@ class Post(Post):
                 outputs[identifier]["uom"] = \
                     outputNode.getAttributeNS(self.nameSpace,"uom") 
 
-                outputs[identifier]["asReference"] = False
+                outputs[identifier]["asreference"] = False
                 if outputNode.getAttributeNS(
                         self.nameSpace,"asReference").lower() == "true":
-                    outputs[identifier]["asReference"] = True
+                    outputs[identifier]["asreference"] = True
 
             form["responsedocument"]["outputs"] = outputs
 
@@ -468,8 +468,8 @@ class Get:
         # ResponseDocument
         try:
             self.wps.inputs["responseform"]["responsedocument"] = \
-                                self.parseDataInputs(
-                                self.unparsedInputs["responsedocument"])
+                    {"outputs":  self.parseDataInputs(
+                                self.unparsedInputs["responsedocument"])}
         except KeyError:
             self.wps.inputs["responseform"]["responsedocument"] = {}
 
@@ -558,5 +558,19 @@ class Get:
             for attribute in attributes:
                 attributeKey, attributeValue = attribute.split("=")
                 parsedDataInputs[key][attributeKey] =\
-                                                            attributeValue
+                                                    self._trueOrFalse(attributeValue)
         return parsedDataInputs
+
+    def _trueOrFalse(self,str):
+        """Return True or False, if input is "true" or "false" """
+
+        if str.lower() == "false":
+            return False
+        elif str.lower() == "true":
+            return True
+        elif str.lower() == "f":
+            return False
+        elif str.lower() == "t":
+            return True
+        else:
+            return None
