@@ -485,7 +485,7 @@ class Get:
         try:
             if self.unparsedInputs["storeexecuteresponse"].lower() ==\
                                                                     "true":
-                self.wps.inputs["storeexecutenesponse"] = True
+                self.wps.inputs["storeexecuteresponse"] = True
             else:
                 self.wps.inputs["storeexecuteresponse"] = False
 
@@ -504,7 +504,7 @@ class Get:
         except KeyError:
             self.wps.inputs["responseform"]["responsedocument"]["lineage"]=\
                                                                       False
-
+        # status
         try:
             if self.unparsedInputs["status"].lower() == "true":
                 self.wps.inputs["responseform"]["responsedocument"]["status"]=\
