@@ -272,6 +272,8 @@ Several sections are in the file.
             (\texttt{/usr/lib/grass})
             \item ldLibraryPath -- Path of GRASS Libs
             (\texttt{/usr/lib/grass/lib})
+	    \item gisdbase -- Full path to location directory 
+	    (\texttt{/home/foo/grassdata})
         \end{itemize}
 \end{itemize}
 
@@ -319,6 +321,7 @@ version=6.2.1
 gui=text
 gisbase=/usr/lib/grass/
 ldLibraryPath=/usr/lib/grass/lib
+gisbase=/home/foo/datagrass
 \end{verbatim}
     
 subsection{Testing after installation}
@@ -567,13 +570,13 @@ In this case, temporary GRASS Location will be created and after the
 process is done, it will be deleted again. By default, no GRASS Location is
 created.
 
-You can also work in existing GRASS Location, then just set the location
-path:
+You can also work in existing GRASS Location, then just set only the location
+name.
 \begin{verbatim}
          WPSProcess.__init__(self,
              identifier = "exampleBufferProcess",
              ....
-             grassLocation = "/home/grass/grassdata/spearfish60")
+             grassLocation = "spearfish60")
 \end{verbatim}
 
 %---------------------------------------------------------------------
