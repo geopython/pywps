@@ -269,8 +269,8 @@ class Execute(Response):
                     continue
 
                 # asReference
-                if respOut.has_key("asReference"):
-                    poutput.asReference = respOut["asReference"]
+                if respOut.has_key("asreference"):
+                    poutput.asReference = respOut["asreference"]
 
     def onInputProblem(self,what,why):
         """
