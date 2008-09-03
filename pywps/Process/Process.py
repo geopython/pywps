@@ -27,17 +27,28 @@ import types
 import sys
 
 class Status:
-    def __init__(self):
-        self.creationTime = time.time()
-        self.code = None
-        self.percentCompleted = 0
-        self.exceptionReport = None
-        self.code = None
-        self.value = None
+    """
+    Status object for each process
+
+    Attributes:
+    creationTime time.time()
+    code {String} "processstarted", "processfailed" or anything else
+    percentCompleted {Float} how far the calculation is
+    value {String} message string to the client
+    """
+    creationTime = time.time()
+    code = None
+    percentCompleted = 0
+    code = None
+    value = None
 
     def set(self, msg="",percentDone=0, propagate=True):
-        """
-        propagate - call onStatusChanged method
+        """ Set status message
+
+        Parameters:
+        msg {String} message for the client
+        percentDone {Float} percent > 0
+        propagate {Boolean} call onStatusChanged method
         """
         self.code = "processstarted"
         if (type(percentDone) == types.StringType):
@@ -62,6 +73,11 @@ class Status:
     def setProcessStatus(self,code,value):
         """
         Sets current status of the process. Calls onStatusChanged method
+
+        Parameters:
+        code {String} one of "processaccepted" "processstarted"
+                    "processsucceeded" "processpaused" "processfailed"
+        value {String} additional message
         """
 
         self.value = value
@@ -73,11 +89,56 @@ class Status:
 
 
 class WPSProcess:
-    """
-    """
+    """Base class for any PyWPS Process"""
+    identifier = None
+    version = None
+    metadata = None
+    title = None
+    abstract = None
+    wsdl  = None
+    profile = None
+    storeSupported = None
+    statusSupported = None
+    debug = None
+    status = None
+    inputs = None
+    outputs = None
+    lang = None
+    grassLocation = None
+
     def __init__(self, identifier, title = None, abstract=None,
             metadata=[],profile=[], version=None,
             statusSupported=True, storeSupported=False, grassLocation=None):
+        """Process initialization. All parameters can be set lately
+        
+        Mandatory parameters:
+        identifier {String} process identifier
+        title {String} process title
+        
+        Optional parameters:
+        abstract {String} process description
+                default: None
+        metadata List of {Dict} aditional metadata.  See
+                    http://www.opengeospatial.org/standards/common, table 32 on page 65
+                E.g. {"foo":"bar"}
+                default: None
+        profile {URN}
+                default: None
+        version {String} process version
+                default: None
+        statusSupported {Boolean} this process can be run assynchronously
+                default: True
+        storeSupported {Boolean} outputs from this process can be stored
+                for later dowload
+                default: True
+        grassLocation {String} or {Boolean} name of GRASS Location within
+                "grassdbase" directory (from pywps.cfg configuration file).
+                If set to True, temporary GRASS Location will be created
+                and grass environment will be started. If None or False, no
+                GRASS environment will be started.
+                default: None
+        """
+
 
         self.identifier = identifier
         self.version = version
@@ -108,9 +169,9 @@ class WPSProcess:
     def initProcess(self, title = None, abstract=None,
             metadata=[],profile=[], version=None,
             statusSupported=True, storeSupported=False, grassLocation=None):
-        """
-        Can be used for later process re-initialization
-        """
+        """Can be used for later process re-initialization 
+
+        For parameters, see __init__ method options.  """
 
         self.title = title
         self.abstract = abstract
@@ -128,19 +189,42 @@ class WPSProcess:
 
         self.grassLocation = grassLocation
 
-    def addMetadata(self,Identifier, type, textContent):
-        """Add new metadata to this process"""
-        self.Metadata.append({
-            "Identifier": Identifier,
-            "type":type,
-            "textContent":textContent})
-
     def addLiteralInput(self, identifier, title, abstract=None,
             uoms=(), minOccurs=1, maxOccurs=1, 
             allowedValues=("*"), type=types.IntType ,
             default=None, metadata= []):
         """
         Add new input item of type LiteralValue to this process
+
+        Mandatory parameters:
+        identifier {String} input identifier
+        title {String} input title
+
+        Optional parameters:
+        abstract {String} input description. Default: None
+                    default: None
+        uoms List of {String} value units
+                    default: ()
+        minOccurs {Integer} minimum number of occurencies. 
+                    default: 1
+        maxOccurs {Integer} maximum number of occurencies. 
+                    default: 1
+        allowedValues  List of {String} or {List} list of allowed values,
+                    which can be used with this input. You can set interval
+                    using list with two items, like:
+
+                    (1,2,3,(5,9),10,"a",("d","g"))
+
+                    This will produce allowed values 1,2,3,10, "a" and
+                    any value between 5 and 9 or "d" and "g".
+                    default: ()
+        type {types.TypeType} value type, e.g. Integer, String, etc. you
+                    can uses the "types" module of python.
+                    default: types.IntType
+        default {Any} default value.
+                    default: None
+        metadata List of {Dict} Aditional metadata. E.g. {"foo":"bar"}
+                    default: None
         """
 
         self.inputs[identifier] = InAndOutputs.LiteralInput(identifier=identifier,
@@ -153,6 +237,36 @@ class WPSProcess:
     def addComplexInput(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=1,maxOccurs=1,
                 formats=[{"mimeType":"text/xml"}],maxmegabites=5):
+        """Add complex input to this process
+
+        Mandatory parameters:
+        identifier {String} input identifier
+        title {String} input title
+
+        Optional parameters:
+        abstract {String} input description. 
+                default: None
+        metadata List of {Dict} {key:value} pairs. 
+                default: None
+        minOccurs {Integer} minimum number of occurencies. 
+                default: 1
+        maxOccurs {Integer} maximum number of occurencies. 
+                default: 1
+        formats List of {Dict} according to table 23 (page 25). E.g.
+                    [
+                        {"mimeType": "image/tiff"},
+                        {
+                            "mimeType": "text/xml",
+                            "encoding": "utf-8",
+                            "schema":"http://foo/bar"
+                        }
+                    ]
+                default: [{"mimeType":"text/xml"}]
+        maxmegabites {Float} Maximum input file size. Can not be bigger, as
+                defined in global configuration file. 
+                default: 5
+        """
+
 
         self.inputs[identifier] = InAndOutputs.ComplexInput(identifier=identifier,
                 title=title,abstract=abstract,
@@ -165,6 +279,24 @@ class WPSProcess:
     def addBBoxInput(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=1,maxOccurs=1,
                 crss=["EPSG:4326"]):
+        """Add BoundingBox input
+
+        Mandatory parameters:
+        identifier {String} input identifier
+        title {String} input title
+
+        Optional parameters:
+        abstract {String} input description. 
+                default: None
+        metadata List of {Dict} {key:value} pairs. 
+                default: None
+        minOccurs {Integer} minimum number of occurencies. 
+                default: 1
+        maxOccurs {Integer} maximum number of occurencies. 
+                default: 1
+        crss List of {String} supported coordinate systems.
+                default: ["EPSG:4326"]
+        """
         self.inputs[identifier] = InAndOutputs.BoundingBoxInput(self,
                 identifier,title,abtract=abstract,
                 metadata=metadata,minOccurs=minOccurs,maxOccurs=maxOccurs,
@@ -176,6 +308,26 @@ class WPSProcess:
 
     def addComplexOutput(self,identifier,title,abstract=None,
             metadata=[],formats=[{"mimeType":"text/xml"}]):
+        """Add complex output to this process
+
+        Mandatory parameters:
+        identifier {String} output identifier
+        title {String} output title
+
+        Optional parameters:
+        metadata List of {Dict} {key:value} pairs. 
+                default: None
+        formats List of {Dict} according to table 23 (page 25). E.g.
+                    [
+                        {"mimeType": "image/tiff"},
+                        {
+                            "mimeType": "text/xml",
+                            "encoding": "utf-8",
+                            "schema":"http://foo/bar"
+                        }
+                    ]
+                default: [{"mimeType":"text/xml"}]
+        """
 
         self.outputs[identifier] = InAndOutputs.ComplexOutput(identifier=identifier,
                 title=title,abstract=abstract, metadata=[], formats=formats)
@@ -186,6 +338,21 @@ class WPSProcess:
             uoms=(), type=types.IntType, default=None):
         """
         Add new output item of type LiteralValue to this process
+
+        Mandatory parameters:
+        identifier {String} input identifier
+        title {String} input title
+
+        Optional parameters:
+        abstract {String} input description. Default: None
+                    default: None
+        uoms List of {String} value units
+                    default: ()
+        type {types.TypeType} value type, e.g. Integer, String, etc. you
+                    can uses the "types" module of python.
+                    default: types.IntType
+        default {Any} default value.
+                    default: None
         """
 
         self.outputs[identifier] = InAndOutputs.LiteralOutput(identifier=identifier,
@@ -195,7 +362,20 @@ class WPSProcess:
 
     def addBBoxOutput(self, identifier, title, abstract=None,
             crs="EPSG:4326", dimensions=2):
-        """ Add new output item of type BoundingBoxValue to this process """
+        """ Add new output item of type BoundingBoxValue to this process 
+        
+        Mandatory parameters:
+        identifier {String} input identifier
+        title {String} input title
+
+        Optional parameters:
+        abstract {String} input description. 
+                default: None
+        crss List of {String} supported coordinate systems.
+                default: ["EPSG:4326"]
+        dimensions {Integer} number of dimensions
+                default: 2
+        """
 
         self.outputs[identifier] = InAndOutputs.BoundingBoxOutput(identifier=identifier,
                 title=title, abstract=abstract, crss=[crs], dimensions=dimensions)
@@ -241,28 +421,53 @@ class WPSProcess:
         return stdout.splitlines()
 
     def message(self,msg,force=False):
+        """Print some message to standard error
+
+        Parameters:
+        msg {String} print this string to standard error
+        force {Boolean} if self.debug or force == True, the message will be
+                printed. nothing happen otherwise.
+        """
+
         if self.debug or force:
             sys.stderr.write(msg)
         return
 
     def getInput(self,identifier):
+        """Get input defined by identifier
+
+        Returns: None or Input
+        """
         try:
             return self.inputs[identifier]
         except:
             return None
 
     def getInputValue(self,identifier):
+        """Get input value according to identifier
+
+        Returns: None or self.inputs[identifier].value
+        """
+
         try:
             return self.inputs[identifier].value
         except:
             return None
 
     def setOutputValue(self,identifier,value):
+        """Set output value
+
+        Returns: None 
+        """
         try:
             return self.outputs[identifier].setValue(value)
         except:
             return None
 
     def i18n(self,key):
+        """Give back translation of defined key
+
+        Returns: {String} translated string
+        """
         return self.lang.get(key)
 
