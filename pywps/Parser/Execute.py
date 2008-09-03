@@ -485,12 +485,12 @@ class Get:
         try:
             if self.unparsedInputs["storeexecuteresponse"].lower() ==\
                                                                     "true":
-                self.wps.inputs["storeexecuteresponse"] = True
+                self.wps.inputs["responseform"]["responsedocument"]["storeexecuteresponse"] = True
             else:
-                self.wps.inputs["storeexecuteresponse"] = False
+                self.wps.inputs["responseform"]["responsedocument"]["storeexecuteresponse"] = False
 
         except KeyError:
-            self.wps.inputs["storeexecuteresponse"] = False
+            self.wps.inputs["responseform"]["responsedocument"]["storeexecuteresponse"] = False
 
         # lineage
         try:
