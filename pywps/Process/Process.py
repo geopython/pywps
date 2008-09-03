@@ -217,7 +217,9 @@ class WPSProcess:
 
                     This will produce allowed values 1,2,3,10, "a" and
                     any value between 5 and 9 or "d" and "g".
-                    default: ()
+
+                    If "*" is used, it means "any value"
+                    default: ("*")
         type {types.TypeType} value type, e.g. Integer, String, etc. you
                     can uses the "types" module of python.
                     default: types.IntType
