@@ -1,11 +1,13 @@
 FILE=pywps-howto
 SRC=${FILE}.tex
 PDFLATEX=pdflatex
+PROCESS=../pywps/Process
 
 all: ${SRC}
 	make pdf
 	make html
 	make txt
+	make proces
 
 pdf: ${SRC}
 	rm -f ${FILE}.pdf
@@ -18,12 +20,8 @@ html: ${SRC}
 txt: ${SRC} html/${FILE}.html
 	links2 -dump html/${FILE}.html > ${FILE}.txt
 
-process:
-	${SRC}
-	cd ../pywps/Wps/
-	pydoc -w ./process.py
-	mv process.html ../../doc
-	cd -
+process: ${PROCESS}
+	cd ${PROCESS} && pydoc -w ./Process.py && pydoc -w ./InAndOutputs.py && pydoc -w ./Lang.py && mv *.html ../../doc/
 
 clean:
 	rm -f *.aux *.log *.out *.nav *.snm *.toc *~ *.log *.bak all
@@ -35,5 +33,6 @@ help:
 	@echo all
 	@echo pdf
 	@echo txt
+	@echo process
 	@echo clean
 	@echo veryclean

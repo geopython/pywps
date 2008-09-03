@@ -1,0 +1,575 @@
+
+<!doctype html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module InAndOutputs</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>InAndOutputs</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/jachym/usr/src/pywps/trunk/pywps/Process/InAndOutputs.py">/home/jachym/usr/src/pywps/trunk/pywps/Process/InAndOutputs.py</a></font></td></tr></table>
+    <p><tt>#&nbsp;Author:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Jachym&nbsp;Cepicky<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://les-ejk.cz">http://les-ejk.cz</a><br>
+#&nbsp;Lince:&nbsp;<br>
+#&nbsp;<br>
+#&nbsp;Web&nbsp;Processing&nbsp;Service&nbsp;implementation<br>
+#&nbsp;Copyright&nbsp;(C)&nbsp;2006&nbsp;Jachym&nbsp;Cepicky<br>
+#&nbsp;<br>
+#&nbsp;This&nbsp;program&nbsp;is&nbsp;free&nbsp;software;&nbsp;you&nbsp;can&nbsp;redistribute&nbsp;it&nbsp;and/or&nbsp;modify<br>
+#&nbsp;it&nbsp;under&nbsp;the&nbsp;terms&nbsp;of&nbsp;the&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License&nbsp;as&nbsp;published&nbsp;by<br>
+#&nbsp;the&nbsp;Free&nbsp;Software&nbsp;Foundation;&nbsp;either&nbsp;version&nbsp;2&nbsp;of&nbsp;the&nbsp;License.<br>
+#&nbsp;<br>
+#&nbsp;This&nbsp;program&nbsp;is&nbsp;distributed&nbsp;in&nbsp;the&nbsp;hope&nbsp;that&nbsp;it&nbsp;will&nbsp;be&nbsp;useful,<br>
+#&nbsp;but&nbsp;WITHOUT&nbsp;ANY&nbsp;WARRANTY;&nbsp;without&nbsp;even&nbsp;the&nbsp;implied&nbsp;warranty&nbsp;of<br>
+#&nbsp;MERCHANTABILITY&nbsp;or&nbsp;FITNESS&nbsp;FOR&nbsp;A&nbsp;PARTICULAR&nbsp;PURPOSE.&nbsp;&nbsp;See&nbsp;the<br>
+#&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License&nbsp;for&nbsp;more&nbsp;details.<br>
+#&nbsp;<br>
+#&nbsp;You&nbsp;should&nbsp;have&nbsp;received&nbsp;a&nbsp;copy&nbsp;of&nbsp;the&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License<br>
+#&nbsp;along&nbsp;with&nbsp;this&nbsp;program;&nbsp;if&nbsp;not,&nbsp;write&nbsp;to&nbsp;the&nbsp;Free&nbsp;Software<br>
+#&nbsp;Foundation,&nbsp;Inc.,&nbsp;51&nbsp;Franklin&nbsp;Street,&nbsp;Fifth&nbsp;Floor,&nbsp;Boston,&nbsp;MA&nbsp;&nbsp;02110-1301&nbsp;&nbsp;USA</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#fffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="re.html">re</a><br>
+</td><td width="25%" valign=top><a href="types.html">types</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="InAndOutputs.html#Input">Input</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="InAndOutputs.html#BoundingBoxInput">BoundingBoxInput</a>
+</font></dt><dt><font face="helvetica, arial"><a href="InAndOutputs.html#ComplexInput">ComplexInput</a>
+</font></dt><dt><font face="helvetica, arial"><a href="InAndOutputs.html#LiteralInput">LiteralInput</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="InAndOutputs.html#Output">Output</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="InAndOutputs.html#BoundingBoxOutput">BoundingBoxOutput</a>
+</font></dt><dt><font face="helvetica, arial"><a href="InAndOutputs.html#ComplexOutput">ComplexOutput</a>
+</font></dt><dt><font face="helvetica, arial"><a href="InAndOutputs.html#LiteralOutput">LiteralOutput</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="BoundingBoxInput">class <strong>BoundingBoxInput</strong></a>(<a href="InAndOutputs.html#Input">Input</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="BoundingBoxInput-__init__"><strong>__init__</strong></a>(self, identifier, title, abstract<font color="#909090">=None</font>, metadata<font color="#909090">=[]</font>, minOccurs<font color="#909090">=1</font>, maxOccurs<font color="#909090">=1</font>, dimensions<font color="#909090">=2</font>, crss<font color="#909090">=[]</font>)</dt><dd><tt>Add&nbsp;BoundingBox&nbsp;input<br>
+&nbsp;<br>
+Mandatory&nbsp;parameters:<br>
+identifier&nbsp;{String}&nbsp;input&nbsp;identifier<br>
+title&nbsp;{String}&nbsp;input&nbsp;title<br>
+&nbsp;<br>
+Optional&nbsp;parameters:<br>
+abstract&nbsp;{String}&nbsp;input&nbsp;description.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;None<br>
+metadata&nbsp;List&nbsp;of&nbsp;{Dict}&nbsp;{key:value}&nbsp;pairs.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;None<br>
+minOccurs&nbsp;{Integer}&nbsp;minimum&nbsp;number&nbsp;of&nbsp;occurencies.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;1<br>
+maxOccurs&nbsp;{Integer}&nbsp;maximum&nbsp;number&nbsp;of&nbsp;occurencies.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;1<br>
+crss&nbsp;List&nbsp;of&nbsp;{String}&nbsp;supported&nbsp;coordinate&nbsp;systems.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;["EPSG:4326"]<br>
+<a href="#Input">Input</a>.<a href="#BoundingBoxInput-__init__">__init__</a>(self,identifier,title,abstract=None,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;metadata=[],minOccurs=minOccurs,maxOccurs=maxOccurs,type="BoundingBoxValue")</tt></dd></dl>
+
+<dl><dt><a name="BoundingBoxInput-setValue"><strong>setValue</strong></a>(self, value)</dt><dd><tt>Set&nbsp;value&nbsp;of&nbsp;this&nbsp;input<br>
+&nbsp;<br>
+Parameters:<br>
+value&nbsp;{Tuple}&nbsp;(minx,miny,maxx,maxy)</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>crs</strong> = None</dl>
+
+<dl><dt><strong>crss</strong> = None</dl>
+
+<dl><dt><strong>dimensions</strong> = None</dl>
+
+<dl><dt><strong>maxx</strong> = None</dl>
+
+<dl><dt><strong>maxy</strong> = None</dl>
+
+<dl><dt><strong>minx</strong> = None</dl>
+
+<hr>
+Data and other attributes inherited from <a href="InAndOutputs.html#Input">Input</a>:<br>
+<dl><dt><strong>abstract</strong> = None</dl>
+
+<dl><dt><strong>identifier</strong> = None</dl>
+
+<dl><dt><strong>maxOccurs</strong> = None</dl>
+
+<dl><dt><strong>metadata</strong> = None</dl>
+
+<dl><dt><strong>minOccurs</strong> = None</dl>
+
+<dl><dt><strong>title</strong> = None</dl>
+
+<dl><dt><strong>type</strong> = None</dl>
+
+<dl><dt><strong>value</strong> = None</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="BoundingBoxOutput">class <strong>BoundingBoxOutput</strong></a>(<a href="InAndOutputs.html#Output">Output</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="BoundingBoxOutput-__init__"><strong>__init__</strong></a>(self, identifier, title, abstract<font color="#909090">=None</font>, metadata<font color="#909090">=[]</font>, crss<font color="#909090">=[]</font>, dimensions<font color="#909090">=2</font>, asReference<font color="#909090">=False</font>)</dt><dd><tt>BoundingBox&nbsp;output<br>
+&nbsp;<br>
+Mandatory&nbsp;parameters:<br>
+identifier&nbsp;{String}&nbsp;input&nbsp;identifier<br>
+title&nbsp;{String}&nbsp;input&nbsp;title<br>
+&nbsp;<br>
+Optional&nbsp;parameters:<br>
+abstract&nbsp;{String}&nbsp;input&nbsp;description.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;None<br>
+crss&nbsp;List&nbsp;of&nbsp;{String}&nbsp;supported&nbsp;coordinate&nbsp;systems.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;["EPSG:4326"]<br>
+dimensions&nbsp;{Integer}&nbsp;number&nbsp;of&nbsp;dimensions<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;2<br>
+asReference&nbsp;{Boolean}&nbsp;wheather&nbsp;this&nbsp;output&nbsp;will&nbsp;be&nbsp;given&nbsp;back&nbsp;as<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;reference&nbsp;or&nbsp;as&nbsp;file<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;False</tt></dd></dl>
+
+<dl><dt><a name="BoundingBoxOutput-setValue"><strong>setValue</strong></a>(self, value)</dt><dd><tt>Set&nbsp;value&nbsp;to&nbsp;bbox&nbsp;output<br>
+&nbsp;<br>
+Parameters:<br>
+value&nbsp;{Tuple}&nbsp;(minx,miny,maxx,maxy)</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>crss</strong> = None</dl>
+
+<dl><dt><strong>dimensions</strong> = None</dl>
+
+<dl><dt><strong>maxx</strong> = None</dl>
+
+<dl><dt><strong>maxy</strong> = None</dl>
+
+<dl><dt><strong>minx</strong> = None</dl>
+
+<dl><dt><strong>miny</strong> = None</dl>
+
+<hr>
+Data and other attributes inherited from <a href="InAndOutputs.html#Output">Output</a>:<br>
+<dl><dt><strong>abstract</strong> = None</dl>
+
+<dl><dt><strong>asReference</strong> = None</dl>
+
+<dl><dt><strong>identifier</strong> = None</dl>
+
+<dl><dt><strong>metadata</strong> = None</dl>
+
+<dl><dt><strong>title</strong> = None</dl>
+
+<dl><dt><strong>type</strong> = None</dl>
+
+<dl><dt><strong>value</strong> = None</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ComplexInput">class <strong>ComplexInput</strong></a>(<a href="InAndOutputs.html#Input">Input</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#ComplexInput">ComplexInput</a>&nbsp;type<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="ComplexInput-__init__"><strong>__init__</strong></a>(self, identifier, title, abstract<font color="#909090">=None</font>, metadata<font color="#909090">=[]</font>, minOccurs<font color="#909090">=1</font>, maxOccurs<font color="#909090">=1</font>, maxmegabites<font color="#909090">=5</font>, formats<font color="#909090">=[{'mimeType': 'text/xml'}]</font>)</dt><dd><tt>Init&nbsp;complex&nbsp;input<br>
+&nbsp;<br>
+Mandatory&nbsp;parameters:<br>
+identifier&nbsp;{String}&nbsp;input&nbsp;identifier<br>
+title&nbsp;{String}&nbsp;input&nbsp;title<br>
+&nbsp;<br>
+Optional&nbsp;parameters:<br>
+abstract&nbsp;{String}&nbsp;input&nbsp;description.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;None<br>
+metadata&nbsp;List&nbsp;of&nbsp;{Dict}&nbsp;{key:value}&nbsp;pairs.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;None<br>
+minOccurs&nbsp;{Integer}&nbsp;minimum&nbsp;number&nbsp;of&nbsp;occurencies.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;1<br>
+maxOccurs&nbsp;{Integer}&nbsp;maximum&nbsp;number&nbsp;of&nbsp;occurencies.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;1<br>
+formats&nbsp;List&nbsp;of&nbsp;{Dict}&nbsp;according&nbsp;to&nbsp;table&nbsp;23&nbsp;(page&nbsp;25).&nbsp;E.g.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{"mimeType":&nbsp;"image/tiff"},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"mimeType":&nbsp;"text/xml",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"encoding":&nbsp;"utf-8",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"schema":"<a href="http://foo/bar">http://foo/bar</a>"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;[{"mimeType":"text/xml"}]<br>
+maxmegabites&nbsp;{Float}&nbsp;Maximum&nbsp;input&nbsp;file&nbsp;size.&nbsp;Can&nbsp;not&nbsp;be&nbsp;bigger,&nbsp;as<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;defined&nbsp;in&nbsp;global&nbsp;configuration&nbsp;file.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;5</tt></dd></dl>
+
+<dl><dt><a name="ComplexInput-downloadData"><strong>downloadData</strong></a>(self, url)</dt><dd><tt>Download&nbsp;data&nbsp;from&nbsp;given&nbsp;url.&nbsp;Do&nbsp;not&nbsp;download&nbsp;more,&nbsp;then<br>
+self.<strong>maxmegabites</strong><br>
+&nbsp;<br>
+Parameters:<br>
+url&nbsp;{String}&nbsp;URL&nbsp;where&nbsp;the&nbsp;data&nbsp;are&nbsp;lying</tt></dd></dl>
+
+<dl><dt><a name="ComplexInput-onMaxFileSizeExceeded"><strong>onMaxFileSizeExceeded</strong></a>(self, why)</dt><dd><tt>Empty&nbsp;method,&nbsp;called,&nbsp;when&nbsp;there&nbsp;was&nbsp;any&nbsp;problem&nbsp;with&nbsp;the&nbsp;input.<br>
+&nbsp;<br>
+Parameters:<br>
+why&nbsp;{String}&nbsp;Error&nbsp;code</tt></dd></dl>
+
+<dl><dt><a name="ComplexInput-onNotFound"><strong>onNotFound</strong></a>(self, what)</dt><dd><tt>Empty&nbsp;method,&nbsp;called,&nbsp;when&nbsp;there&nbsp;was&nbsp;any&nbsp;problem&nbsp;with&nbsp;the&nbsp;input.<br>
+&nbsp;<br>
+Parameters:<br>
+what&nbsp;{String}&nbsp;Error&nbsp;code</tt></dd></dl>
+
+<dl><dt><a name="ComplexInput-onProblem"><strong>onProblem</strong></a>(self, what, why)</dt><dd><tt>Empty&nbsp;method,&nbsp;called,&nbsp;when&nbsp;there&nbsp;was&nbsp;any&nbsp;problem&nbsp;with&nbsp;the&nbsp;input.<br>
+&nbsp;<br>
+Parameters:<br>
+what&nbsp;{String}&nbsp;Message&nbsp;with&nbsp;error&nbsp;description<br>
+why&nbsp;{String}&nbsp;Error&nbsp;code</tt></dd></dl>
+
+<dl><dt><a name="ComplexInput-setValue"><strong>setValue</strong></a>(self, input)</dt><dd><tt>Set&nbsp;input&nbsp;value&nbsp;for&nbsp;this&nbsp;input</tt></dd></dl>
+
+<dl><dt><a name="ComplexInput-storeData"><strong>storeData</strong></a>(self, data)</dt><dd><tt>To&nbsp;be&nbsp;redefined&nbsp;in&nbsp;each&nbsp;instance</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>format</strong> = None</dl>
+
+<dl><dt><strong>formats</strong> = None</dl>
+
+<dl><dt><strong>maxFileSize</strong> = None</dl>
+
+<hr>
+Data and other attributes inherited from <a href="InAndOutputs.html#Input">Input</a>:<br>
+<dl><dt><strong>abstract</strong> = None</dl>
+
+<dl><dt><strong>identifier</strong> = None</dl>
+
+<dl><dt><strong>maxOccurs</strong> = None</dl>
+
+<dl><dt><strong>metadata</strong> = None</dl>
+
+<dl><dt><strong>minOccurs</strong> = None</dl>
+
+<dl><dt><strong>title</strong> = None</dl>
+
+<dl><dt><strong>type</strong> = None</dl>
+
+<dl><dt><strong>value</strong> = None</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ComplexOutput">class <strong>ComplexOutput</strong></a>(<a href="InAndOutputs.html#Output">Output</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Complex&nbsp;value&nbsp;output<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="ComplexOutput-__init__"><strong>__init__</strong></a>(self, identifier, title, abstract<font color="#909090">=None</font>, metadata<font color="#909090">=[]</font>, formats<font color="#909090">=[{'mimeType': 'text/xml'}]</font>, asReference<font color="#909090">=False</font>)</dt><dd><tt>Complex&nbsp;output<br>
+&nbsp;<br>
+Mandatory&nbsp;parameters:<br>
+identifier&nbsp;{String}&nbsp;output&nbsp;identifier<br>
+title&nbsp;{String}&nbsp;output&nbsp;title<br>
+&nbsp;<br>
+Optional&nbsp;parameters:<br>
+metadata&nbsp;List&nbsp;of&nbsp;{Dict}&nbsp;{key:value}&nbsp;pairs.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;None<br>
+formats&nbsp;List&nbsp;of&nbsp;{Dict}&nbsp;according&nbsp;to&nbsp;table&nbsp;23&nbsp;(page&nbsp;25).&nbsp;E.g.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{"mimeType":&nbsp;"image/tiff"},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"mimeType":&nbsp;"text/xml",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"encoding":&nbsp;"utf-8",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"schema":"<a href="http://foo/bar">http://foo/bar</a>"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;[{"mimeType":"text/xml"}]<br>
+asReference&nbsp;{Boolean}&nbsp;wheather&nbsp;this&nbsp;output&nbsp;will&nbsp;be&nbsp;given&nbsp;back&nbsp;as<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;reference&nbsp;or&nbsp;as&nbsp;file<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;False</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>format</strong> = None</dl>
+
+<dl><dt><strong>formats</strong> = None</dl>
+
+<hr>
+Methods inherited from <a href="InAndOutputs.html#Output">Output</a>:<br>
+<dl><dt><a name="ComplexOutput-setValue"><strong>setValue</strong></a>(self, value)</dt><dd><tt>Set&nbsp;this&nbsp;output&nbsp;value</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="InAndOutputs.html#Output">Output</a>:<br>
+<dl><dt><strong>abstract</strong> = None</dl>
+
+<dl><dt><strong>asReference</strong> = None</dl>
+
+<dl><dt><strong>identifier</strong> = None</dl>
+
+<dl><dt><strong>metadata</strong> = None</dl>
+
+<dl><dt><strong>title</strong> = None</dl>
+
+<dl><dt><strong>type</strong> = None</dl>
+
+<dl><dt><strong>value</strong> = None</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Input">class <strong>Input</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Class&nbsp;WPS&nbsp;<a href="#Input">Input</a><br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Input-__init__"><strong>__init__</strong></a>(self, identifier, title, abstract<font color="#909090">=None</font>, metadata<font color="#909090">=[]</font>, minOccurs<font color="#909090">=1</font>, maxOccurs<font color="#909090">=1</font>, type<font color="#909090">=None</font>)</dt><dd><tt><a href="#Input">Input</a>&nbsp;initialization<br>
+&nbsp;<br>
+Mandatory&nbsp;parameters:<br>
+identifier&nbsp;{String}&nbsp;input&nbsp;identifier<br>
+title&nbsp;{String}&nbsp;input&nbsp;title<br>
+&nbsp;<br>
+Optional&nbsp;parameters:<br>
+abstract&nbsp;{String}&nbsp;input&nbsp;description.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;None<br>
+metadata&nbsp;List&nbsp;of&nbsp;{Dict}&nbsp;{key:value}&nbsp;pairs.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;None<br>
+minOccurs&nbsp;{Integer}&nbsp;minimum&nbsp;number&nbsp;of&nbsp;occurencies.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;1<br>
+maxOccurs&nbsp;{Integer}&nbsp;maximum&nbsp;number&nbsp;of&nbsp;occurencies.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;1<br>
+type&nbsp;{String}&nbsp;one&nbsp;of&nbsp;"LiteralValue",&nbsp;"ComplexValue"&nbsp;&nbsp;or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"BoundingBoxValue"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="Input-setValue"><strong>setValue</strong></a>(self, input)</dt><dd><tt>Control&nbsp;in&nbsp;some&nbsp;way&nbsp;the&nbsp;input&nbsp;value<br>
+&nbsp;<br>
+Parameters:<br>
+input&nbsp;{pywps.Process.<a href="#Input">Input</a>}</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>abstract</strong> = None</dl>
+
+<dl><dt><strong>identifier</strong> = None</dl>
+
+<dl><dt><strong>maxOccurs</strong> = None</dl>
+
+<dl><dt><strong>metadata</strong> = None</dl>
+
+<dl><dt><strong>minOccurs</strong> = None</dl>
+
+<dl><dt><strong>title</strong> = None</dl>
+
+<dl><dt><strong>type</strong> = None</dl>
+
+<dl><dt><strong>value</strong> = None</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="LiteralInput">class <strong>LiteralInput</strong></a>(<a href="InAndOutputs.html#Input">Input</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Literal&nbsp;input&nbsp;type&nbsp;of&nbsp;input.&nbsp;<br>
+&nbsp;<br>
+NOTE:&nbsp;The&nbsp;spacing&nbsp;parameter&nbsp;was&nbsp;not&nbsp;used&nbsp;yet<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="LiteralInput-__init__"><strong>__init__</strong></a>(self, identifier, title, abstract<font color="#909090">=None</font>, metadata<font color="#909090">=[]</font>, minOccurs<font color="#909090">=1</font>, maxOccurs<font color="#909090">=1</font>, dataType<font color="#909090">=&lt;type 'str'&gt;</font>, uoms<font color="#909090">=()</font>, values<font color="#909090">='*'</font>, spacing<font color="#909090">=None</font>, default<font color="#909090">=None</font>)</dt><dd><tt>Init&nbsp;the&nbsp;literal&nbsp;value&nbsp;type&nbsp;of&nbsp;input<br>
+&nbsp;<br>
+Mandatory&nbsp;parameters:<br>
+identifier&nbsp;{String}&nbsp;input&nbsp;identifier<br>
+title&nbsp;{String}&nbsp;input&nbsp;title<br>
+&nbsp;<br>
+Optional&nbsp;parameters:<br>
+abstract&nbsp;{String}&nbsp;input&nbsp;description.&nbsp;Default:&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;None<br>
+uoms&nbsp;List&nbsp;of&nbsp;{String}&nbsp;value&nbsp;units<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;()<br>
+minOccurs&nbsp;{Integer}&nbsp;minimum&nbsp;number&nbsp;of&nbsp;occurencies.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;1<br>
+maxOccurs&nbsp;{Integer}&nbsp;maximum&nbsp;number&nbsp;of&nbsp;occurencies.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;1<br>
+allowedValues&nbsp;&nbsp;List&nbsp;of&nbsp;{String}&nbsp;or&nbsp;{List}&nbsp;list&nbsp;of&nbsp;allowed&nbsp;values,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;which&nbsp;can&nbsp;be&nbsp;used&nbsp;with&nbsp;this&nbsp;input.&nbsp;You&nbsp;can&nbsp;set&nbsp;interval<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;using&nbsp;list&nbsp;with&nbsp;two&nbsp;items,&nbsp;like:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(1,2,3,(5,9),10,"a",("d","g"))<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;will&nbsp;produce&nbsp;allowed&nbsp;values&nbsp;1,2,3,10,&nbsp;"a"&nbsp;and<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;any&nbsp;value&nbsp;between&nbsp;5&nbsp;and&nbsp;9&nbsp;or&nbsp;"d"&nbsp;and&nbsp;"g".<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;"*"&nbsp;is&nbsp;used,&nbsp;it&nbsp;means&nbsp;"any&nbsp;value"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;("*")<br>
+type&nbsp;{types.TypeType}&nbsp;value&nbsp;type,&nbsp;e.g.&nbsp;Integer,&nbsp;String,&nbsp;etc.&nbsp;you<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;can&nbsp;uses&nbsp;the&nbsp;"types"&nbsp;module&nbsp;of&nbsp;python.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;types.StringType<br>
+default&nbsp;{Any}&nbsp;default&nbsp;value.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;None<br>
+spacing&nbsp;{Float}&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="LiteralInput-getValue"><strong>getValue</strong></a>(self)</dt><dd><tt>Get&nbsp;the&nbsp;input.value</tt></dd></dl>
+
+<dl><dt><a name="LiteralInput-setValue"><strong>setValue</strong></a>(self, input)</dt><dd><tt>Set&nbsp;input&nbsp;value&nbsp;value&nbsp;to&nbsp;this&nbsp;input</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>dataType</strong> = None</dl>
+
+<dl><dt><strong>default</strong> = None</dl>
+
+<dl><dt><strong>restrictedCharacters</strong> = [r'\', '#', ';', '&amp;', '!']</dl>
+
+<dl><dt><strong>spacing</strong> = None</dl>
+
+<dl><dt><strong>uom</strong> = None</dl>
+
+<dl><dt><strong>uoms</strong> = None</dl>
+
+<dl><dt><strong>values</strong> = None</dl>
+
+<hr>
+Data and other attributes inherited from <a href="InAndOutputs.html#Input">Input</a>:<br>
+<dl><dt><strong>abstract</strong> = None</dl>
+
+<dl><dt><strong>identifier</strong> = None</dl>
+
+<dl><dt><strong>maxOccurs</strong> = None</dl>
+
+<dl><dt><strong>metadata</strong> = None</dl>
+
+<dl><dt><strong>minOccurs</strong> = None</dl>
+
+<dl><dt><strong>title</strong> = None</dl>
+
+<dl><dt><strong>type</strong> = None</dl>
+
+<dl><dt><strong>value</strong> = None</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="LiteralOutput">class <strong>LiteralOutput</strong></a>(<a href="InAndOutputs.html#Output">Output</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Literal&nbsp;output&nbsp;class<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="LiteralOutput-__init__"><strong>__init__</strong></a>(self, identifier, title, abstract<font color="#909090">=None</font>, metadata<font color="#909090">=[]</font>, uoms<font color="#909090">=()</font>, dataType<font color="#909090">=&lt;type 'str'&gt;</font>, default<font color="#909090">=None</font>, asReference<font color="#909090">=False</font>)</dt><dd><tt><a href="#Output">Output</a>&nbsp;of&nbsp;type&nbsp;LiteralValue<br>
+&nbsp;<br>
+Mandatory&nbsp;parameters:<br>
+identifier&nbsp;{String}&nbsp;input&nbsp;identifier<br>
+title&nbsp;{String}&nbsp;input&nbsp;title<br>
+&nbsp;<br>
+Optional&nbsp;parameters:<br>
+abstract&nbsp;{String}&nbsp;input&nbsp;description.&nbsp;Default:&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;None<br>
+metadata&nbsp;List&nbsp;of&nbsp;{Dict}&nbsp;additional&nbsp;metadata<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;()<br>
+uoms&nbsp;List&nbsp;of&nbsp;{String}&nbsp;value&nbsp;units<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;()<br>
+dataType&nbsp;{types.TypeType}&nbsp;value&nbsp;type,&nbsp;e.g.&nbsp;Integer,&nbsp;String,&nbsp;etc.&nbsp;you<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;can&nbsp;uses&nbsp;the&nbsp;"types"&nbsp;module&nbsp;of&nbsp;python.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;types.StringType<br>
+default&nbsp;{Any}&nbsp;default&nbsp;value.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;None<br>
+asReference&nbsp;{Boolean}&nbsp;wheather&nbsp;this&nbsp;output&nbsp;will&nbsp;be&nbsp;given&nbsp;back&nbsp;as<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;reference&nbsp;or&nbsp;as&nbsp;file<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;False</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="InAndOutputs.html#Output">Output</a>:<br>
+<dl><dt><a name="LiteralOutput-setValue"><strong>setValue</strong></a>(self, value)</dt><dd><tt>Set&nbsp;this&nbsp;output&nbsp;value</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="InAndOutputs.html#Output">Output</a>:<br>
+<dl><dt><strong>abstract</strong> = None</dl>
+
+<dl><dt><strong>asReference</strong> = None</dl>
+
+<dl><dt><strong>identifier</strong> = None</dl>
+
+<dl><dt><strong>metadata</strong> = None</dl>
+
+<dl><dt><strong>title</strong> = None</dl>
+
+<dl><dt><strong>type</strong> = None</dl>
+
+<dl><dt><strong>value</strong> = None</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Output">class <strong>Output</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Class&nbsp;WPS&nbsp;<a href="#Input">Input</a><br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Output-__init__"><strong>__init__</strong></a>(self, identifier, title, abstract<font color="#909090">=None</font>, metadata<font color="#909090">=[]</font>, type<font color="#909090">=None</font>, asReference<font color="#909090">=False</font>)</dt><dd><tt><a href="#Output">Output</a>&nbsp;initialization<br>
+&nbsp;<br>
+Mandatory&nbsp;parameters:<br>
+identifier&nbsp;{String}&nbsp;input&nbsp;identifier<br>
+title&nbsp;{String}&nbsp;input&nbsp;title<br>
+&nbsp;<br>
+Optional&nbsp;parameters:<br>
+abstract&nbsp;{String}&nbsp;input&nbsp;description.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;None<br>
+metadata&nbsp;List&nbsp;of&nbsp;{Dict}&nbsp;{key:value}&nbsp;pairs.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;None<br>
+type&nbsp;{String}&nbsp;one&nbsp;of&nbsp;"LiteralValue",&nbsp;"ComplexValue"&nbsp;&nbsp;or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"BoundingBoxValue"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;None<br>
+asReference&nbsp;{Boolean}&nbsp;wheather&nbsp;this&nbsp;output&nbsp;will&nbsp;be&nbsp;given&nbsp;back&nbsp;as<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;reference&nbsp;or&nbsp;as&nbsp;file<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;False</tt></dd></dl>
+
+<dl><dt><a name="Output-setValue"><strong>setValue</strong></a>(self, value)</dt><dd><tt>Set&nbsp;this&nbsp;output&nbsp;value</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>abstract</strong> = None</dl>
+
+<dl><dt><strong>asReference</strong> = None</dl>
+
+<dl><dt><strong>identifier</strong> = None</dl>
+
+<dl><dt><strong>metadata</strong> = None</dl>
+
+<dl><dt><strong>title</strong> = None</dl>
+
+<dl><dt><strong>type</strong> = None</dl>
+
+<dl><dt><strong>value</strong> = None</dl>
+
+</td></tr></table></td></tr></table>
+</body></html>
