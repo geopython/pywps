@@ -230,9 +230,10 @@ class WPSProcess:
         """
 
         self.inputs[identifier] = InAndOutputs.LiteralInput(identifier=identifier,
-                title=title, abstract=abstract, metadata=[],
+                title=title, abstract=abstract, metadata=metadata,
                 minOccurs=minOccurs,maxOccurs=maxOccurs,
-                dataType=type, uoms=uoms, values=allowedValues, default=None)
+                dataType=type, uoms=uoms, values=allowedValues,
+                default=default)
 
         return self.inputs[identifier]
 
@@ -272,7 +273,7 @@ class WPSProcess:
 
         self.inputs[identifier] = InAndOutputs.ComplexInput(identifier=identifier,
                 title=title,abstract=abstract,
-                metadata=[],minOccurs=minOccurs,maxOccurs=maxOccurs,
+                metadata=metadata,minOccurs=minOccurs,maxOccurs=maxOccurs,
                 formats=formats, maxmegabites=maxmegabites)
 
         return self.inputs[identifier]
@@ -331,7 +332,7 @@ class WPSProcess:
         """
 
         self.outputs[identifier] = InAndOutputs.ComplexOutput(identifier=identifier,
-                title=title,abstract=abstract, metadata=[], formats=formats)
+                title=title,abstract=abstract, metadata=metadata, formats=formats)
 
         return self.outputs[identifier]
 
