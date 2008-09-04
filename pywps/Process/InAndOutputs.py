@@ -122,7 +122,7 @@ class LiteralInput(Input):
         spacing {Float} 
                     default: None
         """
-        Input.__init__(self,identifier,title,abstract=None,
+        Input.__init__(self,identifier,title,abstract=abstract,
                 metadata=[],minOccurs=minOccurs,maxOccurs=maxOccurs,type="LiteralValue")
         
         self.dataType = dataType
@@ -233,7 +233,7 @@ class ComplexInput(Input):
                 default: 5
         """
 
-        Input.__init__(self,identifier,title,abstract=None,
+        Input.__init__(self,identifier,title,abstract=abstract,
                 metadata=[],minOccurs=minOccurs,maxOccurs=maxOccurs,type="ComplexValue")
         
         if maxmegabites:
@@ -380,9 +380,9 @@ class BoundingBoxInput(Input):
                 default: 1
         crss List of {String} supported coordinate systems.
                 default: ["EPSG:4326"]
-        Input.__init__(self,identifier,title,abstract=None,
-                metadata=[],minOccurs=minOccurs,maxOccurs=maxOccurs,type="BoundingBoxValue")
         """
+        Input.__init__(self,identifier,title,abstract=abstract,
+                metadata=metadata,minOccurs=minOccurs,maxOccurs=maxOccurs,type="BoundingBoxValue")
         
         self.crss = crss
         self.dimensions = dimensions
