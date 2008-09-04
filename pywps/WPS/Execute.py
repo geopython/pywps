@@ -244,7 +244,12 @@ class Execute(Response):
                     input.maxFileSize = maxFileSize
 
             try:
-                input.setValue(self.wps.inputs["datainputs"][unicode(identifier)])
+                for inp in self.wps.inputs["datainputs"]:
+                    if unicode(inp["identifier"]) == unicode(identifier):
+                        resp = input.setValue(inp)
+                        if resp:
+                            self.cleanEnv()
+                            raise self.wps.exceptions.InvalidParameterValue(resp)
             except KeyError,e:
                 pass
 
@@ -252,7 +257,7 @@ class Execute(Response):
         for identifier in self.process.inputs:
             input = self.process.inputs[identifier]
 
-            if not input.value:
+            if not input.value and input.minOccurs > 0:
                 self.cleanEnv()
                 raise self.wps.exceptions.MissingParameterValue(identifier)
 
@@ -263,13 +268,12 @@ class Execute(Response):
             for identifier in self.process.outputs:
                 poutput = self.process.outputs[identifier]
                 respOut = None
-                try:
-                    respOut = respOutputs[identifier]
-                except:
-                    continue
+                for out in respOutputs:
+                    if out["identifier"] == identifier:
+                        respOut = out
 
                 # asReference
-                if respOut.has_key("asreference"):
+                if respOut and respOut.has_key("asreference"):
                     poutput.asReference = respOut["asreference"]
 
     def onInputProblem(self,what,why):
@@ -392,34 +396,41 @@ class Execute(Response):
         templateInputs = []
     
         for identifier in self.process.inputs.keys():
-            templateInput = {}
             input = self.process.inputs[identifier]
-            wpsInput = self.wps.inputs["datainputs"][identifier]
 
-            templateInput["identifier"] = input.identifier
-            templateInput["title"] = input.title
-            templateInput["abstract"] = input.abstract
+            for wpsInput in self.wps.inputs["datainputs"]:
+                if wpsInput["identifier"] != identifier or\
+                        wpsInput.has_key("lineaged"):
+                    continue
 
-            templateInputs.append(templateInput);
+                templateInput = {}
+                wpsInput["lineaged"] = True
 
-            if input.type == "LiteralValue":
-                templateInput = self._lineageLiteralInput(input,templateInput)
-            elif wpsInput["type"] == "ComplexValue" and \
-                                            wpsInput["asReference"] == True:
-                templateInput = self._lineageComplexReferenceInput(wpsInput,
-                                                            input,templateInput)
-            elif input.type == "ComplexValue":
-                templateInput = self._lineageComplexInput(input,templateInput)
-            elif input.type == "BoundingBoxValue":
-                templateInput = self._lineageBBoxInput(input,templateInput)
+                templateInput["identifier"] = input.identifier
+                templateInput["title"] = input.title
+                templateInput["abstract"] = input.abstract
+
+
+                if input.type == "LiteralValue":
+                    templateInput = self._lineageLiteralInput(input,wpsInput,templateInput)
+                elif input.type == "ComplexValue" and \
+                                                wpsInput["asReference"] == True:
+                    templateInput = self._lineageComplexReferenceInput(wpsInput,
+                                                                input,templateInput)
+                elif input.type == "ComplexValue":
+                    templateInput = self._lineageComplexInput(input,templateInput)
+                elif input.type == "BoundingBoxValue":
+                    templateInput = self._lineageBBoxInput(input,templateInput)
+
+                templateInputs.append(templateInput)
 
         self.templateProcessor.set("Inputs",templateInputs)
 
-    def _lineageLiteralInput(self, input, literalInput):
+    def _lineageLiteralInput(self, input, wpsInput, literalInput):
         """
         Fill input of literal data
         """
-        literalInput["literaldata"] = input.value
+        literalInput["literaldata"] = wpsInput["value"]
         literalInput["uom"] = str(input.uom)
         return literalInput
 
@@ -441,17 +452,21 @@ class Execute(Response):
         processInput - self.process.inputs
         """
         complexInput["reference"] = wpsInput["value"]
-        complexInput["method"] = wpsInput["method"]
+        method = "GET"
+        if wpsInput.has_key("method"):
+            method = wpsInput["method"]
+        complexInput["method"] = method
         complexInput["mimeType"] = processInput.format["mimeType"]
         complexInput["encoding"] = processInput.format["encoding"]
-        if wpsInput["header"]:
+        if wpsInput.has_key("header") and wpsInput["header"]:
             complexInput["header"] = 1
             complexInput["key"] = wpsInput["header"].keys()[0]
             complexInput["value"] = wpsInput["header"][wpsInput["header"].keys()[0]]
-        if wpsInput["body"]:
+        if wpsInput.has_key("body") and wpsInput["body"]:
             complexInput["body"] = wpsInput["body"]
-        if wpsInput["bodyreference"]:
+        if wpsInput.has_key("bodyreference") and wpsInput["bodyreference"]:
             complexInput["bodyReference"] = wpsInput["bodyreference"]
+        return complexInput
 
     def _lineageBBoxInput(self,input,bboxInput):
         """ Fill input of bbox data """
@@ -517,7 +532,7 @@ class Execute(Response):
         bboxOutput["crs"] = output.crs
         bboxOutput["dimensions"] = output.dimensions
 
-        return complexOutput
+        return bboxOutput
 
     def processOutputs(self):
         """Fill <ProcessOutputs> part in the ouput XML document
@@ -527,27 +542,32 @@ class Execute(Response):
         templateOutputs = []
     
         for identifier in self.process.outputs.keys():
-            templateOutput = {}
-            output = self.process.outputs[identifier]
+            try:
+                templateOutput = {}
+                output = self.process.outputs[identifier]
 
-            templateOutput["identifier"] = output.identifier
-            templateOutput["title"] = output.title
-            templateOutput["abstract"] = output.abstract
+                templateOutput["identifier"] = output.identifier
+                templateOutput["title"] = output.title
+                templateOutput["abstract"] = output.abstract
 
-            # Reference
-            if output.asReference:
-                templateOutput = self._asReferenceOutput(templateOutput, output)
-            # Data
-            else:
-                templateOutput["reference"] = 0
-                if output.type == "LiteralValue":
-                    templateOutput = self._literalOutput(output,templateOutput)
-                elif output.type == "ComplexValue":
-                    templateOutput = self._complexOutput(output,templateOutput)
-                elif output.type == "BoundingBoxValue":
-                    templateOutput = self._bboxOutput(output,templateOutput)
+                # Reference
+                if output.asReference:
+                    templateOutput = self._asReferenceOutput(templateOutput, output)
+                # Data
+                else:
+                    templateOutput["reference"] = 0
+                    if output.type == "LiteralValue":
+                        templateOutput = self._literalOutput(output,templateOutput)
+                    elif output.type == "ComplexValue":
+                        templateOutput = self._complexOutput(output,templateOutput)
+                    elif output.type == "BoundingBoxValue":
+                        templateOutput = self._bboxOutput(output,templateOutput)
 
-            templateOutputs.append(templateOutput);
+                templateOutputs.append(templateOutput);
+            except Exception,e:
+                self.cleanEnv()
+                raise self.wps.exceptions.NoApplicableCode(
+                        "Process executed. Failed to build final response for output [%s]: %s" % (identifier,e))
         self.templateProcessor.set("Outputs",templateOutputs)
 
     def _literalOutput(self, output, literalOutput):

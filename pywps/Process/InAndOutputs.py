@@ -19,6 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import types,re
+from pywps import Exceptions
 
 class Input:
     """Class WPS Input"""
@@ -70,11 +71,32 @@ class Input:
         Parameters:
         input {pywps.Process.Input} 
         """
-        self.value = input["value"]
+
+        for inpt in input["value"]:
+            resp =  self._setValueWithOccurence(self.value, inpt)
+            if resp:
+                return resp
         return
-    
-    def getValue(self):
-        """Get this value"""
+
+    def _setValueWithOccurence(self,oldValues, newValue):
+        """Check min and max occurence and set this.value"""
+
+        if self.maxOccurs > 1:
+            if not oldValues:
+                oldValues =  [newValue]
+            else:
+                if self.maxOccurs > len(oldValues):
+                    oldValues.append(newValue)
+                else:
+                    return "Too many occurances of input [%s]: %s" % (self.identifier,newValue)
+        else:
+            oldValues = newValue
+
+        self.value = oldValues
+        return
+
+    def getValue(self, idx=0):
+        """Get this value """
 
         return self.value
 
@@ -143,7 +165,10 @@ class LiteralInput(Input):
     def setValue(self, input):
         """Set input value value to this input"""
 
-        self.value = self._control(input["value"])
+        for inpt in input["value"]:
+            resp = self._setValueWithOccurence(self.value, self._control(inpt))
+            if resp:
+                return resp
 
     def getValue(self):
         """
@@ -166,7 +191,7 @@ class LiteralInput(Input):
         # ugly characters
         for char in self.restrictedCharacters:
             if value.find(char) > -1:
-                raise self.wps.exceptions.InvalidParameterValue(value)
+                raise Exceptions.InvalidParameterValue(value)
 
         # type 
         try:
@@ -178,7 +203,7 @@ class LiteralInput(Input):
                 value = int(value)
             #TODO other types missing
         except (ValueError), e:
-            raise InvalidParameterValue(value,e)
+            raise Exceptions.InvalidParameterValue(value,e)
 
         # value list
         if "*" in self.values:
@@ -197,7 +222,7 @@ class LiteralInput(Input):
                 if str(value) == str(allowed):
                     return value
             
-        raise InvalidParameterValue(value,e)
+        raise Exceptions.InvalidParameterValue(value,e)
 
 class ComplexInput(Input):
     """ComplexInput type"""
@@ -270,7 +295,7 @@ class ComplexInput(Input):
                 input["value"].find("http://") == 0:
             input["asReference"] = True
 
-        self.value = input["value"]
+        #self.value = input["value"]
 
         # download data
         if input["asReference"] == True:
@@ -331,10 +356,12 @@ class ComplexInput(Input):
             if size > self.maxFileSize: 
                 self.onProblem("FileSizeExceeded","Maximum file size is "+
                         str(self.maxFileSize/1024/1024)+" MB for input "+
-                        url)
+                        uNNrl)
         fout.close()
 
-        self.value = outputName
+        resp = self._setValueWithOccurence(self.value, outputName)
+        if resp:
+            return resp
         return
     
     def onProblem(self,what, why):
@@ -367,7 +394,7 @@ class BoundingBoxInput(Input):
     dimensions = None
     crs = None
     minx = None
-    minx = None
+    miny = None
     maxx = None
     maxy = None
 
@@ -410,10 +437,28 @@ class BoundingBoxInput(Input):
         Parameters:
         value {Tuple} (minx,miny,maxx,maxy)
         """
-        self.minx = value[0]
-        self.minx = value[1]
-        self.maxx = value[2]
-        self.maxy = value[3]
+
+        resp = self._setValueWithOccurence(self.value,
+                self._control(value))
+        if resp:
+            return resp
+
+        if type(self.value) == type([]):
+            if len(self.value) == 1:
+                self.minx[value[0]]
+                self.minx[value[1]]
+                self.maxx[value[2]]
+                self.maxy[value[3]]
+            else:
+                self.minx.append(value[0])
+                self.minx.append(value[1])
+                self.maxx.append(value[2])
+                self.maxy.append(value[3])
+        else:
+            self.minx = value[0]
+            self.minx = value[1]
+            self.maxx = value[2]
+            self.maxy = value[3]
 
     def getValue(self):
         """Get this value"""
@@ -553,6 +598,7 @@ class ComplexOutput(Output):
 
 class BoundingBoxOutput(Output):
     crss = None
+    crs = None
     dimensions = None
     minx = None
     miny = None
@@ -581,6 +627,7 @@ class BoundingBoxOutput(Output):
         Output.__init__(self,identifier,title,abstract=None,
                 metadata=[],type="BoundingBoxValue",asReference=asReference)
         self.crss = crss
+        self.crs = crss[0]
         self.dimensions = dimensions
         self.minx = None
         self.miny = None
@@ -598,6 +645,7 @@ class BoundingBoxOutput(Output):
         if len(value) != 4:
             raise Exception("Bounding box value is wrong, it has to have a form: "+
                     "[minx,miny,maxx,maxy]")
+        self.value = value
         self.minx  = value[0]
         self.miny  = value[1]
         self.maxx  = value[2]

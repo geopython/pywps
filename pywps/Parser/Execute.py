@@ -146,7 +146,7 @@ class Post(Post):
                 form["responsedocument"]["status"]=False
 
             form["responsedocument"]["outputs"] = {}
-            outputs = {}
+            outputs = []
             for outputNode in responseDocumentNode.getElementsByTagNameNS(
                                                 self.nameSpace, "Output"):
 
@@ -155,25 +155,25 @@ class Post(Post):
                     identifier = outputNode.getElementsByTagNameNS(
                                     self.owsNameSpace,
                                     "Identifier")[0].firstChild.nodeValue
-                    outputs[identifier] = {}
+                    outputs.append({"identifier": identifier})
                 except IndexError:
                     raise self.wps.exceptions.MissingParameterValue("Identifier")
                 # Abstract, Title are not supported yet
                 # is it necessary ?
 
-                outputs[identifier]["mimetype"] = \
+                outputs[-1]["mimetype"] = \
                     outputNode.getAttributeNS("*","mimeType") 
-                outputs[identifier]["encoding"] = \
+                outputs[-1]["encoding"] = \
                     outputNode.getAttributeNS("*","encoding") 
-                outputs[identifier]["schema"] = \
+                outputs[-1]["schema"] = \
                     outputNode.getAttributeNS("*","schema") 
-                outputs[identifier]["uom"] = \
+                outputs[-1]["uom"] = \
                     outputNode.getAttributeNS(self.nameSpace,"uom") 
 
-                outputs[identifier]["asreference"] = False
+                outputs[-1]["asreference"] = False
                 if outputNode.getAttributeNS(
                         self.nameSpace,"asReference").lower() == "true":
-                    outputs[identifier]["asreference"] = True
+                    outputs[-1]["asreference"] = True
 
             form["responsedocument"]["outputs"] = outputs
 
@@ -203,7 +203,7 @@ class Post(Post):
     def parseDataInputs(self,inputsNode):
         """ Parse intput data from given node """
 
-        parsedDataInputs = {}
+        parsedDataInputs = []
         
         for inputNode in inputsNode.getElementsByTagNameNS(self.nameSpace,
                                                                 "Input"):
@@ -215,7 +215,8 @@ class Post(Post):
                 raise self.wps.exceptions.NoApplicableCode(
                                               "Identifer for input not set")
 
-            parsedDataInputs[identifier] = {"value":None, "attributes":{}}
+            parsedDataInputs.append({"identifier":identifier,"value":None,
+                "attributes":{}})
 
             # Title and Abstract are only mandatory and not necessary:
             # skipping, not supported yet
@@ -224,18 +225,20 @@ class Post(Post):
             try:
                 dataTypeNode = inputNode.getElementsByTagNameNS(
                                             self.nameSpace,"Reference")[0]
-                parsedDataInputs[identifier] =\
-                            self.parseReferenceDataInput(dataTypeNode)
+                attributes = self.parseReferenceDataInput(dataTypeNode) 
+                attributes["identifier"] = identifier
+                parsedDataInputs[-1] = attributes
             except IndexError:
                 dataTypeNode = inputNode.getElementsByTagNameNS(
                                                 self.nameSpace,"Data")[0]
-                parsedDataInputs[identifier] =\
-                            self.parseDataInput(dataTypeNode)
-
+                attributes =self.parseDataInput(dataTypeNode) 
+                attributes["identifier"] = identifier
+                parsedDataInputs[-1] = attributes
             try:
-                parsedDataInputs[identifier]
+                parsedDataInputs[-1]
             except KeyError:
                 raise self.wps.exceptions.InvalidParameterValue(identifier)
+
                 
         return parsedDataInputs
 
@@ -525,7 +528,7 @@ class Get:
         
         """
 
-        parsedDataInputs = {}
+        parsedDataInputs = []
 
         # Parameters are separated by ";"
         for dataInput in dataInputs.split(";"):
@@ -540,24 +543,24 @@ class Get:
                 continue
 
             # initial value
-            parsedDataInputs[key] = {"value":None}
+            parsedDataInputs.append({"identifier":key, "value":None})
             
             # aditional input attributes are separated by "@"
             attributes = []
             if value.find("@") > 0:
-                parsedDataInputs[key]["value"]=value.split("@")[0]
+                parsedDataInputs[-1]["value"]=value.split("@")[0]
                 attributes=value.split("@")[1:]
             elif value.find("@") == 0:
-                parsedDataInputs[key]["value"]=None
+                parsedDataInputs[-1]["value"]=None
                 attributes=value.split("@")[1:]
             else:
-                parsedDataInputs[key]["value"]=value
+                parsedDataInputs[-1]["value"]=value
                 attributes = []
 
             # aditional attribute key is separated by "=" from it's value
             for attribute in attributes:
                 attributeKey, attributeValue = attribute.split("=")
-                parsedDataInputs[key][attributeKey] =\
+                parsedDataInputs[-1][attributeKey.lower()] =\
                                                     self._trueOrFalse(attributeValue)
         return parsedDataInputs
 
@@ -568,9 +571,5 @@ class Get:
             return False
         elif str.lower() == "true":
             return True
-        elif str.lower() == "f":
-            return False
-        elif str.lower() == "t":
-            return True
         else:
-            return None
+            return str

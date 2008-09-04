@@ -23,14 +23,17 @@
 			<ows:Identifier>width</ows:Identifier>
 			<ows:Title>buffer width</ows:Title>
 			<wps:Data>
-				<wps:LiteralData>400</wps:LiteralData>
+				<wps:LiteralData>4</wps:LiteralData>
 			</wps:Data>
 		</wps:Input>
 	</wps:DataInputs>
 	<wps:ResponseForm>
                 <wps:ResponseDocument wps:lineage="true" wps:storeExecuteResponse="true" wps:status="frue">
-                    <wps:Output wps:asReference="true">
+                    <wps:Output wps:asReference="false">
                         <ows:Identifier>buffer</ows:Identifier>
+                    </wps:Output>
+                    <wps:Output wps:asReference="true">
+                        <ows:Identifier>bufferRaster</ows:Identifier>
                     </wps:Output>
                 </wps:ResponseDocument>
 	</wps:ResponseForm>
