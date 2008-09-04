@@ -300,7 +300,7 @@ class WPSProcess:
                 default: ["EPSG:4326"]
         """
         self.inputs[identifier] = InAndOutputs.BoundingBoxInput(self,
-                identifier,title,abtract=abstract,
+                identifier,title,absstract=abstract,
                 metadata=metadata,minOccurs=minOccurs,maxOccurs=maxOccurs,
                 crss=crss)
 
@@ -364,7 +364,7 @@ class WPSProcess:
 
     def addBBoxOutput(self, identifier, title, abstract=None,
             crs="EPSG:4326", dimensions=2):
-        """ Add new output item of type BoundingBoxValue to this process 
+        """Add new output item of type BoundingBoxValue to this process 
         
         Mandatory parameters:
         identifier {String} input identifier
