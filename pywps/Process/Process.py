@@ -299,10 +299,9 @@ class WPSProcess:
         crss List of {String} supported coordinate systems.
                 default: ["EPSG:4326"]
         """
-        self.inputs[identifier] = InAndOutputs.BoundingBoxInput(self,
-                identifier,title,abstract=abstract,
-                metadata=metadata,minOccurs=minOccurs,maxOccurs=maxOccurs,
-                crss=crss)
+        self.inputs[identifier] = InAndOutputs.BoundingBoxInput(identifier,
+                title, abstract=abstract, metadata=metadata,
+                minOccurs=minOccurs, maxOccurs=maxOccurs, crss=crss)
 
         return self.inputs[identifier]
  
