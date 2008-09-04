@@ -300,7 +300,7 @@ class WPSProcess:
                 default: ["EPSG:4326"]
         """
         self.inputs[identifier] = InAndOutputs.BoundingBoxInput(self,
-                identifier,title,absstract=abstract,
+                identifier,title,abstract=abstract,
                 metadata=metadata,minOccurs=minOccurs,maxOccurs=maxOccurs,
                 crss=crss)
 
