@@ -72,6 +72,11 @@ class Input:
         """
         self.value = input["value"]
         return
+    
+    def getValue(self):
+        """Get this value"""
+
+        return self.value
 
 class LiteralInput(Input):
     """Literal input type of input. 
@@ -265,6 +270,8 @@ class ComplexInput(Input):
                 input["value"].find("http://") == 0:
             input["asReference"] = True
 
+        self.value = input["value"]
+
         # download data
         if input["asReference"] == True:
             self.downloadData(input["value"])
@@ -276,6 +283,10 @@ class ComplexInput(Input):
         """To be redefined in each instance"""
         pass
 
+    def getValue(self):
+        """Get this value"""
+
+        return self.value
 
     def downloadData(self, url):
         """Download data from given url. Do not download more, then
@@ -403,6 +414,10 @@ class BoundingBoxInput(Input):
         self.minx = value[1]
         self.maxx = value[2]
         self.maxy = value[3]
+
+    def getValue(self):
+        """Get this value"""
+        return (self.minx,self.miny,self.maxx,self.maxy)
 
 class Output:
     """Class WPS Input"""
