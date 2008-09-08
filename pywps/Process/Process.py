@@ -385,7 +385,7 @@ class WPSProcess:
         return self.outputs[identifier]
 
     # --------------------------------------------------------------------
-    def cmd(self,cmd,stdin=None):
+    def cmd(self,cmd,stdin=None,stdout=True):
         """Runs GRASS command, fetches all GRASS_MESSAGE and
         GRASS_PERCENT messages and sets self.status according to them, so
         the client application can track the progress information, when
@@ -393,20 +393,37 @@ class WPSProcess:
 
         This module is supposed to be used instead of 'os.system()', while
         running GRASS modules
+
+        Parameters:
+        cmd {String} the command
+        stdin {String} string to be send into the command via standard in
+        stdout {Boolean}  give stdout and stderror from the command back
         
         Example Usage:
-            self.Gcmd("r.los in=elevation.dem out=los coord=1000,1000")
+            self.cmd("r.los in=elevation.dem out=los coord=1000,1000")
 
-            self.Gcmd("v.net.path network afcol=forward abcol=backward \
+            self.cmd("v.net.path network afcol=forward abcol=backward \
             out=mypath nlayer=1","1 9 12")
+
+            self.cmd("d,mon start=PNG",stdout=False)
             """
 
         self.message("PyWPS Cmd: %s\n" % (cmd.strip()))
 
         try:
+            subprocessstdin = None
+            if stdin:
+                subprocessstdin = subprocess.PIPE
+
+            subprocessstdout = None
+            subprocessstderr = None
+            if stdout:
+                subprocessstdout = subprocess.PIPE
+                subprocessstderr = subprocess.PIPE
+
             p = subprocess.Popen(cmd,shell=True,
-                stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,)
+                stdin=subprocessstdin, stdout=subprocessstdout,
+                stderr=subprocessstderr)
         except Exception,e :
             self.failed = True
             raise Exception("Could not perform command [%s]: %s" % (cmd,e))
@@ -420,7 +437,7 @@ class WPSProcess:
            self.message("PyWPS stderr: %s\n" % (stderr),True)
            raise Exception("PyWPS could not perform command [%s]:\n%s" % (cmd,stderr))
 
-        return stdout.splitlines()
+        return stdout
 
     def message(self,msg,force=False):
         """Print some message to standard error
