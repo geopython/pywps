@@ -35,7 +35,7 @@ doclines = __doc__.split("\n")
 # win or *nix
 data_files= []
 if sys.platform.find('linux')>-1:
-    data_files= [('/etc/', ['pywps/etc/pywps.cfg']) ]]
+    data_files= [('/etc/', ['pywps/etc/pywps.cfg']) ]
 
 setup(
         name = 'pywps',
@@ -54,7 +54,7 @@ setup(
 
         packages = [
             'pywps',
-            'pywps.WPS',
+            'pywps.Wps',
             'pywps.etc',
             'pywps.Parser',
             'pywps.Process',
@@ -63,7 +63,7 @@ setup(
         ],
         package_dir={
                     'pywps':"pywps",
-                    'pywps.WPS':'pywps/WPS',
+                    'pywps.Wps':'pywps/Wps',
                     'pywps.Parser':'pywps/Parser',
                     'pywps.Process':'pywps/Process',
                     'pywps.Templates':'pywps/Templates',
