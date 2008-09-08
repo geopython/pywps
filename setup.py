@@ -28,8 +28,14 @@ classifiers=[
 
 
 from distutils.core import setup
+import sys
 
 doclines = __doc__.split("\n")
+
+# win or *nix
+data_files= []
+if sys.platform.find('linux')>-1:
+    data_files= [('/etc/', ['pywps/etc/pywps.cfg']) ]]
 
 setup(
         name = 'pywps',
