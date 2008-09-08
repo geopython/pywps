@@ -58,7 +58,7 @@ __version__ = "3.0-svn"
 import pywps
 from pywps import Parser 
 from pywps import Exceptions
-from pywps import WPS
+from pywps import Wps
 from pywps.Exceptions import *
 
 import sys, os, ConfigParser
@@ -170,8 +170,8 @@ class WPS:
         # Windows or Unix
         if sys.platform == 'win32':
             self.workingDir = os.path.abspath(os.path.join(os.getcwd(), os.path.dirname(sys.argv[0])))
-            cfgfiles = (os.path.join(workingDir,"pywps","default.cfg"),
-                       os.path.join(workingDir, "pywps","etc","pywps.cfg"))
+            cfgfiles = (os.path.join(self.workingDir,"pywps","default.cfg"),
+                       os.path.join(self.workingDir, "pywps","etc","pywps.cfg"))
         else:
             cfgfiles = (os.path.join(pywps.__path__[0],"default.cfg"),
                         os.path.join(pywps.__path__[0],"etc", "pywps.cfg"), "/etc/pywps.cfg")
@@ -185,13 +185,13 @@ class WPS:
         # the modules are imported first, when the request type is known
         try:
             if self.inputs["request"]  == "getcapabilities":
-                from pywps.WPS.GetCapabilities import GetCapabilities
+                from pywps.Wps.GetCapabilities import GetCapabilities
                 self.request = GetCapabilities(self)
             elif self.inputs["request"]  == "describeprocess":
-                from pywps.WPS.DescribeProcess import DescribeProcess
+                from pywps.Wps.DescribeProcess import DescribeProcess
                 self.request = DescribeProcess(self)
             elif self.inputs["request"]  == "execute":
-                from pywps.WPS.Execute import Execute
+                from pywps.Wps.Execute import Execute
                 self.request = Execute(self)
             else:
                 raise self.exceptions.InvalidParameterValue(
