@@ -47,6 +47,11 @@ class Process(WPSProcess):
         self.bufferRasterOut = self.addComplexOutput(identifier="bufferRaster",
                                 title="Output buffer as Raster",
                                 formats=[{"mimeType":"image/tiff"}])
+
+        # complex raster output
+        self.asPNG = self.addComplexOutput(identifier="asPNG",
+                                title="Output buffer as Raster in PNG format",
+                                formats=[{"mimeType":"image/png"}])
         # literal output
         self.textOut = self.addLiteralOutput(identifier="text",
                                 title="Just some literal output")
@@ -69,6 +74,13 @@ class Process(WPSProcess):
 	out = self.cmd("v.in.ogr dsn=%s output=data" %\
                 (self.getInputValue('data')))
 	self.cmd("g.region vect=data")
+
+        # creating output with GRASS PNG driver
+        import os
+        self.cmd("d.mon start=PNG",stdout=False)
+        self.cmd("d.vect data")
+        self.cmd("d.mon stop=PNG")
+        self.asPNG.setValue("map.png")
 
         # buffer
         self.status.set("Buffering",50)

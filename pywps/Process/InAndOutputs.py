@@ -157,6 +157,8 @@ class LiteralInput(Input):
         self.restrictedCharacters = ['\\',"#",";", "&","!"]
         if type(values) == types.StringType:
             self.values = (values)
+        elif type(values) == types.ListType:
+            self.values = values
         self.default = default
         self.spacing = spacing
         self.uom = None 
@@ -165,8 +167,13 @@ class LiteralInput(Input):
     def setValue(self, input):
         """Set input value value to this input"""
 
-        for inpt in input["value"]:
-            resp = self._setValueWithOccurence(self.value, self._control(inpt))
+        if type(input["value"]) == types.ListType:
+            for inpt in input["value"]:
+                resp = self._setValueWithOccurence(self.value, self._control(inpt))
+                if resp:
+                    return resp
+        else:
+            resp = self._setValueWithOccurence(self.value, self._control(input["value"]))
             if resp:
                 return resp
 
@@ -201,6 +208,8 @@ class LiteralInput(Input):
                 value = str(value)
             elif self.dataType == types.IntType:
                 value = int(value)
+            elif self.dataType == types.BooleanType:
+                value = bool(value)
             #TODO other types missing
         except (ValueError), e:
             raise Exceptions.InvalidParameterValue(value,e)
@@ -222,7 +231,7 @@ class LiteralInput(Input):
                 if str(value) == str(allowed):
                     return value
             
-        raise Exceptions.InvalidParameterValue(value,e)
+        raise Exceptions.InvalidParameterValue(value)
 
 class ComplexInput(Input):
     """ComplexInput type"""

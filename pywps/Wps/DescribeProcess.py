@@ -193,12 +193,13 @@ class DescribeProcess(Response):
                     valrecord = {}
                     if type(val) == type([]):
                         valrecord["minMax"] = 1
-                        valercord["minimumValue"] = val[0]
-                        valercord["maximumValue"] = val[-1]
-                        valercord["spacing"] = inoutput.spacing
+                        valrecord["minimumValue"] = val[0]
+                        valrecord["maximumValue"] = val[-1]
+                        valrecord["spacing"] = inoutput.spacing
                     else:
                         valrecord["discrete"] = 1
                         valrecord["value"] = val
+                    processInOutput["allowedValues"].append(valrecord)
         except AttributeError:
             pass
 

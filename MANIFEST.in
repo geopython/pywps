@@ -1,6 +1,6 @@
 include setup.py
 
-graft pywps/WPS
+graft pywps/Wps
 graft pywps/processes
 graft pywps/etc
 graft pywps/Parser

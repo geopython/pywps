@@ -469,7 +469,7 @@ class WPSProcess:
         """
 
         try:
-            return self.inputs[identifier].value
+            return self.inputs[identifier].getValue()
         except:
             return None
 
