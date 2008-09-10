@@ -40,7 +40,7 @@ class Get(Parser):
     requestParser = None
 
     def __init__(self,wps):
-        """Contructor"""
+        """Constructor"""
         Parser.__init__(self,wps)
 
     def parse(self,queryString):
@@ -65,7 +65,12 @@ class Get(Parser):
             # omit empty KVPs, e.g. due to optional ampersand after the last
             # KVP in request string (OWS_1-1-0, p.75, sect. 11.2):
             if not feature == '':
-                key,value = split(feature,"=",maxsplit=1)
+                try:
+                    key,value = split(feature,"=",maxsplit=1)
+                except:
+                    raise self.wps.exceptions.NoApplicableCode(\
+                                                'Invalid Key-Value-Pair: "' + \
+                                                str(feature) + '"')
                 if value.find("[") == 0:  # if value in brackets:
                     value = value[1:-1]   #    delete brackets
                 keys.append(key)

@@ -67,6 +67,12 @@ class Post(Post):
         self.wps.inputs["version"] = firstChild.getAttribute("version")
         if not self.wps.inputs["version"]:
             raise self.wps.exceptions.MissingParameterValue("version")
+        # check version against the version parameter in config file:
+        if not self.wps.inputs["version"] == \
+               self.wps.getConfigValue("wps", "version"):
+            raise self.wps.exceptions.VersionNegotiationFailed(
+                            'The requested version "' + self.wps.inputs["version"] + \
+                            '" is not supported by this server.')
 
         # identifiers
         for identifierNode in self.document.getElementsByTagNameNS(
@@ -111,16 +117,22 @@ class Get:
         #
         # Mandatory options
 
-        # service (is allready controled)
+        # service (is already controlled)
         if self.unparsedInputs["service"].lower() == "wps":
             self.wps.inputs["service"] = self.unparsedInputs["service"].lower()
 
-        # Request (is allready controled)
+        # Request (is already controlled)
         if self.unparsedInputs["request"].lower() == "describeprocess":
             self.wps.inputs["request"] = self.unparsedInputs["request"].lower()
 
         # version
         self.wps.inputs["version"] = self.unparsedInputs["version"]
+        # check version against the version parameter in config file:
+        if not self.wps.inputs["version"] == \
+               self.wps.getConfigValue("wps", "version"):
+            raise self.wps.exceptions.VersionNegotiationFailed(
+                            'The requested version "' + self.wps.inputs["version"] + \
+                            '" is not supported by this server.')
 
         # identifier
         self.wps.inputs["identifier"] = self.unparsedInputs["identifier"].split(",")
