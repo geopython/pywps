@@ -18,6 +18,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+# references used in the comments of this source code:
+# OWS_1-1-0:
+#      OGC Web Services Common Specification
+#      version 1.1.0 with Corrigendum 1
+#      ref.num.: OGC 06-121r3
+
 import types
 from string import split
 from pywps.Parser.Parser import Parser
@@ -56,11 +62,14 @@ class Get(Parser):
         # validation
         for feature in queryString.split("&"):
             feature = feature.strip()
-            key,value = split(feature,"=",maxsplit=1)
-            if value.find("[") == 0:  # if value in brackets:
-                value = value[1:-1]   #    delete brackets
-            keys.append(key)
-            self.unparsedInputs[key.lower()] = value[:maxInputLength]
+            # omit empty KVPs, e.g. due to optional ampersand after the last
+            # KVP in request string (OWS_1-1-0, p.75, sect. 11.2):
+            if not feature == '':
+                key,value = split(feature,"=",maxsplit=1)
+                if value.find("[") == 0:  # if value in brackets:
+                    value = value[1:-1]   #    delete brackets
+                keys.append(key)
+                self.unparsedInputs[key.lower()] = value[:maxInputLength]
 
         try:
             self.checkInputLength()
