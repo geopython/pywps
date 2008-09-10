@@ -23,6 +23,10 @@
 #      OGC Web Services Common Specification
 #      version 1.1.0 with Corrigendum 1
 #      ref.num.: OGC 06-121r3
+# WPS_1-0-0:
+#      OpenGIS(R) Web Processing Service
+#      version 1.0.0
+#      ref.num.: OGC 05-007r7
 
 import types
 from string import split
@@ -99,7 +103,9 @@ class Get(Parser):
                
                 raise FileSizeExceeded(key)
 
-        # check service name: service name is mandatory; service must be "WPS"
+        # check service name:
+        # service name is mandatory for all requests (OWS_1-1-0 p.14 tab.3 +
+        # p.46 tab.26); service must be "WPS" (WPS_1-0-0 p.17 tab.13 + p.32 tab.39) 
         if self.unparsedInputs[self.SERVICE].lower() != self.WPS:
             raise self.wps.exceptions.InvalidParameterValue(
                     self.unparsedInputs[self.SERVICE])
@@ -108,6 +114,7 @@ class Get(Parser):
         """Find requested request type and import given request parser."""
 
         # test, if one of the mandatory WPS operation is called (via request)
+        # (mandatory operations see WPS_1-0-0 p.4 sect.6.1)
         if self.unparsedInputs["request"].lower() ==\
            self.GET_CAPABILITIES:
             import GetCapabilities 
