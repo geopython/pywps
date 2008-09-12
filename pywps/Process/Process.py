@@ -118,7 +118,7 @@ class WPSProcess:
         Optional parameters:
         abstract {String} process description
                 default: None
-        metadata List of {Dict} aditional metadata.  See
+        metadata List of {Dict} additional metadata.  See
                     http://www.opengeospatial.org/standards/common, table 32 on page 65
                 E.g. {"foo":"bar"}
                 default: None
@@ -126,13 +126,13 @@ class WPSProcess:
                 default: None
         version {String} process version
                 default: None
-        statusSupported {Boolean} this process can be run assynchronously
+        statusSupported {Boolean} this process can be run asynchronously
                 default: True
         storeSupported {Boolean} outputs from this process can be stored
-                for later dowload
+                for later download
                 default: True
         grassLocation {String} or {Boolean} name of GRASS Location within
-                "grassdbase" directory (from pywps.cfg configuration file).
+                "gisdbase" directory (from pywps.cfg configuration file).
                 If set to True, temporary GRASS Location will be created
                 and grass environment will be started. If None or False, no
                 GRASS environment will be started.
@@ -205,9 +205,9 @@ class WPSProcess:
                     default: None
         uoms List of {String} value units
                     default: ()
-        minOccurs {Integer} minimum number of occurencies. 
+        minOccurs {Integer} minimum number of occurrences. 
                     default: 1
-        maxOccurs {Integer} maximum number of occurencies. 
+        maxOccurs {Integer} maximum number of occurrences. 
                     default: 1
         allowedValues  List of {String} or {List} list of allowed values,
                     which can be used with this input. You can set interval
@@ -225,7 +225,7 @@ class WPSProcess:
                     default: types.IntType
         default {Any} default value.
                     default: None
-        metadata List of {Dict} Aditional metadata. E.g. {"foo":"bar"}
+        metadata List of {Dict} Additional metadata. E.g. {"foo":"bar"}
                     default: None
         """
 
@@ -251,9 +251,9 @@ class WPSProcess:
                 default: None
         metadata List of {Dict} {key:value} pairs. 
                 default: None
-        minOccurs {Integer} minimum number of occurencies. 
+        minOccurs {Integer} minimum number of occurrences. 
                 default: 1
-        maxOccurs {Integer} maximum number of occurencies. 
+        maxOccurs {Integer} maximum number of occurrences. 
                 default: 1
         formats List of {Dict} according to table 23 (page 25). E.g.
                     [
@@ -293,9 +293,9 @@ class WPSProcess:
                 default: None
         metadata List of {Dict} {key:value} pairs. 
                 default: None
-        minOccurs {Integer} minimum number of occurencies. 
+        minOccurs {Integer} minimum number of occurrences. 
                 default: 1
-        maxOccurs {Integer} maximum number of occurencies. 
+        maxOccurs {Integer} maximum number of occurrences. 
                 default: 1
         crss List of {String} supported coordinate systems.
                 default: ["EPSG:4326"]
@@ -389,7 +389,7 @@ class WPSProcess:
         """Runs GRASS command, fetches all GRASS_MESSAGE and
         GRASS_PERCENT messages and sets self.status according to them, so
         the client application can track the progress information, when
-        runing with Status=True
+        running with Status=True
 
         This module is supposed to be used instead of 'os.system()', while
         running GRASS modules

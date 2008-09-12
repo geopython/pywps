@@ -29,7 +29,7 @@ called = 0
 
 class WPSException(Exception):
     """
-    WPSException should be base class for all exeptions
+    WPSException should be base class for all exceptions
     """
     def make_xml(self):
         # formulate XML

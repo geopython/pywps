@@ -94,7 +94,7 @@ class WPS:
     DEFAULT_WPS_VERSION = "1.0.0"
 
     def __init__(self):
-        """Class contrustor
+        """Class constructor
 
         Will load configuration files, parse the input parameters and
         perform the request.

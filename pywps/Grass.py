@@ -1,5 +1,5 @@
 """
-Module is here for work with GRASS GIS environment varibales and
+Module is here for work with GRASS GIS environmental variables and
 locations and mapsets
 """
 # Author:	Jachym Cepicky
@@ -37,7 +37,7 @@ class Grass:
     gisbase = ""
 
     def  __init__(self,executeRequest):
-        """ Initalization of GRASS environment variables (except GISRC).  """
+        """ Initialization of GRASS environmental variables (except GISRC).  """
 
         self.executeRequest = executeRequest
         self.wps = self.executeRequest.wps
@@ -63,14 +63,14 @@ class Grass:
     def mkMapset(self,location=None):
         """
         Create GRASS mapset in current directory. Mapsets name is 'mapset'.
-        At the end, GRASS will beleve, it was runned correctly.
+        At the end, GRASS will believe, it has run correctly.
 
         Returns name of new created mapset. location!=None, this mapset
         should be deleted!
 
-        Argumnets:
+        Arguments:
             location     -  Should the new mapset be created in the some old
-                            location, which is allread on this server?
+                            location, which is already on this server?
                             Default: only mapset within
                             /tmp/grasstmpSOMEHTIN/
                             will be created
@@ -153,7 +153,7 @@ class Grass:
         return
 
     def setEnv(self,key,value):
-        """Set GRASS environment variables """
+        """Set GRASS environmental variables """
 
         origValue = os.getenv(key)
         if origValue:

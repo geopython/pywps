@@ -72,7 +72,7 @@ class Lang:
         return self.defaultCode
 
     def setCode(self):
-        """ Set choosen language code """
+        """ Set chosen language code """
 
         # HACK - wouldn't there be some better way, that to use the
         # environment variable ?
@@ -80,7 +80,7 @@ class Lang:
             self.code = self.getCode(os.getenv("PYWPS_LANGUAGE"))
 
     def initStrings(self):
-        """ Initialize self.strings object accoring to known codces from
+        """ Initialize self.strings object according to known codes from
         Lang.py
 
         It can be used later like:

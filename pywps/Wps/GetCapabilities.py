@@ -148,7 +148,7 @@ class GetCapabilities(Response):
                 # process identifier must be == package name 
                 if process.identifier != processName:
                     raise ImportError(
-                            "Process indentifier \"%s\" != package name \"%s\": File name has to be the same, as the identifier is!" %\
+                            "Process identifier \"%s\" != package name \"%s\": File name has to be the same, as the identifier is!" %\
                             (process.identifier, processName))
                 processData["processok"] = 1
                 processData["identifier"] = process.identifier

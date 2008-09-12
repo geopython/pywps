@@ -86,7 +86,7 @@ class DescribeProcess(Response):
                 # process identifier must be == package name 
                 if process.identifier != processName:
                     raise ImportError(
-                            "Process indentifier \"%s\" != package name \"%s\": File name has to be the same, as the identifier is!" %\
+                            "Process identifier \"%s\" != package name \"%s\": File name has to be the same, as the identifier is!" %\
                             (process.identifier, processName))
 
                 processData["processok"] = 1
@@ -133,7 +133,7 @@ class DescribeProcess(Response):
             if input.type == "ComplexValue":
                 processInput["complexvalue"] = 1
                 self.complexValue(input,processInput)
-            if input.type == "BoudningBoxValue":
+            if input.type == "BoundingBoxValue":
                 processInput["boundingboxvalue"] = 1
                 self.bboxValue(input,processInput)
             processInputs.append(processInput)

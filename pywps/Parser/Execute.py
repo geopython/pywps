@@ -201,7 +201,7 @@ class Post(Post):
         return form
 
     def parseDataInputs(self,inputsNode):
-        """ Parse intput data from given node """
+        """ Parse input data from given node """
 
         parsedDataInputs = []
         
@@ -213,7 +213,7 @@ class Post(Post):
                      self.owsNameSpace,"Identifier")[0].firstChild.nodeValue
             except IndexError:
                 raise self.wps.exceptions.NoApplicableCode(
-                                              "Identifer for input not set")
+                                              "Identifier for input not set")
 
             parsedDataInputs.append({"identifier":identifier,"value":None,
                 "attributes":{}})
@@ -248,7 +248,7 @@ class Post(Post):
         attributes = {}
 
         #
-        # mandatrory attributes
+        # mandatory attributes
         #
         attributes["value"] =\
                     dataTypeNode.getAttributeNS(self.xlinkNameSpace,"href")
@@ -305,7 +305,7 @@ class Post(Post):
         return attributes
 
     def parseHeaderDataInput(self,headerNode):
-        """ Parse hearder node """
+        """ Parse header node """
 
         header = {}
 
@@ -314,7 +314,7 @@ class Post(Post):
                         headerNode.getAttributeNS(self.nameSpace,"value")
 
             if len(header.keys()) == 0:
-                raise self.wps.exeptions.MissingParameterValue("Header")
+                raise self.wps.exceptions.MissingParameterValue("Header")
 
         return header
 
@@ -432,11 +432,11 @@ class Get:
         # Mandatory options
         #
 
-        # service (is allready controled)
+        # service (is already controlled)
         if self.unparsedInputs["service"].lower() == "wps":
             self.wps.inputs["service"] = self.unparsedInputs["service"].lower()
 
-        # Request (is allready controled)
+        # Request (is already controlled)
         if self.unparsedInputs["request"].lower() == "execute":
             self.wps.inputs["request"] = self.unparsedInputs["request"].lower()
 
@@ -545,7 +545,7 @@ class Get:
             # initial value
             parsedDataInputs.append({"identifier":key, "value":None})
             
-            # aditional input attributes are separated by "@"
+            # additional input attributes are separated by "@"
             attributes = []
             if value.find("@") > 0:
                 parsedDataInputs[-1]["value"]=value.split("@")[0]
@@ -557,7 +557,7 @@ class Get:
                 parsedDataInputs[-1]["value"]=value
                 attributes = []
 
-            # aditional attribute key is separated by "=" from it's value
+            # additional attribute key is separated by "=" from it's value
             for attribute in attributes:
                 attributeKey, attributeValue = attribute.split("=")
                 parsedDataInputs[-1][attributeKey.lower()] =\

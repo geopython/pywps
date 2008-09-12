@@ -45,7 +45,7 @@ class Post(Post):
         self.wps = wps
 
     def parse(self,document):
-        """ Parse the requesed XML document"""
+        """ Parse the requested XML document"""
         self.document = document  # input DOM
 
         versions = []   # accepted versions

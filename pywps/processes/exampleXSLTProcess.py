@@ -13,7 +13,7 @@ class Process(WPSProcess):
     def __init__(self):
         """Process initialization"""
 
-        # initializa the process with minimal inputs
+        # initialize the process with minimal inputs
         # in this case, only process identifier is really needed
         WPSProcess.__init__(self,"exampleXSLTProcess")
 

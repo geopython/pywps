@@ -33,7 +33,7 @@ class Post(Parser):
     EXECUTE = "Execute"
 
     def __init__(self,wps):
-        """Contructor"""
+        """Constructor"""
         Parser.__init__(self,wps)
 
     def parse(self,file):

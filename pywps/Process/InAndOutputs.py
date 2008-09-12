@@ -45,9 +45,9 @@ class Input:
                 default: None
         metadata List of {Dict} {key:value} pairs. 
                 default: None
-        minOccurs {Integer} minimum number of occurencies. 
+        minOccurs {Integer} minimum number of occurrences. 
                 default: 1
-        maxOccurs {Integer} maximum number of occurencies. 
+        maxOccurs {Integer} maximum number of occurrences. 
                 default: 1
         type {String} one of "LiteralValue", "ComplexValue"  or
                 "BoundingBoxValue"
@@ -79,7 +79,7 @@ class Input:
         return
 
     def _setValueWithOccurence(self,oldValues, newValue):
-        """Check min and max occurence and set this.value"""
+        """Check min and max occurrence and set this.value"""
 
         if self.maxOccurs > 1:
             if not oldValues:
@@ -88,7 +88,7 @@ class Input:
                 if self.maxOccurs > len(oldValues):
                     oldValues.append(newValue)
                 else:
-                    return "Too many occurances of input [%s]: %s" % (self.identifier,newValue)
+                    return "Too many occurrences of input [%s]: %s" % (self.identifier,newValue)
         else:
             oldValues = newValue
 
@@ -126,9 +126,9 @@ class LiteralInput(Input):
                     default: None
         uoms List of {String} value units
                     default: ()
-        minOccurs {Integer} minimum number of occurencies. 
+        minOccurs {Integer} minimum number of occurrences. 
                     default: 1
-        maxOccurs {Integer} maximum number of occurencies. 
+        maxOccurs {Integer} maximum number of occurrences. 
                     default: 1
         allowedValues  List of {String} or {List} list of allowed values,
                     which can be used with this input. You can set interval
@@ -421,9 +421,9 @@ class BoundingBoxInput(Input):
                 default: None
         metadata List of {Dict} {key:value} pairs. 
                 default: None
-        minOccurs {Integer} minimum number of occurencies. 
+        minOccurs {Integer} minimum number of occurrences. 
                 default: 1
-        maxOccurs {Integer} maximum number of occurencies. 
+        maxOccurs {Integer} maximum number of occurrences. 
                 default: 1
         crss List of {String} supported coordinate systems.
                 default: ["EPSG:4326"]
@@ -499,7 +499,7 @@ class Output:
         type {String} one of "LiteralValue", "ComplexValue"  or
                 "BoundingBoxValue"
                 default: None
-        asReference {Boolean} wheather this output will be given back as
+        asReference {Boolean} whether this output will be given back as
                 reference or as file
                 default: False
         """
@@ -540,7 +540,7 @@ class LiteralOutput(Output):
                     default: types.StringType
         default {Any} default value.
                     default: None
-        asReference {Boolean} wheather this output will be given back as
+        asReference {Boolean} whether this output will be given back as
                 reference or as file
                 default: False
         """
@@ -583,7 +583,7 @@ class ComplexOutput(Output):
                         }
                     ]
                 default: [{"mimeType":"text/xml"}]
-        asReference {Boolean} wheather this output will be given back as
+        asReference {Boolean} whether this output will be given back as
                 reference or as file
                 default: False
         """
@@ -629,7 +629,7 @@ class BoundingBoxOutput(Output):
                 default: ["EPSG:4326"]
         dimensions {Integer} number of dimensions
                 default: 2
-        asReference {Boolean} wheather this output will be given back as
+        asReference {Boolean} whether this output will be given back as
                 reference or as file
                 default: False
         """

@@ -30,7 +30,7 @@ from shutil import rmtree as RMTREE
 
 class Execute(Response):
     """
-    This class performes the Execute request of WPS specification
+    This class performs the Execute request of WPS specification
 
     In the class, fork of the  processes has to be done, if the client
     requested asynchronous request performance (status=true)
@@ -45,7 +45,7 @@ class Execute(Response):
     paused = "processpaused"
     failed = "processfailed"
 
-    # runnig process id
+    # running process id
     pid = None
 
     # session ID
@@ -57,7 +57,7 @@ class Execute(Response):
     statusFiles = [sys.stdout]
     
     # process status
-    statusRequired = False # should the request run assynchronously?
+    statusRequired = False # should the request run asynchronously?
     status = None
     statusMessage = None
     percent = 0
@@ -146,7 +146,7 @@ class Execute(Response):
             # init environment variable
             self.initEnv()
 
-            # donwload and consolidate data
+            # download and consolidate data
             self.consolidateInputs()
 
             # set output data attributes defined in the request
@@ -190,7 +190,7 @@ class Execute(Response):
 
     def initProcess(self):
         """
-        Setting and controling input values, set by the client. Also the
+        Setting and controlling input values, set by the client. Also the
         processes from PYWPS_PROCESS directory or default directory is
         imported.
         """
@@ -214,7 +214,7 @@ class Execute(Response):
                     self.wps.inputs["identifier"])
 
 
-        # set propper method for status change
+        # set proper method for status change
         self.process.wps = self.wps
         self.process.status.onStatusChanged = self.onStatusChanged
         self.process.debug = self.wps.getConfigValue("server","debug")
@@ -237,7 +237,7 @@ class Execute(Response):
             # exceptions handler
             input.onProblem = self.onInputProblem
 
-            # maximum input file size mut not be grater, then the one,
+            # maximum input file size must not be greater, than the one,
             # defined in the global config file
             if input.type == "ComplexValue":
                 if not input.maxFileSize or input.maxFileSize > maxFileSize:
@@ -296,7 +296,7 @@ class Execute(Response):
 
     def executeProcess(self):
         """
-        Calls 'execute' method of the process, catches possible exeptions
+        Calls 'execute' method of the process, catches possible exceptions
         and raise error, if needed
         """
         try:
@@ -335,8 +335,8 @@ class Execute(Response):
         {String} status -  name of the status
         {String} statusMessage - message, which should appear in output xml file
         {Float} percent - percent done message
-        {String} exceptioncode - eventualy exception
-        {String} locator - where the problem occured
+        {String} exceptioncode - eventually exception
+        {String} locator - where the problem occurred
         """
 
         self.process.status.percentCompleted, self.process.status.value,\
@@ -448,7 +448,7 @@ class Execute(Response):
         """
         Fill reference input
 
-        wpsInput - asociative field of self.wps.inputs["datainputs"]
+        wpsInput - associative field of self.wps.inputs["datainputs"]
         processInput - self.process.inputs
         """
         complexInput["reference"] = wpsInput["value"]
@@ -535,7 +535,7 @@ class Execute(Response):
         return bboxOutput
 
     def processOutputs(self):
-        """Fill <ProcessOutputs> part in the ouput XML document
+        """Fill <ProcessOutputs> part in the output XML document
         This method is called if, self.status == ProcessSucceeded
         """
 
