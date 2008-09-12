@@ -405,7 +405,7 @@ class WPSProcess:
             self.cmd("v.net.path network afcol=forward abcol=backward \
             out=mypath nlayer=1","1 9 12")
 
-            self.cmd("d,mon start=PNG",stdout=False)
+            self.cmd("d.mon start=PNG",stdout=False)
             """
 
         self.message("PyWPS Cmd: %s\n" % (cmd.strip()))

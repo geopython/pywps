@@ -198,8 +198,8 @@ class Execute(Response):
         # import the right package
         if self.wps.inputs["identifier"] in self.processes.__all__:
             try:
-                module = __import__(self.processes.__name__,
-                                        fromlist=[str(self.wps.inputs["identifier"])])
+                module = __import__(self.processes.__name__, None, None,
+                                        [str(self.wps.inputs["identifier"])])
                 self.process = eval("module."+self.wps.inputs["identifier"]+".Process()")
 
             except Exception, e:
@@ -655,7 +655,7 @@ class Execute(Response):
                 self.pid = os.getpid()
 
                 # should the status be printed on each change?
-                self.irintStatus = True
+                self.printStatus = True
 
                 self.parentProcess = False
                 self.statusFiles.remove(sys.stdout)

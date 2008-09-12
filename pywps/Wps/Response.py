@@ -63,6 +63,9 @@ class Response:
                                     "Execute.tmpl")
 
         self.processDir = os.getenv("PYWPS_PROCESSES")
+        if not self.processDir:
+            try: self.processDir = self.wps.getConfigValue("server", "processesPath")
+            except: pass
 
         if self.processDir:
             import sys
