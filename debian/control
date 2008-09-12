@@ -7,7 +7,7 @@ Standards-Version: 3.6.2
 
 Package: pywps
 Architecture: all
-Depends: python, python-xml
+Depends: python, python-htmltmpl, python-xml
 Suggests: grass, apache2, apache
 Description: Implementation of OGC's Web Processing Service
  PyWPS is implementation of Web Processing Service from Open Geospatial Consortium Inc.(R) with help of  Python Programming Language and GIS GRASS as working tool in background.
