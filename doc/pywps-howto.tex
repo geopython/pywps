@@ -47,7 +47,7 @@
 In this file, you can found the description of installation and
 configuration of PyWPS script. At the and, you can learn, how to add
 your own process. This document describes most recent
-version of PyWPS (\version), available in subversion respository.
+version of PyWPS (\version), available in subversion repository.
 
 PyWPS project has been started on April 2006 with support of DBU --
 Deutsche Bundesstiftung Umwelt\footnote{\url{http://dbu.de}} and with help of
@@ -123,7 +123,7 @@ string, it could be security problem. Take care on your inputs and do
 not use it directly in scripts to avoid your server to be hacked.
 \end{itemize}
 
-Please report all problems or unexpected handeling either via pywps mailing
+Please report all problems or unexpected handling either via pywps mailing
 list\footnote{\href{http://wald.intevation.org/mailman/listinfo/pywps-devel}{PyWPS
 - development list}}
 or using PyWPS
@@ -192,12 +192,12 @@ adjust the configuration file
 \begin{verbatim}
 $ vim /etc/pywps.cfg
 \end{verbatim} 
-permint write access to templates directory
+permit write access to templates directory
 \begin{verbatim}
 # chmod -R 777 /usr/lib/python2.5/site-packages/pywps/Templates
 \end{verbatim} 
 
-Several binary packages for Linux distributios (\texttt{RPM,DEB}) are also avaliable on PyWPS
+Several binary packages for Linux distributions (\texttt{RPM,DEB}) are also available on PyWPS
 homepage\footnote{\pywpssite}.
 
 %---------------------------------------------------------------------
@@ -224,12 +224,12 @@ Several sections are in the file.
             \item encoding -- Language encoding (utf-8, iso-8859-2, windows-1250, \dots)
             \item title -- Server title 
             \item version -- WPS version (1.0.0)
-            \item abstract -- Server anstract
+            \item abstract -- Server abstract
             \item fees -- Possible fees
             \item constraints -- Possible constraints
             \item serveraddress -- WPS script address: \url{http://foo/bar/wps.py}
-            \item keywords -- Comma-separated list of kyewords
-            \item lang -- Default langue (eng)
+            \item keywords -- Comma-separated list of keywords
+            \item lang -- Default language (eng)
         \end{itemize}
     \item Section \textbf{[provider]} contains informations about you
         \begin{itemize}
@@ -256,12 +256,12 @@ Several sections are in the file.
             \item maxfilesize -- Maximal input file size (raster or
             vector). The size can be determined as follows: 1GB, 5MB, 3kB,
             1000b.
-            \item tempPath -- Direcotory for temporary files (mostly
+            \item tempPath -- Directory for temporary files (mostly
             temporary GRASS locations).
             \item outputUrl -- Url where the outputs are stored.
             \item outputPath -- Path. where output files are stored.
             \item debug -- true/false
-            \item processPath -- path to your processes. Default is
+            \item processesPath -- path to your processes. Default is
             \texttt{pywps/processes}. 
 
             NOTE: You can set also \texttt{PYWPS\_PROCESSES} environment
@@ -315,6 +315,7 @@ maxoperations=3
 maxinputparamlength=1024
 maxfilesize=3mb
 tempPath=/tmp
+processesPath=
 outputUrl=http://localhost/wps/wpsoutputs
 outputPath=/var/www/wps/wpsoutputs
 debug=true
@@ -389,9 +390,11 @@ your system.
     
 All processes are stored in the \texttt{pywps/processes} directory. You can
 create custom directory anywhere in your system and set
-\texttt{\$PYTHON\_PROCESS} environment variabl (how to do this for the web
-server, refer to your Server documentation). Following example will
-describe buffering process.  Several example processes are distributed along with PyWPS source code.
+\texttt{\$PYTHON\_PROCESS} environmental variable (on how to do this for the web
+server, refer to your Server documentation). Alternatively you can set this path to 
+the \texttt{processesPath} setting in the configuration file.
+Following example will describe buffering process. Several example processes are 
+distributed along with PyWPS source code.
 
 Create file \texttt{exampleBufferProcess.py} in PYWPS\_PROCESSES directory.
     
@@ -423,7 +426,7 @@ store it's output data on the server (\texttt{storeSupported}) and it is also po
 asynchronous mode (\texttt{statusSupported}). The process will run within
 GRASS GIS environment (\texttt{grassLocation = True}).
      
-\paragraph{Metadata defition} is stored in array \texttt{self.Metadata} in
+\paragraph{Metadata definition} is stored in array \texttt{self.Metadata} in
 \texttt{\_\_init\_\_} method. You can add new Medatada using
 \texttt{self.AddMetadata()} method:
 \begin{verbatim}
@@ -463,7 +466,7 @@ With literal input, you can obtain any type of character string.
  23 
 \end{verbatim}
 
-For further documentation, refere example processes distributed with the
+For further documentation, refer to example processes distributed with the
 source code as well as \texttt{pydoc~pywps/Wps/Process.py}. This help is
 also available in
 \texttt{process.html}\footnote{\href{http://wald.intevation.org/plugins/scmsvn/viewcvs.php/*checkout*/trunk/doc/process.html?rev=369&root=pywps}{Documentation
@@ -474,7 +477,7 @@ source code.
 Data outputs can be defined in similar way.
 \begin{itemize}
     \item Literal Output
-    \item ComplexValue Outout
+    \item ComplexValue Output
     \item BoundingBox Output
 \end{itemize}
     
@@ -499,7 +502,7 @@ If you want to output any text string.
 \subsection{Process Programming}
     
 The process must be defined in the \texttt{execute(self)} method. 
-Basicly, you want to get input values and set output values. For this
+Basically, you want to get input values and set output values. For this
 purpose, you can use \texttt{getValue(input\_identifier)} and
 \texttt{setValue(output\_identifier,value)} methods of the input/output
 objects (see lower).
