@@ -125,6 +125,7 @@ class Response:
 
             # '""' and '"None"'s will be removed
             f.write(re.sub(self.emptyParamRegex,"",self.response))
+            f.flush()
 
             if (f != STDOUT):
                 f.close()
