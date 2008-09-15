@@ -73,7 +73,6 @@ class Execute(Response):
     workingDir = ""
     grass = None
 
-    parentProcess = False # Fork
     printStatus = False
 
     rawDataOutput = None
@@ -133,60 +132,64 @@ class Execute(Response):
         # Status == True ?
         if self.statusRequired:
             # Status
+            self.printStatus = True
+            # Output response to client
+            print "Content-type: text/xml\n"
             self.promoteStatus(self.accepted,"Process %s accepted" %\
                     self.process.identifier)
+
+            # redirect stdout, so that apache sends back the response immediately
+            so = open(os.devnull, 'a+')
+            os.dup2(so.fileno(), sys.stdout.fileno())
             
-            self.printStatus = True
+            # remove stdout and add statusFileName to statusFiles
+            self.statusFiles.remove(sys.stdout)
+            if len(self.statusFiles) == 0:
+                self.statusFiles = [open(self.statusFileName,"w")]
 
-            # fork
-            self.splitThreads()
+        # init environment variable
+        self.initEnv()
 
-        if not self.parentProcess:
+        # download and consolidate data
+        self.consolidateInputs()
 
-            # init environment variable
-            self.initEnv()
+        # set output data attributes defined in the request
+        self.consolidateOutputs()
 
-            # download and consolidate data
-            self.consolidateInputs()
+        self.promoteStatus(self.started,"Process %s started" %\
+                self.process.identifier)
 
-            # set output data attributes defined in the request
-            self.consolidateOutputs()
+        # Execute
+        self.executeProcess()
 
-            self.promoteStatus(self.started,"Process %s started" %\
-                    self.process.identifier)
+        # Status
+        self.promoteStatus(self.succeeded, 
+                statusMessage="PyWPS Process %s successfully calculated" %\
+                self.process.identifier)
 
-            # Execute
-            self.executeProcess()
+        # lineage in and outputs
+        if self.wps.inputs['responseform'].has_key("responsedocument"):
+            if self.wps.inputs['responseform']['responsedocument'].has_key('lineage') and \
+                self.wps.inputs['responseform']['responsedocument']['lineage'] == True:
+                self.templateProcessor.set("lineage",1)
+                self.lineageInputs()
+                self.outputDefinitions()
 
-            # Status
-            self.promoteStatus(self.succeeded, 
-                    statusMessage="PyWPS Process %s successfully calculated" %\
-                    self.process.identifier)
+        # fill outputs
+        self.processOutputs()
 
-            # lineage in and outputs
-            if self.wps.inputs['responseform'].has_key("responsedocument"):
-                if self.wps.inputs['responseform']['responsedocument'].has_key('lineage') and \
-                    self.wps.inputs['responseform']['responsedocument']['lineage'] == True:
-                    self.templateProcessor.set("lineage",1)
-                    self.lineageInputs()
-                    self.outputDefinitions()
+        # Response document
+        self.response = self.templateProcessor.process(self.template)
 
-            # fill outputs
-            self.processOutputs()
+        if self.rawDataOutput:
+            self.response = None
+            self.printRawData()
 
-            # Response document
-            self.response = self.templateProcessor.process(self.template)
+        # everything worked, remove all temporary files
+        self.cleanEnv()
 
-            if self.rawDataOutput:
-                self.response = None
-                self.printRawData()
-
-            # everything worked, remove all temporary files
-            self.cleanEnv()
-
-            if (self.statusRequired):
-                self.printResponse(self.statusFiles)
-        return
+        if (self.statusRequired):
+            self.printResponse(self.statusFiles)
 
     def initProcess(self):
         """
@@ -637,47 +640,6 @@ class Execute(Response):
         return templateOutput
 
     # --------------------------------------------------------------------
-
-    def splitThreads(self):
-        """
-        Will 'try' to for currently running process. Parent process will
-        formulate resulting XML response with ProcessAccepted status, child
-        process will turn all sys.stdout and sys.stdin off, so the Web
-        Server can break the connection to the client.
-        """
-        try:
-            # this is the parent process
-            if os.fork():
-                self.parentProcess = True
-                return
-            # this is the child process
-            else:
-                self.pid = os.getpid()
-
-                # should the status be printed on each change?
-                self.printStatus = True
-
-                self.parentProcess = False
-                self.statusFiles.remove(sys.stdout)
-                if len(self.statusFiles) == 0:
-                    self.statusFiles = [open(self.statusFileName,"w")]
-
-                self.promoteStatus(self.started,"Process %s started" %\
-                    self.process.identifier)
-
-                return
-                # time.sleep(2)
-                # Reassign stdin, stdout, stderr for child
-                # so Apache will ignore it
-                si = open(os.devnull, 'r')
-                so = open(os.devnull, 'a+')
-                se = open(os.devnull, 'a+', 0)
-                os.dup2(si.fileno(), sys.stdin.fileno())
-                os.dup2(so.fileno(), sys.stdout.fileno())
-                os.dup2(se.fileno(), sys.stderr.fileno())
-        except OSError, e: 
-            raise self.wps.exceptions.NoApplicableCode("Fork failed: %d (%s)\n" % (e.errno, e.strerror) )
-        return
 
     def makeSessionId(self):
         """
