@@ -29,3 +29,7 @@ version=1.0.0&service=wps&request=execute&identifier=exampleBufferNoInputsProces
 # page 38, table 53, 
 version=1.0.0&service=wps&request=execute&identifier=exampleBufferNoInputsProcess&responsedocument=[buffer=@asreference=true]&StoreExecuteResponse=true
  
+# define output format for resulting raster map
+# this process can produce resulting map in image/png or image/tiff format,
+# choose one of them:
+version=1.0.0&service=wps&request=execute&identifier=exampleLosProcess&datainputs=[dem=http://localhost/temp/dem.tif;easting=603067.6875;northing=4925118.1875]&responsedocument=[los=@mimeType=image/png@asreference=true]
