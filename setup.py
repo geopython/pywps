@@ -39,7 +39,7 @@ if sys.platform.find('linux')>-1:
 
 setup(
         name = 'pywps',
-        version = '3.0.0',
+        version = '3.0.0rc1',
         maintainer="Jachym Cepicky",
         maintainer_email = 'jachym@les-ejk.cz',
         author = 'Jachym Cepicky',
