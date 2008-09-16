@@ -1,3 +1,8 @@
+pywps (2.0.1-1) stable; urgency=low
+
+  * Bugfix release
+
+ -- Jachym Cepicky <jachym@les-ejk.cz>  Mon, 4 Jun 2007 15:38:00 +0200
 pywps (2.0.0-1) stable; urgency=low
 
   * New version
