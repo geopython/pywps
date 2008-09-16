@@ -38,7 +38,7 @@ install: build
 	dh_clean 
 	dh_installdirs
 
-	python setup.py install --prefix=/usr --no-compile --root=`pwd`/debian/pywps
+	python setup.py install --no-compile --root=`pwd`/debian/pywps
 
 # Build architecture-dependent files here.
 binary-arch: build install

@@ -1,3 +1,12 @@
+pywps (3.0.0-1) stable; urgency=low
+
+  * New version
+  * New code structure
+  * New processes examples
+  * New configuration file
+  * See change log for more details
+
+ -- Jachym Cepicky <jachym@les-ejk.cz>  Thu, 16 Sep 2008 10:00:00 +0100
 pywps (2.0.0-1) stable; urgency=low
 
   * New version
