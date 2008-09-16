@@ -239,7 +239,7 @@ class Inputs:
             for input in self.values['datainputs'].keys():
                 if self.values['datainputs'][input] == "!complexvalue!":
                     for Input in formDocument.getElementsByTagName("Input"):
-                        cmplxval = Input.getElementsByTagName("ows:ComplexValue")
+                        cmplxval = Input.getElementsByTagName("ComplexValue")
                         identifier = Input.getElementsByTagName("ows:Identifier")[0].firstChild.data
                         if len(cmplxval) and identifier == input:
                             self.values['datainputs'][input] = cmplxval[0].getElementsByTagNameNS(eh.valueFirstChild[0],eh.valueFirstChild[1])[0].toprettyxml()

@@ -26,7 +26,7 @@ class Process:
                     'Title': 'Bounding Box Value',
                     'Abstract': ' "bounding box value" ',
                     'BoundingBoxValue': {},
-                    'value': ["0 0", "10 10"],
+                    'value': [0,0, 10,10],
                  },
 
                 ]
@@ -50,13 +50,12 @@ class Process:
                     'Title': 'Bounding Box Value',
                     'Abstract': ' "bounding box value" ',
                     'BoundingBoxValue': {},
-                    'value': ["0 0", "10 10"],
+                    'value': [11, 11, 14,14.4],
                  },
 
         ]
         
     def execute(self):
-        print self.Inputs[1]['value']
         self.Outputs[1]['value'] = self.Inputs[1]['value']
         self.Outputs[2]['value'] = [self.Inputs[2]['value'][0].split()[0],
                                     self.Inputs[2]['value'][0].split()[1],

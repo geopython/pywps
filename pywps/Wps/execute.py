@@ -423,8 +423,15 @@ class Execute:
                     print line,
                 outputh.close()
 
-            elif "LiteralValue":
+            elif "LiteralValue" in output.keys():
                 print output['value'],
+
+            elif "BoundingBoxValue" in output.keys():
+                if output['value'][0] >  output['value'][2]:
+                    output['value'][0],  output['value'][1], output['value'][2],  output['value'][3] =\
+                            output['value'][2],  output['value'][3], output['value'][0],  output['value'][1] 
+                print output['value'][0],output['value'][1],output['value'][2],output['value'][3],
+
             self.document = None
             return
 
@@ -641,15 +648,16 @@ class Execute:
                                 (outputOws['elements']['ValueFormChoice']['elements']['BoundingBoxValue']['elements']['UpperCorner']['ns'],"UpperCorner"))
 
                         try:
-                            if outputProc['value'][0] <  outputProc['value'][2]:
+                            if outputProc['value'][0] >  outputProc['value'][2]:
                                 outputProc['value'][0],  outputProc['value'][1], outputProc['value'][2],  outputProc['value'][3] =\
                                         outputProc['value'][2],  outputProc['value'][3], outputProc['value'][0],  outputProc['value'][1] 
-                                lower.appendChild(self.document.createTextNode(
-                                    "%s %s" %
-                                    (str(outputProc['value'][0]).strip(),str(outputProc['value'][1]).strip())))
-                                upper.appendChild(self.document.createTextNode(
-                                    "%s %s" %
-                                    (str(outputProc['value'][2]).strip(),str(outputProc['value'][3]).strip())))
+                            lower.appendChild(self.document.createTextNode(
+                                "%s %s" %
+                                (str(outputProc['value'][0]).strip(),str(outputProc['value'][1]).strip())))
+                            upper.appendChild(self.document.createTextNode(
+                                "%s %s" %
+                                (str(outputProc['value'][2]).strip(),str(outputProc['value'][3]).strip())))
+
                         except IndexError,e:
                             lower = upper = "%s: not enough output values for bounding box"
                         bboxNode.appendChild(lower)
