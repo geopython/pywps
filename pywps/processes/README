@@ -1,0 +1,46 @@
+This folder contains processes, which can be offerd by the server to be
+executed from the client.
+
+The processes folder needs to contain one __init__.py with __all__ list of
+available processes, e.g.
+
+__all__ = ["foo","bar"]
+
+will make processes in files "foo.py" and "bar.py" available (suppose, they
+exist in this folder).
+
+Several examples, as well as example of __init__.py file are already in
+this folder, named with "-dist" extension. To make everything work, just
+run
+
+for f in *-dist; do out="`echo $f|sed -e 's/-dist//'`"; mv $f $out; done
+
+This folder does not have to be, where you found it, it can be stored
+anywhere in your system (e.g. /usr/local/pywps/myprocesses). Than you have
+to setup 'processesPath' variable in [server] section of the configuration
+file (pywps.cfg).
+
+You can also have multiple WPS servers with only one PyWPS installation, by
+creating multiple process directories (e.g.  /usr/local/pywps/myprocesses,
+/usr/local/pywps/customprocesses, /foo/bar/prc, ...) and exporting
+PYWPS_PROCESES environment variable. 
+
+For example, suppose, you want to have multiple urls, with differet set of
+WPS processes. For each WPS server (set of processes) create separate file
+in /usr/lib/cgi-bin/ with following content (e.g.):
+
+#!/bin/sh
+export PYWPS_PROCESES=/usr/local/myprocesses
+/usr/bin/wps.py
+# end of file
+
+you can call the file e.g. (/usr/lib/cgi-bin/mywps
+
+another file (/usr/lib/cgi-bin/foowps) should look like this
+
+#!/bin/sh
+export PYWPS_PROCESES=/foo/bar/prc/
+/usr/bin/wps.py
+# end of file
+
+and so on
