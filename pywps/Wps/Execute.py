@@ -275,9 +275,26 @@ class Execute(Response):
                     if out["identifier"] == identifier:
                         respOut = out
 
-                # asReference
-                if respOut and respOut.has_key("asreference"):
-                    poutput.asReference = respOut["asreference"]
+                if respOut:
+                    # asReference
+                    if respOut.has_key("asreference"):
+                        poutput.asReference = respOut["asreference"]
+
+                    # mimetype
+                    if respOut.has_key("mimetype"):
+                        poutput.format["mimeType"] = respOut["mimetype"]
+
+                    # schema
+                    if respOut.has_key("schema"):
+                        poutput.format["schema"] = respOut["schema"]
+
+                    # encoding
+                    if respOut.has_key("encoding"):
+                        poutput.format["encoding"] = respOut["encoding"]
+
+                    # uom
+                    if respOut.has_key("uom"):
+                        poutput.format["uom"] = respOut["uom"]
 
     def onInputProblem(self,what,why):
         """
