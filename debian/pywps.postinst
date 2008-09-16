@@ -1,5 +1,5 @@
 #!/bin/sh
 
 ln -s /usr/bin/wps.py /usr/lib/cgi-bin/wps.py
-chmod 777 /usr/lib/`pythonversions -d`/site-packages/pywps/Templates
-chmod 777 /usr/lib/`pythonversions -d`/site-packages/pywps/Templates/inc
+chmod 777 /usr/lib/`pythonversions -d`/site-packages/pywps/Templates/1_0_0
+chmod 777 /usr/lib/`pythonversions -d`/site-packages/pywps/Templates/1_0_0/inc
