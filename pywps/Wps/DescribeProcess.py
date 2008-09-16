@@ -40,7 +40,11 @@ class DescribeProcess(Response):
         """
         Response.__init__(self,wps)
 
-        self.template = self.templateManager.prepare(self.templateFile)
+        try:
+            self.template = self.templateManager.prepare(self.templateFile)
+        except TemplateError:
+            self.cleanEnv()
+            raise self.wps.exceptions.InvalidParameterValue("version")
 
         #
         # HEAD

@@ -24,6 +24,7 @@ WPS Execute request handler
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 from Response import Response
+from htmltmpl import TemplateError
 import time,os,sys,tempfile,re
 from shutil import copyfile as COPY
 from shutil import rmtree as RMTREE
@@ -87,7 +88,11 @@ class Execute(Response):
 
         self.wps = wps
         self.process = None
-        self.template = self.templateManager.prepare(self.templateFile)
+        try:
+            self.template = self.templateManager.prepare(self.templateFile)
+        except TemplateError:
+            self.cleanEnv()
+            raise self.wps.exceptions.InvalidParameterValue("version")
 
         # initialization
         self.statusTime = time.time()

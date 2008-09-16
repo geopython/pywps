@@ -42,9 +42,12 @@ class Response:
     processDir = None # Directory with processes
     statusFiles = STDOUT 
     emptyParamRegex = re.compile('( \w+="")|( \w+="None")')
+    templateVersionDirectory = None # directory with templates for specified version
 
     def __init__(self,wps):
         self.wps = wps
+
+        self.templateVersionDirectory = self.wps.inputs["version"].replace(".","_")
 
         self.templateManager = TemplateManager(precompile = 1, 
             debug = self.wps.config.getboolean("server","debug")) 
@@ -52,14 +55,17 @@ class Response:
         if self.wps.inputs["request"] == "getcapabilities":
             self.templateFile = os.path.join(
                                 os.path.join(Templates.__path__)[0],
-                                     "GetCapabilities.tmpl")
+                                self.templateVersionDirectory,
+                                    "GetCapabilities.tmpl")
         elif self.wps.inputs["request"] == "describeprocess":
             self.templateFile = os.path.join(
                                 os.path.join(Templates.__path__)[0],
+                                self.templateVersionDirectory,
                                     "DescribeProcess.tmpl")
         elif self.wps.inputs["request"] == "execute":
             self.templateFile = os.path.join(
                                 os.path.join(Templates.__path__)[0],
+                                self.templateVersionDirectory,
                                     "Execute.tmpl")
 
         self.processDir = os.getenv("PYWPS_PROCESSES")
@@ -129,3 +135,7 @@ class Response:
 
             if (f != STDOUT):
                 f.close()
+
+    def cleanEnv(self):
+        """Clean possible temporary files etc. created by this request
+        type"""
