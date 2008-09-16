@@ -59,7 +59,8 @@ setup(
             'pywps.Parser',
             'pywps.Process',
             'pywps.Templates',
-            'pywps.Templates.inc',
+            'pywps.Templates.1_0_0',
+            'pywps.Templates.1_0_0.inc',
         ],
         package_dir={
                     'pywps':"pywps",
@@ -67,11 +68,15 @@ setup(
                     'pywps.Parser':'pywps/Parser',
                     'pywps.Process':'pywps/Process',
                     'pywps.Templates':'pywps/Templates',
-                    'pywps.Templates.inc':'pywps/Templates/inc',
+                    'pywps.Templates.1_0_0':'pywps/Templates/1_0_0',
+                    'pywps.Templates.1_0_0.inc':'pywps/Templates/1_0_0/inc',
                 },
         package_data={
-                    'pywps': ['Templates/*.tmpl','processes/*.py','default.cfg'],
-                    'pywps.Templates': ['inc/*.tmpl']
+                    'pywps':
+                    ['Templates/1_0_0/*.tmpl',
+                     'processes/*.py-dist','processes/README',
+                     'default.cfg'],
+                    'pywps.Templates.1_0_0': ['inc/*.tmpl']
                 },
         data_files=[
                     ('/etc/', ['pywps/etc/pywps.cfg'])
