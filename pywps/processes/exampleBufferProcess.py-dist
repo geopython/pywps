@@ -49,6 +49,11 @@ class Process(WPSProcess):
                                 formats=[{"mimeType":"image/tiff"},
                                          {"mimeType":"image/png"}])
 
+        # input as png
+        self.asPNG = self.addComplexOutput(identifier="asPNG",
+                                title="Input file as PNG raster",
+                                formats=[{"mimeType":"image/png"}])
+
         # literal output
         self.textOut = self.addLiteralOutput(identifier="text",
                                 title="Just some literal output")
@@ -73,7 +78,6 @@ class Process(WPSProcess):
 	self.cmd("g.region vect=data")
 
         # creating output with GRASS PNG driver
-        import os
         self.cmd("d.mon start=PNG",stdout=False)
         self.cmd("d.vect data")
         self.cmd("d.mon stop=PNG")
