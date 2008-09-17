@@ -228,7 +228,9 @@ class DescribeProcess(Response):
     def bboxValue(self,input,processInput):
         processInput["crs"] = input.crss[0]
 
-        processInput["CRSs"] = inputs.crss
+        processInput["CRSs"] = []
+        for crs in input.crss:
+            processInput["CRSs"].append({"crs":crs})
 
         return 
 
