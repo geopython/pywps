@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #-*- coding: utf-8 -*-
 """
 This program is simple implementation of OGC's [http://opengeospatial.org]
@@ -37,26 +37,26 @@ __version__ = "3.0-svn"
 
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
-# License: 
-# 
+# License:
+#
 # Web Processing Service implementation
 # Copyright (C) 2006 Jachym Cepicky
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import pywps
-from pywps import Parser 
+from pywps import Parser
 from pywps import Exceptions
 from pywps import Wps
 from pywps.Exceptions import *
@@ -69,10 +69,7 @@ class WPS:
     desired operation and writes required response back.
     """
 
-    method  =""                      # HTTP POST or GET 
-    maxInputLength = 0  # maximal length of one input item
-    maxFileSize = 0 # maximal input XML or other file size
-    maxInputSize = 0 # maximal size of HTTP Get request
+    method  =""                      # HTTP POST or GET
     parser = None
     config = None  # Configuration
     workingDir = None # this working directory
@@ -82,7 +79,11 @@ class WPS:
     inputs = {} # parsed input values
     request = None # object with getcapabilities/describeprocess/execute
                    # class
+
     defaultLanguage = "eng"
+    languages = [defaultLanguage]
+    defaultVersion = "1.0.0"
+    versions=[defaultVersion]
 
     # global variables
     METHOD_GET="GET"
@@ -105,6 +106,13 @@ class WPS:
         # get settings
         self._loadConfiguration()
 
+        # set default language
+        self.languages = self.getConfigValue("wps","lang").split(",")
+        self.defaultLanguage = self.languages[0]
+        # set default version
+        self.versions=self.getConfigValue("wps","version").split(",")
+        self.defaultVersion = self.versions[0]
+
         # find out the request method
         self.method = os.getenv("REQUEST_METHOD")
         if not self.method:  # set standard method
@@ -116,7 +124,7 @@ class WPS:
             from pywps.Parser.Get import Get
             parser = Get(self)
             querystring = ""
-            try: 
+            try:
                 querystring = os.environ["QUERY_STRING"]
             except KeyError:
                 # if QUERY_STRING isn't found in env-dictionary, try to read
@@ -134,10 +142,6 @@ class WPS:
 
         # inputs parsed, perform request
         if self.inputs:
-            self.defaultLanguage = self.getConfigValue("wps","lang").split(",")[0]
-            # HACK - wouldn't there be some better way, that to use the
-            # environment variable ?
-            os.environ["PYWPS_LANGUAGE"] = self.inputs["language"]
             self.performRequest()
 
         # request performed, write the response back
@@ -149,7 +153,7 @@ class WPS:
                 self.request.printResponse(self.request.statusFiles)
 
         return
-    
+
     def _loadConfiguration(self):
         """Load PyWPS configuration from configuration files. This are
 
@@ -199,7 +203,7 @@ class WPS:
                         "request: "+self.inputs["request"])
         except KeyError,e:
             raise self.exceptions.NoApplicableCode(e.message)
-    
+
     def getConfigValue(self,*args):
         """Return desired value from the configuration files
 

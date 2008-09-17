@@ -14,21 +14,21 @@ In the process:
 
 """
 # Author:	Jachym Cepicky
-#        	http://les-ejk.cz 
-# Lince: 
-# 
-# Web Processing Service implementation 
-# Copyright (C) 2006 Jachym Cepicky 
-# 
-# This program is free software; you can redistribute it and/or modify 
-# it under the terms of the GNU General Public License as published by 
-# the Free Software Foundation; either version 2 of the License.  
-# 
-# This program is distributed in the hope that it will be useful, 
+#        	http://les-ejk.cz
+# Lince:
+#
+# Web Processing Service implementation
+# Copyright (C) 2006 Jachym Cepicky
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License.
+#
+# This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -36,48 +36,56 @@ In the process:
 import os
 
 class Lang:
-    def __init__(self):
 
-        # taken from
-        # http://www.loc.gov/standards/iso639-2/php/code_list.php
+    # static list of language codes
 
-        # self.codes[0] = ISO 639-2 
-        # self.codes[1] = ISO 639-1
-        # self.codes[2] = English name
+    # taken from
+    # http://www.loc.gov/standards/iso639-2/php/code_list.php
 
-        self.codes = [
-                ["eng","en","english"],
-                ["ger","de","german"],
-                ["fre","fr","french"],
-                ["cze","cz","czech"],
-                ["ita","it","italian"]
-                # to be continued ...
-        ]
+    # self.codes[0] = ISO 639-2
+    # self.codes[1] = ISO 639-1
+    # self.codes[2] = English name
+    codes = [
+            ["eng","en","english"],
+            ["ger","de","german"],
+            ["fre","fr","french"],
+            ["cze","cz","czech"],
+            ["ita","it","italian"],
+            ["gre","el","greek"],
+            ["cat","ca","catalan"],
+            ["spa","es","spanish"],
+            ["fin","fi","finnish"],
+            ["swe","sv","swedish"],
+            # to be continued ...
+    ]
+    defaultCode ="eng"
 
-        # default
-        self.code = "eng"
-        self.defaultCode ="eng"
-        self.strings = {}
+    # static method
+    def getCode(langString):
 
-        self.initStrings()
-        self.setCode()
-
-    def getCode(self, langString):
-
-        for lang in self.codes:
+        for lang in Lang.codes:
             if langString in lang:
                 return lang[0]
 
-        # return english, if nothing found
-        return self.defaultCode
+        # return None if nothing found
+        return None
 
-    def setCode(self):
+    getCode = staticmethod(getCode)
+
+    def __init__(self):
+
+        # default
+        self.code = self.defaultCode
+        self.strings = {}
+        self.initStrings()
+
+    def setCode(self, code):
         """ Set chosen language code """
 
-        # HACK - wouldn't there be some better way, that to use the
-        # environment variable ?
-        if os.getenv("PYWPS_LANGUAGE"):
-            self.code = self.getCode(os.getenv("PYWPS_LANGUAGE"))
+        self.code = Lang.getCode(code)
+        if not self.code:
+            self.code = self.defaultCode
+        return
 
     def initStrings(self):
         """ Initialize self.strings object according to known codes from
@@ -94,7 +102,7 @@ class Lang:
 
     def get(self,key):
         """ Will return desired string in selected language """
-        
+
         for string in self.strings:
             if self.strings[self.code].has_key(key):
                 return self.strings[self.code][key]

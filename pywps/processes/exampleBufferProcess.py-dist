@@ -46,12 +46,14 @@ class Process(WPSProcess):
         # complex raster output
         self.bufferRasterOut = self.addComplexOutput(identifier="bufferRaster",
                                 title="Output buffer as Raster",
-                                formats=[{"mimeType":"image/tiff"}])
+                                formats=[{"mimeType":"image/tiff"},
+                                         {"mimeType":"image/png"}])
 
-        # complex raster output
+        # input as png
         self.asPNG = self.addComplexOutput(identifier="asPNG",
-                                title="Output buffer as Raster in PNG format",
+                                title="Input file as PNG raster",
                                 formats=[{"mimeType":"image/png"}])
+
         # literal output
         self.textOut = self.addLiteralOutput(identifier="text",
                                 title="Just some literal output")
@@ -76,7 +78,6 @@ class Process(WPSProcess):
 	self.cmd("g.region vect=data")
 
         # creating output with GRASS PNG driver
-        import os
         self.cmd("d.mon start=PNG",stdout=False)
         self.cmd("d.vect data")
         self.cmd("d.mon stop=PNG")
@@ -98,9 +99,16 @@ class Process(WPSProcess):
         # export
         self.status.set("Exporting data",90)
 	self.cmd("v.out.ogr type=area format=GML input=data_buff dsn=out.xml  olayer=path.xml")
-	self.cmd("r.out.gdal in=buff type=Byte output=buffer.tiff")
+
+        # deside, if the user wants PNG or GeoTIFF format
+        bufffile = "buffer.png"
+        if self.bufferRasterOut.format["mimeType"] == "image/tiff":
+            losfile = "buffer.tif"
+            self.cmd("r.out.gdal in=buff out=buffer.tif type=Byte")
+        else:
+            self.cmd("r.out.png in=buff out=buffer.png")
         
         # setting output values
         self.bufferOut.setValue("out.xml")
-        self.bufferRasterOut.setValue("buffer.tiff")
+        self.bufferRasterOut.setValue(bufffile)
         self.textOut.setValue("hallo, world")

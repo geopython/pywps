@@ -4,43 +4,37 @@ This module parses OGC Web Processing Service (WPS) Execute request.
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
 #               jachym at les-ejk dot cz
-# Lince: 
-# 
+# Lince:
+#
 # Web Processing Service implementation
 # Copyright (C) 2006 Jachym Cepicky
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import xml.dom.minidom
 from pywps.Parser.Post import Post
+from pywps.Parser.Get import Get
 
 import string,re
 
 class Post(Post):
     """ HTTP POST XML request encoding parser.  """
 
-    wps = None # main WPS instance
-    document = None # input DOM object
-    inputs = {} # resulting parsed inputs
     nameSpace = None # WPS namespace
     owsNameSpace = None # OWS namespace
     xlinkNameSpace = None # OWS namespace
-
-    def __init__(self,wps):
-        """ Constructor """
-        self.wps = wps
 
     def parse(self,document):
         """ Parse given XML document """
@@ -49,7 +43,7 @@ class Post(Post):
         firstChild = self.getFirstChildNode(self.document)  # no comments or
                                                             # white spaces
         self.nameSpace = firstChild.namespaceURI    # document namespace
-        self.owsNameSpace = self.wps.OWS_NAMESPACE  
+        self.owsNameSpace = self.wps.OWS_NAMESPACE
         self.xlinkNameSpace = self.wps.XLINK_NAMESPACE
         language  = None
         identifiers = []
@@ -59,17 +53,11 @@ class Post(Post):
         #
         # Mandatory options
         #
-        
-        # service
-        self.wps.inputs["service"] = "wps"
-        
-        # request 
-        self.wps.inputs["request"] = "execute"
+
+        # service & Request are already controlled
 
         # version
-        self.wps.inputs["version"] = firstChild.getAttribute("version")
-        if not self.wps.inputs["version"]:
-            raise self.wps.exceptions.MissingParameterValue("version")
+        self.checkVersion(firstChild)
 
         # identifier
         try:
@@ -81,19 +69,15 @@ class Post(Post):
         #
         # Optional options
         #
-            
-        # language
-        language = firstChild.getAttribute("language")
-        if not language:
-            language = self.wps.defaultLanguage
 
-        self.wps.inputs["language"] = language
+        # language
+        self.checkLanguage(firstChild)
 
         # dataInputs
         try:
             inputsNode = firstChild.getElementsByTagNameNS(
                                             self.nameSpace,"DataInputs")[0]
-            self.wps.inputs["datainputs"] = self.parseDataInputs(inputsNode) 
+            self.wps.inputs["datainputs"] = self.parseDataInputs(inputsNode)
         except IndexError:
             self.wps.inputs["datainputs"] = None
 
@@ -103,14 +87,14 @@ class Post(Post):
                 firstChild.getElementsByTagNameNS(self.nameSpace,
                                                         "ResponseForm")[0]
             self.wps.inputs["responseform"] = self.parseResponseForm(
-                                                        responseFormNode) 
+                                                        responseFormNode)
         except IndexError:
             self.wps.inputs["responseform"] = None
 
 
     def parseResponseForm(self,responseFormNode):
         """ Parse requested response form node """
-        
+
         form = {}
         form["responsedocument"] = {}
         form["rawdataoutput"] = {}
@@ -142,7 +126,7 @@ class Post(Post):
             if responseDocumentNode.getAttributeNS(self.nameSpace,
                     "status").lower() == "true":
                 form["responsedocument"]["status"]=True
-            else: 
+            else:
                 form["responsedocument"]["status"]=False
 
             form["responsedocument"]["outputs"] = {}
@@ -162,13 +146,13 @@ class Post(Post):
                 # is it necessary ?
 
                 outputs[-1]["mimetype"] = \
-                    outputNode.getAttributeNS("*","mimeType") 
+                    outputNode.getAttributeNS("*","mimeType")
                 outputs[-1]["encoding"] = \
-                    outputNode.getAttributeNS("*","encoding") 
+                    outputNode.getAttributeNS("*","encoding")
                 outputs[-1]["schema"] = \
-                    outputNode.getAttributeNS("*","schema") 
+                    outputNode.getAttributeNS("*","schema")
                 outputs[-1]["uom"] = \
-                    outputNode.getAttributeNS(self.nameSpace,"uom") 
+                    outputNode.getAttributeNS(self.nameSpace,"uom")
 
                 outputs[-1]["asreference"] = False
                 if outputNode.getAttributeNS(
@@ -204,7 +188,7 @@ class Post(Post):
         """ Parse input data from given node """
 
         parsedDataInputs = []
-        
+
         for inputNode in inputsNode.getElementsByTagNameNS(self.nameSpace,
                                                                 "Input"):
             # input Identifier
@@ -220,18 +204,18 @@ class Post(Post):
 
             # Title and Abstract are only mandatory and not necessary:
             # skipping, not supported yet
-            
+
             # formchoice
             try:
                 dataTypeNode = inputNode.getElementsByTagNameNS(
                                             self.nameSpace,"Reference")[0]
-                attributes = self.parseReferenceDataInput(dataTypeNode) 
+                attributes = self.parseReferenceDataInput(dataTypeNode)
                 attributes["identifier"] = identifier
                 parsedDataInputs[-1] = attributes
             except IndexError:
                 dataTypeNode = inputNode.getElementsByTagNameNS(
                                                 self.nameSpace,"Data")[0]
-                attributes =self.parseDataInput(dataTypeNode) 
+                attributes =self.parseDataInput(dataTypeNode)
                 attributes["identifier"] = identifier
                 parsedDataInputs[-1] = attributes
             try:
@@ -239,12 +223,12 @@ class Post(Post):
             except KeyError:
                 raise self.wps.exceptions.InvalidParameterValue(identifier)
 
-                
+
         return parsedDataInputs
 
     def parseReferenceDataInput(self,dataTypeNode):
         """ Parse given complex value reference node """
-        
+
         attributes = {}
 
         #
@@ -260,13 +244,13 @@ class Post(Post):
         #
 
         # mimeType, encoding, schema - not yet supported
-        
+
         # method
         attributes["method"] = \
                    dataTypeNode.getAttributeNS(self.nameSpace,"method")
         if attributes["method"] == "":
             attributes["method"] = "GET"
-        
+
         # header
         try:
             attributes["header"] = self.parseHeaderDataInput(
@@ -280,7 +264,7 @@ class Post(Post):
             attributes["body"] = \
                         dataTypeNode.getElementsByTagNameNS(self.nameSpace,
                         "Body")[0].firstChild
-        
+
             # get node value, if node type is Text or CDATA
             if attributes["body"].nodeType == \
                                     xml.dom.minidom.Text.nodeType or\
@@ -301,7 +285,7 @@ class Post(Post):
 
         attributes["type"] = "ComplexValue"
         attributes["asReference"] = True
-        
+
         return attributes
 
     def parseHeaderDataInput(self,headerNode):
@@ -329,7 +313,7 @@ class Post(Post):
             attributes = self.parseComplexData(
                                 dataTypeNode.getElementsByTagNameNS(
                                            self.nameSpace,"ComplexData")[0])
-            
+
         # literalData
         elif len(dataTypeNode.getElementsByTagNameNS(
                                     self.nameSpace,"LiteralData")) > 0:
@@ -343,7 +327,7 @@ class Post(Post):
                                 dataTypeNode.getElementsByTagNameNS(
                                        self.nameSpace,"BoundingBoxData")[0])
 
-        # if attributes are still None, exception will 
+        # if attributes are still None, exception will
         # be called in parent method
 
         return attributes
@@ -369,9 +353,9 @@ class Post(Post):
                 attributes["value"] = complexDataChildNode.toxml()
 
         attributes["type"] = "ComplexValue"
-            
+
         return attributes
-    
+
     def parseLiteralData(self,literalDataNode):
         """Parse literal data node"""
 
@@ -406,22 +390,10 @@ class Post(Post):
         return attributes
 
 
-class Get:
+class Get(Get):
     """
     Parses input request obtained via HTTP GET encoding.
     """
-
-    wps = None  # main WPS instance
-    unparsedInputs = {} # input arguments
-    inputs = {} # resulting parsed inputs
-
-    def __init__(self,wps):
-        """
-        Arguments:
-           self
-           wps   - parent WPS instance
-        """
-        self.wps = wps
 
     def parse(self,unparsedInputs):
         """ Parse given inputs """
@@ -432,30 +404,23 @@ class Get:
         # Mandatory options
         #
 
-        # service (is already controlled)
-        if self.unparsedInputs["service"].lower() == "wps":
-            self.wps.inputs["service"] = self.unparsedInputs["service"].lower()
-
-        # Request (is already controlled)
-        if self.unparsedInputs["request"].lower() == "execute":
-            self.wps.inputs["request"] = self.unparsedInputs["request"].lower()
+        # service & Request are already controlled
 
         # version
-        self.wps.inputs["version"] = self.unparsedInputs["version"]
+        self.checkVersion()
 
         # identifier
-        self.wps.inputs["identifier"] = self.unparsedInputs["identifier"]
+        if "identifier" in self.unparsedInputs:
+            self.wps.inputs["identifier"] = self.unparsedInputs["identifier"]
+        else:
+            raise self.wps.exceptions.MissingParameterValue("identifier")
 
-        # 
+        #
         # Optional options
         #
 
         # Language
-        try:
-            self.wps.inputs["language"] =\
-                                    self.unparsedInputs["language"].lower()
-        except KeyError,e:
-            self.wps.inputs["language"] = self.wps.defaultLanguage
+        self.checkLanguage()
 
         # dataInputs
         try:
@@ -524,8 +489,8 @@ class Get:
     def parseDataInputs(self,dataInputs):
         """Parse DataInputs parameter
 
-        This is described in OGC WPS 1.0.0,  05-007, page 38 
-        
+        This is described in OGC WPS 1.0.0,  05-007, page 38
+
         """
 
         parsedDataInputs = []
@@ -544,7 +509,7 @@ class Get:
 
             # initial value
             parsedDataInputs.append({"identifier":key, "value":None})
-            
+
             # additional input attributes are separated by "@"
             attributes = []
             if value.find("@") > 0:

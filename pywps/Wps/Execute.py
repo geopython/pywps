@@ -4,21 +4,21 @@ WPS Execute request handler
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
 #               jachym at les-ejk dot cz
-# Lince: 
-# 
+# Lince:
+#
 # Web Processing Service implementation
 # Copyright (C) 2006 Jachym Cepicky
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -56,7 +56,7 @@ class Execute(Response):
     statusLocation = ''
     statusFileName = None
     statusFiles = [sys.stdout]
-    
+
     # process status
     statusRequired = False # should the request run asynchronously?
     status = None
@@ -68,7 +68,7 @@ class Execute(Response):
     statusTime = None
 
     # directories, which should be removed
-    dirsToBeRemoved = []     
+    dirsToBeRemoved = []
 
     # working directory and grass
     workingDir = ""
@@ -111,7 +111,7 @@ class Execute(Response):
         if  self.wps.inputs["responseform"]["responsedocument"].has_key("status"):
             if self.wps.inputs["responseform"]["responsedocument"]["status"]:
                 self.statusRequired = True
-                
+
         # is store response required ?
         if  self.wps.inputs["responseform"]["responsedocument"].has_key("storeexecuteresponse"):
             if self.wps.inputs["responseform"]["responsedocument"]["storeexecuteresponse"]:
@@ -124,9 +124,9 @@ class Execute(Response):
         self.templateProcessor.set("encoding",
                                     self.wps.getConfigValue("wps","encoding"))
         self.templateProcessor.set("lang",
-                                    self.wps.getConfigValue("wps","lang"))
+                                    self.wps.inputs["language"])
         self.templateProcessor.set("version",
-                                    self.wps.getConfigValue("wps","version"))
+                                    self.wps.inputs["version"])
         self.templateProcessor.set("statuslocation",
                                     self.statusLocation)
         self.templateProcessor.set("serviceinstance",
@@ -146,7 +146,7 @@ class Execute(Response):
             # redirect stdout, so that apache sends back the response immediately
             so = open(os.devnull, 'a+')
             os.dup2(so.fileno(), sys.stdout.fileno())
-            
+
             # remove stdout and add statusFileName to statusFiles
             self.statusFiles.remove(sys.stdout)
             if len(self.statusFiles) == 0:
@@ -168,7 +168,7 @@ class Execute(Response):
         self.executeProcess()
 
         # Status
-        self.promoteStatus(self.succeeded, 
+        self.promoteStatus(self.succeeded,
                 statusMessage="PyWPS Process %s successfully calculated" %\
                 self.process.identifier)
 
@@ -236,7 +236,7 @@ class Execute(Response):
         for identifier in self.process.inputs:
 
             # Status
-            self.promoteStatus(self.paused, 
+            self.promoteStatus(self.paused,
                     statusMessage="Getting input %s of process %s" %\
                     (identifier, self.process.identifier))
 
@@ -308,7 +308,7 @@ class Execute(Response):
         what - locator of the problem
         why - possible reason of the problem
         """
-        
+
         exception = None
 
         if what == "FileSizeExceeded":
@@ -339,16 +339,28 @@ class Execute(Response):
 
     def processDescription(self):
         """
-        Fills Identifier, Title and Abstract, eventually WSDL and Profile
+        Fills Identifier, Title and Abstract, eventually WSDL, Metadata and Profile
         parts of the output XML document
         """
 
-        self.templateProcessor.set("title", self.process.title)
-        self.templateProcessor.set("abstract", self.process.abstract)
         self.templateProcessor.set("identifier", self.process.identifier)
-
-        #self.templateProcessor.set("profile", self.process.profile)
-        #self.templateProcessor.set("wsdl", self.process.wsdl)
+        self.templateProcessor.set("title", self.process.i18n(self.process.title))
+        if self.process.abstract:
+            self.templateProcessor.set("abstract", self.process.i18n(self.process.abstract))
+        if self.process.metadata:
+            metadata=[]
+            for meta in self.process.metadata:
+                metadata.append({"metadatatitle":meta})
+            self.templateProcessor.set("Metadata", metadata)
+        if self.process.profile:
+            profiles=[]
+            for profile in self.process.profile:
+                profiles.append({"profile":profile})
+            self.templateProcessor.set("Profiles", profiles)
+        if self.process.wsdl:
+            self.templateProcessor.set("wsdl", self.process.wsdl)
+        if self.process.version:
+            self.templateProcessor.set("processVersion", process.version)
 
     def promoteStatus(self,status,
                     statusMessage=0, percent=0,
@@ -366,15 +378,15 @@ class Execute(Response):
 
         self.process.status.percentCompleted, self.process.status.value,\
         self.printStatus
-        
+
         self.statusTime = time.time()
         self.templateProcessor.set("statustime", time.ctime(self.statusTime))
         self.status = status
-        if statusMessage != 0: self.statusMessage = statusMessage 
-        if percent != 0: self.percent = percent 
-        if exceptioncode != 0: self.exceptioncode = exceptioncode 
-        if locator != 0: self.locator = locator 
-        
+        if statusMessage != 0: self.statusMessage = statusMessage
+        if percent != 0: self.percent = percent
+        if exceptioncode != 0: self.exceptioncode = exceptioncode
+        if locator != 0: self.locator = locator
+
         # init value
         self.templateProcessor.set("processstarted",0)
         self.templateProcessor.set("processsucceeded",0)
@@ -419,7 +431,7 @@ class Execute(Response):
         output XML document.
         """
         templateInputs = []
-    
+
         for identifier in self.process.inputs.keys():
             input = self.process.inputs[identifier]
 
@@ -432,8 +444,8 @@ class Execute(Response):
                 wpsInput["lineaged"] = True
 
                 templateInput["identifier"] = input.identifier
-                templateInput["title"] = input.title
-                templateInput["abstract"] = input.abstract
+                templateInput["title"] = self.process.i18n(input.title)
+                templateInput["abstract"] = self.process.i18n(input.abstract)
 
 
                 if input.type == "LiteralValue":
@@ -510,15 +522,15 @@ class Execute(Response):
         output XML document.
         """
         templateOutputs = []
-    
+
         for identifier in self.process.outputs.keys():
             templateOutput = {}
             output = self.process.outputs[identifier]
 
             templateOutput["identifier"] = output.identifier
-            templateOutput["title"] = output.title
-            templateOutput["abstract"] = output.abstract
-        
+            templateOutput["title"] = self.process.i18n(output.title)
+            templateOutput["abstract"] = self.process.i18n(output.abstract)
+
             if self.process.storeSupported and output.asReference:
                 templateOutput["asreference"] = "true"
             else:
@@ -565,15 +577,15 @@ class Execute(Response):
         """
 
         templateOutputs = []
-    
+
         for identifier in self.process.outputs.keys():
             try:
                 templateOutput = {}
                 output = self.process.outputs[identifier]
 
                 templateOutput["identifier"] = output.identifier
-                templateOutput["title"] = output.title
-                templateOutput["abstract"] = output.abstract
+                templateOutput["title"] = self.process.i18n(output.title)
+                templateOutput["abstract"] = self.process.i18n(output.abstract)
 
                 # Reference
                 if output.asReference:
@@ -637,7 +649,7 @@ class Execute(Response):
 
     def _asReferenceOutput(self,templateOutput, output):
 
-        
+
         # copy the file to output directory
         if output.type == "LiteralValue":
             f = open(os.path.join(
@@ -758,7 +770,7 @@ class Execute(Response):
             raise self.wps.exceptions.NoApplicableCode("Could not init GRASS: %s" % e)
 
         return
-        
+
     def cleanEnv(self):
         """
         Removes temporary created files and dictionaries
@@ -777,7 +789,7 @@ class Execute(Response):
 
         units = re.compile("[gmkb].*")
         size = float(re.sub(units,'',maxSize))
-        
+
         if maxSize.find("g") > -1:
             size *= 1024*1024*1024
         elif maxSize.find("m") > -1:
@@ -788,7 +800,7 @@ class Execute(Response):
             size *= 1
 
         return size
-    
+
     def printRawData(self):
         """
         Prints raw data to sys.stdout with correct content-type, according

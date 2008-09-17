@@ -4,21 +4,21 @@ WPS GetCapabilities request handler
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
 #               jachym at les-ejk dot cz
-# Lince: 
-# 
+# Lince:
+#
 # Web Processing Service implementation
 # Copyright (C) 2006 Jachym Cepicky
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -52,7 +52,7 @@ class GetCapabilities(Response):
         self.templateProcessor.set("encoding",
                                     self.wps.getConfigValue("wps","encoding"))
         self.templateProcessor.set("lang",
-                                    self.wps.getConfigValue("wps","lang"))
+                                    self.wps.inputs["language"])
         self.templateProcessor.set("servertitle",
                                     self.wps.getConfigValue("wps","title"))
         self.templateProcessor.set("serverabstract",
@@ -62,7 +62,7 @@ class GetCapabilities(Response):
         for keyword in self.wps.getConfigValue("wps","keywords").split(','):
             keywordList.append({'keyword':keyword.strip()})
         self.templateProcessor.set("Keywords",keywordList)
-        
+
         self.templateProcessor.set("Versions",
                                     [{'version':
                                       self.wps.getConfigValue("wps","version")}])
@@ -126,11 +126,11 @@ class GetCapabilities(Response):
                     self.wps.getConfigValue("provider","electronicMailAddress"))
         else:
            self.templateProcessor.set("address", 0)
-            
+
         # OperationsMetadata
         self.templateProcessor.set("Operations",
              [{"operation":"GetCapabilities",
-               "url":self.wps.getConfigValue("wps","serveraddress")}, 
+               "url":self.wps.getConfigValue("wps","serveraddress")},
               {"operation":"DescribeProcess",
                "url":self.wps.getConfigValue("wps","serveraddress")},
               {"operation":"Execute",
@@ -140,7 +140,7 @@ class GetCapabilities(Response):
         processesData = []
 
         # Import processes
-        
+
         for processName in self.processes.__all__:
 
             processData = {}
@@ -150,19 +150,33 @@ class GetCapabilities(Response):
                                     locals(), [processName])
                 process = eval("module."+processName+".Process()")
 
-                # process identifier must be == package name 
+                # process identifier must be == package name
                 if process.identifier != processName:
                     raise ImportError(
                             "Process identifier \"%s\" != package name \"%s\": File name has to be the same, as the identifier is!" %\
                             (process.identifier, processName))
+                # set selected language
+                process.lang.setCode(self.wps.inputs["language"])
+
                 processData["processok"] = 1
                 processData["identifier"] = process.identifier
                 processData["processversion"] = process.version
-                processData["title"] = process.title
-                processData["abstract"] = process.abstract
-                processData["profile"] = process.profile
-                processData["wsdl"] = process.wsdl
-                processData["metadatalen"] = 0
+                processData["title"] = process.i18n(process.title)
+                if process.abstract:
+                    processData["abstract"] = process.i18n(process.abstract)
+                if process.metadata:
+                    metadata=[]
+                    for meta in process.metadata:
+                        metadata.append({"metadatatitle":meta})
+                    processData["Metadata"] = metadata
+                if process.profile:
+                    profiles=[]
+                    for profile in process.profile:
+                        profiles.append({"profile":profile})
+                    processData["Profiles"] = profiles
+                if process.wsdl:
+                    processData["wsdl"] = process.wsdl
+
             except Exception, e:
                 processData["processok"] = 0
                 processData["process"] = processName

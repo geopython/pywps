@@ -47,7 +47,7 @@ class Grass:
                 "version":"GRASS_VERSION",
                 "gui":"GRASS_GUI",
                 "gisbase": "GISBASE",
-                "ldLibraryPath": "LD_LIBRARY_PATH"
+                "ldLibraryPath": "LD_LIBRARY_PATH",
                 "home": "HOME"
         }
 
