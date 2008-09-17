@@ -46,12 +46,9 @@ class Process(WPSProcess):
         # complex raster output
         self.bufferRasterOut = self.addComplexOutput(identifier="bufferRaster",
                                 title="Output buffer as Raster",
-                                formats=[{"mimeType":"image/tiff"}])
+                                formats=[{"mimeType":"image/tiff"},
+                                         {"mimeType":"image/png"}])
 
-        # complex raster output
-        self.asPNG = self.addComplexOutput(identifier="asPNG",
-                                title="Output buffer as Raster in PNG format",
-                                formats=[{"mimeType":"image/png"}])
         # literal output
         self.textOut = self.addLiteralOutput(identifier="text",
                                 title="Just some literal output")
