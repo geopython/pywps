@@ -48,6 +48,7 @@ class Grass:
                 "gui":"GRASS_GUI",
                 "gisbase": "GISBASE",
                 "ldLibraryPath": "LD_LIBRARY_PATH"
+                "home": "HOME"
         }
 
         # put env
