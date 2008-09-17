@@ -96,19 +96,17 @@
                         <TMPL_IF abstract>
 			<ows:Abstract><TMPL_VAR abstract></ows:Abstract>
                         </TMPL_IF>
-                        <TMPL_IF metadatalen>
-                        <TMPL_LOOP metadata>
+                        <TMPL_LOOP Metadata>
 			<ows:Metadata xlink:title="<TMPL_VAR metadatatitle>" />
                         </TMPL_LOOP>
-                        </TMPL_IF>
-                        <TMPL_IF profile>
-			<wps:Profile><TMPL_VAR profile></ows:Profile>
-                        </TMPL_IF>
+                        <TMPL_LOOP Profiles>
+			<wps:Profile><TMPL_VAR profile></wps:Profile>
+                        </TMPL_LOOP>
                         <TMPL_IF wsdl>
 			<wps:WSDL><TMPL_VAR wsdl></ows:WSDL>
                         </TMPL_IF>
 		</wps:Process>
-                <TMPL_ELSE> 
+                <TMPL_ELSE>
                 <!-- Process <TMPL_VAR process> failed: <TMPL_VAR exception> -->
                 </TMPL_IF>
                 </TMPL_LOOP>
@@ -122,6 +120,6 @@
 			<ows:Language><TMPL_VAR language></ows:Language>
 		</wps:Supported>
                 </TMPL_LOOP>
-	</wps:Languages> 
+	</wps:Languages>
 	<wps:WSDL xlink:href="<TMPL_VAR url>?WSDL"/>
 </wps:Capabilities>

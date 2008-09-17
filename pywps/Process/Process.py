@@ -1,19 +1,19 @@
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
-# Lince: 
-# 
+# Lince:
+#
 # Web Processing Service implementation
 # Copyright (C) 2006 Jachym Cepicky
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -110,19 +110,19 @@ class WPSProcess:
             metadata=[],profile=[], version=None,
             statusSupported=True, storeSupported=False, grassLocation=None):
         """Process initialization. All parameters can be set lately
-        
+
         Mandatory parameters:
         identifier {String} process identifier
         title {String} process title
-        
+
         Optional parameters:
         abstract {String} process description
                 default: None
-        metadata List of {Dict} additional metadata.  See
+        metadata List of additional metadata.  See
                     http://www.opengeospatial.org/standards/common, table 32 on page 65
-                E.g. {"foo":"bar"}
+                E.g. ["foo":"bar"]
                 default: None
-        profile {URN}
+        profile [URN]
                 default: None
         version {String} process version
                 default: None
@@ -169,7 +169,7 @@ class WPSProcess:
     def initProcess(self, title = None, abstract=None,
             metadata=[],profile=[], version=None,
             statusSupported=True, storeSupported=False, grassLocation=None):
-        """Can be used for later process re-initialization 
+        """Can be used for later process re-initialization
 
         For parameters, see __init__ method options.  """
 
@@ -190,7 +190,7 @@ class WPSProcess:
         self.grassLocation = grassLocation
 
     def addLiteralInput(self, identifier, title, abstract=None,
-            uoms=(), minOccurs=1, maxOccurs=1, 
+            uoms=(), minOccurs=1, maxOccurs=1,
             allowedValues=("*"), type=types.IntType ,
             default=None, metadata= []):
         """
@@ -205,9 +205,9 @@ class WPSProcess:
                     default: None
         uoms List of {String} value units
                     default: ()
-        minOccurs {Integer} minimum number of occurrences. 
+        minOccurs {Integer} minimum number of occurrences.
                     default: 1
-        maxOccurs {Integer} maximum number of occurrences. 
+        maxOccurs {Integer} maximum number of occurrences.
                     default: 1
         allowedValues  List of {String} or {List} list of allowed values,
                     which can be used with this input. You can set interval
@@ -247,13 +247,13 @@ class WPSProcess:
         title {String} input title
 
         Optional parameters:
-        abstract {String} input description. 
+        abstract {String} input description.
                 default: None
-        metadata List of {Dict} {key:value} pairs. 
+        metadata List of {Dict} {key:value} pairs.
                 default: None
-        minOccurs {Integer} minimum number of occurrences. 
+        minOccurs {Integer} minimum number of occurrences.
                 default: 1
-        maxOccurs {Integer} maximum number of occurrences. 
+        maxOccurs {Integer} maximum number of occurrences.
                 default: 1
         formats List of {Dict} according to table 23 (page 25). E.g.
                     [
@@ -266,7 +266,7 @@ class WPSProcess:
                     ]
                 default: [{"mimeType":"text/xml"}]
         maxmegabites {Float} Maximum input file size. Can not be bigger, as
-                defined in global configuration file. 
+                defined in global configuration file.
                 default: 5
         """
 
@@ -289,13 +289,13 @@ class WPSProcess:
         title {String} input title
 
         Optional parameters:
-        abstract {String} input description. 
+        abstract {String} input description.
                 default: None
-        metadata List of {Dict} {key:value} pairs. 
+        metadata List of {Dict} {key:value} pairs.
                 default: None
-        minOccurs {Integer} minimum number of occurrences. 
+        minOccurs {Integer} minimum number of occurrences.
                 default: 1
-        maxOccurs {Integer} maximum number of occurrences. 
+        maxOccurs {Integer} maximum number of occurrences.
                 default: 1
         crss List of {String} supported coordinate systems.
                 default: ["EPSG:4326"]
@@ -305,7 +305,7 @@ class WPSProcess:
                 minOccurs=minOccurs, maxOccurs=maxOccurs, crss=crss)
 
         return self.inputs[identifier]
- 
+
     # --------------------------------------------------------------------
 
     def addComplexOutput(self,identifier,title,abstract=None,
@@ -317,7 +317,7 @@ class WPSProcess:
         title {String} output title
 
         Optional parameters:
-        metadata List of {Dict} {key:value} pairs. 
+        metadata List of {Dict} {key:value} pairs.
                 default: None
         formats List of {Dict} according to table 23 (page 25). E.g.
                     [
@@ -364,14 +364,14 @@ class WPSProcess:
 
     def addBBoxOutput(self, identifier, title, abstract=None,
             crs="EPSG:4326", dimensions=2):
-        """Add new output item of type BoundingBoxValue to this process 
-        
+        """Add new output item of type BoundingBoxValue to this process
+
         Mandatory parameters:
         identifier {String} input identifier
         title {String} input title
 
         Optional parameters:
-        abstract {String} input description. 
+        abstract {String} input description.
                 default: None
         crss List of {String} supported coordinate systems.
                 default: ["EPSG:4326"]
@@ -398,7 +398,7 @@ class WPSProcess:
         cmd {String} the command
         stdin {String} string to be send into the command via standard in
         stdout {Boolean}  give stdout and stderror from the command back
-        
+
         Example Usage:
             self.cmd("r.los in=elevation.dem out=los coord=1000,1000")
 
@@ -476,7 +476,7 @@ class WPSProcess:
     def setOutputValue(self,identifier,value):
         """Set output value
 
-        Returns: None 
+        Returns: None
         """
         try:
             return self.outputs[identifier].setValue(value)

@@ -2,14 +2,14 @@
 <wps:ProcessDescriptions xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd" service="WPS" version="1.0.0" xml:lang="<TMPL_VAR lang>">
     <TMPL_LOOP Processes>
     <TMPL_IF processok>
-    <ProcessDescription wps:processVersion="<TMPL_VAR version>" storeSupported="<TMPL_VAR store>" statusSupported="<TMPL_VAR status>">
+    <ProcessDescription wps:processVersion="<TMPL_VAR processVersion>" storeSupported="<TMPL_VAR store>" statusSupported="<TMPL_VAR status>">
         <ows:Identifier><TMPL_VAR identifier></ows:Identifier>
         <ows:Title><TMPL_VAR title></ows:Title>
         <TMPL_IF abstract>
         <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
         </TMPL_IF>
         <TMPL_LOOP Metadata>
-        <ows:Metadata xlink:title="<TMPL_VAR metadata>" />
+        <ows:Metadata xlink:title="<TMPL_VAR metadatatitle>" />
         </TMPL_LOOP>
         <TMPL_LOOP Profiles>
         <wps:Profile><TMPL_VAR profile></wps:Profile>
@@ -74,7 +74,7 @@
         </ProcessOutputs>
         </TMPL_IF>
     </ProcessDescription>
-    <TMPL_ELSE> 
+    <TMPL_ELSE>
     <!-- Process <TMPL_VAR process> failed: <TMPL_VAR exception> -->
     </TMPL_IF>
     </TMPL_LOOP>

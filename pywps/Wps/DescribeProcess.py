@@ -4,21 +4,21 @@ WPS DescribeProcess request handler
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
 #               jachym at les-ejk dot cz
-# Lince: 
-# 
+# Lince:
+#
 # Web Processing Service implementation
 # Copyright (C) 2006 Jachym Cepicky
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -53,9 +53,9 @@ class DescribeProcess(Response):
         self.templateProcessor.set("encoding",
                                     self.wps.getConfigValue("wps","encoding"))
         self.templateProcessor.set("lang",
-                                    self.wps.getConfigValue("wps","lang"))
+                                    self.wps.inputs["language"])
         self.templateProcessor.set("version",
-                                    self.wps.getConfigValue("wps","version"))
+                                    self.wps.inputs["version"])
 
         #
         # Processes
@@ -75,7 +75,7 @@ class DescribeProcess(Response):
         processesData = []
 
         for processName in self.processes.__all__:
-            # skip process, if not requested or 
+            # skip process, if not requested or
             # identifier != "ALL"
             if not processName in self.wps.inputs["identifier"] and \
                 self.wps.inputs["identifier"][0].lower() != "all":
@@ -88,22 +88,36 @@ class DescribeProcess(Response):
 
                 process = eval("module."+processName+".Process()")
 
-                # process identifier must be == package name 
+                # process identifier must be == package name
                 if process.identifier != processName:
                     raise ImportError(
                             "Process identifier \"%s\" != package name \"%s\": File name has to be the same, as the identifier is!" %\
                             (process.identifier, processName))
 
+                # set selected language
+                process.lang.setCode(self.wps.inputs["language"])
+
                 processData["processok"] = 1
                 processData["identifier"] = process.identifier
-                processData["title"] = process.title
-                processData["abstract"] = process.abstract
-                processData["Metadata"] = 0 #TODO
-                processData["Profiles"] = process.profile
-                processData["wsdl"] = process.wsdl
+                processData["title"] = process.i18n(process.title)
+                if process.abstract:
+                    processData["abstract"] = process.i18n(process.abstract)
+                if process.metadata:
+                    metadata=[]
+                    for meta in process.metadata:
+                        metadata.append({"metadatatitle":meta})
+                    processData["Metadata"] = metadata
+                if process.profile:
+                    profiles=[]
+                    for profile in process.profile:
+                        profiles.append({"profile":profile})
+                    processData["Profiles"] = profiles
+                if process.wsdl:
+                    processData["wsdl"] = process.wsdl
                 processData["store"] = process.storeSupported
                 processData["status"] = process.statusSupported
-                processData["version"] = process.version
+                if process.version:
+                    processData["processVersion"] = process.version
 
                 processData["Datainputs"] = self.processInputs(process)
                 processData["datainputslen"] = len(processData["Datainputs"])
@@ -128,8 +142,8 @@ class DescribeProcess(Response):
             processInput = {}
             input = process.inputs[identifier]
             processInput["identifier"] = identifier
-            processInput["title"] =     input.title
-            processInput["abstract"] =  input.abstract
+            processInput["title"] =     process.i18n(input.title)
+            processInput["abstract"] =  process.i18n(input.abstract)
             processInput["minoccurs"] = input.minOccurs
             processInput["maxoccurs"] = input.maxOccurs
             if input.type == "LiteralValue":
@@ -154,8 +168,8 @@ class DescribeProcess(Response):
             processOutput = {}
             output = process.outputs[identifier]
             processOutput["identifier"] = identifier
-            processOutput["title"] =     output.title
-            processOutput["abstract"] =  output.abstract
+            processOutput["title"] =     process.i18n(output.title)
+            processOutput["abstract"] =  process.i18n(output.abstract)
             if output.type == "LiteralValue":
                 processOutput["literalvalue"] = 1
                 self.literalValue(output,processOutput)
@@ -167,14 +181,14 @@ class DescribeProcess(Response):
                 self.bboxValue(output,processOutput)
             processOutputs.append(processOutput)
         return processOutputs
-    
+
     def literalValue(self,inoutput,processInOutput):
 
         # data types
         dataTypeReference = self.getDataTypeReference(inoutput)
         processInOutput["dataType"] = dataTypeReference["type"]
         processInOutput["dataTypeReference"] = dataTypeReference["reference"]
-        
+
         # UOMs
         if inoutput.uom:
             processInOutput["UOM"] = 1
@@ -232,5 +246,5 @@ class DescribeProcess(Response):
         for crs in input.crss:
             processInput["CRSs"].append({"crs":crs})
 
-        return 
+        return
 

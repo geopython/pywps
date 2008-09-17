@@ -4,138 +4,106 @@ This module parses OGC Web Processing Service (WPS) GetCapabilities request.
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
 #               jachym at les-ejk dot cz
-# Lince: 
-# 
+# Lince:
+#
 # Web Processing Service implementation
 # Copyright (C) 2006 Jachym Cepicky
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import xml.dom.minidom
-import pywps.Exceptions as WPSExceptions
 
 from pywps.Parser.Post import Post
+from pywps.Parser.Get import Get
 
 class Post(Post):
     """ Parses input request obtained via HTTP POST encoding - should be XML
     file.
     """
-    wps = None # main WPS instance
-    document = None # input DOM object
-
-
-    def __init__(self,wps):
-        """
-        Arguments:
-           self
-           wps   - parent WPS instance
-        """
-        self.wps = wps
 
     def parse(self,document):
         """ Parse the requested XML document"""
         self.document = document  # input DOM
 
         versions = []   # accepted versions
-        acceptedVersionsNodes = None 
+        acceptedVersionsNodes = None
         versionNode = None
         firstChild = self.getFirstChildNode(self.document)
         nameSpace = self.document.firstChild.namespaceURI
-        language  = None
 
         #
         # Mandatory options
-        
-        # service
-        self.wps.inputs["service"] = "wps"
-        
-        # request 
-        self.wps.inputs["request"] = "getcapabilities"
+
+        # service & Request are already controlled
 
         #
         # Optional options
-            
+
         # acceptVersions
         acceptedVersionsNodes = self.document.getElementsByTagNameNS(
                                                 nameSpace,"AcceptVersions")
         if len(acceptedVersionsNodes) > 0:
             for versionNode in\
                 acceptedVersionsNodes[-1].getElementsByTagNameNS(nameSpace,"Version"):
-                versions.append(self.controll(versionNode.firstChild.nodeValue))
-
+                versions.append(versionNode.firstChild.nodeValue)
         if len(versions) == 0:
-            versions = [self.wps.DEFAULT_WPS_VERSION]
-
+            versions = self.wps.versions
         self.wps.inputs["acceptversions"] = versions
+        for version in self.wps.inputs["acceptversions"]:
+            if version in self.wps.versions:
+                self.wps.inputs["version"]=version
+        if not "version" in self.wps.inputs:
+            raise self.wps.exceptions.VersionNegotiationFailed(
+                                "There's no version in AcceptVersions parameter " +
+                                "that is supported by this server.")
 
         # language
-        language = self.controll(firstChild.getAttribute("language"))
-        if not language:
-            language = self.wps.defaultLanguage
-
-        self.wps.inputs["language"] = language
+        self.checkLanguage(firstChild)
 
         return
 
-class Get:
+class Get(Get):
     """ Parses input request obtained via HTTP GET encoding.  """
-
-    wps = None  # main WPS instance
-    unparsedInputs = {} # input arguments
-    inputs = {} # resulting parsed inputs
-
-    def __init__(self,wps):
-        """
-        Arguments:
-           self
-           wps   - parent WPS instance
-        """
-        self.wps = wps
 
     def parse(self,unparsedInputs):
         """ Parse rawly parsed inputs """
-        
+
         self.unparsedInputs = unparsedInputs
 
         #
         # Mandatory options
 
-        # service (is already controlled)
-        if self.unparsedInputs["service"].lower() == "wps":
-            self.wps.inputs["service"] = self.unparsedInputs["service"]
+        # service & Request are already controlled
 
-        # Request (is already controlled)
-        if self.unparsedInputs["request"].lower() == "getcapabilities":
-            self.wps.inputs["request"] = self.unparsedInputs["request"].lower()
-
-        # 
+        #
         # Optional options
 
         # AcceptVersions
         try:
-            self.wps.inputs["version"] = \
-                               self.unparsedInputs["acceptversions"]
+            self.wps.inputs["acceptversions"] = \
+                               self.unparsedInputs["acceptversions"].split(",")
         except KeyError,e:
-            self.wps.inputs["version"] = self.wps.DEFAULT_WPS_VERSION
-        if self.wps.inputs["version"] not in self.wps.ACCEPTED_WPS_VERSIONS:
-            raise WPSExceptions.InvalidParameterValue("acceptversions")
+            self.wps.inputs["acceptversions"] = self.wps.versions
+        for version in self.wps.inputs["acceptversions"]:
+            if version in self.wps.versions:
+                self.wps.inputs["version"]=version
+        if not "version" in self.wps.inputs:
+            raise self.wps.exceptions.VersionNegotiationFailed(
+                                "There's no version in AcceptVersions parameter " +
+                                "that is supported by this server.")
 
         # Language
-        try:
-            self.wps.inputs["language"] =\
-                                    self.unparsedInputs["language"].lower()
-        except KeyError,e:
-            self.wps.inputs["language"] = self.wps.defaultLanguage
-        
+        self.checkLanguage()
+
