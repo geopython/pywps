@@ -92,9 +92,6 @@ class WPS:
     WPS_NAMESPACE = "http://www.opengis.net/wps/1.0.0"
     XLINK_NAMESPACE = "http://www.w3.org/1999/xlink"
 
-    DEFAULT_WPS_VERSION = "1.0.0"
-    ACCEPTED_WPS_VERSIONS = ["1.0.0"]
-
     def __init__(self):
         """Class constructor
 

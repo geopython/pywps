@@ -707,7 +707,7 @@ class Execute(Response):
             else:
                 serveraddress += "?"
 
-        serveraddress += "service=WPS&request=GetCapabilities&version="+self.wps.DEFAULT_WPS_VERSION
+        serveraddress += "service=WPS&request=GetCapabilities&version="+self.wps.defaultVersion
 
         serveraddress = serveraddress.replace("&", "&amp;") # Must be done first!
         serveraddress = serveraddress.replace("<", "&lt;")
