@@ -41,25 +41,25 @@ class Process(WPSProcess):
 
         # call the method for later process initialization with translated
         # strings
-        self.initProcess(title= self.i18n("title"),
+        self.initProcess(title= "title",
             version = "0.1",
             storeSupported = "true",
             statusSupported = "true",
-            abstract= self.i18n("abstract"))
+            abstract= "abstract")
 
         # define in- and outputs
         self.gmlIn = self.addComplexInput(identifier="gml",
-                             title = self.i18n("gml"))
+                             title = "gml")
 
         self.xsltIn = self.addComplexInput(identifier = "xslt",
-                             title = self.i18n("xslt"))
+                             title = "xslt")
 
         self.gmlOut = self.addComplexOutput(identifier="gml",
-                                title=self.i18n("gmlOut"))
+                                title="gmlOut")
 
         self.bboxOut = self.addBBoxOutput(identifier="bbox",
-                                title=self.i18n("bboxOut"),
-                                abstract=self.i18n("bboxOut.abstract"))
+                                title="bboxOut",
+                                abstract="bboxOut.abstract")
 
     def execute(self):
         """Execute process"""
@@ -73,7 +73,7 @@ class Process(WPSProcess):
 
         # set first output
         self.gmlOut.setValue("output.gml")
-        
+
         # get the bounding box of the transformation result using ogr tools
         self.status.set("Estimating bounding box",75)
 
@@ -82,10 +82,10 @@ class Process(WPSProcess):
         self.bboxOut.setValue(extent)
 
     def getBBox(self,file):
-        """Get bounding box of given vector file. 
-        
+        """Get bounding box of given vector file.
+
         The attributes are mined using python-gdal bindings
-        
+
         """
         # NOTE: this could be done by standard shell functions as well
         # but this is more elegant way
@@ -103,4 +103,4 @@ class Process(WPSProcess):
         extent = layer.GetExtent()
 
         return extent
-        
+
