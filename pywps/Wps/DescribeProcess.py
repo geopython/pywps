@@ -162,7 +162,7 @@ class DescribeProcess(Response):
             if output.type == "ComplexValue":
                 processOutput["complexvalue"] = 1
                 self.complexValue(output,processOutput)
-            if output.type == "BoudningBoxValue":
+            if output.type == "BoundingBoxValue":
                 processOutput["boundingboxvalue"] = 1
                 self.bboxValue(output,processOutput)
             processOutputs.append(processOutput)
