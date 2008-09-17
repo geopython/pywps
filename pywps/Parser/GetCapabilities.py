@@ -125,14 +125,12 @@ class Get:
 
         # AcceptVersions
         try:
-            self.wps.inputs["acceptversions"] = \
-                               self.unparsedInputs["acceptversions"].split(",")
+            self.wps.inputs["version"] = \
+                               self.unparsedInputs["acceptversions"]
         except KeyError,e:
-            self.wps.inputs["acceptversions"] = [self.wps.DEFAULT_WPS_VERSION]
-        if self.wps.DEFAULT_WPS_VERSION not in self.wps.inputs["acceptversions"]:
-            raise WPSExceptions.VersionNegotiationFailed(
-                                "There's no version in AcceptVersions parameter " +
-                                "that will be supported by this server.")
+            self.wps.inputs["version"] = self.wps.DEFAULT_WPS_VERSION
+        if self.wps.inputs["version"] not in self.wps.ACCEPTED_WPS_VERSIONS:
+            raise WPSExceptions.InvalidParameterValue("acceptversions")
 
         # Language
         try:
