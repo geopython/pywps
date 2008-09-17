@@ -92,6 +92,7 @@ class WPS:
     XLINK_NAMESPACE = "http://www.w3.org/1999/xlink"
 
     DEFAULT_WPS_VERSION = "1.0.0"
+    ACCEPTED_WPS_VERSIONS = ["1.0.0"]
 
     def __init__(self):
         """Class constructor
@@ -197,7 +198,7 @@ class WPS:
                 raise self.exceptions.InvalidParameterValue(
                         "request: "+self.inputs["request"])
         except KeyError,e:
-            raise self.exceptions.MissingParameterValue("request")
+            raise self.exceptions.NoApplicableCode(e.message)
     
     def getConfigValue(self,*args):
         """Return desired value from the configuration files
