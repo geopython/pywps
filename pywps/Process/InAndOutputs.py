@@ -212,7 +212,7 @@ class LiteralInput(Input):
                 value = bool(value)
             #TODO other types missing
         except (ValueError), e:
-            raise Exceptions.InvalidParameterValue(value,e)
+            raise Exceptions.InvalidParameterValue(value)
 
         # value list
         if "*" in self.values:
