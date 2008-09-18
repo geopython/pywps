@@ -54,8 +54,6 @@ class DescribeProcess(Response):
                                     self.wps.getConfigValue("wps","encoding"))
         self.templateProcessor.set("lang",
                                     self.wps.inputs["language"])
-        self.templateProcessor.set("version",
-                                    self.wps.inputs["version"])
 
         #
         # Processes
@@ -117,7 +115,7 @@ class DescribeProcess(Response):
                 processData["store"] = process.storeSupported
                 processData["status"] = process.statusSupported
                 if process.version:
-                    processData["processVersion"] = process.version
+                    processData["processversion"] = process.version
 
                 processData["Datainputs"] = self.processInputs(process)
                 processData["datainputslen"] = len(processData["Datainputs"])
