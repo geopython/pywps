@@ -125,8 +125,6 @@ class Execute(Response):
                                     self.wps.getConfigValue("wps","encoding"))
         self.templateProcessor.set("lang",
                                     self.wps.inputs["language"])
-        self.templateProcessor.set("version",
-                                    self.wps.inputs["version"])
         self.templateProcessor.set("statuslocation",
                                     self.statusLocation)
         self.templateProcessor.set("serviceinstance",
@@ -360,7 +358,7 @@ class Execute(Response):
         if self.process.wsdl:
             self.templateProcessor.set("wsdl", self.process.wsdl)
         if self.process.version:
-            self.templateProcessor.set("processVersion", process.version)
+            self.templateProcessor.set("processversion", self.process.version)
 
     def promoteStatus(self,status,
                     statusMessage=0, percent=0,

@@ -37,7 +37,6 @@ class Post(Post):
         self.document = document  # input DOM
 
         firstChild = self.getFirstChildNode(self.document)
-        nameSpace = self.document.firstChild.namespaceURI
         owsNameSpace = self.wps.OWS_NAMESPACE
         identifiers = []
         identifierNode = None

@@ -41,7 +41,8 @@ class Post(Post):
         acceptedVersionsNodes = None
         versionNode = None
         firstChild = self.getFirstChildNode(self.document)
-        nameSpace = self.document.firstChild.namespaceURI
+        owsNameSpace = self.wps.OWS_NAMESPACE
+        wpsNameSpace = self.wps.WPS_NAMESPACE
 
         #
         # Mandatory options
@@ -53,10 +54,10 @@ class Post(Post):
 
         # acceptVersions
         acceptedVersionsNodes = self.document.getElementsByTagNameNS(
-                                                nameSpace,"AcceptVersions")
+                                                wpsNameSpace,"AcceptVersions")
         if len(acceptedVersionsNodes) > 0:
             for versionNode in\
-                acceptedVersionsNodes[-1].getElementsByTagNameNS(nameSpace,"Version"):
+                acceptedVersionsNodes[-1].getElementsByTagNameNS(owsNameSpace,"Version"):
                 versions.append(versionNode.firstChild.nodeValue)
         if len(versions) == 0:
             versions = self.wps.versions
