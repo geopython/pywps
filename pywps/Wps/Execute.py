@@ -37,8 +37,6 @@ class Execute(Response):
     requested asynchronous request performance (status=true)
     """
 
-    statusPrinted = 0
-
     # status variants
     accepted = "processaccepted"
     started = "processstarted"
@@ -58,7 +56,9 @@ class Execute(Response):
     statusFiles = [sys.stdout]
 
     # process status
-    statusRequired = False # should the request run asynchronously?
+    storeRequired = False # should the request run asynchronously?
+    statusRequired = False # should the status file be updated?
+    lineageRequired = False # should the output have lineage?
     status = None
     statusMessage = None
     percent = 0
@@ -73,8 +73,6 @@ class Execute(Response):
     # working directory and grass
     workingDir = ""
     grass = None
-
-    printStatus = False
 
     rawDataOutput = None
 
@@ -104,21 +102,62 @@ class Execute(Response):
 
         # rawDataOutput
         if self.wps.inputs["responseform"]["rawdataoutput"]:
-            self.rawDataOutput = self.wps.inputs["responseform"]["rawdataoutput"].keys()[0]
+            self.rawDataOutput = self.wps.inputs["responseform"]["rawdataoutput"][0].values()[0]
 
         # is status required
         self.statusRequired = False
-        if  self.wps.inputs["responseform"]["responsedocument"].has_key("status"):
+        if self.wps.inputs["responseform"]["responsedocument"].has_key("status"):
             if self.wps.inputs["responseform"]["responsedocument"]["status"]:
                 self.statusRequired = True
 
         # is store response required ?
-        if  self.wps.inputs["responseform"]["responsedocument"].has_key("storeexecuteresponse"):
+        self.storeRequired = False
+        if self.wps.inputs["responseform"]["responsedocument"].has_key("storeexecuteresponse"):
             if self.wps.inputs["responseform"]["responsedocument"]["storeexecuteresponse"]:
                 self.statusFiles.append(open(self.statusFileName,"w"))
+                self.storeRequired = True
+
+        # is lineage required ?
+        lineageRequired = False
+        if self.wps.inputs["responseform"].has_key("responsedocument"):
+            if self.wps.inputs["responseform"]["responsedocument"].has_key("lineage") and \
+                self.wps.inputs["responseform"]["responsedocument"]["lineage"] == True:
+                lineageRequired = True
 
         # setInput values
         self.initProcess()
+
+        # check rawdataoutput against process
+        if self.rawDataOutput and self.rawDataOutput not in self.process.outputs:
+            self.cleanEnv()
+            raise self.wps.exceptions.InvalidParameterValue("rawDataOutput")
+
+        # check storeExecuteResponse against process
+        if self.storeRequired and not self.process.storeSupported:
+            self.cleanEnv()
+            raise self.wps.exceptions.InvalidParameterValue(
+                "storeExecuteResponse is true, but the process does not support output storage")
+
+        # check status against process
+        if self.statusRequired and not self.process.statusSupported:
+            self.cleanEnv()
+            raise self.wps.exceptions.InvalidParameterValue(
+                "status is true, but the process does not support status updates")
+
+        # OGC 05-007r7 page 43
+        # if status is true and storeExecuteResponse is false, raise an exception
+        if self.statusRequired and not self.storeRequired:
+            self.cleanEnv()
+            raise self.wps.exceptions.InvalidParameterValue(
+                "status is true, but storeExecuteResponse is false")
+
+        # OGC 05-007r7 page 36, Table 49
+        # Either responseDocument or rawDataOutput should be specified
+        if self.rawDataOutput and self.storeRequired:
+            self.cleanEnv()
+            raise self.wps.exceptions.InvalidParameterValue(
+                "Either responseDocument or rawDataOutput should be specified, but not both")
+
 
         # HEAD
         self.templateProcessor.set("encoding",
@@ -132,12 +171,13 @@ class Execute(Response):
         # Description
         self.processDescription()
 
-        # Status == True ?
-        if self.statusRequired:
-            # Status
-            self.printStatus = True
+        # Asynchronous request
+        # OGC 05-007r7 page 36, Table 50, note (a)
+        # OGC 05-007r7 page 42
+        if self.storeRequired:
             # Output response to client
             print "Content-type: text/xml\n"
+            # set status to accepted
             self.promoteStatus(self.accepted,"Process %s accepted" %\
                     self.process.identifier)
 
@@ -150,49 +190,63 @@ class Execute(Response):
             if len(self.statusFiles) == 0:
                 self.statusFiles = [open(self.statusFileName,"w")]
 
-        # init environment variable
-        self.initEnv()
+        try:
 
-        # download and consolidate data
-        self.consolidateInputs()
+            # init environment variable
+            self.initEnv()
 
-        # set output data attributes defined in the request
-        self.consolidateOutputs()
+            # download and consolidate data
+            self.consolidateInputs()
 
-        self.promoteStatus(self.started,"Process %s started" %\
-                self.process.identifier)
+            # set output data attributes defined in the request
+            self.consolidateOutputs()
 
-        # Execute
-        self.executeProcess()
+            # Execute
+            self.executeProcess()
 
-        # Status
-        self.promoteStatus(self.succeeded,
-                statusMessage="PyWPS Process %s successfully calculated" %\
-                self.process.identifier)
+        except self.wps.exceptions.WPSException,e:
+            # set status to failed
+            self.promoteStatus(self.failed,
+                    statusMessage=e.value,
+                    exceptioncode=e.code,
+                    locator=e.locator)
+
+        except Exception,ex:
+            # set status to failed
+            self.promoteStatus(self.failed,
+                    statusMessage=str(e),
+                    exceptioncode="NoApplicableCode")
 
         # lineage in and outputs
-        if self.wps.inputs['responseform'].has_key("responsedocument"):
-            if self.wps.inputs['responseform']['responsedocument'].has_key('lineage') and \
-                self.wps.inputs['responseform']['responsedocument']['lineage'] == True:
-                self.templateProcessor.set("lineage",1)
-                self.lineageInputs()
-                self.outputDefinitions()
+        if lineageRequired:
+            self.templateProcessor.set("lineage",1)
+            self.lineageInputs()
+            self.outputDefinitions()
 
-        # fill outputs
-        self.processOutputs()
+        # if succeeded
+        if self.status == self.succeeded:
 
-        # Response document
-        self.response = self.templateProcessor.process(self.template)
+            # fill outputs
+            self.processOutputs()
 
-        if self.rawDataOutput:
-            self.response = None
-            self.printRawData()
+            # Response document
+            self.response = self.templateProcessor.process(self.template)
 
-        # everything worked, remove all temporary files
-        self.cleanEnv()
+            # if rawDataOutput is required
+            if self.rawDataOutput:
+                self.response = None
+                self.printRawData()
 
-        if (self.statusRequired):
+        # Failed but output lineage anyway
+        elif lineageRequired:
+            self.response = self.templateProcessor.process(self.template)
+
+        # print status
+        if self.storeRequired:
             self.printResponse(self.statusFiles)
+
+        # remove all temporary files
+        self.cleanEnv()
 
     def initProcess(self):
         """
@@ -320,20 +374,28 @@ class Execute(Response):
     def executeProcess(self):
         """
         Calls 'execute' method of the process, catches possible exceptions
-        and raise error, if needed
+        and set process failed or succeeded
         """
         try:
+            # set status to started
+            self.promoteStatus(self.started,"Process %s started" %\
+                    self.process.identifier)
+            # execute
             processError = self.process.execute()
             if processError:
-                self.cleanEnv()
                 raise self.wps.exceptions.NoApplicableCode(
                         "Failed to execute WPS process [%s]: %s" %\
                                 (self.process.identifier,processError))
+            else:
+                # set status to succeeded
+                self.promoteStatus(self.succeeded,
+                        statusMessage="PyWPS Process %s successfully calculated" %\
+                        self.process.identifier)
+
         except Exception,e:
-                self.cleanEnv()
-                raise self.wps.exceptions.NoApplicableCode(
-                        "Failed to execute WPS process [%s]: %s" %\
-                                (self.process.identifier,e))
+            raise self.wps.exceptions.NoApplicableCode(
+                    "Failed to execute WPS process [%s]: %s" %\
+                            (self.process.identifier,e))
 
     def processDescription(self):
         """
@@ -374,9 +436,6 @@ class Execute(Response):
         {String} locator - where the problem occurred
         """
 
-        self.process.status.percentCompleted, self.process.status.value,\
-        self.printStatus
-
         self.statusTime = time.time()
         self.templateProcessor.set("statustime", time.ctime(self.statusTime))
         self.status = status
@@ -411,15 +470,21 @@ class Execute(Response):
             self.templateProcessor.set("percentcompleted", self.percent)
 
         elif self.status == self.failed:
-            self.templateProcessor.set("exceptiontext", self.statusMessage)
+            self.templateProcessor.set("processfailed", 1)
+            if self.statusMessage:
+                self.templateProcessor.set("exceptiontext", self.statusMessage)
             self.templateProcessor.set("exceptioncode", self.exceptioncode)
+            if self.locator:
+                self.templateProcessor.set("locator", self.locator)
 
         # update response
         self.response = self.templateProcessor.process(self.template)
 
-        # printStatus
-        if self.printStatus and not self.rawDataOutput:
-            self.statusPrinted += 1
+        # print status
+        if self.storeRequired and (self.statusRequired or
+                                   self.status == self.accepted or
+                                   self.status == self.succeeded or
+                                   self.status == self.failed):
             self.printResponse(self.statusFiles)
 
 
@@ -661,8 +726,9 @@ class Execute(Response):
             outName = output.value
             outSuffix = outName.split(".")[len(outName.split("."))-1]
             outName = output.identifier+"-"+str(self.pid)+"."+outSuffix
-
-            COPY(output.value, self.wps.getConfigValue("server","outputPath")+"/"+outName)
+            outFile = self.wps.getConfigValue("server","outputPath")+"/"+outName
+            if not self._samefile(output.value,outFile):
+                COPY(output.value, outFile)
             templateOutput["reference"] = \
                     self.wps.getConfigValue("server","outputUrl")+"/"+outName
         templateOutput["mimetype"] = output.format["mimeType"]
@@ -671,7 +737,17 @@ class Execute(Response):
 
         return templateOutput
 
-    # --------------------------------------------------------------------
+    def _samefile(self, src, dst):
+        # Macintosh, Unix.
+        if hasattr(os.path,'samefile'):
+            try:
+                return os.path.samefile(src, dst)
+            except OSError:
+                return False
+
+        # All other platforms: check for same pathname.
+        return (os.path.normcase(os.path.abspath(src)) ==
+                os.path.normcase(os.path.abspath(dst)))
 
     def makeSessionId(self):
         """
@@ -718,8 +794,8 @@ class Execute(Response):
         This method is used for redefinition of self.process.status class
         """
 
-        self.promoteStatus(self.process.status.code,statusMessage =
-                self.process.status.value,
+        self.promoteStatus(self.process.status.code,
+                statusMessage=self.process.status.value,
                 percent=self.process.status.percentCompleted)
 
     def initEnv(self):

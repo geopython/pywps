@@ -35,10 +35,11 @@
                 <TMPL_IF exceptiontext>
                 <ows:Exception exceptionCode="<TMPL_VAR exceptioncode>" locator="<TMPL_VAR locator>">
                     <ows:ExceptionText><TMPL_VAR exceptiontext></ows:ExceptionText>
+                </ows:Exception>
                 <TMPL_ELSE>
                 <ows:Exception exceptionCode="<TMPL_VAR exceptioncode>" locator="<TMPL_VAR locator>" />
                 </TMPL_IF>
-            </wps.ExceptionReport>
+            </wps:ExceptionReport>
         </wps:ProcessFailed>
         </TMPL_IF>
     </wps:Status>

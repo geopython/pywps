@@ -3,28 +3,28 @@ Exception classes of WPS
 """
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
-# Lince: 
-# 
+# Lince:
+#
 # Web Processing Service implementation
 # Copyright (C) 2006 Jachym Cepicky
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 from xml.dom.minidom import Document
 import sys
-        
+
 called = 0
 
 class WPSException(Exception):
@@ -41,7 +41,7 @@ class WPSException(Exception):
         self.document.appendChild(self.ExceptionReport)
 
         # make exception
-                
+
         self.Exception = self.document.createElement("Exception")
         self.Exception.setAttribute("exceptionCode",self.code)
 
@@ -49,7 +49,7 @@ class WPSException(Exception):
             self.Exception.setAttribute("locator",self.locator)
 
         self.ExceptionReport.appendChild(self.Exception)
-
+        self.value = None
 
     def __str__(self):
 
@@ -61,13 +61,13 @@ class WPSException(Exception):
 class MissingParameterValue(WPSException):
     def __init__(self, value):
         self.code = "MissingParameterValue"
-        self.locator = value
+        self.locator = str(value)
         self.make_xml()
 
 class InvalidParameterValue(WPSException):
     def __init__(self,value):
         self.code = "InvalidParameterValue"
-        self.locator = value
+        self.locator = str(value)
         self.make_xml()
 
 class NoApplicableCode(WPSException):
@@ -79,6 +79,7 @@ class NoApplicableCode(WPSException):
             self.ExceptionText = self.document.createElement("ExceptionText")
             self.ExceptionText.appendChild(self.document.createTextNode(value))
             self.Exception.appendChild(self.ExceptionText)
+            self.value = str(value)
 
 class VersionNegotiationFailed(WPSException):
     def __init__(self,value=None):
@@ -89,17 +90,18 @@ class VersionNegotiationFailed(WPSException):
             self.ExceptionText = self.document.createElement("ExceptionText")
             self.ExceptionText.appendChild(self.document.createTextNode(value))
             self.Exception.appendChild(self.ExceptionText)
+            self.value = str(value)
 
 class ServerBusy(WPSException):
     def __init__(self,value=None):
         self.code = "ServerBusy"
-        self.locator = value
+        self.locator = str(value)
         self.make_xml()
 
 class FileSizeExceeded(WPSException):
     def __init__(self,value=None):
         self.code = "FileSizeExceeded"
-        self.locator = value
+        self.locator = str(value)
         self.make_xml()
 
 class ServerError(WPSException):
