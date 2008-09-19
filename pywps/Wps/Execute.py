@@ -4,7 +4,7 @@ WPS Execute request handler
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
 #               jachym at les-ejk dot cz
-# Lince:
+# License:
 #
 # Web Processing Service implementation
 # Copyright (C) 2006 Jachym Cepicky
@@ -32,9 +32,6 @@ from shutil import rmtree as RMTREE
 class Execute(Response):
     """
     This class performs the Execute request of WPS specification
-
-    In the class, fork of the  processes has to be done, if the client
-    requested asynchronous request performance (status=true)
     """
 
     # status variants
@@ -101,7 +98,7 @@ class Execute(Response):
         self.statusLocation = self.wps.getConfigValue("server","outputUrl")+"/"+self.id+".xml"
 
         # rawDataOutput
-        if self.wps.inputs["responseform"]["rawdataoutput"]:
+        if len(self.wps.inputs["responseform"]["rawdataoutput"])>0:
             self.rawDataOutput = self.wps.inputs["responseform"]["rawdataoutput"][0].values()[0]
 
         # is status required
@@ -150,14 +147,6 @@ class Execute(Response):
             self.cleanEnv()
             raise self.wps.exceptions.InvalidParameterValue(
                 "status is true, but storeExecuteResponse is false")
-
-        # OGC 05-007r7 page 36, Table 49
-        # Either responseDocument or rawDataOutput should be specified
-        if self.rawDataOutput and self.storeRequired:
-            self.cleanEnv()
-            raise self.wps.exceptions.InvalidParameterValue(
-                "Either responseDocument or rawDataOutput should be specified, but not both")
-
 
         # HEAD
         self.templateProcessor.set("encoding",
