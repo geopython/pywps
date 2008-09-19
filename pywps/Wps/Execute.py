@@ -179,6 +179,7 @@ class Execute(Response):
             if len(self.statusFiles) == 0:
                 self.statusFiles = [open(self.statusFileName,"w")]
 
+        # attempt to execute
         try:
 
             # init environment variable
@@ -200,34 +201,55 @@ class Execute(Response):
                     exceptioncode=e.code,
                     locator=e.locator)
 
-        except Exception,ex:
+        except Exception,e:
             # set status to failed
             self.promoteStatus(self.failed,
                     statusMessage=str(e),
                     exceptioncode="NoApplicableCode")
 
-        # lineage in and outputs
-        if lineageRequired:
-            self.templateProcessor.set("lineage",1)
-            self.lineageInputs()
-            self.outputDefinitions()
+        # attempt to fill-in lineage and outputs
+        try:
 
-        # if succeeded
-        if self.status == self.succeeded:
+            # lineage in and outputs
+            if lineageRequired:
+                self.templateProcessor.set("lineage",1)
+                self.lineageInputs()
+                self.outputDefinitions()
 
-            # fill outputs
-            self.processOutputs()
+            # if succeeded
+            if self.status == self.succeeded:
 
+                # fill outputs
+                self.processOutputs()
+
+                # Response document
+                self.response = self.templateProcessor.process(self.template)
+
+                # if rawDataOutput is required
+                if self.rawDataOutput:
+                    self.response = None
+                    self.printRawData()
+
+            # Failed but output lineage anyway
+            elif lineageRequired:
+                self.response = self.templateProcessor.process(self.template)
+
+
+        except self.wps.exceptions.WPSException,e:
+            # set status to failed
+            self.promoteStatus(self.failed,
+                    statusMessage=e.value,
+                    exceptioncode=e.code,
+                    locator=e.locator)
             # Response document
             self.response = self.templateProcessor.process(self.template)
 
-            # if rawDataOutput is required
-            if self.rawDataOutput:
-                self.response = None
-                self.printRawData()
-
-        # Failed but output lineage anyway
-        elif lineageRequired:
+        except Exception,e:
+            # set status to failed
+            self.promoteStatus(self.failed,
+                    statusMessage=str(e),
+                    exceptioncode="NoApplicableCode")
+            # Response document
             self.response = self.templateProcessor.process(self.template)
 
         # print status
