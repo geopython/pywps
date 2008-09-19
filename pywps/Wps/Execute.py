@@ -135,7 +135,7 @@ class Execute(Response):
         # check storeExecuteResponse against process
         if self.storeRequired and not self.process.storeSupported:
             self.cleanEnv()
-            raise self.wps.exceptions.InvalidParameterValue(
+            raise self.wps.exceptions.StorageNotSupported(
                 "storeExecuteResponse is true, but the process does not support output storage")
 
         # check status against process

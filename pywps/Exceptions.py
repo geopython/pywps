@@ -92,6 +92,18 @@ class VersionNegotiationFailed(WPSException):
             self.Exception.appendChild(self.ExceptionText)
             self.value = str(value)
 
+class NotEnoughStorage(WPSException):
+    def __init__(self,value=None):
+        self.code = "NotEnoughStorage"
+        self.locator = value
+        self.make_xml()
+
+class StorageNotSupported(WPSException):
+    def __init__(self,value=None):
+        self.code = "StorageNotSupported"
+        self.locator = value
+        self.make_xml()
+
 class ServerBusy(WPSException):
     def __init__(self,value=None):
         self.code = "ServerBusy"
