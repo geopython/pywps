@@ -185,21 +185,18 @@ class WPS:
         """Performs the desired WSP Request."""
 
         # the modules are imported first, when the request type is known
-        try:
-            if self.inputs["request"]  == "getcapabilities":
-                from pywps.Wps.GetCapabilities import GetCapabilities
-                self.request = GetCapabilities(self)
-            elif self.inputs["request"]  == "describeprocess":
-                from pywps.Wps.DescribeProcess import DescribeProcess
-                self.request = DescribeProcess(self)
-            elif self.inputs["request"]  == "execute":
-                from pywps.Wps.Execute import Execute
-                self.request = Execute(self)
-            else:
-                raise self.exceptions.InvalidParameterValue(
-                        "request: "+self.inputs["request"])
-        except KeyError,e:
-            raise self.exceptions.NoApplicableCode(e.message)
+        if self.inputs["request"]  == "getcapabilities":
+            from pywps.Wps.GetCapabilities import GetCapabilities
+            self.request = GetCapabilities(self)
+        elif self.inputs["request"]  == "describeprocess":
+            from pywps.Wps.DescribeProcess import DescribeProcess
+            self.request = DescribeProcess(self)
+        elif self.inputs["request"]  == "execute":
+            from pywps.Wps.Execute import Execute
+            self.request = Execute(self)
+        else:
+            raise self.exceptions.InvalidParameterValue(
+                    "request: "+self.inputs["request"])
 
     def getConfigValue(self,*args):
         """Return desired value from the configuration files
