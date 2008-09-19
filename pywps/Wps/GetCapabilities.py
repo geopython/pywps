@@ -4,7 +4,7 @@ WPS GetCapabilities request handler
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
 #               jachym at les-ejk dot cz
-# Lince:
+# License:
 #
 # Web Processing Service implementation
 # Copyright (C) 2006 Jachym Cepicky
@@ -187,10 +187,9 @@ class GetCapabilities(Response):
 
 
         # Language
-        self.templateProcessor.set("defaultlanguage",
-                    self.wps.getConfigValue("wps","lang").split(",")[0])
+        self.templateProcessor.set("defaultlanguage", self.wps.defaultLanguage)
         languages = []
-        for lang in self.wps.getConfigValue("wps","lang").split(","):
+        for lang in self.wps.languages:
             languages.append({"language":lang})
         self.templateProcessor.set("Languages",languages)
 
