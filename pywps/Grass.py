@@ -4,21 +4,21 @@ locations and mapsets
 """
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
-# Lince: 
-# 
+# License:
+#
 # Web Processing Service implementation
 # Copyright (C) 2006 Jachym Cepicky
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -60,7 +60,7 @@ class Grass:
 
         # GIS_LOCK
         self.setEnv('GIS_LOCK',str(os.getpid()))
-        
+
     def mkMapset(self,location=None):
         """
         Create GRASS mapset in current directory. Mapsets name is 'mapset'.
@@ -109,7 +109,17 @@ class Grass:
 
             # export env. vars
             (self.gisdbase,location) = os.path.split(self.locationDir)
-             
+
+        # GRASS creates a temp dir for the display driver.
+        # Add it to dirsToBeRemoved
+        try:
+            grassTmpDir = os.path.join(tempfile.gettempdir(),
+                                       "grass"+self.wps.getConfigValue("grass","version")[:1]+\
+                                       "-"+os.getenv("USERNAME")+\
+                                       "-"+str(os.getpid()))
+            self.executeRequest.dirsToBeRemoved.append(grassTmpDir)
+        except :
+            pass
 
         self.setEnv('MAPSET', self.mapsetName)
         self.setEnv('LOCATION_NAME',self.locationName)
