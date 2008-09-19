@@ -25,7 +25,7 @@ WPS Execute request handler
 
 from Response import Response
 from htmltmpl import TemplateError
-import time,os,sys,tempfile,re
+import time,os,sys,tempfile,re,types
 from shutil import copyfile as COPY
 from shutil import rmtree as RMTREE
 
@@ -97,9 +97,13 @@ class Execute(Response):
         self.statusFileName = os.path.join(self.wps.getConfigValue("server","outputPath"),self.id+".xml")
         self.statusLocation = self.wps.getConfigValue("server","outputUrl")+"/"+self.id+".xml"
 
+        # TODO: Uniform parsing in Post and Get because now they differ
         # rawDataOutput
         if len(self.wps.inputs["responseform"]["rawdataoutput"])>0:
-            self.rawDataOutput = self.wps.inputs["responseform"]["rawdataoutput"][0].values()[0]
+            if type(self.wps.inputs["responseform"]["rawdataoutput"]) == types.ListType:
+                self.rawDataOutput = self.wps.inputs["responseform"]["rawdataoutput"][0].values()[0]
+            elif type(self.wps.inputs["responseform"]["rawdataoutput"]) == types.DictType:
+                self.rawDataOutput = self.wps.inputs["responseform"]["rawdataoutput"].keys()[0]
 
         # is status required
         self.statusRequired = False
