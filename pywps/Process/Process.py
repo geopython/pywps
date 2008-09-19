@@ -155,6 +155,12 @@ class WPSProcess:
             else:
                 storeSupported = False
         self.storeSupported = storeSupported
+        if type(statusSupported) == type(""):
+            if statusSupported.find("t") == 0 or\
+                statusSupported.find("T") == 0:
+                statusSupported = True
+            else:
+                statusSupported = False
         self.statusSupported = statusSupported
         self.debug = False
 
@@ -185,6 +191,12 @@ class WPSProcess:
             else:
                 storeSupported = False
         self.storeSupported = storeSupported
+        if type(statusSupported) == type(""):
+            if statusSupported.find("t") == 0 or\
+                statusSupported.find("T") == 0:
+                statusSupported = True
+            else:
+                statusSupported = False
         self.statusSupported = statusSupported
 
         self.grassLocation = grassLocation
