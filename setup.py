@@ -11,6 +11,10 @@ served back to the client. Providing GRASS funktionality on the Internet
 should be as easy as possible.
 """
 
+#   SETUP
+name = 'pywps'
+#   END of SETUP
+
 classifiers=[
           'Development Status :: 0.1',
           'Environment :: CGI',
@@ -28,7 +32,7 @@ classifiers=[
 
 
 from distutils.core import setup
-import sys
+import sys,os
 
 doclines = __doc__.split("\n")
 
@@ -38,7 +42,7 @@ if sys.platform.find('linux')>-1:
     data_files= [('/etc/', ['pywps/etc/pywps.cfg']) ]
 
 setup(
-        name = 'pywps',
+        name = name,
         version = '3.0.0',
         maintainer="Jachym Cepicky",
         maintainer_email = 'jachym@les-ejk.cz',
@@ -83,4 +87,43 @@ setup(
                 ],
         scripts=['wps.py']
 )
+
+
+#       compile templates
+#       -----------------
+#       compiling before installing is necessary, because the apache
+#       webserver has not the permission to create new files in the 
+#       python site-packages directory
+
+dryRun = False
+install = False
+for arg in sys.argv:
+    if arg == "--dry-run":
+        dryRun = True
+    if arg == "install":
+        install = True
+
+if not dryRun and install:
+    from htmltmpl import TemplateManager, TemplateProcessor
+    from distutils import sysconfig
+
+    baseDir =  os.path.join(sysconfig.get_python_lib(),
+                            name,'Templates')
+    versionDirs = ['1_0_0']
+
+    template_files = ['GetCapabilities', 'DescribeProcess','Execute']
+
+    for version in versionDirs:
+        for template_file in template_files:
+            print "Compiling template "+template_file
+            template_file = os.path.join(baseDir,version,
+                                    template_file + '.tmpl')
+            template = TemplateManager().prepare(template_file)
+            tproc = TemplateProcessor()
+            compiled_document = tproc.process(template)
+
+else:
+    print "dry-run only, templates are not complied"
+
+
 
