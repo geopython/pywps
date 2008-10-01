@@ -46,7 +46,7 @@ class GetCapabilities(Response):
             try:
                 rep = e.message
             except:
-                rep = e
+                rep = e.__str__()
             raise self.wps.exceptions.NoApplicableCode(rep)
 
         try:
