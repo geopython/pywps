@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta name="generator" content=
+"HTML Tidy for Linux (vers 6 November 2007), see www.w3.org" />
+<meta http-equiv="Content-Type" content=
+"application/xhtml+xml; charset=utf-8" />
+<meta name="generator" content="NanoBlogger 3.3" />
+<meta name="robots" content="all" />
+<meta name="revisit-after" content="31 days" />
+<title>PyWPS</title>
+<link rel="stylesheet" href="./styles/nb_rusted.css" type=
+"text/css" media="all" />
+<link rel="stylesheet" href="./styles/print.css" type="text/css"
+media="print" />
+<link rel="shortcut icon" href="./images/favicon.ico" />
+<link rel="alternate" type="application/atom+xml" title="Atom 1.0"
+href="./atom.xml" />
+<link rel="alternate" type="application/rss+xml" title="RSS 2.0"
+href="./rss.xml" />
+</head>
+<body>
+<div id="container" class="clearfix">
+<div id="header" class="clearfix">
+<h1><a href="./index.html" accesskey="1">PyWPS</a></h1>
+<span class="description">Web Processing Service in Python</span>
+<img id="logo" src="/images/pywps.png" name="logo" /></div>
+<div id="links">
+<div class="calendar">
+<table border="0" cellspacing="4" cellpadding="0" summary=
+"Calendar">
+<caption class="calendarhead"><a href=
+"./archives/2008/10/index.html">October 2008</a></caption>
+<tr>
+<th><span class="calendarday">Su</span></th>
+<th><span class="calendarday">Mo</span></th>
+<th><span class="calendarday">Tu</span></th>
+<th><span class="calendarday">We</span></th>
+<th><span class="calendarday">Th</span></th>
+<th><span class="calendarday">Fr</span></th>
+<th><span class="calendarday">Sa</span></th>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td><span class="calendar"><a href=
+"./archives/2008/10/01/index.html#e2008-10-01T13_09_02.txt">1</a></span></td>
+<td><span class="calendar">2</span></td>
+<td><span class="calendar">3</span></td>
+<td><span class="calendar">4</span></td>
+</tr>
+<tr>
+<td><span class="calendar">5</span></td>
+<td><span class="calendar">6</span></td>
+<td><span class="calendar">7</span></td>
+<td><span class="calendar">8</span></td>
+<td><span class="calendar">9</span></td>
+<td><span class="calendar">10</span></td>
+<td><span class="calendar">11</span></td>
+</tr>
+<tr>
+<td><span class="calendar">12</span></td>
+<td><span class="calendar">13</span></td>
+<td><span class="calendar">14</span></td>
+<td><span class="calendar">15</span></td>
+<td><span class="calendar">16</span></td>
+<td><span class="calendar">17</span></td>
+<td><span class="calendar">18</span></td>
+</tr>
+<tr>
+<td><span class="calendar">19</span></td>
+<td><span class="calendar">20</span></td>
+<td><span class="calendar">21</span></td>
+<td><span class="calendar">22</span></td>
+<td><span class="calendar">23</span></td>
+<td><span class="calendar">24</span></td>
+<td><span class="calendar">25</span></td>
+</tr>
+<tr>
+<td><span class="calendar">26</span></td>
+<td><span class="calendar">27</span></td>
+<td><span class="calendar">28</span></td>
+<td><span class="calendar">29</span></td>
+<td><span class="calendar">30</span></td>
+<td><span class="calendar">31</span></td>
+<td></td>
+</tr>
+</table>
+</div>
+<div class="sidetitle">articles</div>
+<div class="side"><!--About--><a href=
+"./articles/about/index.html">About</a><br />
+<!--Documentation--><a href=
+"./articles/docs/index.html">Documentation</a><br />
+<!--Dovelopment--><a href=
+"./articles/development/index.html">Dovelopment</a><br />
+<!--Download--><a href=
+"./articles/download/index.html">Download</a><br />
+<!--FAQ--><a href="./articles/faq/index.html">FAQ</a><br />
+<!--Support--><a href=
+"./articles/support/index.html">Support</a><br /></div>
+<div class="sidetitle">Links</div>
+<div class="side"><a href="./index.html">Main</a><br />
+<a href="http://pywps.ominiverdi.org/wiki/">Wiki</a><br />
+<a href="http://wald.intevation.org/projects/pywps/">Wald
+page</a><br />
+<a href=
+"http://lists.wald.intevation.org/mailman/listinfo/pywps-devel">Mailing
+list</a><br />
+<!-- add more links below this line --></div>
+<div class="sidetitle">Recent Entries</div>
+<div class="side"><a href=
+"./archives/2008/10/01/index.html#e2008-10-01T13_09_02.txt">PyWPS
+3.0.0rc3</a><br />
+<a href=
+"./archives/2008/10/01/index.html#e2008-10-01T13_04_19.txt">French
+translation of the documentation</a><br />
+<a href=
+"./archives/2008/10/01/index.html#e2008-10-01T13_00_41.txt">PyWPS
+3.0.0rc2</a><br />
+<a href=
+"./archives/2008/10/01/index.html#e2008-10-01T12_56_21.txt">PyWPS
+3.0.0rc1</a><br />
+<a href=
+"./archives/2008/10/01/index.html#e2008-10-01T12_53_47.txt">PyWPS
+2.0.1</a><br />
+<a href=
+"./archives/2008/10/01/index.html#e2008-10-01T12_49_01.txt">PyWPS
+2.0.0</a><br />
+<a href=
+"./archives/2008/10/01/index.html#e2008-10-01T12_47_16.txt">PyWPS
+workshop</a><br />
+<a href=
+"./archives/2008/10/01/index.html#e2008-10-01T12_45_22.txt">Ka-map!
+&amp; PyWPS</a><br />
+<a href=
+"./archives/2008/10/01/index.html#e2008-10-01T12_36_32.txt">PyWPS
+has new WIKI</a><br />
+<a href=
+"./archives/2008/10/01/index.html#e2008-10-01T12_34_58.txt">PyWPS
+1.0.0 released</a><br /></div>
+<div class="sidetitle">Categories</div>
+<div class="side"><a href=
+"./archives/nanoblogger_help/index.html">NanoBlogger Help</a>
+(1)<br /></div>
+<div class="sidetitle">Archives</div>
+<div class="side"><a href="./archives/index.html">Archive
+Index</a><br />
+<a href="./archives/2008/index.html">2008</a> (14)<br />
+<!-- <a href="./archives/2008/10/index.html">October 2008    </a> (14)<br /> --></div>
+<div class="sidetitle">Syndicate</div>
+<div class="side">Site (<a href="./rss.xml" class=
+"feed-small">RSS</a>, <a href="./atom.xml" class=
+"feed-small">Atom</a>)<br /></div>
+<div class="sidetitle">Contact</div>
+<div class="side"></div>
+<div class="sidetitle">Weblog Status</div>
+<div class="side"><!-- Total categories:: 1<br /> -->
+Total entries: 14<br />
+Last entry: 2008-10-01 13:09:02<br />
+Last updated:</div>
+</div>
+<div id="content">
+<p>PyWPS <em>(Python Web Processing Service)</em> is implementation
+of <a href=
+"http://www.opengeospatial.org/standards/requests/28">Web
+Processing Service</a> standard from <a href=
+"http://opengeospatial.org">Open Geospatial Consortium</a>.</p>
+<p>It has been started on Mai 2006 as project supported by <a href=
+"http://dbu.de">DBU</a>. It offers environment for programming own
+process (geofunctions or models) which can be accessed from the
+public. The main advantage of PyWPS is, that it has been written
+with native support for <a href="http://grass.itc.it">GRASS</a>.
+Access GRASS modules via web interace should be as easy as
+possible.</p>
+<p>PyWPS is written in <a href="http://python.org">Python
+programming language</a>, your processes must use this language
+too.</p>
+<div id="wrap"><a id="top" name="top"></a>
+<div class="blog">
+<div class="item"><a id="e2008-10-01T13_09_02.txt" name=
+"e2008-10-01T13_09_02.txt"></a>
+<h2 class="date">2008-10-01 13:09:02</h2>
+<div class="blogbody">
+<h3 class="title">PyWPS 3.0.0rc3</h3>
+<div class="item-description">
+<p>PyWPS Development team announces next release candidate of new
+PyWPS[1] version with number 3.0.0 (3.0.0rc3).</p>
+<p>Features of this release candidate:</p>
+<ul>
+<li>Updated setup script</li>
+<li style="list-style: none; display: inline">
+<ul>
+<li>Templates are compiled during installation automatically</li>
+<li>pywps.cfg is not installed to /etc/ by default</li>
+</ul>
+</li>
+<li>Added example for custom CGI wrapper in doc/ directory</li>
+<li>Support for PYWPS_CFG environment variable - put your
+configuration</li>
+<li style="list-style: none">file anywhere in the system</li>
+<li>Example processes moved from pywps/processes to
+doc/examples/processes</li>
+</ul>
+<p>For more details, see original announcement of PyWPS 3.0.0. rc1
+[1] and rc2 [2]</p>
+<p>For download and testing this new release candidate, please
+follow the link below [2] or download the RC from subversion
+directly [4].</p>
+<p>Please download &amp; test!</p>
+<p>Happy GISing!</p>
+<p>Jachym &amp; PyWPS Development team</p>
+<p>[1] <a href=
+"http://lists.wald.intevation.org/pipermail/pywps-devel/2008-September/000365.html">
+http://lists.wald.intevation.org/pipermail/pywps-devel/2008-September/000365.html</a><br />
+
+[2] <a href=
+"http://lists.wald.intevation.org/pipermail/pywps-devel/2008-September/000369.html">
+http://lists.wald.intevation.org/pipermail/pywps-devel/2008-September/000369.html</a><br />
+
+[3] <a href=
+"http://wald.intevation.org/frs/download.php/495/pywps-3.0.0rc2.tar.gz">
+http://wald.intevation.org/frs/download.php/495/pywps-3.0.0rc2.tar.gz</a><br />
+
+[4] svn checkout
+https://svn.wald.intevation.org/svn/pywps/tags/pywps-3.0.0rc3</p>
+</div>
+</div>
+<div class="posted"><br />
+Posted by <span class="item-creator">PyWPS Development Team</span>
+| <a class="link" href=
+"./archives/2008/10/01/index.html#e2008-10-01T13_09_02.txt">Permanent
+Link</a> 
+<!-- <br /><a href="./archives/#comments">Comments</a> --></div>
+</div>
+<div class="item"><a id="e2008-10-01T13_04_19.txt" name=
+"e2008-10-01T13_04_19.txt"></a>
+<h2 class="date">2008-10-01 13:04:19</h2>
+<div class="blogbody">
+<h3 class="title">French translation of the documentation</h3>
+<div class="item-description">
+<p>I made the translation in french of the PyWPS .txt docs. (Here :
+<a href=
+"http://geotribu.net/?q=node/45">http://geotribu.net/?q=node/45</a>)
+I should start the pdf translation during this week.</p>
+<p>Arnaud</p>
+</div>
+</div>
+<div class="posted"><br />
+Posted by <span class="item-creator">Arnaud Vandecasteele</span> |
+<a class="link" href=
+"./archives/2008/10/01/index.html#e2008-10-01T13_04_19.txt">Permanent
+Link</a> 
+<!-- <br /><a href="./archives/#comments">Comments</a> --></div>
+</div>
+<div class="item"><a id="e2008-10-01T13_00_41.txt" name=
+"e2008-10-01T13_00_41.txt"></a>
+<h2 class="date">2008-10-01 13:00:41</h2>
+<div class="blogbody">
+<h3 class="title">PyWPS 3.0.0rc2</h3>
+<div class="item-description">
+<p>PyWPS Development team announces next release candidate of new
+PyWPS[1] version with number 3.0.0 (3.0.0rc2).</p>
+<p>Features of this release candidate:</p>
+<ul>
+<li>Fixed DescribeProcess template</li>
+<li>Fixed some missing python packages</li>
+<li>Fixed versions parameter in GetCapabilities</li>
+</ul>
+<p>For more details, see original announcement of PyWPS 3.0.0. rc1
+[1]</p>
+<p>For download and testing this new release candidate, please
+follow the link below [2] or download the RC from subversion
+directly [3].</p>
+<p>For testing purposes, public PyWPS-3.0.0 server was setuped
+[4].</p>
+<p>Please download &amp; test!</p>
+<p>Happy GISing!</p>
+<p>Jachym &amp; PyWPS Development team</p>
+<p>[1] <a href=
+"http://lists.wald.intevation.org/pipermail/pywps-devel/2008-September/000365.html">
+http://lists.wald.intevation.org/pipermail/pywps-devel/2008-September/000365.html</a><br />
+
+[2] <a href=
+"http://wald.intevation.org/frs/download.php/495/pywps-3.0.0rc2.tar.gz">
+http://wald.intevation.org/frs/download.php/495/pywps-3.0.0rc2.tar.gz</a><br />
+
+[3] svn checkout
+https://svn.wald.intevation.org/svn/pywps/tags/pywps-3.0.0rc2<br />
+[4] <a href=
+"http://apps.esdi-humboldt.cz/cgi-bin/pywps_3_0?service=wps&amp;request=getcapabilities">
+http://apps.esdi-humboldt.cz/cgi-bin/pywps_3_0?service=wps&amp;request=getcapabilities</a></p>
+</div>
+</div>
+<div class="posted"><br />
+Posted by <span class="item-creator">PyWPS Development Team</span>
+| <a class="link" href=
+"./archives/2008/10/01/index.html#e2008-10-01T13_00_41.txt">Permanent
+Link</a> 
+<!-- <br /><a href="./archives/#comments">Comments</a> --></div>
+</div>
+<div class="item"><a id="e2008-10-01T12_56_21.txt" name=
+"e2008-10-01T12_56_21.txt"></a>
+<h2 class="date">2008-10-01 12:56:21</h2>
+<div class="blogbody">
+<h3 class="title">PyWPS 3.0.0rc1</h3>
+<div class="item-description">
+<p>PyWPS Development team announces first release candidate of new
+PyWPS[1] version with number 3.0.0 (3.0.0rc1).</p>
+<p>Features of this version:</p>
+<ul>
+<li>Support for OGC(R) WPS 3.0.0</li>
+<li>New simple configuration files</li>
+<li>New methods for custom process definition</li>
+<li>Support for multiple WPS servers with one PyWPS
+Installation</li>
+<li>Support for internationalization</li>
+<li>Simple code structure</li>
+<li>Python-htmltmpl templating system</li>
+<li>New examples of processes</li>
+<li>...</li>
+</ul>
+<p>For download and testing this new release candidate, please
+follow the link below [2] or download the RC from subversion
+directly [3].</p>
+<p>NOTE: This version processes are note fully compatible with
+previous versions of PyWPS. However, the upgrade should note be
+complicated, please follow examples from pywps/processes/
+directory.</p>
+<h3>What is PyWPS:</h3>
+<p>PyWPS (Python Web Processing Service) is implementation of Web
+Processing Service standard from Open Geospatial Consortium. The
+main advantage of PyWPS is, that it has been written with native
+support for GRASS GIS. Access GRASS modules via web interace should
+be as easy as possible. Processes can be written using GRASS GIS,
+but usage of other programs is also possible. Usage together with R
+package or GDAL or PROJ tools.</p>
+<p>Please download &amp; test!</p>
+<p>Happy GISing!</p>
+<p>Jachym &amp; PyWPS Development team</p>
+</div>
+</div>
+<div class="posted"><br />
+Posted by <span class="item-creator">PyWPS Development Team</span>
+| <a class="link" href=
+"./archives/2008/10/01/index.html#e2008-10-01T12_56_21.txt">Permanent
+Link</a> 
+<!-- <br /><a href="./archives/#comments">Comments</a> --></div>
+</div>
+<div class="item"><a id="e2008-10-01T12_53_47.txt" name=
+"e2008-10-01T12_53_47.txt"></a>
+<h2 class="date">2008-10-01 12:53:47</h2>
+<div class="blogbody">
+<h3 class="title">PyWPS 2.0.1</h3>
+<div class="item-description">
+<p>Today, PyWPS 2.0.1 was released. It is a bugfix release, which
+fixes the "PyWPSdebug" issue, which was reported by several
+people.</p>
+<p>Have fun!</p>
+<p>Jachym</p>
+</div>
+</div>
+<div class="posted"><br />
+Posted by <span class="item-creator">PyWPS Development Team</span>
+| <a class="link" href=
+"./archives/2008/10/01/index.html#e2008-10-01T12_53_47.txt">Permanent
+Link</a> 
+<!-- <br /><a href="./archives/#comments">Comments</a> --></div>
+</div>
+<div class="item"><a id="e2008-10-01T12_49_01.txt" name=
+"e2008-10-01T12_49_01.txt"></a>
+<h2 class="date">2008-10-01 12:49:01</h2>
+<div class="blogbody">
+<h3 class="title">PyWPS 2.0.0</h3>
+<div class="item-description">
+<p>8.10.2007<br />
+http://pywps.wald.intevation.org</p>
+<p>After a year of development, Python Web Processing Service
+(PyWPS) 2.0.0 is new stable release, which fixes number of bugs and
+instabilities in previous 1.0.0 version, as well as adds new
+functionality.</p>
+<p>PyWPS implements OGC Web Processing Service 0.4.0 standard [1].
+It is developed with native support for GRASS GIS [2], however, it
+can be used with other GIS command line tools too (PROJ, GDAL/OGR,
+...), as well as with the R Project for Statistical Computing.</p>
+<p>OGC Web Processing Service specification provides client access
+across a network to pre-programmed calculations and/or computation
+models that operate on spatially referenced data. The calculation
+can be extremely simple or highly complex, with any number of data
+inputs and outputs. It does not specify the specific processes that
+could be implemented by a WPS. Instead, it specifies a generic
+mechanism that can be used to describe and web-enable any sort of
+geospatial process.</p>
+<p>Several client applications can be used with PyWPS, e.g. Embrio
+project [3] and there is also plugin for OpenLayers [4][5].</p>
+<p>Major changes:</p>
+<ul>
+<li>New Process interface for easier coding</li>
+<li>More stable, temporary files should be deleted in any case</li>
+<li>More verbose, better debugging output</li>
+<li>OGC WPS 0.4.0 still not fully implemented, but much more</li>
+<li>...</li>
+</ul>
+<p>New development should be focused at implementation of the OGC
+WPS 1.0.0 specification.</p>
+<p>Jachym &amp; PyWPS Development Team</p>
+</div>
+</div>
+<div class="posted"><br />
+Posted by <span class="item-creator">PyWPS Development Team</span>
+| <a class="link" href=
+"./archives/2008/10/01/index.html#e2008-10-01T12_49_01.txt">Permanent
+Link</a> 
+<!-- <br /><a href="./archives/#comments">Comments</a> --></div>
+</div>
+<div class="item"><a id="e2008-10-01T12_47_16.txt" name=
+"e2008-10-01T12_47_16.txt"></a>
+<h2 class="date">2008-10-01 12:47:16</h2>
+<div class="blogbody">
+<h3 class="title">PyWPS workshop</h3>
+<div class="item-description">PyWPS Course in Hildesheim (Germany).
+See <a href=
+"http://www.nature-consult.de/index.php?option=com_content&amp;task=view&amp;id=82&amp;Itemid=82">
+Nature-Consult.de</a> for details.</div>
+</div>
+<div class="posted"><br />
+Posted by <span class="item-creator">jachym</span> | <a class=
+"link" href=
+"./archives/2008/10/01/index.html#e2008-10-01T12_47_16.txt">Permanent
+Link</a> 
+<!-- <br /><a href="./archives/#comments">Comments</a> --></div>
+</div>
+<div class="item"><a id="e2008-10-01T12_45_22.txt" name=
+"e2008-10-01T12_45_22.txt"></a>
+<h2 class="date">2008-10-01 12:45:22</h2>
+<div class="blogbody">
+<h3 class="title">Ka-map! &amp; PyWPS</h3>
+<div class="item-description">Ka-map! togher with PyWPS, thanks
+Ominiverdi (again): <a href=
+"http://pywps.ominiverdi.org/ka-map/htdocs/index_wps_winman.html">http://pywps.ominiverdi.org/ka-map/htdocs/index_wps_winman.html</a></div>
+</div>
+<div class="posted"><br />
+Posted by <span class="item-creator">PyWPS Development Team</span>
+| <a class="link" href=
+"./archives/2008/10/01/index.html#e2008-10-01T12_45_22.txt">Permanent
+Link</a> 
+<!-- <br /><a href="./archives/#comments">Comments</a> --></div>
+</div>
+<div class="item"><a id="e2008-10-01T12_36_32.txt" name=
+"e2008-10-01T12_36_32.txt"></a>
+<h2 class="date">2008-10-01 12:36:32</h2>
+<div class="blogbody">
+<h3 class="title">PyWPS has new WIKI</h3>
+<div class="item-description">
+<p>Thanks Ominiverdi, PyWPS has new wiki at <a href=
+"http://pywps.ominiverdi.org/wiki">http://pywps.ominiverdi.org/wiki</a></p>
+</div>
+</div>
+<div class="posted"><br />
+Posted by <span class="item-creator">PyWPS Development Team</span>
+| <a class="link" href=
+"./archives/2008/10/01/index.html#e2008-10-01T12_36_32.txt">Permanent
+Link</a> 
+<!-- <br /><a href="./archives/#comments">Comments</a> --></div>
+</div>
+<div class="item"><a id="e2008-10-01T12_34_58.txt" name=
+"e2008-10-01T12_34_58.txt"></a>
+<h2 class="date">2008-10-01 12:34:58</h2>
+<div class="blogbody">
+<h3 class="title">PyWPS 1.0.0 released</h3>
+<div class="item-description">
+<p>After some time of development, PyWPS 1.0.0 stable has been
+released.</p>
+<h3>Features</h3>
+<ul>
+<li>Support for all input and output data types defined by OGC Web
+Processing Service standard</li>
+<li>Support for KVP (via HTTP GET) and XML (HTTP POST) request
+types</li>
+<li>Processes can be run assynchronously</li>
+<li>Default support for GRASS GIS, other tools (R, GDAL/OGR,
+PROJ.4, ...) is possible to use too.</li>
+</ul>
+<h3>What is PyWPS</h3>
+<p>PyWPS is implementation of OGS Web Processing Service standard
+written in Python programming language. The main advantage of PyWPS
+is, that it has been written with native support for GRASS GIS.
+Access GRASS modules via web interace should be as easy as
+possible.</p>
+</div>
+</div>
+<div class="posted"><br />
+Posted by <span class="item-creator">jachym</span> | <a class=
+"link" href=
+"./archives/2008/10/01/index.html#e2008-10-01T12_34_58.txt">Permanent
+Link</a> 
+<!-- <br /><a href="./archives/#comments">Comments</a> --></div>
+</div>
+</div>
+</div>
+<div class="pagenav" align="center"></div>
+</div>
+</div>
+<div id="footer" style="clear:both;">
+<div class="metainfo">powered by $EDITOR, bash, cat, grep, sed, and
+<a href="http://nanoblogger.sourceforge.net">nb 3.3</a></div>
+<div class="menu"><a href="#top">/\</a><br /></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,26 @@
+TITLE: Embrio - Web interface for PyWPS
+AUTHOR: Lorenzo
+DATE: 2007-10-01 12:32:39
+DESC: 
+FORMAT: raw
+-----
+BODY:
+<p>
+As Wuiw is growing with calm,
+me and doktoreas developed an Interface called Embrio.
+</p>
+<p>
+here the home page:<br />
+<a href="http://pywps.ominiverdi.org/subversion/trunk/web/" target="_new">http://pywps.ominiverdi.org/subversion/trunk/web/</a>
+</p>
+<p>
+developed module:
+<ul>
+<li>r.los</li>
+<li>v.net.path</li>
+<li>v.buffer</li>
+</ul>
+just as examples
+
+</p>
+END-----

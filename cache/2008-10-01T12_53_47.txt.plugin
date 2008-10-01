@@ -1,0 +1,19 @@
+TITLE: PyWPS 2.0.1
+AUTHOR: PyWPS Development Team
+DATE: 2008-10-01 12:53:47
+DESC: 
+FORMAT: raw
+-----
+BODY:
+
+<p>
+Today, PyWPS 2.0.1 was released. It is a bugfix release, which fixes the
+"PyWPSdebug" issue, which was reported by several people.
+</p>
+<p>
+Have fun!
+</p>
+<p>
+Jachym
+</p>
+END-----

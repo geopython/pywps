@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE rdf:RDF
+[
+<!ENTITY % HTMLlat1 PUBLIC
+ "-//W3C//ENTITIES Latin 1 for XHTML//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml-lat1.ent">
+]>
+<rdf:RDF xmlns="http://purl.org/rss/1.0/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:admin="http://webns.net/mvcb/">
+<channel rdf:about="">
+<title>My Weblog</title>
+<link></link>
+<description>news, diary, journal, whatever</description>
+<dc:language>en-us</dc:language>
+<dc:creator>kevin</dc:creator>
+<dc:date>2005-06-06T23:45:04-04:00</dc:date>
+<admin:generatorAgent rdf:resource="http://nanoblogger.sourceforge.net" />
+<items>
+<rdf:Seq>
+<rdf:li rdf:resource="/archives/2005/06/#e2005-06-02T20_48_35.txt" />
+</rdf:Seq>
+</items>
+</channel>
+<item rdf:about="/archives/2005/06/#e2005-06-02T20_48_35.txt">
+<link>/archives/2005/06/#e2005-06-02T20_48_35.txt</link>
+<title>Welcome to NanoBlogger!</title>
+<dc:date>2005-06-02T20:48:35-04:00</dc:date>
+<dc:creator>n1xt3r</dc:creator>
+<dc:subject>NanoBlogger Help</dc:subject>
+<description>
+<![CDATA[<p>The basic syntax is: <code>nb [-b blog_dir] [options]</code></p>
+<b>How to ...</b>
+<ul>
+<li>create a new weblog (directory) = <code>nb -b [blog_dir] -a</code></li>
+<li>create a new entry = <code>nb -a</code></li>
+<li>create a new category = <code>nb -c <em>new</em> -a</code></li>
+<li>create a new entry for a category = <code>nb -c [cat_id] -a</code></li>
+<li>list current entries = <code>nb -l [current|all]</code></li>
+<li>list categories = <code>nb -l <em>cat</em></code></li>
+<li>list entries by category = <code>nb -c [cat_id] -l [current|all]</code></li>
+<li>edit an entry = <code>nb -e [entry_id]</code></li>
+<li>move an entry to a category = <code>nb -c [cat_id] -m [entry_id]</code></li>
+<li>delete an entry = <code>nb -d [entry_id]</code></li>
+<li>delete a category = <code>nb -c [cat_id] -d <em>cat</em></code></li>
+<li>delete an entry from a category = <code>nb -c [cat_id] -d [entry_id]</code></li>
+<li>force update of weblog = <code>nb -u [current|all|main]</code></li>
+</ul>
+<p>
+Thank you for trying NanoBlogger.  Please direct comments and suggestions to the <a href="http://groups.yahoo.com/group/nanoblogger/">mailing list</a> or submit a bug report to the <a href="http://sourceforge.net/tracker/?atid=635240&amp;group_id=103576&amp;func=browse">project page</a> on sourceforge.net.
+</p>]]>
+</description>
+</item>
+</rdf:RDF>

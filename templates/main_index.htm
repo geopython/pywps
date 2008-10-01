@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="$BLOG_CHARSET"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="$BLOG_MIMETYPE; charset=$BLOG_CHARSET" />
+<meta name="generator" content="NanoBlogger $VERSION" />
+<meta name="robots" content="all" />
+<meta name="revisit-after" content="31 days" />
+
+<title>$BLOG_TITLE</title>
+
+<link rel="stylesheet" href="${BASE_URL}$BLOG_CSS" type="text/css" media="all" />
+<link rel="stylesheet" href="${BASE_URL}styles/print.css" type="text/css" media="print" />
+<link rel="shortcut icon" href="${BASE_URL}$BLOG_ICON" />
+$NB_AtomAltLink
+$NB_RSS2AltLink
+$NB_RSSAltLink
+</head>
+
+<body>
+
+<div id="container" class="clearfix">
+	<div id="header" class="clearfix">
+		<h1><a href="${BASE_URL}$NB_INDEX" accesskey="1">$BLOG_TITLE</a></h1>
+		<span class="description">$BLOG_DESCRIPTION</span>
+                <img id="logo" src="/images/pywps.png" />
+	</div>
+	<div id="links">
+		<div class="calendar">
+			$NB_Calendar
+		</div>
+		$NB_ArticleLinks
+		<div class="sidetitle">
+			$template_links
+		</div>
+		<div class="side">
+			$NB_MainLinks
+		</div>
+		<div class="sidetitle">
+			$template_rentries
+		</div>
+		<div class="side">
+			$NB_RecentEntries
+		</div>
+		<div class="sidetitle">
+			$template_category
+		</div>
+		<div class="side">
+			$NB_CategoryLinks
+		</div>
+		<div class="sidetitle">
+			$template_archives
+		</div>
+		<div class="side">
+			<a href="${BASE_URL}$ARCHIVES_DIR/$NB_INDEX">$template_archiveindex</a><br />
+			$NB_YearLinks
+			<!-- $NB_MonthLinks -->
+		</div>
+		<div class="sidetitle">
+			$template_syndicate
+		</div>
+		<div class="side">
+			$template_syndicate_main
+			(<a href="${BASE_URL}rss.$NB_SYND_FILETYPE" class="feed-small">RSS</a>,
+			<a href="${BASE_URL}atom.$NB_SYND_FILETYPE" class="feed-small">Atom</a>)<br />
+			$NB_CategoryFeeds
+		</div>
+		<div class="sidetitle">
+			$template_contact
+		</div>
+		<div class="side">
+			$BLOG_CONTACT
+		</div>
+		<div class="sidetitle">
+			$template_status
+		</div>
+		<div class="side">
+			$NB_BlogStatus
+		</div>
+	</div>
+	<div id="content">
+            <p>
+            PyWPS <em>(Python Web Processing Service)</em> is implementation of <a href="http://www.opengeospatial.org/standards/requests/28">Web Processing Service</a> standard from <a href="http://opengeospatial.org">Open Geospatial Consortium</a>.
+            </p>
+
+            <p>
+            It has been started on Mai 2006 as project supported by <a href="http://dbu.de">DBU</a>. It offers environment for programming own process (geofunctions or models) which can be accessed from the public. The main advantage of PyWPS is, that it has been written with native support for <a href="http://grass.itc.it">GRASS</a>. Access GRASS modules via web interace should be as easy as possible.
+            </p>
+            <p>
+            PyWPS is written in <a href="http://python.org">Python programming language</a>, your processes must use this language too.
+            </p>
+
+		<div id="wrap">
+			<a id="top"></a>
+			<div class="blog">
+				$NB_MetaBody
+			</div>
+		</div>
+		<div class="pagenav" align="center">
+			$NB_PageLinks
+		</div>
+	</div>
+</div>
+<div id="footer" style="clear:both;">
+	<div class="metainfo">
+		$template_powered
+		<a href="http://nanoblogger.sourceforge.net">nb $VERSION</a>
+	</div>
+	<div class="menu">
+		<a href="#top">$NB_TopPage</a><br />
+	</div>
+</div>
+
+</body>
+</html>
+

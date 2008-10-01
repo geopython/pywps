@@ -1,0 +1,53 @@
+TITLE: PyWPS 2.0.0
+AUTHOR: PyWPS Development Team
+DATE: 2008-10-01 12:49:01
+DESC: 
+FORMAT: raw
+-----
+BODY:
+<p>
+8.10.2007<br/>
+http://pywps.wald.intevation.org
+</p>
+<p>
+After a year of development, Python Web Processing Service (PyWPS) 2.0.0
+is new stable release, which fixes number of bugs and instabilities in
+previous 1.0.0 version, as well as adds new functionality. 
+</p>
+<p>
+PyWPS implements OGC Web Processing Service 0.4.0 standard [1]. It is
+developed with native support for GRASS GIS [2], however, it can be used
+with other GIS command line tools  too (PROJ, GDAL/OGR, ...), as well as
+with the R Project for Statistical Computing. 
+</p>
+<p>
+OGC Web Processing Service specification provides client access across a
+network to pre-programmed calculations and/or computation models that
+operate on spatially referenced data. The calculation can be extremely
+simple or highly complex, with any number of data inputs and outputs. It
+does not specify the specific processes that could be implemented by a
+WPS. Instead, it specifies a generic mechanism that can be used to
+describe and web-enable any sort of geospatial process. 
+</p>
+<p>
+Several client applications can be used with PyWPS, e.g. Embrio project
+[3] and there is also plugin for OpenLayers [4][5].
+</p>
+<p>
+Major changes:
+<ul>
+<li>New Process interface for easier coding</li>
+<li>More stable, temporary files should be deleted in any case</li>
+<li>More verbose, better debugging output</li>
+<li>OGC WPS 0.4.0 still not fully implemented, but much more</li>
+<li>...</li>
+</ul>
+</p>
+<p>
+New development should be focused at implementation of the OGC WPS 1.0.0
+specification.
+</p>
+<p>
+Jachym & PyWPS Development Team
+</p>
+END-----

@@ -1,0 +1,89 @@
+TITLE: Download
+AUTHOR: jachym
+DATE:
+DESC: Download PyWPS
+FORMAT: raw
+-----
+BODY:
+            <!-- ====================== content ============================== -->
+            <div id="sitenavigation">
+                <ul>
+
+                    <li><a href="#download">Download</a></li>
+                    <li><a href="#addons">Addons</a></li>
+                </ul>
+                <hr />
+            </div>
+
+            <a name="download"><h3>Download</h3></a>
+            <h4>Stable: 2.0.1</h4>
+
+            <p>
+                4.11.2007
+            </p>
+            <p>
+                <a href="http://wald.intevation.org/frs/download.php/400/pywps-2.0.1.tar.gz">Source TAR.GZ</a>
+            |
+            <a href="http://wald.intevation.org/frs/download.php/401/pywps_2.0.1-1_all.deb">DEB</a>
+            |
+            <a href="http://wald.intevation.org/frs/download.php/402/pywps-2.0.1-1.noarch.rpm">RPM</a>
+
+            </p>
+            <p>
+            <strong>Anonymous Subversion Access</strong><br />
+            svn checkout https://svn.wald.intevation.org/svn/pywps/branches/pywps-2.0
+            </p>
+
+            <hr/>
+            <h4>Old Stable</h4>
+            <h5>2.0.0</h5>
+
+            <p>
+                8.10.2007
+            </p>
+            <p>
+                <a href="http://wald.intevation.org/frs/download.php/389/pywps-2.0.0.tar.gz">Source TAR.GZ</a>
+            |
+            <a href="http://wald.intevation.org/frs/download.php/388/pywps_2.0.0-1_all.deb">DEB</a>
+            |
+            <a href="http://wald.intevation.org/frs/download.php/391/pywps-2.0.0-1.noarch.rpm">RPM</a>
+
+            </p>
+            <p>
+            <strong>Anonymous Subversion Access</strong><br />
+            svn checkout https://svn.wald.intevation.org/svn/pywps/branches/pywps-2.0
+            </p>
+            <h5>1.0.0</h5>
+            <p>
+                26.11.2006
+            </p>
+
+            <p>
+                <a href="http://wald.intevation.org/frs/download.php/289/pywps-1.0.0.tar.gz">TAR.GZ</a>
+            |
+            <a href="http://wald.intevation.org/frs/download.php/288/pywps_1.0.0-1_i386.deb">DEB</a>
+            |
+            <a href="http://wald.intevation.org/frs/download.php/290/pywps-1.0.0-1.noarch.rpm">RPM</a>
+            </p>
+            <p>
+
+            <strong>Anonymous Subversion Access</strong><br />
+            svn checkout https://svn.wald.intevation.org/svn/pywps/branches/1.0
+            </p>
+            
+            <h4>Development</h4>
+            <p>
+            <strong>Anonymous Subversion Access</strong><br />
+            svn checkout https://svn.wald.intevation.org/svn/pywps/trunk
+            </p>
+
+            <div class="archive">
+                <a href="http://wald.intevation.org/frs/?group_id=22">File Archive</a>
+            </div>
+
+            <hr />
+            <a name="addons"><h3>Addons</h3></a>
+            <em>No addons have been published yet<em>
+
+            <!-- ====================== /content ============================== -->
+END-----

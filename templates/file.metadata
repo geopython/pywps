@@ -1,0 +1,9 @@
+TITLE: $NB_MetaTitle
+AUTHOR: $NB_MetaAuthor
+DATE: $NB_MetaDate
+DESC: $NB_MetaDescription
+FORMAT: $NB_MetaFormat
+$METADATA_MARKER
+BODY:
+$NB_MetaBody
+$METADATA_CLOSETAG

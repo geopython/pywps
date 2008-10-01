@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+<?xml-stylesheet type="text/css" href="http://pywps.wald.intavation.org//styles/feed.css"?>
+<title type="html">PyWPS</title>
+<link rel="alternate" type="text/html" href="http://pywps.wald.intavation.org/" />
+<link rel="self" type="application/atom+xml" href="http://pywps.wald.intavation.org//atom.xml" />
+<updated>2008-10-01T13:54:29+02:00</updated>
+<author>
+<name>PyWPS Development Team</name>
+<uri>http://pywps.wald.intavation.org/</uri>
+</author>
+<id>http://pywps.wald.intavation.org//</id>
+<generator uri="http://nanoblogger.sourceforge.net" version="3.3">NanoBlogger</generator>
+<entry>
+<title type="html">PyWPS 3.0.0rc3</title>
+<author>
+<name>PyWPS Development Team</name>
+</author>
+<link rel="alternate" type="text/html" href="http://pywps.wald.intavation.org//archives/2008/10/01/index.html#e2008-10-01T13_09_02.txt" />
+<id>http://pywps.wald.intavation.org//archives/2008/10/01/index.html#e2008-10-01T13_09_02.txt</id>
+<published>2008-10-01T13:09:02+02:00</published>
+<updated>2008-10-01T13:09:02+02:00</updated>
+<content type="xhtml">
+<div xmlns="http://www.w3.org/1999/xhtml">
+<![CDATA[<p>
+PyWPS Development team announces next release candidate of new
+PyWPS[1] version with number 3.0.0 (3.0.0rc3).
+</p>
+<p>
+Features of this release candidate:
+<ul>
+ <li> Updated setup script</li>
+    <ul>
+    <li> Templates are compiled during installation automatically</li>
+    <li> pywps.cfg is not installed to /etc/ by default</li>
+    </ul>
+ <li> Added example for custom CGI wrapper in doc/ directory</li>
+ <li> Support for PYWPS_CFG environment variable - put your configuration</li>
+file anywhere in the system</li>
+ <li> Example processes moved from pywps/processes to doc/examples/processes</li>
+ </ul>
+</p>
+<p>
+For more details, see original announcement of PyWPS 3.0.0. rc1 [1] and rc2 [2]
+</p>
+<p>
+For download and testing this new release candidate, please follow the
+link below [2] or download the RC from subversion directly [4].
+</p>
+<p>
+Please download & test!
+</p>
+<p>
+Happy GISing!
+</p>
+<p>
+Jachym & PyWPS Development team
+</p>
+<p>
+[1] <a href="http://lists.wald.intevation.org/pipermail/pywps-devel/2008-September/000365.html">http://lists.wald.intevation.org/pipermail/pywps-devel/2008-September/000365.html</a><br />
+[2] <a href="http://lists.wald.intevation.org/pipermail/pywps-devel/2008-September/000369.html">http://lists.wald.intevation.org/pipermail/pywps-devel/2008-September/000369.html</a><br />
+[3] <a href="http://wald.intevation.org/frs/download.php/495/pywps-3.0.0rc2.tar.gz">http://wald.intevation.org/frs/download.php/495/pywps-3.0.0rc2.tar.gz</a><br />
+[4] svn checkout https://svn.wald.intevation.org/svn/pywps/tags/pywps-3.0.0rc3
+</p>]]>
+</div>
+</content>
+</entry>
+<entry>
+<title type="html">French translation of the documentation</title>
+<author>
+<name>Arnaud Vandecasteele</name>
+</author>
+<link rel="alternate" type="text/html" href="http://pywps.wald.intavation.org//archives/2008/10/01/index.html#e2008-10-01T13_04_19.txt" />
+<id>http://pywps.wald.intavation.org//archives/2008/10/01/index.html#e2008-10-01T13_04_19.txt</id>
+<published>2008-10-01T13:04:19+02:00</published>
+<updated>2008-10-01T13:04:19+02:00</updated>
+<content type="xhtml">
+<div xmlns="http://www.w3.org/1999/xhtml">
+<![CDATA[<p>
+I made the translation in french of the PyWPS .txt docs. (Here :
+<a href="http://geotribu.net/?q=node/45">http://geotribu.net/?q=node/45</a>)
+I should start the pdf translation during this week.
+</p>
+<p>
+Arnaud
+</p>]]>
+</div>
+</content>
+</entry>
+<entry>
+<title type="html">PyWPS 3.0.0rc2</title>
+<author>
+<name>PyWPS Development Team</name>
+</author>
+<link rel="alternate" type="text/html" href="http://pywps.wald.intavation.org//archives/2008/10/01/index.html#e2008-10-01T13_00_41.txt" />
+<id>http://pywps.wald.intavation.org//archives/2008/10/01/index.html#e2008-10-01T13_00_41.txt</id>
+<published>2008-10-01T13:00:41+02:00</published>
+<updated>2008-10-01T13:00:41+02:00</updated>
+<content type="xhtml">
+<div xmlns="http://www.w3.org/1999/xhtml">
+<![CDATA[<p>
+PyWPS Development team announces next release candidate of new
+PyWPS[1] version with number 3.0.0 (3.0.0rc2).
+</p>
+<p>
+Features of this release candidate:
+<ul>
+ <li>Fixed DescribeProcess template</li>
+ <li>Fixed some missing python packages</li>
+ <li>Fixed versions parameter in GetCapabilities</li>
+</ul>
+</p>
+<p>
+For more details, see original announcement of PyWPS 3.0.0. rc1 [1]
+</p>
+<p>
+For download and testing this new release candidate, please follow the
+link below [2] or download the RC from subversion directly [3].
+</p>
+<p>
+For testing purposes, public PyWPS-3.0.0 server was setuped [4].
+</p>
+<p>
+Please download & test!
+</p>
+<p>
+Happy GISing!
+</p>
+<p>
+Jachym & PyWPS Development team
+</p>
+<p>
+[1] <a href="http://lists.wald.intevation.org/pipermail/pywps-devel/2008-September/000365.html">http://lists.wald.intevation.org/pipermail/pywps-devel/2008-September/000365.html</a>
+<br />
+[2] <a href="http://wald.intevation.org/frs/download.php/495/pywps-3.0.0rc2.tar.gz">http://wald.intevation.org/frs/download.php/495/pywps-3.0.0rc2.tar.gz</a>
+<br />
+[3] svn checkout https://svn.wald.intevation.org/svn/pywps/tags/pywps-3.0.0rc2
+<br />
+[4] <a href="http://apps.esdi-humboldt.cz/cgi-bin/pywps_3_0?service=wps&request=getcapabilities">http://apps.esdi-humboldt.cz/cgi-bin/pywps_3_0?service=wps&request=getcapabilities</a>
+</p>]]>
+</div>
+</content>
+</entry>
+<entry>
+<title type="html">PyWPS 3.0.0rc1</title>
+<author>
+<name>PyWPS Development Team</name>
+</author>
+<link rel="alternate" type="text/html" href="http://pywps.wald.intavation.org//archives/2008/10/01/index.html#e2008-10-01T12_56_21.txt" />
+<id>http://pywps.wald.intavation.org//archives/2008/10/01/index.html#e2008-10-01T12_56_21.txt</id>
+<published>2008-10-01T12:56:21+02:00</published>
+<updated>2008-10-01T12:56:21+02:00</updated>
+<content type="xhtml">
+<div xmlns="http://www.w3.org/1999/xhtml">
+<![CDATA[<p>
+PyWPS Development team announces first release candidate of new
+PyWPS[1] version with number 3.0.0 (3.0.0rc1).
+</p>
+<p>
+Features of this version:
+<ul>
+ <li>Support for OGC(R) WPS 3.0.0</li>
+ <li>New simple configuration files</li>
+ <li>New methods for custom process definition</li>
+ <li>Support for multiple WPS servers with one PyWPS Installation</li>
+ <li>Support for internationalization</li>
+ <li>Simple code structure</li>
+ <li>Python-htmltmpl templating system</li>
+ <li>New examples of processes</li>
+ <li>...</li>
+</ul>
+</p>
+<p>
+For download and testing this new release candidate, please follow the
+link below [2] or download the RC from subversion directly [3].
+</p>
+<p>
+NOTE: This version processes are note fully compatible with previous
+versions of PyWPS. However, the upgrade should note be complicated,
+please follow examples from pywps/processes/ directory.
+</p>
+<h3>What is PyWPS:</h3>
+<p>
+PyWPS (Python Web Processing Service) is implementation of Web
+Processing Service standard from Open Geospatial Consortium. The main
+advantage of PyWPS is, that it has been written with native support
+for GRASS GIS. Access GRASS modules via web interace should be as easy
+as possible. Processes can be written using GRASS GIS, but usage of
+other programs is also possible. Usage together with R package or GDAL
+or PROJ tools.
+</p>
+<p>
+Please download & test!
+</p>
+<p>
+Happy GISing!
+</p>
+<p>
+Jachym & PyWPS Development team
+</p>]]>
+</div>
+</content>
+</entry>
+<entry>
+<title type="html">PyWPS 2.0.1</title>
+<author>
+<name>PyWPS Development Team</name>
+</author>
+<link rel="alternate" type="text/html" href="http://pywps.wald.intavation.org//archives/2008/10/01/index.html#e2008-10-01T12_53_47.txt" />
+<id>http://pywps.wald.intavation.org//archives/2008/10/01/index.html#e2008-10-01T12_53_47.txt</id>
+<published>2008-10-01T12:53:47+02:00</published>
+<updated>2008-10-01T12:53:47+02:00</updated>
+<content type="xhtml">
+<div xmlns="http://www.w3.org/1999/xhtml">
+<![CDATA[
+<p>
+Today, PyWPS 2.0.1 was released. It is a bugfix release, which fixes the
+"PyWPSdebug" issue, which was reported by several people.
+</p>
+<p>
+Have fun!
+</p>
+<p>
+Jachym
+</p>]]>
+</div>
+</content>
+</entry>
+<entry>
+<title type="html">PyWPS 2.0.0</title>
+<author>
+<name>PyWPS Development Team</name>
+</author>
+<link rel="alternate" type="text/html" href="http://pywps.wald.intavation.org//archives/2008/10/01/index.html#e2008-10-01T12_49_01.txt" />
+<id>http://pywps.wald.intavation.org//archives/2008/10/01/index.html#e2008-10-01T12_49_01.txt</id>
+<published>2008-10-01T12:49:01+02:00</published>
+<updated>2008-10-01T12:49:01+02:00</updated>
+<content type="xhtml">
+<div xmlns="http://www.w3.org/1999/xhtml">
+<![CDATA[<p>
+8.10.2007<br/>
+http://pywps.wald.intevation.org
+</p>
+<p>
+After a year of development, Python Web Processing Service (PyWPS) 2.0.0
+is new stable release, which fixes number of bugs and instabilities in
+previous 1.0.0 version, as well as adds new functionality. 
+</p>
+<p>
+PyWPS implements OGC Web Processing Service 0.4.0 standard [1]. It is
+developed with native support for GRASS GIS [2], however, it can be used
+with other GIS command line tools  too (PROJ, GDAL/OGR, ...), as well as
+with the R Project for Statistical Computing. 
+</p>
+<p>
+OGC Web Processing Service specification provides client access across a
+network to pre-programmed calculations and/or computation models that
+operate on spatially referenced data. The calculation can be extremely
+simple or highly complex, with any number of data inputs and outputs. It
+does not specify the specific processes that could be implemented by a
+WPS. Instead, it specifies a generic mechanism that can be used to
+describe and web-enable any sort of geospatial process. 
+</p>
+<p>
+Several client applications can be used with PyWPS, e.g. Embrio project
+[3] and there is also plugin for OpenLayers [4][5].
+</p>
+<p>
+Major changes:
+<ul>
+<li>New Process interface for easier coding</li>
+<li>More stable, temporary files should be deleted in any case</li>
+<li>More verbose, better debugging output</li>
+<li>OGC WPS 0.4.0 still not fully implemented, but much more</li>
+<li>...</li>
+</ul>
+</p>
+<p>
+New development should be focused at implementation of the OGC WPS 1.0.0
+specification.
+</p>
+<p>
+Jachym & PyWPS Development Team
+</p>]]>
+</div>
+</content>
+</entry>
+<entry>
+<title type="html">PyWPS workshop</title>
+<author>
+<name>jachym</name>
+</author>
+<link rel="alternate" type="text/html" href="http://pywps.wald.intavation.org//archives/2008/10/01/index.html#e2008-10-01T12_47_16.txt" />
+<id>http://pywps.wald.intavation.org//archives/2008/10/01/index.html#e2008-10-01T12_47_16.txt</id>
+<published>2008-10-01T12:47:16+02:00</published>
+<updated>2008-10-01T12:47:16+02:00</updated>
+<content type="xhtml">
+<div xmlns="http://www.w3.org/1999/xhtml">
+<![CDATA[
+PyWPS Course in Hildesheim (Germany). See <a href="http://www.nature-consult.de/index.php?option=com_content&task=view&id=82&Itemid=82">Nature-Consult.de</a> for details.]]>
+</div>
+</content>
+</entry>
+<entry>
+<title type="html">Ka-map! &amp; PyWPS</title>
+<author>
+<name>PyWPS Development Team</name>
+</author>
+<link rel="alternate" type="text/html" href="http://pywps.wald.intavation.org//archives/2008/10/01/index.html#e2008-10-01T12_45_22.txt" />
+<id>http://pywps.wald.intavation.org//archives/2008/10/01/index.html#e2008-10-01T12_45_22.txt</id>
+<published>2008-10-01T12:45:22+02:00</published>
+<updated>2008-10-01T12:45:22+02:00</updated>
+<content type="xhtml">
+<div xmlns="http://www.w3.org/1999/xhtml">
+<![CDATA[Ka-map! togher with PyWPS, thanks Ominiverdi (again):
+<a href="http://pywps.ominiverdi.org/ka-map/htdocs/index_wps_winman.html">http://pywps.ominiverdi.org/ka-map/htdocs/index_wps_winman.html</a>]]>
+</div>
+</content>
+</entry>
+<entry>
+<title type="html">PyWPS has new WIKI</title>
+<author>
+<name>PyWPS Development Team</name>
+</author>
+<link rel="alternate" type="text/html" href="http://pywps.wald.intavation.org//archives/2008/10/01/index.html#e2008-10-01T12_36_32.txt" />
+<id>http://pywps.wald.intavation.org//archives/2008/10/01/index.html#e2008-10-01T12_36_32.txt</id>
+<published>2008-10-01T12:36:32+02:00</published>
+<updated>2008-10-01T12:36:32+02:00</updated>
+<content type="xhtml">
+<div xmlns="http://www.w3.org/1999/xhtml">
+<![CDATA[<p>
+Thanks Ominiverdi, PyWPS has new wiki at
+<a href="http://pywps.ominiverdi.org/wiki">http://pywps.ominiverdi.org/wiki</a>
+</p>]]>
+</div>
+</content>
+</entry>
+<entry>
+<title type="html">PyWPS 1.0.0 released</title>
+<author>
+<name>jachym</name>
+</author>
+<link rel="alternate" type="text/html" href="http://pywps.wald.intavation.org//archives/2008/10/01/index.html#e2008-10-01T12_34_58.txt" />
+<id>http://pywps.wald.intavation.org//archives/2008/10/01/index.html#e2008-10-01T12_34_58.txt</id>
+<published>2008-10-01T12:34:58+02:00</published>
+<updated>2008-10-01T12:34:58+02:00</updated>
+<content type="xhtml">
+<div xmlns="http://www.w3.org/1999/xhtml">
+<![CDATA[<p>
+After some time of development, PyWPS 1.0.0 stable has been released.
+</p>
+
+<h3>Features</h3>
+<ul>
+<li>Support for all input and output data types defined by OGC Web
+Processing Service standard</li>
+<li>Support for KVP (via HTTP GET) and XML (HTTP POST) request types</li>
+<li>Processes can be run assynchronously</li>
+<li>Default support for GRASS GIS, other tools (R, GDAL/OGR, PROJ.4, ...)
+is possible to use too.</li>
+</ul>
+
+<h3>What is PyWPS</h3>
+<p>
+PyWPS is implementation of OGS Web Processing Service standard written in Python programming language. The main advantage of PyWPS is, that it has been written with native support for GRASS GIS. Access GRASS modules via web interace should be as easy as possible.
+</p>]]>
+</div>
+</content>
+</entry>
+</feed>

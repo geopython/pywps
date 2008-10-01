@@ -1,0 +1,48 @@
+TITLE: PyWPS 3.0.0rc3
+AUTHOR: PyWPS Development Team
+DATE: 2008-10-01 13:09:02
+DESC: 
+FORMAT: raw
+-----
+BODY:
+<p>
+PyWPS Development team announces next release candidate of new
+PyWPS[1] version with number 3.0.0 (3.0.0rc3).
+</p>
+<p>
+Features of this release candidate:
+<ul>
+ <li> Updated setup script</li>
+    <ul>
+    <li> Templates are compiled during installation automatically</li>
+    <li> pywps.cfg is not installed to /etc/ by default</li>
+    </ul>
+ <li> Added example for custom CGI wrapper in doc/ directory</li>
+ <li> Support for PYWPS_CFG environment variable - put your configuration</li>
+file anywhere in the system</li>
+ <li> Example processes moved from pywps/processes to doc/examples/processes</li>
+ </ul>
+</p>
+<p>
+For more details, see original announcement of PyWPS 3.0.0. rc1 [1] and rc2 [2]
+</p>
+<p>
+For download and testing this new release candidate, please follow the
+link below [2] or download the RC from subversion directly [4].
+</p>
+<p>
+Please download & test!
+</p>
+<p>
+Happy GISing!
+</p>
+<p>
+Jachym & PyWPS Development team
+</p>
+<p>
+[1] <a href="http://lists.wald.intevation.org/pipermail/pywps-devel/2008-September/000365.html">http://lists.wald.intevation.org/pipermail/pywps-devel/2008-September/000365.html</a><br />
+[2] <a href="http://lists.wald.intevation.org/pipermail/pywps-devel/2008-September/000369.html">http://lists.wald.intevation.org/pipermail/pywps-devel/2008-September/000369.html</a><br />
+[3] <a href="http://wald.intevation.org/frs/download.php/495/pywps-3.0.0rc2.tar.gz">http://wald.intevation.org/frs/download.php/495/pywps-3.0.0rc2.tar.gz</a><br />
+[4] svn checkout https://svn.wald.intevation.org/svn/pywps/tags/pywps-3.0.0rc3
+</p>
+END-----

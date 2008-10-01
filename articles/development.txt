@@ -1,0 +1,175 @@
+TITLE: Dovelopment
+AUTHOR: jachym
+DATE:
+DESC: Developing PyWPS
+FORMAT: raw
+-----
+BODY:
+           <!-- ====================== content ============================== -->
+            <div id="sitenavigation">
+                <ul>
+
+                    <li><a href="#tracker">Tracker</a></li>
+                    <li><a href="#tasks">Tasks</a></li>
+                    <li><a href="#svn">Subversion</a></li>
+                    <li><a href="#files">Files</a></li>
+                    <li><a href="#join">Join</a></li>
+                    <li><a href="#team">Team</a></li>
+
+                </ul>
+            </div>
+
+            <hr />
+            <p>
+                PyWPS is hosting on <a href="http://gforge.org">GForge</a> server <a href="http://wald.intevation.org">Wald.intevation.org</a>. As such, some services are offered there. 
+            </p>
+
+                <h3><a name="tracker" href="http://wald.intevation.org/tracker/?group_id=22"><img src="http://wald.intevation.org/themes/gforge/images/ic/tracker20g.png" alt="Tracker" border="0" width="20" height="20" />Tracker</a></h3>
+                <ul>
+                    <li><a
+                            href="http://wald.intevation.org/tracker/?atid=174&amp;group_id=22&amp;func=browse">Bugs</a>
+                    -  Bug Tracking System</li>
+                    <li><a
+                            href="http://wald.intevation.org/tracker/?atid=175&amp;group_id=22&amp;func=browse">Support</a>
+                    -   	Tech Support Tracking System</li>
+
+                    <li><a
+                            href="http://wald.intevation.org/tracker/?atid=176&amp;group_id=22&amp;func=browse">Patches</a>
+                    - Patch Tracking System </li>
+                    <li><a
+                            href="http://wald.intevation.org/tracker/?atid=177&amp;group_id=22&amp;func=browse">Feature
+                            Requests</a> - Feature Request Tracking System</li>
+                </ul>
+
+                <h3><a  name="tasks" 
+                        href="http://wald.intevation.org/pm/?group_id=22"><img
+                            src="http://wald.intevation.org/themes/gforge/images/ic/taskman20g.png"
+                            border="0" alt="Tasks" width="20" height="20"
+                            />Task&nbsp;Manager</a></h3>
+
+                <ul>
+                    <li>
+                        <a
+                        href="http://wald.intevation.org/pm/task.php?group_project_id=36&amp;group_id=22&amp;func=browse">To
+                        Do</a> 
+                    </li>
+
+                    <li>
+                <a
+                        href="http://wald.intevation.org/pm/task.php?group_project_id=37&amp;group_id=22&amp;func=browse">Next
+                        Release</a>
+
+
+                    </li>
+                </ul>
+
+                <h3><a name="svn"
+                        href="http://wald.intevation.org/scm/?group_id=22"><img
+                            src="http://wald.intevation.org/themes/gforge/images/ic/cvs16b.png"
+                            border="0" alt="SCM" width="20" height="20"
+                            />Subversion&nbsp;Tree</a></h3>
+                    <p>
+                        Documentation for Subversion (sometimes referred to as "SVN") is available <a href="http://svnbook.red-bean.com/">here</a>.
+                    </p>
+                    <p>
+
+                        <strong>Anonymous Subversion Access</strong><br />
+                        This project's SVN repository can be checked out through anonymous access with the following command(s).
+                        </p>
+                        <pre>svn checkout https://svn.wald.intevation.org/svn/pywps/trunk</pre>
+                        <p>
+                        [<a href="http://wald.intevation.org/snapshots.php?group_id=22">Download The Nightly SVN Tree Snapshot</a>]
+                        </p>
+                        <p>
+
+                            <strong> Browse the Subversion Tree</strong><br />
+
+Browsing the SVN tree gives you a great view into the current status of this project's code. You may also view the complete histories of any file in the repository.
+                        </p>
+                        <p>
+
+[<a href="https://svn.wald.intevation.org/plugins/scmsvn/viewcvs.php/?root=pywps">Browse Subversion Repository</a>]
+                        </p>
+
+                <h3><a name="files"
+                        href="http://wald.intevation.org/project/showfiles.php?group_id=22"><img
+                            src="http://wald.intevation.org/themes/gforge/images/ic/ftp16b.png"
+                            border="0" alt="FTP" width="20" height="20"
+                            />Released&nbsp;Files</a></h3>
+
+                </ul>
+
+                <hr />
+                <h3><a name="join">Join the development!</a></h3>
+                <p>
+                    All new developers are welcome. To join the <a
+                        href="#team">development team</a>,  with write
+                    access to svn, you have to
+                    perform following steps:
+                </p>
+                <ol>
+
+                    <li> Register yourself at <a
+                            href="http://wald.intevation.org">http://wald.intevation.org</a></li>
+                    <li> <a
+                            href="http://wald.intevation.org/project/request.php?group_id=22">Request
+                            to join</a> PyWPS development.</li>
+                    <li> After you will be accepted, you have to <a
+                            href="http://wald.intevation.org/account/editsshkeys.php">edit
+                            your ssh public key</a></li>
+                    <li> Download the fresh svn version as new PyWPS
+                        developer:
+                        <pre>svn checkout svn+ssh://developername@svn.wald.intevation.org/pywps/trunk
+                    </pre></li>
+
+                </ol>
+
+                <hr />
+                <h3><a name="team">PyWPS development team</a></h3>
+                <p>
+                    <ul>
+                        <li> Lorenzo Becchi <br />
+                             role: Web interface coder<br />
+
+                             URL: <a href="http://www.omniverdi.org">http://www.omniverdi.org</a><br />
+                             contact: <em>lorenzo&nbsp;at&nbsp;omniverdi&nbsp;dot&nbsp;org</em><br />
+                         </li>
+                        <li> Luca Casagrande<br />
+
+                             role: Web interface coder<br />
+                             URL: <br />
+                             contact: <br />
+                         </li>
+                        <li> Jáchym Čepický <br />
+                             role: Main coder <br />
+
+                             URL: <a href="http://les-ejk.cz">http://les-ejk.cz</a>  <br />
+                             contact: <em>jachym.cepicky&nbsp;at&nbsp;centrum&nbsp;dot&nbsp;cz</em>
+                         </li>
+
+                         <li> Štěpán Kafka <br />
+
+                             role: outputs validator, initial tester and poweruser <br />
+                             URL: <a href="http://www.bnhelp.cz">http://www.bnhelp.cz</a>  <br />
+                             contact: 
+                        </li>
+
+                        <li> <em>Add your name here!</em>
+                        </li>
+
+                    </ul>
+                    <div class="archive">
+                        <a
+                            href="http://wald.intevation.org/project/memberlist.php?group_id=22">All members
+                            of the team with their role and position</a>
+                    </div>
+                </p>
+                <p>
+                     PyWPS is developed by support of <a href="http://www.dbu.de">Deutsche Bundesstiftung Umwelt</a>. The main development is done with support of <a href="http://gdf-hannover.de">GDF-Hannover.de</a>. Tested and developed with help of <a href="http://bnhelp.cz">Help Service Remote Sensing</a>.
+                </p>
+
+
+            
+            <!-- ====================== /content ============================== -->
+
+END-----

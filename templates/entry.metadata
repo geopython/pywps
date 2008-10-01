@@ -1,0 +1,9 @@
+TITLE: $NB_EntryTitle
+AUTHOR: $NB_EntryAuthor
+DATE: $NB_EntryDate
+DESC: $NB_EntryDescription
+FORMAT: $NB_EntryFormat
+$METADATA_MARKER
+BODY:
+$NB_EntryBody
+$METADATA_CLOSETAG

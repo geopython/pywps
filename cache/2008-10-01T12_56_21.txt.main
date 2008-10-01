@@ -1,0 +1,54 @@
+TITLE: PyWPS 3.0.0rc1
+AUTHOR: PyWPS Development Team
+DATE: 2008-10-01 12:56:21
+DESC: 
+FORMAT: raw
+-----
+BODY:
+<p>
+PyWPS Development team announces first release candidate of new
+PyWPS[1] version with number 3.0.0 (3.0.0rc1).
+</p>
+<p>
+Features of this version:
+<ul>
+ <li>Support for OGC(R) WPS 3.0.0</li>
+ <li>New simple configuration files</li>
+ <li>New methods for custom process definition</li>
+ <li>Support for multiple WPS servers with one PyWPS Installation</li>
+ <li>Support for internationalization</li>
+ <li>Simple code structure</li>
+ <li>Python-htmltmpl templating system</li>
+ <li>New examples of processes</li>
+ <li>...</li>
+</ul>
+</p>
+<p>
+For download and testing this new release candidate, please follow the
+link below [2] or download the RC from subversion directly [3].
+</p>
+<p>
+NOTE: This version processes are note fully compatible with previous
+versions of PyWPS. However, the upgrade should note be complicated,
+please follow examples from pywps/processes/ directory.
+</p>
+<h3>What is PyWPS:</h3>
+<p>
+PyWPS (Python Web Processing Service) is implementation of Web
+Processing Service standard from Open Geospatial Consortium. The main
+advantage of PyWPS is, that it has been written with native support
+for GRASS GIS. Access GRASS modules via web interace should be as easy
+as possible. Processes can be written using GRASS GIS, but usage of
+other programs is also possible. Usage together with R package or GDAL
+or PROJ tools.
+</p>
+<p>
+Please download & test!
+</p>
+<p>
+Happy GISing!
+</p>
+<p>
+Jachym & PyWPS Development team
+</p>
+END-----
