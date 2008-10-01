@@ -175,7 +175,14 @@ class WPS:
 
         # configuration file as environment variable
         if os.getenv("PYWPS_CFG"):
-            cfgfiles = os.getenv("PYWPS_CFG")
+
+            # Windows or Unix
+            if sys.platform == 'win32':
+                cfgfiles = (os.path.join(self.workingDir,"pywps","default.cfg"),
+                        os.getenv("PYWPS_CFG"))
+            else:
+                cfgfiles = (os.path.join(pywps.__path__[0],"default.cfg"),
+                        os.getenv("PYWPS_CFG"))
 
         # try to eastimate the default location
         else:
