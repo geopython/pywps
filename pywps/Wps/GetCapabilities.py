@@ -42,9 +42,11 @@ class GetCapabilities(Response):
             Response.__init__(self,wps)
         except Exception, e:
             self.cleanEnv()
-            rep = e
-            if e.has_key("message"):
+            rep = None
+            try:
                 rep = e.message
+            except:
+                rep = e
             raise self.wps.exceptions.NoApplicableCode(rep)
 
         try:
