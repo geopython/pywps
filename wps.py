@@ -154,10 +154,14 @@ class WPS:
     def _loadConfiguration(self):
         """Load PyWPS configuration from configuration files. This are
 
+        Both:
+        $PYWPS_CFG environment variable
+
         Unix/Linux:
         pywps/default.cfg
         /etc/pywps.cfg
         pywps/etc/pywps.cfg
+        $HOME/.pywps.cfg
 
         Windows:
         pywps\\default.cfg
@@ -169,14 +173,21 @@ class WPS:
 
         cfgfiles = None
 
-        # Windows or Unix
-        if sys.platform == 'win32':
-            self.workingDir = os.path.abspath(os.path.join(os.getcwd(), os.path.dirname(sys.argv[0])))
-            cfgfiles = (os.path.join(self.workingDir,"pywps","default.cfg"),
-                       os.path.join(self.workingDir, "pywps","etc","pywps.cfg"))
+        # configuration file as environment variable
+        if os.getenv("PYWPS_CFG"):
+            cfgfiles = os.getenv("PYWPS_CFG")
+
+        # try to eastimate the default location
         else:
-            cfgfiles = (os.path.join(pywps.__path__[0],"default.cfg"),
-                        os.path.join(pywps.__path__[0],"etc", "pywps.cfg"), "/etc/pywps.cfg")
+            # Windows or Unix
+            if sys.platform == 'win32':
+                self.workingDir = os.path.abspath(os.path.join(os.getcwd(), os.path.dirname(sys.argv[0])))
+                cfgfiles = (os.path.join(self.workingDir,"pywps","default.cfg"),
+                        os.path.join(self.workingDir, "pywps","etc","pywps.cfg"),
+                        os.path.join(os.getenv("HOME"),".pywps.cfg"))
+            else:
+                cfgfiles = (os.path.join(pywps.__path__[0],"default.cfg"),
+                            os.path.join(pywps.__path__[0],"etc", "pywps.cfg"), "/etc/pywps.cfg")
 
         self.config = ConfigParser.ConfigParser()
         self.config.read(cfgfiles)
