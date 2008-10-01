@@ -42,7 +42,10 @@ class GetCapabilities(Response):
             Response.__init__(self,wps)
         except Exception, e:
             self.cleanEnv()
-            raise self.wps.exceptions.NoApplicableCode(e.message)
+            rep = e
+            if e.message:
+                rep = e.message
+            raise self.wps.exceptions.NoApplicableCode(rep)
 
         try:
             self.template = self.templateManager.prepare(self.templateFile)
