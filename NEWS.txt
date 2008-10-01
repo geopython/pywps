@@ -1,4 +1,5 @@
-PyWPS 3.0.0
+PyWPS 3.0.0 
+2008-09-16
 -----------
 * Support for OGC(R) WPS 1.0.0
 
