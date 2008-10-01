@@ -36,10 +36,6 @@ import sys,os
 
 doclines = __doc__.split("\n")
 
-# win or *nix
-data_files= []
-if sys.platform.find('linux')>-1:
-    data_files= [('/etc/', ['pywps/etc/pywps.cfg']) ]
 
 setup(
         name = name,
@@ -82,19 +78,12 @@ setup(
                      'default.cfg'],
                     'pywps.Templates.1_0_0': ['inc/*.tmpl']
                 },
-        data_files=[
-                    ('/etc/', ['pywps/etc/pywps.cfg'])
-                ],
         scripts=['wps.py']
 )
 
 
-#       compile templates
-#       -----------------
-#       compiling before installing is necessary, because the apache
-#       webserver has not the permission to create new files in the 
-#       python site-packages directory
 
+# check, if we are really installing
 dryRun = False
 install = False
 for arg in sys.argv:
@@ -103,7 +92,12 @@ for arg in sys.argv:
     if arg == "install":
         install = True
 
+# post installation part
 if not dryRun and install:
+    # compile templates
+    # compiling before installing is necessary, because the apache
+    # webserver has not the permission to create new files in the 
+    # python site-packages directory
     from htmltmpl import TemplateManager, TemplateProcessor
     from distutils import sysconfig
 
