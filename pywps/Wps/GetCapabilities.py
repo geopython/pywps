@@ -38,7 +38,11 @@ class GetCapabilities(Response):
            self
            wps   - parent WPS instance
         """
-        Response.__init__(self,wps)
+        try:
+            Response.__init__(self,wps)
+        except Exception, e:
+            self.cleanEnv()
+            raise self.wps.exceptions.NoApplicableCode(e.message)
 
         try:
             self.template = self.templateManager.prepare(self.templateFile)
