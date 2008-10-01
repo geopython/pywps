@@ -43,7 +43,7 @@ class GetCapabilities(Response):
         except Exception, e:
             self.cleanEnv()
             rep = e
-            if e.message:
+            if e.has_key("message"):
                 rep = e.message
             raise self.wps.exceptions.NoApplicableCode(rep)
 
