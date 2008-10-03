@@ -196,6 +196,8 @@ permit write access to templates directory
 \begin{verbatim}
 # chmod -R 777 /usr/lib/python2.5/site-packages/pywps/Templates
 \end{verbatim} 
+you will maybe have to add \texttt{+ExecCGI +FollowSymLinks} options to
+your \texttt{cgi-bin} directory in the web-server configuration
 
 Several binary packages for Linux distributions (\texttt{RPM,DEB}) are also available on PyWPS
 homepage\footnote{\pywpssite}.
