@@ -1,30 +1,18 @@
-\documentclass[a4paper,11pt]{article}
+\documentclass[a4paper,11pt]{report}
+\usepackage{pywps}
 \usepackage{layout}
 \usepackage{lscape}
 \usepackage[utf8]{inputenc}
-\usepackage{a4wide}
 \usepackage[dvips]{graphicx}
 \usepackage{url}
 \usepackage[colorlinks=true]{hyperref}
 \usepackage[table,dvipsnames]{xcolor}[2004/07/04]
 
-\author{Jachym Cepicky}
+\author{PyWPS Development team\thanks{\url{http://wald.intevation.org/projects/pywps/http://wald.intevation.org/projects/pywps/}}}
 
 \title{Implementation of OGC WPS standard: PyWPS}
 
-\makeatletter
-%\Lesejk
-\def\Lesejk{{\tt{}Les-e\makebox(2,11)[t]{\rotatebox{35}{j}}\kern-.1667em\lower.5ex\hbox{\rotatebox{315}{k}}\kern-.125em\@}}
-
-
-\newcommand{\link}[1]{\texttt{<\url{#1}>}}
-\newcommand{\pywpssite}{\url{http://pywps.wald.intevation.org}}
-\newcommand{\pywpswiki}{\url{http://pywps.ominiverdi.org/wiki}}
-\newcommand{\pywpsDocCurrent}{OGC 05-007r7\footnote{\url{http://opengeospatial.org/standards/wps/}}}
-\newcommand{\note}[1]{\medskip{}\noindent{}NOTE: #1\medskip{}}
-\newcommand{\version}{\emph{2.0.0}}
-\makeatother
-
+\date{\today\\{}\vspace{2cm}\includegraphics[width=5cm]{pic/pywps.png}}
 
 \pagestyle{plain}
 
@@ -55,34 +43,43 @@ GDF-Hannover\footnote{\url{http://gdf-hannover.de}} and Help Service Remote
 Sensing\footnote{\url{http://www.bnhelp.cz}} companies. Initial author is Jachym
 Cepicky\footnote{\url{http://les-ejk.cz}}.
     
+\chapter{Changes}
+Changes of this document
+\begin{description}
+    \item [2008-10-06] Updated according to new PyWPS version (3.0.0) \jachym
+\end{description}
 
-    \tableofcontents
+\tableofcontents
 
 \newpage
 
 %---------------------------------------------------------------------
-\section{Introduction}
+\chapter{Introduction}
 PyWPS (Python Web Processing Service) is implementation of Web
 Processing Service 1.0.x standard from Open Geospatial
 Consortium\footnote{\url{http://www.opengeospatial.org/standards/requests/28}}.
 
 It has been started on Mai 2006 as project supported by DBU. It offers
 environment for programming own process (geofunctions or models) which can
-be accessed from the public. The main advantage of PyWPS is, that it has
+be accessed via HTTP protocol from various clients. The main advantage of PyWPS is, that it has
 been written with native support for GRASS
 GIS\footnote{http://grass.itc.it}. Access GRASS modules via web
-interace should be as easy as possible.
+interface should be as easy as possible.
 However, not only GRASS GIS is supported. Usage of other programs, like
 R package or GDAL or PROJ tools is possible as well.
 
 PyWPS is written in Python programming language, your processes must use
-this language too. 
+this language too. However, this does not mean, that you have to write all
+your processes using Python. You can write single scripts/programs in any
+programming language you are used to. In Python, you have to setup only
+small wrapper file, which will call your custom processes and provide the
+response back to the client.
 
 PyWPS Homepage can be found at \pywpssite.
 PyWPS Wiki is hosted on \pywpswiki. 
 
-\subsection{How it works}
-PyWPS is an translator application between client (Web Browser, Desktop
+\section{How it works}
+PyWPS is an translator proxy) application between client (Web Browser, Desktop
 GIS, command line tool, \dots) and working tool installed on the server.
 PyWPS does no process the data by it self. As working tool, GRASS GIS, GDAL, PROJ, R
 and other programs can be used.
@@ -96,25 +93,7 @@ and other programs can be used.
 \end{figure}
 
 %---------------------------------------------------------------------
-\section{Quick install}
-\begin{enumerate}
-    \item Install PyWPS, see page~\pageref{install} for details
-    \item NOTE: Rename original files (process examples, configuration files)
-    with \texttt{.py-dist} suffix to \texttt{.py}, when you see them.
-    \item Edit configuration files in \texttt{pywps/etc/} directory. See
-    page~\pageref{configuration} for details.
-    \item Create or edit \texttt{\_\_init\_\_.py} file in
-    \texttt{pywps/processes} directory. Add available process names to
-    \texttt{\_\_all\_\_} array.
-    \item Add your processes to \texttt{pywps/processes} directory. See
-    page~\pageref{processes} for details.
-    \item Run PyWPS with \texttt{./wps.py} command, see
-    page~\pageref{testing} for details.
-\end{enumerate}
-
-    
-%---------------------------------------------------------------------
-\section{Know issues}
+\chapter{Know issues}
 Known bugs and limitations to \date
 \begin{itemize}
 \item Translations do not work for GetCapabilities. They only work for DescribeProcess request types.
@@ -123,15 +102,15 @@ string, it could be security problem. Take care on your inputs and do
 not use it directly in scripts to avoid your server to be hacked.
 \end{itemize}
 
-Please report all problems or unexpected handling either via pywps mailing
+Please report all problems or unexpected handling either via PyWPS mailing
 list\footnote{\href{http://wald.intevation.org/mailman/listinfo/pywps-devel}{PyWPS
 - development list}}
 or using PyWPS
-bugtracker\footnote{\href{http://wald.intevation.org/tracker/?atid=174&group\_id=22&func=browse}{PyWPS
+bug tracker\footnote{\href{http://wald.intevation.org/tracker/?atid=174&group\_id=22&func=browse}{PyWPS
 Bug tracker}}.
 
 %---------------------------------------------------------------------
-\section{Installation}
+\chapter{Installation}
 \label{install}   
 Required packages:
     
@@ -168,9 +147,9 @@ Recommended packages:
 
 \end{itemize}
     
-\subsection{Installation the quick 'n' dirty way}
-For installing pywps to your server simply unzip the archive to the
-directory, where cgi programs are allowed to run. You can also use current
+\section{Installation the quick 'n' dirty way}
+For installing PyWPS to your server simply unzip the archive to the
+directory, where CGI programs are allowed to run. You can also use current
 repository version.
 
 \begin{verbatim}
@@ -179,7 +158,20 @@ $ tar xvzf /tmp/pywps-VERSION.tar.gz
 $ pywps/wps.py
 \end{verbatim}
 
-\subsection{Installation the 'clean' way}
+\subsection{Post-installation steps}
+You have to change the write access to \texttt{pywps/Templates} directory,
+so the web server can compile the templates:
+\begin{verbatim}
+chmod 777 pywps/Templates/1_0_0
+\end{verbatim}
+
+The default location of the configuration file is
+\texttt{pywps/etc/pywps.cfg}. The default location of the processes
+directory is \texttt{pywps/processes}. NOTE: See
+section~\ref{environment_variables} how to customize the location of
+configuration files and processes directory.
+
+\section{Installation the 'clean' way}
 Unzip the package 
 \begin{verbatim}
 $ tar -xzf pywps-VERSION.tar.gz
@@ -188,22 +180,78 @@ and run
 \begin{verbatim}
 $ python setup.py install
 \end{verbatim} 
-adjust the configuration file 
-\begin{verbatim}
-$ vim /etc/pywps.cfg
-\end{verbatim} 
-permit write access to templates directory
-\begin{verbatim}
-# chmod -R 777 /usr/lib/python2.5/site-packages/pywps/Templates
-\end{verbatim} 
-you will maybe have to add \texttt{+ExecCGI +FollowSymLinks} options to
-your \texttt{cgi-bin} directory in the web-server configuration
 
-Several binary packages for Linux distributions (\texttt{RPM,DEB}) are also available on PyWPS
-homepage\footnote{\pywpssite}.
+The default location of the configuration file is
+\texttt{/etc/pywps.cfg} on Unix or
+\texttt{PYWPS\_INSTALLATION\_PATH/pywps/etc/pywps.cfg} on Windows. The default location of the processes
+directory is on \texttt{PYWPS\_INSTALLATION\_PATH/pywps/processes/}. On
+Unix, \texttt{PYWPS\_INSTALLATION\_PYWPS} is something similar to
+\texttt{/usr/lib/python2.5/site-packages/}.
+NOTE: See section~\ref{environment_variables} how to customize the location of
+configuration file and processes directory.
+
+\section{PyWPS Environment variables}
+\label{environment_variables}
+Several environment variables can be set (see section~\ref{wrapper_script}
+for examples), to change the default PyWPS behaviour:
+\begin{description}
+    \item[\texttt{PYWPS\_CFG}] Location of the PyWPS configuration file.
+    Default is \texttt{/etc/pywps.cfg} or
+    \texttt{PYWPS\_INSTALLATION\_PATH/pywps/etc/pywps.cfg}.
+
+    \item[\texttt{PYWPS\_PROCESSES}] Location of the processes directory
+    (python-package). The directory contains \texttt{\_\_init\_\_.py}
+    configuration script, as well as all processes.
+\end{description}
+
+\section{PyWPS as CGI}
+\subsection{Symlink}
+If you did not installed PyWPS to \texttt{cgi-bin} directory of your
+server, you can create the symlink in \texttt{cgi-bin} to \texttt{wps.py}:
+\begin{verbatim}
+ln -s /usr/bin/wps.py /usr/lib/cgi-bin/wps.py
+\end{verbatim}
+In this case, options \texttt{+ExecCGI +FollowSymLinks} must be enabled for
+\texttt{cgi-bin} directory in the web server configuration file. Example:
+\begin{verbatim}
+# /etc/apache2/sites-enabled/000-default
+# ...
+        ScriptAlias /cgi-bin/ /usr/lib/cgi-bin/
+        <Directory "/usr/lib/cgi-bin">
+                AllowOverride None
+                Options +ExecCGI -MultiViews +FollowSymLinks
+                Order allow,deny
+                Allow from all
+        </Directory>
+# ...
+\end{verbatim}
+
+\subsection{Wrapper script}
+\label{wrapper_script}
+You can also write little wrapper script, which will setup environment
+variables and run \texttt{wps.py} script. In this case, you can create
+several WPS servers  (separate sets of processes) with only one PyWPS
+installation. Example follows:
+\begin{verbatim}
+#!/usr/sh
+
+# Author: jachym
+# Purpose: PyWPS wrapper script
+# Licence: GNU/GPL
+# Version: To be used with PyWPS >= 3.0.0
+# Installation: Put this script to /usr/lib/cgi-bin directory (or other
+#               cgi-bin directory of your web server) and call it whatever
+#               you like (e.g. "foowps"). Adjust the variables below and 
+#               chmod +x this script.
+
+export PYWPS_CFG=/usr/local/pywps/foo/pywps.cfg
+export PYWPS_PROCESSES=/usr/local/pywps/foo/processes/
+
+/usr/bin/wps.py
+\end{verbatim}
 
 %---------------------------------------------------------------------
-\section{Configuration}
+\chapter{Configuration}
 \label{configuration}
     
 Before you start to tune your PyWPS installation, you should get your copy of
@@ -213,7 +261,10 @@ OpenGIS(R) Web Processing Service document (OGC  05-007r7) version
 \note{Note, that the configuration option are CASE SENSITIVE}
     
 Pywps configuration takes place in \texttt{pywps.cfg} file located in
-\texttt{/etc/pywps.cfg} or \texttt{pywps/etc/pywps.cfg}. 
+\texttt{/etc/pywps.cfg} or \texttt{pywps/etc/pywps.cfg}. Path to the
+configuration file can be also set by the \texttt{PYWPS\_CFG} environment
+variable (section \ref{environment_variables}), see
+section~\ref{wrapper_script} for example usage.
 
 Default configuration file is located in \texttt{pywps/default.cfg}, you
 can always make a copy of this file and start the configuration from
@@ -267,7 +318,7 @@ Several sections are in the file.
             \texttt{pywps/processes}. 
 
             NOTE: You can set also \texttt{PYWPS\_PROCESSES} environment
-            variable with same result.
+            variable with same result (section~\ref{environment_variables}).
         \end{itemize}
     \item Section \textbf{[grass]} -- GRASS GIS settings
         \begin{itemize}
@@ -335,10 +386,11 @@ gisbase=/home/foo/datagrass
 subsection{Testing after installation}
 \label{testing}
 For test, just run
-\texttt{wps.py} in your command line:
+\texttt{wps.py} in the terminal. The parameters can be written as one
+parameter:
     
 \begin{verbatim}
-$ ./wps.py "service=wps&request=getcapabilities"
+$ wps.py "service=wps&request=getcapabilities"
 
 INIT DONE
 LOADING PRECOMPILED
@@ -387,24 +439,31 @@ This message means, that the python-htmltmpl package is not installed in
 your system.
      
 %---------------------------------------------------------------------
-\section{Write your own processes}
+\chapter{Write your own processes}
 \label{processes}
     
-All processes are stored in the \texttt{pywps/processes} directory. You can
+The default location for processes is \texttt{PYWPS\_INSTALLATION\_PATH/pywps/processes}. You can
 create custom directory anywhere in your system and set
 \texttt{\$PYTHON\_PROCESS} environmental variable (on how to do this for the web
-server, refer to your Server documentation). Alternatively you can set this path to 
-the \texttt{processesPath} setting in the configuration file.
-Following example will describe buffering process. Several example processes are 
-distributed along with PyWPS source code.
+server, refer to your Server documentation, see sections
+\ref{wrapper_script} and \ref{environment_variables} for details).
 
-Create file \texttt{exampleBufferProcess.py} in PYWPS\_PROCESSES directory.
+Alternatively you can set the \texttt{processesPath} variable in the configuration file.
+Following example will describe buffering process. Several example processes are 
+distributed along with PyWPS source code -- feel free to get inspired by
+them.
+
+\section{Process initialization and configuration}
+\begin{enumerate}
+\item Create file \texttt{foo.py} in \texttt{PYWPS\_PROCESSES} directory.
+\item Add \texttt{foo} to \texttt{\_\_all\_\_} array in the \texttt{\_\_init\_\_.py}
+file.
+\end{enumerate}
     
 Each process is stand-alone python script with one class \texttt{Process},
 which has two methods: \texttt{\_\_init\_\_, execute}. It is possible also to add as 
 many your functions/methods, as you wish.
     
-\subsection{Process initialization and configuration}
 
 \begin{verbatim}
   1 from pywps.Process.Process import WPSProcess                                
@@ -414,7 +473,7 @@ many your functions/methods, as you wish.
   5         """Process initialization"""
   7         # init process
   8         WPSProcess.__init__(self,
-  9             identifier = "exampleBufferProcess",
+  9             identifier = "foo", # must be same, as filename
  10             title="Buffer",
  11             version = "0.2",
  12             storeSupported = "true",
@@ -423,33 +482,26 @@ many your functions/methods, as you wish.
  15             grassLocation = True)
 \end{verbatim}
 
-We defined new process called \texttt{exampleBufferProcess}. The process is allowed to
+We defined new process called \texttt{foo}. The process is allowed to
 store it's output data on the server (\texttt{storeSupported}) and it is also possible to run it in
 asynchronous mode (\texttt{statusSupported}). The process will run within
-GRASS GIS environment (\texttt{grassLocation = True}).
+GRASS GIS environment (\texttt{grassLocation = True}) -- temporary location
+will be created and deleted again, after the processes is done.
      
-\paragraph{Metadata definition} is stored in array \texttt{self.Metadata} in
-\texttt{\_\_init\_\_} method. You can add new Medatada using
-\texttt{self.AddMetadata()} method:
-\begin{verbatim}
-            self.AddMetadata(identifier="point",type="point",
-                            textContent="Click in the map")
-\end{verbatim}
-
-\subsubsection{Data Inputs}
+\subsection{Data Inputs}
 
 Three types of data inputs are defined:
 \begin{itemize}
     \item Literal Input -- Basic literal input -- single number or text
     value
-    \item ComplexValue Input  -- Mostly vector file embded in input XML
-    request or reference (URL) to such file.
+    \item ComplexValue Input  -- Mostly vector file will be included in input XML
+    request. It can be also only referenced (only URL will be send).
     \item BoundingBox Input -- Coordinates for lower-left and upper-right
     corner.
 \end{itemize}
 
 
-\paragraph{ComplexInput}
+\subsubsection{ComplexInput}
 Complex input can be raster or vector file, to be processed. 
 
 \begin{verbatim}
@@ -458,7 +510,42 @@ Complex input can be raster or vector file, to be processed.
  20 
 \end{verbatim}
 
-\paragraph{LiteralInput}
+Mandatory parameters:
+\begin{itemize}
+    \item identifier \textbf{String} input identifier
+    \item title \textbf{String} input title
+\end{itemize}
+
+Optional parameters:
+\begin{itemize}
+\item abstract \textbf{String} input description.
+        default: None
+\item metadata List of \textbf{Dict} {key:value} pairs.
+        default: None
+\item minOccurs \textbf{Integer} minimum number of occurrences.
+        default: 1
+\item maxOccurs \textbf{Integer} maximum number of occurrences.
+        default: 1
+\item formats List of \textbf{Dict} according to table 23 (page 25). E.g.
+    \begin{verbatim}
+            [
+                {"mimeType": "image/tiff"},
+                {
+                    "mimeType": "text/xml",
+                    "encoding": "utf-8",
+                    "schema":"http://foo/bar"
+                }
+            ]
+    \end{verbatim}
+        default: [{"mimeType":"text/xml"}]
+\item maxmegabites \textbf{Float} Maximum input file size. Can not be bigger, as
+        defined in global configuration file.\\
+        default: 5
+\end{itemize}
+
+
+
+\subsubsection{LiteralInput}
 
 With literal input, you can obtain any type of character string.
 
@@ -468,14 +555,69 @@ With literal input, you can obtain any type of character string.
  23 
 \end{verbatim}
 
-For further documentation, refer to example processes distributed with the
-source code as well as \texttt{pydoc~pywps/Wps/Process.py}. This help is
-also available in
-\texttt{process.html}\footnote{\href{http://wald.intevation.org/plugins/scmsvn/viewcvs.php/*checkout*/trunk/doc/process.html?rev=369&root=pywps}{Documentation
-to Process.py module}} file distributed along with PyWPS
-source code.
+Mandatory parameters:
+\begin{itemize}
+\item identifier \textbf{String} input identifier
+\item title \textbf{String} input title
+\end{itemize}
 
-\subsubsection{Data Outputs}
+Optional parameters:
+\begin{itemize}
+\item abstract \textbf{String} input description. Default: None
+            default: None\\
+\item uoms List of \textbf{String} value units\\
+            default: ()
+\item minOccurs \textbf{Integer} minimum number of occurrences.\\
+            default: 1
+\item maxOccurs \textbf{Integer} maximum number of occurrences.
+            default: 1\\
+\item allowedValues  List of {String} or {List} list of allowed values,
+            which can be used with this input. You can set interval
+            using list with two items, like:
+
+            (1,2,3,(5,9),10,"a",("d","g"))
+
+            This will produce allowed values 1,2,3,10, "a" and
+            any value between 5 and 9 or "d" and "g".
+
+            If "*" is used, it means "any value"\\
+            default: ("*")
+\item type \textbf{types.TypeType} value type, e.g. Integer, String, etc. you
+            can uses the "types" module of python.\\
+            default: types.IntType
+\item default \textbf{Any} default value.\\
+            default: None
+\item metadata List of \textbf{Dict} Additional metadata. E.g.  {"foo":"bar"}\\
+            default: None
+\end{itemize}
+
+\subsubsection{BoundingBox Input}
+The input is added to the process using \texttt{addBBoxInput}.
+
+Mandatory parameters:
+\begin{itemize}
+\item identifier \textbf{String} input identifier
+\item title \textbf{String} input title
+\end{itemize}
+
+Optional parameters:
+\begin{itemize}
+\item abstract \textbf{String} input description.\\
+        default: None
+\item metadata List of \textbf{Dict} {key:value} pairs.\\
+        default: None
+\item minOccurs \textbf{Integer} minimum number of occurrences.\\
+        default: 1
+\item maxOccurs \textbf{Integer} maximum number of occurrences.\\
+        default: 1
+\item crss List of \textbf{String} supported coordinate systems.\\
+        default: \[["EPSG:4326"]\]
+\end{itemize}
+
+For further documentation, refer to example processes distributed with the
+source code as well as \texttt{pydoc~pywps/Wps/Process/Process.py}. 
+
+\subsection{Data Outputs}
 Data outputs can be defined in similar way.
 \begin{itemize}
     \item Literal Output
@@ -483,7 +625,7 @@ Data outputs can be defined in similar way.
     \item BoundingBox Output
 \end{itemize}
     
-\paragraph{ComplexValue Output}
+\subsubsection{ComplexValue Output}
 The complex value can be raster or vector file (or any other binary or text
 file).
 
@@ -493,7 +635,32 @@ file).
 26
 \end{verbatim}
 
-\paragraph{Literal Output}
+Mandatory parameters:
+\begin{itemize}
+\item identifier \textbf{String} output identifier
+\item title \textbf{String} output title
+\end{itemize}
+
+Optional parameters:
+\begin{itemize}
+\item metadata List of \textbf{Dict} {key:value} pairs.
+        default: None
+\item formats List of \textbf{Dict} according to table 23 (page 25). E.g.
+        \begin{verbatim}
+            [
+                {"mimeType": "image/tiff"},
+                {
+                    "mimeType": "text/xml",
+                    "encoding": "utf-8",
+                    "schema":"http://foo/bar"
+                }
+            ]
+        \end{verbatim}
+        default: [\{"mimeType":"text/xml"\}]
+\end{itemize}
+
+
+\subsubsection{Literal Output}
 If you want to output any text string.
 \begin{verbatim}
 27          self.textOut = self.addLiteralOutput(identifier="text",
@@ -501,12 +668,51 @@ If you want to output any text string.
 29
 \end{verbatim}
 
-\subsection{Process Programming}
+Mandatory parameters:
+\begin{itemize}
+\item identifier \textbf{String} input identifier
+\item title \textbf{String} input title
+\end{itemize}
+
+Optional parameters:
+\begin{itemize}
+\item abstract \textbf{String} input description. Default: None\\
+            default: None
+\item uoms List of \textbf{String} value units\\
+            default: ()
+\item type \textbf{types.TypeType} value type, e.g. Integer, String, etc. you
+            can uses the "types" module of python.\\
+            default: types.IntType
+\item default \textbf{Any} default value.\\
+            default: None
+\end{itemize}
+
+\subsubsection{BoundingBox Output}
+BoundingBox output is added with the addBBoxOutput method
+
+Mandatory parameters:
+\begin{itemize}
+\item identifier \textbf{String} input identifier
+\item title \textbf{String} input title
+\end{itemize}
+
+Optional parameters:
+\begin{itemize}
+\item abstract \textbf{String} input description.\\
+        default: None
+\item crss List of\textbf {String} supported coordinate systems.\\
+        default: ["EPSG:4326"]
+\item dimensions \textbf{Integer} number of dimensions\\
+        default: 2
+\end{itemize}
+
+\section{Process Programming}
     
 The process must be defined in the \texttt{execute(self)} method. 
 Basically, you want to get input values and set output values. For this
 purpose, you can use \texttt{getValue(input\_identifier)} and
-\texttt{setValue(output\_identifier,value)} methods of the input/output
+\texttt{setValue(output\_identifier,value)} methods of the process or
+\texttt{getValue()} and \texttt{setValue(value)} of the input/output
 objects (see lower).
 
 If you need to execute some shell command, you should use
@@ -542,11 +748,11 @@ Example follows:
 53         self.cmd("v.out.ogr type=area format=GML input=data_buff dsn=out.xml olayer=path.xml")
 54         
 55         self.bufferOut.setValue("out.xml")
-56         self.textOut.setValue("ahoj, svete")
+56         self.textOut.setValue("hallo, world")
 57         return
 \end{verbatim}
 
-\subsubsection{Error handling}
+\subsection{Error handling}
     
 At the end of the \texttt{execute} function, \texttt{None} value should be returned. Any other 
 value means, that the calculation will be stopped and error report will be
@@ -559,7 +765,7 @@ returned back to the client, example:
 \end{verbatim}
     
 
-\subsection{Using GRASS GIS}
+\section{Using GRASS GIS}
 
 Configuration is done using standard pywps configuration file (see
 page\pageref{configuration}).
@@ -571,7 +777,7 @@ process definition:
 
 \begin{verbatim}
          WPSProcess.__init__(self,
-             identifier = "exampleBufferProcess",
+             identifier = "foo",
              ....
              grassLocation = True)
 \end{verbatim}
@@ -581,16 +787,17 @@ process is done, it will be deleted again. By default, no GRASS Location is
 created.
 
 You can also work in existing GRASS Location, then just set only the location
-name.
+name. The gisdbase should be set in the configuration
+file~\ref{configuration}.
 \begin{verbatim}
          WPSProcess.__init__(self,
-             identifier = "exampleBufferProcess",
+             identifier = "foo",
              ....
              grassLocation = "spearfish60")
 \end{verbatim}
 
 %---------------------------------------------------------------------
-\section{Testing your new process}
+\chapter{Testing your new process}
 
 To test your PyWPS installation, you run it either as Webserver
 cgi-application or in the command line directly. It is always good to start
@@ -600,20 +807,20 @@ the web server.
 \begin{itemize}
     \item GetCapabilities request (webserver)
 \begin{verbatim}
-./wps.py "service=wps&request=getcapabilities"
+$ wps.py "service=wps&request=getcapabilities"
 
-wget -nv -q -O - "http://localhost/cgi-bin/wps.py?\
+$ wget -nv -q -O - "http://localhost/cgi-bin/wps.py?\
     service=Wps&request=getcapabilities"
 \end{verbatim}
         
     \item DescribeProcess request:
 \begin{verbatim}
-./wps.py "version=1.0.0&service=Wps&request=DescribeProcess&\
+$ wps.py "version=1.0.0&service=Wps&request=DescribeProcess&\
     Identifier=bufferExampleProcess"
 
-wget -nv -q -O - "http://localhost/cgi-bin/wps.py?\
+$ wget -nv -q -O - "http://localhost/cgi-bin/wps.py?\
     version=0.4.0&service=Wps&request=DescribeProcess&\
-    Identifier=exampleBufferProcess"
+    Identifier=foo"
 \end{verbatim}
         
     \item Execute request:
@@ -622,7 +829,7 @@ wget -nv -q -O - "http://localhost/cgi-bin/wps.py?\
             encoding``
 \begin{verbatim}
 ./wps.py "version=1.0.0&service=Wps&\
-    request=Execute&Identifier=exampleBufferProcess&\
+    request=Execute&Identifier=foo&\
     datainputs=data=http://foo/bar/roads.gml;width=0.5"
 \end{verbatim}
         
@@ -638,7 +845,7 @@ script via standard input:
 
 \begin{verbatim}
 $ export REQUEST_METHOD=POST
-$ cat doc/wps_execute_request-responsedocument.xml|./wps.py
+$ cat doc/wps_execute_request-responsedocument.xml| wps.py
 \end{verbatim}
 
 \end{document}
