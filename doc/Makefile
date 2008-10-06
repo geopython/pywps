@@ -7,7 +7,7 @@ all: ${SRC}
 	make pdf
 	make html
 	make txt
-	make proces
+	make process
 
 pdf: ${SRC}
 	rm -f ${FILE}.pdf
