@@ -63,7 +63,7 @@ It has been started on Mai 2006 as project supported by DBU. It offers
 environment for programming own process (geofunctions or models) which can
 be accessed via HTTP protocol from various clients. The main advantage of PyWPS is, that it has
 been written with native support for GRASS
-GIS\footnote{http://grass.itc.it}. Access GRASS modules via web
+GIS\footnote{\url{http://grass.itc.it}}. Access GRASS modules via web
 interface should be as easy as possible.
 However, not only GRASS GIS is supported. Usage of other programs, like
 R package or GDAL or PROJ tools is possible as well.
@@ -75,13 +75,13 @@ programming language you are used to. In Python, you have to setup only
 small wrapper file, which will call your custom processes and provide the
 response back to the client.
 
-PyWPS Homepage can be found at \pywpssite.
-PyWPS Wiki is hosted on \pywpswiki. 
+PyWPS Homepage can be found at \url{http://pywps.wald.intevation.org}.
+PyWPS Wiki is hosted on \url{http://pywps.ominiverdi.org/wiki}.
 
 \section{How it works}
-PyWPS is an translator proxy) application between client (Web Browser, Desktop
+PyWPS is a translator-proxy application between client (Web Browser, Desktop
 GIS, command line tool, \dots) and working tool installed on the server.
-PyWPS does no process the data by it self. As working tool, GRASS GIS, GDAL, PROJ, R
+PyWPS does not process the data by it self. As working tool, GRASS GIS, GDAL, PROJ, R
 and other programs can be used.
 
 \begin{figure}[ht]
@@ -91,23 +91,6 @@ and other programs can be used.
 \label{pic:pywps}
 \end{center}
 \end{figure}
-
-%---------------------------------------------------------------------
-\chapter{Know issues}
-Known bugs and limitations to \date
-\begin{itemize}
-\item Translations do not work for GetCapabilities. They only work for DescribeProcess request types.
-\item If inputs are of type \texttt{LiteralValue} and it's type is
-string, it could be security problem. Take care on your inputs and do
-not use it directly in scripts to avoid your server to be hacked.
-\end{itemize}
-
-Please report all problems or unexpected handling either via PyWPS mailing
-list\footnote{\href{http://wald.intevation.org/mailman/listinfo/pywps-devel}{PyWPS
-- development list}}
-or using PyWPS
-bug tracker\footnote{\href{http://wald.intevation.org/tracker/?atid=174&group\_id=22&func=browse}{PyWPS
-Bug tracker}}.
 
 %---------------------------------------------------------------------
 \chapter{Installation}
@@ -148,7 +131,7 @@ Recommended packages:
 \end{itemize}
     
 \section{Installation the quick 'n' dirty way}
-For installing PyWPS to your server simply unzip the archive to the
+For installing PyWPS to your server simply unpack the archive to the
 directory, where CGI programs are allowed to run. You can also use current
 repository version.
 
@@ -159,7 +142,7 @@ $ pywps/wps.py
 \end{verbatim}
 
 \subsection{Post-installation steps}
-You have to change the write access to \texttt{pywps/Templates} directory,
+You have to change the write access of \texttt{pywps/Templates} directory,
 so the web server can compile the templates:
 \begin{verbatim}
 chmod 777 pywps/Templates/1_0_0
@@ -172,7 +155,7 @@ section~\ref{environment_variables} how to customize the location of
 configuration files and processes directory.
 
 \section{Installation the 'clean' way}
-Unzip the package 
+Unpack the package 
 \begin{verbatim}
 $ tar -xzf pywps-VERSION.tar.gz
 \end{verbatim}
@@ -185,7 +168,7 @@ The default location of the configuration file is
 \texttt{/etc/pywps.cfg} on Unix or
 \texttt{PYWPS\_INSTALLATION\_PATH/pywps/etc/pywps.cfg} on Windows. The default location of the processes
 directory is on \texttt{PYWPS\_INSTALLATION\_PATH/pywps/processes/}. On
-Unix, \texttt{PYWPS\_INSTALLATION\_PYWPS} is something similar to
+Unix, \texttt{PYWPS\_INSTALLATION\_PATH} is something similar to
 \texttt{/usr/lib/python2.5/site-packages/}.
 NOTE: See section~\ref{environment_variables} how to customize the location of
 configuration file and processes directory.
@@ -331,7 +314,11 @@ Several sections are in the file.
             \item ldLibraryPath -- Path of GRASS Libs
             (\texttt{/usr/lib/grass/lib})
 	    \item gisdbase -- Full path to location directory 
-	    (\texttt{/home/foo/grassdata})
+	    (\texttt{/home/foo/grassdata}) NOTE: You do not have to setup
+            this variable in the configuration file globaly. You can use
+            \texttt{grassLocation} attribute while calling the
+            \texttt{\_\_init\_\_} method of Process class, while process
+            initialization. See section~\ref{processes} for more details.
         \end{itemize}
 \end{itemize}
 
@@ -380,13 +367,13 @@ version=6.2.1
 gui=text
 gisbase=/usr/lib/grass/
 ldLibraryPath=/usr/lib/grass/lib
-gisbase=/home/foo/datagrass
+gisdbase=/home/foo/datagrass
 \end{verbatim}
     
-subsection{Testing after installation}
+\subsection{Testing after installation}
 \label{testing}
 For test, just run
-\texttt{wps.py} in the terminal. The parameters can be written as one
+\texttt{wps.py} in the terminal. The WPS options can be written as
 parameter:
     
 \begin{verbatim}
@@ -450,7 +437,8 @@ server, refer to your Server documentation, see sections
 
 Alternatively you can set the \texttt{processesPath} variable in the configuration file.
 Following example will describe buffering process. Several example processes are 
-distributed along with PyWPS source code -- feel free to get inspired by
+distributed along with PyWPS source code (they are in the
+\texttt{doc/examples/processes} directory) -- feel free to get inspired by
 them.
 
 \section{Process initialization and configuration}
@@ -487,6 +475,40 @@ store it's output data on the server (\texttt{storeSupported}) and it is also po
 asynchronous mode (\texttt{statusSupported}). The process will run within
 GRASS GIS environment (\texttt{grassLocation = True}) -- temporary location
 will be created and deleted again, after the processes is done.
+
+
+\paragraph{Mandatory parameters of the \texttt{\_\_init\_\_} method:}
+\begin{itemize}
+        identifier \textbf{String} process identifier
+        title \textbf{String} process title
+\end{itemize}
+
+\paragraph{Optional parameters:}
+\begin{itemize}
+\item abstract \textbf{String} process description
+                default: None
+\item metadata List of additional metadata.  See
+                    http://www.opengeospatial.org/standards/common, table 32 on page 65
+                E.g. ["foo":"bar"]\\
+                default: None
+\item profile [URN]\\
+                default: None
+\item version \textbf{String} process version\\
+                default: None
+\item statusSupported \textbf{Boolean} this process can be run
+        asynchronously\\
+                default: True
+\item storeSupported \textbf{Boolean} outputs from this process can be stored
+                for later download\\
+                default: True
+\item grassLocation \textbf{String} or {Boolean} name of GRASS Location within
+                "gisdbase" directory (from pywps.cfg configuration file).
+                If set to True, temporary GRASS Location will be created
+                and grass environment will be started. If None or False, no
+                GRASS environment will be started.\\
+                default: None
+\end{itemize}
+
      
 \subsection{Data Inputs}
 
@@ -510,13 +532,13 @@ Complex input can be raster or vector file, to be processed.
  20 
 \end{verbatim}
 
-Mandatory parameters:
+\paragraph{Mandatory parameters:}
 \begin{itemize}
     \item identifier \textbf{String} input identifier
     \item title \textbf{String} input title
 \end{itemize}
 
-Optional parameters:
+\paragraph{Optional parameters:}
 \begin{itemize}
 \item abstract \textbf{String} input description.
         default: None
@@ -555,13 +577,13 @@ With literal input, you can obtain any type of character string.
  23 
 \end{verbatim}
 
-Mandatory parameters:
+\paragraph{Mandatory parameters:}
 \begin{itemize}
 \item identifier \textbf{String} input identifier
 \item title \textbf{String} input title
 \end{itemize}
 
-Optional parameters:
+\paragraph{Optional parameters:}
 \begin{itemize}
 \item abstract \textbf{String} input description. Default: None
             default: None\\
@@ -594,13 +616,13 @@ Optional parameters:
 \subsubsection{BoundingBox Input}
 The input is added to the process using \texttt{addBBoxInput}.
 
-Mandatory parameters:
+\paragraph{Mandatory parameters:}
 \begin{itemize}
 \item identifier \textbf{String} input identifier
 \item title \textbf{String} input title
 \end{itemize}
 
-Optional parameters:
+\paragraph{Optional parameters:}
 \begin{itemize}
 \item abstract \textbf{String} input description.\\
         default: None
@@ -611,7 +633,7 @@ Optional parameters:
 \item maxOccurs \textbf{Integer} maximum number of occurrences.\\
         default: 1
 \item crss List of \textbf{String} supported coordinate systems.\\
-        default: \[["EPSG:4326"]\]
+        default: ["EPSG:4326"]
 \end{itemize}
 
 For further documentation, refer to example processes distributed with the
@@ -635,13 +657,13 @@ file).
 26
 \end{verbatim}
 
-Mandatory parameters:
+\paragraph{Mandatory parameters:}
 \begin{itemize}
 \item identifier \textbf{String} output identifier
 \item title \textbf{String} output title
 \end{itemize}
 
-Optional parameters:
+\paragraph{Optional parameters:}
 \begin{itemize}
 \item metadata List of \textbf{Dict} {key:value} pairs.
         default: None
@@ -668,13 +690,13 @@ If you want to output any text string.
 29
 \end{verbatim}
 
-Mandatory parameters:
+\paragraph{Mandatory parameters:}
 \begin{itemize}
 \item identifier \textbf{String} input identifier
 \item title \textbf{String} input title
 \end{itemize}
 
-Optional parameters:
+\paragraph{Optional parameters:}
 \begin{itemize}
 \item abstract \textbf{String} input description. Default: None\\
             default: None
@@ -690,13 +712,13 @@ Optional parameters:
 \subsubsection{BoundingBox Output}
 BoundingBox output is added with the addBBoxOutput method
 
-Mandatory parameters:
+\paragraph{Mandatory parameters:}
 \begin{itemize}
 \item identifier \textbf{String} input identifier
 \item title \textbf{String} input title
 \end{itemize}
 
-Optional parameters:
+\paragraph{Optional parameters:}
 \begin{itemize}
 \item abstract \textbf{String} input description.\\
         default: None
@@ -795,6 +817,15 @@ file~\ref{configuration}.
              ....
              grassLocation = "spearfish60")
 \end{verbatim}
+In this case, you had to specify \texttt{gisdbase} option in
+\texttt{[grass]} section of the configuration file. Otherwise, you have to
+specify full path to existing location, e.g.
+\begin{verbatim}
+         WPSProcess.__init__(self,
+             identifier = "foo",
+             ....
+             grassLocation = "/foo/bar/grassdata/spearfish60")
+\end{verbatim}
 
 %---------------------------------------------------------------------
 \chapter{Testing your new process}
@@ -805,7 +836,7 @@ with the command line test, so do not have to check \texttt{error.log} of
 the web server.
 
 \begin{itemize}
-    \item GetCapabilities request (webserver)
+    \item GetCapabilities request:
 \begin{verbatim}
 $ wps.py "service=wps&request=getcapabilities"
 
