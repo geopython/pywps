@@ -358,7 +358,7 @@ class WPSProcess:
         title {String} input title
 
         Optional parameters:
-        abstract {String} input description. Default: None
+        abstract {String} input description. 
                     default: None
         uoms List of {String} value units
                     default: ()
@@ -420,7 +420,11 @@ class WPSProcess:
             self.cmd("d.mon start=PNG",stdout=False)
             """
 
-        self.message("PyWPS Cmd: %s\n" % (cmd.strip()))
+        # splitting the command, if not already done
+        if (type(cmd) == types.StringType):
+            cmd = cmd.strip().split()
+
+        self.message("PyWPS Cmd: %s\n" % (cmd.__str__()))
 
         try:
             subprocessstdin = None
@@ -433,7 +437,7 @@ class WPSProcess:
                 subprocessstdout = subprocess.PIPE
                 subprocessstderr = subprocess.PIPE
 
-            p = subprocess.Popen(cmd,shell=True,
+            p = subprocess.Popen(cmd,
                 stdin=subprocessstdin, stdout=subprocessstdout,
                 stderr=subprocessstderr)
         except Exception,e :
