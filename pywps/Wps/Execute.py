@@ -407,6 +407,10 @@ class Execute(Response):
                         statusMessage="PyWPS Process %s successfully calculated" %\
                         self.process.identifier)
 
+        # re-raise WPSException, will be caught outside
+        except self.wps.exceptions.WPSException,e:
+            raise e
+
         except Exception,e:
             raise self.wps.exceptions.NoApplicableCode(
                     "Failed to execute WPS process [%s]: %s" %\

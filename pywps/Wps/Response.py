@@ -4,21 +4,21 @@ Request handler - prototype class
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
 #               jachym at les-ejk dot cz
-# Lince: 
-# 
+# Lince:
+#
 # Web Processing Service implementation
 # Copyright (C) 2006 Jachym Cepicky
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -40,7 +40,7 @@ class Response:
     template = None # HTML Template
     templateFile = None # File with template
     processDir = None # Directory with processes
-    statusFiles = STDOUT 
+    statusFiles = STDOUT
     emptyParamRegex = re.compile('( \w+="")|( \w+="None")')
     templateVersionDirectory = None # directory with templates for specified version
 
@@ -49,8 +49,8 @@ class Response:
 
         self.templateVersionDirectory = self.wps.inputs["version"].replace(".","_")
 
-        self.templateManager = TemplateManager(precompile = 1, 
-            debug = self.wps.config.getboolean("server","debug")) 
+        self.templateManager = TemplateManager(precompile = 1,
+            debug = self.wps.config.getboolean("server","debug"))
 
         if self.wps.inputs["request"] == "getcapabilities":
             self.templateFile = os.path.join(
@@ -83,18 +83,17 @@ class Response:
             processes = __import__(os.path.split(self.processDir)[-1])
             self.processes = processes
         else:
-            import pywps 
+            import pywps
             from pywps import processes
             self.processes = pywps.processes
 
     def getDataTypeReference(self,inoutput):
         """
-        Returns data type reference according to W3C 
+        Returns data type reference according to W3C
         """
-        
+
         dataType = {"type": None, "reference": None}
         if inoutput.dataType == types.StringType:
-            processInOutput["dataTypeReference"] = \
             dataType["type"] = "string"
             dataType["reference"] = "http://www.w3.org/TR/xmlschema-2/#string"
         elif inoutput.dataType == types.FloatType:
