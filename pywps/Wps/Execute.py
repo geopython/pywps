@@ -174,14 +174,29 @@ class Execute(Response):
             self.promoteStatus(self.accepted,"Process %s accepted" %\
                     self.process.identifier)
 
-            # redirect stdout, so that apache sends back the response immediately
-            so = open(os.devnull, 'a+')
-            os.dup2(so.fileno(), sys.stdout.fileno())
-
-            # remove stdout and add statusFileName to statusFiles
+            # remove stdout from statusFiles
             self.statusFiles.remove(sys.stdout)
-            if len(self.statusFiles) == 0:
-                self.statusFiles = [open(self.statusFileName,"w")]
+
+            # apache 1.x requires forking for asynchronous requests
+            serverSoft=os.getenv("SERVER_SOFTWARE")
+            forkingRequired=serverSoft and serverSoft.lower().startswith("apache/1.")
+            if forkingRequired:
+                try:
+                    # this is the parent process
+                    if os.fork():
+                        # exit here
+                        return
+                    # this is the child process
+                    else:
+                        # continue execution
+                        pass
+
+                except OSError, e:
+                    raise self.wps.exceptions.NoApplicableCode("Fork failed: %d (%s)\n" % (e.errno, e.strerror) )
+
+            # redirect stdout, so that apache sends back the response immediately
+            so = open(os.devnull, 'a+', 0)
+            os.dup2(so.fileno(), sys.stdout.fileno())
 
         # attempt to execute
         try:
@@ -908,5 +923,4 @@ class Execute(Response):
             print "Content-type: %s\n" % output.format["mimeType"]
             print f.read()
             f.close()
-
 
