@@ -17,7 +17,7 @@ html: ${SRC}
 	latex2html -local_icons -split 0 ${SRC}
 
 txt: ${SRC} ${FILE}/${FILE}.html
-	links2 -dump ${FILE}/${FILE}.html > ${FILE}.txt
+	elinks -dump ${FILE}/${FILE}.html > ${FILE}.txt
 
 process: ${PROCESS}
 	cd ${PROCESS} && pydoc -w ./Process.py && pydoc -w ./InAndOutputs.py && pydoc -w ./Lang.py && mv *.html ../../doc/
