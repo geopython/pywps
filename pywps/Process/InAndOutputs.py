@@ -301,7 +301,7 @@ class ComplexInput(Input):
         
         # if HTTP GET was performed, the type does not have to be set
         if not input.has_key("type") and\
-                input["value"].find("http://") == 0:
+                (input["value"].find("http://") == 0 or input["value"].find("http%3A%2F%2F") == 0):
             input["asReference"] = True
 
         #self.value = input["value"]
@@ -333,7 +333,7 @@ class ComplexInput(Input):
         from os import curdir
 
         try:
-            inputUrl = urllib.urlopen(url)
+            inputUrl = urllib.urlopen(urllib.unquote(url))
         except IOError,e:
             self.onProblem("NoApplicableCode",e)
 
