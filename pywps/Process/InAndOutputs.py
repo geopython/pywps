@@ -365,7 +365,7 @@ class ComplexInput(Input):
             if size > self.maxFileSize: 
                 self.onProblem("FileSizeExceeded","Maximum file size is "+
                         str(self.maxFileSize/1024/1024)+" MB for input "+
-                        uNNrl)
+                        inputUrl)
         fout.close()
 
         resp = self._setValueWithOccurence(self.value, outputName)
