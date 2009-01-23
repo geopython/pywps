@@ -307,15 +307,36 @@ class ComplexInput(Input):
         #self.value = input["value"]
 
         # download data
-        if input["asReference"] == True:
+        if input.has_key("asReference") and input["asReference"] == True:
             self.downloadData(input["value"])
         else:
             self.storeData(input["value"])
         return
 
     def storeData(self,data):
-        """To be redefined in each instance"""
-        pass
+        """Store data from given file. Not bigger, then self.maxmegabites
+        
+        Parameters: 
+        data {String} the data, which should be stored
+        """
+        import tempfile
+        from os import curdir
+
+        outputName = tempfile.mktemp(prefix="pywpsInput",dir=curdir)
+        try:
+            fout=open(outputName,'wb')
+        except IOError, what:
+            self.onProblem("NoApplicableCode","Could not open file for writing")
+
+        # NOTE: the filesize should be already checked in pywps/Post.py,
+        # while getting the input XML file
+        fout.write(data)
+        fout.close()
+
+        resp = self._setValueWithOccurence(self.value, outputName)
+        if resp:
+            return resp
+        return
 
     def getValue(self):
         """Get this value"""
