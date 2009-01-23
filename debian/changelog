@@ -1,3 +1,10 @@
+pywps (3.0.1-1) stable; urgency=low
+
+  * New version
+  * Bugfix release
+
+ -- Jachym Cepicky <jachym@les-ejk.cz>  Fri, 23 Jan 2009 10:00:00 +0100
+
 pywps (3.0.0-1) stable; urgency=low
 
   * New version
@@ -7,6 +14,7 @@ pywps (3.0.0-1) stable; urgency=low
   * See change log for more details
 
  -- Jachym Cepicky <jachym@les-ejk.cz>  Thu, 16 Sep 2008 10:00:00 +0100
+
 pywps (2.0.0-1) stable; urgency=low
 
   * New version
