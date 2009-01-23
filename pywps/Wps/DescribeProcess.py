@@ -143,6 +143,11 @@ class DescribeProcess(Response):
             processInput["title"] =     process.i18n(input.title)
             processInput["abstract"] =  process.i18n(input.abstract)
             processInput["minoccurs"] = input.minOccurs
+            try:
+                if input.default:
+                    processInput["minoccurs"] = 0
+            except Exception:
+                pass
             processInput["maxoccurs"] = input.maxOccurs
             if input.type == "LiteralValue":
                 processInput["literalvalue"] = 1
@@ -191,12 +196,18 @@ class DescribeProcess(Response):
         if inoutput.uom:
             processInOutput["UOM"] = 1
             processInOutput["defaultUOM"] = inoutput.uom
+
         if len(inoutput.uoms) > 0:
             supportedUOMS = []
             for uom in inoutput.uoms:
                 supportedUOMS.append({"uom":uom})
             processInOutput["supportedUOMS"] = supportedUOMS
             processInOutput["UOM"] = 1
+
+        # default values
+        if inoutput.default:
+            processInOutput["isDefaultValue"] = 1
+            processInOutput["defaultValue"] = inoutput.default
 
         # allowed values
         # NOTE: only for inputs, but does not matter

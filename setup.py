@@ -39,7 +39,7 @@ doclines = __doc__.split("\n")
 
 setup(
         name = name,
-        version = '3.0.0rc4',
+        version = '3.0.1',
         maintainer="Jachym Cepicky",
         maintainer_email = 'jachym@les-ejk.cz',
         author = 'Jachym Cepicky',
@@ -92,8 +92,9 @@ for arg in sys.argv:
     if arg == "install":
         install = True
 
+import os
 # post installation part
-if not dryRun and install:
+if not dryRun and install and not os.environ.has_key("FAKEROOTKEY"):
     # compile templates
     # compiling before installing is necessary, because the apache
     # webserver has not the permission to create new files in the 

@@ -301,21 +301,42 @@ class ComplexInput(Input):
         
         # if HTTP GET was performed, the type does not have to be set
         if not input.has_key("type") and\
-                input["value"].find("http://") == 0:
+                (input["value"].find("http://") == 0 or input["value"].find("http%3A%2F%2F") == 0):
             input["asReference"] = True
 
         #self.value = input["value"]
 
         # download data
-        if input["asReference"] == True:
+        if input.has_key("asReference") and input["asReference"] == True:
             self.downloadData(input["value"])
         else:
             self.storeData(input["value"])
         return
 
     def storeData(self,data):
-        """To be redefined in each instance"""
-        pass
+        """Store data from given file. Not bigger, then self.maxmegabites
+        
+        Parameters: 
+        data {String} the data, which should be stored
+        """
+        import tempfile
+        from os import curdir
+
+        outputName = tempfile.mktemp(prefix="pywpsInput",dir=curdir)
+        try:
+            fout=open(outputName,'wb')
+        except IOError, what:
+            self.onProblem("NoApplicableCode","Could not open file for writing")
+
+        # NOTE: the filesize should be already checked in pywps/Post.py,
+        # while getting the input XML file
+        fout.write(data)
+        fout.close()
+
+        resp = self._setValueWithOccurence(self.value, outputName)
+        if resp:
+            return resp
+        return
 
     def getValue(self):
         """Get this value"""
@@ -333,7 +354,7 @@ class ComplexInput(Input):
         from os import curdir
 
         try:
-            inputUrl = urllib.urlopen(url)
+            inputUrl = urllib.urlopen(urllib.unquote(url))
         except IOError,e:
             self.onProblem("NoApplicableCode",e)
 
@@ -365,7 +386,7 @@ class ComplexInput(Input):
             if size > self.maxFileSize: 
                 self.onProblem("FileSizeExceeded","Maximum file size is "+
                         str(self.maxFileSize/1024/1024)+" MB for input "+
-                        uNNrl)
+                        inputUrl)
         fout.close()
 
         resp = self._setValueWithOccurence(self.value, outputName)
