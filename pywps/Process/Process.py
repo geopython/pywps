@@ -442,18 +442,11 @@ class WPSProcess:
                 stderr=subprocessstderr)
         except Exception,e :
             self.failed = True
+            print >> sys.stderr, p.stderr.read()
             raise Exception("Could not perform command [%s]: %s" % (cmd,e))
 
-        (stdout, stderr) = p.communicate(stdin)
-
-        retcode = p.wait()
-
-        if retcode != 0:
-           self.status.setProcessStatus("processFailed", True)
-           self.message("PyWPS stderr: %s\n" % (stderr),True)
-           raise Exception("PyWPS could not perform command [%s]:\n%s" % (cmd,stderr))
-
-        return stdout
+        print >> sys.stderr, p.stderr.read()
+        return p.stdout
 
     def message(self,msg,force=False):
         """Print some message to standard error
