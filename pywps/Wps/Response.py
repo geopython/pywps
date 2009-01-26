@@ -82,6 +82,8 @@ class Response:
             sys.path.append(os.path.split(self.processDir)[0])
             processes = __import__(os.path.split(self.processDir)[-1])
             self.processes = processes
+
+            sys.path.append(self.processDir)
         else:
             import pywps
             from pywps import processes
