@@ -411,6 +411,9 @@ class WPSProcess:
         stdin {String} string to be send into the command via standard in
         stdout {Boolean}  give stdout and stderror from the command back
 
+        Returns:
+        {String} stdoutdata
+
         Example Usage:
             self.cmd("r.los in=elevation.dem out=los coord=1000,1000")
 
