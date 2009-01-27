@@ -867,9 +867,9 @@ class Execute(Response):
                 from pywps import Grass
                 grass = Grass.Grass(self)
                 if self.process.grassLocation == True:
-                    grass.mkMapset()
+                    self.process.grassMapset = grass.mkMapset()
                 elif os.path.exists(os.path.join(self.wps.getConfigValue("grass","gisdbase"),self.process.grassLocation)):
-                    grass.mkMapset(self.process.grassLocation)
+                    self.process.grassMapset = grass.mkMapset(self.process.grassLocation)
                 else:
                     raise Exception("Location [%s] does not exist" % self.process.grassLocation)
         except Exception,e:
