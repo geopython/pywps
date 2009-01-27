@@ -338,10 +338,20 @@ class ComplexInput(Input):
             return resp
         return
 
-    def getValue(self):
-        """Get this value"""
+    def getValue(self, asFile=False):
+        """Get this value
+        
+        Parameters:
+        asFile - {Boolean} return file object
+        
+        Return:
+        {String} or {File}
+        """
 
-        return self.value
+        if asFile == True:
+            return open(self.value,"r")
+        else:
+            return self.value
 
     def downloadData(self, url):
         """Download data from given url. Do not download more, then
@@ -625,6 +635,22 @@ class ComplexOutput(Output):
         self.formats = formats
         self.format = formats[0]
         return
+
+    def setValue(self, value)
+        """Set the output value
+
+        Parameters:
+        value - {String} or {File} object
+        """
+
+        if type(value) == types.StringType:
+            self.value = value
+        elif type(value) == types.FileType:
+            self.value = value.name
+        # TODO add more types, like Arrays and lists for example
+        else:
+            raise Exception("Output type '%s' of '%s' output not known" %\
+                    (type(value),self.identifier))
 
 class BoundingBoxOutput(Output):
     crss = None
