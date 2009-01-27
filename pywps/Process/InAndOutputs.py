@@ -636,7 +636,7 @@ class ComplexOutput(Output):
         self.format = formats[0]
         return
 
-    def setValue(self, value)
+    def setValue(self, value):
         """Set the output value
 
         Parameters:
