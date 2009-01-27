@@ -105,6 +105,7 @@ class WPSProcess:
     outputs = None
     lang = None
     grassLocation = None
+    grassMapset = None
 
     def __init__(self, identifier, title = None, abstract=None,
             metadata=[],profile=[], version=None,
