@@ -167,7 +167,7 @@ class Execute(Response):
         # Asynchronous request
         # OGC 05-007r7 page 36, Table 50, note (a)
         # OGC 05-007r7 page 42
-        if self.storeRequired:
+        if self.storeRequired and self.statusRequired:
             # Output response to client
             print "Content-type: text/xml\n"
             # set status to accepted
@@ -180,6 +180,11 @@ class Execute(Response):
             # apache 1.x requires forking for asynchronous requests
             serverSoft=os.getenv("SERVER_SOFTWARE")
             forkingRequired=serverSoft and serverSoft.lower().startswith("apache/1.")
+
+            # FIXME: forking is always required, unless we find some better
+            # solution
+            forkingRequired = True
+
             if forkingRequired:
                 try:
                     # this is the parent process
@@ -194,9 +199,15 @@ class Execute(Response):
                 except OSError, e:
                     raise self.wps.exceptions.NoApplicableCode("Fork failed: %d (%s)\n" % (e.errno, e.strerror) )
 
+            # this is child process, parent is already gone away
             # redirect stdout, so that apache sends back the response immediately
-            so = open(os.devnull, 'a+', 0)
+            si = open('/dev/null', 'r')
+            so = open('/dev/null', 'a+')
+            #se = open('/dev/null', 'a+', 0)
+            os.dup2(si.fileno(), sys.stdin.fileno())
             os.dup2(so.fileno(), sys.stdout.fileno())
+            #os.dup2(se.fileno(), sys.stderr.fileno())
+
 
         # attempt to execute
         try:
@@ -272,7 +283,7 @@ class Execute(Response):
             self.response = self.templateProcessor.process(self.template)
 
         # print status
-        if self.storeRequired:
+        if self.storeRequired and self.statusRequired:
             self.printResponse(self.statusFiles)
 
         # remove all temporary files
@@ -517,7 +528,7 @@ class Execute(Response):
         # print status
         if self.storeRequired and (self.statusRequired or
                                    self.status == self.accepted or
-                                   self.status == self.succeeded or
+                                   #self.status == self.succeeded or
                                    self.status == self.failed):
             self.printResponse(self.statusFiles)
 
