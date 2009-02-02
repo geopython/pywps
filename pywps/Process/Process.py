@@ -106,10 +106,12 @@ class WPSProcess:
     lang = None
     grassLocation = None
     grassMapset = None
+    logFile = None
 
     def __init__(self, identifier, title = None, abstract=None,
             metadata=[],profile=[], version=None,
-            statusSupported=True, storeSupported=False, grassLocation=None):
+            statusSupported=True, storeSupported=False, grassLocation=None,
+            logFile = sys.stderr):
         """Process initialization. All parameters can be set lately
 
         Mandatory parameters:
@@ -428,7 +430,13 @@ class WPSProcess:
         if (type(cmd) == types.StringType):
             cmd = cmd.strip().split()
 
-        self.message("PyWPS Cmd: %s\n" % (cmd.__str__()))
+        idx = stdin.find("\n")
+        if 0 < idx <= 60:
+            stdinOut = stdin[:idx]
+        else:
+            stdinOut = stdin[:60]
+
+        self.message("PyWPS Cmd: %s %s\n" % (cmd.__str__(),stdinOut))
 
         try:
             subprocessstdin = None
@@ -468,8 +476,8 @@ class WPSProcess:
                 printed. nothing happen otherwise.
         """
 
-        if self.debug or force:
-            sys.stderr.write(msg)
+        if self.debug or force and self.logFile:
+            self.logFile.write(msg)
         return
 
     def getInput(self,identifier):

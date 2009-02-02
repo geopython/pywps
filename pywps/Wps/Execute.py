@@ -25,7 +25,7 @@ WPS Execute request handler
 
 from Response import Response
 from htmltmpl import TemplateError
-import time,os,sys,tempfile,re,types
+import time,os,sys,tempfile,re,types, ConfigParser
 from shutil import copyfile as COPY
 from shutil import rmtree as RMTREE
 
@@ -72,6 +72,7 @@ class Execute(Response):
     grass = None
 
     rawDataOutput = None
+    logFile = None
 
 
     def __init__(self,wps):
@@ -90,6 +91,7 @@ class Execute(Response):
             raise self.wps.exceptions.InvalidParameterValue("version")
 
         # initialization
+        self.logFile = sys.stderr
         self.statusTime = time.time()
         self.pid = os.getpid()
         self.status = None
@@ -203,10 +205,20 @@ class Execute(Response):
             # redirect stdout, so that apache sends back the response immediately
             si = open('/dev/null', 'r')
             so = open('/dev/null', 'a+')
-            #se = open('/dev/null', 'a+', 0)
             os.dup2(si.fileno(), sys.stdin.fileno())
             os.dup2(so.fileno(), sys.stdout.fileno())
-            #os.dup2(se.fileno(), sys.stderr.fileno())
+
+        # logfile
+        try:
+            self.logFile = self.wps.getConfigValue("server","logFile")
+            se = open(self.logFile, 'a+', 0)
+            os.dup2(se.fileno(), sys.stderr.fileno())
+        except ConfigParser.NoOptionError,e:
+            pass
+        except IOError,e:
+            raise self.wps.exceptions.NoApplicableCode("Logfile IOError: %s" % e.__str__())
+        except Exception, e:
+            raise self.wps.exceptions.NoApplicableCode("Logfile error: %s" % e.__str__())
 
 
         # attempt to execute
@@ -319,6 +331,7 @@ class Execute(Response):
         self.process.wps = self.wps
         self.process.status.onStatusChanged = self.onStatusChanged
         self.process.debug = self.wps.getConfigValue("server","debug")
+        self.process.logFile = self.logFile
 
     def consolidateInputs(self):
         """ Donwload and control input data, defined by the client """
@@ -531,6 +544,11 @@ class Execute(Response):
                                    #self.status == self.succeeded or
                                    self.status == self.failed):
             self.printResponse(self.statusFiles)
+        
+        if self.status == self.started:
+            print >>sys.stderr, "PyWPS Status [%s][%.1f]: %s" % (self.status,float(self.percent),self.statusMessage)
+        else:
+            print >>sys.stderr, "PyWPS Status [%s]: %s" % (self.status,self.statusMessage)
 
 
     def lineageInputs(self):

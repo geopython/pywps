@@ -34,7 +34,7 @@ class Process(WPSProcess):
          self.status.set("Preparing....", 0)
          for i in xrange(1, 11):
              time.sleep(10)
-             self.status.set("Thinking.....", float(i*20)) 
+             self.status.set("Thinking.....", float(i*10)) 
          #The final answer    
          self.Answer.setValue("42")
         
