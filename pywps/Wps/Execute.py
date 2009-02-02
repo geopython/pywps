@@ -86,7 +86,7 @@ class Execute(Response):
         self.process = None
         try:
             self.template = self.templateManager.prepare(self.templateFile)
-        except TemplateError:
+        except TemplateError,e:
             self.cleanEnv()
             raise self.wps.exceptions.NoApplicableCode(e.__str__())
 
