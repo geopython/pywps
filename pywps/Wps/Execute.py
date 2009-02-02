@@ -211,8 +211,11 @@ class Execute(Response):
         # logfile
         try:
             self.logFile = self.wps.getConfigValue("server","logFile")
-            se = open(self.logFile, 'a+', 0)
-            os.dup2(se.fileno(), sys.stderr.fileno())
+            if self.logFile:
+                se = open(self.logFile, 'a+', 0)
+                os.dup2(se.fileno(), sys.stderr.fileno())
+            else:
+                self.logFile = sys.stderr
         except ConfigParser.NoOptionError,e:
             pass
         except IOError,e:
