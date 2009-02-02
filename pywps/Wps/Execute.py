@@ -91,7 +91,7 @@ class Execute(Response):
             raise self.wps.exceptions.NoApplicableCode(e.__str__())
 
         # initialization
-        self.logFile = sys.stderr
+        self.setLogFile()
         self.statusTime = time.time()
         self.pid = os.getpid()
         self.status = None
@@ -207,21 +207,6 @@ class Execute(Response):
             so = open('/dev/null', 'a+')
             os.dup2(si.fileno(), sys.stdin.fileno())
             os.dup2(so.fileno(), sys.stdout.fileno())
-
-        # logfile
-        try:
-            self.logFile = self.wps.getConfigValue("server","logFile")
-            if self.logFile:
-                se = open(self.logFile, 'a+', 0)
-                os.dup2(se.fileno(), sys.stderr.fileno())
-            else:
-                self.logFile = sys.stderr
-        except ConfigParser.NoOptionError,e:
-            pass
-        except IOError,e:
-            raise self.wps.exceptions.NoApplicableCode("Logfile IOError: %s" % e.__str__())
-        except Exception, e:
-            raise self.wps.exceptions.NoApplicableCode("Logfile error: %s" % e.__str__())
 
 
         # attempt to execute
@@ -955,4 +940,25 @@ class Execute(Response):
             print "Content-type: %s\n" % output.format["mimeType"]
             print f.read()
             f.close()
+
+    def setLogFile(self):
+        """Set self.logFile to sys.stderr or something else
+        """
+
+        # logfile
+        self.logFile = sys.stderr
+        try:
+            self.logFile = self.wps.getConfigValue("server","logFile")
+            if self.logFile:
+                se = open(self.logFile, 'a+', 0)
+                os.dup2(se.fileno(), sys.stderr.fileno())
+            else:
+                self.logFile = sys.stderr
+        except ConfigParser.NoOptionError,e:
+            pass
+        except IOError,e:
+            raise self.wps.exceptions.NoApplicableCode("Logfile IOError: %s" % e.__str__())
+        except Exception, e:
+            raise self.wps.exceptions.NoApplicableCode("Logfile error: %s" % e.__str__())
+
 
