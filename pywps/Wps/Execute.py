@@ -88,7 +88,7 @@ class Execute(Response):
             self.template = self.templateManager.prepare(self.templateFile)
         except TemplateError:
             self.cleanEnv()
-            raise self.wps.exceptions.InvalidParameterValue("version")
+            raise self.wps.exceptions.NoApplicableCode(e.__str__())
 
         # initialization
         self.logFile = sys.stderr
