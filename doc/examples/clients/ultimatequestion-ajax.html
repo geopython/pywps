@@ -16,22 +16,20 @@
 
         var httpRequest;
 
-        if (window.XMLHttpRequest) { // Mozilla, Safari, ...
-            httpRequest = new XMLHttpRequest();
-            if (httpRequest.overrideMimeType) {
-                httpRequest.overrideMimeType('text/xml');
-                // See note below about this line
-            }
-        } 
-        else if (window.ActiveXObject) { // IE
+        try {
+            // Firefox, Opera 8.0+, Safari
+            httpRequest=new XMLHttpRequest();
+        }
+        catch (e) {
+        // Internet Explorer
             try {
-                httpRequest = new ActiveXObject("Msxml2.XMLHTTP");
-            } 
+                httpRequest=new ActiveXObject("Msxml2.XMLHTTP");
+            }
             catch (e) {
-                try {
-                    httpRequest = new ActiveXObject("Microsoft.XMLHTTP");
-                } 
-                catch (e) {}
+                    try {
+                    httpRequest=new ActiveXObject("Microsoft.XMLHTTP");
+                    }
+                    catch (e) { }
             }
         }
 
@@ -50,7 +48,6 @@
         if (httpRequest.readyState == 4) {
             if (httpRequest.status == 200) {
                 var resp = httpRequest.responseXML;
-
                 var statusText = null;
                 var statusValue = null;
                 var percentDone = null;
@@ -87,8 +84,8 @@
                         answer = resp.getElementsByTagName("wps:LiteralData")[0].firstChild.nodeValue;
                         answerTitle = resp.getElementsByTagName("wps:Output")[0].getElementsByTagName("ows:Title")[0].firstChild.nodeValue;
                     }
-                    url = resp.firstChild.getAttribute("statusLocation");
                     if (accepted || started) {
+                        url = resp.getElementsByTagName("wps:ExecuteResponse")[0].getAttribute("statusLocation");
                         window.setTimeout("makeRequest('"+url+"')",2000);
                     }
                 }
@@ -101,6 +98,7 @@
                document.getElementById("answerTitle").innerHTML = answerTitle; 
                document.getElementById("answerValue").innerHTML = answer; 
                document.getElementById("response").innerHTML = new Date().getTime().toLocaleString();
+               document.getElementById("responseFile").innerHTML = "<a href=\""+url+"\">"+url+"</a>";
 
             } else {
                 alert('There was a problem with the request.');
@@ -135,6 +133,9 @@
 
         <dt>Last response:</dt>
         <dd id="response"></dd>
+
+        <dt>Last response:</dt>
+        <dd id="responseFile"></dd>
     </dl>
     <input type="button" onclick="startRequest()" value="Start calculation" />
 </body>
