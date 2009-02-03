@@ -1,9 +1,0 @@
-TITLE: PyWPS 1.0.0rc3
-AUTHOR: jachym
-DATE: 2008-10-01 12:28:55
-DESC: 
-FORMAT: raw
------
-BODY:
-PyWPS 1.0 RC3 released today.
-END-----

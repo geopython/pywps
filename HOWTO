@@ -1,3 +1,0 @@
-to upload a new index.html use:
-
-rsync /path/to/my/local/index.html $USER@wald.intevation.org:/$PROJECT/htdocs/
