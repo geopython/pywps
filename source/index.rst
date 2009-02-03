@@ -37,6 +37,11 @@ PyWPS is written in `Python <http://python.org>`_, your processes must use this 
 News
 ****
 
+---------------------------------
+2009-02-03 PyWPS Has new homepage
+---------------------------------
+    Based on Sphinx http://sphinx.pocoo.org/
+
 ----------------------
 2008-11-06 PyWPS 3.0.0
 ----------------------
