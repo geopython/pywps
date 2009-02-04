@@ -121,10 +121,7 @@ class Execute(Response):
                     self.statusFiles.append(open(self.statusFileName,"w"))
                 except Exception, e:
                     self.cleanEnv()
-                    self.promoteStatus(self.failed,
-                            statusMessage=str(e),
-                            exceptioncode="NoApplicableCode")
-                self.storeRequired = True
+                    raise self.wps.exceptions.NoApplicableCode(e.__str__())
 
         # is lineage required ?
         lineageRequired = False
