@@ -117,7 +117,11 @@ class Execute(Response):
         self.storeRequired = False
         if self.wps.inputs["responseform"]["responsedocument"].has_key("storeexecuteresponse"):
             if self.wps.inputs["responseform"]["responsedocument"]["storeexecuteresponse"]:
-                self.statusFiles.append(open(self.statusFileName,"w"))
+                try:
+                    self.statusFiles.append(open(self.statusFileName,"w"))
+                except Exception, e:
+                    self.cleanEnv()
+                    raise self.wps.exceptions.NoApplicableCode(e.__str__())
                 self.storeRequired = True
 
         # is lineage required ?
