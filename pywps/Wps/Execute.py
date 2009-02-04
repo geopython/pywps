@@ -122,6 +122,7 @@ class Execute(Response):
                 except Exception, e:
                     self.cleanEnv()
                     raise self.wps.exceptions.NoApplicableCode(e.__str__())
+                self.storeRequired = True
 
         # is lineage required ?
         lineageRequired = False
