@@ -76,9 +76,9 @@ News
     * [3] svn checkout https://svn.wald.intevation.org/svn/pywps/tags/pywps-3.0.0
 
 
-----------------------
+-------------------------
 2008-10-01 PyWPS 3.0.0rc3
-----------------------
+-------------------------
 
     PyWPS Development team announces next release candidate of new PyWPS[1] version with number 3.0.0 (3.0.0rc3).
 
@@ -107,17 +107,17 @@ News
     [4] svn checkout https://svn.wald.intevation.org/svn/pywps/tags/pywps-3.0.0rc3
 
 
-----------------------
+--------------------------------------------------
 2008-10-01 French translation of the documentation
-----------------------
+--------------------------------------------------
 
     I made the translation in french of the PyWPS .txt docs. (Here : http://geotribu.net/?q=node/45) I should start the pdf translation during this week.
 
     Arnaud
 
-----------------------
+-------------------------
 2008-10-01 PyWPS 3.0.0rc2
-----------------------
+-------------------------
 
     PyWPS Development team announces next release candidate of new PyWPS[1] version with number 3.0.0 (3.0.0rc2).
 
@@ -145,9 +145,9 @@ News
     [4] http://apps.esdi-humboldt.cz/cgi-bin/pywps_3_0?service=wps&request=getcapabilities
 
 
-----------------------
+-------------------------
 2008-10-01 PyWPS 3.0.0rc1
-----------------------
+-------------------------
 
     PyWPS Development team announces first release candidate of new PyWPS[1] version with number 3.0.0 (3.0.0rc1).
 

@@ -1,0 +1,14 @@
+HOWTO manage PyWPS Homepage
+===========================
+
+step #1: edit source/*
+
+
+step #2: run
+
+    sphinx-build source build
+
+
+step #3: rsync
+
+    sync --delete-excluded --del -r build/ $DEVELOPERNAME@wald.intevation.org:/pywps/htdocs/
