@@ -127,6 +127,11 @@ class Response:
 
         for f in fileDes:
 
+            if f == STDOUT:
+                print "Content-Type: text/xml"
+                print "Content-Length: %d" % len(self.response)
+                print ""
+
             # open file
             if f != STDOUT and f.closed:
                 f = open(f.name,"w")

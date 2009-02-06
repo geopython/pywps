@@ -174,8 +174,6 @@ class Execute(Response):
         # OGC 05-007r7 page 36, Table 50, note (a)
         # OGC 05-007r7 page 42
         if self.storeRequired and self.statusRequired:
-            # Output response to client
-            print "Content-type: text/xml\n"
             # set status to accepted
             self.promoteStatus(self.accepted,"Process %s accepted" %\
                     self.process.identifier)
