@@ -34,6 +34,7 @@ import re
 
 class Response:
     response = None # Output document
+    respSize = None # Size of the ouput document
     wps = None # Parent WPS object
     templateManager = None # HTML TemplateManager
     templateProcessor = TemplateProcessor(html_escape=0) # HTML TemplateProcessor
