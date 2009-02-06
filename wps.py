@@ -146,7 +146,9 @@ class WPS:
             # print only to standard out
             if self.request.statusFiles == sys.stdout or\
                sys.stdout in self.request.statusFiles:
-                print "Content-type: text/xml\n"
+                print "Content-type: text/xml"
+                print "Content-length: %s" % len(self.request.response)
+                print ""
                 self.request.printResponse(self.request.statusFiles)
 
         return
