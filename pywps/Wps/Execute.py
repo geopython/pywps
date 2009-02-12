@@ -378,24 +378,29 @@ class Execute(Response):
 
                 if respOut:
                     # asReference
-                    if respOut.has_key("asreference"):
+                    if respOut.has_key("asreference") and \
+                        "asReference" in dir(poutput):
                         poutput.asReference = respOut["asreference"]
 
                     # mimetype
-                    if respOut.has_key("mimetype"):
+                    if respOut.has_key("mimetype") and \
+                        "format" in dir(poutput):
                         poutput.format["mimeType"] = respOut["mimetype"]
 
                     # schema
-                    if respOut.has_key("schema"):
+                    if respOut.has_key("schema") and \
+                        "format" in dir(poutput):
                         poutput.format["schema"] = respOut["schema"]
 
                     # encoding
-                    if respOut.has_key("encoding"):
+                    if respOut.has_key("encoding") and \
+                        "format" in dir(poutput):
                         poutput.format["encoding"] = respOut["encoding"]
 
                     # uom
-                    if respOut.has_key("uom"):
-                        poutput.format["uom"] = respOut["uom"]
+                    if respOut.has_key("uom") and \
+                        "uom" in dir(poutput):
+                        poutput.uom = respOut["uom"]
 
     def onInputProblem(self,what,why):
         """
