@@ -430,11 +430,14 @@ class WPSProcess:
         if (type(cmd) == types.StringType):
             cmd = cmd.strip().split()
 
-        idx = stdin.find("\n")
-        if 0 < idx <= 60:
-            stdinOut = stdin[:idx]
+        if stdin:
+            idx = stdin.find("\n")
+            if 0 < idx <= 60:
+                stdinOut = stdin[:idx]
+            else:
+                stdinOut = stdin[:60]
         else:
-            stdinOut = stdin[:60]
+            stdinOut = ""
 
         self.message("PyWPS Cmd: %s %s\n" % (cmd.__str__(),stdinOut))
 

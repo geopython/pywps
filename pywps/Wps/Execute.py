@@ -943,7 +943,7 @@ class Execute(Response):
             print "Content-type: text/plain\n"
             print output.value
         elif output.type == "ComplexValue":
-            f = open(output.value,"r")
+            f = open(output.value,"rb")
             print "Content-type: %s\n" % output.format["mimeType"]
             print f.read()
             f.close()
