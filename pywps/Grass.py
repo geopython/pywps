@@ -43,7 +43,7 @@ class Grass:
         self.wps = self.executeRequest.wps
         self.envs = {
                 "path":"PATH",
-                "addonPath":"GRASS_ADDONS_PATH",
+                "addonPath":"GRASS_ADDON_PATH",
                 "version":"GRASS_VERSION",
                 "gui":"GRASS_GUI",
                 "gisbase": "GISBASE",
