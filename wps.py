@@ -139,6 +139,7 @@ class WPS:
 
         # inputs parsed, perform request
         if self.inputs:
+            self.debug(self.inputs)
             self.performRequest()
 
         # request performed, write the response back
@@ -232,6 +233,14 @@ class WPS:
         elif value.lower() == "true" :
             value = True
         return value
+
+    def debug(self,debug):
+        """Print debug argument to standard error
+        """
+
+        dbg = self.getConfigValue("server","debug")
+        if dbg == True or dbg.lower() == "true" or int(dbg) != 0:
+                print >>sys.stderr, "PyWPS Debug: %s" % debug.__str__()
 
 if __name__ == "__main__":
     wps = WPS()
