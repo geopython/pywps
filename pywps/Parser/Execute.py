@@ -203,7 +203,7 @@ class Post(Post):
             try:
                 identifier = inputNode.getElementsByTagNameNS(
                      self.owsNameSpace,"Identifier")[0].firstChild.nodeValue
-            except IndexError:
+            except (IndexError, AttributeError):
                 raise self.wps.exceptions.NoApplicableCode(
                                               "Identifier for input not set")
 
