@@ -114,27 +114,25 @@ class Post(Post):
 
             # store
             store = False
-            if responseDocumentNode.hasAttributeNS(self.nameSpace, "storeExecuteResponse"):
-                if responseDocumentNode.getAttributeNS(
-                        self.nameSpace, "storeExecuteResponse").lower() == "true":
+            if responseDocumentNode.hasAttribute("storeExecuteResponse"):
+                if responseDocumentNode.getAttribute("storeExecuteResponse").lower() == "true":
                     form["responsedocument"]["storeexecuteresponse"]=True
                 else:
                     form["responsedocument"]["storeexecuteresponse"]=False
 
             # lineage
             lineage = False
-            if responseDocumentNode.hasAttributeNS(self.nameSpace, "lineage"):
-                if responseDocumentNode.getAttributeNS(
-                        self.nameSpace, "lineage").lower() == "true":
+            if responseDocumentNode.hasAttribute("lineage"):
+                if responseDocumentNode.getAttribute("lineage").lower() == "true":
                     form["responsedocument"]["lineage"]=True
                 else:
                     form["responsedocument"]["lineage"]=False
 
             # status
             status = False
-            if responseDocumentNode.hasAttributeNS(self.nameSpace,"status"):
-                if responseDocumentNode.getAttributeNS(
-                        self.nameSpace, "status").lower() == "true":
+            if responseDocumentNode.hasAttribute("status"):
+                if responseDocumentNode.getAttribute(
+                        "status").lower() == "true":
                     form["responsedocument"]["status"]=True
                 else:
                     form["responsedocument"]["status"]=False
