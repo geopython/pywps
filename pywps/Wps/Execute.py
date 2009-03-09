@@ -595,7 +595,7 @@ class Execute(Response):
         """
         Fill input of complex data
         """
-        complexInput["complexdata"] = input.value
+        complexInput["complexdata"] = open(input.value,"r").read()
         complexInput["encoding"] = input.format["encoding"]
         complexInput["mimetype"] = input.format["mimeType"]
         complexInput["schema"] = input.format["schema"]
