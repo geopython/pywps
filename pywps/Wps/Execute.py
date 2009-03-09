@@ -568,11 +568,10 @@ class Execute(Response):
                 templateInput["title"] = self.process.i18n(input.title)
                 templateInput["abstract"] = self.process.i18n(input.abstract)
 
-
                 if input.type == "LiteralValue":
                     templateInput = self._lineageLiteralInput(input,wpsInput,templateInput)
                 elif input.type == "ComplexValue" and \
-                                                wpsInput["asReference"] == True:
+                       wpsInput.has_key("asReference") and wpsInput["asReference"] == True:
                     templateInput = self._lineageComplexReferenceInput(wpsInput,
                                                                 input,templateInput)
                 elif input.type == "ComplexValue":
