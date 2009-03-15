@@ -43,17 +43,6 @@ class Process(WPSProcess):
         self.bufferOut = self.addComplexOutput(identifier="buffer",
                                 title="Output buffer file")
 
-        # complex raster output
-        self.bufferRasterOut = self.addComplexOutput(identifier="bufferRaster",
-                                title="Output buffer as Raster",
-                                formats=[{"mimeType":"image/tiff"},
-                                         {"mimeType":"image/png"}])
-
-        # input as png
-        self.asPNG = self.addComplexOutput(identifier="asPNG",
-                                title="Input file as PNG raster",
-                                formats=[{"mimeType":"image/png"}])
-
         # literal output
         self.textOut = self.addLiteralOutput(identifier="text",
                                 title="Just some literal output")
@@ -69,46 +58,48 @@ class Process(WPSProcess):
         """
 
         # run some command from the command line
-        self.cmd("g.region -d")
+        self.cmd(["g.region","-d"])
 
         # import data
         self.status.set("Importing data",20)
-	out = self.cmd("v.in.ogr dsn=%s output=data" %\
-                (self.getInputValue('data')))
-	self.cmd("g.region vect=data")
-
-        # creating output with GRASS PNG driver
-        self.cmd("d.mon start=PNG",stdout=False)
-        self.cmd("d.vect data")
-        self.cmd("d.mon stop=PNG")
-        self.asPNG.setValue("map.png")
+	out = self.cmd(["v.in.ogr","-o","dsn=%s" % (self.getInputValue('data')),"output=data"])
+	self.cmd(["g.region","vect=data"])
 
         # buffer
         self.status.set("Buffering",50)
-	self.cmd("v.buffer input=data output=data_buff buffer=%s scale=1.0 tolerance=0.01" %\
-                (self.getInputValue('width'))[0])
+	self.cmd(["v.buffer","input=data","output=data_buff","distance=%s"%self.widthIn.getValue()[0],
+                "scale=1.0","tolerance=0.01"])
 
         # vector -> raster
         self.status.set("Vector to raster conversion",70)
         if self.bboxIn.minx == None:
-            self.cmd("g.region vect=data_buff")
+            self.cmd(["g.region","vect=data_buff"])
         else:
-            self.cmd("g.region e=%s s=%s w=%s n=%s" % (self.bboxIn.value))
-	self.cmd("v.to.rast use=cat input=data_buff output=buff type=area") 
+            self.cmd(["g.region",
+                "e=%s" % self.bboxIn.minx,
+                "s=%s" % self.bboxIn.miny,
+                "w=%s" % self.bboxIn.maxx,
+                "n=%s" % self.bboxIn.maxx])
+	self.cmd(["v.to.rast","use=cat","input=data_buff","output=buff","type=area"]) 
 
         # export
         self.status.set("Exporting data",90)
-	self.cmd("v.out.ogr type=area format=GML input=data_buff dsn=out.xml  olayer=path.xml")
+	self.cmd(["v.out.ogr","type=area","format=GML","input=data_buff","dsn=out.xml","olayer=path.xml"])
 
-        # deside, if the user wants PNG or GeoTIFF format
-        bufffile = "buffer.png"
-        if self.bufferRasterOut.format["mimeType"] == "image/tiff":
-            losfile = "buffer.tif"
-            self.cmd("r.out.gdal in=buff out=buffer.tif type=Byte")
-        else:
-            self.cmd("r.out.png in=buff out=buffer.png")
-        
+        north = south = east = west = 0
+        for l in self.cmd(["v.info","-g","data_buff"]).split("\n"):
+            coord=l.split("=")
+            if coord[0] == "north":
+                north = coord[1]
+            elif coord[0] == "west":
+                west = coord[1]
+            elif coord[0] == "east":
+                east = coord[1]
+            elif coord[0] == "south":
+                south = coord[1]
+
+        self.bboxOut.setValue([west,south,east,north])
+
         # setting output values
         self.bufferOut.setValue("out.xml")
-        self.bufferRasterOut.setValue(bufffile)
         self.textOut.setValue("hallo, world")
