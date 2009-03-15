@@ -244,7 +244,7 @@ class Post(Post):
         #
         attributes["value"] =\
                     dataTypeNode.getAttributeNS(self.xlinkNameSpace,"href")
-        if attributes == "":
+        if attributes["value"] == "":
             raise self.wps.exceptions.MissingParameterValue("'href'")
 
         #
@@ -313,7 +313,7 @@ class Post(Post):
     def parseDataInput(self,dataTypeNode):
         """Parse attributes of given data type node """
 
-        attributes = None
+        attributes = {}
 
         # complexData
         if len(dataTypeNode.getElementsByTagNameNS(
