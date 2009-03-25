@@ -467,8 +467,11 @@ class Execute(Response):
             self.templateProcessor.set("Metadata", metadata)
         if self.process.profile:
             profiles=[]
-            for profile in self.process.profile:
-                profiles.append({"profile":profile})
+            if type(process.profile) == types.ListType:
+                for profile in process.profile:
+                    profiles.append({"profile":profile})
+            else:
+                profiles.append({"profile":process.profile})
             self.templateProcessor.set("Profiles", profiles)
         if self.process.wsdl:
             self.templateProcessor.set("wsdl", self.process.wsdl)
