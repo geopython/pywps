@@ -385,22 +385,26 @@ class Execute(Response):
                     # mimetype
                     if respOut.has_key("mimetype") and \
                         "format" in dir(poutput):
-                        poutput.format["mimeType"] = respOut["mimetype"]
+                        if respOut["mimetype"] != '':
+                            poutput.format["mimeType"] = respOut["mimetype"]
 
                     # schema
                     if respOut.has_key("schema") and \
                         "format" in dir(poutput):
-                        poutput.format["schema"] = respOut["schema"]
+                        if respOut["schema"] != '':
+                            poutput.format["schema"] = respOut["schema"]
 
                     # encoding
                     if respOut.has_key("encoding") and \
                         "format" in dir(poutput):
-                        poutput.format["encoding"] = respOut["encoding"]
+                        if respOut["encoding"] != '':
+                            poutput.format["encoding"] = respOut["encoding"]
 
                     # uom
                     if respOut.has_key("uom") and \
                         "uom" in dir(poutput):
-                        poutput.uom = respOut["uom"]
+                        if respOut["uom"] != '':
+                            poutput.uom = respOut["uom"]
 
     def onInputProblem(self,what,why):
         """
@@ -467,11 +471,11 @@ class Execute(Response):
             self.templateProcessor.set("Metadata", metadata)
         if self.process.profile:
             profiles=[]
-            if type(process.profile) == types.ListType:
-                for profile in process.profile:
+            if type(self.process.profile) == types.ListType:
+                for profile in self.process.profile:
                     profiles.append({"profile":profile})
             else:
-                profiles.append({"profile":process.profile})
+                profiles.append({"profile":self.process.profile})
             self.templateProcessor.set("Profiles", profiles)
         if self.process.wsdl:
             self.templateProcessor.set("wsdl", self.process.wsdl)
@@ -771,7 +775,6 @@ class Execute(Response):
         return bboxOutput
 
     def _asReferenceOutput(self,templateOutput, output):
-
 
         # copy the file to output directory
         if output.type == "LiteralValue":
