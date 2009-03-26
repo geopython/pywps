@@ -149,19 +149,8 @@ OWS.Utils = {
             });
         }
         catch(e) {
-            console.log("OpenLayers nefungují:",e);
-            try {
-                request = Ext.Ajax.request({
-                    url: uri,
-                    success: success,
-                    scope: scope,
-                    failure: failure
-                });
-
-            }
-            catch(e) {
-                OWS.Utils.debug("Nemůžu naloadit žádný ajax");
-            }
+            throw new Exception("Could not load Ajax: Is OpenLayers available? "+e);
+            return;
         }
         return request;
     },
@@ -192,9 +181,7 @@ OWS.Utils = {
             });
         }
         catch(e) {
-            console.log("OpenLayers nefungují:",e);
-            console.log("Ext se to zatím neumí");
-            OWS.Utils.debug("Nemůžu naloadit žádný ajax");
+            throw new Exception("Could not load Ajax: Is OpenLayers available? "+e);
         }
         return request;
     },
