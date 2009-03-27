@@ -115,11 +115,11 @@
 		<wps:Default>
 			<ows:Language><TMPL_VAR defaultlanguage></ows:Language>
 		</wps:Default>
-                <TMPL_LOOP Languages>
 		<wps:Supported>
+                <TMPL_LOOP Languages>
 			<ows:Language><TMPL_VAR language></ows:Language>
-		</wps:Supported>
                 </TMPL_LOOP>
+		</wps:Supported>
 	</wps:Languages>
 	<wps:WSDL xlink:href="<TMPL_VAR url>?WSDL"/>
 </wps:Capabilities>
