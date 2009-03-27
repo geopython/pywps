@@ -372,7 +372,11 @@ class Post(Post):
                                         "*","dataType")
         attributes["uom"] = literalDataNode.getAttributeNS(
                                         "*","uom")
-        attributes["value"] = literalDataNode.firstChild.nodeValue
+        try:
+            attributes["value"] = literalDataNode.firstChild.nodeValue
+        except:
+            attributes["value"] = None
+
         return attributes
 
     def parseBBoxData(self,bboxDataNode):
