@@ -5,8 +5,7 @@
  * Version:     0.0.1
  * Supported WPS Versions: 1.0.0
  *
- * The Library is designed to work mainly with OpenLayers
- * [http://openlayers.org]
+ * The Library is designed to work with OpenLayers [http://openlayers.org]
  * 
  * Licence:     
  *  Web Processing Service Client implementation
@@ -29,249 +28,12 @@
  *  - a lot
  */
 
-/**
- * Class:   OWS
- * Generic OpenWebServices Class. This could support other W*Ss defined by
- * OGC
- */
-var OWS = function() {
-    var cls = function() {
-        if (this.initialize) {
-            this.initialize.apply(this, arguments);
-        }
-    };
-
-    var extended = {};
-    var parent;
-    extended = OWS.Utils.extend(this,extended);
-    for(var i=0, len=arguments.length; i<len; ++i) {
-        if(typeof arguments[i] == "function") {
-            // get the prototype of the superclass
-            parent = arguments[i].prototype;
-        } else {
-            // in this case we're extending with the prototype
-            parent = arguments[i];
-        }
-        extended = OWS.Utils.extend(parent,extended);
-    }
-
-    cls.prototype = extended;
-    return cls;
-};
 
 /**
- * Class:    OWS.Utils
- * Some useful functions, which makes life easier
- */
-OWS.Utils = {
-
-    /**
-     * Function:    extend
-     * Extend target object with attributes from the source object
-     *
-     * Parameters:
-     * source   - {Object} 
-     * target   - {Object}
-     *
-     * Returns
-     * {Object} extended target object
-     */
-    extend : function(source,target) {
-
-        for(var property in source) {
-            var value = source[property];
-            if(value !== undefined) {
-                target[property] = value;
-            }
-        }
-        return target;
-        
-    },
-
-    /**
-     * Function: extendUrl
-     * Extend URL parameters with newParams object
-     *
-     * Parameters:
-     * source - {String} url
-     * newParams - {Object}
-     *
-     * Returns:
-     * {String} new URL
-     */
-    extendUrl: function(source,newParams) {
-        var sourceBase = source.split("?")[0];
-        try {
-            var sourceParamsList = source.split("?")[1].split("&");
-        }
-        catch (e) {
-            var sourceParamsList = [];
-        }
-        var sourceParams = {};
-
-        for (var i = 0; i < sourceParamsList.length; i++) {
-            var key; var value;
-            key = sourceParamsList[i].split('=')[0];
-            value = sourceParamsList[i].split('=')[1];
-            if (key && value ) {
-                sourceParams[key] = value;
-            }
-        }
-        newParams = OWS.Utils.extend(newParams, sourceParams);
-
-        var newParamsString = "";
-        for (var key in newParams) {
-            newParamsString += "&"+key+"="+newParams[key];
-        }
-        return sourceBase+"?"+newParamsString;
-    },
-
-    /**
-     * Method: loadGet
-     * Loads the request via HTTP GET method
-     *
-     * Parameters:
-     * uri - {String}
-     * params - {Object}
-     * success - {Function}
-     * failure -  {Function}
-     * scope - {Object}
-     *
-     * Returns:
-     * {HTTPRequest}
-     */
-    loadGet : function (uri,params, success,failure, scope) { 
-        var request = null;
-        try {
-            request =  OpenLayers.Request.GET({
-                url: uri, params:{},
-                success: success, failure: failure, scope:  scope
-            });
-        }
-        catch(e) {
-            throw new Exception("Could not load Ajax: Is OpenLayers available? "+e);
-            return;
-        }
-        return request;
-    },
-
-    /**
-     * Method: loadPost
-     * Loads the request via HTTP POST method
-     *
-     * Parameters:
-     * uri - {String}
-     * data - {Object}
-     * success - {Function}
-     * failure -  {Function}
-     * scope - {Object}
-     *
-     * Returns:
-     * {HTTPRequest}
-     */
-    loadPost : function (uri,data, success,failure, scope) { 
-        var request = null;
-        try {
-            request =  OpenLayers.Request.POST({
-                url: uri, 
-                data:data,
-                success: success,
-                failure: failure,
-                scope:  scope
-            });
-        }
-        catch(e) {
-            throw new Exception("Could not load Ajax: Is OpenLayers available? "+e);
-        }
-        return request;
-    },
-    
-    /**
-     * Function: debug
-     * Write somethig to Firebug's console
-     *
-     */
-    debug : function() {
-        try {
-            for (var i = 0; i < arguments.length; i++) {
-                console.log(arguments[i]);
-            }
-        }
-        catch(e) {
-        }
-    },
-
-    /**
-     * Function: getDomFromString
-     * Create DOM from String
-     *
-     * Parameters:
-     * str - {String}
-     *
-     * Returns
-     * {DOM}
-     */
-    getDomFromString : function(str) {
-        try {
-            return  OpenLayers.parseXMLString(str);
-        }
-        catch(e)  {
-            this.debug("OpenLayers not available, I have to parse the string myself.");
-
-            try {
-                var xmldom = new ActiveXObject('Microsoft.XMLDOM');
-                xmldom.loadXML(text);
-                return xmldom;
-            }
-            catch(e) {
-                try {
-                    return new DOMParser().parseFromString(text, 'text/xml');
-                }
-                catch(e) {
-                    try {
-                        var req = new XMLHttpRequest();
-                        req.open("GET", "data:" + "text/xml" +
-                                ";charset=utf-8," + encodeURIComponent(text), false);
-                        if (req.overrideMimeType) {
-                            req.overrideMimeType("text/xml");
-                        }
-                        req.send(null);
-                        return req.responseXML;
-                    }
-                    catch(e) {
-                        OWS.Utils.debug("Could not parse String to DOM");
-                    }
-                }
-            }
-        }
-    },
-
-    /**
-     * Function:    isIn
-     * Check, if some element is in array
-     *
-     * Parameters:
-     * list - {Array}
-     * elem - {Object} 
-     *
-     * Returns:
-     * {Boolean} weather the element is in the list or not
-     */
-    isIn  : function(list, elem) {
-        var obj = {};
-        for(var i = 0; i <list.length;i++) {
-            obj[list[i]] = null;
-        }
-        return elem in obj;
-    }
-
-};
-
-/**
- * Class: OWS.WPS
+ * Class: OpenLayers.WPS
  * Web Processing Service Client
  */
-OWS.WPS = new OWS({
+OpenLayers.WPS = OpenLayers.Class({
     /**
      * Property: service
      * {String}
@@ -291,10 +53,25 @@ OWS.WPS = new OWS({
      * Property: getCapabilitiesUrlPost
      * {String}
      */
-    getCapabilitiesUrlPost: null,
+    getcapabilitiesurlpost: null,
+
     /**
-     * Property: describeProcessUrlGet
+     * property: responseText
      * {String}
+     * Last response as text
+     */
+    responseText: null,
+
+    /**
+     * property: responseDOM
+     * {DOM}
+     * Last response as DOM
+     */
+    responseDOM: null,
+
+    /**
+     * property: describeprocessurlget
+     * {string}
      */
     describeProcessUrlGet: null,
     /**
@@ -354,6 +131,16 @@ OWS.WPS = new OWS({
      * {String}
      */
     title: null,
+
+    /**
+     * Property:  scope
+     * {Object}
+     * Scope for onSucceeded, onFailed, onStatusChanged and similar
+     * functions
+     *
+     * Default: this
+     */
+    scope: this,
     
     /**
      * Property:  abstr
@@ -422,13 +209,22 @@ OWS.WPS = new OWS({
     statusEvents : {},
 
     /**
+     * Property: requestText
+     * {String}
+     * The Execute request (XML) as text string
+     */
+    requestText : null,
+
+    /**
      * Contructor: initialize
      *
      * Parameters:
      * url - {String} initial url of GetCapabilities request
-     * params - {Object}
+     * options - {Object}
      */
-    initialize: function(url,params) {
+    initialize: function(url,options) {
+        OpenLayers.Util.extend(this, options);
+
         this.getCapabilitiesUrlGet = url;
         this.describeProcessUrlGet = url;
         this.executeUrlGet = url;
@@ -436,7 +232,7 @@ OWS.WPS = new OWS({
         this.describeProcessUrlPost = url;
         this.executeUrlPost = url;
 
-        OWS.Utils.extend(params,this);
+        OpenLayers.Util.extend(this,options);
 
         /* if (this.getCapabilitiesUrlGet) {
              this.getCapabilitiesGet(this.getCapabilitiesUrlGet);
@@ -445,8 +241,8 @@ OWS.WPS = new OWS({
 
         this.wpsNS +=this.version;
 
-        OWS.WPS.instances.push(this);
-        this.id = OWS.WPS.instances.length-1;
+        OpenLayers.WPS.instances.push(this);
+        this.id = OpenLayers.WPS.instances.length-1;
 
         this.statusEvents = {
                     "ProcessAccepted":this.onAccepted,
@@ -477,9 +273,9 @@ OWS.WPS = new OWS({
         if (url) {
             this.getCapabilitiesUrlGet = url;
         }
-        var uri = OWS.Utils.extendUrl(url,{service: this.service, version: this.version,request: "GetCapabilities"});
+        var uri = OpenLayers.WPS.Utils.extendUrl(url,{service: this.service, version: this.version,request: "GetCapabilities"});
 
-        var request = OWS.Utils.loadGet(uri, {}, this.parseGetCapabilities, this.onException,this);
+        var request = OpenLayers.Request.GET({url:uri, params:{},success:this.parseGetCapabilities,failure:this.onException,scope:this});
     },
 
     /**
@@ -503,10 +299,10 @@ OWS.WPS = new OWS({
      * identifier - {String} 
      */
     describeProcessGet : function(identifier) {
-        var uri = OWS.Utils.extendUrl(this.describeProcessUrlGet,{service:this.service,version:this.version,
+        var uri = OpenLayers.WPS.Utils.extendUrl(this.describeProcessUrlGet,{service:this.service,version:this.version,
                                                                 request:"DescribeProcess",identifier:identifier});
 
-        var request = OWS.Utils.loadGet(uri, {}, this.parseDescribeProcess, this.onException, this);
+        var request = OpenLayers.Request.GET({url:uri,params:{},success:this.parseDescribeProcess,failure:this.onException,scope:this});
     },
 
     /**
@@ -517,7 +313,9 @@ OWS.WPS = new OWS({
      * resp - {XMLHTTP}
      */
     parseGetCapabilities: function (resp) {
-        var dom = resp.responseXML ? resp.responseXML : OWS.Utils.getDomFromString(resp.responseText);
+        this.responseText = resp.responseText;
+        var dom = resp.responseXML ? resp.responseXML : OpenLayers.parseXMLString(resp.responseText);
+        this.responseDOM = dom;
         this.title = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.owsNS, this.owsPref, "Title")[0].firstChild.nodeValue;
         this.abstract = null;
         try {
@@ -557,7 +355,7 @@ OWS.WPS = new OWS({
                 abstract = OpenLayers.Ajax.getElementsByTagNameNS(processes[i],this.owsNS, this.owsPref, "Abstract")[0].firstChild.nodeValue;
             } catch(e) {}
             var version = processes[i].getAttributeNS(this.wpsNS, this.wpsPref, version);
-            var process = new OWS.Process({identifier:identifier,title: title, abstract: abstract, version: version,wps:this});
+            var process = new OpenLayers.WPS.Process({identifier:identifier,title: title, abstract: abstract, version: version,wps:this});
             this.addProcess(process);
         }
 
@@ -572,7 +370,21 @@ OWS.WPS = new OWS({
      * process - {Object}
      */
     addProcess: function(process) {
+        var oldOne = this.getProcess(process.identifier);
+        if (oldOne) {
+            var newProcesses = [];
+            for (var i = 0; i < this.processes.length; i++) {
+                if (this.processes[i] != oldOne) {
+                   newProcesses.push(this.process[i]); 
+                }
+                else {
+                   this.processes[i] = null;
+                }
+            }
+            this.processes = newProcesses;
+        }
         this.processes.push(process);
+        process.wps = this;
     },
 
     /**
@@ -583,7 +395,9 @@ OWS.WPS = new OWS({
      * resp - {HTTPRexuest}
      */
     parseDescribeProcess: function (resp) {
-        var dom = resp.responseXML ? resp.responseXML : OWS.Utils.getDomFromString(resp.responseText);
+        this.responseText = resp.responseText;
+        var dom = resp.responseXML ? resp.responseXML : OpenLayers.parseXMLString(resp.responseText);
+        this.responseDOM = dom;
 
         var processes = dom.getElementsByTagName("ProcessDescription");
         for (var i = 0; i < processes.length; i++) {
@@ -615,7 +429,7 @@ OWS.WPS = new OWS({
      * puts - {List} of {DOM}s
      *
      * Returns
-     * {List} of {OWS.Put}
+     * {List} of {OpenLayers.WPS.Put}
      */
     parseDescribePuts: function(puts) {
         var wpsputs = [];
@@ -687,7 +501,7 @@ OWS.WPS = new OWS({
             var supportedFormats = cmplxData[0].getElementsByTagName("Supported")[0].getElementsByTagName("Format");
             for (var i = 0; i < supportedFormats.length; i++) {
                 var format = OpenLayers.Ajax.getElementsByTagNameNS(supportedFormats[i],this.owsNS, this.owsPref, "MimeType")[0].firstChild.nodeValue;
-                if (OWS.Utils.isIn(formats,format) == false) {
+                if (OpenLayers.WPS.Utils.isIn(formats,format) == false) {
                     formats.push(format);
                 }
             }
@@ -697,7 +511,7 @@ OWS.WPS = new OWS({
         if (formats[0].search("text") > -1) {
             asReference = false;
         }
-        return new OWS.Put.Complex({
+        return new OpenLayers.WPS.ComplexPut({
                     identifier: identifier,
                     title: title,
                     asReference: asReference,
@@ -737,13 +551,13 @@ OWS.WPS = new OWS({
         var supported = domcrss.getElementsByTagName("Supported");
         for (var i = 0; i < supported.length; i++) {
             var crs = supported[i].getElementsByTagName("CRS")[0].getAttributeNS(this.xlinkNS, xlink.wpsPref, "href");
-            if (OWS.Utils.isIn(crss,crs) == false) {
+            if (OpenLayers.WPS.Utils.isIn(crss,crs) == false) {
                 crss.push(crs);
             }
         }
 
 
-        return new OWS.Put.BoundingBox({
+        return new OpenLayers.WPS.BoundingBoxPut({
                     identifier: identifier,
                     title: title,
                     abstract:abstract,
@@ -801,7 +615,7 @@ OWS.WPS = new OWS({
 
         }
 
-        return new OWS.Put.Literal({
+        return new OpenLayers.WPS.LiteralPut({
                 identifier : identifier,
                 title : title,
                 abstract : abstract,
@@ -834,7 +648,7 @@ OWS.WPS = new OWS({
         var uri = this.executeUrlPost
         var process = this.getProcess(identifier);
 
-        var data = OWS.WPS.executeRequestTemplate.replace("$IDENTIFIER$",identifier);
+        var data = OpenLayers.WPS.executeRequestTemplate.replace("$IDENTIFIER$",identifier);
         data = data.replace("$STORE_AND_STATUS$",process.assync);
 
         // inputs
@@ -844,17 +658,17 @@ OWS.WPS = new OWS({
             var tmpl = "";
             if (input.CLASS_NAME.search("Complex")>-1) {
                 if (input.asReference) {
-                    tmpl = OWS.WPS.complexInputReferenceTemplate.replace("$REFERENCE$",escape(input.getValue()));
+                    tmpl = OpenLayers.WPS.complexInputReferenceTemplate.replace("$REFERENCE$",escape(input.getValue()));
                 }
                 else {
-                    tmpl = OWS.WPS.complexInputDataTemplate.replace("$DATA$",input.getValue());
+                    tmpl = OpenLayers.WPS.complexInputDataTemplate.replace("$DATA$",input.getValue());
                 }
             }
             else if (input.CLASS_NAME.search("Literal") > -1) {
-                tmpl = OWS.WPS.literalInputTemplate.replace("$DATA$",input.getValue());
+                tmpl = OpenLayers.WPS.literalInputTemplate.replace("$DATA$",input.getValue());
             }
             else if (input.CLASS_NAME.search("BoundingBox") > -1) {
-                tmpl = OWS.WPS.boundingBoxInputTemplate.replace("$DIMENSIONS$",input.dimensions);
+                tmpl = OpenLayers.WPS.boundingBoxInputTemplate.replace("$DIMENSIONS$",input.dimensions);
                 tmpl = tmpl.replace("$CRS$",input.crs);
                 tmpl = tmpl.replace("$MINX$",input.value.minx);
                 tmpl = tmpl.replace("$MINY$",input.value.miny);
@@ -872,13 +686,27 @@ OWS.WPS = new OWS({
             var output = process.outputs[i];
             var tmpl = "";
             if (output.CLASS_NAME.search("Complex")>-1) {
-                tmpl = OWS.WPS.complexOutputTemplate.replace("$AS_REFERENCE$",output.asReference);
+                tmpl = OpenLayers.WPS.complexOutputTemplate.replace("$AS_REFERENCE$",output.asReference);
+                var format = (output.format ? output.format : output.formats[0]);
+                var formatStr ="";
+                if (format) {
+                    if (format.mimeType) {
+                        formatStr += " mimeType=\""+format.mimeType+"\"";
+                    }
+                    if (format.schema) {
+                        formatStr += " schema=\""+format.schema+"\"";
+                    }
+                    if (format.encoding) {
+                        formatStr += " encoding=\""+format.encoding+"\"";
+                    }
+                }
+                tmpl = tmpl.replace("$FORMAT$",formatStr);
             }
             else if (output.CLASS_NAME.search("Literal") > -1) {
-                tmpl = OWS.WPS.literalOutputTemplate;
+                tmpl = OpenLayers.WPS.literalOutputTemplate;
             }
             else if (output.CLASS_NAME.search("BoundingBox") > -1) {
-                tmpl = OWS.WPS.boundingBoxOutputTemplate;
+                tmpl = OpenLayers.WPS.boundingBoxOutputTemplate;
             }
             tmpl = tmpl.replace("$IDENTIFIER$",output.identifier); 
             outputs += tmpl;
@@ -886,7 +714,8 @@ OWS.WPS = new OWS({
         data = data.replace("$DATA_INPUTS$",inputs);
         data = data.replace("$OUTPUT_DEFINITIONS$",outputs);
 
-        var request = OWS.Utils.loadPost(uri, data, this.parseExecute, this.onException, this);
+        this.requestText = data;
+        var request = OpenLayers.Request.POST({url:uri,data:data,success:this.parseExecute,failure:this.onException,scope:this});
     },
 
     /**
@@ -898,11 +727,13 @@ OWS.WPS = new OWS({
      */
     parseExecute: function(resp) {
         var text = resp.responseText;
+        this.responseText = text;
         if (OpenLayers.Util.getBrowserName() == "msie") {
             resp.responseXML = null;
             text = text.replace(/<\?xml .[^>]*>/,"");
         }
-        var dom = resp.responseXML ? resp.responseXML : OWS.Utils.getDomFromString(text);
+        var dom = resp.responseXML ? resp.responseXML : OpenLayers.parseXMLString(text);
+        this.responseDOM = dom;
         this.statusLocation = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.wpsNS, this.wpsPref, "ExecuteResponse")[0].getAttribute("statusLocation");
         var identifier = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.owsNS, this.owsPref, "Identifier")[0].firstChild.nodeValue;
         var process = this.getProcess(identifier);
@@ -919,17 +750,20 @@ OWS.WPS = new OWS({
                 this.parseExecuteOutput(process,outputs[i]);
             }
         }
+        else if (this.status == "ProcessFailed") {
+            this.parseProcessFailed(process,dom);
+        }
 
-        this.statusEvents[this.status](process);
+        this.statusEvents[this.status].apply(this.scope,[process]);
         this.onStatusChanged(this.status,process);
         
         if (this.status != "ProcessFailed" && this.status != "ProcessSucceeded") {
             if (this.statusLocation) {
 
-                window.setTimeout("OWS.Utils.loadGet(OWS.WPS.instances["+this.id+"].statusLocation,"+
-                                "{}, OWS.WPS.instances["+this.id+"].parseExecute,"+
-                                "   OWS.WPS.instances["+this.id+"].onException, "+
-                                "   OWS.WPS.instances["+this.id+"])", this.timeOut);
+                window.setTimeout("OpenLayers.WPS.Utils.loadGet(OpenLayers.WPS.WPS.instances["+this.id+"].statusLocation,"+
+                                "{}, OpenLayers.WPS.instances["+this.id+"].parseExecute,"+
+                                "   OpenLayers.WPS.instances["+this.id+"].onException, "+
+                                "   OpenLayers.WPS.instances["+this.id+"])", this.timeOut);
             }
         }
     },
@@ -940,7 +774,7 @@ OWS.WPS = new OWS({
      * property
      *
      * Parameters:
-     * process - {OWS.Process} process, to which this output belongs to
+     * process - {OpenLayers.WPS.Process} process, to which this output belongs to
      * dom - {DOMelement} <wps:Output />
      */
     parseExecuteOutput: function(process,dom) {
@@ -1041,6 +875,29 @@ OWS.WPS = new OWS({
      */
     onFailed: function(process) {
     },
+
+    /**
+     * Method: parseProcessFailed
+     * 
+     */
+    parseProcessFailed: function(process,dom) {
+        var Exception = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.owsNS,this.owsPref,"Exception");
+        var code;
+        if (Exception.length) {
+            code = Exception[0].getAttribute('exceptionCode');
+        }
+        var text;
+        var ExceptionText = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.owsNS,this.owsPref,"ExceptionText");
+        if (ExceptionText.length) {
+            try {
+                text = ExceptionText[0].firstChild.nodeValue;
+            } catch(e) {
+                text = '';
+            }
+        }
+        process.exception = {code:code,text:text};
+    },
+
     /**
      * Method: onStarted
      * To be redefined by the user
@@ -1080,10 +937,8 @@ OWS.WPS = new OWS({
      * Method: onException
      * Called, when some exception occured
      *
-     * FIXME: Not finished yet!
      */
-    onException: function () {
-        var dom = OWS.Utils.getDomFromString(resp.responseText);
+    onException: function (process,code,text) {
     },
 
     /**
@@ -1115,15 +970,77 @@ OWS.WPS = new OWS({
      */
     onStatusChanged: function(status,process) {
 
-    }
+    },
+
+    CLASS_NAME : "OpenLayers.WPS"
 });
 
 
+OpenLayers.WPS.Utils = {
+    /**
+     * Function: extendUrl
+     * Extend URL parameters with newParams object
+     *
+     * Parameters:
+     * source - {String} url
+     * newParams - {Object}
+     *
+     * Returns:
+     * {String} new URL
+     */
+    extendUrl: function(source,newParams) {
+        var sourceBase = source.split("?")[0];
+        try {
+            var sourceParamsList = source.split("?")[1].split("&");
+        }
+        catch (e) {
+            var sourceParamsList = [];
+        }
+        var sourceParams = {};
+
+        for (var i = 0; i < sourceParamsList.length; i++) {
+            var key; var value;
+            key = sourceParamsList[i].split('=')[0];
+            value = sourceParamsList[i].split('=')[1];
+            if (key && value ) {
+                sourceParams[key] = value;
+            }
+        }
+        newParams = OpenLayers.Util.extend(newParams, sourceParams);
+
+        var newParamsString = "";
+        for (var key in newParams) {
+            newParamsString += "&"+key+"="+newParams[key];
+        }
+        return sourceBase+"?"+newParamsString;
+    },
+
+    /**
+     * Function:    isIn
+     * Check, if some element is in array
+     *
+     * Parameters:
+     * list - {Array}
+     * elem - {Object} 
+     *
+     * Returns:
+     * {Boolean} weather the element is in the list or not
+     */
+    isIn  : function(list, elem) {
+        var obj = {};
+        for(var i = 0; i <list.length;i++) {
+            obj[list[i]] = null;
+        }
+        return elem in obj;
+    }
+};
+
+
 /**
- * Class OWS.Process
+ * Class OpenLayers.WPS.Process
  * Process object
  */
-OWS.Process = new OWS({
+OpenLayers.WPS.Process = OpenLayers.Class({
     /**
      * Property: identifier
      * {String}
@@ -1147,6 +1064,12 @@ OWS.Process = new OWS({
      * {List}
      */
     inputs : [],
+
+    /**
+     * Property: exception
+     * {Object}
+     */
+    exception : [],
 
     /**
      * Property: output
@@ -1182,10 +1105,10 @@ OWS.Process = new OWS({
      * Construcor: identifier
      *
      * Parameters:
-     * params   {Object}
+     * options   {Object}
      */
-    initialize: function(params) {
-        OWS.Utils.extend(params,this);
+    initialize: function(options) {
+        OpenLayers.Util.extend(this, options);
     },
 
     /**
@@ -1193,11 +1116,13 @@ OWS.Process = new OWS({
      */
     addInput : function(params) {
     },
+
     /**
      * Method: addOutput
      */
     addOutput : function(params) {
     },
+
     /**
      * Method: execute
      */
@@ -1241,14 +1166,14 @@ OWS.Process = new OWS({
         return null;
     },
 
-    CLASS_NAME: "OWS.Process"
+    CLASS_NAME: "OpenLayers.WPS.Process"
 });
 
 /**
- * Class:   OWS.Put
+ * Class:   OpenLayers.WPS.Put
  * In- and Outputs base class
  */
-OWS.Put = new OWS({
+OpenLayers.WPS.Put = OpenLayers.Class({
     /**
      * Property:    identifier
      * {String}
@@ -1276,9 +1201,12 @@ OWS.Put = new OWS({
     /**
      * Constructor:    initialize
      * {String}
+     *
+     * Parameters:
+     * options
      */
-    initialize: function(params) {
-        OWS.Utils.extend(params,this);
+    initialize: function(options) {
+        OpenLayers.Util.extend(this, options);
     },
 
     /**
@@ -1295,67 +1223,47 @@ OWS.Put = new OWS({
         return this.value;
     },
 
-    CLASS_NAME: "OWS.Put"
+    CLASS_NAME: "OpenLayers.WPS.Put"
 });
 
 /**
- * Class:   OWS.Put.Literal
+ * Class:   OpenLayers.WPS.LiteralPut
  * Base Class for LiteralData In- and Outputs
  */
-OWS.Put.Literal = new OWS(OWS.Put,{
+OpenLayers.WPS.LiteralPut = OpenLayers.Class(OpenLayers.WPS.Put,{
     allowedValues:[],
     defaultValue: null,
     type: null,
-    CLASS_NAME: "OWS.Put.Literal"
+    CLASS_NAME: "OpenLayers.WPS.LiteralPut"
 });
 
 /**
- * Class:   OWS.Put.Complex
+ * Class:   OpenLayers.WPS.ComplexPut
  * Base Class for ComplexData In- and Outputs
  */
-OWS.Put.Complex = new OWS(OWS.Put,{
+OpenLayers.WPS.ComplexPut = OpenLayers.Class(OpenLayers.WPS.Put,{
     asReference:false,
     formats:[],
-    CLASS_NAME: "OWS.Put.Complex"
+    format:{},
+    CLASS_NAME: "OpenLayers.WPS.ComplexPut"
 });
 
 /**
- * Class:   OWS.Put.BoundingBox
+ * Class:   OpenLayers.WPS.BoundingBoxPut
  * Base Class for BoundingBoxData In- and Outputs
  */
-OWS.Put.BoundingBox = new OWS(OWS.Put,{
+OpenLayers.WPS.BoundingBoxPut = OpenLayers.Class(OpenLayers.WPS.Put,{
     dimensions:2,
     crss: null,
     value: {minx: null,miny:null, maxx: null,maxy:null,bottom:null, top:null},
-    CLASS_NAME: "OWS.Put.BoundingBox"
+    CLASS_NAME: "OpenLayers.WPS.BoundingBoxPut"
 });
-/*
-OWS.Put.LiteralOutput = new OWS(OWS.Put,{
-    allowedValues:[],
-    defaultValue: null,
-    type: null,
-    CLASS_NAME: "OWS.Put.LiteralOutput"
-});
-
-OWS.Put.ComplexOutput = new OWS(OWS.Put,{
-    asReference:false,
-    formats:[],
-    CLASS_NAME: "OWS.Put.ComplexOutput"
-});
-
-OWS.Put.BoundingBoxOutput = new OWS(OWS.Put,{
-    dimensions:2,
-    crss: null,
-    bbox: {minx: null,miny:null, maxx: null,maxy:null,bottom:null, top:null},
-    CLASS_NAME: "OWS.Put.BoundingBoxOutput"
-});
-*/
 
 /**
  * Property:    executeRequestTemplate
  * {String} Temple for Execute Request XML 
  */
-OWS.WPS.executeRequestTemplate = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+OpenLayers.WPS.executeRequestTemplate = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
                                  '<wps:Execute service="WPS" version="1.0.0" '+
                                  'xmlns:wps="http://www.opengis.net/wps/1.0.0" '+
                                  'xmlns:ows="http://www.opengis.net/ows/1.1" '+
@@ -1379,7 +1287,7 @@ OWS.WPS.executeRequestTemplate = '<?xml version="1.0" encoding="UTF-8" standalon
  * Property:    literalInputTemplate
  * {String} Temple for Execute Request XML 
  */
-OWS.WPS.literalInputTemplate  = "<wps:Input>"+
+OpenLayers.WPS.literalInputTemplate  = "<wps:Input>"+
                                 "<ows:Identifier>$IDENTIFIER$</ows:Identifier>"+
                                 "<wps:Data>"+
 				"<wps:LiteralData>$DATA$</wps:LiteralData>"+
@@ -1390,7 +1298,7 @@ OWS.WPS.literalInputTemplate  = "<wps:Input>"+
  * Property:    complexInputReferenceTemplate
  * {String} Temple for Execute Request XML 
  */
-OWS.WPS.complexInputReferenceTemplate = "<wps:Input>"+
+OpenLayers.WPS.complexInputReferenceTemplate = "<wps:Input>"+
                                 "<ows:Identifier>$IDENTIFIER$</ows:Identifier>"+
                                 "<wps:Data>"+
                                 '<wps:Reference xlink:href="$REFERENCE$"/>'+
@@ -1401,7 +1309,7 @@ OWS.WPS.complexInputReferenceTemplate = "<wps:Input>"+
  * Property:    complexInputDataTemplate
  * {String} Temple for Execute Request XML 
  */
-OWS.WPS.complexInputDataTemplate = "<wps:Input>"+
+OpenLayers.WPS.complexInputDataTemplate = "<wps:Input>"+
                                 "<ows:Identifier>$IDENTIFIER$</ows:Identifier>"+
                                 "<wps:Data>"+
 				"<wps:ComplexData>"+
@@ -1413,7 +1321,7 @@ OWS.WPS.complexInputDataTemplate = "<wps:Input>"+
  * Property:    boundingBoxInputTemplate
  * {String} Temple for Execute Request XML 
  */
-OWS.WPS.boundingBoxInputTemplate = "<wps:Input>"+
+OpenLayers.WPS.boundingBoxInputTemplate = "<wps:Input>"+
                                 "<ows:Identifier>$IDENTIFIER$</ows:Identifier>"+
                                 "<wps:Data>"+
 				'<wps:BoundingBoxData ows:dimensions="$DIMENSIONS$" ows:crs="$CRS$">'+
@@ -1427,7 +1335,7 @@ OWS.WPS.boundingBoxInputTemplate = "<wps:Input>"+
  * Property:    complexOutputTemplate
  * {String} Temple for Execute Request XML 
  */
-OWS.WPS.complexOutputTemplate = '<wps:Output wps:asReference="$AS_REFERENCE$">'+
+OpenLayers.WPS.complexOutputTemplate = '<wps:Output wps:asReference="$AS_REFERENCE$" $FORMAT$>'+
                                 '<ows:Identifier>$IDENTIFIER$</ows:Identifier>'+
                                 "</wps:Output>";
 
@@ -1435,7 +1343,7 @@ OWS.WPS.complexOutputTemplate = '<wps:Output wps:asReference="$AS_REFERENCE$">'+
  * Property:    literalOutputTemplate
  * {String} Temple for Execute Request XML 
  */
-OWS.WPS.literalOutputTemplate = '<wps:Output wps:asReference="false">'+
+OpenLayers.WPS.literalOutputTemplate = '<wps:Output wps:asReference="false">'+
                                 '<ows:Identifier>$IDENTIFIER$</ows:Identifier>'+
                                 '</wps:Output>';
 
@@ -1443,10 +1351,10 @@ OWS.WPS.literalOutputTemplate = '<wps:Output wps:asReference="false">'+
  * Property:    boundingBoxOutputTemplate
  * {String} Temple for Execute Request XML 
  */
-OWS.WPS.boundingBoxOutputTemplate = OWS.WPS.literalOutputTemplate;
+OpenLayers.WPS.boundingBoxOutputTemplate = OpenLayers.WPS.literalOutputTemplate;
 
 /**
- * Property:    OWS.WPS.instances
+ * Property:    OpenLayers.WPS.instances
  * {List} running instances of WPS
  */
-OWS.WPS.instances = [];
+OpenLayers.WPS.instances = [];
