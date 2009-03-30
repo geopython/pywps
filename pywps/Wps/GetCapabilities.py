@@ -197,8 +197,7 @@ class GetCapabilities(Response):
                     processData["exception"] = e
                 processesData.append(processData)
         except Exception,e:
-            raise NoApplicableCode("Could not import processes: %s " %
-                    (e))
+            raise self.wps.exceptions.NoApplicableCode("Could not import processes: %s " % (e))
         self.templateProcessor.set("Processes",processesData)
 
 
