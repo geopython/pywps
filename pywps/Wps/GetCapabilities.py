@@ -151,50 +151,54 @@ class GetCapabilities(Response):
 
         # Import processes
 
-        for processName in self.processes.__all__:
+        try: 
+            for processName in self.processes.__all__:
 
-            processData = {}
-            try:
-                # dynamic module import from processes dir:
-                module = __import__(self.processes.__name__, globals(),\
-                                    locals(), [processName])
-                process = eval("module."+processName+".Process()")
+                processData = {}
+                try:
+                    # dynamic module import from processes dir:
+                    module = __import__(self.processes.__name__, globals(),\
+                                        locals(), [processName])
+                    process = eval("module."+processName+".Process()")
 
-                # process identifier must be == package name
-                if process.identifier != processName:
-                    raise ImportError(
-                            "Process identifier \"%s\" != package name \"%s\": File name has to be the same, as the identifier is!" %\
-                            (process.identifier, processName))
-                # set selected language
-                process.lang.setCode(self.wps.inputs["language"])
+                    # process identifier must be == package name
+                    if process.identifier != processName:
+                        raise ImportError(
+                                "Process identifier \"%s\" != package name \"%s\": File name has to be the same, as the identifier is!" %\
+                                (process.identifier, processName))
+                    # set selected language
+                    process.lang.setCode(self.wps.inputs["language"])
 
-                processData["processok"] = 1
-                processData["identifier"] = process.identifier
-                processData["processversion"] = process.version
-                processData["title"] = process.i18n(process.title)
-                if process.abstract:
-                    processData["abstract"] = process.i18n(process.abstract)
-                if process.metadata:
-                    metadata=[]
-                    for meta in process.metadata:
-                        metadata.append({"metadatatitle":meta})
-                    processData["Metadata"] = metadata
-                if process.profile:
-                    profiles=[]
-                    if type(process.profile) == types.ListType:
-                        for profile in process.profile:
-                            profiles.append({"profile":profile})
-                    else:
-                        profiles.append({"profile":process.profile})
-                    processData["Profiles"] = profiles
-                if process.wsdl:
-                    processData["wsdl"] = process.wsdl
+                    processData["processok"] = 1
+                    processData["identifier"] = process.identifier
+                    processData["processversion"] = process.version
+                    processData["title"] = process.i18n(process.title)
+                    if process.abstract:
+                        processData["abstract"] = process.i18n(process.abstract)
+                    if process.metadata:
+                        metadata=[]
+                        for meta in process.metadata:
+                            metadata.append({"metadatatitle":meta})
+                        processData["Metadata"] = metadata
+                    if process.profile:
+                        profiles=[]
+                        if type(process.profile) == types.ListType:
+                            for profile in process.profile:
+                                profiles.append({"profile":profile})
+                        else:
+                            profiles.append({"profile":process.profile})
+                        processData["Profiles"] = profiles
+                    if process.wsdl:
+                        processData["wsdl"] = process.wsdl
 
-            except Exception, e:
-                processData["processok"] = 0
-                processData["process"] = processName
-                processData["exception"] = e
-            processesData.append(processData)
+                except Exception, e:
+                    processData["processok"] = 0
+                    processData["process"] = processName
+                    processData["exception"] = e
+                processesData.append(processData)
+        except Exception,e:
+            raise NoApplicableCode("Could not import processes: %s " %
+                    (e))
         self.templateProcessor.set("Processes",processesData)
 
 
