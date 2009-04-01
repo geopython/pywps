@@ -80,9 +80,13 @@ class Response:
                 self.processDir = self.processDir[:-1]
 
 
-            sys.path.append(os.path.split(self.processDir)[0])
-            processes = __import__(os.path.split(self.processDir)[-1])
-            self.processes = processes
+            try:
+                sys.path.append(os.path.split(self.processDir)[0])
+                processes = __import__(os.path.split(self.processDir)[-1])
+                self.processes = processes
+            except ImportError,e:
+                raise self.wps.exceptions.NoApplicableCode("Could not import processes from the dir [%s]: %s! __init__.py file missing?" % (self.processDir,e))
+
 
             sys.path.append(self.processDir)
         else:

@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://www.w3.org/MarkUp/SCHEMA/xhtml11.xsd"
+     xml:lang="en" >
+    <head>
+        <title>WPS Client</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <script type="text/javascript" src="OpenLayers-minimal-wps.js"></script>
+        <script type="text/javascript" src="WPS.js"></script>
+        <script type="text/javascript">
+
+            var wps;
+            var selectedProcess;
+	
+            /**************************************************************
+             * This is the first possible approach, how to use WPS class: *
+             * You have to call GetCapabilites->DescribeProcess->Execute  *
+             * chain. The webpage content should guide you through the    *
+             * proces                                                     *
+             **************************************************************/
+
+            /**
+             * Function makeWPS
+             * will create the wps object and call getCapabilities
+             */
+            var makeWPS = function () {
+                var url = document.getElementById("capsUrl").value;
+                wps = new OWS.WPS(url,{onGotCapabilities:onCapabilitiesParsed,
+                            onDescribedProcess:onDescribeProcessParsed,
+                            onStatusChanged:onStatusChanged,
+                            onSucceeded: onExecuted});
+                wps.getCapabilities(url);
+            };
+
+            /**
+             * Function: onCapabilitiesParsed
+             * Called after GetCapabilities is parsed
+             *
+             * This function will generate form with <select> object with
+             * all processes available on the server, so the user can
+             * choose the processes, she is interested in.
+             */
+            var onCapabilitiesParsed = function() {
+                document.getElementById("server").innerHTML =
+                    "<h1>"+this.title+"</h1><div>"+this.abstract+"</div>";
+                for (var i = 0; i < this.processes.length; i++) {
+                    var option = document.createElement("option");
+                    option.value = this.processes[i].identifier;
+                    option.appendChild(document.createTextNode(this.processes[i].title));
+
+                    document.getElementById("processesSelect").appendChild(option);
+
+                    if (i == 0) {
+                        wps.describeProcess(this.processes[i].identifier);
+                    }
+                }
+                document.getElementById("describeProcessButton").disabled = null;
+            };
+
+            /**
+             * Function: onProcessChanged
+             * This function is called, when the user changes the contetn of
+             * <select> input.
+             *
+             */
+            var onProcessChanged = function() {
+                wps.describeProcess(document.getElementById("processesSelect").value);
+            };
+
+            /**
+             * Function: onDescribeProcessParsed
+             *
+             * Will try to generate the form fo inputs for the Execute
+             * request
+             *
+             * This 'could' be coded in more nicer way...
+             */
+            var onDescribeProcessParsed  = function(process) {
+                document.getElementById("processes").style.display="block";
+                document.getElementById("data").style.display="block";
+                var processDiv = document.getElementById("process");
+                processDiv.innerHTML = '';
+                document.getElementById("outputs").innerHTML = '';
+
+                var titleDiv = document.createElement("div");
+                titleDiv.id ="process.title";
+                titleDiv.innerHTML = "<h2>"+process.title+"</h2>";
+
+                var absDiv = document.createElement("div");
+                absDiv.id ="process.abstract";
+                absDiv.innerHTML = process.abstract;
+
+                var versionDiv = document.createElement("div");
+                versionDiv.id ="process.abstract";
+                versionDiv.innerHTML = "Version: "+process.version;
+
+                var inputsDiv = document.createElement("div");
+                versionDiv.id ="process.inputs";
+
+                processDiv.appendChild(titleDiv);
+                processDiv.appendChild(absDiv);
+                processDiv.appendChild(versionDiv);
+
+                /* For each input, generate <input>
+                 */
+                for (var i = 0; i < process.inputs.length; i++) {
+                    var inputDiv = document.createElement("div");
+                    var label = document.createElement("label")
+                    label.appendChild(document.createTextNode(process.inputs[i].title));
+                    label.style.width = "200px";
+                    var postLabel = document.createTextNode(process.inputs[i].abstract);
+                    inputDiv.appendChild(label);
+
+                    if (process.inputs[i].CLASS_NAME.search("Complex") > -1) {
+                        var input = document.createElement("textarea");
+                        var checkbox = document.createElement("input");
+                        label.setAttribute("for",process.inputs[i].identifier);
+                        input.id = process.inputs[i].identifier;
+                        checkbox.setAttribute("type","checkbox");
+                        process.inputs[i].complexInput = input;
+                        process.inputs[i].asReferenceInput = checkbox;
+                        inputDiv.appendChild(document.createElement("br"));
+                        inputDiv.appendChild(document.createTextNode("asReference"));
+                        inputDiv.appendChild(checkbox);
+                        inputDiv.appendChild(document.createElement("br"));
+                        inputDiv.appendChild(input);
+                    }
+                    else if (process.inputs[i].CLASS_NAME.search("Literal") > -1) {
+                        var input = document.createElement("input");
+                        label.setAttribute("for",process.inputs[i].identifier);
+                        input.id = process.inputs[i].identifier;
+                        inputDiv.appendChild(input);
+                        process.inputs[i].literalInput = input;
+                    }
+                    else if (process.inputs[i].CLASS_NAME.search("BoundingBox") > -1) {
+                        var minx = document.createElement("input");
+                        minx.id = process.inputs[i].identifier+".minx";
+                        label.setAttribute("for",process.inputs[i].identifier+"minx");
+                        var miny = document.createElement("input");
+                        minx.id = process.inputs[i].identifier+".miny";
+                        var maxx = document.createElement("input");
+                        minx.id = process.inputs[i].identifier+".maxx";
+                        var maxy = document.createElement("input");
+                        minx.id = process.inputs[i].identifier+".maxy";
+                        inputDiv.appendChild(minx);
+                        inputDiv.appendChild(miny);
+                        inputDiv.appendChild(maxx);
+                        inputDiv.appendChild(maxy);
+                        process.inputs[i].bboxInputs = [minx,miny,maxx,maxy];
+                    }
+                    processDiv.appendChild(inputDiv);
+                    inputDiv.appendChild(document.createElement("br"));
+                    inputDiv.appendChild(postLabel);
+
+                }
+
+                var outpusInfo = document.createElement("ul");
+                for (var i = 0; i < process.outputs.length; i++) {
+                    var li = document.createElement("li");
+                    li.appendChild(document.createTextNode(process.outputs[i].title));
+                                
+
+                }
+                
+                /* synchron/asynchron */
+                var assync = document.createElement("input");
+                assync.setAttribute("type","checkbox");
+                assync.id="assynchronous";
+                processDiv.appendChild(document.createTextNode("Run assynchronously: "));
+                processDiv.appendChild(assync);
+                processDiv.appendChild(document.createElement("br"));
+
+                /* execute button */
+                var execButt = document.createElement("input");
+                execButt.setAttribute("type","button");
+                execButt.onclick=callExecute;
+                execButt.value="Execute";
+                processDiv.appendChild(execButt);
+
+                /* yet another global variable */
+                selectedProcess = process;
+
+            }
+
+            /**
+             * Function: callExecute
+             * what will happe, when Execute button is clicked
+             * 
+             * call input.setValue(something)  for each input and
+             * call wps.execute() at the end
+             */
+            var callExecute = function() {
+
+                /* nastaveni hodnot pro vsechny vstupy */
+                for (var i = 0; i< selectedProcess.inputs.length; i++) {
+                    var input = selectedProcess.inputs[i];
+                    if(input.literalInput) {
+                        input.setValue(input.literalInput.value);
+                    }
+                    else if (input.complexInput) {
+                        input.setValue(input.complexInput.value);
+                        input.asReference = input.asReferenceInput.checked;
+                    }
+
+                    else if (input.bboxInputs) {
+                        input.setValue({minx : input.bboxInputs[0],
+                                    miny : input.bboxInputs[1],
+                                    maxx : input.bboxInputs[2],
+                                    maxy : input.bboxInputs[3]});
+                    }
+                }
+
+                selectedProcess.assync = document.getElementById("assynchronous").checked;
+
+                /* execute */
+                wps.execute(selectedProcess.identifier);
+                
+            };
+
+            /**
+             * Function: onExecuted
+             * called on Status Succeeded
+             *
+             * The results are displayed on the web page
+             */
+            var onExecuted = function(process) {
+                var dl = document.createElement("dl");
+                for (var i = 0; i < process.outputs.length; i++) {
+                    var dt = document.createElement("dt");
+                        dt.appendChild(document.createTextNode(process.outputs[i].title+": "));
+                    var dd = document.createElement("dd");
+                        dt.appendChild(document.createTextNode(process.outputs[i].getValue()));
+                    dl.appendChild(dt);
+                    dl.appendChild(dd);
+                }
+                document.getElementById("outputs").appendChild(dl);
+            };
+
+            /**
+             * Function: onStatusChanged
+             * called for every status change
+             */
+            var onStatusChanged = function(status,process) {
+                var statdiv = document.getElementById("statusmsg");
+                statdiv.innerHTML = "<strong>"+this.status+"</strong> ("+this.percentCompleted+"% "+this.statusTime+"): "+this.statusMessage;
+            };
+
+            /**************************************************************
+             * This is the second possible approach, how to use WPS class:*
+             * You know all your inputs and outputs of the particalura    *
+             * process, so you just create the objects and execute the    *
+             * process                                                    *
+             **************************************************************/
+
+            /**
+             * Function: executeOnlyProcess
+             * Tahle funkce je tu od toho, aby se spustila, kdyz se klikne
+             * na tlacitko "Jdi rovnou na Lines of sigth"
+             *
+             * Definuje se objekt wps, vsechny potrebny vstupy, process a
+             * spusti se execute (tudiz vubec neprobiha getcapabilities
+             * ani describeprocess).
+             */
+            var executeOnlyProcess = function () {
+
+                // get URL
+                var url = document.getElementById("capsUrl").value;
+
+                // Create the WPS object
+                wps = new OWS.WPS(url,{onStatusChanged:onStatusChanged,
+                            onSucceeded: onExecuted});
+
+                // Create the complexData input
+                var demin = new OWS.Put.Complex({
+                        identifier: "dem",
+                        asReference: true,
+                        value: "http://geo.sazp.sk/cgi-bin/sazp?service=WCS&request=getCoverage&crs=epsg:102067&coverage=dem&resx=706&resy=706&format=image/tiff16&bbox=-366407,-1247121,-333951,-1219604"
+                        });
+
+                // Create the  LiteralData input
+                var easting = new OWS.Put.Literal({
+                        identifier:"easting",
+                        value:-350179
+                        });
+
+                // Create the  LiteralData input
+                var northing = new OWS.Put.Literal({
+                        identifier:"northing",
+                        value:-1233362
+                        });
+
+                // Create the  LiteralData input
+                var height = new OWS.Put.Literal({
+                        identifier:"height",
+                        value:1
+                        });
+
+                // Create the  ComplexData output
+                var losOut = new OWS.Put.Complex({
+                        identifier:"los",
+                        asReference:"true"
+                        });
+
+                // Now, define new process with predefined in and outputs
+                var los = new OWS.Process({
+                        identifier: "exampleLosProcess",
+                        assync: true,
+                        inputs : [easting,northing,height,demin],
+                        outputs : [losOut]
+                        });
+
+                // add the process to wps object
+                wps.addProcess(los);
+
+                // and execute - that's all, folks
+                wps.execute(los.identifier);
+            };
+        </script>
+    </head>
+    <body>
+        <h1>WPS JavaScript Client for (Py)WPS</h1>
+        <p>
+        Example of usage of the <a href="WPS.js">WPS.js</a> file and it's OWS.WPS class.
+        </p>
+        <p>
+        There are two types of usage: You can let OWS.WPS go though the
+        whole GetCapabilities-&gt;DescribeProcess-&gt;Execute chain, or if
+        you alreay know, what kind of in- and outputs, you just have to
+        defined them.
+        </p>
+
+        <div id="wps">
+            <div id="url">
+                URL: <input type="text" id="capsUrl" value="http://localhost/cgi-bin/wps-trunk?blah=blah"></input><br />
+                <input type="button" onclick="makeWPS()" value="GetCapabilities"></input>
+                <input type="button" onclick="executeOnlyProcess()" value="Jdi rovnou na Lines Of Sight"></input>
+            </div>
+            <div id="server"></div>
+            <div id="processes" style="display:none">
+                Processes: <select id="processesSelect" onchange="onProcessChanged()"></select> 
+                <input id="describeProcessButton" type="button" onclick="onProcessChanged()" value="DescribeProcess" disabled="disabled"></input>
+            </div>
+            <div id="process">
+            </div>
+            <div id="statusmsg">
+            </div>
+            <div id="outputs">
+            </div>
+        </div>
+
+        <div id="data" style="display: none">
+            <h2>If you need some data, here are some examples</h2>
+            <ul>
+                <li> http://openlayers.org/dev/examples/gml/polygon.xml
+                </li>
+                <li> http://sigma.openplans.org/geoserver/wfs?typename=topp%3Atasmania_cities&SERVICE=WFS&VERSION=1.0.0&REQUEST
+=GetFeature&SRS=EPSG%3A4326&BBOX=135.015,-47.235,157.515,-35.985
+                </li>
+                <li>
+                    <gml:featureMember xmlns:gml="http://www.opengis.net/gml" xsi:schemaLocation="http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/profiles/gmlsfProfile/1.0.0/gmlsf.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><feature:feature xmlns:feature="http://example.com/feature"><feature:geometry><gml:LineString><gml:posList>0 25.6640625 21.09375 1.7578125 39.375 29.1796875 59.765625 -0.3515625</gml:posList></gml:LineString></feature:geometry></feature:feature></gml:featureMember>
+                </li>
+                <li>
+                    http://geo.sazp.sk/cgi-bin/sazp?service=WCS&request=getCoverage&crs=epsg:102067&coverage=dem&resx=706&resy=706&format=image/tiff16&bbox=-366407,-1247121,-333951,-1219604
+                </li>
+                <li> easting: -350179 northing: -1233362
+
+        </div>
+    </body>
+</html>

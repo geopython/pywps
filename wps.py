@@ -178,6 +178,7 @@ class WPS:
 
             # Windows or Unix
             if sys.platform == 'win32':
+                self.workingDir = os.path.abspath(os.path.join(os.getcwd(), os.path.dirname(sys.argv[0])))
                 cfgfiles = (os.path.join(self.workingDir,"pywps","default.cfg"),
                         os.getenv("PYWPS_CFG"))
             else:

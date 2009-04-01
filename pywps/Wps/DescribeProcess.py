@@ -25,7 +25,7 @@ WPS DescribeProcess request handler
 
 from Response import Response
 from htmltmpl import TemplateError
-import os
+import os,types
 
 class DescribeProcess(Response):
     """
@@ -107,8 +107,11 @@ class DescribeProcess(Response):
                     processData["Metadata"] = metadata
                 if process.profile:
                     profiles=[]
-                    for profile in process.profile:
-                        profiles.append({"profile":profile})
+                    if type(process.profile) == types.ListType:
+                        for profile in process.profile:
+                            profiles.append({"profile":profile})
+                    else:
+                        profiles.append({"profile":process.profile})
                     processData["Profiles"] = profiles
                 if process.wsdl:
                     processData["wsdl"] = process.wsdl

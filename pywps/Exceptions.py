@@ -75,6 +75,7 @@ class NoApplicableCode(WPSException):
         self.code = "NoApplicableCode"
         self.locator = None
         self.make_xml()
+        self.message = value
         if value:
             self.ExceptionText = self.document.createElement("ExceptionText")
             self.ExceptionText.appendChild(self.document.createTextNode(value))
