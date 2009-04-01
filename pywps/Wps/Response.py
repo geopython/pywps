@@ -70,15 +70,19 @@ class Response:
                                     "Execute.tmpl")
 
         self.processDir = os.getenv("PYWPS_PROCESSES")
-        if not self.processDir:
-            try: self.processDir = self.wps.getConfigValue("server", "processesPath")
-            except: pass
+        if self.processDir:
+            self.wps.debug("PYWPS_PROCESSES set from environment variable to %s" %self.processDir)
+        else:
+            try:
+                self.processDir = self.wps.getConfigValue("server", "processesPath")
+                self.wps.debug("PYWPS_PROCESSES: set from configuration file to [%s]" %self.processDir)
+            except: 
+                self.wps.debug("'processesPath' not found in the 'server' section of pywps configuration file")
 
         if self.processDir:
             import sys
             if self.processDir[-1] == os.path.sep:
                 self.processDir = self.processDir[:-1]
-
 
             try:
                 sys.path.append(os.path.split(self.processDir)[0])
@@ -87,11 +91,18 @@ class Response:
             except ImportError,e:
                 raise self.wps.exceptions.NoApplicableCode("Could not import processes from the dir [%s]: %s! __init__.py file missing?" % (self.processDir,e))
 
-
             sys.path.append(self.processDir)
         else:
-            import pywps
-            from pywps import processes
+            self.wps.debug("Importing the processes from default (pywps/processes) location")
+            try:
+                import pywps
+            except ImportError,e:
+                raise self.wps.exceptions.NoApplicableCode("Could not import pywps module: %s" % (e))
+            try:
+                from pywps import processes
+                self.wps.debug("PYWPS_PROCESSES: %s" %os.path.abspath(pywps.processes.__path__[-1]))
+            except Exception,e:
+                raise self.wps.exceptions.NoApplicableCode("Could not import pywps.processes module: %s" % (e))
             self.processes = pywps.processes
 
     def getDataTypeReference(self,inoutput):
