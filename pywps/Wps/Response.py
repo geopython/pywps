@@ -73,6 +73,7 @@ class Response:
         if self.processDir:
             self.wps.debug("PYWPS_PROCESSES set from environment variable to %s" %self.processDir)
         else:
+            self.wps.debug("PYWPS_PROCESSES environment variable not set.  Trying to find something in the configuration file")
             try:
                 self.processDir = self.wps.getConfigValue("server", "processesPath")
                 self.wps.debug("PYWPS_PROCESSES: set from configuration file to [%s]" %self.processDir)
