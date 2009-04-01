@@ -86,7 +86,7 @@ class Response:
                 self.processDir = self.processDir[:-1]
 
             try:
-                sys.path.append(os.path.split(self.processDir)[0])
+                sys.path.insert(0,os.path.split(self.processDir)[0])
                 processes = __import__(os.path.split(self.processDir)[-1])
                 self.processes = processes
             except ImportError,e:
