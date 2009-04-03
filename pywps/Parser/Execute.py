@@ -189,7 +189,7 @@ class Post(Post):
             form["rawdataoutput"][identifier]["schema"] = \
                     responseFormNode.getAttribute("schema")
             form["rawdataoutput"][identifier]["uom"] = \
-                    responseFormNode.getAttributeNS(self.nameSpace"uom")
+                    responseFormNode.getAttributeNS(self.nameSpace,"uom")
         return form
 
     def parseDataInputs(self,inputsNode):
