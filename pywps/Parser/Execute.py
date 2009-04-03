@@ -154,11 +154,11 @@ class Post(Post):
                 # is it necessary ?
 
                 outputs[-1]["mimetype"] = \
-                    outputNode.getAttributeNS("*","mimeType")
+                    outputNode.getAttribute("mimeType")
                 outputs[-1]["encoding"] = \
-                    outputNode.getAttributeNS("*","encoding")
+                    outputNode.getAttribute("encoding")
                 outputs[-1]["schema"] = \
-                    outputNode.getAttributeNS("*","schema")
+                    outputNode.getAttribute("schema")
                 outputs[-1]["uom"] = \
                     outputNode.getAttributeNS(self.nameSpace,"uom")
 
@@ -183,13 +183,13 @@ class Post(Post):
             except IndexError:
                 raise self.wps.exceptions.MissingParameterValue("Identifier")
             form["rawdataoutput"][identifier]["mimetype"] = \
-                    responseFormNode.getAttributeNS("*","mimeType")
+                    responseFormNode.getAttribute("mimeType")
             form["rawdataoutput"][identifier]["encoding"] = \
-                    responseFormNode.getAttributeNS("*","encoding")
+                    responseFormNode.getAttribute("encoding")
             form["rawdataoutput"][identifier]["schema"] = \
-                    responseFormNode.getAttributeNS("*","schema")
+                    responseFormNode.getAttribute("schema")
             form["rawdataoutput"][identifier]["uom"] = \
-                    responseFormNode.getAttributeNS("*","uom")
+                    responseFormNode.getAttributeNS(self.nameSpace"uom")
         return form
 
     def parseDataInputs(self,inputsNode):
