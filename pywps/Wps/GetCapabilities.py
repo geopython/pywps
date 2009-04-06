@@ -42,6 +42,7 @@ class GetCapabilities(Response):
         try:
             Response.__init__(self,wps)
         except Exception, e:
+            print dir(e), e.message, e.args
             self.cleanEnv()
             rep = None
             try:
@@ -153,7 +154,6 @@ class GetCapabilities(Response):
 
         try: 
             for processName in self.processes.__all__:
-
                 processData = {}
                 try:
                     # dynamic module import from processes dir:
