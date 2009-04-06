@@ -42,7 +42,6 @@ class GetCapabilities(Response):
         try:
             Response.__init__(self,wps)
         except Exception, e:
-            print dir(e), e.message, e.args
             self.cleanEnv()
             rep = None
             try:
