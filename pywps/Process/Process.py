@@ -433,13 +433,13 @@ class WPSProcess:
         if stdin:
             idx = stdin.find("\n")
             if 0 < idx <= 60:
-                stdinOut = stdin[:idx]
+                stdinOut = " "+stdin[:idx]
             else:
-                stdinOut = stdin[:60]
+                stdinOut = " "+stdin[:60]
         else:
             stdinOut = ""
 
-        self.message("PyWPS Cmd: %s | %s\n" % (" ".join(cmd),stdinOut))
+        self.message("PyWPS Cmd: %s\n" % (" ".join(cmd)+stdinOut))
 
         try:
             subprocessstdin = None
