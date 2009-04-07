@@ -439,7 +439,7 @@ class WPSProcess:
         else:
             stdinOut = ""
 
-        self.message("PyWPS Cmd: %s %s\n" % (cmd.__str__(),stdinOut))
+        self.message("PyWPS Cmd: %s | %s\n" % (" ".join(cmd),stdinOut))
 
         try:
             subprocessstdin = None
@@ -480,7 +480,15 @@ class WPSProcess:
         """
 
         if self.debug or force and self.logFile:
-            self.logFile.write(msg)
+            if type(self.logFile) == type(""):
+                try:
+                    f = open(self.logFile,"w")
+                    f.write(msg)
+                    f.close()
+                except:
+                    print >>sys.stderr, "PyWPS WARNING: Could not write to logfile [%s]" % self.logFile
+            else:
+                self.logFile.write(msg)
         return
 
     def getInput(self,identifier):
