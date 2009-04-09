@@ -158,7 +158,7 @@ OpenLayers.WPS = OpenLayers.Class({
      * Property: timeOut
      * {Integer}, ms
      */
-    timeOut: 5000,
+    timeOut: 10000,
 
     /**
      * Property: statusLocation
@@ -316,20 +316,23 @@ OpenLayers.WPS = OpenLayers.Class({
         this.responseText = resp.responseText;
         var dom = resp.responseXML ? resp.responseXML : OpenLayers.parseXMLString(resp.responseText);
         this.responseDOM = dom;
-        this.title = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.owsNS, this.owsPref, "Title")[0].firstChild.nodeValue;
+        this.title = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.owsNS, "Title")[0].firstChild.nodeValue;
         this.abstract = null;
         try {
-            this.abstract = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.owsNS, this.owsPref, "Abstract")[0].firstChild.nodeValue;
+            this.abstract = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.owsNS, "Abstract")[0].firstChild.nodeValue;
         } catch(e) {}
 
         // describeProcess Get, Post
         // execute Get, Post
-        var operationsMetadataNode = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.owsNS, this.owsPref, "OperationsMetadata")[0];
-        var operationsMetadata = OpenLayers.Ajax.getElementsByTagNameNS(operationsMetadataNode,this.owsNS, this.owsPref, "Operation");
+        var operationsMetadataNode = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.owsNS, "OperationsMetadata")[0];
+        var operationsMetadata = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(operationsMetadataNode, this.owsNS, "Operation");
         for (var i = 0; i < operationsMetadata.length; i++) {
-            var operationName = operationsMetadata[i].getAttribute("name");
-            var get = OpenLayers.Ajax.getElementsByTagNameNS(operationsMetadata[i],this.owsNS, this.owsPref, "Get")[0].getAttributeNS(this.xlinkNS, xlink.wpsPref, "href");
-            var post = OpenLayers.Ajax.getElementsByTagNameNS(operationsMetadata[i],this.owsNS, this.owsPref, "Post")[0].getAttributeNS(this.xlinkNS, xlink.wpsPref, "href");
+            var operationNameNode = operationsMetadata[i].getAttribute("name");
+            var getNode = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(operationsMetadata[i],this.owsNS, "Get")[0];
+           
+            var get = OpenLayers.Format.XML.prototype.getAttributeNS(getNode,this.xlinkNS, "href");
+            var postNode = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(operationsMetadata[i],this.owsNS, "Post")[0];
+            var post = OpenLayers.Format.XML.prototype.getAttributeNS(postNode,this.xlinkNS, "href");
 
             switch(operationName.toLowerCase()) {
                 case "getcapabilities": this.getCapabilitiesUrlGet = get;
@@ -345,16 +348,16 @@ OpenLayers.WPS = OpenLayers.Class({
         }
 
         // processes
-        var processesNode = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.wpsNS, this.wpsPref, "ProcessOfferings")[0];
-        var processes = OpenLayers.Ajax.getElementsByTagNameNS(processesNode,this.wpsNS, this.wpsPref, "Process");
+        var processesNode = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.wpsNS, "ProcessOfferings")[0];
+        var processes = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(processesNode,this.wpsNS,  "Process");
         for (var i = 0; i < processes.length; i++) {
-            var identifier = OpenLayers.Ajax.getElementsByTagNameNS(processes[i],this.owsNS, this.owsPref, "Identifier")[0].firstChild.nodeValue;
-            var title = OpenLayers.Ajax.getElementsByTagNameNS(processes[i],this.owsNS, this.owsPref, "Title")[0].firstChild.nodeValue;
+            var identifier = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(processes[i],this.owsNS,  "Identifier")[0].firstChild.nodeValue;
+            var title = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(processes[i],this.owsNS,  "Title")[0].firstChild.nodeValue;
             var abstract = null;
             try {
-                abstract = OpenLayers.Ajax.getElementsByTagNameNS(processes[i],this.owsNS, this.owsPref, "Abstract")[0].firstChild.nodeValue;
+                abstract = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(processes[i],this.owsNS,  "Abstract")[0].firstChild.nodeValue;
             } catch(e) {}
-            var version = processes[i].getAttributeNS(this.wpsNS, this.wpsPref, version);
+            var version = OpenLayers.Format.XML.prototype.getAttributeNS(processes[i],this.wpsNS, "version");
             var process = new OpenLayers.WPS.Process({identifier:identifier,title: title, abstract: abstract, version: version,wps:this});
             this.addProcess(process);
         }
@@ -401,12 +404,12 @@ OpenLayers.WPS = OpenLayers.Class({
 
         var processes = dom.getElementsByTagName("ProcessDescription");
         for (var i = 0; i < processes.length; i++) {
-            var identifier = OpenLayers.Ajax.getElementsByTagNameNS(processes[i],this.owsNS, this.owsPref, "Identifier")[0].firstChild.nodeValue;
+            var identifier = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(processes[i],this.owsNS,  "Identifier")[0].firstChild.nodeValue;
             var process = this.getProcess(identifier);
 
-            process.title = OpenLayers.Ajax.getElementsByTagNameNS(processes[i],this.owsNS, this.owsPref, "Title")[0].firstChild.nodeValue;
-            process.abstract = OpenLayers.Ajax.getElementsByTagNameNS(processes[i],this.owsNS, this.owsPref, "Abstract")[0].firstChild.nodeValue;
-            process.version = processes[i].getAttributeNS(this.wpsNS, this.wpsPref, "processVersion");
+            process.title = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(processes[i],this.owsNS,  "Title")[0].firstChild.nodeValue;
+            process.abstract = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(processes[i],this.owsNS,  "Abstract")[0].firstChild.nodeValue;
+            process.version = OpenLayers.Format.XML.prototype.getAttributeNS(processes[i],this.wpsNS, "processVersion");
 
             /* parseInputs */
             process.inputs = process.inputs.concat(process.inputs,
@@ -457,10 +460,10 @@ OpenLayers.WPS = OpenLayers.Class({
             }
 
             // metadata
-            var metadataDom = OpenLayers.Ajax.getElementsByTagNameNS(puts[i],this.owsNS, this.owsPref, "Metadata");
+            var metadataDom = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(puts[i],this.owsNS,  "Metadata");
             var metadata = {};
             if (metadataDom.length>0) {
-                metadataDom[metadataDom[i].getAttributeNS(this.xlinkNS, xlink.wpsPref, "title")] = metadataDom[i].firstChild.nodeValue;
+                metadataDom[OpenLayers.Format.XML.prototype.getAttributeNS(metadataDom[i],this.xlinkNS, "title")] = metadataDom[i].firstChild.nodeValue;
             }
             wpsputs[wpsputs.length-1].metadata = metadata;
         }
@@ -475,11 +478,11 @@ OpenLayers.WPS = OpenLayers.Class({
      * dom - {DOM}  input
      */
     parseDescribeComplexPuts: function(dom){
-        var identifier = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.owsNS, this.owsPref, "Identifier")[0].firstChild.nodeValue;
-        var title = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.owsNS, this.owsPref, "Title")[0].firstChild.nodeValue;
+        var identifier = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.owsNS,  "Identifier")[0].firstChild.nodeValue;
+        var title = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.owsNS,  "Title")[0].firstChild.nodeValue;
         var abstract = null;
         try {
-            abstract = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.owsNS, this.owsPref, "Abstract")[0].firstChild.nodeValue;
+            abstract = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.owsNS,  "Abstract")[0].firstChild.nodeValue;
         } catch(e) {}
 
         var formats = [];
@@ -494,13 +497,13 @@ OpenLayers.WPS = OpenLayers.Class({
         if (cmplxData.length > 0) {
             // default format first
             var formatsNode = cmplxData[0].getElementsByTagName("Default")[0].getElementsByTagName("Format")[0];
-            var frmts = OpenLayers.Ajax.getElementsByTagNameNS(formatsNode,this.owsNS, this.owsPref, "MimeType")[0].firstChild.nodeValue;
+            var frmts = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(formatsNode,this.owsNS,  "MimeType")[0].firstChild.nodeValue;
             formats.push(frmts);
             
             // all otheres afterwards
             var supportedFormats = cmplxData[0].getElementsByTagName("Supported")[0].getElementsByTagName("Format");
             for (var i = 0; i < supportedFormats.length; i++) {
-                var format = OpenLayers.Ajax.getElementsByTagNameNS(supportedFormats[i],this.owsNS, this.owsPref, "MimeType")[0].firstChild.nodeValue;
+                var format = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(supportedFormats[i],this.owsNS,  "MimeType")[0].firstChild.nodeValue;
                 if (OpenLayers.WPS.Utils.isIn(formats,format) == false) {
                     formats.push(format);
                 }
@@ -529,11 +532,11 @@ OpenLayers.WPS = OpenLayers.Class({
      * dom - {DOM} input
      */
     parseDescribeBoundingBoxPuts: function(dom){
-        var identifier = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.owsNS, this.owsPref, "Identifier")[0].firstChild.nodeValue;
-        var title = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.owsNS, this.owsPref, "Title")[0].firstChild.nodeValue;
+        var identifier = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.owsNS,  "Identifier")[0].firstChild.nodeValue;
+        var title = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.owsNS,  "Title")[0].firstChild.nodeValue;
         var abstract = null;
         try {
-            abstract = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.owsNS, this.owsPref, "Abstract")[0].firstChild.nodeValue;
+            abstract = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.owsNS,  "Abstract")[0].firstChild.nodeValue;
         } catch(e) {}
         var crss = [];
 
@@ -545,12 +548,12 @@ OpenLayers.WPS = OpenLayers.Class({
         }
 
         // default first
-        crss.push(domcrss.getElementsByTagName("Default")[0].getElementsByTagName("CRS")[0].getAttributeNS(this.xlinkNS, xlink.wpsPref, "href"));
+        crss.push(OpenLayers.Format.XML.prototype.getAttributeNS(domcrss.getElementsByTagName("Default")[0].getElementsByTagName("CRS")[0],this.xlinkNS,  "href"));
 
         // supported afterwards
         var supported = domcrss.getElementsByTagName("Supported");
         for (var i = 0; i < supported.length; i++) {
-            var crs = supported[i].getElementsByTagName("CRS")[0].getAttributeNS(this.xlinkNS, xlink.wpsPref, "href");
+            var crs = OpenLayers.Format.XML.prototype.getAttributeNS(supported[i].getElementsByTagName("CRS")[0],this.xlinkNS, xlink.wpsPref, "href");
             if (OpenLayers.WPS.Utils.isIn(crss,crs) == false) {
                 crss.push(crs);
             }
@@ -574,11 +577,11 @@ OpenLayers.WPS = OpenLayers.Class({
      */
     parseDescribeLiteralPuts: function(dom){
 
-        var identifier = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.owsNS, this.owsPref, "Identifier")[0].firstChild.nodeValue;
-        var title = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.owsNS, this.owsPref, "Title")[0].firstChild.nodeValue;
+        var identifier = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.owsNS,  "Identifier")[0].firstChild.nodeValue;
+        var title = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.owsNS,  "Title")[0].firstChild.nodeValue;
         var abstract = null;
         try {
-            abstract = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.owsNS, this.owsPref, "Abstract")[0].firstChild.nodeValue;
+            abstract = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.owsNS,  "Abstract")[0].firstChild.nodeValue;
         } catch(e) {}
 
         var allowedValues = [];
@@ -587,17 +590,17 @@ OpenLayers.WPS = OpenLayers.Class({
         var inputs = [];
         
         // dataType
-        var dataType = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.owsNS, this.owsPref, "DataType")[0];
+        var dataType = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.owsNS,  "DataType")[0];
         if (dataType) {
             type = dataType.firstChild.nodeValue.toLowerCase();
         }
         // anyValue
-        if (OpenLayers.Ajax.getElementsByTagNameNS(dom,this.owsNS, this.owsPref, "AnyValue").length > 0){
+        if (OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.owsNS,  "AnyValue").length > 0){
             allowedValues = ["*"];
         }
         // allowedValues
-        else if (OpenLayers.Ajax.getElementsByTagNameNS(dom,this.owsNS, this.owsPref, "AllowedValues").length > 0) {
-            var nodes = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.owsNS, this.owsPref, 
+        else if (OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.owsNS,  "AllowedValues").length > 0) {
+            var nodes = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.owsNS,  
                                     "AllowedValues")[0].childNodes;
             // allowedValues
             for (var i = 0; i < nodes.length; i++) {
@@ -607,8 +610,8 @@ OpenLayers.WPS = OpenLayers.Class({
                 }
                 // range
                 else if (nodes[i].localName == "Range") {
-                    var min = OpenLayers.Ajax.getElementsByTagNameNS(nodes[i],this.owsNS, this.owsPref, "MinimumValue")[0].firstChild.nodeValue;
-                    var max = OpenLayers.Ajax.getElementsByTagNameNS(nodes[i],this.owsNS, this.owsPref, "MaximumValue")[0].firstChild.nodeValue;
+                    var min = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(nodes[i],this.owsNS,  "MinimumValue")[0].firstChild.nodeValue;
+                    var max = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(nodes[i],this.owsNS, "MaximumValue")[0].firstChild.nodeValue;
                     allowedValues.push([min,max]);
                 }
             }
@@ -734,17 +737,22 @@ OpenLayers.WPS = OpenLayers.Class({
         }
         var dom = resp.responseXML ? resp.responseXML : OpenLayers.parseXMLString(text);
         this.responseDOM = dom;
-        this.statusLocation = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.wpsNS, this.wpsPref, "ExecuteResponse")[0].getAttribute("statusLocation");
-        var identifier = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.owsNS, this.owsPref, "Identifier")[0].firstChild.nodeValue;
+        try {
+            this.statusLocation = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.wpsNS,  "ExecuteResponse")[0].getAttribute("statusLocation");
+        }
+        catch(e) {
+            this.statusLocation = null;
+        }
+        var identifier = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.owsNS,  "Identifier")[0].firstChild.nodeValue;
         var process = this.getProcess(identifier);
-        var status = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.wpsNS, this.wpsPref, "Status");
+        var status = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.wpsNS,  "Status");
         if (status.length > 0) { this.parseStatus(status[0]); }
 
         if (this.status == "ProcessSucceeded") {
-            var procOutputsDom = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.wpsNS, this.wpsPref, "ProcessOutputs");
+            var procOutputsDom = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.wpsNS,  "ProcessOutputs");
             var outputs = null;
             if (procOutputsDom.length) {
-                outputs = OpenLayers.Ajax.getElementsByTagNameNS(procOutputsDom[0],this.wpsNS, this.wpsPref, "Output"); 
+                outputs = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(procOutputsDom[0],this.wpsNS,  "Output"); 
             }
             for (var i = 0; i < outputs.length; i++) {
                 this.parseExecuteOutput(process,outputs[i]);
@@ -759,11 +767,11 @@ OpenLayers.WPS = OpenLayers.Class({
         
         if (this.status != "ProcessFailed" && this.status != "ProcessSucceeded") {
             if (this.statusLocation) {
-
-                window.setTimeout("OpenLayers.WPS.Utils.loadGet(OpenLayers.WPS.WPS.instances["+this.id+"].statusLocation,"+
-                                "{}, OpenLayers.WPS.instances["+this.id+"].parseExecute,"+
-                                "   OpenLayers.WPS.instances["+this.id+"].onException, "+
-                                "   OpenLayers.WPS.instances["+this.id+"])", this.timeOut);
+                
+                window.setTimeout("OpenLayers.Request.GET({url:OpenLayers.WPS.instances["+this.id+"].statusLocation,"+
+                                "params:{},success: OpenLayers.WPS.instances["+this.id+"].parseExecute,"+
+                                "failure: OpenLayers.WPS.instances["+this.id+"].onException, "+
+                                "scope: OpenLayers.WPS.instances["+this.id+"]})", this.timeOut);
             }
         }
     },
@@ -778,17 +786,16 @@ OpenLayers.WPS = OpenLayers.Class({
      * dom - {DOMelement} <wps:Output />
      */
     parseExecuteOutput: function(process,dom) {
-        var identifier  = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.owsNS, this.owsPref, "Identifier")[0].firstChild.nodeValue;
+        var identifier  = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.owsNS,  "Identifier")[0].firstChild.nodeValue;
         var output = process.getOutput(identifier);
-
-        var literalData = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.wpsNS, this.wpsPref, "LiteralData");
-        var complexData = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.wpsNS, this.wpsPref, "ComplexData");
-        var boundingBoxData = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.wpsNS, this.wpsPref, "BoundingBox");
-	var reference = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.wpsNS, this.wpsPref, "Reference");
+        var literalData = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.wpsNS,  "LiteralData");
+        var complexData = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.wpsNS,  "ComplexData");
+        var boundingBoxData = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.wpsNS,  "BoundingBox");
+	var reference = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.wpsNS,  "Reference");
 	
 
 	if (reference.length > 0) {
-            output.setValue(reference[0].getAttributeNS(this.xlinkNS, xlink.wpsPref, "href"));
+            output.setValue(OpenLayers.Format.XML.prototype.getAttributeNS(reference[0],this.xlinkNS, "href"));
         }
         else if(literalData.length > 0) {
             output.setValue(literalData[0].firstChild.nodeValue);
@@ -808,8 +815,8 @@ OpenLayers.WPS = OpenLayers.Class({
         }
         else if (boundingBoxData.length > 0 ) {
 	    var minxy; var maxxy;
-	    minxy = OpenLayers.Ajax.getElementsByTagNameNS(boundingBoxData,this.owsNS, this.owsPref, "LowerCorner");
-	    maxxy = OpenLayers.Ajax.getElementsByTagNameNS(boundingBoxData,this.owsNS, this.owsPref, "UpperCorner");
+	    minxy = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(boundingBoxData,this.owsNS,  "LowerCorner");
+	    maxxy = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(boundingBoxData,this.owsNS,  "UpperCorner");
 	    var crs = boundingBoxData.getAttribute("crs");
 	    var dimensions = boundingBoxData.getAttribute("dimensions");
             output.setValue([minxy.split(" ")[0],minxy.split(" ")[1],
@@ -845,7 +852,7 @@ OpenLayers.WPS = OpenLayers.Class({
      */
     parseStatus: function(status) {
         for (var k in this.statusEvents) {
-            var dom = OpenLayers.Ajax.getElementsByTagNameNS(status,this.wpsNS, this.wpsPref, k);
+            var dom = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(status,this.wpsNS,  k);
             if (dom.length>0) {
                 this.setStatus(k,
                             dom[0].firstChild.nodeValue,
@@ -881,13 +888,13 @@ OpenLayers.WPS = OpenLayers.Class({
      * 
      */
     parseProcessFailed: function(process,dom) {
-        var Exception = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.owsNS,this.owsPref,"Exception");
+        var Exception = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.owsNS,"Exception");
         var code;
         if (Exception.length) {
             code = Exception[0].getAttribute('exceptionCode');
         }
         var text;
-        var ExceptionText = OpenLayers.Ajax.getElementsByTagNameNS(dom,this.owsNS,this.owsPref,"ExceptionText");
+        var ExceptionText = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.owsNS,"ExceptionText");
         if (ExceptionText.length) {
             try {
                 text = ExceptionText[0].firstChild.nodeValue;
@@ -1276,8 +1283,8 @@ OpenLayers.WPS.executeRequestTemplate = '<?xml version="1.0" encoding="UTF-8" st
                                 '</wps:DataInputs>'+
                                 '<wps:ResponseForm>'+
                                 '<wps:ResponseDocument wps:lineage="false" '+
-                                'wps:storeExecuteResponse="true" '+
-                                'wps:status="$STORE_AND_STATUS$">'+
+                                'storeExecuteResponse="true" '+
+                                'status="$STORE_AND_STATUS$">'+
                                 "$OUTPUT_DEFINITIONS$"+
                                 '</wps:ResponseDocument>'+
                                 '</wps:ResponseForm>'+
