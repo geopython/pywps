@@ -933,7 +933,7 @@ OpenLayers.WPS = OpenLayers.Class({
     getProcess: function(identifier) {
         
         for (var i = 0; i < this.processes.length; i++) {
-            if (this.processes[i].identifier == identifier) {
+            if (this.processes[i] && this.processes[i].identifier == identifier) {
                 return this.processes[i];
             }
         }
