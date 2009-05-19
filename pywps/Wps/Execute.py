@@ -40,6 +40,7 @@ class Execute(Response):
     succeeded = "processsucceeded"
     paused = "processpaused"
     failed = "processfailed"
+    curdir = os.path.abspath(os.path.curdir)
 
     # running process id
     pid = None
@@ -205,11 +206,10 @@ class Execute(Response):
 
             # this is child process, parent is already gone away
             # redirect stdout, so that apache sends back the response immediately
-            si = open('/dev/null', 'r')
-            so = open('/dev/null', 'a+')
+            si = open(os.devnull, 'r')
+            so = open(os.devnull, 'a+')
             os.dup2(si.fileno(), sys.stdin.fileno())
             os.dup2(so.fileno(), sys.stdout.fileno())
-
 
         # attempt to execute
         try:
@@ -229,9 +229,9 @@ class Execute(Response):
         except self.wps.exceptions.WPSException,e:
             # set status to failed
             self.promoteStatus(self.failed,
-                    statusMessage=e.value,
-                    exceptioncode=e.code,
-                    locator=e.locator)
+                     statusMessage=e.value,
+                     exceptioncode=e.code,
+                     locator=e.locator)
 
         except Exception,e:
             # set status to failed
@@ -495,7 +495,6 @@ class Execute(Response):
         {String} exceptioncode - eventually exception
         {String} locator - where the problem occurred
         """
-
         self.statusTime = time.time()
         self.templateProcessor.set("statustime", time.ctime(self.statusTime))
         self.status = status
@@ -911,10 +910,14 @@ class Execute(Response):
         """
         Removes temporary created files and dictionaries
         """
+        os.chdir(self.curdir)
+        def onError(*args):
+            print >>self.logFile, "PYWPS Error: Could not remove temporary dir"
+
         for i in range(len(self.dirsToBeRemoved)):
             dir = self.dirsToBeRemoved[0]
             if os.path.isdir(dir) and dir != "/":
-                RMTREE(dir)
+                RMTREE(dir, onerror=onError)
                 pass
             self.dirsToBeRemoved.remove(dir)
 

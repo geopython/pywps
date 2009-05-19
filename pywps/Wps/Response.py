@@ -44,13 +44,18 @@ class Response:
     statusFiles = STDOUT
     emptyParamRegex = re.compile('( \w+="")|( \w+="None")')
     templateVersionDirectory = None # directory with templates for specified version
+    precompile = 1
+    stdOutClosed = False
 
     def __init__(self,wps):
         self.wps = wps
 
         self.templateVersionDirectory = self.wps.inputs["version"].replace(".","_")
 
-        self.templateManager = TemplateManager(precompile = 1,
+	if os.name == "nt":
+		self.precompile = 0
+
+        self.templateManager = TemplateManager(precompile = self.precompile,
             debug = self.wps.config.getboolean("server","debug"))
 
         if self.wps.inputs["request"] == "getcapabilities":
@@ -143,9 +148,12 @@ class Response:
 
         for f in fileDes:
 
+	    if f == STDOUT and self.stdOutClosed == True:
+		    continue
+
             if f == STDOUT:
                 print "Content-Type: text/xml"
-                print "Content-Length: %d" % len(self.response)
+                #print "Content-Length: %d" % len(self.response)
                 print ""
 
             # open file
@@ -158,6 +166,10 @@ class Response:
 
             if (f != STDOUT):
                 f.close()
+
+	    # remove stdout from fileDes
+	    else: 
+		self.stdOutClosed = True
 
     def cleanEnv(self):
         """Clean possible temporary files etc. created by this request
