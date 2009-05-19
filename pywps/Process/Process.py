@@ -24,7 +24,7 @@ import Lang
 import subprocess
 import time
 import types
-import sys
+import sys,os
 
 class Status:
     """
@@ -165,6 +165,11 @@ class WPSProcess:
             else:
                 statusSupported = False
         self.statusSupported = statusSupported
+
+	# status not supported on windows
+	if os.name == "nt":
+		self.statusSupported = False
+
         self.debug = False
 
         self.status = Status()
