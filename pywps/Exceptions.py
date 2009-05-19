@@ -72,6 +72,7 @@ class InvalidParameterValue(WPSException):
 
 class NoApplicableCode(WPSException):
     def __init__(self,value=None):
+        WPSException.__init__(self,value)
         self.code = "NoApplicableCode"
         self.locator = None
         self.make_xml()

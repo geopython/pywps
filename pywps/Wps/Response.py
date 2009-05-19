@@ -44,13 +44,18 @@ class Response:
     statusFiles = STDOUT
     emptyParamRegex = re.compile('( \w+="")|( \w+="None")')
     templateVersionDirectory = None # directory with templates for specified version
+    precompile = 1
+    stdOutClosed = False
 
     def __init__(self,wps):
         self.wps = wps
 
         self.templateVersionDirectory = self.wps.inputs["version"].replace(".","_")
 
-        self.templateManager = TemplateManager(precompile = 1,
+	if os.name == "nt":
+		self.precompile = 0
+
+        self.templateManager = TemplateManager(precompile = self.precompile,
             debug = self.wps.config.getboolean("server","debug"))
 
         if self.wps.inputs["request"] == "getcapabilities":
@@ -70,28 +75,40 @@ class Response:
                                     "Execute.tmpl")
 
         self.processDir = os.getenv("PYWPS_PROCESSES")
-        if not self.processDir:
-            try: self.processDir = self.wps.getConfigValue("server", "processesPath")
-            except: pass
+        if self.processDir:
+            self.wps.debug("PYWPS_PROCESSES set from environment variable to %s" %self.processDir)
+        else:
+            self.wps.debug("PYWPS_PROCESSES environment variable not set or empty.  Trying to find something in the configuration file")
+            try:
+                self.processDir = self.wps.getConfigValue("server", "processesPath")
+                self.wps.debug("PYWPS_PROCESSES: set from configuration file to [%s]" %self.processDir)
+            except: 
+                self.wps.debug("'processesPath' not found in the 'server' section of pywps configuration file")
 
         if self.processDir:
             import sys
             if self.processDir[-1] == os.path.sep:
                 self.processDir = self.processDir[:-1]
 
-
             try:
-                sys.path.append(os.path.split(self.processDir)[0])
+                sys.path.insert(0,os.path.split(self.processDir)[0])
                 processes = __import__(os.path.split(self.processDir)[-1])
                 self.processes = processes
             except ImportError,e:
                 raise self.wps.exceptions.NoApplicableCode("Could not import processes from the dir [%s]: %s! __init__.py file missing?" % (self.processDir,e))
 
-
             sys.path.append(self.processDir)
         else:
-            import pywps
-            from pywps import processes
+            self.wps.debug("Importing the processes from default (pywps/processes) location")
+            try:
+                import pywps
+            except ImportError,e:
+                raise self.wps.exceptions.NoApplicableCode("Could not import pywps module: %s" % (e))
+            try:
+                from pywps import processes
+                self.wps.debug("PYWPS_PROCESSES: %s" %os.path.abspath(pywps.processes.__path__[-1]))
+            except Exception,e:
+                raise self.wps.exceptions.NoApplicableCode("Could not import pywps.processes module: %s" % (e))
             self.processes = pywps.processes
 
     def getDataTypeReference(self,inoutput):
@@ -131,9 +148,12 @@ class Response:
 
         for f in fileDes:
 
+	    if f == STDOUT and self.stdOutClosed == True:
+		    continue
+
             if f == STDOUT:
                 print "Content-Type: text/xml"
-                print "Content-Length: %d" % len(self.response)
+                #print "Content-Length: %d" % len(self.response)
                 print ""
 
             # open file
@@ -147,7 +167,10 @@ class Response:
             if (f != STDOUT):
                 f.close()
 
+	    # remove stdout from fileDes
+	    else: 
+		self.stdOutClosed = True
+
     def cleanEnv(self):
         """Clean possible temporary files etc. created by this request
         type"""
-

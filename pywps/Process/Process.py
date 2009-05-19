@@ -24,7 +24,7 @@ import Lang
 import subprocess
 import time
 import types
-import sys
+import sys,os
 
 class Status:
     """
@@ -165,6 +165,11 @@ class WPSProcess:
             else:
                 statusSupported = False
         self.statusSupported = statusSupported
+
+	# status not supported on windows
+	if os.name == "nt":
+		self.statusSupported = False
+
         self.debug = False
 
         self.status = Status()
@@ -433,13 +438,13 @@ class WPSProcess:
         if stdin:
             idx = stdin.find("\n")
             if 0 < idx <= 60:
-                stdinOut = stdin[:idx]
+                stdinOut = " "+stdin[:idx]
             else:
-                stdinOut = stdin[:60]
+                stdinOut = " "+stdin[:60]
         else:
             stdinOut = ""
 
-        self.message("PyWPS Cmd: %s %s\n" % (cmd.__str__(),stdinOut))
+        self.message("PyWPS Cmd: %s\n" % (" ".join(cmd)+stdinOut))
 
         try:
             subprocessstdin = None
@@ -473,7 +478,15 @@ class WPSProcess:
         """
 
         if self.debug or force and self.logFile:
-            self.logFile.write(msg)
+            if type(self.logFile) == type(""):
+                try:
+                    f = open(self.logFile,"w")
+                    f.write(msg)
+                    f.close()
+                except:
+                    print >>sys.stderr, "PyWPS WARNING: Could not write to logfile [%s]" % self.logFile
+            else:
+                self.logFile.write(msg)
         return
 
     def getInput(self,identifier):

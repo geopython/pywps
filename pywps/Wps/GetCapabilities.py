@@ -153,7 +153,6 @@ class GetCapabilities(Response):
 
         try: 
             for processName in self.processes.__all__:
-
                 processData = {}
                 try:
                     # dynamic module import from processes dir:
