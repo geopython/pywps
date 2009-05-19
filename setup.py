@@ -104,6 +104,11 @@ if not dryRun and install and not os.environ.has_key("FAKEROOTKEY"):
 
     baseDir =  os.path.join(sysconfig.get_python_lib(),
                             name,'Templates')
+
+    for i in range(len(sys.path)):
+        if os.path.split(sys.path[i])[1] == "dist-packages":
+            baseDir =  os.path.join(sys.path[i],
+                                name,'Templates')
     versionDirs = ['1_0_0']
 
     template_files = ['GetCapabilities', 'DescribeProcess','Execute']
