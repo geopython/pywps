@@ -29,10 +29,10 @@
 	</wps:DataInputs>
 	<wps:ResponseForm>
                 <wps:ResponseDocument wps:lineage="true" wps:storeExecuteResponse="true" wps:status="frue">
-                    <wps:Output wps:asReference="false">
+                    <wps:Output asReference="false">
                         <ows:Identifier>buffer</ows:Identifier>
                     </wps:Output>
-                    <wps:Output wps:asReference="true">
+                    <wps:Output asReference="true">
                         <ows:Identifier>bufferRaster</ows:Identifier>
                     </wps:Output>
                 </wps:ResponseDocument>
