@@ -240,7 +240,8 @@ class WPS:
         """
 
         dbg = self.getConfigValue("server","debug")
-        if dbg == True or dbg.lower() == "true" or int(dbg) != 0:
+        if dbg == True or (type(dbg) == type("") and \
+                dbg.lower() == "true") or int(dbg) != 0:
                 print >>sys.stderr, "PyWPS Debug: %s" % debug.__str__()
 
 if __name__ == "__main__":
