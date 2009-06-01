@@ -1,4 +1,10 @@
 include setup.py
+include ChangeLog
+include LICENSE
+include AUTHORS
+include INSTALL
+include README
+include SUBMITTING
 
 graft pywps/Wps
 graft pywps/processes
