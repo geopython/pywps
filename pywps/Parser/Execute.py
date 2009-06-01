@@ -163,7 +163,7 @@ class Post(Post):
                     outputNode.getAttributeNS(self.nameSpace,"uom")
 
                 outputs[-1]["asreference"] = False
-                if outputNode.getAttributeNS("asReference").lower() == "true":
+                if outputNode.getAttribute("asReference").lower() == "true":
                     outputs[-1]["asreference"] = True
 
             form["responsedocument"]["outputs"] = outputs
