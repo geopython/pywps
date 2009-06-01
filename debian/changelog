@@ -1,3 +1,12 @@
+pywps (3.1.0-1) stable; urgency=low
+
+  * New version
+  * Added first version of generic JavaScript  WPS Client
+  * New style for output and input data
+  * MS Windows enabled again
+  * See change log for more details
+
+ -- Jachym Cepicky <jachym@les-ejk.cz>  Thu, 01 Jan 2009 16:00:00 +0100
 pywps (3.0.0-1) stable; urgency=low
 
   * New version
