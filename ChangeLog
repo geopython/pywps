@@ -1,0 +1,52 @@
+2009-06-01  Jachym Cepicky <jachym@bnhelp.cz>
+    PyWPS 3.1.0
+    New stable release
+
+    * Bugs:
+	- Minor namespace fix
+
+2009-05-19  Jachym Cepicky <jachym@bnhelp.cz>
+    PyWPS 3.0.1rc4
+    * Features:
+	- new pythonish wrapper cgi script example added
+
+    * Bugs:
+	- Fixed bug on MS Windows: configuration files can be read now
+	- Partly solved problem with os.fork() on MS Windows: PyWPS can NOT
+	    run in assynchronous mode on MS Windows (but it does not fail)
+	- Fixed bug on Ubuntu 9.04 && Python 2.6 in the installing process
+
+2009-03-15  Jachym Cepicky <jachym@bnhelp.cz>
+    PyWPS 3.0.1rc3
+    * Features:
+    - Updated examples
+
+    * Bugs:
+    - small bugfixes
+
+2009-03-11  Jachym Cepicky <jachym@bnhelp.cz>
+    PyWPS 3.0.1rc2
+    * Features:
+	- Updated debian configuration files
+	- New examples
+	- Basic logfile enabled
+
+    * Bugs:
+	- few namespaces bugs
+	- lineage works better now
+	- setValue and getValue methods do accept file object as well, not only
+	    file names (string)
+	- multiple bugs in status and store, process forking is back
+	- bugfix for complex input data
+
+2009-01-23 Jachym Cepicky <jachym@bnhelp.cz>
+    PyWPS 3.0.1rc1	
+    * Features:
+	- Updated debian configuration files
+
+    * Bugs:
+	- lineage and status attributes are parsed with namespaces
+	- "http://" can be parsed as encoded string
+	- bugfix in InAndOutputs.py: bad variable name
+	- fixed missing default value parameter in describe process document
+	- bugfix for complex input data
