@@ -94,8 +94,9 @@ class Post(Post):
 
         # OGC 05-007r7 page 36, Table 49
         # Either responseDocument or rawDataOutput should be specified, not both
-        if len(self.wps.inputs["responseform"]["rawdataoutput"])>0 and \
-            len(self.wps.inputs["responseform"]["responsedocument"])>0:
+        if not self.wps.inputs.has_key('responseform') or\
+           (not self.wps.inputs["responseform"].has_key("rawdataoutput") and \
+            not self.wps.inputs["responseform"].has_key("responsedocument")):
             raise self.wps.exceptions.InvalidParameterValue(
                 "Either responseDocument or rawDataOutput should be specified, but not both")
 
