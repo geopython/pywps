@@ -193,9 +193,15 @@ class WPS:
                 cfgfiles = (os.path.join(self.workingDir,"pywps","default.cfg"),
                         os.path.join(self.workingDir, "pywps","etc","pywps.cfg"))
             else:
-                cfgfiles = (os.path.join(pywps.__path__[0],"default.cfg"),
+                homePath = os.getenv("HOME")
+                if homePath:
+                    cfgfiles = (os.path.join(pywps.__path__[0],"default.cfg"),
                             os.path.join(pywps.__path__[0],"etc", "pywps.cfg"), "/etc/pywps.cfg",
                         os.path.join(os.getenv("HOME"),".pywps.cfg" ))
+                else: 
+                    cfgfiles = (os.path.join(pywps.__path__[0],"default.cfg"),
+                            os.path.join(pywps.__path__[0],"etc",
+                                "pywps.cfg"), "/etc/pywps.cfg")
 
         self.config = ConfigParser.ConfigParser()
         self.config.read(cfgfiles)
