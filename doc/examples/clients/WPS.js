@@ -158,7 +158,7 @@ OpenLayers.WPS = OpenLayers.Class({
      * Property: timeOut
      * {Integer}, ms
      */
-    timeOut: 10000,
+    timeOut: 5000,
 
     /**
      * Property: statusLocation
@@ -762,8 +762,12 @@ OpenLayers.WPS = OpenLayers.Class({
             this.parseProcessFailed(process,dom);
         }
 
-        this.statusEvents[this.status].apply(this.scope,[process]);
+        if (this.status == "ProcessSucceeded") {
+            this.statusEvents[this.status](process);
+        }
+
         this.onStatusChanged(this.status,process);
+        this.statusEvents[this.status].apply(this.scope,[process]);
         
         if (this.status != "ProcessFailed" && this.status != "ProcessSucceeded") {
             if (this.statusLocation) {
@@ -841,7 +845,7 @@ OpenLayers.WPS = OpenLayers.Class({
         this.status = status;
         this.statusMessage = message;
         this.statusTime = creationTime;
-        this.percentCompleted = percentCompleted;
+        this.percentCompleted = (status == "ProcessSucceeded" ? 100 : (percentCompleted ? percentCompleted : 0));
     },
 
     /**
@@ -910,6 +914,7 @@ OpenLayers.WPS = OpenLayers.Class({
      * To be redefined by the user
      */
     onStarted: function(process) {
+        OpenLayers.Console.log("started");
     },
 
     /**
@@ -946,6 +951,7 @@ OpenLayers.WPS = OpenLayers.Class({
      *
      */
     onException: function (process,code,text) {
+        OpenLayers.Console.log("onException: ", process, code, text);
     },
 
     /**
@@ -1342,7 +1348,7 @@ OpenLayers.WPS.boundingBoxInputTemplate = "<wps:Input>"+
  * Property:    complexOutputTemplate
  * {String} Temple for Execute Request XML 
  */
-OpenLayers.WPS.complexOutputTemplate = '<wps:Output wps:asReference="$AS_REFERENCE$" $FORMAT$>'+
+OpenLayers.WPS.complexOutputTemplate = '<wps:Output asReference="$AS_REFERENCE$" $FORMAT$>'+
                                 '<ows:Identifier>$IDENTIFIER$</ows:Identifier>'+
                                 "</wps:Output>";
 
@@ -1350,7 +1356,7 @@ OpenLayers.WPS.complexOutputTemplate = '<wps:Output wps:asReference="$AS_REFEREN
  * Property:    literalOutputTemplate
  * {String} Temple for Execute Request XML 
  */
-OpenLayers.WPS.literalOutputTemplate = '<wps:Output wps:asReference="false">'+
+OpenLayers.WPS.literalOutputTemplate = '<wps:Output asReference="false">'+
                                 '<ows:Identifier>$IDENTIFIER$</ows:Identifier>'+
                                 '</wps:Output>';
 
