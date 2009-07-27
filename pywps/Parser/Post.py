@@ -23,6 +23,7 @@ import xml
 from xml.dom.minidom import parseString
 from pywps.Parser.Parser import Parser
 from pywps.Process.Lang import Lang
+from pywps import Soap 
 
 class Post(Parser):
     """Main class for parsing of HTTP POST request types"""
@@ -59,9 +60,16 @@ class Post(Parser):
             self.document = parseString(inputXml)
         except xml.parsers.expat.ExpatError,e:
             raise self.wps.exceptions.NoApplicableCode(e.message)
-
+        
         # get first child
         firstChild = self.getFirstChildNode(self.document)
+
+        # SOAP ??
+        if Soap.isSoap(firstChild):
+            soapCls = Soap.SOAP(firstChild)
+            firstChild = soapCls.getNode(Soap.soap_env_NS[soapCls.nsIndex],"Body")
+            firstChild = self.getFirstChildNode(firstChild)
+            self.isSoap = True
 
         # check service name
         self.checkService(firstChild)

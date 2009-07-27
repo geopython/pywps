@@ -64,28 +64,35 @@ class Get(Parser):
             # omit empty KVPs, e.g. due to optional ampersand after the last
             # KVP in request string (OWS_1-1-0, p.75, sect. 11.2):
             if not feature == '':
-                try:
-                    key,value = split(feature,"=",maxsplit=1)
-                except:
-                    raise self.wps.exceptions.NoApplicableCode(\
-                                                'Invalid Key-Value-Pair: "' + \
-                                                str(feature) + '"')
-                if value.find("[") == 0:  # if value in brackets:
-                    value = value[1:-1]   #    delete brackets
-                if len(value)>maxInputLength:
-                        raise self.wps.exceptions.FileSizeExceeded(key)
+                if feature.lower() == "wsdl":
+                    self.wps.inputs["wsdl"] = True
+                    break
+                else:
+                    try:
+                        key,value = split(feature,"=",maxsplit=1)
+                    except:
+                        raise self.wps.exceptions.NoApplicableCode(\
+                                                    'Invalid Key-Value-Pair: "' + \
+                                                    str(feature) + '"')
+                    if value.find("[") == 0:  # if value in brackets:
+                        value = value[1:-1]   #    delete brackets
+                    if len(value)>maxInputLength:
+                            raise self.wps.exceptions.FileSizeExceeded(key)
                 keys.append(key)
                 self.unparsedInputs[key.lower()] = value[:maxInputLength]
 
 
-        # check service name
-        self.checkService()
+        if not self.wps.inputs.has_key("wsdl"):
+            # check service name
+            service = self.checkService()
 
-        # check request type
-        self.checkRequestType()
+            # check request type
+            self.checkRequestType()
 
-        # parse the request
-        self.requestParser.parse(self.unparsedInputs)
+            # parse the request
+            self.requestParser.parse(self.unparsedInputs)
+
+        return
 
     def checkRequestType(self):
         """Find requested request type and import given request parser."""
@@ -121,12 +128,15 @@ class Get(Parser):
         # p.46 tab.26); service must be "WPS" (WPS_1-0-0 p.17 tab.13 + p.32 tab.39)
         if "service" in self.unparsedInputs:
             value=self.unparsedInputs["service"].upper()
-            if value != "WPS":
+            if value == "WSDL":
+                self.wps.inputs["service"] = "WSDL"
+            elif value != "WPS":
                 raise self.wps.exceptions.InvalidParameterValue("service")
             else:
                 self.wps.inputs["service"] = "WPS"
         else:
             raise self.wps.exceptions.MissingParameterValue("service")
+        return self.wps.inputs["service"]
 
     def checkLanguage(self):
         """ Check optional language parameter.  """

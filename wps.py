@@ -61,7 +61,7 @@ from pywps import Exceptions
 from pywps import Wps
 from pywps.Exceptions import *
 
-import sys, os, ConfigParser
+import sys, os, ConfigParser, urllib
 
 
 class WPS:
@@ -115,6 +115,15 @@ class WPS:
         if not self.method:  # set standard method
             self.method = self.METHOD_GET
 
+        serverPath = urllib.splithost(urllib.splittype(self.getConfigValue("wps","serveraddress"))[1])[1]
+        scriptName = os.getenv("SCRIPT_NAME")
+        restPath = None
+        try:
+            restPath= os.getenv("PATH_INFO").split(os.sep)[1:]
+        except:
+            pass
+        print >>sys.stderr, serverPath, scriptName, restPath
+
         # decide, which method to use
         # HTTP GET vs. HTTP POST
         if self.method == self.METHOD_GET:
@@ -137,6 +146,7 @@ class WPS:
             parser = Post(self)
             parser.parse(sys.stdin)
 
+
         # inputs parsed, perform request
         if self.inputs:
             self.debug(self.inputs)
@@ -147,7 +157,7 @@ class WPS:
             # print only to standard out
             if self.request.statusFiles == sys.stdout or\
                sys.stdout in self.request.statusFiles:
-                self.request.printResponse(self.request.statusFiles)
+                self.request.printResponse(self.request.statusFiles,parser.isSoap)
 
         return
 
@@ -210,15 +220,20 @@ class WPS:
         """Performs the desired WSP Request."""
 
         # the modules are imported first, when the request type is known
-        if self.inputs["request"]  == "getcapabilities":
-            from pywps.Wps.GetCapabilities import GetCapabilities
-            self.request = GetCapabilities(self)
-        elif self.inputs["request"]  == "describeprocess":
-            from pywps.Wps.DescribeProcess import DescribeProcess
-            self.request = DescribeProcess(self)
-        elif self.inputs["request"]  == "execute":
-            from pywps.Wps.Execute import Execute
-            self.request = Execute(self)
+        if self.inputs.has_key("request"):
+            if self.inputs["request"]  == "getcapabilities":
+                from pywps.Wps.GetCapabilities import GetCapabilities
+                self.request = GetCapabilities(self)
+            elif self.inputs["request"]  == "describeprocess":
+                from pywps.Wps.DescribeProcess import DescribeProcess
+                self.request = DescribeProcess(self)
+            elif self.inputs["request"]  == "execute":
+                from pywps.Wps.Execute import Execute
+                self.request = Execute(self)
+        elif self.inputs.has_key("wsdl"):
+            self.inputs["version"]="1.0.0"
+            from pywps.Wps.Wsdl import Wsdl
+            self.request = Wsdl(self)
         else:
             raise self.exceptions.InvalidParameterValue(
                     "request: "+self.inputs["request"])

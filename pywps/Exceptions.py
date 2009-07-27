@@ -23,9 +23,12 @@ Exception classes of WPS
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 from xml.dom.minidom import Document
+from pywps.Soap import SOAP
+import pywps.Soap
 import sys
 
 called = 0
+
 
 class WPSException(Exception):
     """
@@ -53,10 +56,15 @@ class WPSException(Exception):
 
     def __str__(self):
 
-        str = "Content-type: text/xml\n\n"
-        str += self.document.toprettyxml(indent='\t', newl='\n', encoding="utf-8")
+        print  "Content-type: text/xml\n\n"
+        response= self.document.toprettyxml(indent='\t', newl='\n', encoding="utf-8")
+        if pywps.Soap.soap == True:
+            soapCls = SOAP()
+            response = soapCls.getResponse(response)
+
         sys.stderr.write("PyWPS %s: %s\n" % (self.code, self.locator))
-        print str
+
+        print response
 
 class MissingParameterValue(WPSException):
     def __init__(self, value):

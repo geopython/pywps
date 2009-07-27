@@ -30,6 +30,7 @@ import os
 from sys import stdout as STDOUT
 import types
 from pywps import Templates
+from pywps import Soap
 import re
 
 class Response:
@@ -58,21 +59,27 @@ class Response:
         self.templateManager = TemplateManager(precompile = self.precompile,
             debug = self.wps.config.getboolean("server","debug"))
 
-        if self.wps.inputs["request"] == "getcapabilities":
+        if self.wps.inputs.has_key("request"):
+            if self.wps.inputs["request"] == "getcapabilities":
+                self.templateFile = os.path.join(
+                                    os.path.join(Templates.__path__)[0],
+                                    self.templateVersionDirectory,
+                                        "GetCapabilities.tmpl")
+            elif self.wps.inputs["request"] == "describeprocess":
+                self.templateFile = os.path.join(
+                                    os.path.join(Templates.__path__)[0],
+                                    self.templateVersionDirectory,
+                                        "DescribeProcess.tmpl")
+            elif self.wps.inputs["request"] == "execute":
+                self.templateFile = os.path.join(
+                                    os.path.join(Templates.__path__)[0],
+                                    self.templateVersionDirectory,
+                                        "Execute.tmpl")
+        elif self.wps.inputs.has_key("wsdl"):
             self.templateFile = os.path.join(
                                 os.path.join(Templates.__path__)[0],
                                 self.templateVersionDirectory,
-                                    "GetCapabilities.tmpl")
-        elif self.wps.inputs["request"] == "describeprocess":
-            self.templateFile = os.path.join(
-                                os.path.join(Templates.__path__)[0],
-                                self.templateVersionDirectory,
-                                    "DescribeProcess.tmpl")
-        elif self.wps.inputs["request"] == "execute":
-            self.templateFile = os.path.join(
-                                os.path.join(Templates.__path__)[0],
-                                self.templateVersionDirectory,
-                                    "Execute.tmpl")
+                                    "Wsdl.tmpl")
 
         self.processDir = os.getenv("PYWPS_PROCESSES")
         if self.processDir:
@@ -137,14 +144,25 @@ class Response:
 
         return dataType
 
-    def printResponse(self,fileDes):
+    def printResponse(self,fileDes,isSoap):
         """
         print response to file descriptor file descriptor
         can be of type list or file
+
+        Parameters:
+            fileDes - file descriptor, where to print the result
+            isSoap - Boolean, if the response should be printed in the SOAP
+                    envelope or no
         """
 
         if type(fileDes) != type([]):
             fileDes = [fileDes]
+
+        response = self.response
+        if isSoap:
+            soap = Soap.SOAP()
+            response = soap.getResponse(response)
+
 
         for f in fileDes:
 
@@ -161,7 +179,7 @@ class Response:
                 f = open(f.name,"w")
 
             # '""' and '"None"'s will be removed
-            f.write(re.sub(self.emptyParamRegex,"",self.response))
+            f.write(re.sub(self.emptyParamRegex,"",response))
             f.flush()
 
             if (f != STDOUT):

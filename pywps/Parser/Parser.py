@@ -22,6 +22,7 @@ class Parser:
     """Parent class for all request parsers."""
 
     wps = None
+    isSoap = False
 
     def __init__(self,wps):
         self.wps = wps
