@@ -65,17 +65,17 @@
         <operation name="GetCapabilities">
             <input message="tns:GetCapabilitiesRequest"/>
             <output message="tns:GetCapabilitiesResponse"/>
-            <fault message="tns:ExceptionResponse" />
+            <fault message="tns:ExceptionResponse" name="ExceptionResponse" />
         </operation>
         <operation name="DescribeProcess">
             <input message="tns:DescribeProcessRequest"/>
             <output message="tns:DescribeProcessResponse"/>
-            <fault message="tns:ExceptionResponse" />
+            <fault message="tns:ExceptionResponse" name="ExceptionResponse" />
         </operation>
         <operation name="Execute">
             <input message="tns:ExecuteRequest"/>
             <output message="tns:ExecuteResponse"/>
-            <fault message="tns:ExceptionResponse" />
+            <fault message="tns:ExceptionResponse" name="ExceptionResponse" />
         </operation>
     </portType>
 
