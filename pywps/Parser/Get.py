@@ -32,6 +32,7 @@ import types
 from string import split
 from pywps.Parser.Parser import Parser
 from pywps.Process.Lang import Lang
+import urllib
 
 class Get(Parser):
     """ Main Class for parsing HTTP GET request types """
@@ -59,7 +60,7 @@ class Get(Parser):
         # arguments are separated by "&" character
         # everything is stored into unparsedInputs structure, for latter
         # validation
-        for feature in queryString.split("&"):
+        for feature in urllib.unquote(queryString).split("&"):
             feature = feature.strip()
             # omit empty KVPs, e.g. due to optional ampersand after the last
             # KVP in request string (OWS_1-1-0, p.75, sect. 11.2):
