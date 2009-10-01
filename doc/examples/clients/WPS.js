@@ -763,6 +763,7 @@ OpenLayers.WPS = OpenLayers.Class({
         }
 
         if (this.status == "ProcessSucceeded") {
+            pri
             this.statusEvents[this.status](process);
         }
 

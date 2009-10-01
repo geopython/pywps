@@ -144,7 +144,7 @@ class Response:
 
         return dataType
 
-    def printResponse(self,fileDes,isSoap):
+    def printResponse(self,fileDes,isSoap=False):
         """
         print response to file descriptor file descriptor
         can be of type list or file
