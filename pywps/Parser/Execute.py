@@ -351,11 +351,15 @@ class Post(Post):
         attributes["schema"] = complexDataNode.getAttributeNS(
                                         "*","schema")
         for complexDataChildNode in complexDataNode.childNodes:
-            if complexDataChildNode.nodeType == \
+            # CDATA or text and the input value is empty and the Text or
+            # CDATA is not empty
+            if (complexDataChildNode.nodeType == \
                 xml.dom.minidom.Text.nodeType or \
                 complexDataChildNode.nodeType == \
-                xml.dom.minidom.CDATASection.nodeType:
+                xml.dom.minidom.CDATASection.nodeType) and\
+                complexDataChildNode.nodeValue and not attributes["value"]:
                 attributes["value"] = complexDataChildNode.nodeValue
+            # xml input
             elif complexDataChildNode.nodeType == \
                     xml.dom.minidom.Element.nodeType:
                 attributes["value"] = complexDataChildNode.toxml()
