@@ -158,7 +158,7 @@ OpenLayers.WPS = OpenLayers.Class({
      * Property: timeOut
      * {Integer}, ms
      */
-    timeOut: 5000,
+    timeOut: 10000,
 
     /**
      * Property: statusLocation
@@ -762,13 +762,8 @@ OpenLayers.WPS = OpenLayers.Class({
             this.parseProcessFailed(process,dom);
         }
 
-        if (this.status == "ProcessSucceeded") {
-            pri
-            this.statusEvents[this.status](process);
-        }
-
-        this.onStatusChanged(this.status,process);
         this.statusEvents[this.status].apply(this.scope,[process]);
+        this.onStatusChanged(this.status,process);
         
         if (this.status != "ProcessFailed" && this.status != "ProcessSucceeded") {
             if (this.statusLocation) {
@@ -846,7 +841,7 @@ OpenLayers.WPS = OpenLayers.Class({
         this.status = status;
         this.statusMessage = message;
         this.statusTime = creationTime;
-        this.percentCompleted = (status == "ProcessSucceeded" ? 100 : (percentCompleted ? percentCompleted : 0));
+        this.percentCompleted = percentCompleted;
     },
 
     /**
@@ -915,7 +910,6 @@ OpenLayers.WPS = OpenLayers.Class({
      * To be redefined by the user
      */
     onStarted: function(process) {
-        OpenLayers.Console.log("started");
     },
 
     /**
@@ -939,7 +933,7 @@ OpenLayers.WPS = OpenLayers.Class({
     getProcess: function(identifier) {
         
         for (var i = 0; i < this.processes.length; i++) {
-            if (this.processes[i] && this.processes[i].identifier == identifier) {
+            if (this.processes[i].identifier == identifier) {
                 return this.processes[i];
             }
         }
@@ -952,7 +946,6 @@ OpenLayers.WPS = OpenLayers.Class({
      *
      */
     onException: function (process,code,text) {
-        OpenLayers.Console.log("onException: ", process, code, text);
     },
 
     /**
