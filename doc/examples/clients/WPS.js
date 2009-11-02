@@ -223,6 +223,7 @@ OpenLayers.WPS = OpenLayers.Class({
      * options - {Object}
      */
     initialize: function(url,options) {
+        this.processes =  [];
         OpenLayers.Util.extend(this, options);
 
         this.getCapabilitiesUrlGet = url;
@@ -635,6 +636,7 @@ OpenLayers.WPS = OpenLayers.Class({
      * identifier
      */
     execute: function(identifier) {
+
         if(this.executeUrlPost) {
             this.executePost(identifier);
         }
@@ -773,6 +775,12 @@ OpenLayers.WPS = OpenLayers.Class({
                                 "failure: OpenLayers.WPS.instances["+this.id+"].onException, "+
                                 "scope: OpenLayers.WPS.instances["+this.id+"]})", this.timeOut);
             }
+        }
+        else {
+            for (var inst in OpenLayers.WPS.instances) {
+                OpenLayers.WPS.instances[inst] = null;
+            }
+            OpenLayers.WPS.instances = [];
         }
     },
 
@@ -1115,6 +1123,16 @@ OpenLayers.WPS.Process = OpenLayers.Class({
      * options   {Object}
      */
     initialize: function(options) {
+        this.identifier=  null;
+        this.title= null;
+        this.abstract= null;
+        this.inputs = [];
+        this.exception = [];
+        this.outputs = [];
+        this.metadata= {};
+        this.version= null;
+        this.status= false;
+        this.wps= null;
         OpenLayers.Util.extend(this, options);
     },
 
