@@ -49,7 +49,7 @@ class Post(Post):
         language  = None
         identifiers = []
         identifierNode = None
-        dataInputs = None
+        dataInputs = []
 
         #
         # Mandatory options
@@ -197,6 +197,7 @@ class Post(Post):
 
         parsedDataInputs = []
 
+        import sys
         for inputNode in inputsNode.getElementsByTagNameNS(self.nameSpace,
                                                                 "Input"):
             # input Identifier
@@ -206,7 +207,6 @@ class Post(Post):
             except (IndexError, AttributeError):
                 raise self.wps.exceptions.NoApplicableCode(
                                               "Identifier for input not set")
-
             parsedDataInputs.append({"identifier":identifier,"value":None,
                 "attributes":{}})
 
@@ -220,7 +220,8 @@ class Post(Post):
                 attributes = self.parseReferenceDataInput(dataTypeNode)
                 attributes["identifier"] = identifier
                 parsedDataInputs[-1] = attributes
-            except IndexError:
+            except IndexError,e:
+
                 dataTypeNode = inputNode.getElementsByTagNameNS(
                                                 self.nameSpace,"Data")[0]
                 attributes =self.parseDataInput(dataTypeNode)

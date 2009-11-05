@@ -25,7 +25,7 @@ WPS Execute request handler
 
 from Response import Response
 from htmltmpl import TemplateError
-import time,os,sys,tempfile,re,types, ConfigParser
+import time,os,sys,tempfile,re,types, ConfigParser, base64
 from shutil import copyfile as COPY
 from shutil import rmtree as RMTREE
 
@@ -749,9 +749,13 @@ class Execute(Response):
 
         # CDATA section in output
         if output.format["mimeType"].find("text") < 0:
-            complexOutput["cdata"] = 1
-        # set output value
-        complexOutput["complexdata"] = open(output.value,"r").read()
+            #complexOutput["cdata"] = 1
+            os.rename(output.value, output.value+".binary")
+            base64.encode(open(output.value+".binary"),open(output.value,"w"))
+            complexOutput["complexdata"] = open(output.value,"r").read()
+        else:
+            # set output value
+            complexOutput["complexdata"] = open(output.value,"r").read()
 
         # remove <?xml version= ... part from beginning of some xml
         # documents

@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import types,re
+import types,re, magic, base64
 from pywps import Exceptions
 
 class Input:
@@ -333,6 +333,22 @@ class ComplexInput(Input):
         fout.write(data)
         fout.close()
 
+        # load the mimetypes
+        ms = magic.open(magic.MAGIC_MIME)
+        ms.load()
+        
+        # check, if the file is binary or not
+        if self.format["mimeType"].find("text") == -1:
+            # it *should* be binary, is the file really binary?
+            # if so, convert it to binary using base64
+            if ms.open(fout.name).find("text") > -1: 
+                sys.rename(fout.name,fout.name+".base64")
+                base64.decode(open(fout.name+".base64"),
+                              open(fout.name,"w"))
+
+        # check the mimeType again
+        self.checkMimeType(ms.open(fout.name))
+            
         resp = self._setValueWithOccurence(self.value, outputName)
         if resp:
             return resp
@@ -399,6 +415,11 @@ class ComplexInput(Input):
                         inputUrl)
         fout.close()
 
+        # check the mimetypes
+        ms = magic.open(magic.MAGIC_MIME)
+        ms.load()
+        self.checkMimeType(ms.open(fout.name))
+
         resp = self._setValueWithOccurence(self.value, outputName)
         if resp:
             return resp
@@ -412,6 +433,24 @@ class ComplexInput(Input):
         why {String} Error code
         """
         pass
+
+    def checkMimeType(self,mimeType):
+        """Check, if the given mimetype is in self.formats
+
+        Parameters:
+        mimeType {String}
+        """
+        mimeTypes = "";
+        for format in self.formats:
+            mimeTypes += format["mimeType"] + " ";
+            if ms.file(fout.name()) in format["mimeType"]:
+                self.format = format
+                return
+        if self.format == None:
+            self.onProblem("InvalidParameterValue","Files mimeType ["+
+                ms.file(fout.name())" does not correspond with allowed
+                mimeType values, which can be on from ["+ mimeTypes+"]")
+
 
     def onMaxFileSizeExceeded(self, why):
         """Empty method, called, when there was any problem with the input.
