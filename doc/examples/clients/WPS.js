@@ -771,7 +771,7 @@ OpenLayers.WPS = OpenLayers.Class({
             if (this.statusLocation) {
                 
                 window.setTimeout("OpenLayers.Request.GET({url:OpenLayers.WPS.instances["+this.id+"].statusLocation,"+
-                                "params:{},success: OpenLayers.WPS.instances["+this.id+"].parseExecute,"+
+                                "params:{salt:"+Math.random()+"},success: OpenLayers.WPS.instances["+this.id+"].parseExecute,"+
                                 "failure: OpenLayers.WPS.instances["+this.id+"].onException, "+
                                 "scope: OpenLayers.WPS.instances["+this.id+"]})", this.timeOut);
             }
