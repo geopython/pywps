@@ -347,8 +347,8 @@ class ComplexInput(Input):
                     base64.decode(open(fout.name+".base64"),
                                 open(fout.name,"w"))
                 except:
-                    self.onProblem("NoApplicableCode","Could not convert
-                            text input to binary using base64 encoding.")
+                    self.onProblem("NoApplicableCode",
+                    "Could not convert text input to binary using base64 encoding.")
 
                 
 
