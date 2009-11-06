@@ -343,8 +343,14 @@ class ComplexInput(Input):
             # if so, convert it to binary using base64
             if ms.open(fout.name).find("text") > -1: 
                 sys.rename(fout.name,fout.name+".base64")
-                base64.decode(open(fout.name+".base64"),
-                              open(fout.name,"w"))
+                try:
+                    base64.decode(open(fout.name+".base64"),
+                                open(fout.name,"w"))
+                except:
+                    self.onProblem("NoApplicableCode","Could not convert
+                            text input to binary using base64 encoding.")
+
+                
 
         # check the mimeType again
         self.checkMimeType(ms.open(fout.name))
