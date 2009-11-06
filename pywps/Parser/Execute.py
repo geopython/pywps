@@ -90,15 +90,18 @@ class Post(Post):
             self.wps.inputs["responseform"] = self.parseResponseForm(
                                                         responseFormNode)
         except IndexError:
-            self.wps.inputs["responseform"] = None
+            self.wps.inputs["responseform"] = {}
 
         # OGC 05-007r7 page 36, Table 49
         # Either responseDocument or rawDataOutput should be specified, not both
-        if not self.wps.inputs.has_key('responseform') or\
-           (not self.wps.inputs["responseform"].has_key("rawdataoutput") and \
-            not self.wps.inputs["responseform"].has_key("responsedocument")):
+        if self.wps.inputs.has_key('responseform') and \
+           (self.wps.inputs["responseform"].has_key("rawdataoutput") and \
+            self.wps.inputs["responseform"].has_key("responsedocument")):
             raise self.wps.exceptions.InvalidParameterValue(
                 "Either responseDocument or rawDataOutput should be specified, but not both")
+        else:
+            self.wps.inputs["responseform"]["responsedocument"] = {}
+            self.wps.inputs["responseform"]["rawdataoutput"] = {}
 
     def parseResponseForm(self,responseFormNode):
         """ Parse requested response form node """
@@ -197,7 +200,6 @@ class Post(Post):
 
         parsedDataInputs = []
 
-        import sys
         for inputNode in inputsNode.getElementsByTagNameNS(self.nameSpace,
                                                                 "Input"):
             # input Identifier
@@ -212,7 +214,6 @@ class Post(Post):
 
             # Title and Abstract are only mandatory and not necessary:
             # skipping, not supported yet
-
             # formchoice
             try:
                 dataTypeNode = inputNode.getElementsByTagNameNS(
@@ -351,13 +352,13 @@ class Post(Post):
                                         "*","encoding")
         attributes["schema"] = complexDataNode.getAttributeNS(
                                         "*","schema")
+        attributes["value"] = None
+
         for complexDataChildNode in complexDataNode.childNodes:
             # CDATA or text and the input value is empty and the Text or
             # CDATA is not empty
-            if (complexDataChildNode.nodeType == \
-                xml.dom.minidom.Text.nodeType or \
-                complexDataChildNode.nodeType == \
-                xml.dom.minidom.CDATASection.nodeType) and\
+            if (complexDataChildNode.nodeType == xml.dom.minidom.Text.nodeType or \
+                complexDataChildNode.nodeType == xml.dom.minidom.CDATASection.nodeType) and\
                 complexDataChildNode.nodeValue and not attributes["value"]:
                 attributes["value"] = complexDataChildNode.nodeValue
             # xml input

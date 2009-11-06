@@ -25,7 +25,7 @@ WPS Execute request handler
 
 from Response import Response
 from htmltmpl import TemplateError
-import time,os,sys,tempfile,re,types, ConfigParser, base64
+import time,os,sys,tempfile,re,types, ConfigParser, base64, traceback
 from shutil import copyfile as COPY
 from shutil import rmtree as RMTREE
 
@@ -88,6 +88,7 @@ class Execute(Response):
         try:
             self.template = self.templateManager.prepare(self.templateFile)
         except TemplateError,e:
+            traceback.print_exc(file=sys.stderr)
             self.cleanEnv()
             raise self.wps.exceptions.NoApplicableCode(e.__str__())
 
@@ -121,6 +122,7 @@ class Execute(Response):
                 try:
                     self.statusFiles.append(open(self.statusFileName,"w"))
                 except Exception, e:
+                    traceback.print_exc(file=sys.stderr)
                     self.cleanEnv()
                     raise self.wps.exceptions.NoApplicableCode(e.__str__())
                 self.storeRequired = True
@@ -202,6 +204,7 @@ class Execute(Response):
                         pass
 
                 except OSError, e:
+                    traceback.print_exc(file=sys.stderr)
                     raise self.wps.exceptions.NoApplicableCode("Fork failed: %d (%s)\n" % (e.errno, e.strerror) )
 
             # this is child process, parent is already gone away
@@ -232,9 +235,10 @@ class Execute(Response):
                      statusMessage=e.value,
                      exceptioncode=e.code,
                      locator=e.locator)
-
         except Exception,e:
+
             # set status to failed
+            traceback.print_exc(file=sys.stderr)
             self.promoteStatus(self.failed,
                     statusMessage=str(e),
                     exceptioncode="NoApplicableCode")
@@ -278,6 +282,7 @@ class Execute(Response):
 
         except Exception,e:
             # set status to failed
+            traceback.print_exc(file=sys.stderr)
             self.promoteStatus(self.failed,
                     statusMessage=str(e),
                     exceptioncode="NoApplicableCode")
@@ -307,6 +312,7 @@ class Execute(Response):
 
             except Exception, e:
                 self.cleanEnv()
+                traceback.print_exc(file=sys.stderr)
                 raise self.wps.exceptions.NoApplicableCode(
                 "Could not import process [%s]: %s" %\
                         (self.wps.inputs["identifier"], e))
@@ -436,6 +442,7 @@ class Execute(Response):
             # execute
             processError = self.process.execute()
             if processError:
+                traceback.print_exc(file=sys.stderr)
                 raise self.wps.exceptions.NoApplicableCode(
                         "Failed to execute WPS process [%s]: %s" %\
                                 (self.process.identifier,processError))
@@ -450,6 +457,7 @@ class Execute(Response):
             raise e
 
         except Exception,e:
+            traceback.print_exc(file=sys.stderr)
             raise self.wps.exceptions.NoApplicableCode(
                     "Failed to execute WPS process [%s]: %s" %\
                             (self.process.identifier,e))
@@ -729,6 +737,7 @@ class Execute(Response):
                 templateOutputs.append(templateOutput);
             except Exception,e:
                 self.cleanEnv()
+                traceback.print_exc(file=sys.stderr)
                 raise self.wps.exceptions.NoApplicableCode(
                         "Process executed. Failed to build final response for output [%s]: %s" % (identifier,e))
         self.templateProcessor.set("Outputs",templateOutputs)
@@ -906,6 +915,7 @@ class Execute(Response):
                     raise Exception("Location [%s] does not exist" % self.process.grassLocation)
         except Exception,e:
             self.cleanEnv()
+            traceback.print_exc(file=sys.stderr)
             raise self.wps.exceptions.NoApplicableCode("Could not init GRASS: %s" % e)
 
         return
@@ -976,8 +986,10 @@ class Execute(Response):
         except ConfigParser.NoOptionError,e:
             pass
         except IOError,e:
+            traceback.print_exc(file=sys.stderr)
             raise self.wps.exceptions.NoApplicableCode("Logfile IOError: %s" % e.__str__())
         except Exception, e:
+            traceback.print_exc(file=sys.stderr)
             raise self.wps.exceptions.NoApplicableCode("Logfile error: %s" % e.__str__())
 
 

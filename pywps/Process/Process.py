@@ -25,6 +25,7 @@ import subprocess
 import time
 import types
 import sys,os
+import traceback
 
 class Status:
     """
@@ -461,6 +462,7 @@ class WPSProcess:
                 stdin=subprocessstdin, stdout=subprocessstdout,
                 stderr=subprocessstderr)
         except Exception,e :
+            traceback.print_exc(file=sys.stderr)
             self.failed = True
             raise Exception("Could not perform command [%s]: %s" % (cmd,e))
 

@@ -31,6 +31,8 @@ class Input:
     maxOccurs = None
     type = None
     value = None
+    ms = None # magic mimeTypes
+
 
     def __init__(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=1,maxOccurs=1,type=None):
@@ -62,6 +64,7 @@ class Input:
         self.maxOccurs = maxOccurs
         self.type = type
         self.value = None
+
         return
     
     def setValue(self,input):
@@ -294,6 +297,10 @@ class ComplexInput(Input):
 
         self.formats = formats
         self.format = self.formats[0]
+
+        self.ms = magic.open(magic.MAGIC_MIME)
+        self.ms.load()
+
         return
 
     def setValue(self, input):
@@ -320,9 +327,10 @@ class ComplexInput(Input):
         data {String} the data, which should be stored
         """
         import tempfile
-        from os import curdir
+        from os import curdir, rename
 
         outputName = tempfile.mktemp(prefix="pywpsInput",dir=curdir)
+        fout = None
         try:
             fout=open(outputName,'wb')
         except IOError, what:
@@ -333,16 +341,13 @@ class ComplexInput(Input):
         fout.write(data)
         fout.close()
 
-        # load the mimetypes
-        ms = magic.open(magic.MAGIC_MIME)
-        ms.load()
         
         # check, if the file is binary or not
         if self.format["mimeType"].find("text") == -1:
             # it *should* be binary, is the file really binary?
             # if so, convert it to binary using base64
-            if ms.open(fout.name).find("text") > -1: 
-                sys.rename(fout.name,fout.name+".base64")
+            if self.ms.file(fout.name).find("text") > -1: 
+                rename(fout.name,fout.name+".base64")
                 try:
                     base64.decode(open(fout.name+".base64"),
                                 open(fout.name,"w"))
@@ -353,7 +358,7 @@ class ComplexInput(Input):
                 
 
         # check the mimeType again
-        self.checkMimeType(ms.open(fout.name))
+        self.checkMimeType(fout.name,self.ms.file(fout.name))
             
         resp = self._setValueWithOccurence(self.value, outputName)
         if resp:
@@ -392,6 +397,7 @@ class ComplexInput(Input):
 
         outputName = tempfile.mktemp(prefix="pywpsInput",dir=curdir)
 
+        fout = None
         try:
             fout=open(outputName,'wb')
         except IOError, what:
@@ -422,9 +428,7 @@ class ComplexInput(Input):
         fout.close()
 
         # check the mimetypes
-        ms = magic.open(magic.MAGIC_MIME)
-        ms.load()
-        self.checkMimeType(ms.open(fout.name))
+        self.checkMimeType(fout.name,self.ms.open(fout.name))
 
         resp = self._setValueWithOccurence(self.value, outputName)
         if resp:
@@ -440,21 +444,22 @@ class ComplexInput(Input):
         """
         pass
 
-    def checkMimeType(self,mimeType):
+    def checkMimeType(self,fileName,mimeType):
         """Check, if the given mimetype is in self.formats
 
         Parameters:
+        fileName {String}
         mimeType {String}
         """
         mimeTypes = "";
         for format in self.formats:
             mimeTypes += format["mimeType"] + " ";
-            if ms.file(fout.name()) in format["mimeType"]:
+            if self.ms.file(fileName) in format["mimeType"]:
                 self.format = format
                 return
         if self.format == None:
             self.onProblem("InvalidParameterValue",
-                "Files mimeType ["+ ms.file(fout.name()) +
+                "Files mimeType ["+ self.ms.file(fileName) +
                 " does not correspond with allowed mimeType values, which can be on from ["+ mimeTypes+"]")
 
 
@@ -558,6 +563,7 @@ class Output:
     type = None
     asReference = None
     value = None
+    ms = None # magic mimeTypes
 
     def __init__(self,identifier,title,abstract=None,
                 metadata=[],type=None, asReference=False):
@@ -679,6 +685,10 @@ class ComplexOutput(Output):
 
         self.formats = formats
         self.format = formats[0]
+
+        self.ms = magic.open(magic.MAGIC_MIME)
+        self.ms.load()
+
         return
 
     def setValue(self, value):
