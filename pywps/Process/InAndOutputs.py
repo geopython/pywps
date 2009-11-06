@@ -453,9 +453,9 @@ class ComplexInput(Input):
                 self.format = format
                 return
         if self.format == None:
-            self.onProblem("InvalidParameterValue","Files mimeType ["+
-                ms.file(fout.name())" does not correspond with allowed
-                mimeType values, which can be on from ["+ mimeTypes+"]")
+            self.onProblem("InvalidParameterValue",
+                "Files mimeType ["+ ms.file(fout.name()) +
+                " does not correspond with allowed mimeType values, which can be on from ["+ mimeTypes+"]")
 
 
     def onMaxFileSizeExceeded(self, why):
