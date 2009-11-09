@@ -99,22 +99,22 @@ class Post(Post):
             self.wps.inputs["responseform"].has_key("responsedocument")):
             raise self.wps.exceptions.InvalidParameterValue(
                 "Either responseDocument or rawDataOutput should be specified, but not both")
-        else:
-            self.wps.inputs["responseform"]["responsedocument"] = {}
-            self.wps.inputs["responseform"]["rawdataoutput"] = {}
+        if not self.wps.inputs["responseform"].has_key("rawdataoutput"):
+               self.wps.inputs["responseform"]["rawdataoutput"] = {}
+        if not self.wps.inputs["responseform"].has_key("responsedocument"):
+               self.wps.inputs["responseform"]["responsedocument"] = {}
+        return
 
     def parseResponseForm(self,responseFormNode):
         """ Parse requested response form node """
 
         form = {}
-        form["responsedocument"] = {}
-        form["rawdataoutput"] = {}
 
         # ResponseDocument
         try:
+            form["responsedocument"] = {}
             responseDocumentNode = responseFormNode.getElementsByTagNameNS(
                                     self.nameSpace, "ResponseDocument")[0]
-            form["responsedocument"] = {}
 
             # store
             store = False
