@@ -428,7 +428,7 @@ class ComplexInput(Input):
         fout.close()
 
         # check the mimetypes
-        self.checkMimeType(fout.name,self.ms.open(fout.name))
+        self.checkMimeType(fout.name,self.ms.file(fout.name))
 
         resp = self._setValueWithOccurence(self.value, outputName)
         if resp:
