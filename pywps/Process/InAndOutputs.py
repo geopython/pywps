@@ -33,7 +33,6 @@ class Input:
     value = None
     ms = None # magic mimeTypes
 
-
     def __init__(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=1,maxOccurs=1,type=None):
         """Input initialization
@@ -642,10 +641,14 @@ class ComplexOutput(Output):
     """Complex value output"""
     formats = None
     format = None
+    projection = None
+    bbox = None
+    width = None
+    height = None
 
     def __init__(self,identifier,title,abstract=None,
                 metadata=[], formats=[{"mimeType":"text/xml"}],
-                asReference=False):
+                asReference=False, projection=None, bbox=None):
         """Complex output
 
         Mandatory parameters:
@@ -668,6 +671,10 @@ class ComplexOutput(Output):
         asReference {Boolean} whether this output will be given back as
                 reference or as file
                 default: False
+        projection {String} proj4 text, used for the proj init parameter,
+                e.g. "epsg:4326", used for mapserver
+        bbox {Tupple} of 4 elements (minx,miny,maxx,maxy), used for
+                mapserver
         """
         Output.__init__(self,identifier,title,abstract=None,
                 metadata=[],type="ComplexValue", asReference=asReference)
@@ -685,6 +692,9 @@ class ComplexOutput(Output):
 
         self.formats = formats
         self.format = formats[0]
+        
+        self.projection = projection
+        self.bbox = bbox
 
         self.ms = magic.open(magic.MAGIC_MIME)
         self.ms.load()
@@ -706,6 +716,7 @@ class ComplexOutput(Output):
         else:
             raise Exception("Output type '%s' of '%s' output not known" %\
                     (type(value),self.identifier))
+
 
 class BoundingBoxOutput(Output):
     crss = None

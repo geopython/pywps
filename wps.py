@@ -122,7 +122,7 @@ class WPS:
             restPath= os.getenv("PATH_INFO").split(os.sep)[1:]
         except:
             pass
-        print >>sys.stderr, serverPath, scriptName, restPath
+        self.debug("%s %s %s"% (serverPath, scriptName, restPath))
 
         # decide, which method to use
         # HTTP GET vs. HTTP POST
@@ -256,14 +256,14 @@ class WPS:
             value = True
         return value
 
-    def debug(self,debug):
+    def debug(self,debug,code="Debug"):
         """Print debug argument to standard error
         """
 
         dbg = self.getConfigValue("server","debug")
         if dbg == True or (type(dbg) == type("") and \
                 dbg.lower() == "true") or int(dbg) != 0:
-            print >>sys.stderr, "PyWPS Debug: %s" % debug.__str__()[0:160],
+            print >>sys.stderr, "PyWPS %s: %s" % (code,debug.__str__()[0:160]),
             if len(debug.__str__()) > 160:
                 print >>sys.stderr, "...",
             print >>sys.stderr, "\n"

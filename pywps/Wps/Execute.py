@@ -29,6 +29,11 @@ import time,os,sys,tempfile,re,types, ConfigParser, base64, traceback
 from shutil import copyfile as COPY
 from shutil import rmtree as RMTREE
 
+try:
+    from mapscript import *
+except:
+    pass
+
 class Execute(Response):
     """
     This class performs the Execute request of WPS specification
@@ -74,6 +79,9 @@ class Execute(Response):
 
     rawDataOutput = None
     logFile = None
+
+    mapObj = None
+    mapFileName = None
 
 
     def __init__(self,wps):
@@ -255,8 +263,45 @@ class Execute(Response):
             # if succeeded
             if self.status == self.succeeded:
 
+                # mapscript support?
+                if mapObj:
+                    self.mapObj = mapObj()
+                    self.mapObj.setExtent(-180,-90,180,90)
+                    self.mapObj.setProjection("+init=epsg:4326")
+                    self.mapObj.name = "%s-%s"%(self.process.identifier,self.pid)
+                    self.mapObj.setMetaData("ows_title", self.wps.getConfigValue("wps","title"))
+                    self.mapObj.setMetaData("wms_abstract", self.wps.getConfigValue("wps","abstract"))
+                    self.mapObj.setMetaData("wcs_abstract", self.wps.getConfigValue("wps","abstract"))
+                    self.mapObj.setMetaData("wfs_abstract", self.wps.getConfigValue("wps","abstract"))
+                    self.mapObj.setMetaData("ows_keywordlist", self.wps.getConfigValue("wps","keywords"))
+                    self.mapObj.setMetaData("ows_fees", self.wps.getConfigValue("wps","fees"))
+                    self.mapObj.setMetaData("ows_accessconstraints", self.wps.getConfigValue("wps","constraints"))
+                    self.mapObj.setMetaData("ows_contactorganization", self.wps.getConfigValue("provider","providerName"))
+                    self.mapObj.setMetaData("ows_contactperson", self.wps.getConfigValue("provider","individualName"))
+                    self.mapObj.setMetaData("ows_contactposition", self.wps.getConfigValue("provider","positionName"))
+                    phone =  self.wps.getConfigValue("provider","phoneVoice")
+                    if phone:
+                        self.mapObj.setMetaData("ows_contactvoicetelephone", self.wps.getConfigValue("provider","phoneVoice"))
+                    phone = self.wps.getConfigValue("provider","phoneFacsimile")
+                    if phone:
+                        self.mapObj.setMetaData("ows_contactfacsimiletelephone", self.wps.getConfigValue("provider","phoneFacsimile"))
+                    self.mapObj.setMetaData("ows_address", self.wps.getConfigValue("provider","deliveryPoint"))
+                    self.mapObj.setMetaData("ows_city", self.wps.getConfigValue("provider","city"))
+                    self.mapObj.setMetaData("ows_country", self.wps.getConfigValue("provider","country"))
+                    self.mapObj.setMetaData("ows_postcode", self.wps.getConfigValue("provider","postalCode"))
+                    self.mapObj.setMetaData("ows_contactelectronicmailaddress", self.wps.getConfigValue("provider","electronicMailAddress"))
+                    self.mapObj.setMetaData("ows_role", self.wps.getConfigValue("provider","role"))
+
+                    self.mapFileName = os.path.join(self.wps.getConfigValue("server","outputPath"),"wps"+str(self.pid)+".map")
+
+                    self.mapObj.setMetaData("wms_onlineresource",self.wps.getConfigValue("mapserver","mapserveraddress")+"?map="+self.mapFileName)
+                else:
+                    self.wps.debug("GDAL could not be loaded, mapserver not supported","Warning")
+
                 # fill outputs
                 self.processOutputs()
+                self.mapObj.save(self.mapFileName)
+
 
                 # Response document
                 self.response = self.templateProcessor.process(self.template)
@@ -735,6 +780,7 @@ class Execute(Response):
                         templateOutput = self._bboxOutput(output,templateOutput)
 
                 templateOutputs.append(templateOutput);
+
             except Exception,e:
                 self.cleanEnv()
                 traceback.print_exc(file=sys.stderr)
@@ -789,6 +835,7 @@ class Execute(Response):
     def _asReferenceOutput(self,templateOutput, output):
 
         # copy the file to output directory
+        # literal value
         if output.type == "LiteralValue":
             f = open(os.path.join(
                         self.wps.getConfigValue("server","outputPath"),
@@ -797,6 +844,7 @@ class Execute(Response):
             f.close()
             templateOutput["reference"] = self.wps.getConfigValue("server","outputUrl")+\
                     "/"+output.identifier+"-"+str(self.pid)
+        # complex value
         else:
             outName = output.value
             outSuffix = outName.split(".")[len(outName.split("."))-1]
@@ -806,11 +854,97 @@ class Execute(Response):
                 COPY(output.value, outFile)
             templateOutput["reference"] = \
                     self.wps.getConfigValue("server","outputUrl")+"/"+outName
+            output.value = outFile
+
+            # mapscript supported
+            if self.mapObj:
+
+                # get projection and bounding box
+                if not output.projection or not output.bbox:
+                    try:
+                        from osgeo import gdal
+                        dataset = gdal.Open(output.value)
+                        if not output.projection:
+                            output.projection = dataset.GetProjection()
+                        if not output.projection:
+                            output.projection = self.mapObj.getProjection()
+                        if not output.bbox:
+                            geotransform = dataset.GetGeoTransform()
+                            output.bbox = (geotransform[0],
+                                        geotransform[3]+geotransform[5]*dataset.RasterYSize,
+                                        geotransform[0]+geotransform[1]*dataset.RasterXSize,
+                                        geotransform[3])
+                            output.width = dataset.RasterXSize
+                            output.height = dataset.RasterYSize
+
+                        myLayerObj = layerObj(self.mapObj)
+                        myLayerObj.setMetaData("wms_title", output.title)
+                        myLayerObj.setMetaData("wcs_label", output.title)
+                        myLayerObj.setMetaData("wfs_title", output.title)
+                        myLayerObj.group = self.process.identifier
+                        myLayerObj.setMetaData("wms_group_title",self.process.title)
+                        if self.process.abstract:
+                            myLayerObj.setMetaData("group_abstract",self.process.abstract)
+                        if output.abstract:
+                            myLayerObj.setMetaData("wms_abstract", output.abstract)
+                            myLayerObj.setMetaData("wcs_abstract", output.abstract)
+                            myLayerObj.setMetaData("wfs_abstract", output.abstract)
+                        myLayerObj.data = output.value
+                        myLayerObj.name = output.identifier
+
+                        if output.projection:
+                            myLayerObj.setProjection("epsg:4326")
+                        if output.bbox:
+                            myLayerObj.setExtent(output.bbox[0],output.bbox[1],output.bbox[2],output.bbox[3])
+
+                        # set the output to be WMS
+                        if output.format["mimeType"].find("tiff") == -1:
+                            templateOutput["reference"] = self._getMapServerWMS(output)
+                            myLayerObj.type = MS_LAYER_RASTER
+                        # make it WFS
+                        elif output.format["mimeType"].find("text")  > -1:
+                            templateOutput["reference"] = self._getMapServerWFS(output)
+                        # make it WCS
+                        else:
+                            myLayerObj.type = MS_LAYER_RASTER
+                            templateOutput["reference"] = self._getMapServerWCS(output)
+                    except ImportError:
+                        self.wps.debug("GDAL could not be loaded, mapserver not supported","Warning")
+
+ 
         templateOutput["mimetype"] = output.format["mimeType"]
         templateOutput["schema"] = output.format["encoding"]
         templateOutput["encoding"] = output.format["schema"]
 
         return templateOutput
+
+    def _getMapServerWMS(self,output):
+        """Get the URL for mapserver WMS request of the output"""
+        import urllib2
+        return urllib2.quote(self.wps.getConfigValue("mapserver","mapserveraddress")+
+                "?map="+self.mapFileName+
+                "&SERVICE=WMS"+ "&REQUEST=GetMap"+ "&VERSION=1.3.0"+
+                "&LAYERS="+output.identifier+"&STYLES=default&SRS="+output.projection.replace("+init=","")+
+                "&BBOX=%s,%s,%s,%s&"%(output.bbox[0],output.bbox[1],output.bbox[2],output.bbox[3])+
+                "&WIDTH=%s"%output.width+"&HEIGHT=%s"%output.height+"&FORMAT=%s"%output.format["mimeType"])
+
+    def _getMapServerWCS(self,output):
+        """Get the URL for mapserver WCS request of the output"""
+        import urllib2
+        return urllib2.quote(self.wps.getConfigValue("mapserver","mapserveraddress")+
+                "?map="+self.mapFileName+
+                "&SERVICE=WCS"+ "&REQUEST=GetCoverage"+ "&VERSION=1.0.0"+
+                "&COVERAGE="+output.identifier+"&CRS="+output.projection.replace("+init=","")+
+                "&BBOX=%s,%s,%s,%s&"%(output.bbox[0],output.bbox[1],output.bbox[2],output.bbox[3])+
+                "&WIDTH=%s"%output.width+"&HEIGHT=%s"%output.height+"&FORMAT=%s"%output.format["mimeType"])
+
+    def _getMapServerWFS(self,output):
+        """Get the URL for mapserver WFS request of the output"""
+        import urllib2
+        return urllib2.quote(self.wps.getConfigValue("mapserver","mapserveraddress")+
+                "?map="+self.mapFileName+
+                "&SERVICE=WFS"+ "&REQUEST=GetFeature"+ "&VERSION=1.0.0"+
+                "&TYPENAME="+output.identifier)
 
     def _samefile(self, src, dst):
         # Macintosh, Unix.
@@ -926,7 +1060,7 @@ class Execute(Response):
         """
         os.chdir(self.curdir)
         def onError(*args):
-            print >>self.logFile, "PYWPS Error: Could not remove temporary dir"
+            self.wps.debug("Could not remove temporary dir","Error")
 
         for i in range(len(self.dirsToBeRemoved)):
             dir = self.dirsToBeRemoved[0]
