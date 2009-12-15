@@ -53,7 +53,7 @@ class Response:
 
         self.templateVersionDirectory = self.wps.inputs["version"].replace(".","_")
 
-	if os.name == "nt":
+	if os.name == "nt" or os.name == "java":
 		self.precompile = 0
 
         self.templateManager = TemplateManager(precompile = self.precompile,
