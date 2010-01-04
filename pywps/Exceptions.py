@@ -56,7 +56,7 @@ class WPSException(Exception):
 
     def __str__(self):
 
-        print  "Content-type: text/xml\n\n"
+        print  "Content-type: text/xml\n"
         response= self.document.toprettyxml(indent='\t', newl='\n', encoding="utf-8")
         if pywps.Soap.soap == True:
             soapCls = SOAP()
