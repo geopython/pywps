@@ -137,6 +137,17 @@ class GetCapabilities(Response):
         else:
            self.templateProcessor.set("address", 0)
 
+        # other ContactInfo
+        if self.wps.getConfigValue("provider","role"):
+            self.templateProcessor.set("role",
+                        self.wps.getConfigValue("provider","role"))
+        if self.wps.getConfigValue("provider","hoursofservice"):
+            self.templateProcessor.set("hoursofservice",
+                        self.wps.getConfigValue("provider","hoursofservice"))
+        if self.wps.getConfigValue("provider","contactinstructions"):
+            self.templateProcessor.set("contactinstructions",
+                        self.wps.getConfigValue("provider","contactinstructions"))
+
         # OperationsMetadata
         self.templateProcessor.set("Operations",
              [{"operation":"GetCapabilities",

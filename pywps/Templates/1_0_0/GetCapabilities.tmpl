@@ -68,7 +68,19 @@
                                         </TMPL_IF>
 				</ows:Address>
                                 </TMPL_IF>
+                                <TMPL_IF providersite>
+				<ows:OnlineResource xlink:href="<TMPL_VAR providersite>"/>
+                                </TMPL_IF>
+                                <TMPL_IF hoursofservice>
+				<ows:HoursOfService><TMPL_VAR hoursofservice></ows:HoursOfService>
+                                </TMPL_IF>
+                                <TMPL_IF contactinstructions>
+				<ows:ContactInstructions><TMPL_VAR contactinstructions></ows:ContactInstructions>
+                                </TMPL_IF>
 			</ows:ContactInfo>
+                        <TMPL_IF role>
+			<ows:Role><TMPL_VAR role></ows:Role>
+                        </TMPL_IF>
 		</ows:ServiceContact>
 	</ows:ServiceProvider>
 	<ows:OperationsMetadata>
