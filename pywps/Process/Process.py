@@ -330,7 +330,8 @@ class WPSProcess:
     # --------------------------------------------------------------------
 
     def addComplexOutput(self,identifier,title,abstract=None,
-            metadata=[],formats=[{"mimeType":"text/xml"}]):
+            metadata=[],formats=[{"mimeType":"text/xml"}],
+            useMapscript=False):
         """Add complex output to this process
 
         Mandatory parameters:
@@ -353,7 +354,8 @@ class WPSProcess:
         """
 
         self.outputs[identifier] = InAndOutputs.ComplexOutput(identifier=identifier,
-                title=title,abstract=abstract, metadata=metadata, formats=formats)
+                title=title,abstract=abstract, metadata=metadata,
+                formats=formats,useMapscript = useMapscript)
 
         return self.outputs[identifier]
 

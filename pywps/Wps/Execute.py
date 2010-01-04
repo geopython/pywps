@@ -264,43 +264,16 @@ class Execute(Response):
             if self.status == self.succeeded:
 
                 # mapscript support?
-                if mapObj:
-                    self.mapObj = mapObj()
-                    self.mapObj.setExtent(-180,-90,180,90)
-                    self.mapObj.setProjection("+init=epsg:4326")
-                    self.mapObj.name = "%s-%s"%(self.process.identifier,self.pid)
-                    self.mapObj.setMetaData("ows_title", self.wps.getConfigValue("wps","title"))
-                    self.mapObj.setMetaData("wms_abstract", self.wps.getConfigValue("wps","abstract"))
-                    self.mapObj.setMetaData("wcs_abstract", self.wps.getConfigValue("wps","abstract"))
-                    self.mapObj.setMetaData("wfs_abstract", self.wps.getConfigValue("wps","abstract"))
-                    self.mapObj.setMetaData("ows_keywordlist", self.wps.getConfigValue("wps","keywords"))
-                    self.mapObj.setMetaData("ows_fees", self.wps.getConfigValue("wps","fees"))
-                    self.mapObj.setMetaData("ows_accessconstraints", self.wps.getConfigValue("wps","constraints"))
-                    self.mapObj.setMetaData("ows_contactorganization", self.wps.getConfigValue("provider","providerName"))
-                    self.mapObj.setMetaData("ows_contactperson", self.wps.getConfigValue("provider","individualName"))
-                    self.mapObj.setMetaData("ows_contactposition", self.wps.getConfigValue("provider","positionName"))
-                    phone =  self.wps.getConfigValue("provider","phoneVoice")
-                    if phone:
-                        self.mapObj.setMetaData("ows_contactvoicetelephone", self.wps.getConfigValue("provider","phoneVoice"))
-                    phone = self.wps.getConfigValue("provider","phoneFacsimile")
-                    if phone:
-                        self.mapObj.setMetaData("ows_contactfacsimiletelephone", self.wps.getConfigValue("provider","phoneFacsimile"))
-                    self.mapObj.setMetaData("ows_address", self.wps.getConfigValue("provider","deliveryPoint"))
-                    self.mapObj.setMetaData("ows_city", self.wps.getConfigValue("provider","city"))
-                    self.mapObj.setMetaData("ows_country", self.wps.getConfigValue("provider","country"))
-                    self.mapObj.setMetaData("ows_postcode", self.wps.getConfigValue("provider","postalCode"))
-                    self.mapObj.setMetaData("ows_contactelectronicmailaddress", self.wps.getConfigValue("provider","electronicMailAddress"))
-                    self.mapObj.setMetaData("ows_role", self.wps.getConfigValue("provider","role"))
-
-                    self.mapFileName = os.path.join(self.wps.getConfigValue("server","outputPath"),"wps"+str(self.pid)+".map")
-
-                    self.mapObj.setMetaData("wms_onlineresource",self.wps.getConfigValue("mapserver","mapserveraddress")+"?map="+self.mapFileName)
-                else:
-                    self.wps.debug("GDAL could not be loaded, mapserver not supported","Warning")
+                try:
+                    self._initMapscript()
+                except Exception, e:
+                    self.wps.debug("MapScript could not be loaded, mapserver not supported: %s" %e,"Warning")
 
                 # fill outputs
                 self.processOutputs()
-                self.mapObj.save(self.mapFileName)
+
+                if self.mapObj:
+                    self.mapObj.save(self.mapFileName)
 
 
                 # Response document
@@ -856,15 +829,17 @@ class Execute(Response):
                     self.wps.getConfigValue("server","outputUrl")+"/"+outName
             output.value = outFile
 
-            # mapscript supported
-            if self.mapObj:
+            # mapscript supported and the mapserver should be used for this
+            # output
+            # redefine the output 
+            if self.mapObj and output.useMapscript:
 
                 # get projection and bounding box
                 if not output.projection or not output.bbox:
                     try:
-                        from osgeo import gdal
-                        dataset = gdal.Open(output.value)
                         if not output.projection:
+                            from osgeo import gdal
+                            dataset = gdal.Open(output.value)
                             output.projection = dataset.GetProjection()
                         if not output.projection:
                             output.projection = self.mapObj.getProjection()
@@ -1126,4 +1101,38 @@ class Execute(Response):
             traceback.print_exc(file=sys.stderr)
             raise self.wps.exceptions.NoApplicableCode("Logfile error: %s" % e.__str__())
 
+
+    def _initMapscript(self):
+        """Create self.mapObj"""
+
+        self.mapObj = mapObj()
+        self.mapObj.setExtent(-180,-90,180,90)
+        self.mapObj.setProjection("+init=epsg:4326")
+        self.mapObj.name = "%s-%s"%(self.process.identifier,self.pid)
+        self.mapObj.setMetaData("ows_title", self.wps.getConfigValue("wps","title"))
+        self.mapObj.setMetaData("wms_abstract", self.wps.getConfigValue("wps","abstract"))
+        self.mapObj.setMetaData("wcs_abstract", self.wps.getConfigValue("wps","abstract"))
+        self.mapObj.setMetaData("wfs_abstract", self.wps.getConfigValue("wps","abstract"))
+        self.mapObj.setMetaData("ows_keywordlist", self.wps.getConfigValue("wps","keywords"))
+        self.mapObj.setMetaData("ows_fees", self.wps.getConfigValue("wps","fees"))
+        self.mapObj.setMetaData("ows_accessconstraints", self.wps.getConfigValue("wps","constraints"))
+        self.mapObj.setMetaData("ows_contactorganization", self.wps.getConfigValue("provider","providerName"))
+        self.mapObj.setMetaData("ows_contactperson", self.wps.getConfigValue("provider","individualName"))
+        self.mapObj.setMetaData("ows_contactposition", self.wps.getConfigValue("provider","positionName"))
+        phone =  self.wps.getConfigValue("provider","phoneVoice")
+        if phone:
+            self.mapObj.setMetaData("ows_contactvoicetelephone", self.wps.getConfigValue("provider","phoneVoice"))
+        phone = self.wps.getConfigValue("provider","phoneFacsimile")
+        if phone:
+            self.mapObj.setMetaData("ows_contactfacsimiletelephone", self.wps.getConfigValue("provider","phoneFacsimile"))
+        self.mapObj.setMetaData("ows_address", self.wps.getConfigValue("provider","deliveryPoint"))
+        self.mapObj.setMetaData("ows_city", self.wps.getConfigValue("provider","city"))
+        self.mapObj.setMetaData("ows_country", self.wps.getConfigValue("provider","country"))
+        self.mapObj.setMetaData("ows_postcode", self.wps.getConfigValue("provider","postalCode"))
+        self.mapObj.setMetaData("ows_contactelectronicmailaddress", self.wps.getConfigValue("provider","electronicMailAddress"))
+        self.mapObj.setMetaData("ows_role", self.wps.getConfigValue("provider","role"))
+
+        self.mapFileName = os.path.join(self.wps.getConfigValue("server","outputPath"),"wps"+str(self.pid)+".map")
+
+        self.mapObj.setMetaData("wms_onlineresource",self.wps.getConfigValue("mapserver","mapserveraddress")+"?map="+self.mapFileName)
 

@@ -645,10 +645,12 @@ class ComplexOutput(Output):
     bbox = None
     width = None
     height = None
+    useMapscript = False
 
     def __init__(self,identifier,title,abstract=None,
                 metadata=[], formats=[{"mimeType":"text/xml"}],
-                asReference=False, projection=None, bbox=None):
+                asReference=False, projection=None, bbox=None, useMapscript
+                =  False):
         """Complex output
 
         Mandatory parameters:
@@ -698,6 +700,7 @@ class ComplexOutput(Output):
 
         self.ms = magic.open(magic.MAGIC_MIME)
         self.ms.load()
+        self.useMapscript = useMapscript
 
         return
 
