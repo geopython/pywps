@@ -379,7 +379,7 @@ class Post(Post):
         attributes["uom"] = literalDataNode.getAttributeNS(
                                         "*","uom")
         try:
-            attributes["value"] = literalDataNode.firstChild.nodeValue
+            attributes["value"] = (literalDataNode.firstChild.nodeValue).encode("utf-8")
         except:
             attributes["value"] = None
 
