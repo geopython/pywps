@@ -423,7 +423,7 @@ class ComplexInput(Input):
             if size > self.maxFileSize: 
                 self.onProblem("FileSizeExceeded","Maximum file size is "+
                         str(self.maxFileSize/1024/1024)+" MB for input "+
-                        inputUrl)
+                        url)
         fout.close()
 
         # check the mimetypes
