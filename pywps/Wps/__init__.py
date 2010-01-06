@@ -118,9 +118,11 @@ class Request:
             self.processes = pywps.processes
 
         # check, if all required processes are available
+        prc = None
         if self.wps.inputs.has_key("identifier"):
             if type(self.wps.inputs["identifier"]) == type(""):
-                if not self.wps.inputs["identifier"] in self.processes.__all__:
+                prc = self.wps.inputs["identifier"]
+                if not prc in self.processes.__all__:
                     raise self.wps.exceptions.InvalidParameterValue(prc)
             else:
                 for prc in self.wps.inputs["identifier"]:
