@@ -62,7 +62,7 @@ class Post(Post):
 
         # identifier
         try:
-            self.wps.inputs["identifier"] =\
+            self.inputs["identifier"] =\
             firstChild.getElementsByTagNameNS(self.owsNameSpace,"Identifier")[0].firstChild.nodeValue
         except IndexError:
                 raise self.wps.exceptions.MissingParameterValue("Identifier")
@@ -78,32 +78,32 @@ class Post(Post):
         try:
             inputsNode = firstChild.getElementsByTagNameNS(
                                             self.nameSpace,"DataInputs")[0]
-            self.wps.inputs["datainputs"] = self.parseDataInputs(inputsNode)
+            self.inputs["datainputs"] = self.parseDataInputs(inputsNode)
         except IndexError:
-            self.wps.inputs["datainputs"] = None
+            self.inputs["datainputs"] = None
 
         # responseForm
         try:
             responseFormNode = \
                 firstChild.getElementsByTagNameNS(self.nameSpace,
                                                         "ResponseForm")[0]
-            self.wps.inputs["responseform"] = self.parseResponseForm(
+            self.inputs["responseform"] = self.parseResponseForm(
                                                         responseFormNode)
         except IndexError:
-            self.wps.inputs["responseform"] = {}
+            self.inputs["responseform"] = {}
 
         # OGC 05-007r7 page 36, Table 49
         # Either responseDocument or rawDataOutput should be specified, not both
-        if self.wps.inputs.has_key('responseform') and \
-           (self.wps.inputs["responseform"].has_key("rawdataoutput") and \
-            self.wps.inputs["responseform"].has_key("responsedocument")):
+        if self.inputs.has_key('responseform') and \
+           (self.inputs["responseform"].has_key("rawdataoutput") and \
+            self.inputs["responseform"].has_key("responsedocument")):
             raise self.wps.exceptions.InvalidParameterValue(
                 "Either responseDocument or rawDataOutput should be specified, but not both")
-        if not self.wps.inputs["responseform"].has_key("rawdataoutput"):
-               self.wps.inputs["responseform"]["rawdataoutput"] = {}
-        if not self.wps.inputs["responseform"].has_key("responsedocument"):
-               self.wps.inputs["responseform"]["responsedocument"] = {}
-        return
+        if not self.inputs["responseform"].has_key("rawdataoutput"):
+               self.inputs["responseform"]["rawdataoutput"] = {}
+        if not self.inputs["responseform"].has_key("responsedocument"):
+               self.inputs["responseform"]["responsedocument"] = {}
+        return self.inputs
 
     def parseResponseForm(self,responseFormNode):
         """ Parse requested response form node """
@@ -429,7 +429,7 @@ class Get(Get):
 
         # identifier
         if "identifier" in self.unparsedInputs:
-            self.wps.inputs["identifier"] = self.unparsedInputs["identifier"]
+            self.inputs["identifier"] = self.unparsedInputs["identifier"]
         else:
             raise self.wps.exceptions.MissingParameterValue("identifier")
 
@@ -442,63 +442,64 @@ class Get(Get):
 
         # dataInputs
         try:
-            self.wps.inputs["datainputs"] = self.parseDataInputs(
+            self.inputs["datainputs"] = self.parseDataInputs(
                         self.unparsedInputs["datainputs"])
         except KeyError:
-            self.wps.inputs["datainputs"] = {}
+            self.inputs["datainputs"] = {}
 
         # ResponseForm
 
-        self.wps.inputs["responseform"] = {}
+        self.inputs["responseform"] = {}
 
         # ResponseDocument
         try:
-            self.wps.inputs["responseform"]["responsedocument"] = \
+            self.inputs["responseform"]["responsedocument"] = \
                     {"outputs":  self.parseDataInputs(
                                 self.unparsedInputs["responsedocument"])}
         except KeyError:
-            self.wps.inputs["responseform"]["responsedocument"] = {}
+            self.inputs["responseform"]["responsedocument"] = {}
 
         # RawDataOutput
         try:
-            self.wps.inputs["responseform"]["rawdataoutput"] = \
+            self.inputs["responseform"]["rawdataoutput"] = \
                                     self.parseDataInputs(
                                     self.unparsedInputs["rawdataoutput"])
         except KeyError:
-            self.wps.inputs["responseform"]["rawdataoutput"] = {}
+            self.inputs["responseform"]["rawdataoutput"] = {}
 
         # storeExecuteResponse
         if "storeexecuteresponse" in self.unparsedInputs:
             if self.unparsedInputs["storeexecuteresponse"].lower() ==\
                                                                     "true":
-                self.wps.inputs["responseform"]["responsedocument"]["storeexecuteresponse"] = True
+                self.inputs["responseform"]["responsedocument"]["storeexecuteresponse"] = True
             else:
-                self.wps.inputs["responseform"]["responsedocument"]["storeexecuteresponse"] = False
+                self.inputs["responseform"]["responsedocument"]["storeexecuteresponse"] = False
 
         # lineage
         if "lineage" in self.unparsedInputs:
             if self.unparsedInputs["lineage"].lower() == "true":
-                self.wps.inputs["responseform"]["responsedocument"]["lineage"]=\
+                self.inputs["responseform"]["responsedocument"]["lineage"]=\
                                                                         True
             else:
-                self.wps.inputs["responseform"]["responsedocument"]["lineage"]=\
+                self.inputs["responseform"]["responsedocument"]["lineage"]=\
                                                                        False
 
         # status
         if "status" in self.unparsedInputs:
             if self.unparsedInputs["status"].lower() == "true":
-                self.wps.inputs["responseform"]["responsedocument"]["status"]=\
+                self.inputs["responseform"]["responsedocument"]["status"]=\
                                                                         True
             else:
-                self.wps.inputs["responseform"]["responsedocument"]["status"]=\
+                self.inputs["responseform"]["responsedocument"]["status"]=\
                                                                       False
 
         # OGC 05-007r7 page 36, Table 49
         # Either responseDocument or rawDataOutput should be specified, not both
-        if len(self.wps.inputs["responseform"]["rawdataoutput"])>0 and \
-            len(self.wps.inputs["responseform"]["responsedocument"])>0:
+        if len(self.inputs["responseform"]["rawdataoutput"])>0 and \
+            len(self.inputs["responseform"]["responsedocument"])>0:
             raise self.wps.exceptions.InvalidParameterValue(
                 "Either responseDocument or rawDataOutput should be specified, but not both")
+        return self.inputs
 
     def parseDataInputs(self,dataInputs):
         """Parse DataInputs parameter

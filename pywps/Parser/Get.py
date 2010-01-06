@@ -30,7 +30,7 @@
 
 import types
 from string import split
-from pywps.Parser.Parser import Parser
+from pywps.Parser import Parser
 from pywps.Process.Lang import Lang
 import urllib
 
@@ -66,7 +66,7 @@ class Get(Parser):
             # KVP in request string (OWS_1-1-0, p.75, sect. 11.2):
             if not feature == '':
                 if feature.lower() == "wsdl":
-                    self.wps.inputs["wsdl"] = True
+                    self.inputs["wsdl"] = True
                     break
                 else:
                     try:
@@ -83,7 +83,7 @@ class Get(Parser):
                 self.unparsedInputs[key.lower()] = value[:maxInputLength]
 
 
-        if not self.wps.inputs.has_key("wsdl"):
+        if not self.inputs.has_key("wsdl"):
             # check service name
             service = self.checkService()
 
@@ -93,7 +93,7 @@ class Get(Parser):
             # parse the request
             self.requestParser.parse(self.unparsedInputs)
 
-        return
+        return self.inputs
 
     def checkRequestType(self):
         """Find requested request type and import given request parser."""
@@ -107,17 +107,17 @@ class Get(Parser):
            self.GET_CAPABILITIES:
             import GetCapabilities
             self.requestParser = GetCapabilities.Get(self.wps)
-            self.wps.inputs["request"] = self.GET_CAPABILITIES
+            self.inputs["request"] = self.GET_CAPABILITIES
         elif self.unparsedInputs["request"].lower() ==\
            self.DESCRIBE_PROCESS:
             import DescribeProcess
             self.requestParser = DescribeProcess.Get(self.wps)
-            self.wps.inputs["request"] = self.DESCRIBE_PROCESS
+            self.inputs["request"] = self.DESCRIBE_PROCESS
         elif self.unparsedInputs["request"].lower() ==\
            self.EXECUTE:
             import Execute
             self.requestParser = Execute.Get(self.wps)
-            self.wps.inputs["request"] = self.EXECUTE
+            self.inputs["request"] = self.EXECUTE
         else:
             raise self.wps.exceptions.InvalidParameterValue("request")
 
@@ -130,14 +130,14 @@ class Get(Parser):
         if "service" in self.unparsedInputs:
             value=self.unparsedInputs["service"].upper()
             if value == "WSDL":
-                self.wps.inputs["service"] = "WSDL"
+                self.inputs["service"] = "WSDL"
             elif value != "WPS":
                 raise self.wps.exceptions.InvalidParameterValue("service")
             else:
-                self.wps.inputs["service"] = "WPS"
+                self.inputs["service"] = "WPS"
         else:
             raise self.wps.exceptions.MissingParameterValue("service")
-        return self.wps.inputs["service"]
+        return self.inputs["service"]
 
     def checkLanguage(self):
         """ Check optional language parameter.  """
@@ -147,9 +147,9 @@ class Get(Parser):
             if value not in self.wps.languages:
                 raise self.wps.exceptions.InvalidParameterValue("language")
             else:
-                self.wps.inputs["language"] = value
+                self.inputs["language"] = value
         else:
-            self.wps.inputs["language"] = self.wps.defaultLanguage
+            self.inputs["language"] = self.wps.defaultLanguage
 
     def checkVersion(self):
         """ Check mandatory version parameter.  """
@@ -161,6 +161,6 @@ class Get(Parser):
                     'The requested version "' + value + \
                     '" is not supported by this server.')
             else:
-                self.wps.inputs["version"] = value
+                self.inputs["version"] = value
         else:
             raise self.wps.exceptions.MissingParameterValue("version")

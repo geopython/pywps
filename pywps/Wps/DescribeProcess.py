@@ -23,11 +23,11 @@ WPS DescribeProcess request handler
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-from Response import Response
+from pywps.Wps import Request
 from htmltmpl import TemplateError
-import os,types
+import os,types,traceback
 
-class DescribeProcess(Response):
+class DescribeProcess(Request):
     """
     Parses input request obtained via HTTP POST encoding - should be XML
     file.
@@ -39,13 +39,13 @@ class DescribeProcess(Response):
            self
            wps   - parent WPS instance
         """
-        Response.__init__(self,wps)
+        Request.__init__(self,wps)
 
         try:
             self.template = self.templateManager.prepare(self.templateFile)
         except TemplateError,e:
             self.cleanEnv()
-            raise self.wps.exceptions.NoApplicableCode(e.__str__())
+            raise wps.exceptions.NoApplicableCode(e.__str__())
 
         #
         # HEAD
@@ -127,6 +127,7 @@ class DescribeProcess(Response):
                 processData["dataoutputslen"] = len(processData["Dataoutputs"])
 
             except Exception, e:
+                traceback.print_exc(file=self.wps.logFile)
                 processData["processok"] = 0
                 processData["process"] = processName
                 processData["exception"] = e

@@ -23,7 +23,7 @@ WPS Execute request handler
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-from Response import Response
+from pywps.Wps import Request
 from htmltmpl import TemplateError
 import time,os,sys,tempfile,re,types, ConfigParser, base64, traceback
 from shutil import copyfile as COPY
@@ -34,7 +34,7 @@ try:
 except:
     pass
 
-class Execute(Response):
+class Execute(Request):
     """
     This class performs the Execute request of WPS specification
     """
@@ -78,7 +78,6 @@ class Execute(Response):
     grass = None
 
     rawDataOutput = None
-    logFile = None
 
     mapObj = None
     mapFileName = None
@@ -89,19 +88,18 @@ class Execute(Response):
         wps   - parent WPS instance
         """
 
-        Response.__init__(self,wps)
+        Request.__init__(self,wps)
 
         self.wps = wps
         self.process = None
         try:
             self.template = self.templateManager.prepare(self.templateFile)
         except TemplateError,e:
-            traceback.print_exc(file=sys.stderr)
+            traceback.print_exc(file=self.wps.logFile)
             self.cleanEnv()
             raise self.wps.exceptions.NoApplicableCode(e.__str__())
 
         # initialization
-        self.setLogFile()
         self.statusTime = time.time()
         self.pid = os.getpid()
         self.status = None
@@ -130,7 +128,7 @@ class Execute(Response):
                 try:
                     self.statusFiles.append(open(self.statusFileName,"w"))
                 except Exception, e:
-                    traceback.print_exc(file=sys.stderr)
+                    traceback.print_exc(file=self.wps.logFile)
                     self.cleanEnv()
                     raise self.wps.exceptions.NoApplicableCode(e.__str__())
                 self.storeRequired = True
@@ -212,7 +210,7 @@ class Execute(Response):
                         pass
 
                 except OSError, e:
-                    traceback.print_exc(file=sys.stderr)
+                    traceback.print_exc(file=self.wps.logFile)
                     raise self.wps.exceptions.NoApplicableCode("Fork failed: %d (%s)\n" % (e.errno, e.strerror) )
 
             # this is child process, parent is already gone away
@@ -239,6 +237,7 @@ class Execute(Response):
 
         except self.wps.exceptions.WPSException,e:
             # set status to failed
+            traceback.print_exc(file=self.wps.logFile)
             self.promoteStatus(self.failed,
                      statusMessage=e.value,
                      exceptioncode=e.code,
@@ -246,7 +245,7 @@ class Execute(Response):
         except Exception,e:
 
             # set status to failed
-            traceback.print_exc(file=sys.stderr)
+            traceback.print_exc(file=self.wps.logFile)
             self.promoteStatus(self.failed,
                     statusMessage=str(e),
                     exceptioncode="NoApplicableCode")
@@ -290,6 +289,7 @@ class Execute(Response):
 
 
         except self.wps.exceptions.WPSException,e:
+            traceback.print_exc(file=self.wps.logFile)
             # set status to failed
             self.promoteStatus(self.failed,
                     statusMessage=e.value,
@@ -300,7 +300,7 @@ class Execute(Response):
 
         except Exception,e:
             # set status to failed
-            traceback.print_exc(file=sys.stderr)
+            traceback.print_exc(file=self.wps.logFile)
             self.promoteStatus(self.failed,
                     statusMessage=str(e),
                     exceptioncode="NoApplicableCode")
@@ -309,7 +309,7 @@ class Execute(Response):
 
         # print status
         if self.storeRequired and self.statusRequired:
-            self.printResponse(self.statusFiles)
+            self.wps.printResponse(self.statusFiles,response=self.response)
 
         # remove all temporary files
         self.cleanEnv()
@@ -330,7 +330,7 @@ class Execute(Response):
 
             except Exception, e:
                 self.cleanEnv()
-                traceback.print_exc(file=sys.stderr)
+                traceback.print_exc(file=self.wps.logFile)
                 raise self.wps.exceptions.NoApplicableCode(
                 "Could not import process [%s]: %s" %\
                         (self.wps.inputs["identifier"], e))
@@ -345,7 +345,7 @@ class Execute(Response):
         self.process.wps = self.wps
         self.process.status.onStatusChanged = self.onStatusChanged
         self.process.debug = self.wps.getConfigValue("server","debug")
-        self.process.logFile = self.logFile
+        self.process.logFile = self.wps.logFile
 
     def consolidateInputs(self):
         """ Donwload and control input data, defined by the client """
@@ -460,7 +460,7 @@ class Execute(Response):
             # execute
             processError = self.process.execute()
             if processError:
-                traceback.print_exc(file=sys.stderr)
+                traceback.print_exc(file=self.wps.logFile)
                 raise self.wps.exceptions.NoApplicableCode(
                         "Failed to execute WPS process [%s]: %s" %\
                                 (self.process.identifier,processError))
@@ -475,7 +475,7 @@ class Execute(Response):
             raise e
 
         except Exception,e:
-            traceback.print_exc(file=sys.stderr)
+            traceback.print_exc(file=self.wps.logFile)
             raise self.wps.exceptions.NoApplicableCode(
                     "Failed to execute WPS process [%s]: %s" %\
                             (self.process.identifier,e))
@@ -570,12 +570,14 @@ class Execute(Response):
                                    self.status == self.accepted or
                                    #self.status == self.succeeded or
                                    self.status == self.failed):
-            self.printResponse(self.statusFiles)
+            self.wps.printResponse(self.statusFiles, response=self.response, )
         
         if self.status == self.started:
-            print >>sys.stderr, "PyWPS Status [%s][%.1f]: %s" % (self.status,float(self.percent),self.statusMessage)
+            self.wps.debug("%s" % self.statusMessage,
+                    code = "PyWPS Status [%s][%.1f]: "% (self.status,float(self.percent)))
         else:
-            print >>sys.stderr, "PyWPS Status [%s]: %s" % (self.status,self.statusMessage)
+            self.wps.debug("%s" % self.statusMessage,
+                        code="PyWPS Status [%s]"%self.status )
 
 
     def lineageInputs(self):
@@ -756,7 +758,7 @@ class Execute(Response):
 
             except Exception,e:
                 self.cleanEnv()
-                traceback.print_exc(file=sys.stderr)
+                traceback.print_exc(file=self.wps.logFile)
                 raise self.wps.exceptions.NoApplicableCode(
                         "Process executed. Failed to build final response for output [%s]: %s" % (identifier,e))
         self.templateProcessor.set("Outputs",templateOutputs)
@@ -979,7 +981,7 @@ class Execute(Response):
         """
 
         self.promoteStatus(self.process.status.code,
-                statusMessage=self.process.status.value,
+                statusMessage="%s %s"%(self.process.status.code,self.process.status.value),
                 percent=self.process.status.percentCompleted)
 
     def initEnv(self):
@@ -1000,7 +1002,7 @@ class Execute(Response):
 
         if pyWPSDirs >= maxOperations and\
             maxOperations != 0:
-            raise self.wps.exceptions.ServerBusy()
+            raise self.wps.exceptions.ServerBusy(value="Maximal number of permitted operations exceeded")
 
         # create temp dir
         self.workingDir = tempfile.mkdtemp(prefix="pywps", dir=tempPath)
@@ -1024,7 +1026,7 @@ class Execute(Response):
                     raise Exception("Location [%s] does not exist" % self.process.grassLocation)
         except Exception,e:
             self.cleanEnv()
-            traceback.print_exc(file=sys.stderr)
+            traceback.print_exc(file=self.wps.logFile)
             raise self.wps.exceptions.NoApplicableCode("Could not init GRASS: %s" % e)
 
         return
@@ -1078,28 +1080,6 @@ class Execute(Response):
             print "Content-type: %s\n" % output.format["mimeType"]
             print f.read()
             f.close()
-
-    def setLogFile(self):
-        """Set self.logFile to sys.stderr or something else
-        """
-
-        # logfile
-        self.logFile = sys.stderr
-        try:
-            self.logFile = self.wps.getConfigValue("server","logFile")
-            if self.logFile:
-                se = open(self.logFile, 'a+', 0)
-                os.dup2(se.fileno(), sys.stderr.fileno())
-            else:
-                self.logFile = sys.stderr
-        except ConfigParser.NoOptionError,e:
-            pass
-        except IOError,e:
-            traceback.print_exc(file=sys.stderr)
-            raise self.wps.exceptions.NoApplicableCode("Logfile IOError: %s" % e.__str__())
-        except Exception, e:
-            traceback.print_exc(file=sys.stderr)
-            raise self.wps.exceptions.NoApplicableCode("Logfile error: %s" % e.__str__())
 
 
     def _initMapscript(self):

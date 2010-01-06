@@ -61,11 +61,11 @@ class Post(Post):
                 versions.append(versionNode.firstChild.nodeValue)
         if len(versions) == 0:
             versions = self.wps.versions
-        self.wps.inputs["acceptversions"] = versions
-        for version in self.wps.inputs["acceptversions"]:
+        self.inputs["acceptversions"] = versions
+        for version in self.inputs["acceptversions"]:
             if version in self.wps.versions:
-                self.wps.inputs["version"]=version
-        if not "version" in self.wps.inputs:
+                self.inputs["version"]=version
+        if not "version" in self.inputs:
             raise self.wps.exceptions.VersionNegotiationFailed(
                                 "There's no version in AcceptVersions parameter " +
                                 "that is supported by this server.")
@@ -73,7 +73,7 @@ class Post(Post):
         # language
         self.checkLanguage(firstChild)
 
-        return
+        return self.inputs
 
 class Get(Get):
     """ Parses input request obtained via HTTP GET encoding.  """
@@ -93,14 +93,14 @@ class Get(Get):
 
         # AcceptVersions
         try:
-            self.wps.inputs["acceptversions"] = \
+            self.inputs["acceptversions"] = \
                                self.unparsedInputs["acceptversions"].split(",")
         except KeyError,e:
-            self.wps.inputs["acceptversions"] = self.wps.versions
-        for version in self.wps.inputs["acceptversions"]:
+            self.inputs["acceptversions"] = self.wps.versions
+        for version in self.inputs["acceptversions"]:
             if version in self.wps.versions:
-                self.wps.inputs["version"]=version
-        if not "version" in self.wps.inputs:
+                self.inputs["version"]=version
+        if not "version" in self.inputs:
             raise self.wps.exceptions.VersionNegotiationFailed(
                                 "There's no version in AcceptVersions parameter " +
                                 "that is supported by this server.")
@@ -108,3 +108,4 @@ class Get(Get):
         # Language
         self.checkLanguage()
 
+        return self.inputs

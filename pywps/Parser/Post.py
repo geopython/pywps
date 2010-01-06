@@ -21,7 +21,7 @@
 import types,sys
 import xml
 from xml.dom.minidom import parseString
-from pywps.Parser.Parser import Parser
+from pywps.Parser import Parser
 from pywps.Process.Lang import Lang
 from pywps import Soap 
 
@@ -80,6 +80,8 @@ class Post(Parser):
         # parse the document
         self.requestParser.parse(self.document)
 
+        return self.inputs
+
     def checkService(self, node):
         """ Check mandatory service name parameter.  """
 
@@ -90,7 +92,7 @@ class Post(Parser):
             if value != "WPS":
                 raise self.wps.exceptions.InvalidParameterValue("service")
             else:
-                self.wps.inputs["service"] = "WPS"
+                self.inputs["service"] = "WPS"
         else:
             raise self.wps.exceptions.MissingParameterValue("service")
 
@@ -102,9 +104,9 @@ class Post(Parser):
             if value not in self.wps.languages:
                 raise self.wps.exceptions.InvalidParameterValue("language")
             else:
-                self.wps.inputs["language"] = value
+                self.inputs["language"] = value
         else:
-            self.wps.inputs["language"] = self.wps.defaultLanguage
+            self.inputs["language"] = self.wps.defaultLanguage
 
     def checkVersion(self, node):
         """ Check optional language parameter.  """
@@ -116,7 +118,7 @@ class Post(Parser):
                     'The requested version "' + value + \
                     '" is not supported by this server.')
             else:
-                self.wps.inputs["version"] = value
+                self.inputs["version"] = value
         else:
             raise self.wps.exceptions.MissingParameterValue("version")
 
@@ -128,15 +130,15 @@ class Post(Parser):
         if firstTagName.find(self.GET_CAPABILITIES) > -1:
             import GetCapabilities
             self.requestParser = GetCapabilities.Post(self.wps)
-            self.wps.inputs["request"] = "getcapabilities"
+            self.inputs["request"] = "getcapabilities"
         elif firstTagName.find(self.DESCRIBE_PROCESS) > -1:
             import DescribeProcess
             self.requestParser = DescribeProcess.Post(self.wps)
-            self.wps.inputs["request"] = "describeprocess"
+            self.inputs["request"] = "describeprocess"
         elif firstTagName.find(self.EXECUTE) > -1:
             import Execute
             self.requestParser = Execute.Post(self.wps)
-            self.wps.inputs["request"] = "execute"
+            self.inputs["request"] = "execute"
         else:
             raise self.wps.Exceptions.InvalidParameterValue("request")
 

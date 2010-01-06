@@ -23,11 +23,11 @@ WPS GetCapabilities request handler
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-from Response import Response
+from pywps.Wps import Request
 from htmltmpl import TemplateError
-import types
+import types, traceback
 
-class GetCapabilities(Response):
+class GetCapabilities(Request):
     """
     Parses input request obtained via HTTP POST encoding - should be XML
     file.
@@ -40,7 +40,7 @@ class GetCapabilities(Response):
            wps   - parent WPS instance
         """
         try:
-            Response.__init__(self,wps)
+            Request.__init__(self,wps)
         except Exception, e:
             self.cleanEnv()
             rep = None
@@ -48,7 +48,7 @@ class GetCapabilities(Response):
                 rep = e.message
             except:
                 rep = e.__str__()
-            raise self.wps.exceptions.NoApplicableCode(rep)
+            raise wps.exceptions.NoApplicableCode(rep)
 
         try:
             self.template = self.templateManager.prepare(self.templateFile)
@@ -202,11 +202,13 @@ class GetCapabilities(Response):
                         processData["wsdl"] = process.wsdl
 
                 except Exception, e:
+                    traceback.print_exc(file=self.wps.logFile)
                     processData["processok"] = 0
                     processData["process"] = processName
                     processData["exception"] = e
                 processesData.append(processData)
         except Exception,e:
+            traceback.print_exc(file=self.wps.logFile)
             raise self.wps.exceptions.NoApplicableCode("Could not import processes: %s " % (e))
         self.templateProcessor.set("Processes",processesData)
 

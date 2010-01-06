@@ -55,7 +55,7 @@ class Post(Post):
             identifiers.append(identifierNode.firstChild.nodeValue)
         if len(identifiers) == 0:
             raise self.wps.exceptions.MissingParameterValue("Identifier")
-        self.wps.inputs["identifier"] = identifiers
+        self.inputs["identifier"] = identifiers
 
         #
         # Optional options
@@ -63,7 +63,7 @@ class Post(Post):
         # language
         self.checkLanguage(firstChild)
 
-        return
+        return self.inputs
 
 class Get(Get):
     """
@@ -85,7 +85,7 @@ class Get(Get):
 
         # identifier
         if "identifier" in self.unparsedInputs:
-            self.wps.inputs["identifier"] = self.unparsedInputs["identifier"].split(",")
+            self.inputs["identifier"] = self.unparsedInputs["identifier"].split(",")
         else:
             raise self.wps.exceptions.MissingParameterValue("identifier")
 
@@ -94,3 +94,5 @@ class Get(Get):
 
         # Language
         self.checkLanguage()
+
+        return self.inputs

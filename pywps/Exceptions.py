@@ -34,7 +34,27 @@ class WPSException(Exception):
     """
     WPSException should be base class for all exceptions
     """
-    def make_xml(self):
+    code = "NoApplicableCode"
+    value = None
+    locator = None
+
+    def promoteException(self,contentType = False, toFiles=None):
+        """Print this exception text to files
+
+        Parameters:
+        toFiles {List} list of file objects, where to put  this exception
+            text. Default. sys.stdout && sys.stderr
+        """
+
+        if toFiles:
+            for i in toFiles:
+                if contentType: print >>i, "Content-type: text/xml\n"
+                print >>i, self
+        else:
+            if contentType: print >>sys.stdout, "Content-type: text/xml\n"
+            print >>sys.stdout, self
+
+    def _make_xml(self):
         # formulate XML
         self.document = Document()
         self.ExceptionReport = self.document.createElementNS("http://www.opengis.net/ows","ExceptionReport")
@@ -52,38 +72,37 @@ class WPSException(Exception):
             self.Exception.setAttribute("locator",self.locator)
 
         self.ExceptionReport.appendChild(self.Exception)
-        self.value = None
+        #self.value = None
 
     def __str__(self):
 
-        print  "Content-type: text/xml\n"
         response= self.document.toprettyxml(indent='\t', newl='\n', encoding="utf-8")
         if pywps.Soap.soap == True:
             soapCls = SOAP()
             response = soapCls.getResponse(response)
 
-        sys.stderr.write("PyWPS %s: %s\n" % (self.code, self.locator))
+        sys.stderr.write("PyWPS %s: Locator: %s; Value: %s\n" % (self.code, self.locator, self.value))
 
-        print response
+        return response
 
 class MissingParameterValue(WPSException):
     def __init__(self, value):
         self.code = "MissingParameterValue"
         self.locator = str(value)
-        self.make_xml()
+        self._make_xml()
 
 class InvalidParameterValue(WPSException):
     def __init__(self,value):
         self.code = "InvalidParameterValue"
         self.locator = str(value)
-        self.make_xml()
+        self._make_xml()
 
 class NoApplicableCode(WPSException):
     def __init__(self,value=None):
         WPSException.__init__(self,value)
         self.code = "NoApplicableCode"
-        self.locator = None
-        self.make_xml()
+        self.value = None
+        self._make_xml()
         self.message = value
         if value:
             self.ExceptionText = self.document.createElement("ExceptionText")
@@ -95,7 +114,7 @@ class VersionNegotiationFailed(WPSException):
     def __init__(self,value=None):
         self.code = "VersionNegotiationFailed"
         self.locator = None
-        self.make_xml()
+        self._make_xml()
         if value:
             self.ExceptionText = self.document.createElement("ExceptionText")
             self.ExceptionText.appendChild(self.document.createTextNode(value))
@@ -106,25 +125,25 @@ class NotEnoughStorage(WPSException):
     def __init__(self,value=None):
         self.code = "NotEnoughStorage"
         self.locator = value
-        self.make_xml()
+        self._make_xml()
 
 class StorageNotSupported(WPSException):
     def __init__(self,value=None):
         self.code = "StorageNotSupported"
         self.locator = value
-        self.make_xml()
+        self._make_xml()
 
 class ServerBusy(WPSException):
     def __init__(self,value=None):
         self.code = "ServerBusy"
-        self.locator = str(value)
-        self.make_xml()
+        self.value = value
+        self._make_xml()
 
 class FileSizeExceeded(WPSException):
     def __init__(self,value=None):
         self.code = "FileSizeExceeded"
         self.locator = str(value)
-        self.make_xml()
+        self._make_xml()
 
 class ServerError(WPSException):
     def __init__(self,value=None):
@@ -134,7 +153,8 @@ class ServerError(WPSException):
             self.locator = str(value)
         except:
             self.locator = None
-        self.make_xml()
+        self._make_xml()
         self.ExceptionText = self.document.createElement("ExceptionText")
         self.ExceptionText.appendChild(self.document.createTextNode("General server error"))
         self.Exception.appendChild(self.ExceptionText)
+
