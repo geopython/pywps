@@ -81,7 +81,10 @@ class WPSException(Exception):
             soapCls = SOAP()
             response = soapCls.getResponse(response)
 
-        sys.stderr.write("PyWPS %s: Locator: %s; Value: %s\n" % (self.code, self.locator, self.value))
+        try:
+            logFile.write("PyWPS %s: Locator: %s; Value: %s\n" % (self.code, self.locator, self.value))
+        except:
+            sys.stderr.write("PyWPS %s: Locator: %s; Value: %s\n" % (self.code, self.locator, self.value))
 
         return response
 

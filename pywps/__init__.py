@@ -334,3 +334,4 @@ class Pywps:
             traceback.print_exc(file=STDERR)
             raise self.exceptions.NoApplicableCode("Logfile error: %s" % e.__str__())
 
+        self.exceptions.logFile = self.logFile
