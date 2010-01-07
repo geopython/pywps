@@ -1,19 +1,4 @@
-For installing PyWPS:
+For installing PyWPS see 
+
+    http://pywps.wald.intevation.org/documentation/installation.html
     
-1) unzip the archive with the program
-
-    $ tar xzf pywps-3.0.0.tar.gz
-
-
-2) Run the installation script
-    
-    $ cd pywps-0.1
-    $ python setup.py install
-
-3) Make symlink to wps.py file in your cgi-bin directory
-
-    $ ln -s /usr/bin/wps.py /usr/lib/cgi-bin/wps.py
-
-4) Update your configuration in etc/pywps.cfg
-
-5) See doc/pywps-howto.[pdf|txt|html] for more details

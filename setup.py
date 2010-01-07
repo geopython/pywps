@@ -78,7 +78,7 @@ setup(
                      'default.cfg'],
                     'pywps.Templates.1_0_0': ['inc/*.tmpl']
                 },
-        scripts=['wps.py']
+        scripts=['cgiwps.py']
 )
 
 
