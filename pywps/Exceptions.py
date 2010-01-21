@@ -1,4 +1,7 @@
 """
+Exceptions
+----------
+
 Exception classes of WPS
 """
 # Author:	Jachym Cepicky
@@ -31,8 +34,7 @@ called = 0
 
 
 class WPSException(Exception):
-    """
-    WPSException should be base class for all exceptions
+    """WPSException should be base class for all exceptions
     """
     code = "NoApplicableCode"
     value = None
@@ -41,9 +43,11 @@ class WPSException(Exception):
     def promoteException(self,contentType = False, toFiles=None):
         """Print this exception text to files
 
-        Parameters:
-        toFiles {List} list of file objects, where to put  this exception
+        :param toFiles: list of file objects, where to put  this exception
             text. Default. sys.stdout && sys.stderr
+        :type toFiles: list
+        :param contentType: print content type information as well
+        :type contentType: boolean
         """
 
         if toFiles:
@@ -89,18 +93,21 @@ class WPSException(Exception):
         return response
 
 class MissingParameterValue(WPSException):
+    """MissingParameterValue WPS Exception"""
     def __init__(self, value):
         self.code = "MissingParameterValue"
         self.locator = str(value)
         self._make_xml()
 
 class InvalidParameterValue(WPSException):
+    """InvalidParameterValue WPS Exception"""
     def __init__(self,value):
         self.code = "InvalidParameterValue"
         self.locator = str(value)
         self._make_xml()
 
 class NoApplicableCode(WPSException):
+    """NoApplicableCode WPS Exception"""
     def __init__(self,value=None):
         WPSException.__init__(self,value)
         self.code = "NoApplicableCode"
@@ -114,6 +121,7 @@ class NoApplicableCode(WPSException):
             self.value = str(value)
 
 class VersionNegotiationFailed(WPSException):
+    """VersionNegotiationFailed WPS Exception"""
     def __init__(self,value=None):
         self.code = "VersionNegotiationFailed"
         self.locator = None
@@ -125,30 +133,37 @@ class VersionNegotiationFailed(WPSException):
             self.value = str(value)
 
 class NotEnoughStorage(WPSException):
+    """NotEnoughStorage WPS Exception"""
     def __init__(self,value=None):
         self.code = "NotEnoughStorage"
         self.locator = value
         self._make_xml()
 
 class StorageNotSupported(WPSException):
+    """StorageNotSupported WPS Exception"""
     def __init__(self,value=None):
         self.code = "StorageNotSupported"
         self.locator = value
         self._make_xml()
 
 class ServerBusy(WPSException):
+    """ServerBusy WPS Exception"""
     def __init__(self,value=None):
         self.code = "ServerBusy"
         self.value = value
         self._make_xml()
 
 class FileSizeExceeded(WPSException):
+    """FileSizeExceeded WPS Exception"""
     def __init__(self,value=None):
         self.code = "FileSizeExceeded"
         self.locator = str(value)
         self._make_xml()
 
 class ServerError(WPSException):
+    """ServerError WPS Exception
+    
+    .. note:: This is custom PyWPS exception and should not be used."""
     def __init__(self,value=None):
         raise NoApplicableCode(value)
         self.code = "ServerError"

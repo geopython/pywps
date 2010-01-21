@@ -1,16 +1,53 @@
 """
-PyWPS
+pywps
 =====
 This package contains classes necessary for input parsing OGC WPS requests,
 working with list of processes, executing them and redirecting OGC WPS
 responses back to client.
 
-The outputs are generated using python's htmltmpl template system.
+example how to use this module::
+
+    import sys
+
+    request="service=wps&request=getcapabilities"
+
+    wps = Pywps(pywps.METHOD_GET)
+
+    if wps.parserRequest(request):
+        response = wps.performRequest()
+
+        if response:
+            wps.printResponse(sys.stdout)
+
 
 .. moduleauthor:: Jachym Cepicky <jachym bnhelp cz>
+
+.. data:: METHOD_GET 
+
+    String for HTTP GET method identification
+
+.. data:: METHOD_POST
+
+    String for HTTP POST method identification
+
+.. data:: OWS_NAMESPACE
+
+    Namespace of OGC OWS 1.1. standard 
+
+.. data:: WPS_NAMESPACE
+
+    Namespace of OGC OWS 1.0.0 standard 
+
+.. data:: XLINK_NAMESPACE
+
+    Namespace of OGC OWS 1.0.0 standard 
+
+.. data:: EMPTYPARAMREGEX
+
+    Regular expression for empty parameter identificaion
 """
 
-__all__ = [ "Parser","processes", "Process", "Exceptions", "Wps", "Templates"]
+__all__ = [ "Parser","processes", "Process", "Exceptions", "Wps", "Templates","Template"]
 
 
 # Author:	Jachym Cepicky
@@ -55,6 +92,74 @@ EMPTYPARAMREGEX = re.compile('( \w+="")|( \w+="None")')
 class Pywps:
     """This is main PyWPS Class, which parses the request, performs the
     desired operation and writes required response back.
+
+    :param method: Used HTTP method, which is either :data:`METHOD_POST`
+        or :data:`METHOD_GET`:
+    :type method: string
+    :param configFiles: List of configuration files. Ignore, if you want to use standard files location
+    :type configFiles: list
+
+    .. attribute:: method 
+
+        METHOD_GET or METHOD_POST
+
+    .. attribute:: parser 
+
+        WPS request parser
+
+    .. attribute:: config 
+
+        Configuration file parser
+
+    .. attribute:: workingDir 
+
+        Temporary working directory, which will be deleted, after process
+        execution successfuly ended
+
+    .. attribute:: exceptions
+
+        Shortcut to pywps.exceptions package
+
+    .. attribute:: statusFiles
+
+        List of files, where PYWPS status reports will be redirected
+    
+    .. attribute:: stdOutClosed
+
+        Indicates, whether standard output is closed for writing or not
+
+    .. attribute:: inputs
+
+        Parsed inputs object
+
+    .. attribute:: request
+
+        GetCapabilities, DescribeProcess or Execute (response) object
+
+    .. attribute:: parser
+
+        GetCapabilities, DescribeProcess or Execute, POST or GET (parsing) object
+
+    .. attribute:: defaultLanguage
+
+        Default document language
+
+    .. attribute:: languages
+
+        List of supported languages
+
+    .. attribute:: defaultVersion
+
+        Default WPS version
+
+    .. attribute:: versions
+
+        Default supported versions
+
+    .. attribute:: logFile
+
+        File object, where to write logs and erros to
+
     """
 
     method  =""                      # HTTP POST or GET
@@ -75,16 +180,10 @@ class Pywps:
     languages = [defaultLanguage]
     defaultVersion = "1.0.0"
     versions=[defaultVersion]
-    logFile = STDERR
+    logFile = STDERR  
 
     def __init__(self, method=METHOD_GET, configFiles=None):
         """Class constructor
-
-        :param method: Used HTTP method, which is either ref:METHOD_POST:
-        or :ref:`METHOD_GET`:
-        :type method: string
-        :param configFiles: List of configuration files. Ignore, if you want to use standard files location
-        :type configFiles: list
         """
 
         # get settings
@@ -252,10 +351,11 @@ class Pywps:
     def debug(self,debug,code="Debug"):
         """Print debug argument to standard error
 
-        :param debug: debugging text, which should be printed to the 
-            :ref:`logFile`_
+        :param debug: debugging text, which should be printed to the
+            :attr:`logFile`
         :type debug: string
-        :param code: text, which will be printed to the :ref:`logFile`_
+        :param code: text, which will be printed to the
+            :attr:`logFile`
             direct after 'PyWPS' and before the debug text
         :type code: string.
         """

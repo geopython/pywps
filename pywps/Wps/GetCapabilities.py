@@ -24,7 +24,7 @@ WPS GetCapabilities request handler
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 from pywps.Wps import Request
-from htmltmpl import TemplateError
+from pywps.Template import TemplateError
 import types, traceback
 
 class GetCapabilities(Request):
@@ -49,12 +49,6 @@ class GetCapabilities(Request):
             except:
                 rep = e.__str__()
             raise wps.exceptions.NoApplicableCode(rep)
-
-        try:
-            self.template = self.templateManager.prepare(self.templateFile)
-        except TemplateError,e:
-            self.cleanEnv()
-            raise self.wps.exceptions.NoApplicableCode(e.__str__())
 
         #
         # ServiceIdentification
@@ -221,5 +215,5 @@ class GetCapabilities(Request):
             languages.append({"language":lang})
         self.templateProcessor.set("Languages",languages)
 
-        self.response = self.templateProcessor.process(self.template)
+        self.response = self.templateProcessor.__str__()
         return

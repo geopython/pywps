@@ -99,7 +99,7 @@ if not dryRun and install and not os.environ.has_key("FAKEROOTKEY"):
     # compiling before installing is necessary, because the apache
     # webserver has not the permission to create new files in the 
     # python site-packages directory
-    from htmltmpl import TemplateManager, TemplateProcessor
+    from pywps.Template import TemplateProcessor
     from distutils import sysconfig
 
     baseDir =  os.path.join(sysconfig.get_python_lib(),
@@ -118,10 +118,7 @@ if not dryRun and install and not os.environ.has_key("FAKEROOTKEY"):
             print "Compiling template "+template_file
             template_file = os.path.join(baseDir,version,
                                     template_file + '.tmpl')
-            template = TemplateManager().prepare(template_file)
-            tproc = TemplateProcessor()
-            compiled_document = tproc.process(template)
-
+            template = TemplateProcessor(fileName=template_file,compile=True)
 else:
     print "dry-run only, templates are not complied"
 

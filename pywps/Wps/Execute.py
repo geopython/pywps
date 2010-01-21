@@ -24,7 +24,7 @@ WPS Execute request handler
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 from pywps.Wps import Request
-from htmltmpl import TemplateError
+from pywps.Template import TemplateError
 import time,os,sys,tempfile,re,types, ConfigParser, base64, traceback
 from shutil import copyfile as COPY
 from shutil import rmtree as RMTREE
@@ -92,12 +92,6 @@ class Execute(Request):
 
         self.wps = wps
         self.process = None
-        try:
-            self.template = self.templateManager.prepare(self.templateFile)
-        except TemplateError,e:
-            traceback.print_exc(file=self.wps.logFile)
-            self.cleanEnv()
-            raise self.wps.exceptions.NoApplicableCode(e.__str__())
 
         # initialization
         self.statusTime = time.time()
@@ -276,7 +270,7 @@ class Execute(Request):
 
 
                 # Response document
-                self.response = self.templateProcessor.process(self.template)
+                self.response = self.templateProcessor.__str__()
 
                 # if rawDataOutput is required
                 if self.rawDataOutput:
@@ -285,7 +279,7 @@ class Execute(Request):
 
             # Failed but output lineage anyway
             elif lineageRequired:
-                self.response = self.templateProcessor.process(self.template)
+                self.response = self.templateProcessor.__str__()
 
 
         except self.wps.exceptions.WPSException,e:
@@ -296,7 +290,7 @@ class Execute(Request):
                     exceptioncode=e.code,
                     locator=e.locator)
             # Response document
-            self.response = self.templateProcessor.process(self.template)
+            self.response = self.templateProcessor.__str__()
 
         except Exception,e:
             # set status to failed
@@ -305,7 +299,7 @@ class Execute(Request):
                     statusMessage=str(e),
                     exceptioncode="NoApplicableCode")
             # Response document
-            self.response = self.templateProcessor.process(self.template)
+            self.response = self.templateProcessor.__str__()
 
         # print status
         if self.storeRequired and self.statusRequired:
@@ -563,7 +557,7 @@ class Execute(Request):
                 self.templateProcessor.set("locator", self.locator)
 
         # update response
-        self.response = self.templateProcessor.process(self.template)
+        self.response = self.templateProcessor.__str__()
 
         # print status
         if self.storeRequired and (self.statusRequired or

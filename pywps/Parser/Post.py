@@ -1,3 +1,8 @@
+"""
+Post
+----
+"""
+
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
 # Lince:
@@ -26,7 +31,18 @@ from pywps.Process.Lang import Lang
 from pywps import Soap 
 
 class Post(Parser):
-    """Main class for parsing of HTTP POST request types"""
+    """Main class for parsing of HTTP POST request types
+    
+    .. attribute:: document
+    
+        DOM of input document
+    
+    .. attribute:: requestParser
+
+        :class:`pywps.Parser.GetCapabilities`, :class:`pywps.Parser.DescribeProcess` 
+        or :class:`pywps.Parser.Execute`
+
+    """
 
     document = None # Document Object Model
     requestParser = None
@@ -36,8 +52,10 @@ class Post(Parser):
     EXECUTE = "Execute"
 
     def parse(self,file):
-        """
-        Parse parameters stored as XML file
+        """Parse parameters stored as XML file
+
+        :param file: input file object
+        :return: parsed input object
         """
 
         maxFileSize = None
@@ -83,7 +101,10 @@ class Post(Parser):
         return self.inputs
 
     def checkService(self, node):
-        """ Check mandatory service name parameter.  """
+        """Check mandatory service name parameter.  
+        
+        :param node: :class:`xml.dom.Node`, where to search
+        """
 
         # service name is mandatory for all requests (OWS_1-1-0 p.14 tab.3 +
         # p.46 tab.26); service must be "WPS" (WPS_1-0-0 p.17 tab.13 + p.32 tab.39)

@@ -24,7 +24,7 @@ WPS DescribeProcess request handler
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 from pywps.Wps import Request
-from htmltmpl import TemplateError
+from pywps.Template import TemplateError
 import os,types,traceback
 
 class DescribeProcess(Request):
@@ -41,12 +41,6 @@ class DescribeProcess(Request):
         """
         Request.__init__(self,wps)
 
-        try:
-            self.template = self.templateManager.prepare(self.templateFile)
-        except TemplateError,e:
-            self.cleanEnv()
-            raise wps.exceptions.NoApplicableCode(e.__str__())
-
         #
         # HEAD
         #
@@ -61,7 +55,7 @@ class DescribeProcess(Request):
 
         self.templateProcessor.set("Processes",self.processesDescription())
 
-        self.response = self.templateProcessor.process(self.template)
+        self.response = self.templateProcessor.__str__()
 
         return
 

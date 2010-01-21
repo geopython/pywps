@@ -1,3 +1,8 @@
+"""
+Process
+-------
+Package for creating (Py)WPS Process classes
+"""
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
 # Lince:
@@ -30,14 +35,23 @@ import sys,os
 import traceback
 
 class Status:
-    """
-    Status object for each process
+    """Status object for each process
 
-    Attributes:
-    creationTime time.time()
-    code {String} "processstarted", "processfailed" or anything else
-    percentCompleted {Float} how far the calculation is
-    value {String} message string to the client
+    .. attribute:: creationTime 
+    
+        :func:`time.time()`
+
+    .. attribute:: code 
+    
+        "processstarted", "processfailed" or anything else
+
+    .. attribute:: percentCompleted 
+    
+        how far the calculation is
+
+    .. attribute:: value 
+            
+        message string to the client
     """
     creationTime = time.time()
     code = None
@@ -48,10 +62,12 @@ class Status:
     def set(self, msg="",percentDone=0, propagate=True):
         """ Set status message
 
-        Parameters:
-        msg {String} message for the client
-        percentDone {Float} percent > 0
-        propagate {Boolean} call onStatusChanged method
+        :param msg: message for the client
+        :type msg: string
+        :param percentDone: percent > 0
+        :type percentDone: float
+        :param propagate: call onStatusChanged method
+        :type propagate: boolean
         """
         self.code = "processstarted"
         if (type(percentDone) == types.StringType):
@@ -68,19 +84,18 @@ class Status:
             self.onStatusChanged()
 
     def onStatusChanged(self):
-        """
-        To be redefined by other methods
+        """Redefine this method in your functions
         """
         pass
 
     def setProcessStatus(self,code,value):
-        """
-        Sets current status of the process. Calls onStatusChanged method
+        """Sets current status of the process. Calls onStatusChanged method
 
-        Parameters:
-        code {String} one of "processaccepted" "processstarted"
+        :param code: one of "processaccepted" "processstarted"
                     "processsucceeded" "processpaused" "processfailed"
-        value {String} additional message
+        :type code: string
+        :param value: additional message
+        :type value: string
         """
 
         self.value = value
@@ -92,7 +107,117 @@ class Status:
 
 
 class WPSProcess:
-    """Base class for any PyWPS Process"""
+    """Base class for any PyWPS Process
+
+    :param identifier: process identifier
+    :type identifier: string
+    :param title: process title
+    :type title: string
+    :param abstract: process description
+    :type abstract: string
+    :param metadata: List of additional metadata. See http://www.opengeospatial.org/standards/common, table 32 on page 65
+
+           Example::
+            
+                ["foo":"bar"]
+
+    :param profile: profile URN
+    :type profile: [string]
+    :param version:  process version
+    :param statusSupported: this process can be run asynchronously
+    :type statusSupported: boolean
+    :param storeSupported: outputs from this process can be stored
+           for later download
+    :type storeSupported: boolean
+    :param grassLocation: name of GRASS Location within
+            "gisdbase" directory (from pywps.cfg configuration file).
+            If set to True, temporary GRASS Location will be created
+            and grass environment will be started. If None or False, no
+            GRASS environment will be started.
+
+    .. attribute:: identifier
+    
+        Process identifier
+        
+    .. attribute:: version
+    
+        Process version
+        
+    .. attribute:: metadata
+    
+        Metadata object
+        
+    .. attribute:: title
+        
+        Process title 
+        
+    .. attribute:: abstract
+    
+        Process abstract
+        
+    .. attribute:: wsdl
+
+        Not implemented
+
+    .. attribute:: profile
+
+        Process profile
+
+    .. attribute:: storeSupported
+
+        Indicates, whether the process supports storing of it's results for
+        later usage
+
+    .. attribute:: statusSupported
+
+        Indicates, whether assynchronous running of the process is possible
+
+    .. attribute:: debug
+        
+        Print some information to log file
+
+    .. attribute:: status
+
+        Instance of :class:`Status`
+
+    .. attribute:: inputs
+
+        List of process inputs, :class:`pywps.Process.InAndOutputs.Input`
+
+    .. attribute:: outputs
+
+        List of process outputs, :class:`pywps.Process.InAndOutputs.Output`
+
+    .. attribute:: lang
+
+        instance of :class:`pywps.Process.Lang.Lang` class
+
+    .. attribute:: grassLocation
+
+        Indicates, if and how `GRASS GIS <http://grass.osgeo.org>`_ should be used
+
+        None/False
+            GRASS GIS is not used in any way. No location/mapset is
+            created, no GRASS environment is initialized.
+
+        True
+            Temporary GRASS location is created. It is in XY reference
+            coordinate system
+
+            .. note:: In the future, location should have the same
+                coordinate system, as the input dataset is.
+
+        String
+            Name of existing GRASS Location (location name or full path),
+            with existing PERMANENT mapset, where your Process can take
+            input data from (or store results to). Temporary mapset within
+            this location is created.
+    
+    .. attribute:: logFile
+
+        File object, where to print log in.
+
+    """
     identifier = None
     version = None
     metadata = None
@@ -115,36 +240,7 @@ class WPSProcess:
             metadata=[],profile=[], version=None,
             statusSupported=True, storeSupported=False, grassLocation=None,
             logFile = sys.stderr):
-        """Process initialization. All parameters can be set lately
-
-        Mandatory parameters:
-        identifier {String} process identifier
-        title {String} process title
-
-        Optional parameters:
-        abstract {String} process description
-                default: None
-        metadata List of additional metadata.  See
-                    http://www.opengeospatial.org/standards/common, table 32 on page 65
-                E.g. ["foo":"bar"]
-                default: None
-        profile [URN]
-                default: None
-        version {String} process version
-                default: None
-        statusSupported {Boolean} this process can be run asynchronously
-                default: True
-        storeSupported {Boolean} outputs from this process can be stored
-                for later download
-                default: True
-        grassLocation {String} or {Boolean} name of GRASS Location within
-                "gisdbase" directory (from pywps.cfg configuration file).
-                If set to True, temporary GRASS Location will be created
-                and grass environment will be started. If None or False, no
-                GRASS environment will be started.
-                default: None
-        """
-
+        """Contructor"""
 
         self.identifier = identifier
         self.version = version
@@ -188,7 +284,7 @@ class WPSProcess:
             statusSupported=True, storeSupported=False, grassLocation=None):
         """Can be used for later process re-initialization
 
-        For parameters, see __init__ method options.  """
+        For parameters, see constructor :class:`WPSProcess` parameters.  """
 
         self.title = title
         self.abstract = abstract
@@ -219,37 +315,38 @@ class WPSProcess:
         """
         Add new input item of type LiteralValue to this process
 
-        Mandatory parameters:
-        identifier {String} input identifier
-        title {String} input title
-
-        Optional parameters:
-        abstract {String} input description. Default: None
-                    default: None
-        uoms List of {String} value units
-                    default: ()
-        minOccurs {Integer} minimum number of occurrences.
-                    default: 1
-        maxOccurs {Integer} maximum number of occurrences.
-                    default: 1
-        allowedValues  List of {String} or {List} list of allowed values,
+        :param identifier: input identifier
+        :param title: input title
+        :param abstract: input description. 
+        :param uoms: List of value units
+        :type uoms: [string]
+        :param minOccurs: minimum number of occurrences, default 1
+        :param maxOccurs: maximum number of occurrences, default 1
+        :param allowedValues:  List of of allowed values,
                     which can be used with this input. You can set interval
-                    using list with two items, like:
+                    using list with two items, like::
 
-                    (1,2,3,(5,9),10,"a",("d","g"))
+                        (1,2,3,(5,9),10,"a",("d","g"))
 
                     This will produce allowed values 1,2,3,10, "a" and
                     any value between 5 and 9 or "d" and "g".
 
-                    If "*" is used, it means "any value"
-                    default: ("*")
-        type {types.TypeType} value type, e.g. Integer, String, etc. you
-                    can uses the "types" module of python.
+                    If `*` is used, it means "any value"
+                    default ("*")
+        :param type: value type, e.g. Integer, String, etc. you
+                    can uses the :mod:`types` module of python.
                     default: types.IntType
-        default {Any} default value.
-                    default: None
-        metadata List of {Dict} Additional metadata. E.g. {"foo":"bar"}
-                    default: None
+        :type type: `types.TypeType`
+        :param default: default value of this input
+        :param metadata: List of additional metadata
+        
+            Example:: 
+        
+                {"foo":"bar"}
+
+            default: None
+
+        :returns: :class:`pywps.Process.InAndOutputs.LiteralInput`
         """
 
         self.inputs[identifier] = InAndOutputs.LiteralInput(identifier=identifier,
@@ -265,20 +362,16 @@ class WPSProcess:
                 formats=[{"mimeType":"text/xml"}],maxmegabites=5):
         """Add complex input to this process
 
-        Mandatory parameters:
-        identifier {String} input identifier
-        title {String} input title
+        :param identifier: input identifier
+        :param title: input title
+        :param abstract: input description. 
+        :param minOccurs: minimum number of occurrences, default 1
+        :param maxOccurs: maximum number of occurrences, default 1
+        :param formats: List of dictionary according to table 23 (page 25)
+            OGC WPS. 
 
-        Optional parameters:
-        abstract {String} input description.
-                default: None
-        metadata List of {Dict} {key:value} pairs.
-                default: None
-        minOccurs {Integer} minimum number of occurrences.
-                default: 1
-        maxOccurs {Integer} maximum number of occurrences.
-                default: 1
-        formats List of {Dict} according to table 23 (page 25). E.g.
+            Example::
+
                     [
                         {"mimeType": "image/tiff"},
                         {
@@ -287,12 +380,18 @@ class WPSProcess:
                             "schema":"http://foo/bar"
                         }
                     ]
-                default: [{"mimeType":"text/xml"}]
-        maxmegabites {Float} Maximum input file size. Can not be bigger, as
-                defined in global configuration file.
-                default: 5
-        """
 
+        :param maxmegabites: Maximum input file size. Can not be bigger, as
+                defined in global configuration file.
+
+        :param metadata: List of additional metadata
+        
+            Example:: 
+        
+                {"foo":"bar"}
+
+        :returns: :class:`pywps.Process.InAndOutputs.ComplexInput`
+        """
 
         self.inputs[identifier] = InAndOutputs.ComplexInput(identifier=identifier,
                 title=title,abstract=abstract,
@@ -307,21 +406,21 @@ class WPSProcess:
                 crss=["EPSG:4326"]):
         """Add BoundingBox input
 
-        Mandatory parameters:
-        identifier {String} input identifier
-        title {String} input title
-
-        Optional parameters:
-        abstract {String} input description.
-                default: None
-        metadata List of {Dict} {key:value} pairs.
-                default: None
-        minOccurs {Integer} minimum number of occurrences.
-                default: 1
-        maxOccurs {Integer} maximum number of occurrences.
-                default: 1
-        crss List of {String} supported coordinate systems.
-                default: ["EPSG:4326"]
+        :param identifier: input identifier
+        :type identifier: string
+        :param title: input title
+        :type title: string
+        :param abstract: input description.
+        :type abstract: string
+        :param metadata: List of {key:value} pairs.
+        :type metadata: object
+        :param minOccurs: minimum number of occurrences.
+        :type maxOccurs: integer
+        :param maxOccurs: maximum number of occurrences.
+        :type maxOccurs: integer
+        :param crss: of supported coordinate systems.
+        :type crss: list
+        :returns: :class:`pywps.Process.InAndOutputs.BoundingBoxInput`
         """
         self.inputs[identifier] = InAndOutputs.BoundingBoxInput(identifier,
                 title, abstract=abstract, metadata=metadata,
@@ -336,14 +435,14 @@ class WPSProcess:
             useMapscript=False):
         """Add complex output to this process
 
-        Mandatory parameters:
-        identifier {String} output identifier
-        title {String} output title
-
-        Optional parameters:
-        metadata List of {Dict} {key:value} pairs.
-                default: None
-        formats List of {Dict} according to table 23 (page 25). E.g.
+        :param identifier: output identifier
+        :param title: output title
+        :param metadata: List of {key:value} pairs.
+        :param formats: List of dictionaries according to table 23 (page
+            25) of the standard
+            
+            ::
+        
                     [
                         {"mimeType": "image/tiff"},
                         {
@@ -352,7 +451,8 @@ class WPSProcess:
                             "schema":"http://foo/bar"
                         }
                     ]
-                default: [{"mimeType":"text/xml"}]
+
+        :returns: :class:`pywps.Process.InAndOutputs.ComplexOutput`
         """
 
         self.outputs[identifier] = InAndOutputs.ComplexOutput(identifier=identifier,
@@ -366,20 +466,14 @@ class WPSProcess:
         """
         Add new output item of type LiteralValue to this process
 
-        Mandatory parameters:
-        identifier {String} input identifier
-        title {String} input title
-
-        Optional parameters:
-        abstract {String} input description. 
-                    default: None
-        uoms List of {String} value units
-                    default: ()
-        type {types.TypeType} value type, e.g. Integer, String, etc. you
-                    can uses the "types" module of python.
-                    default: types.IntType
-        default {Any} default value.
-                    default: None
+        :param identifier: input identifier
+        :param title: input title
+        :param abstract: input description. 
+        :param uoms: List of string  value units
+        :param type: :class:`types.TypeType` value type, e.g. Integer, String, etc. you
+                    can uses the :mod:`types` module of python.
+        :param default: default value, if any
+        :returns: :class:`pywps.Process.InAndOutputs.LiteralOutput`
         """
 
         self.outputs[identifier] = InAndOutputs.LiteralOutput(identifier=identifier,
@@ -391,17 +485,12 @@ class WPSProcess:
             crs="EPSG:4326", dimensions=2):
         """Add new output item of type BoundingBoxValue to this process
 
-        Mandatory parameters:
-        identifier {String} input identifier
-        title {String} input title
-
-        Optional parameters:
-        abstract {String} input description.
-                default: None
-        crss List of {String} supported coordinate systems.
-                default: ["EPSG:4326"]
-        dimensions {Integer} number of dimensions
-                default: 2
+        :param identifier: input identifier
+        :param title: input title
+        :param abstract: input description.
+        :param crss: List of strings supported coordinate systems.
+        :param dimensions: number of dimensions
+        :returns: :class:`pywps.Process.InAndOutputs.BoundingBoxOutput`
         """
 
         self.outputs[identifier] = InAndOutputs.BoundingBoxOutput(identifier=identifier,
@@ -411,29 +500,28 @@ class WPSProcess:
 
     # --------------------------------------------------------------------
     def cmd(self,cmd,stdin=None,stdout=True):
-        """Runs GRASS command, fetches all GRASS_MESSAGE and
-        GRASS_PERCENT messages and sets self.status according to them, so
-        the client application can track the progress information, when
-        running with Status=True
+        """Command line commands (including GRASS modules)
 
-        This module is supposed to be used instead of 'os.system()', while
-        running GRASS modules
+        .. note:: This module is supposed to be used instead of 'os.system()', while
+            running GRASS modules
 
-        Parameters:
-        cmd {String} the command
-        stdin {String} string to be send into the command via standard in
-        stdout {Boolean}  give stdout and stderror from the command back
+        :param cmd: the command, as list of parameters
+        :type cmd: [string]
+        :param stdin:  string to be send into the command via standard in
+        :param stdout:  give stdout and stderror from the command back
+        :type stdout: boolean
 
-        Returns:
-        {String} stdoutdata
+        :rtype: string
+        :returns: standard ouput from the command
 
-        Example Usage:
-            self.cmd("r.los in=elevation.dem out=los coord=1000,1000")
+        Example Usage::
 
-            self.cmd("v.net.path network afcol=forward abcol=backward \
-            out=mypath nlayer=1","1 9 12")
+            self.cmd(["r.los","in=elevation.dem","out=los","coord=1000,1000"])
 
-            self.cmd("d.mon start=PNG",stdout=False)
+            self.cmd(["v.net.path","network","afcol=forward","abcol=backward",
+            "out=mypath",'''nlayer=1","1 9 12"'''])
+
+            self.cmd(["d.mon","start=PNG"],stdout=False)
             """
 
         # splitting the command, if not already done
@@ -482,11 +570,10 @@ class WPSProcess:
         return stdout
 
     def message(self,msg,force=False):
-        """Print some message to standard error
+        """Print some message to logfile
 
-        Parameters:
-        msg {String} print this string to standard error
-        force {Boolean} if self.debug or force == True, the message will be
+        :param msg: print this string to logfile
+        :param force: if self.debug or force == True, the message will be
                 printed. nothing happen otherwise.
         """
 
@@ -505,7 +592,8 @@ class WPSProcess:
     def getInput(self,identifier):
         """Get input defined by identifier
 
-        Returns: None or Input
+        :param identifier: input identifier
+        :return: :class:`pywps.Process.InAndOutputs.Input`
         """
         try:
             return self.inputs[identifier]
@@ -515,7 +603,8 @@ class WPSProcess:
     def getInputValue(self,identifier):
         """Get input value according to identifier
 
-        Returns: None or self.inputs[identifier].value
+        :param identifier: input identifier
+        :return: None or `self.inputs[identifier].value`
         """
 
         try:
@@ -526,7 +615,8 @@ class WPSProcess:
     def setOutputValue(self,identifier,value):
         """Set output value
 
-        Returns: None
+        :param identifier: output identifier
+        :param value: value to be set
         """
         try:
             return self.outputs[identifier].setValue(value)
@@ -536,7 +626,12 @@ class WPSProcess:
     def i18n(self,key):
         """Give back translation of defined key
 
-        Returns: {String} translated string
+        :param key: key value to be translated
+        :return: translated string
         """
         return self.lang.get(key)
 
+    def execute(self):
+        """This method will be called by :class:`pywps.Wps.Execute.Execute`. Please
+        redefine this in your process instance"""
+        pass

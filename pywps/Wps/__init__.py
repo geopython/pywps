@@ -22,7 +22,8 @@
 __all__ = ["GetCapabilities","DescribeProcess","Execute","Wsdl"]
 
 import xml.dom.minidom
-from htmltmpl import TemplateManager, TemplateProcessor
+# make sure, that the package python-htmltmpl is installed on your system!
+from pywps.Template import TemplateProcessor
 import os
 from sys import stdout as STDOUT
 from sys import stderr as STDERR
@@ -34,8 +35,6 @@ class Request:
     response = None # Output document
     respSize = None # Size of the ouput document
     wps = None # Parent WPS object
-    templateManager = None # HTML TemplateManager
-    templateProcessor = TemplateProcessor(html_escape=0) # HTML TemplateProcessor
     template = None # HTML Template
     templateFile = None # File with template
     processDir = None # Directory with processes
@@ -50,9 +49,6 @@ class Request:
 
 	if os.name == "nt" or os.name == "java":
 		self.precompile = 0
-
-        self.templateManager = TemplateManager(precompile = self.precompile,
-            debug = self.wps.config.getboolean("server","debug"))
 
         if self.wps.inputs.has_key("request"):
             if self.wps.inputs["request"] == "getcapabilities":
@@ -75,6 +71,9 @@ class Request:
                                 os.path.join(Templates.__path__)[0],
                                 self.templateVersionDirectory,
                                     "Wsdl.tmpl")
+
+        self.templateProcessor = TemplateProcessor(self.templateFile,compile=True)
+
 
         self.processDir = os.getenv("PYWPS_PROCESSES")
         if self.processDir:

@@ -1,5 +1,7 @@
 """
-For SOAP
+SOAP
+----
+SOAP wrapper 
 """
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
@@ -48,6 +50,13 @@ def isSoap(document):
         return False
 
 class SOAP:
+    """Soap wrapper, used for parsing requests, which are in Soap envelope
+    and creating Soap responses from normal XMLs.
+
+    .. note:: This class is very primitive, it does not support advanced
+        Soap features, like authorization and so on.
+
+    """
 
     document = None
     nsIndex = 0
@@ -63,6 +72,7 @@ class SOAP:
             self.nsIndex = soap_env_NS.index(document.namespaceURI)
 
     def getNode(self,namespace,nodeName):
+        """Get XML nod from DOM of specified name and namespace"""
 
         elements = self.document.getElementsByTagNameNS(namespace, nodeName)
         if len(elements) > 0:
@@ -71,7 +81,7 @@ class SOAP:
             return None
 
     def getResponse(self,document):
-
+        """Wrap document into soap envelope"""
         # very primitive, but works
         document = document.replace("<?xml version=\"1.0\" encoding=\"utf-8\"?>","")
         return SOAP_ENVELOPE.replace("$SOAPBODY$",document)

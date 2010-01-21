@@ -1039,7 +1039,7 @@ OpenLayers.WPS.Utils = {
      * elem - {Object} 
      *
      * Returns:
-     * {Boolean} weather the element is in the list or not
+     * {Boolean} whether the element is in the list or not
      */
     isIn  : function(list, elem) {
         var obj = {};

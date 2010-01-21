@@ -1,9 +1,11 @@
-"""Parser parses input parameters, send via HTTP Post or HTTP Get method. If
+"""
+Parser
+------
+Parser parses input parameters, send via HTTP Post or HTTP Get method. If
 send via HTTP Post, the input is usually XML file.
 
 Each class in the package is resposible for each type of the request.
 
-$Id$
 """
 
 # Author:	Jachym Cepicky
@@ -36,7 +38,20 @@ __all__ = [
 
 
 class Parser:
-    """Parent class for all request parsers."""
+    """Parent class for all request parsers.
+    
+    .. attribute:: wps
+
+        instace of :class:`pywps.Pywps`
+
+    .. attribute:: isSoap
+
+        indicates, whether the request is in Soap envelope or not
+
+    .. attribute:: inputs
+
+        object, where results of parsing is stored
+    """
 
     wps = None
     isSoap = False

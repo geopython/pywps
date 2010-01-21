@@ -1,4 +1,6 @@
 """
+GRASS
+-----
 Module is here for work with GRASS GIS environmental variables and
 locations and mapsets
 """

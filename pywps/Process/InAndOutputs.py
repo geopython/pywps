@@ -1,3 +1,8 @@
+"""
+InAndOuputs
+-----------
+Inputs and outputs of OGC WPS Processes
+"""
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
 # Lince: 
@@ -22,7 +27,54 @@ import types,re, magic, base64
 from pywps import Exceptions
 
 class Input:
-    """Class WPS Input"""
+    """Class WPS Input
+
+    :param identifier: input identifier
+    :param title: input title
+    :param abstract: input description. 
+    :param metadata: List of {key:value} pairs. 
+    :param minOccurs: minimum number of occurrences. 
+    :param maxOccurs: maximum number of occurrences. 
+    :param type: one of "LiteralValue", "ComplexValue" or "BoundingBoxValue"
+
+    .. attribute :: identifier
+
+        input identifier
+
+    .. attribute :: title
+
+        input title
+
+    .. attribute :: abstract 
+
+        input abstract
+
+    .. attribute :: metadata 
+
+        input metadata
+
+    .. attribute :: minOccurs 
+
+        minimum occurense
+
+    .. attribute :: maxOccurs
+
+        maximum occurense
+
+    .. attribute :: type
+
+        type, one of "LiteralValue", "ComplexValue", "BoundingBoxValue"
+
+    .. attribute :: value
+
+        actual value of this input
+
+    .. attribute :: ms
+        
+        :mod:`magic` cookie
+        
+    """
+
     identifier = None
     title = None
     abstract = None
@@ -35,25 +87,8 @@ class Input:
 
     def __init__(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=1,maxOccurs=1,type=None):
-        """Input initialization
+        """Class constructor"""
 
-        Mandatory parameters:
-        identifier {String} input identifier
-        title {String} input title
-
-        Optional parameters:
-        abstract {String} input description. 
-                default: None
-        metadata List of {Dict} {key:value} pairs. 
-                default: None
-        minOccurs {Integer} minimum number of occurrences. 
-                default: 1
-        maxOccurs {Integer} maximum number of occurrences. 
-                default: 1
-        type {String} one of "LiteralValue", "ComplexValue"  or
-                "BoundingBoxValue"
-                default: None
-        """
         self.identifier = identifier
         self.title = title
         self.abstract = abstract
@@ -67,11 +102,9 @@ class Input:
         return
     
     def setValue(self,input):
-        """
-        Control in some way the input value
+        """Control in some way the input value from the client
         
-        Parameters:
-        input {pywps.Process.Input} 
+        :param input: input value, parsed in :mod:`pywps.Parser.Execute`
         """
 
         for inpt in input["value"]:
@@ -104,8 +137,60 @@ class Input:
 
 class LiteralInput(Input):
     """Literal input type of input. 
+
+    :param identifier: input identifier
+    :param title: input title
+    :param abstract: input description. Default: None
+    :param uoms: List of string value units
+    :param minOccurs: minimum number of occurrences. 
+    :param maxOccurs: maximum number of occurrences. 
+    :param allowedValues:  List of strings or lists of allowed values,
+                which can be used with this input. You can set interval
+                using list with two items, like::
+
+                    (1,2,3,(5,9),10,"a",("d","g"))
+
+                This will produce allowed values 1,2,3,10, "a" and
+                any value between 5 and 9 or "d" and "g".
+
+                If "*" is used, it means "any value"
+    :param type: :class:`types.TypeType` value type, e.g. Integer, String, etc. you
+                can uses the :mod:`types` module of python.
+    :param default:  default value.
+    :param spacing:
+
+        .. note: PyWPS does not support spacing parameter yet
+
+    .. attribute:: dataType
+
+        :class:`types.TypeType` type of literal data. Default is integer
+
+    .. attribute:: uoms
+
+        list of units
+
+    .. attribute: restrictedCharacters
+
+        characters, which will be ommited in the input from security
+        reasons
+
+    .. attribute:: values
+
+        allowed values
     
-    NOTE: The spacing parameter was not used yet"""
+    .. attribute:: default
+
+        default value
+
+    ..  attribute:: spacing
+
+        .. note:: this attribute is not used
+
+    .. attribute:: uom
+        
+        units
+    """
+
     dataType = None
     uoms = None
     restrictedCharacters = ['\\',"#",";", "&","!"]
@@ -117,40 +202,7 @@ class LiteralInput(Input):
     def __init__(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=1,maxOccurs=1,dataType=types.StringType,
                 uoms=(),values=("*"),spacing=None,default=None):
-        """Init the literal value type of input
-
-        Mandatory parameters:
-        identifier {String} input identifier
-        title {String} input title
-
-        Optional parameters:
-        abstract {String} input description. Default: None
-                    default: None
-        uoms List of {String} value units
-                    default: ()
-        minOccurs {Integer} minimum number of occurrences. 
-                    default: 1
-        maxOccurs {Integer} maximum number of occurrences. 
-                    default: 1
-        allowedValues  List of {String} or {List} list of allowed values,
-                    which can be used with this input. You can set interval
-                    using list with two items, like:
-
-                    (1,2,3,(5,9),10,"a",("d","g"))
-
-                    This will produce allowed values 1,2,3,10, "a" and
-                    any value between 5 and 9 or "d" and "g".
-
-                    If "*" is used, it means "any value"
-                    default: ("*")
-        type {types.TypeType} value type, e.g. Integer, String, etc. you
-                    can uses the "types" module of python.
-                    default: types.StringType
-        default {Any} default value.
-                    default: None
-        spacing {Float} 
-                    default: None
-        """
+        """Class constructor"""
         Input.__init__(self,identifier,title,abstract=abstract,
                 metadata=[],minOccurs=minOccurs,maxOccurs=maxOccurs,type="LiteralValue")
         
@@ -167,7 +219,11 @@ class LiteralInput(Input):
         return
 
     def setValue(self, input):
-        """Set input value value to this input"""
+        """Set input value to this input
+        
+        :param input: input parsed by parsers
+        :return: None or Error message
+        """
 
         if type(input["value"]) == types.ListType:
             for inpt in input["value"]:
@@ -180,8 +236,9 @@ class LiteralInput(Input):
                 return resp
 
     def getValue(self):
-        """
-        Get the input.value
+        """Get the input value
+
+        :returns: :attr:`value`
         """
         if self.value:
             return self.value
@@ -191,10 +248,9 @@ class LiteralInput(Input):
             return
 
     def _control(self,value):
-        """
-        Control input value for dangerous characters or types, like "#"
+        """Control input value for dangerous characters or types, like "#"
 
-        Parameters: value
+        :param value: value to be controled
         """
 
         # ugly characters
@@ -236,7 +292,46 @@ class LiteralInput(Input):
         raise Exceptions.InvalidParameterValue(value)
 
 class ComplexInput(Input):
-    """ComplexInput type"""
+    """ComplexInput type
+
+    :param identifier: input identifier
+    :param title: input title
+    :param abstract: input description. 
+    :param metadata: List of {key:value} pairs. 
+    :param minOccurs: minimum number of occurencies. 
+    :param maxOccurs: maximum number of occurencies. 
+    :param formats: List of objects according to table 23 (page 25). E.g.
+
+        ::
+
+            [
+                {"mimeType": "image/tiff"},
+                {
+                    "mimeType": "text/xml",
+                    "encoding": "utf-8",
+                    "schema":"http://foo/bar"
+                }
+            ]
+
+    :param maxmegabites: Maximum input file size. Can not be bigger, as
+            `maxfilesize` defined in global configuration file. 
+    
+    .. attribute:: maxFileSize 
+    
+        maximal allowed file size
+        
+    .. attribute:: formats
+    
+        list of supported formats
+        
+    .. attribute:: format
+    
+        the final format
+
+    .. attribute:: value
+
+        file name with the complex data
+    """
     maxFileSize = None
     formats = None
     format = None
@@ -244,35 +339,7 @@ class ComplexInput(Input):
     def __init__(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=1,maxOccurs=1,
                 maxmegabites=5,formats=[{"mimeType":"text/xml"}]):
-        """ Init complex input
-
-        Mandatory parameters:
-        identifier {String} input identifier
-        title {String} input title
-
-        Optional parameters:
-        abstract {String} input description. 
-                default: None
-        metadata List of {Dict} {key:value} pairs. 
-                default: None
-        minOccurs {Integer} minimum number of occurencies. 
-                default: 1
-        maxOccurs {Integer} maximum number of occurencies. 
-                default: 1
-        formats List of {Dict} according to table 23 (page 25). E.g.
-                    [
-                        {"mimeType": "image/tiff"},
-                        {
-                            "mimeType": "text/xml",
-                            "encoding": "utf-8",
-                            "schema":"http://foo/bar"
-                        }
-                    ]
-                default: [{"mimeType":"text/xml"}]
-        maxmegabites {Float} Maximum input file size. Can not be bigger, as
-                defined in global configuration file. 
-                default: 5
-        """
+        """Class constructor"""
 
         Input.__init__(self,identifier,title,abstract=abstract,
                 metadata=[],minOccurs=minOccurs,maxOccurs=maxOccurs,type="ComplexValue")
@@ -303,7 +370,10 @@ class ComplexInput(Input):
         return
 
     def setValue(self, input):
-        """Set input value for this input"""
+        """Set input value for this input
+
+        :param input: parsed input value
+        """
         
         # if HTTP GET was performed, the type does not have to be set
         if not input.has_key("type") and\
@@ -320,10 +390,11 @@ class ComplexInput(Input):
         return
 
     def storeData(self,data):
-        """Store data from given file. Not bigger, then self.maxmegabites
+        """Store data from given file. Not bigger, then
+        :attr:`maxFileSize`
         
-        Parameters: 
-        data {String} the data, which should be stored
+        :param data: the data, which should be stored
+        :type data: string
         """
         import tempfile
         from os import curdir, rename
@@ -367,11 +438,9 @@ class ComplexInput(Input):
     def getValue(self, asFile=False):
         """Get this value
         
-        Parameters:
-        asFile - {Boolean} return file object
-        
-        Return:
-        {String} or {File}
+        :param asFile: return the value not as file name (default), but as  file object
+        :return: :attr:`value`
+        :rtype: string or file
         """
 
         if asFile == True:
@@ -381,10 +450,9 @@ class ComplexInput(Input):
 
     def downloadData(self, url):
         """Download data from given url. Do not download more, then
-        self.maxmegabites
+        :attr:`maxFileSize`
 
-        Parameters:
-        url {String} URL where the data are lying
+        :param url: URL where the data are lying
         """
         import urllib, tempfile
         from os import curdir
@@ -437,18 +505,16 @@ class ComplexInput(Input):
     def onProblem(self,what, why):
         """Empty method, called, when there was any problem with the input.
         
-        Parameters:
-        what {String} Message with error description
-        why {String} Error code
+        :param what: Message with error description
+        :param why: Error code
         """
         pass
 
     def checkMimeType(self,fileName,mimeType):
         """Check, if the given mimetype is in self.formats
 
-        Parameters:
-        fileName {String}
-        mimeType {String}
+        :param fileName:
+        :param mimeType:
         """
         mimeTypes = "";
         for format in self.formats:
@@ -462,23 +528,53 @@ class ComplexInput(Input):
                 " does not correspond with allowed mimeType values, which can be on from ["+ mimeTypes+"]")
 
 
-    def onMaxFileSizeExceeded(self, why):
+    def onMaxFileSizeExceeded(self, what):
         """Empty method, called, when there was any problem with the input.
         
-        Parameters:
-        why {String} Error code
+        :param what: Error code
         """
         pass
 
     def onNotFound(self,what):
         """Empty method, called, when there was any problem with the input.
         
-        Parameters:
-        what {String} Error code
+        :param what: Error code
         """
         pass
 
 class BoundingBoxInput(Input):
+    """Add BoundingBox input
+
+    :param identifier: input identifier
+    :param title: input title
+    :param abstract: input description. 
+    :param metadata: List of {key:value} pairs. 
+    :param minOccurs: minimum number of occurrences. 
+    :param maxOccurs: maximum number of occurrences. 
+    :param crss: List of strings supported coordinate systems.
+
+    .. attribute:: crss
+        
+        Supported coordinate systems
+
+    .. attribute:: dimensions
+        
+        Bbox dimensions
+
+    .. attribute:: crs
+        
+        Used coordinate system
+
+    .. attribute:: minx
+        
+    .. attribute:: maxx
+    
+    .. attribute:: miny
+
+    .. attribute:: maxy
+        
+    """
+
     crss = None
     dimensions = None
     crs = None
@@ -490,24 +586,7 @@ class BoundingBoxInput(Input):
     def __init__(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=1,maxOccurs=1,dimensions=2,
                 crss=[]):
-        """Add BoundingBox input
-
-        Mandatory parameters:
-        identifier {String} input identifier
-        title {String} input title
-
-        Optional parameters:
-        abstract {String} input description. 
-                default: None
-        metadata List of {Dict} {key:value} pairs. 
-                default: None
-        minOccurs {Integer} minimum number of occurrences. 
-                default: 1
-        maxOccurs {Integer} maximum number of occurrences. 
-                default: 1
-        crss List of {String} supported coordinate systems.
-                default: ["EPSG:4326"]
-        """
+        """Class constructor"""
         Input.__init__(self,identifier,title,abstract=abstract,
                 metadata=metadata,minOccurs=minOccurs,maxOccurs=maxOccurs,type="BoundingBoxValue")
         
@@ -523,8 +602,11 @@ class BoundingBoxInput(Input):
     def setValue(self,value):
         """Set value of this input
 
-        Parameters:
-        value {Tuple} (minx,miny,maxx,maxy)
+        :param value: bounding box in format::
+            
+            (minx,miny,maxx,maxy)
+
+        :type value: tuple
         """
 
         resp = self._setValueWithOccurence(self.value,
@@ -550,7 +632,13 @@ class BoundingBoxInput(Input):
             self.maxy = value[3]
 
     def getValue(self):
-        """Get this value"""
+        """Get this value
+        
+        :returns: bounding box in format::
+            
+                (minx, miny, maxx, maxy)
+                
+        """
         return (self.minx,self.miny,self.maxx,self.maxy)
 
 class Output:

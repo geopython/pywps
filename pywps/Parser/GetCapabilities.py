@@ -1,4 +1,6 @@
 """
+GetCapabilities
+---------------
 This module parses OGC Web Processing Service (WPS) GetCapabilities request.
 """
 # Author:	Jachym Cepicky
@@ -29,7 +31,7 @@ from pywps.Parser.Post import Post
 from pywps.Parser.Get import Get
 
 class Post(Post):
-    """ Parses input request obtained via HTTP POST encoding - should be XML
+    """Parses input request obtained via HTTP POST encoding - should be XML
     file.
     """
 

@@ -1,3 +1,9 @@
+"""
+Get
+---
+
+.. moduleauthor: Jachym Cepicky
+"""
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
 # Lince:
@@ -46,9 +52,8 @@ class Get(Parser):
     def parse(self,queryString):
         """Parse given string with parameters given in KVP encoding
 
-        Keyword arguments:
-        queryString -- string of parameters taken from URL in KVP encoding
-
+        :param queryString: string of parameters taken from URL in KVP encoding
+        :returns: parsed inputs object
         """
 
         key = None

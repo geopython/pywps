@@ -1,4 +1,6 @@
 """
+DescribeProcess
+---------------
 This module parses OGC Web Processing Service (WPS) DescribeProcess request.
 """
 # Author:	Jachym Cepicky
