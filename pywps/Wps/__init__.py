@@ -22,7 +22,6 @@
 __all__ = ["GetCapabilities","DescribeProcess","Execute","Wsdl"]
 
 import xml.dom.minidom
-# make sure, that the package python-htmltmpl is installed on your system!
 from htmltmpl import TemplateManager, TemplateProcessor
 import os
 from sys import stdout as STDOUT

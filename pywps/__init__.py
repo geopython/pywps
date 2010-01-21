@@ -1,16 +1,13 @@
-"""PyWPS main package.
+"""
+PyWPS
+=====
+This package contains classes necessary for input parsing OGC WPS requests,
+working with list of processes, executing them and redirecting OGC WPS
+responses back to client.
 
-This package contains classes necessary for input parsing and request
-performing. The output is done via python's htmltmpl template system.
+The outputs are generated using python's htmltmpl template system.
 
-Here is also the default package with WPS Processes.
-
-This program is free software, distributed under the terms of GNU General
-Public License as published by the Free Software Foundation version 2 of the
-License.
-
-
-$Id$
+.. moduleauthor:: Jachym Cepicky <jachym bnhelp cz>
 """
 
 __all__ = [ "Parser","processes", "Process", "Exceptions", "Wps", "Templates"]
@@ -80,16 +77,14 @@ class Pywps:
     versions=[defaultVersion]
     logFile = STDERR
 
-    def __init__(self, method, configFiles=None):
+    def __init__(self, method=METHOD_GET, configFiles=None):
         """Class constructor
 
-        Will load configuration files, parse the input parameters and
-        perform the request.
-
-        Parameters:
-        configFiles {List} list of configuration files. Ignore, if you want
-            to use standard files location
-
+        :param method: Used HTTP method, which is either ref:METHOD_POST:
+        or :ref:`METHOD_GET`:
+        :type method: string
+        :param configFiles: List of configuration files. Ignore, if you want to use standard files location
+        :type configFiles: list
         """
 
         # get settings
@@ -106,18 +101,17 @@ class Pywps:
 
         # find out the request method
         self.method = method
-        if not self.method:  # set standard method
-            self.method = METHOD_GET
 
 
     def parseRequest(self,queryStringObject):
         """
-        Parameters:
-        queryStringObject {String|file} string or file object with the
-        request
+        Parse input OGC WPS request, which is either URL Query string or
+        file object, e.g.  :mod:`sys.stdin`
 
-        Return:
-        {Object} inputs
+        :param queryStringObject: string or file object with the request
+        :type queryStringObject: string or file object
+        :returns: Dictionary of parsed input values
+        :rtype: dict
         """
 
         # decide, which method to use
@@ -134,11 +128,11 @@ class Pywps:
 
     def _loadConfiguration(self, cfgfiles=None):
         """Load PyWPS configuration from configuration files.
-        The later overwrites configuration from the first
+        The later configuration file in the array overwrites configuration
+        from the first.
 
-        Parameters:
-        cfgfiles {List} array of file names, where to get configuration from.
-
+        :param cfgfiles: list of file names, where to get configuration from.
+        :type cfgfiles: list of strings
         """
 
         if cfgfiles == None:
@@ -151,24 +145,23 @@ class Pywps:
         self.config.read(cfgfiles)
 
     def getDefaultConfigFilesLocation(self):
-        """
-        Get the locations of the standard configuration files. This are
+        """Get the locations of the standard configuration files. This are
 
         Unix/Linux:
-        pywps/default.cfg
-        /etc/pywps.cfg
-        pywps/etc/pywps.cfg
-        $HOME/.pywps.cfg
+            1. `pywps/default.cfg`
+            2. `/etc/pywps.cfg`
+            3. `pywps/etc/pywps.cfg`
+            4. `$HOME/.pywps.cfg`
 
         Windows:
-        pywps\\default.cfg
-        pywps\\etc\\default.cfg
+            1. `pywps\\default.cfg`
+            2. `pywps\\etc\\default.cfg`
         
         Both:
-        $PYWPS_CFG environment variable
+            1. `$PYWPS_CFG environment variable`
 
-        Returns:
-        {List} configuration files
+        :returns: configuration files
+        :rtype: list of strings
         """
 
         # configuration file as environment variable
@@ -205,9 +198,10 @@ class Pywps:
 
     def performRequest(self,inputs = None):
         """Performs the desired WSP Request.
-        
-        Parameters:
-        inputs {Object} idealy self.inputs (Default)
+
+        :param inputs: idealy self.inputs (Default) object, result from
+            parseRequest. Default is self.inputs
+        :rtype: pywps.Wps.Response
         """
 
         if inputs == None:
@@ -236,12 +230,14 @@ class Pywps:
         return self.response
 
     def getConfigValue(self,*args):
-        """Return desired value from the configuration files
+        """Get desired value from  configuration files
 
-        Keyword arguments:
-        section -- section in configuration files
-        key -- key in the section
-
+        :param section: section in configuration files
+        :type section: string
+        :param key: key in the section
+        :type key: string
+        :returns: value found in the configuration file
+        :rtype: string
         """
 
         value = self.config.get(*args)
@@ -255,6 +251,13 @@ class Pywps:
 
     def debug(self,debug,code="Debug"):
         """Print debug argument to standard error
+
+        :param debug: debugging text, which should be printed to the 
+            :ref:`logFile`_
+        :type debug: string
+        :param code: text, which will be printed to the :ref:`logFile`_
+            direct after 'PyWPS' and before the debug text
+        :type code: string.
         """
 
         dbg = self.getConfigValue("server","debug")
@@ -267,13 +270,13 @@ class Pywps:
 
     def printResponse(self,fileDes,isSoap=False,response=None):
         """
-        print response to file descriptor file descriptor
-        can be of type list or file
+        Print response to files given as input parameter.
 
-        Parameters:
-            fileDes - file descriptor, where to print the result
-            isSoap - Boolean, if the response should be printed in the SOAP
-                    envelope or no
+        :param fileDes: file object or list of file objects
+        :type fileDes: string or list
+        :param isSoap: print the response in SOAP envelope
+        :type isSoap: bool
+        :param response: the response object. Default is self.response
         """
 
         if type(fileDes) != type([]):
@@ -312,7 +315,7 @@ class Pywps:
 		self.stdOutClosed = True
 
     def _setLogFile(self):
-        """Set self.logFile to  or something else
+        """Set self.logFile. Default is sys.stderr
         """
 
         # logfile
