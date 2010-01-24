@@ -1,6 +1,4 @@
 """
-InAndOuputs
------------
 Inputs and outputs of OGC WPS Processes
 """
 # Author:	Jachym Cepicky
@@ -642,7 +640,43 @@ class BoundingBoxInput(Input):
         return (self.minx,self.miny,self.maxx,self.maxy)
 
 class Output:
-    """Class WPS Input"""
+    """Class WPS Input
+
+    :param identifier: input identifier
+    :param title: input title
+    :param abstract: input description. 
+    :param metadata: List of {key:value} pairs. 
+    :param type: one of "LiteralValue", "ComplexValue"  or "BoundingBoxValue"
+    :param asReference:  whether this output will be given back as
+            reference or as file
+    :type asReference: boolean
+
+    .. attribute:: identifier
+
+    .. attribute:: title
+
+    .. attribute:: abstract
+
+    .. attribute:: metadata
+
+    .. attribute:: type
+
+        "ComplexValue", "LiteralValue", "BoundingBoxValue"
+
+    .. attribute:: asReference
+    
+        this output should be formated as reference (URL) or give the file
+        content back 
+
+    .. attribute:: value
+
+        output value
+        
+    .. attribute:: ms
+    
+        mime cookie
+
+    """
     identifier = None
     title = None
     abstract = None
@@ -654,24 +688,7 @@ class Output:
 
     def __init__(self,identifier,title,abstract=None,
                 metadata=[],type=None, asReference=False):
-        """Output initialization
-
-        Mandatory parameters:
-        identifier {String} input identifier
-        title {String} input title
-
-        Optional parameters:
-        abstract {String} input description. 
-                default: None
-        metadata List of {Dict} {key:value} pairs. 
-                default: None
-        type {String} one of "LiteralValue", "ComplexValue"  or
-                "BoundingBoxValue"
-                default: None
-        asReference {Boolean} whether this output will be given back as
-                reference or as file
-                default: False
-        """
+        """Class Constructor"""
         self.identifier = identifier
         self.title = title
         self.abstract = abstract
@@ -686,33 +703,24 @@ class Output:
         self.value = value
 
 class LiteralOutput(Output):
-    """Literal output class"""
+    """Literal output class
+
+    :param identifier: input identifier
+    :param title: input title
+    :param abstract: input description. Default: None
+    :param metadata: List of {key:value}s additional metadata
+    :param uoms: List of string values units
+    :param dataType: :class:`types.TypeType` value type, e.g. Integer, String, etc. you
+                can uses the "types" module of python.
+    :param default: default value.
+    :param asReference: whether this output will be given back as
+            reference or as file
+    """
+
     def __init__(self,identifier,title,abstract=None,
                 metadata=[], uoms=(), dataType = types.StringType, 
                 default=None, asReference=False):
-        """
-        Output of type LiteralValue
-
-        Mandatory parameters:
-        identifier {String} input identifier
-        title {String} input title
-
-        Optional parameters:
-        abstract {String} input description. Default: None
-                    default: None
-        metadata List of {Dict} additional metadata
-                    default: ()
-        uoms List of {String} value units
-                    default: ()
-        dataType {types.TypeType} value type, e.g. Integer, String, etc. you
-                    can uses the "types" module of python.
-                    default: types.StringType
-        default {Any} default value.
-                    default: None
-        asReference {Boolean} whether this output will be given back as
-                reference or as file
-                default: False
-        """
+        """Class Constructor"""
         Output.__init__(self,identifier,title,abstract=None,
                 metadata=[],type="LiteralValue",asReference=asReference)
         
@@ -726,7 +734,55 @@ class LiteralOutput(Output):
         return
 
 class ComplexOutput(Output):
-    """Complex value output"""
+    """Complex value output
+    
+    :param identifier: output identifier
+    :param title: output title
+    :param metadata: List of {key:value} pairs. 
+    :param formats: List of format structure according to table 23 (page
+        25). E.g.::
+
+                [
+                    {"mimeType": "image/tiff"},
+                    {
+                        "mimeType": "text/xml",
+                        "encoding": "utf-8",
+                        "schema":"http://foo/bar"
+                    }
+                ]
+
+    :param asReference: whether this output will be given back as
+            reference or as file
+    :param projection: proj4 text, used for the proj init parameter,
+            e.g. "epsg:4326", used for mapserver
+    :param bbox: of 4 elements (minx,miny,maxx,maxy), used for
+            mapserver
+    :param useMapscript: For this output, setup special MapServer
+        MapFile, and give the output back as link to it, WMS, WCS or WFS
+
+    .. attribute :: formats
+
+        list of supported formats
+
+    .. attribute :: format
+
+        file format
+
+    .. attribute :: projection
+
+        file projection (used by mapserver)
+
+    .. attribute :: bbox
+
+        data bounding box (used by mapserver)
+
+    .. attribute :: width
+    .. attribute :: height
+    .. attribute :: useMapscript
+    
+        create dynamicaly mapfile and setup MapServer environment
+        
+    """
     formats = None
     format = None
     projection = None
@@ -739,33 +795,7 @@ class ComplexOutput(Output):
                 metadata=[], formats=[{"mimeType":"text/xml"}],
                 asReference=False, projection=None, bbox=None, useMapscript
                 =  False):
-        """Complex output
-
-        Mandatory parameters:
-        identifier {String} output identifier
-        title {String} output title
-
-        Optional parameters:
-        metadata List of {Dict} {key:value} pairs. 
-                default: None
-        formats List of {Dict} according to table 23 (page 25). E.g.
-                    [
-                        {"mimeType": "image/tiff"},
-                        {
-                            "mimeType": "text/xml",
-                            "encoding": "utf-8",
-                            "schema":"http://foo/bar"
-                        }
-                    ]
-                default: [{"mimeType":"text/xml"}]
-        asReference {Boolean} whether this output will be given back as
-                reference or as file
-                default: False
-        projection {String} proj4 text, used for the proj init parameter,
-                e.g. "epsg:4326", used for mapserver
-        bbox {Tupple} of 4 elements (minx,miny,maxx,maxy), used for
-                mapserver
-        """
+        """Class constructor"""
         Output.__init__(self,identifier,title,abstract=None,
                 metadata=[],type="ComplexValue", asReference=asReference)
         
@@ -795,8 +825,8 @@ class ComplexOutput(Output):
     def setValue(self, value):
         """Set the output value
 
-        Parameters:
-        value - {String} or {File} object
+        :param value: value to be returned (file name or file itself)
+        :type value: string or file
         """
 
         if type(value) == types.StringType:
@@ -810,6 +840,33 @@ class ComplexOutput(Output):
 
 
 class BoundingBoxOutput(Output):
+    """Bounding box ouput 
+        
+    :param identifier: input identifier
+    :param title: input title
+    :param abstract: input description. 
+    :param crss: List of strings of supported coordinate systems.
+    :param dimensions: number of dimensions
+    :param asReference:  whether this output will be given back as
+            reference or as file
+        
+    .. attribute:: crss
+        
+        list of supporte coordinate systems
+
+    .. attribute:: crs
+
+        coordinate system
+
+    .. attribute:: dimensions
+
+        bbox dimensions
+
+    .. attribute:: minx
+    .. attribute:: miny
+    .. attribute:: maxx
+    .. attribute:: maxy
+    """
     crss = None
     crs = None
     dimensions = None
@@ -820,23 +877,7 @@ class BoundingBoxOutput(Output):
 
     def __init__(self,identifier,title,abstract=None,
                 metadata=[], crss=[], dimensions=2, asReference=False):
-        """BoundingBox output
-        
-        Mandatory parameters:
-        identifier {String} input identifier
-        title {String} input title
-
-        Optional parameters:
-        abstract {String} input description. 
-                default: None
-        crss List of {String} supported coordinate systems.
-                default: ["EPSG:4326"]
-        dimensions {Integer} number of dimensions
-                default: 2
-        asReference {Boolean} whether this output will be given back as
-                reference or as file
-                default: False
-        """
+        """BoundingBox output"""
         Output.__init__(self,identifier,title,abstract=None,
                 metadata=[],type="BoundingBoxValue",asReference=asReference)
         self.crss = crss
@@ -851,8 +892,10 @@ class BoundingBoxOutput(Output):
     def setValue(self, value):
         """Set value to bbox output
 
-        Parameters:
-        value {Tuple} (minx,miny,maxx,maxy)
+        :param value: boundngbox::
+        
+            (minx,miny,maxx,maxy)
+
         """
 
         if len(value) != 4:

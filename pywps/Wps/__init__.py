@@ -1,3 +1,7 @@
+"""
+Wps Request
+-----------
+"""
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
 #               jachym at les-ejk dot cz
@@ -32,17 +36,58 @@ from pywps import Templates
 from pywps import Soap
 
 class Request:
+    """WPS Request performing, and response formating
+
+    :param wps: instance of :class:`Pywps`
+
+    .. attribute:: response
+        
+        formated response output
+
+    .. attribute:: wps
+
+        instance of :class:`pywps.PyWPS`
+
+    .. attribute:: templateFile
+
+        name of the template file (based on WPS version and request type)
+
+    .. attribute:: processDir
+
+        temporary created directory, where the process is running
+
+    .. attribute:: templateVersionDirectory
+
+        directory, where templates are stored (based on WPS version)
+        
+    .. attribute:: precompile
+
+        indicates, if the template shuld be precompiled for later usage or
+        not
+
+    .. attribute:: stdOutClosed
+
+        indicates, if we can write to standard output or not (usualy it is
+        opend, it is closed only while the process is running in
+        assynchronous mode)
+        
+    .. attribute:: templateProcessor
+
+        instance of :class:`pywps.Template.TemplateProcessor`
+    """
+
     response = None # Output document
     respSize = None # Size of the ouput document
     wps = None # Parent WPS object
-    template = None # HTML Template
     templateFile = None # File with template
     processDir = None # Directory with processes
     templateVersionDirectory = None # directory with templates for specified version
     precompile = 1
     stdOutClosed = False
+    templateProcessor = None
 
     def __init__(self,wps):
+        """Class constructor"""
         self.wps = wps
 
         self.templateVersionDirectory = self.wps.inputs["version"].replace(".","_")
@@ -128,8 +173,13 @@ class Request:
                         raise self.wps.exceptions.InvalidParameterValue(prc)
 
     def getDataTypeReference(self,inoutput):
-        """
-        Returns data type reference according to W3C
+        """Returns data type reference according to W3C
+
+        :param inoutput: :class:`pywps.Process.InAndOutputs.Input`
+            or :class:`pywps.Process.InAndOutputs.Output`
+
+        :rtype: string
+        :returns: url to w3.org
         """
 
         dataType = {"type": None, "reference": None}
@@ -155,5 +205,10 @@ class Request:
 
     def cleanEnv(self):
         """Clean possible temporary files etc. created by this request
-        type"""
+        type
+        
+        .. note:: this method is empty and should be redefined by particula
+            instances
+        """
+
 

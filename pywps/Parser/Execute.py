@@ -1,6 +1,4 @@
 """
-Execute
--------
 This module parses OGC Web Processing Service (WPS) Execute request.
 """
 # Author:	Jachym Cepicky
@@ -26,6 +24,7 @@ This module parses OGC Web Processing Service (WPS) Execute request.
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import xml.dom.minidom
+import pywps
 from pywps.Parser.Post import Post
 from pywps.Parser.Get import Get
 
@@ -45,9 +44,9 @@ class Post(Post):
         firstChild = self.getFirstChildNode(self.document)  # no comments or
                                                             # white spaces
         self.nameSpace = firstChild.namespaceURI    # document namespace
-        self.nameSpace = self.wps.WPS_NAMESPACE
-        self.owsNameSpace = self.wps.OWS_NAMESPACE
-        self.xlinkNameSpace = self.wps.XLINK_NAMESPACE
+        self.nameSpace = pywps.WPS_NAMESPACE
+        self.owsNameSpace = pywps.OWS_NAMESPACE
+        self.xlinkNameSpace = pywps.XLINK_NAMESPACE
         language  = None
         identifiers = []
         identifierNode = None

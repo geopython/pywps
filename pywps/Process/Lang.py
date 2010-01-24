@@ -3,11 +3,11 @@ user scan use them directly in processes.
 
 In the process:
 
-    User has to define set of messages for all supported languages, like
+    User has to define set of messages for all supported languages, like::
 
-    self.lang["eng"]["key1"] = "Hallo, world!"
-    self.lang["eng"]["key2"] = "Foo"
-    self.lang["eng"]["key3"] = "Bar"
+        self.lang["eng"]["key1"] = "Hallo, world!"
+        self.lang["eng"]["key2"] = "Foo"
+        self.lang["eng"]["key3"] = "Bar"
 
     Than the user can use self.i18n(key) method, which returns the string
     in preset language (given by client request)
@@ -36,6 +36,7 @@ In the process:
 import os
 
 class Lang:
+    """Lang class"""
 
     # static list of language codes
 
@@ -91,7 +92,8 @@ class Lang:
         """ Initialize self.strings object according to known codes from
         Lang.py
 
-        It can be used later like:
+        It can be used later like::
+
             self.strings["eng"]["foo"] = "bar"
 
         """

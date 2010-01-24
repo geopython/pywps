@@ -1,6 +1,4 @@
 """
-GetCapabilities
----------------
 This module parses OGC Web Processing Service (WPS) GetCapabilities request.
 """
 # Author:	Jachym Cepicky
@@ -27,6 +25,7 @@ This module parses OGC Web Processing Service (WPS) GetCapabilities request.
 
 import xml.dom.minidom
 
+import pywps
 from pywps.Parser.Post import Post
 from pywps.Parser.Get import Get
 
@@ -43,8 +42,8 @@ class Post(Post):
         acceptedVersionsNodes = None
         versionNode = None
         firstChild = self.getFirstChildNode(self.document)
-        owsNameSpace = self.wps.OWS_NAMESPACE
-        wpsNameSpace = self.wps.WPS_NAMESPACE
+        owsNameSpace = pywps.OWS_NAMESPACE
+        wpsNameSpace = pywps.WPS_NAMESPACE
 
         #
         # Mandatory options

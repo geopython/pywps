@@ -1,6 +1,4 @@
 """
-DescribeProcess
----------------
 This module parses OGC Web Processing Service (WPS) DescribeProcess request.
 """
 # Author:	Jachym Cepicky
@@ -26,6 +24,7 @@ This module parses OGC Web Processing Service (WPS) DescribeProcess request.
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import xml.dom.minidom
+import pywps
 from pywps.Parser.Post import Post
 from pywps.Parser.Get import Get
 
@@ -39,7 +38,7 @@ class Post(Post):
         self.document = document  # input DOM
 
         firstChild = self.getFirstChildNode(self.document)
-        owsNameSpace = self.wps.OWS_NAMESPACE
+        owsNameSpace = pywps.OWS_NAMESPACE
         identifiers = []
         identifierNode = None
 

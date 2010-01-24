@@ -1,6 +1,3 @@
-"""
-WPS GetCapabilities request handler
-"""
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
 #               jachym at les-ejk dot cz
@@ -31,13 +28,12 @@ class GetCapabilities(Request):
     """
     Parses input request obtained via HTTP POST encoding - should be XML
     file.
+
+    :param wps: :class:`pywps.Pywps`
     """
 
     def __init__(self,wps):
         """
-        Arguments:
-           self
-           wps   - parent WPS instance
         """
         try:
             Request.__init__(self,wps)

@@ -1,6 +1,3 @@
-"""
-WPS Execute request handler
-"""
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
 #               jachym at les-ejk dot cz
@@ -36,7 +33,119 @@ except:
 
 class Execute(Request):
     """
-    This class performs the Execute request of WPS specification
+    This class performs the Execute request of WPS specification and
+    formats output
+
+    :param wps: :class:`pywps.Pywps`
+
+    .. attribute :: accepted
+
+        Process accepted indicator string
+        
+    .. attribute :: started
+
+        Process started indicator string
+
+    .. attribute :: succeeded
+
+        Process succeeded indicator string
+
+    .. attribute :: paused
+
+        Process paused indicator string
+
+    .. attribute :: failed
+
+        Process failed indicator string
+
+    .. attribute :: curdir
+
+        Curent working directory, when the process is started
+
+    .. attribute :: pid
+
+        Id of currently running process on the system level
+
+    .. attribute :: id
+
+        Unique WPS Process identification
+
+    .. attribute :: statusLocation
+
+        Location, where status and response files are stored
+
+    .. attribute :: statusFileName
+
+        Name of the file, where status informations are printed to
+
+    .. attribute :: statusFiles
+
+        List of file objects, where status informations are printed to
+
+    .. attribute :: storeRequired
+
+        Storing of process results is required
+
+    .. attribute :: statusRequired
+
+        Process should run in assynchronous mode
+
+    .. attribute :: lineageRequired
+
+        Include input and output description to final response document
+        (just like DescribeProcess would do it)
+
+    .. attribute :: status
+
+        Current process status,  one of :attr:`processaccepted`,
+        :attr:`processstarted`, :attr:`processsucceeded`, :attr:`processfailed`
+
+    .. attribute :: statusMessage
+        
+        Text message or comment to particular status
+        
+    .. attribute :: percent
+
+        Percent done
+
+    .. attribute :: exceptioncode
+
+        Code of exception
+
+    .. attribute :: locator
+
+        Locator of exception
+
+    .. attribute :: statusTime
+
+        current status time 
+
+    .. attribute :: dirsToBeRemoved
+
+        List of directories, which should be removed, after the process is
+        successfully calculated
+
+    .. attribute :: workingDir
+
+        working directory, where the calculation is done
+
+    .. attribute :: grass
+
+        :class:`pywps.Grass.Grass`
+
+    .. attribute :: rawDataOutput
+
+        indicates, if there is any output, which should be returned
+        directly (without final xml response document)
+
+    .. attribute :: mapObj
+
+        MapServer Map object, if some output should be returned with help
+        of mapserver.
+
+    .. attribute :: mapFileName
+
+        Name of mapfile, wheter it's going to be stored
     """
 
     # status variants
@@ -67,7 +176,6 @@ class Execute(Request):
     percent = 0
     exceptioncode = None
     locator = 0
-    percent = 0
     statusTime = None
 
     # directories, which should be removed
@@ -84,9 +192,6 @@ class Execute(Request):
 
 
     def __init__(self,wps):
-        """
-        wps   - parent WPS instance
-        """
 
         Request.__init__(self,wps)
 
@@ -309,8 +414,7 @@ class Execute(Request):
         self.cleanEnv()
 
     def initProcess(self):
-        """
-        Setting and controlling input values, set by the client. Also the
+        """Setting and controlling input values, set by the client. Also the
         processes from PYWPS_PROCESS directory or default directory is
         imported.
         """
@@ -425,11 +529,10 @@ class Execute(Request):
                             poutput.uom = respOut["uom"]
 
     def onInputProblem(self,what,why):
-        """
-        This method is used for rewriting onProblem method of each input
+        """This method is used for rewriting onProblem method of each input
 
-        what - locator of the problem
-        why - possible reason of the problem
+        :param what: locator of the problem
+        :param why: possible reason of the problem
         """
 
         exception = None
@@ -443,8 +546,7 @@ class Execute(Request):
         raise exception(why)
 
     def executeProcess(self):
-        """
-        Calls 'execute' method of the process, catches possible exceptions
+        """Calls 'execute' method of the process, catches possible exceptions
         and set process failed or succeeded
         """
         try:
@@ -475,8 +577,7 @@ class Execute(Request):
                             (self.process.identifier,e))
 
     def processDescription(self):
-        """
-        Fills Identifier, Title and Abstract, eventually WSDL, Metadata and Profile
+        """ Fills Identifier, Title and Abstract, eventually WSDL, Metadata and Profile
         parts of the output XML document
         """
 
@@ -502,18 +603,15 @@ class Execute(Request):
         if self.process.version:
             self.templateProcessor.set("processversion", self.process.version)
 
-    def promoteStatus(self,status,
-                    statusMessage=0, percent=0,
-                    exceptioncode=0, locator=0,
-                    output=None):
-        """
-        Sets status of currently performed Execute request
+    def promoteStatus(self,status, statusMessage=0, percent=0,
+                    exceptioncode=0, locator=0, output=None):
+        """Sets status of currently performed Execute request
 
-        {String} status -  name of the status
-        {String} statusMessage - message, which should appear in output xml file
-        {Float} percent - percent done message
-        {String} exceptioncode - eventually exception
-        {String} locator - where the problem occurred
+        :param status:  name of the status
+        :param statusMessage: message, which should appear in output xml file
+        :param percent: percent done message
+        :param exceptioncode: eventually exception
+        :param locator: where the problem occurred
         """
         self.statusTime = time.time()
         self.templateProcessor.set("statustime", time.ctime(self.statusTime))
@@ -575,8 +673,7 @@ class Execute(Request):
 
 
     def lineageInputs(self):
-        """
-        Called, if lineage request was set. Fills the <DataInputs> part of
+        """Called, if lineage request was set. Fills the <DataInputs> part of
         output XML document.
         """
         templateInputs = []
@@ -612,16 +709,14 @@ class Execute(Request):
         self.templateProcessor.set("Inputs",templateInputs)
 
     def _lineageLiteralInput(self, input, wpsInput, literalInput):
-        """
-        Fill input of literal data
+        """ Fill input of literal data
         """
         literalInput["literaldata"] = wpsInput["value"]
         literalInput["uom"] = str(input.uom)
         return literalInput
 
     def _lineageComplexInput(self, input, complexInput):
-        """
-        Fill input of complex data
+        """ Fill input of complex data
         """
         complexInput["complexdata"] = open(input.value,"r").read()
         complexInput["encoding"] = input.format["encoding"]
@@ -630,11 +725,10 @@ class Execute(Request):
         return complexInput
 
     def _lineageComplexReferenceInput(self, wpsInput, processInput, complexInput):
-        """
-        Fill reference input
+        """ Fill reference input
 
-        wpsInput - associative field of self.wps.inputs["datainputs"]
-        processInput - self.process.inputs
+        :param wpsInput: associative field of self.wps.inputs["datainputs"]
+        :param processInput: self.process.inputs
         """
         complexInput["reference"] = wpsInput["value"]
         method = "GET"
@@ -665,8 +759,7 @@ class Execute(Request):
         return bboxInput
 
     def outputDefinitions(self):
-        """
-        Called, if lineage request was set. Fills the <OutputDefinitions> part of
+        """Called, if lineage request was set. Fills the <OutputDefinitions> part of
         output XML document.
         """
         templateOutputs = []
@@ -930,16 +1023,20 @@ class Execute(Request):
                 os.path.normcase(os.path.abspath(dst)))
 
     def makeSessionId(self):
-        """
-        Returns unique Execute session ID
+        """ Returns unique Execute session ID
+
+        :rtype: string
+        :return: unique id::
+
+            "pywps-"+str(int(time.time()*100))
+
         """
         return "pywps-"+str(int(time.time()*100))
 
     def getSessionIdFromStatusLocation(self,statusLocation):
-        """
-        Parses the statusLocation, and gets the unique session ID from it
+        """ Parses the statusLocation, and gets the unique session ID from it
 
-        NOTE: Not in use, maybe should be removed.
+        .. note:: Not in use, maybe should be removed.
         """
         begin = statusLocation.find("/pywps-")
         end = statusLocation.find(".xml")
@@ -949,8 +1046,9 @@ class Execute(Request):
             return None
 
     def serviceInstanceUrl(self):
-        """
-        Creates URL of GetCapabilities for this WPS
+        """Creates URL of GetCapabilities for this WPS
+
+        :return: server address
         """
         serveraddress = self.wps.getConfigValue("wps","serveraddress")
 
@@ -970,8 +1068,7 @@ class Execute(Request):
         return serveraddress
 
     def onStatusChanged(self):
-        """
-        This method is used for redefinition of self.process.status class
+        """This method is used for redefinition of self.process.status class
         """
 
         self.promoteStatus(self.process.status.code,
@@ -1026,8 +1123,7 @@ class Execute(Request):
         return
 
     def cleanEnv(self):
-        """
-        Removes temporary created files and dictionaries
+        """ Removes temporary created files and dictionaries
         """
         os.chdir(self.curdir)
         def onError(*args):
@@ -1042,6 +1138,11 @@ class Execute(Request):
 
 
     def calculateMaxInputSize(self):
+        """Calculates maximal size for input file based on configuration
+        and units
+
+        :return: maximum file size bytes
+        """
         maxSize = self.wps.getConfigValue("server","maxfilesize")
         maxSize = maxSize.lower()
 
@@ -1060,8 +1161,7 @@ class Execute(Request):
         return size
 
     def printRawData(self):
-        """
-        Prints raw data to sys.stdout with correct content-type, according
+        """Prints raw data to sys.stdout with correct content-type, according
         to mimeType attribute or output value
         """
 

@@ -1,6 +1,3 @@
-"""
-WPS DescribeProcess request handler
-"""
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
 #               jachym at les-ejk dot cz
@@ -60,8 +57,10 @@ class DescribeProcess(Request):
         return
 
     def processesDescription(self):
-        """
-        Will return Object with processes description
+        """Format process description block
+
+        :return: dictionary, which is to be used for
+            :func:`pywps.Template.TemplateProcessor.set`
         """
 
         processesData = []
@@ -129,8 +128,10 @@ class DescribeProcess(Request):
         return processesData
 
     def processInputs(self,process):
-        """
-        Will return Object with process inputs
+        """Format process inputs block
+
+        :return: dictionary, which is to be used for
+            :func:`pywps.Template.TemplateProcessor.set`
         """
 
         processInputs = []
@@ -160,8 +161,10 @@ class DescribeProcess(Request):
         return processInputs
 
     def processOutputs(self,process):
-        """
-        Will return Object with process output
+        """Format process outputs block
+
+        :return: dictionary, which is to be used for
+            :func:`pywps.Template.TemplateProcessor.set`
         """
 
         processOutputs = []
@@ -184,6 +187,14 @@ class DescribeProcess(Request):
         return processOutputs
 
     def literalValue(self,inoutput,processInOutput):
+        """Format literal value attributes
+
+        :param inoutput: :class:`pywps.Process.InAndOutputs.Input` or 
+            :class:`pywps.Process.InAndOutputs.Output`
+
+        :param processInOutput: dictionary, where to store the parameters
+            in 
+        """
 
         # data types
         dataTypeReference = self.getDataTypeReference(inoutput)
@@ -232,6 +243,14 @@ class DescribeProcess(Request):
         return
 
     def complexValue(self,inoutput,processInOutput):
+        """Format complex value attributes
+
+        :param inoutput: :class:`pywps.Process.InAndOutputs.Input` or 
+            :class:`pywps.Process.InAndOutputs.Output`
+
+        :param processInOutput: dictionary, where to store the parameters
+            in 
+        """
 
         processInOutput["mimetype"] = inoutput.formats[0]["mimeType"]
         processInOutput["encoding"] = inoutput.formats[0]["encoding"]
@@ -247,6 +266,14 @@ class DescribeProcess(Request):
         return
 
     def bboxValue(self,input,processInput):
+        """Format bboxValue value attributes
+
+        :param inoutput: :class:`pywps.Process.InAndOutputs.Input` or 
+            :class:`pywps.Process.InAndOutputs.Output`
+
+        :param processInOutput: dictionary, where to store the parameters
+            in 
+        """
         processInput["crs"] = input.crss[0]
 
         processInput["CRSs"] = []
