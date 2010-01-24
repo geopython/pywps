@@ -1,6 +1,4 @@
 """
-pywps
-=====
 This package contains classes necessary for input parsing OGC WPS requests,
 working with list of processes, executing them and redirecting OGC WPS
 responses back to client.
@@ -379,6 +377,11 @@ class Pywps:
         :param response: the response object. Default is self.response
         """
 
+        inModPython = False
+
+        if repr(type(fileDes)) == "<type 'mp_request'>":
+            inModPython = True
+
         if type(fileDes) != type([]):
             fileDes = [fileDes]
 
@@ -391,7 +394,9 @@ class Pywps:
 
         for f in fileDes:
 
-	    if f == STDOUT and self.stdOutClosed == True:
+
+	    if (f == STDOUT or inModPython) \
+                    and self.stdOutClosed == True:
 		    continue
 
             if f == STDOUT:
@@ -399,15 +404,20 @@ class Pywps:
                 #print "Content-Length: %d" % len(self.response)
                 print ""
 
-            # open file
-            if f != STDOUT and f.closed:
+
+            # apache mod_python
+            if inModPython: 
+                f.content_type = "text/xml"
+
+            # open file, if the file is NOT sys.stdout or apache.request
+            if (f != STDOUT and inModPython == False) and f.closed:
                 f = open(f.name,"w")
 
             # '""' and '"None"'s will be removed
             f.write(re.sub(EMPTYPARAMREGEX,"",response))
             f.flush()
 
-            if (f != STDOUT):
+            if (f != STDOUT and inModPython == False):
                 f.close()
 
 	    # remove stdout from fileDes

@@ -1,9 +1,4 @@
-"""
-Exceptions
-----------
-
-Exception classes of WPS
-"""
+"""Exception classes of WPS """
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
 # Lince:
