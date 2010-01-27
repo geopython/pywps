@@ -633,5 +633,7 @@ class WPSProcess:
 
     def execute(self):
         """This method will be called by :class:`pywps.Wps.Execute.Execute`. Please
-        redefine this in your process instance"""
+        redefine this in your process instance
+        
+        :returns: None if succeeded, error message otherwise."""
         pass

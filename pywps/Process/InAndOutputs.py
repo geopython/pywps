@@ -762,11 +762,22 @@ class ComplexOutput(Output):
 
     .. attribute :: formats
 
-        list of supported formats
+        list of supported formats.::
+            
+            [
+                {
+                    'mimeType':'text/xml',
+                    'encoding':'utf-8',
+                    'schema':'http://schemas.opengis.net/gml/3.2.1/gml.xsd'
+                },
+                {
+                    ....
+                }
+            ]
 
     .. attribute :: format
 
-        file format
+        file format of the input file
 
     .. attribute :: projection
 
