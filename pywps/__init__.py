@@ -396,7 +396,7 @@ class Pywps:
                 self._printResponseModPython(f,response)
 		self.stdOutClosed = True
 
-            elif types.FileType == type(f)
+            elif types.FileType == type(f):
                 if f == STDOUT and self.stdOutClosed == True:
                         continue
                 self._printResponseFile(f,response)
@@ -404,15 +404,15 @@ class Pywps:
             elif repr(type(f)).find("org.apache.catalina.connector") > -1: 
                 if self.stdOutClosed == True:
                         continue
-                self._printResponseJava(f,,response)
+                self._printResponseJava(f,response)
 		self.stdOutClosed = True
 
-    def _printResponseModPython(request, response):
+    def _printResponseModPython(self, request, response):
 
         request.content_type = "text/xml"
         request.write(re.sub(EMPTYPARAMREGEX,"",response))
 
-    def _printResponseFile(fileOut, response):
+    def _printResponseFile(self, fileOut, response):
 
         if fileOut == STDOUT:
             print "Content-Type: text/xml\n"
@@ -427,7 +427,7 @@ class Pywps:
         else:
             self.stdOutClosed = True
 
-    def _printResponseJava(resp, response):
+    def _printResponseJava(self, resp, response):
         resp.setContentType("text/xml")
         toClient = resp.getWriter()
         toClient.println(re.sub(EMPTYPARAMREGEX,"",response))
