@@ -388,19 +388,24 @@ class Pywps:
             soap = Soap.SOAP()
             response = soap.getResponse(response)
 
+        # for each file in file descriptor
         for f in fileDes:
 
+            # consider, if this CGI, mod_python or Java requested output
+            # mod_python here
             if repr(type(f)) == "<type 'mp_request'>":
                 if self.stdOutClosed == True:
                         continue
                 self._printResponseModPython(f,response)
 		self.stdOutClosed = True
 
+            # file object (output, or sys.stdout)
             elif types.FileType == type(f):
                 if f == STDOUT and self.stdOutClosed == True:
                         continue
                 self._printResponseFile(f,response)
 
+            # java servlet response
             elif repr(type(f)).find("org.apache.catalina.connector") > -1: 
                 if self.stdOutClosed == True:
                         continue
