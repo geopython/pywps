@@ -268,10 +268,11 @@ class TemplateProcessor:
         if self._file:
             # parse the file, if it is compiled and it should not be
             # compiled by configuration and if it is up-to-date
-            if self.isCompiled() and compile == False and\
+            if self.isCompiled() and\
                     self.isUpToDate():
                 self.readFromCompiled()
-            else:
+            elif compile == True:
+
                 self.recompile()
 
     def readFromCompiled(self):

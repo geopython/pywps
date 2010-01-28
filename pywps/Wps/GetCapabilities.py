@@ -22,7 +22,7 @@
 
 from pywps.Wps import Request
 from pywps.Template import TemplateError
-import types, traceback
+import types, traceback,sys
 
 class GetCapabilities(Request):
     """
@@ -38,13 +38,8 @@ class GetCapabilities(Request):
         try:
             Request.__init__(self,wps)
         except Exception, e:
-            self.cleanEnv()
-            rep = None
-            try:
-                rep = e.message
-            except:
-                rep = e.__str__()
-            raise wps.exceptions.NoApplicableCode(rep)
+            traceback.print_exc(file=sys.stderr)
+            raise wps.exceptions.NoApplicableCode(repr(e))
 
         #
         # ServiceIdentification

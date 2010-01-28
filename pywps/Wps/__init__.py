@@ -74,6 +74,10 @@ class Request:
     .. attribute:: templateProcessor
 
         instance of :class:`pywps.Template.TemplateProcessor`
+
+    .. attribute:: processes
+
+        list of processes :`class:`pywps.Process.WPSProcess`
     """
 
     response = None # Output document
@@ -85,8 +89,9 @@ class Request:
     precompile = 1
     stdOutClosed = False
     templateProcessor = None
+    processes = None
 
-    def __init__(self,wps):
+    def __init__(self,wps,processes=None):
         """Class constructor"""
         self.wps = wps
 
@@ -119,58 +124,58 @@ class Request:
 
         self.templateProcessor = TemplateProcessor(self.templateFile,compile=True)
 
+        # processes are set while Request is initialized
+        if processes and type(processes) == type(""):
+            self.wps.debug("Setting PYWPS_PROCESSES from the program itself to %s" % processes)
+            self.processes = self.setFromDirectory(processes)
+        elif os.getenv("PYWPS_PROCESSES"):
+            self.wps.debug("Setting PYWPS_PROCESSES from the environment variable to %s" % os.getenv("PYWPS_PROCESSES"))
+            self.processes = self.setFromDirectory(os.getenv("PYWPS_PROCESSES"))
+        elif processes and type(processes) in [type(()), type([])]:
 
-        self.processDir = os.getenv("PYWPS_PROCESSES")
-        if self.processDir:
-            self.wps.debug("PYWPS_PROCESSES set from environment variable to %s" %self.processDir)
-        else:
-            self.wps.debug("PYWPS_PROCESSES environment variable not set or empty.  Trying to find something in the configuration file")
-            try:
-                self.processDir = self.wps.getConfigValue("server", "processesPath")
-                self.wps.debug("PYWPS_PROCESSES: set from configuration file to [%s]" %self.processDir)
-            except: 
-                self.wps.debug("'processesPath' not found in the 'server' section of pywps configuration file")
-
-        if self.processDir:
-            import sys
-            if self.processDir[-1] == os.path.sep:
-                self.processDir = self.processDir[:-1]
-
-            try:
-                sys.path.insert(0,os.path.split(self.processDir)[0])
-                processes = __import__(os.path.split(self.processDir)[-1])
-                self.processes = processes
-            except ImportError,e:
-                traceback.print_exc(file=self.logFile)
-                raise self.wps.exceptions.NoApplicableCode("Could not import processes from the dir [%s]: %s! __init__.py file missing?" % (self.processDir,e))
-
-            sys.path.append(self.processDir)
+            self.wps.debug("Setting PYWPS_PROCESSES not set, we are using the processes array directly")
+        elif self.wps.getConfigValue("server","processesPath"):
+            self.wps.debug("Setting PYWPS_PROCESSES from configuration file to %s" %\
+                        self.wps.getConfigValue("server","processesPath"))
+            self.processes = self.setFromDirectory(self.wps.getConfigValue("server","processesPath"))
         else:
             self.wps.debug("Importing the processes from default (pywps/processes) location")
-            try:
-                import pywps
-            except ImportError,e:
-                traceback.print_exc(file=self.logFile)
-                raise self.wps.exceptions.NoApplicableCode("Could not import pywps module: %s" % (e))
-            try:
-                from pywps import processes
-                self.wps.debug("PYWPS_PROCESSES: %s" %os.path.abspath(pywps.processes.__path__[-1]))
-            except Exception,e:
-                traceback.print_exc(file=self.logFile)
-                raise self.wps.exceptions.NoApplicableCode("Could not import pywps.processes module: %s" % (e))
-            self.processes = pywps.processes
+            import pywps
+            from pywps import processes as pywpsprocesses
+            self.processes = self.setFromDirectory(os.path.abspath(pywpsprocesses.__path__[-1]))
 
-        # check, if all required processes are available
-        prc = None
+        # check the availbility of the process
         if self.wps.inputs.has_key("identifier"):
-            if type(self.wps.inputs["identifier"]) == type(""):
-                prc = self.wps.inputs["identifier"]
-                if not prc in self.processes.__all__:
-                    raise self.wps.exceptions.InvalidParameterValue(prc)
-            else:
-                for prc in self.wps.inputs["identifier"]:
-                    if not prc in self.processes.__all__:
-                        raise self.wps.exceptions.InvalidParameterValue(prc)
+                self.checkProcess(self.wps.inputs["identifier"])
+
+    def setFromDirectory(self,dirname):
+
+        import sys
+        # remove last "/" from the path
+        if dirname[-1] == os.path.sep:
+            dirname = dirname[:-1]
+
+        try:
+            sys.path.insert(0,os.path.split(dirname)[0])
+            return __import__(os.path.split(dirname)[-1])
+        except ImportError,e:
+            traceback.print_exc(file=self.logFile)
+            raise self.wps.exceptions.NoApplicableCode("Could not import processes from the dir [%s]: %s! __init__.py file missing?" % (dirname,e))
+
+            sys.path.append(dirname)
+
+    def checkProcess(self,identifiers):
+        """check, if given identifiers are available as processes"""
+
+        # string to [string]
+        if type(identifieres) == type(""):
+            identifieres = [identifieres]
+
+        # for each process
+        for prc in self.wps.inputs["identifier"]:
+            if not prc in self.processes.__all__:
+                raise self.wps.exceptions.InvalidParameterValue(prc,"Process %s not available" % prc)
+
 
     def getDataTypeReference(self,inoutput):
         """Returns data type reference according to W3C

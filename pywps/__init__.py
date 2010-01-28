@@ -74,7 +74,7 @@ import Exceptions
 import Wps
 from Exceptions import *
 
-import sys, os, ConfigParser, urllib, re, traceback
+import sys, os, ConfigParser, urllib, re, traceback, types
 from sys import stdout as STDOUT
 from sys import stderr as STDERR
 
@@ -357,7 +357,6 @@ class Pywps:
             direct after 'PyWPS' and before the debug text
         :type code: string.
         """
-
         dbg = self.getConfigValue("server","debug")
         if dbg == True or (type(dbg) == type("") and \
                 dbg.lower() == "true") or int(dbg) != 0:
@@ -370,18 +369,15 @@ class Pywps:
         """
         Print response to files given as input parameter.
 
-        :param fileDes: file object or list of file objects
-        :type fileDes: string or list
+        :param fileDes: file object or list of file objects. File name,
+            mod_python request or java servlet response
+        :type fileDes: string or list, 
         :param isSoap: print the response in SOAP envelope
         :type isSoap: bool
         :param response: the response object. Default is self.response
         """
 
-        inModPython = False
-
-        if repr(type(fileDes)) == "<type 'mp_request'>":
-            inModPython = True
-
+        # convert single file to array
         if type(fileDes) != type([]):
             fileDes = [fileDes]
 
@@ -394,35 +390,47 @@ class Pywps:
 
         for f in fileDes:
 
-
-	    if (f == STDOUT or inModPython) \
-                    and self.stdOutClosed == True:
-		    continue
-
-            if f == STDOUT:
-                print "Content-Type: text/xml"
-                #print "Content-Length: %d" % len(self.response)
-                print ""
-
-
-            # apache mod_python
-            if inModPython: 
-                f.content_type = "text/xml"
-
-            # open file, if the file is NOT sys.stdout or apache.request
-            if (f != STDOUT and inModPython == False) and f.closed:
-                f = open(f.name,"w")
-
-            # '""' and '"None"'s will be removed
-            f.write(re.sub(EMPTYPARAMREGEX,"",response))
-            f.flush()
-
-            if (f != STDOUT and inModPython == False):
-                f.close()
-
-	    # remove stdout from fileDes
-	    else: 
+            if repr(type(f)) == "<type 'mp_request'>":
+                if self.stdOutClosed == True:
+                        continue
+                self._printResponseModPython(f,response)
 		self.stdOutClosed = True
+
+            elif types.FileType == type(f)
+                if f == STDOUT and self.stdOutClosed == True:
+                        continue
+                self._printResponseFile(f,response)
+
+            elif repr(type(f)).find("org.apache.catalina.connector") > -1: 
+                if self.stdOutClosed == True:
+                        continue
+                self._printResponseJava(f,,response)
+		self.stdOutClosed = True
+
+    def _printResponseModPython(request, response):
+
+        request.content_type = "text/xml"
+        request.write(re.sub(EMPTYPARAMREGEX,"",response))
+
+    def _printResponseFile(fileOut, response):
+
+        if fileOut == STDOUT:
+            print "Content-Type: text/xml\n"
+        elif fileOut.closed:
+            fileOut = open(fileOut.name,"w")
+
+        fileOut.write(re.sub(EMPTYPARAMREGEX,"",response))
+        fileOut.flush()
+
+        if fileOut != STDOUT:
+            f.close()
+        else:
+            self.stdOutClosed = True
+
+    def _printResponseJava(resp, response):
+        resp.setContentType("text/xml")
+        toClient = resp.getWriter()
+        toClient.println(re.sub(EMPTYPARAMREGEX,"",response))
 
     def _setLogFile(self):
         """Set self.logFile. Default is sys.stderr

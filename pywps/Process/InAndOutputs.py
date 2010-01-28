@@ -21,7 +21,11 @@ Inputs and outputs of OGC WPS Processes
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import types,re, magic, base64
+import types,re, base64
+try:
+    import magic
+except:
+    pass
 from pywps import Exceptions
 
 class Input:
@@ -362,8 +366,11 @@ class ComplexInput(Input):
         self.formats = formats
         self.format = self.formats[0]
 
-        self.ms = magic.open(magic.MAGIC_MIME)
-        self.ms.load()
+        try:
+            self.ms = magic.open(magic.MAGIC_MIME)
+            self.ms.load()
+        except:
+            pass
 
         return
 
@@ -414,7 +421,7 @@ class ComplexInput(Input):
         if self.format["mimeType"].find("text") == -1:
             # it *should* be binary, is the file really binary?
             # if so, convert it to binary using base64
-            if self.ms.file(fout.name).find("text") > -1: 
+            if self.ms and self.ms.file(fout.name).find("text") > -1: 
                 rename(fout.name,fout.name+".base64")
                 try:
                     base64.decode(open(fout.name+".base64"),
@@ -426,7 +433,8 @@ class ComplexInput(Input):
                 
 
         # check the mimeType again
-        self.checkMimeType(fout.name,self.ms.file(fout.name))
+        if self.ms:
+            self.checkMimeType(fout.name,self.ms.file(fout.name))
             
         resp = self._setValueWithOccurence(self.value, outputName)
         if resp:
@@ -493,7 +501,8 @@ class ComplexInput(Input):
         fout.close()
 
         # check the mimetypes
-        self.checkMimeType(fout.name,self.ms.file(fout.name))
+        if self.ms:
+            self.checkMimeType(fout.name,self.ms.file(fout.name))
 
         resp = self._setValueWithOccurence(self.value, outputName)
         if resp:
@@ -827,9 +836,12 @@ class ComplexOutput(Output):
         self.projection = projection
         self.bbox = bbox
 
-        self.ms = magic.open(magic.MAGIC_MIME)
-        self.ms.load()
-        self.useMapscript = useMapscript
+        try:
+            self.ms = magic.open(magic.MAGIC_MIME)
+            self.ms.load()
+            self.useMapscript = useMapscript
+        except:
+            pass
 
         return
 
