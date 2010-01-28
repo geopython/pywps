@@ -168,8 +168,8 @@ class Request:
         """check, if given identifiers are available as processes"""
 
         # string to [string]
-        if type(identifieres) == type(""):
-            identifieres = [identifieres]
+        if type(identifiers) == type(""):
+            identifiers = [identifiers]
 
         # for each process
         for prc in self.wps.inputs["identifier"]:
