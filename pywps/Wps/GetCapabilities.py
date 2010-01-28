@@ -159,11 +159,13 @@ class GetCapabilities(Request):
                 try:
                     if type(processName) == types.ClassType:
                         process = processName()
-                    else:
+                    elif type(processName) == types.InstanceType:
+                        process = processName
+                    elif type(processName) == types.StringType:
                         # dynamic module import from processes dir:
-                        module = __import__(self.processes.__name__, globals(),\
-                                            locals(), [processName])
                         try:
+                            module = __import__(self.processes.__name__, globals(),\
+                                            locals(), [processName])
                             process = eval("module."+processName+".Process()")
                         except AttributeError:
                             process = eval("module."+processName+"."+processName+"()")
