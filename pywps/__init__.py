@@ -293,7 +293,7 @@ class Pywps:
         return cfgfiles
 
 
-    def performRequest(self,inputs = None):
+    def performRequest(self,inputs = None, processes=None):
         """Performs the desired WSP Request.
 
         :param inputs: idealy self.inputs (Default) object, result from
@@ -308,13 +308,13 @@ class Pywps:
         if inputs.has_key("request"):
             if inputs["request"]  == "getcapabilities":
                 from pywps.Wps.GetCapabilities import GetCapabilities
-                self.request = GetCapabilities(self)
+                self.request = GetCapabilities(self,processes=processes)
             elif inputs["request"]  == "describeprocess":
                 from pywps.Wps.DescribeProcess import DescribeProcess
-                self.request = DescribeProcess(self)
+                self.request = DescribeProcess(self,processes=processes)
             elif inputs["request"]  == "execute":
                 from pywps.Wps.Execute import Execute
-                self.request = Execute(self)
+                self.request = Execute(self,processes=processes)
         elif inputs.has_key("wsdl"):
             inputs["version"]="1.0.0"
             from pywps.Wps.Wsdl import Wsdl

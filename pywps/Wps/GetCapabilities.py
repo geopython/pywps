@@ -32,11 +32,11 @@ class GetCapabilities(Request):
     :param wps: :class:`pywps.Pywps`
     """
 
-    def __init__(self,wps):
+    def __init__(self,wps,processes=None):
         """
         """
         try:
-            Request.__init__(self,wps)
+            Request.__init__(self,wps,processes)
         except Exception, e:
             traceback.print_exc(file=sys.stderr)
             raise wps.exceptions.NoApplicableCode(repr(e))
@@ -146,21 +146,33 @@ class GetCapabilities(Request):
         processesData = []
 
         # Import processes
+        listOfProcesses = None
+        try:
+            listOfProcesses = self.processes.__all__
+        except:
+            listOfProcesses = self.processes
+
 
         try: 
-            for processName in self.processes.__all__:
+            for processName in listOfProcesses:
                 processData = {}
                 try:
-                    # dynamic module import from processes dir:
-                    module = __import__(self.processes.__name__, globals(),\
-                                        locals(), [processName])
-                    process = eval("module."+processName+".Process()")
+                    if type(processName) == types.ClassType:
+                        process = processName()
+                    else:
+                        # dynamic module import from processes dir:
+                        module = __import__(self.processes.__name__, globals(),\
+                                            locals(), [processName])
+                        try:
+                            process = eval("module."+processName+".Process()")
+                        except AttributeError:
+                            process = eval("module."+processName+"."+processName+"()")
 
                     # process identifier must be == package name
-                    if process.identifier != processName:
-                        raise ImportError(
-                                "Process identifier \"%s\" != package name \"%s\": File name has to be the same, as the identifier is!" %\
-                                (process.identifier, processName))
+                    #if process.identifier != processName:
+                    #    raise ImportError(
+                    #            "Process identifier \"%s\" != package name \"%s\": File name has to be the same, as the identifier is!" %\
+                    #            (process.identifier, processName))
                     # set selected language
                     process.lang.setCode(self.wps.inputs["language"])
 

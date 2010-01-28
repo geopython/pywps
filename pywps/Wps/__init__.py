@@ -134,6 +134,7 @@ class Request:
         elif processes and type(processes) in [type(()), type([])]:
 
             self.wps.debug("Setting PYWPS_PROCESSES not set, we are using the processes array directly")
+            self.processes = processes
         elif self.wps.getConfigValue("server","processesPath"):
             self.wps.debug("Setting PYWPS_PROCESSES from configuration file to %s" %\
                         self.wps.getConfigValue("server","processesPath"))
