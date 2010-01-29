@@ -124,21 +124,31 @@ class Request:
 
         self.templateProcessor = TemplateProcessor(self.templateFile,compile=True)
 
-        # processes are set while Request is initialized
+        # set self.processes from various inputs
+        #
+        # process are string -- it means the directory
         if processes and type(processes) == type(""):
             self.wps.debug("Setting PYWPS_PROCESSES from the program itself to %s" % processes)
             self.processes = self.setFromDirectory(processes)
+
+        # process are in the environment directory
         elif os.getenv("PYWPS_PROCESSES"):
             self.wps.debug("Setting PYWPS_PROCESSES from the environment variable to %s" % os.getenv("PYWPS_PROCESSES"))
             self.processes = self.setFromDirectory(os.getenv("PYWPS_PROCESSES"))
+
+        # processes are some list -- use them directly
         elif processes and type(processes) in [type(()), type([])]:
 
             self.wps.debug("Setting PYWPS_PROCESSES not set, we are using the processes array directly")
             self.processes = processes
+
+        # processes will be set from configuration file
         elif self.wps.getConfigValue("server","processesPath"):
             self.wps.debug("Setting PYWPS_PROCESSES from configuration file to %s" %\
                         self.wps.getConfigValue("server","processesPath"))
             self.processes = self.setFromDirectory(self.wps.getConfigValue("server","processesPath"))
+
+        # processes will be set from default directory
         else:
             self.wps.debug("Importing the processes from default (pywps/processes) location")
             import pywps
@@ -174,8 +184,19 @@ class Request:
 
         # for each process
         for prc in self.wps.inputs["identifier"]:
-            if not prc in self.processes.__all__:
-                raise self.wps.exceptions.InvalidParameterValue(prc,"Process %s not available" % prc)
+            try:
+                if not prc in self.processes.__all__:
+                    raise self.wps.exceptions.InvalidParameterValue(prc,"Process %s not available" % prc)
+            except AttributeError:
+                invalidParameterValue = True
+                for proc in self.processes:
+                    if type(proc) == types.ClassType:
+                        proc = proc()
+                    if proc.identifier == prc:
+                        invalidParameterValue = False
+                if invalidParameterValue:
+                    raise self.wps.exceptions.InvalidParameterValue(prc)
+
 
 
     def getDataTypeReference(self,inoutput):

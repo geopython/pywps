@@ -152,7 +152,6 @@ class GetCapabilities(Request):
         except:
             listOfProcesses = self.processes
 
-
         try: 
             for processName in listOfProcesses:
                 processData = {}

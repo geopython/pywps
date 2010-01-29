@@ -30,13 +30,13 @@ class DescribeProcess(Request):
     file.
     """
 
-    def __init__(self,wps):
+    def __init__(self,wps,processes=None):
         """
         Arguments:
            self
            wps   - parent WPS instance
         """
-        Request.__init__(self,wps)
+        Request.__init__(self,wps,processes)
 
         #
         # HEAD
@@ -65,65 +65,92 @@ class DescribeProcess(Request):
 
         processesData = []
 
-        for processName in self.processes.__all__:
-            # skip process, if not requested or
-            # identifier != "ALL"
-            if not processName in self.wps.inputs["identifier"] and \
-                self.wps.inputs["identifier"][0].lower() != "all":
-                continue
+        # Import processes
+        listOfProcesses = None
+        try:
+            listOfProcesses = self.processes.__all__
+        except:
+            listOfProcesses = self.processes
 
+        for processObj in listOfProcesses:
+            # try to obtain process object, name and data
+            processName = None
+            process = None
             processData = {}
+
             try:
-                module = __import__(self.processes.__name__, globals(),\
-                                    locals(), [processName])
-
-                process = eval("module."+processName+".Process()")
-
-                # process identifier must be == package name
-                if process.identifier != processName:
-                    raise ImportError(
-                            "Process identifier \"%s\" != package name \"%s\": File name has to be the same, as the identifier is!" %\
-                            (process.identifier, processName))
-
-                # set selected language
-                process.lang.setCode(self.wps.inputs["language"])
-
-                processData["processok"] = 1
-                processData["identifier"] = process.identifier
-                processData["title"] = process.i18n(process.title)
-                if process.abstract:
-                    processData["abstract"] = process.i18n(process.abstract)
-                if process.metadata:
-                    metadata=[]
-                    for meta in process.metadata:
-                        metadata.append({"metadatatitle":meta})
-                    processData["Metadata"] = metadata
-                if process.profile:
-                    profiles=[]
-                    if type(process.profile) == types.ListType:
-                        for profile in process.profile:
-                            profiles.append({"profile":profile})
-                    else:
-                        profiles.append({"profile":process.profile})
-                    processData["Profiles"] = profiles
-                if process.wsdl:
-                    processData["wsdl"] = process.wsdl
-                processData["store"] = process.storeSupported
-                processData["status"] = process.statusSupported
-                if process.version:
-                    processData["processversion"] = process.version
-
-                processData["Datainputs"] = self.processInputs(process)
-                processData["datainputslen"] = len(processData["Datainputs"])
-
-                processData["Dataoutputs"] = self.processOutputs(process)
-                processData["dataoutputslen"] = len(processData["Dataoutputs"])
+                # process is Class - make instance of it
+                if type(processObj) == types.ClassType:
+                    process = processObj()
+                # process is instance already, take it as it is
+                elif type(processObj) == types.InstanceType:
+                    process = processObj
+                # process is string -- import from directory
+                elif type(processName) == types.StringType:
+                    module = __import__(self.processes.__name__, globals(),\
+                                        locals(), [processName])
+                    # originaly, there should be Process class within the
+                    # module 
+                    try:
+                        process = eval("module."+processName+".Process()")
+                    # but having the same class name as the module name is much
+                    # nicer
+                    except AttributeError:
+                        process = eval("module."+processName+"."+processName+"()")
+                        
+                processName = process.identifier
 
             except Exception, e:
                 traceback.print_exc(file=self.wps.logFile)
                 processData["processok"] = 0
                 processData["process"] = processName
                 processData["exception"] = e
+
+            # skip process, if not requested or
+            # identifier != "ALL"
+            if not processName in self.wps.inputs["identifier"] and \
+                self.wps.inputs["identifier"][0].lower() != "all":
+                continue
+
+            # process identifier must be == package name
+            if process.identifier != processName:
+                raise ImportError(
+                        "Process identifier \"%s\" != package name \"%s\": File name has to be the same, as the identifier is!" %\
+                        (process.identifier, processName))
+
+            # set selected language
+            process.lang.setCode(self.wps.inputs["language"])
+
+            processData["processok"] = 1
+            processData["identifier"] = process.identifier
+            processData["title"] = process.i18n(process.title)
+            if process.abstract:
+                processData["abstract"] = process.i18n(process.abstract)
+            if process.metadata:
+                metadata=[]
+                for meta in process.metadata:
+                    metadata.append({"metadatatitle":meta})
+                processData["Metadata"] = metadata
+            if process.profile:
+                profiles=[]
+                if type(process.profile) == types.ListType:
+                    for profile in process.profile:
+                        profiles.append({"profile":profile})
+                else:
+                    profiles.append({"profile":process.profile})
+                processData["Profiles"] = profiles
+            if process.wsdl:
+                processData["wsdl"] = process.wsdl
+            processData["store"] = process.storeSupported
+            processData["status"] = process.statusSupported
+            if process.version:
+                processData["processversion"] = process.version
+
+            processData["Datainputs"] = self.processInputs(process)
+            processData["datainputslen"] = len(processData["Datainputs"])
+
+            processData["Dataoutputs"] = self.processOutputs(process)
+            processData["dataoutputslen"] = len(processData["Dataoutputs"])
             processesData.append(processData)
         return processesData
 

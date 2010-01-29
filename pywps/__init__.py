@@ -406,7 +406,8 @@ class Pywps:
                 self._printResponseFile(f,response)
 
             # java servlet response
-            elif repr(type(f)).find("org.apache.catalina.connector") > -1: 
+            elif repr(type(f)).find("org.apache.catalina.connector") > -1 or \
+                 repr(f) == "<__main__.DummyHttpResponse instance at 0xc14>": 
                 if self.stdOutClosed == True:
                         continue
                 self._printResponseJava(f,response)
