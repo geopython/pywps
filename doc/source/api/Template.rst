@@ -1,0 +1,2 @@
+.. automodule:: pywps.Template
+    :members:
