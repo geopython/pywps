@@ -67,7 +67,7 @@ class Post(Post):
             if version in self.wps.versions:
                 self.inputs["version"]=version
         if not "version" in self.inputs:
-            raise self.wps.exceptions.VersionNegotiationFailed(
+            raise pywps.VersionNegotiationFailed(
                                 "There's no version in AcceptVersions parameter " +
                                 "that is supported by this server.")
 
@@ -102,7 +102,7 @@ class Get(Get):
             if version in self.wps.versions:
                 self.inputs["version"]=version
         if not "version" in self.inputs:
-            raise self.wps.exceptions.VersionNegotiationFailed(
+            raise pywps.VersionNegotiationFailed(
                                 "There's no version in AcceptVersions parameter " +
                                 "that is supported by this server.")
 

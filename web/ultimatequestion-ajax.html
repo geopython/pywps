@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+ <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us" >
+ <head>
+     <title>Ultimate question</title>
+<script type="text/javascript" language="javascript">
+
+    var url = window.location.protocol+"//"+window.location.host+'/cgi-bin/wps-trunk?service=wps&version=1.0.0&request=describeprocess&identifier=ultimatequestionprocess';
+
+    function startRequest() {
+        makeRequest(url);
+        url = window.location.protocol+"//"+window.location.host+'/cgi-bin/wps-trunk?service=wps&version=1.0.0&request=execute&identifier=ultimatequestionprocess&status=true&storeexecuteresponse=true';
+    };
+
+    function makeRequest(url) {
+        document.getElementById("request").innerHTML = new Date().getTime().toLocaleString();
+
+        var httpRequest;
+
+        try {
+            // Firefox, Opera 8.0+, Safari
+            httpRequest=new XMLHttpRequest();
+        }
+        catch (e) {
+        // Internet Explorer
+            try {
+                httpRequest=new ActiveXObject("Msxml2.XMLHTTP");
+            }
+            catch (e) {
+                    try {
+                    httpRequest=new ActiveXObject("Microsoft.XMLHTTP");
+                    }
+                    catch (e) { }
+            }
+        }
+
+        if (!httpRequest) {
+            alert('Giving up :( Cannot create an XMLHTTP instance');
+            return false;
+        }
+        httpRequest.onreadystatechange = function() { displayStatus(httpRequest); };
+        httpRequest.open('GET', url, true);
+        httpRequest.send('');
+
+    }
+
+    function displayStatus(httpRequest) {
+
+        if (httpRequest.readyState == 4) {
+            if (httpRequest.status == 200) {
+                var resp = httpRequest.responseXML;
+                var statusText = null;
+                var statusValue = null;
+                var percentDone = null;
+                var title = resp.getElementsByTagName("ows:Title")[0].firstChild.nodeValue;
+                var abstract = resp.getElementsByTagName("ows:Abstract")[0].firstChild.nodeValue;
+                var stat = resp.getElementsByTagName("wps:Status")[0];
+
+                var answerTitle = null;
+                var answer= null;
+
+                if (stat) {
+                    var answer = null;
+                    var url = null;
+
+                    var accepted = stat.getElementsByTagName("wps:ProcessAccepted")[0];
+                    if (accepted) {
+                        statusValue = accepted.firstChild.nodeValue;
+                        statusText = "ProcessAccepted";
+                        percentDone = 0;
+                    }
+
+                    var started = stat.getElementsByTagName("wps:ProcessStarted")[0];
+                    if (started) {
+                        statusValue = started.firstChild.nodeValue;
+                        statusText = "ProcessStarted";
+                        percentDone = started.getAttribute("percentCompleted");
+                    }
+
+                    var succeeded = stat.getElementsByTagName("wps:ProcessSucceeded")[0];
+                    if (succeeded) {
+                        statusValue = succeeded.firstChild.nodeValue;
+                        statusText = "ProcessStarted";
+                        percentDone = 100;
+                        answer = resp.getElementsByTagName("wps:LiteralData")[0].firstChild.nodeValue;
+                        answerTitle = resp.getElementsByTagName("wps:Output")[0].getElementsByTagName("ows:Title")[0].firstChild.nodeValue;
+                    }
+                    if (accepted || started) {
+                        url = resp.getElementsByTagName("wps:ExecuteResponse")[0].getAttribute("statusLocation");
+                        window.setTimeout("makeRequest('"+url+"')",2000);
+                    }
+                }
+
+               document.getElementById("title").innerHTML = title; 
+               document.getElementById("abstract").innerHTML = abstract; 
+               document.getElementById("statusValue").innerHTML = statusValue; 
+               document.getElementById("statusText").innerHTML = statusText; 
+               document.getElementById("percentDone").innerHTML = percentDone; 
+               document.getElementById("answerTitle").innerHTML = answerTitle; 
+               document.getElementById("answerValue").innerHTML = answer; 
+               document.getElementById("response").innerHTML = new Date().getTime().toLocaleString();
+               document.getElementById("responseFile").innerHTML = "<a href=\""+url+"\">"+url+"</a>";
+
+            } else {
+                alert('There was a problem with the request.');
+            }
+        }
+
+    }
+</script>
+</head>
+<body onload="startRequest()">
+    <h1 id="title"></h1>
+    <div id="abstract">
+    </div>
+    <dl>
+        <dt>Status:</dt>
+        <dd id="statusText"></dd>
+
+        <dt>Value:</dt>
+        <dd id="statusValue"></dd>
+
+        <dt>Percent done:</dt>
+        <dd id="percentDone"></dd>
+
+        <dt>Answer Title:</dt>
+        <dd id="answerTitle"></dd>
+
+        <dt>Answer Value:</dt>
+        <dd id="answerValue"></dd>
+
+        <dt>Last request:</dt>
+        <dd id="request"></dd>
+
+        <dt>Last response:</dt>
+        <dd id="response"></dd>
+
+        <dt>Last response:</dt>
+        <dd id="responseFile"></dd>
+    </dl>
+    <input type="button" onclick="startRequest()" value="Start calculation" />
+</body>

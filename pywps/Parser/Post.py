@@ -26,6 +26,7 @@ Post
 import types,sys
 import xml
 from xml.dom.minidom import parseString
+import pywps
 from pywps.Parser import Parser
 from pywps.Process.Lang import Lang
 from pywps import Soap 
@@ -69,7 +70,7 @@ class Post(Parser):
         if maxFileSize > 0:
             inputXml = file.read(maxFileSize)
             if file.read() != "":
-                raise self.wps.exceptions.FileSizeExceeded()
+                raise pywps.FileSizeExceeded()
         else:
             inputXml = file.read()
 
@@ -77,7 +78,7 @@ class Post(Parser):
         try:
             self.document = parseString(inputXml)
         except xml.parsers.expat.ExpatError,e:
-            raise self.wps.exceptions.NoApplicableCode(e.message)
+            raise pywps.NoApplicableCode(e.message)
         
         # get first child
         firstChild = self.getFirstChildNode(self.document)
@@ -111,11 +112,11 @@ class Post(Parser):
         if node.hasAttribute("service"):
             value=node.getAttribute("service").upper()
             if value != "WPS":
-                raise self.wps.exceptions.InvalidParameterValue("service")
+                raise pywps.InvalidParameterValue("service")
             else:
                 self.inputs["service"] = "WPS"
         else:
-            raise self.wps.exceptions.MissingParameterValue("service")
+            raise pywps.MissingParameterValue("service")
 
     def checkLanguage(self, node):
         """ Check optional language parameter.  """
@@ -123,7 +124,7 @@ class Post(Parser):
         if node.hasAttribute("language"):
             value=Lang.getCode(node.getAttribute("language").lower())
             if value not in self.wps.languages:
-                raise self.wps.exceptions.InvalidParameterValue("language")
+                raise pywps.InvalidParameterValue("language")
             else:
                 self.inputs["language"] = value
         else:
@@ -135,13 +136,13 @@ class Post(Parser):
         if node.hasAttribute("version"):
             value=node.getAttribute("version")
             if value not in self.wps.versions:
-                raise self.wps.exceptions.VersionNegotiationFailed(
+                raise pywps.VersionNegotiationFailed(
                     'The requested version "' + value + \
                     '" is not supported by this server.')
             else:
                 self.inputs["version"] = value
         else:
-            raise self.wps.exceptions.MissingParameterValue("version")
+            raise pywps.MissingParameterValue("version")
 
     def checkRequestType(self, node):
         """Find requested request type and import given request parser."""
@@ -173,7 +174,7 @@ class Post(Parser):
             if node.nodeType == xml.dom.minidom.Element.nodeType:
                 firstChild = node
         if firstChild == None:
-            raise self.wps.exceptions.NoApplicableCode(
+            raise pywps.NoApplicableCode(
                                         "No root Element found!")
         return firstChild
 

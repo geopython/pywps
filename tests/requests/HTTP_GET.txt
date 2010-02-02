@@ -1,0 +1,35 @@
+# Following examples do try to describe possible usages of WPS, via HTTP
+# Get request. The examples do contain page reference in it's description,
+# to OGC WPS 05-007r7, to be found at
+# http://opengeospatial.org/standards/wps
+#
+# output as reference
+# resulting ComplexValues will be stored on the server, only URL will be
+# send back to client
+#
+# page 37, table 51, 
+version=1.0.0&service=wps&request=execute&identifier=exampleBufferNoInputsProcess&responsedocument=[buffer=@asreference=true]
+
+# output part of Execute response
+# resulting ComplexValue will be part of Execute response - if it is binary
+# (raster) file, it will be stored in CDATA section
+#
+# page 37, table 51, 
+version=1.0.0&service=wps&request=execute&identifier=exampleBufferNoInputsProcess&responsedocument=[buffer=@asreference=false]
+
+# lineage outputs
+# part of response document will be description of data outputs
+#
+# page 38, table 53, 
+version=1.0.0&service=wps&request=execute&identifier=exampleBufferNoInputsProcess&responsedocument=[buffer=@asreference=true]&lineage=true
+
+# store execute response
+# the response document will be stored on the server for later reference
+#
+# page 38, table 53, 
+version=1.0.0&service=wps&request=execute&identifier=exampleBufferNoInputsProcess&responsedocument=[buffer=@asreference=true]&StoreExecuteResponse=true
+ 
+# define output format for resulting raster map
+# this process can produce resulting map in image/png or image/tiff format,
+# choose one of them:
+version=1.0.0&service=wps&request=execute&identifier=exampleLosProcess&datainputs=[dem=http://localhost/temp/dem.tif;easting=603067.6875;northing=4925118.1875]&responsedocument=[los=@mimeType=image/png@asreference=true]

@@ -11,4 +11,4 @@
 export PYWPS_CFG=/usr/local/wps/pywps.cfg
 export PYWPS_PROCESSES=/usr/local/wps/processes/
 
-/usr/local/pywps-VERSION/cgiwps.py
+/usr/local/pywps-VERSION/wps.py

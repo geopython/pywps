@@ -217,6 +217,10 @@ class WPSProcess:
 
         File object, where to print log in.
 
+    .. attribute:: pywps
+    
+        copy of the :class:`pywps.Pywps` instance
+
     """
     identifier = None
     version = None
@@ -235,6 +239,7 @@ class WPSProcess:
     grassLocation = None
     grassMapset = None
     logFile = None
+    pywps = None
 
     def __init__(self, identifier, title = None, abstract=None,
             metadata=[],profile=[], version=None,

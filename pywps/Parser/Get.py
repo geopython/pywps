@@ -36,6 +36,9 @@ Get
 
 import types
 from string import split
+import pywps
+from pywps.Exceptions import *
+import pywps.config
 from pywps.Parser import Parser
 from pywps.Process.Lang import Lang
 import urllib
@@ -59,13 +62,13 @@ class Get(Parser):
         key = None
         value = None
         keys = []
-        maxInputLength = self.wps.config.getint("server","maxinputparamlength")
+        maxInputLength = int(pywps.config.getConfigValue("server","maxinputparamlength"))
 
         # parse query string
         # arguments are separated by "&" character
         # everything is stored into unparsedInputs structure, for latter
         # validation
-        for feature in urllib.unquote(queryString).split("&"):
+        for feature in queryString.split("&"):
             feature = feature.strip()
             # omit empty KVPs, e.g. due to optional ampersand after the last
             # KVP in request string (OWS_1-1-0, p.75, sect. 11.2):
@@ -76,14 +79,15 @@ class Get(Parser):
                 else:
                     try:
                         key,value = split(feature,"=",maxsplit=1)
+                        value = urllib.unquote(value)
                     except:
-                        raise self.wps.exceptions.NoApplicableCode(\
+                        raise NoApplicableCode(\
                                                     'Invalid Key-Value-Pair: "' + \
                                                     str(feature) + '"')
                     if value.find("[") == 0:  # if value in brackets:
                         value = value[1:-1]   #    delete brackets
                     if len(value)>maxInputLength:
-                            raise self.wps.exceptions.FileSizeExceeded(key)
+                            raise FileSizeExceeded(key)
                 keys.append(key)
                 self.unparsedInputs[key.lower()] = value[:maxInputLength]
 
@@ -98,13 +102,15 @@ class Get(Parser):
             # parse the request
             self.requestParser.parse(self.unparsedInputs)
 
+        if not self.inputs:
+            raise MissingParameterValue("service")
         return self.inputs
 
     def checkRequestType(self):
         """Find requested request type and import given request parser."""
 
         if not "request" in self.unparsedInputs:
-            raise self.wps.exceptions.MissingParameterValue("request")
+            raise MissingParameterValue("request")
 
         # test, if one of the mandatory WPS operation is called (via request)
         # (mandatory operations see WPS_1-0-0 p.4 sect.6.1)
@@ -124,7 +130,7 @@ class Get(Parser):
             self.requestParser = Execute.Get(self.wps)
             self.inputs["request"] = self.EXECUTE
         else:
-            raise self.wps.exceptions.InvalidParameterValue("request")
+            raise InvalidParameterValue("request")
 
 
     def checkService(self):
@@ -134,14 +140,14 @@ class Get(Parser):
         # p.46 tab.26); service must be "WPS" (WPS_1-0-0 p.17 tab.13 + p.32 tab.39)
         if "service" in self.unparsedInputs:
             value=self.unparsedInputs["service"].upper()
-            if value == "WSDL":
-                self.inputs["service"] = "WSDL"
-            elif value != "WPS":
-                raise self.wps.exceptions.InvalidParameterValue("service")
+            if value.lower() == "wsdl":
+                self.inputs["service"] = "wsdl"
+            elif value.lower() != "wps":
+                raise InvalidParameterValue("service")
             else:
-                self.inputs["service"] = "WPS"
+                self.inputs["service"] = "wps"
         else:
-            raise self.wps.exceptions.MissingParameterValue("service")
+            raise MissingParameterValue("service")
         return self.inputs["service"]
 
     def checkLanguage(self):
@@ -150,11 +156,11 @@ class Get(Parser):
         if "language" in self.unparsedInputs:
             value=Lang.getCode(self.unparsedInputs["language"].lower())
             if value not in self.wps.languages:
-                raise self.wps.exceptions.InvalidParameterValue("language")
+                raise InvalidParameterValue("language")
             else:
                 self.inputs["language"] = value
         else:
-            self.inputs["language"] = self.wps.defaultLanguage
+            self.inputs["language"] = pywps.DEFAULT_LANG
 
     def checkVersion(self):
         """ Check mandatory version parameter.  """
@@ -162,10 +168,10 @@ class Get(Parser):
         if "version" in self.unparsedInputs:
             value=self.unparsedInputs["version"]
             if value not in self.wps.versions:
-                raise self.wps.exceptions.VersionNegotiationFailed(
+                raise VersionNegotiationFailed(
                     'The requested version "' + value + \
                     '" is not supported by this server.')
             else:
                 self.inputs["version"] = value
         else:
-            raise self.wps.exceptions.MissingParameterValue("version")
+            raise MissingParameterValue("version")

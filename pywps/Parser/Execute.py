@@ -66,7 +66,7 @@ class Post(Post):
             self.inputs["identifier"] =\
             firstChild.getElementsByTagNameNS(self.owsNameSpace,"Identifier")[0].firstChild.nodeValue
         except IndexError:
-                raise self.wps.exceptions.MissingParameterValue("Identifier")
+                raise pywps.MissingParameterValue("Identifier")
 
         #
         # Optional options
@@ -98,7 +98,7 @@ class Post(Post):
         if self.inputs.has_key('responseform') and \
            (self.inputs["responseform"].has_key("rawdataoutput") and \
             self.inputs["responseform"].has_key("responsedocument")):
-            raise self.wps.exceptions.InvalidParameterValue(
+            raise pywps.InvalidParameterValue(
                 "Either responseDocument or rawDataOutput should be specified, but not both")
         if not self.inputs["responseform"].has_key("rawdataoutput"):
                self.inputs["responseform"]["rawdataoutput"] = {}
@@ -154,7 +154,7 @@ class Post(Post):
                                     "Identifier")[0].firstChild.nodeValue
                     outputs.append({"identifier": identifier})
                 except IndexError:
-                    raise self.wps.exceptions.MissingParameterValue("Identifier")
+                    raise pywps.MissingParameterValue("Identifier")
                 # Abstract, Title are not supported yet
                 # is it necessary ?
 
@@ -185,7 +185,7 @@ class Post(Post):
                                 "Identifier")[0].firstChild.nodeValue
                 form["rawdataoutput"][identifier] = {}
             except IndexError:
-                raise self.wps.exceptions.MissingParameterValue("Identifier")
+                raise pywps.MissingParameterValue("Identifier")
             form["rawdataoutput"][identifier]["mimetype"] = \
                     responseFormNode.getAttribute("mimeType")
             form["rawdataoutput"][identifier]["encoding"] = \
@@ -208,7 +208,7 @@ class Post(Post):
                 identifier = inputNode.getElementsByTagNameNS(
                      self.owsNameSpace,"Identifier")[0].firstChild.nodeValue
             except (IndexError, AttributeError):
-                raise self.wps.exceptions.NoApplicableCode(
+                raise pywps.NoApplicableCode(
                                               "Identifier for input not set")
             parsedDataInputs.append({"identifier":identifier,"value":None,
                 "attributes":{}})
@@ -232,7 +232,7 @@ class Post(Post):
             try:
                 parsedDataInputs[-1]
             except KeyError:
-                raise self.wps.exceptions.InvalidParameterValue(identifier)
+                raise pywps.InvalidParameterValue(identifier)
 
 
         return parsedDataInputs
@@ -248,7 +248,7 @@ class Post(Post):
         attributes["value"] =\
                     dataTypeNode.getAttributeNS(self.xlinkNameSpace,"href")
         if attributes["value"] == "":
-            raise self.wps.exceptions.MissingParameterValue("'href'")
+            raise pywps.MissingParameterValue("'href'")
 
         #
         # optional attributes
@@ -309,7 +309,7 @@ class Post(Post):
                         headerNode.getAttributeNS(self.nameSpace,"value")
 
             if len(header.keys()) == 0:
-                raise self.wps.exceptions.MissingParameterValue("Header")
+                raise pywps.MissingParameterValue("Header")
 
         return header
 
@@ -432,7 +432,7 @@ class Get(Get):
         if "identifier" in self.unparsedInputs:
             self.inputs["identifier"] = self.unparsedInputs["identifier"]
         else:
-            raise self.wps.exceptions.MissingParameterValue("identifier")
+            raise pywps.MissingParameterValue("identifier")
 
         #
         # Optional options
@@ -498,7 +498,7 @@ class Get(Get):
         # Either responseDocument or rawDataOutput should be specified, not both
         if len(self.inputs["responseform"]["rawdataoutput"])>0 and \
             len(self.inputs["responseform"]["responsedocument"])>0:
-            raise self.wps.exceptions.InvalidParameterValue(
+            raise pywps.InvalidParameterValue(
                 "Either responseDocument or rawDataOutput should be specified, but not both")
         return self.inputs
 

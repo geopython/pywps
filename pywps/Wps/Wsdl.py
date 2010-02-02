@@ -26,6 +26,8 @@ WPS WSDL request handler
 from Response import Response
 from htmltmpl import TemplateError
 import os,types
+import pywps
+from pywps import config
 
 class Wsdl(Response):
     """
@@ -48,9 +50,9 @@ class Wsdl(Response):
         #
         # global variables
         #
-        name = "".join(map(lambda x: x.capitalize(),self.wps.getConfigValue("wps","title").split()))
+        name = "".join(map(lambda x: x.capitalize(),config.getConfigValue("wps","title").split()))
         self.templateProcessor.set("name",name)
-        self.templateProcessor.set("address",self.wps.getConfigValue("wps","serveraddress"))
+        self.templateProcessor.set("address",config.getConfigValue("wps","serveraddress"))
 
         #
         # Processes

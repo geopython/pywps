@@ -40,9 +40,31 @@ example how to use this module::
 
     Namespace of OGC OWS 1.0.0 standard 
 
-.. data:: EMPTYPARAMREGEX
+.. data:: PYWPS_INSTALL_DIR
 
-    Regular expression for empty parameter identificaion
+    Directory, where Pywps is installed
+
+.. data:: DEFAULT_LANG
+
+    Default language for WPS instance
+
+.. data:: DEFAULT_VERSION
+
+    Default version of WPS instance
+
+.. data:: config
+
+    Configuration file parser
+
+.. data:: logFile
+
+    File object, where to write logs and erros to
+
+.. data:: responsePrinter
+
+    :class:`ResponsePrinter` instance, which will print the resulting
+    response for you.
+
 """
 
 __all__ = [ "Parser","processes", "Process", "Exceptions", "Wps", "Templates","Template"]
@@ -69,14 +91,14 @@ __all__ = [ "Parser","processes", "Process", "Exceptions", "Wps", "Templates","T
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import pywps
+import config
+import response
 import Parser
 import Exceptions
 import Wps
 from Exceptions import *
 
-import sys, os, ConfigParser, urllib, re, traceback, types
-from sys import stdout as STDOUT
-from sys import stderr as STDERR
+import sys, os, urllib, re, traceback, types
 
 # global variables
 METHOD_GET="GET"
@@ -84,8 +106,11 @@ METHOD_POST="POST"
 OWS_NAMESPACE = "http://www.opengis.net/ows/1.1"
 WPS_NAMESPACE = "http://www.opengis.net/wps/1.0.0"
 XLINK_NAMESPACE = "http://www.w3.org/1999/xlink"
-EMPTYPARAMREGEX = re.compile('( \w+="")|( \w+="None")')
+logFile = None
 
+PYWPS_INSTALL_DIR = None # this working directory
+DEFAULT_LANG = "eng"
+DEFAULT_VERSION = "1.0.0"
 
 class Pywps:
     """This is main PyWPS Class, which parses the request, performs the
@@ -104,19 +129,6 @@ class Pywps:
     .. attribute:: parser 
 
         WPS request parser
-
-    .. attribute:: config 
-
-        Configuration file parser
-
-    .. attribute:: workingDir 
-
-        Temporary working directory, which will be deleted, after process
-        execution successfuly ended
-
-    .. attribute:: exceptions
-
-        Shortcut to pywps.exceptions package
 
     .. attribute:: statusFiles
 
@@ -138,63 +150,40 @@ class Pywps:
 
         GetCapabilities, DescribeProcess or Execute, POST or GET (parsing) object
 
-    .. attribute:: defaultLanguage
-
-        Default document language
-
     .. attribute:: languages
 
         List of supported languages
-
-    .. attribute:: defaultVersion
-
-        Default WPS version
 
     .. attribute:: versions
 
         Default supported versions
 
-    .. attribute:: logFile
-
-        File object, where to write logs and erros to
-
     """
 
-    method  =""                      # HTTP POST or GET
-    parser = None
-    config = None  # Configuration
-    workingDir = None # this working directory
-
-    exceptions = pywps.Exceptions
-    statusFiles = STDOUT
+    method = METHOD_GET                     # HTTP POST or GET
+    statusFiles = sys.stdout
     stdOutClosed = False
 
-    inputs = {} # parsed input values
+    inputs = None # parsed input values
     request = None # object with getcapabilities/describeprocess/execute
-                   # class
-    parser = None # pywps.Parser Get or Post
+    parser = None
 
-    defaultLanguage = "eng"
-    languages = [defaultLanguage]
-    defaultVersion = "1.0.0"
-    versions=[defaultVersion]
-    logFile = STDERR  
+    languages = [DEFAULT_LANG]
+    versions=[DEFAULT_VERSION]
 
     def __init__(self, method=METHOD_GET, configFiles=None):
         """Class constructor
         """
 
         # get settings
-        self._loadConfiguration(configFiles)
         self._setLogFile()
 
-        # set default language
-        self.languages = self.getConfigValue("wps","lang").split(",")
-        self.defaultLanguage = self.languages[0]
+        self.languages = config.getConfigValue("wps","lang").split(",")
+        DEFAULT_LANG = self.languages[0]
 
         # set default version
-        self.versions=self.getConfigValue("wps","version").split(",")
-        self.defaultVersion = self.versions[0]
+        self.versions = config.getConfigValue("wps","version").split(",")
+        DEFAULT_VERSION = self.versions[0]
 
         # find out the request method
         self.method = method
@@ -206,7 +195,6 @@ class Pywps:
         file object, e.g.  :mod:`sys.stdin`
 
         :param queryStringObject: string or file object with the request
-        :type queryStringObject: string or file object
         :returns: Dictionary of parsed input values
         :rtype: dict
         """
@@ -222,76 +210,6 @@ class Pywps:
 
         self.inputs = self.parser.parse(queryStringObject)
         return self.inputs
-
-    def _loadConfiguration(self, cfgfiles=None):
-        """Load PyWPS configuration from configuration files.
-        The later configuration file in the array overwrites configuration
-        from the first.
-
-        :param cfgfiles: list of file names, where to get configuration from.
-        :type cfgfiles: list of strings
-        """
-
-        if cfgfiles == None:
-            cfgfiles = self.getDefaultConfigFilesLocation()
-
-        if type(cfgfiles) != type(()):
-            cfgfiles = (cfgfiles)
-
-        self.config = ConfigParser.ConfigParser()
-        self.config.read(cfgfiles)
-
-    def getDefaultConfigFilesLocation(self):
-        """Get the locations of the standard configuration files. This are
-
-        Unix/Linux:
-            1. `pywps/default.cfg`
-            2. `/etc/pywps.cfg`
-            3. `pywps/etc/pywps.cfg`
-            4. `$HOME/.pywps.cfg`
-
-        Windows:
-            1. `pywps\\default.cfg`
-            2. `pywps\\etc\\default.cfg`
-        
-        Both:
-            1. `$PYWPS_CFG environment variable`
-
-        :returns: configuration files
-        :rtype: list of strings
-        """
-
-        # configuration file as environment variable
-        if os.getenv("PYWPS_CFG"):
-
-            # Windows or Unix
-            if sys.platform == 'win32':
-                self.workingDir = os.path.abspath(os.path.join(os.getcwd(), os.path.dirname(sys.argv[0])))
-                cfgfiles = (os.path.join(self.workingDir,"pywps","default.cfg"),
-                        os.getenv("PYWPS_CFG"))
-            else:
-                cfgfiles = (os.path.join(pywps.__path__[0],"default.cfg"),
-                        os.getenv("PYWPS_CFG"))
-
-        # try to eastimate the default location
-        else:
-            # Windows or Unix
-            if sys.platform == 'win32':
-                self.workingDir = os.path.abspath(os.path.join(os.getcwd(), os.path.dirname(sys.argv[0])))
-                cfgfiles = (os.path.join(self.workingDir,"pywps","default.cfg"),
-                        os.path.join(self.workingDir, "pywps","etc","pywps.cfg"))
-            else:
-                homePath = os.getenv("HOME")
-                if homePath:
-                    cfgfiles = (os.path.join(pywps.__path__[0],"default.cfg"),
-                            os.path.join(pywps.__path__[0],"etc", "pywps.cfg"), "/etc/pywps.cfg",
-                        os.path.join(os.getenv("HOME"),".pywps.cfg" ))
-                else: 
-                    cfgfiles = (os.path.join(pywps.__path__[0],"default.cfg"),
-                            os.path.join(pywps.__path__[0],"etc",
-                                "pywps.cfg"), "/etc/pywps.cfg")
-        return cfgfiles
-
 
     def performRequest(self,inputs = None, processes=None):
         """Performs the desired WSP Request.
@@ -320,145 +238,35 @@ class Pywps:
             from pywps.Wps.Wsdl import Wsdl
             self.request = Wsdl(self)
         else:
-            raise self.exceptions.InvalidParameterValue(
+            raise Exceptions.InvalidParameterValue(
                     "request: "+inputs["request"])
 
         self.response = self.request.response
         return self.response
 
-    def getConfigValue(self,*args):
-        """Get desired value from  configuration files
-
-        :param section: section in configuration files
-        :type section: string
-        :param key: key in the section
-        :type key: string
-        :returns: value found in the configuration file
-        :rtype: string
-        """
-
-        value = self.config.get(*args)
-
-        # Convert Boolean string to real Boolean values
-        if value.lower() == "false":
-            value = False
-        elif value.lower() == "true" :
-            value = True
-        return value
-
-    def debug(self,debug,code="Debug"):
-        """Print debug argument to standard error
-
-        :param debug: debugging text, which should be printed to the
-            :attr:`logFile`
-        :type debug: string
-        :param code: text, which will be printed to the
-            :attr:`logFile`
-            direct after 'PyWPS' and before the debug text
-        :type code: string.
-        """
-        dbg = self.getConfigValue("server","debug")
-        if dbg == True or (type(dbg) == type("") and \
-                dbg.lower() == "true") or int(dbg) != 0:
-            print >>self.logFile, "PyWPS %s: %s" % (code,debug.__str__()[0:160]),
-            if len(debug.__str__()) > 160:
-                print >>self.logFile, "...",
-            print >>self.logFile, "\n"
-
-    def printResponse(self,fileDes,isSoap=False,response=None):
-        """
-        Print response to files given as input parameter.
-
-        :param fileDes: file object or list of file objects. File name,
-            mod_python request or java servlet response
-        :type fileDes: string or list, 
-        :param isSoap: print the response in SOAP envelope
-        :type isSoap: bool
-        :param response: the response object. Default is self.response
-        """
-
-        # convert single file to array
-        if type(fileDes) != type([]):
-            fileDes = [fileDes]
-
-        if not response:
-            response = self.response
-
-        if isSoap:
-            soap = Soap.SOAP()
-            response = soap.getResponse(response)
-
-        # for each file in file descriptor
-        for f in fileDes:
-
-            # consider, if this CGI, mod_python or Java requested output
-            # mod_python here
-            if repr(type(f)) == "<type 'mp_request'>":
-                if self.stdOutClosed == True:
-                        continue
-                self._printResponseModPython(f,response)
-		self.stdOutClosed = True
-
-            # file object (output, or sys.stdout)
-            elif types.FileType == type(f):
-                if f == STDOUT and self.stdOutClosed == True:
-                        continue
-                self._printResponseFile(f,response)
-
-            # java servlet response
-            elif repr(type(f)).find("org.apache.catalina.connector") > -1 or \
-                 repr(f) == "<__main__.DummyHttpResponse instance at 0xc14>": 
-                if self.stdOutClosed == True:
-                        continue
-                self._printResponseJava(f,response)
-		self.stdOutClosed = True
-
-    def _printResponseModPython(self, request, response):
-
-        request.content_type = "text/xml"
-        request.write(re.sub(EMPTYPARAMREGEX,"",response))
-
-    def _printResponseFile(self, fileOut, response):
-
-        if fileOut == STDOUT:
-            print "Content-Type: text/xml\n"
-        elif fileOut.closed:
-            fileOut = open(fileOut.name,"w")
-
-        fileOut.write(re.sub(EMPTYPARAMREGEX,"",response))
-        fileOut.flush()
-
-        if fileOut != STDOUT:
-            f.close()
-        else:
-            self.stdOutClosed = True
-
-    def _printResponseJava(self, resp, response):
-        resp.setContentType("text/xml")
-        toClient = resp.getWriter()
-        toClient.println(re.sub(EMPTYPARAMREGEX,"",response))
-
     def _setLogFile(self):
-        """Set self.logFile. Default is sys.stderr
+        """Set :data:`logFile`. Default is sys.stderr
         """
+        logFile = config.getConfigValue("server","logFile")
+        if not logFile:
+            logFile = sys.stderr
 
-        # logfile
-        self.logFile = STDERR
-        try:
-            self.logFile = self.getConfigValue("server","logFile")
-            if self.logFile:
-                #se = open(self.logFile, 'a+', 0)
-                #os.dup2(se.fileno(), STDERR.fileno())
-                self.logFile = open(self.logFile,"a+")
-            else:
-                self.logFile = STDERR
-        except ConfigParser.NoOptionError,e:
-            pass
-        except IOError,e:
-            traceback.print_exc(file=STDERR)
-            raise self.exceptions.NoApplicableCode("Logfile IOError: %s" % e.__str__())
-        except Exception, e:
-            traceback.print_exc(file=STDERR)
-            raise self.exceptions.NoApplicableCode("Logfile error: %s" % e.__str__())
+def debug(debug,code="Debug"):
+    """Print debug argument to standard error
 
-        self.exceptions.logFile = self.logFile
+    :param debug: debugging text, which should be printed to the
+        :data:`logFile`
+    :type debug: string
+    :param code: text, which will be printed to the
+        :data:`logFile`
+        direct after 'PyWPS' and before the debug text
+    :type code: string.
+    """
+    dbg = config.getConfigValue("server","debug")
+    if dbg == True or (type(dbg) == type("") and \
+            dbg.lower() == "true") or int(dbg) != 0:
+        print >>logFile, "PyWPS %s: %s" % (code,debug.__str__()[0:160]),
+        if len(debug.__str__()) > 160:
+            print >>logFile, "...",
+        print >>logFile, "\n"
+

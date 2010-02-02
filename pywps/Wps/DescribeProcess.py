@@ -21,6 +21,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 from pywps.Wps import Request
+from pywps import config
 from pywps.Template import TemplateError
 import os,types,traceback
 
@@ -42,7 +43,7 @@ class DescribeProcess(Request):
         # HEAD
         #
         self.templateProcessor.set("encoding",
-                                    self.wps.getConfigValue("wps","encoding"))
+                                    config.getConfigValue("wps","encoding"))
         self.templateProcessor.set("lang",
                                     self.wps.inputs["language"])
 
@@ -66,59 +67,8 @@ class DescribeProcess(Request):
         processesData = []
 
         # Import processes
-        listOfProcesses = None
-        try:
-            listOfProcesses = self.processes.__all__
-        except:
-            listOfProcesses = self.processes
-
-        for processObj in listOfProcesses:
-            # try to obtain process object, name and data
-            processName = None
-            process = None
+        for process in self.getProcesses(self.wps.inputs["identifier"]):
             processData = {}
-
-            try:
-                # process is Class - make instance of it
-                if type(processObj) == types.ClassType:
-                    process = processObj()
-                # process is instance already, take it as it is
-                elif type(processObj) == types.InstanceType:
-                    process = processObj
-                # process is string -- import from directory
-                elif type(processName) == types.StringType:
-                    module = __import__(self.processes.__name__, globals(),\
-                                        locals(), [processName])
-                    # originaly, there should be Process class within the
-                    # module 
-                    try:
-                        process = eval("module."+processName+".Process()")
-                    # but having the same class name as the module name is much
-                    # nicer
-                    except AttributeError:
-                        process = eval("module."+processName+"."+processName+"()")
-                        
-                processName = process.identifier
-
-            except Exception, e:
-                traceback.print_exc(file=self.wps.logFile)
-                processData["processok"] = 0
-                processData["process"] = processName
-                processData["exception"] = e
-
-            # skip process, if not requested or
-            # identifier != "ALL"
-            if not processName in self.wps.inputs["identifier"] and \
-                self.wps.inputs["identifier"][0].lower() != "all":
-                continue
-
-            # process identifier must be == package name
-            if process.identifier != processName:
-                raise ImportError(
-                        "Process identifier \"%s\" != package name \"%s\": File name has to be the same, as the identifier is!" %\
-                        (process.identifier, processName))
-
-            # set selected language
             process.lang.setCode(self.wps.inputs["language"])
 
             processData["processok"] = 1

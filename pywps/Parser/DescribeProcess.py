@@ -55,7 +55,7 @@ class Post(Post):
                 owsNameSpace,"Identifier"):
             identifiers.append(identifierNode.firstChild.nodeValue)
         if len(identifiers) == 0:
-            raise self.wps.exceptions.MissingParameterValue("Identifier")
+            raise pywps.MissingParameterValue("Identifier")
         self.inputs["identifier"] = identifiers
 
         #
@@ -88,7 +88,7 @@ class Get(Get):
         if "identifier" in self.unparsedInputs:
             self.inputs["identifier"] = self.unparsedInputs["identifier"].split(",")
         else:
-            raise self.wps.exceptions.MissingParameterValue("identifier")
+            raise pywps.MissingParameterValue("identifier")
 
         #
         # Optional options

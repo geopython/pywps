@@ -76,17 +76,18 @@ if method == pywps.METHOD_GET:
             inputQuery = sys.argv[1]
     if not inputQuery:
         err =  NoApplicableCode("No query string found.")
-        err.promoteException(contentType=True)
+        pywps.response.response(err,sys.stdout)
         sys.exit(1)
 else:
     inputQuery = sys.stdin
 
 
 # create the WPS object
+wps = None
 try:
     wps = pywps.Pywps(method)
     if wps.parseRequest(inputQuery):
-        wps.debug(wps.inputs)
+        pywps.debug(wps.inputs)
         response = wps.performRequest()
 
         # request performed, write the response back
@@ -94,7 +95,7 @@ try:
             # print only to standard out
             if wps.statusFiles == sys.stdout or\
                 sys.stdout in wps.statusFiles:
-                wps.printResponse(wps.statusFiles,wps.parser.isSoap)
+                pywps.response.response(wps.response, wps.statusFiles,wps.parser.isSoap)
 except WPSException,e:
-    traceback.print_exc(file=sys.stderr)
-    e.promoteException(contentType=True)
+    traceback.print_exc(file=pywps.logFile)
+    pywps.response.response(e, wps.statusFiles, wps.parser.isSoap)

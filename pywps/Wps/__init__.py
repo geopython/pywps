@@ -27,13 +27,17 @@ __all__ = ["GetCapabilities","DescribeProcess","Execute","Wsdl"]
 
 import xml.dom.minidom
 # make sure, that the package python-htmltmpl is installed on your system!
+import pywps
+from pywps import config
+from pywps.Exceptions import *
 from pywps.Template import TemplateProcessor
 import os
 from sys import stdout as STDOUT
 from sys import stderr as STDERR
-import types
 from pywps import Templates
 from pywps import Soap
+import types
+import traceback
 
 class Request:
     """WPS Request performing, and response formating
@@ -77,7 +81,11 @@ class Request:
 
     .. attribute:: processes
 
-        list of processes :`class:`pywps.Process.WPSProcess`
+        list of instances of :`class:`pywps.Process.WPSProcess`
+
+    .. attribute:: processSources
+
+        list of sources of processes
     """
 
     response = None # Output document
@@ -90,6 +98,7 @@ class Request:
     stdOutClosed = False
     templateProcessor = None
     processes = None
+    processSources = None
 
     def __init__(self,wps,processes=None):
         """Class constructor"""
@@ -127,53 +136,74 @@ class Request:
         # set self.processes from various inputs
         #
         # process are string -- it means the directory
-        if processes and type(processes) == type(""):
-            self.wps.debug("Setting PYWPS_PROCESSES from the program itself to %s" % processes)
-            self.processes = self.setFromDirectory(processes)
+        if not processes:
+            processes = os.getenv("PYWPS_PROCESSES")
+        self.initProcesses(processes)
 
-        # process are in the environment directory
-        elif os.getenv("PYWPS_PROCESSES"):
-            self.wps.debug("Setting PYWPS_PROCESSES from the environment variable to %s" % os.getenv("PYWPS_PROCESSES"))
-            self.processes = self.setFromDirectory(os.getenv("PYWPS_PROCESSES"))
-
-        # processes are some list -- use them directly
-        elif processes and type(processes) in [type(()), type([])]:
-
-            self.wps.debug("Setting PYWPS_PROCESSES not set, we are using the processes array directly")
-            self.processes = processes
-
-        # processes will be set from configuration file
-        elif self.wps.getConfigValue("server","processesPath"):
-            self.wps.debug("Setting PYWPS_PROCESSES from configuration file to %s" %\
-                        self.wps.getConfigValue("server","processesPath"))
-            self.processes = self.setFromDirectory(self.wps.getConfigValue("server","processesPath"))
-
-        # processes will be set from default directory
-        else:
-            self.wps.debug("Importing the processes from default (pywps/processes) location")
-            import pywps
-            from pywps import processes as pywpsprocesses
-            self.processes = self.setFromDirectory(os.path.abspath(pywpsprocesses.__path__[-1]))
-
-        # check the availbility of the process
-        if self.wps.inputs.has_key("identifier"):
-                self.checkProcess(self.wps.inputs["identifier"])
-
-    def setFromDirectory(self,dirname):
+    def _initFromDirectory(self,dirname):
 
         import sys
+        processes = []
         # remove last "/" from the path
         if dirname[-1] == os.path.sep:
             dirname = dirname[:-1]
 
+        # try to import process from python package (directory)
         try:
             sys.path.insert(0,os.path.split(dirname)[0])
-            return __import__(os.path.split(dirname)[-1])
-        except ImportError,e:
-            traceback.print_exc(file=self.logFile)
-            raise self.wps.exceptions.NoApplicableCode("Could not import processes from the dir [%s]: %s! __init__.py file missing?" % (dirname,e))
+            sys.path.insert(0,dirname)
+            
+            # import the main directory for processes
+            processSources =  __import__(os.path.split(dirname)[-1])
 
-            sys.path.append(dirname)
+            # for each file within the directory - module within the
+            # package, try to import it as well
+            for procModule in processSources.__all__:
+
+
+                # try to identify every class, based on
+                # pywps.Process.WPSProcess
+                procModule = __import__(procModule, globals(),\
+                                    locals(), [processSources.__name__])
+                
+                for member in dir(procModule):
+                    member = eval("procModule."+member)
+
+                    # check, if the module is Class, make instance of it
+                    # and import it
+                    if type(member) == types.ClassType:
+                        if issubclass(member, pywps.Process.WPSProcess) and \
+                            not member == pywps.Process.WPSProcess:
+
+                            # create instance of the member and append it to
+                            # self.processes
+                            try:
+                                processes.append(member())
+                            except Exception,e:
+                                processes.append(
+                                        "Could not import process [%s]: %s" % \
+                                                (repr(member), repr(e)))
+                    # if the member is Istance, check, if it is istnace of
+                    # WPSProcess class and import it
+                    elif type(member) == types.InstanceType:
+                        if isinstance(member, pywps.Process.WPSProcess):
+                                processes.append(member)
+                        
+
+        except ImportError,e:
+            traceback.print_exc(file=self.wps.logFile)
+            processes.append("Could not import process [%s]: %s" % (repr(procModule), repr(e)))
+        return processes
+
+    def _initFromCode(self,processes):
+
+        outProcesses = []
+        for process in processes:
+            if type(process) == types.InstanceType:
+                outProcesses.append(process)
+            elif type(process) == types.ClassType:
+                outProcesses.append(process())
+        return outProcesses
 
     def checkProcess(self,identifiers):
         """check, if given identifiers are available as processes"""
@@ -186,7 +216,7 @@ class Request:
         for prc in self.wps.inputs["identifier"]:
             try:
                 if not prc in self.processes.__all__:
-                    raise self.wps.exceptions.InvalidParameterValue(prc,"Process %s not available" % prc)
+                    raise InvalidParameterValue(prc,"Process %s not available" % prc)
             except AttributeError:
                 invalidParameterValue = True
                 for proc in self.processes:
@@ -195,7 +225,7 @@ class Request:
                     if proc.identifier == prc:
                         invalidParameterValue = False
                 if invalidParameterValue:
-                    raise self.wps.exceptions.InvalidParameterValue(prc)
+                    raise InvalidParameterValue(prc)
 
 
 
@@ -237,5 +267,77 @@ class Request:
         .. note:: this method is empty and should be redefined by particula
             instances
         """
+        pass
 
+    def initProcesses(self,processes=None):
+        """Initialize list of :attr:`processes`
+        
+        :param processes: processes input processes. If none, environment and default
+            settings will be used.
+        :type processes: list of :class:`pywps.Process.WPSProcess`, list of
+            it's instances, string with directory, where processes are
+            located, ..."""
+        global pywps
+
+        
+        if processes and type(processes) == type(""):
+            pywps.debug("Reading processes from [%s]" % processes)
+            self.processes  = self._initFromDirectory(processes)
+
+        # processes are some list -- use them directly
+        elif processes and type(processes) in [type(()), type([])]:
+
+            pywps.debug("Setting PYWPS_PROCESSES not set, we are using the processes array directly")
+            self.processes = self._initFromCode(processes)
+
+        # processes will be set from configuration file
+        elif config.getConfigValue("server","processesPath"):
+            pywps.debug("Setting PYWPS_PROCESSES from configuration file to %s" %\
+                        config.getConfigValue("server","processesPath"))
+            self.processes = self._initFromDirectory(config.getConfigValue("server","processesPath"))
+
+        # processes will be set from default directory
+        else:
+            pywps.debug("Importing the processes from default (pywps/processes) location")
+            import pywps
+            from pywps import processes as pywpsprocesses
+            self.processes = self._initFromDirectory(os.path.abspath(pywpsprocesses.__path__[-1]))
+        return self.processes
+
+    def getProcess(self,identifier):
+        """Get single processes based on it's identifier"""
+        for process in self.processes:
+            if type(process) == types.StringType:
+                continue
+            if process.identifier == identifier:
+                return process
+        raise InvalidParameterValue(identifier)
+
+    def getProcesses(self,identifiers=None):
+        """Get list of processes identified by list of identifiers
+
+        :param identifiers: List of identifiers. Either list of strings, or 'all'
+        :returns: list of process instances or none
+        """
+
+        if not identifiers:
+            raise MissingParameterValue("Identifier")
+
+        if type(identifiers) == types.StringType:
+            if identifiers.lower() == "all":
+                return self.processes
+            else:
+                return self.getProcess(identifiers)
+        else:
+            processes = []
+            for identifier in identifiers:
+                if identifier.lower() == "all":
+                    return self.processes
+                else:
+                    processes.append(self.getProcess(identifier))
+
+            if len(processes) == 0:
+                raise InvalidParameterValue(identifier)
+            else:
+                return processes
 

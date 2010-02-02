@@ -26,6 +26,7 @@ locations and mapsets
 import os
 import time, shutil, tempfile
 import sys
+from pywps import config
 
 class Grass:
     """ GRASS initialization interface """
@@ -53,7 +54,7 @@ class Grass:
         # put env
         for key in self.envs.keys():
             try:
-                self.setEnv(self.envs[key],self.wps.getConfigValue("grass",key))
+                self.setEnv(self.envs[key],config.getConfigValue("grass",key))
             except :
                 pass
 
@@ -94,7 +95,7 @@ class Grass:
 
         # location is here, we justhave to use it
         else:
-            self.locationDir = os.path.join(self.wps.getConfigValue("grass","gisdbase"), location)
+            self.locationDir = os.path.join(config.getConfigValue("grass","gisdbase"), location)
             self.mapsetDir = tempfile.mkdtemp(prefix="pywps",dir=self.locationDir)
             self.mapsetName = os.path.split(self.mapsetDir)[1]
             self.locationName = location
@@ -113,7 +114,7 @@ class Grass:
         # Add it to dirsToBeRemoved
         try:
             grassTmpDir = os.path.join(tempfile.gettempdir(),
-                                       "grass"+self.wps.getConfigValue("grass","version")[:1]+\
+                                       "grass"+config.getConfigValue("grass","version")[:1]+\
                                        "-"+os.getenv("USERNAME")+\
                                        "-"+str(os.getpid()))
             self.executeRequest.dirsToBeRemoved.append(grassTmpDir)

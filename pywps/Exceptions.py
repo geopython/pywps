@@ -21,6 +21,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 from xml.dom.minidom import Document
+import pywps
 from pywps.Soap import SOAP
 import pywps.Soap
 import sys
@@ -34,24 +35,6 @@ class WPSException(Exception):
     code = "NoApplicableCode"
     value = None
     locator = None
-
-    def promoteException(self,contentType = False, toFiles=None):
-        """Print this exception text to files
-
-        :param toFiles: list of file objects, where to put  this exception
-            text. Default. sys.stdout && sys.stderr
-        :type toFiles: list
-        :param contentType: print content type information as well
-        :type contentType: boolean
-        """
-
-        if toFiles:
-            for i in toFiles:
-                if contentType: print >>i, "Content-type: text/xml\n"
-                print >>i, self
-        else:
-            if contentType: print >>sys.stdout, "Content-type: text/xml\n"
-            print >>sys.stdout, self
 
     def _make_xml(self):
         # formulate XML
@@ -73,19 +56,20 @@ class WPSException(Exception):
         self.ExceptionReport.appendChild(self.Exception)
         #self.value = None
 
-    def __str__(self):
-
-        response= self.document.toprettyxml(indent='\t', newl='\n', encoding="utf-8")
+    def getResponse(self):
+        return self.document.toprettyxml(indent='\t', newl='\n', encoding="utf-8")
         if pywps.Soap.soap == True:
             soapCls = SOAP()
             response = soapCls.getResponse(response)
 
-        try:
-            logFile.write("PyWPS %s: Locator: %s; Value: %s\n" % (self.code, self.locator, self.value))
-        except:
-            sys.stderr.write("PyWPS %s: Locator: %s; Value: %s\n" % (self.code, self.locator, self.value))
+    def __str__(self):
 
-        return response
+        error = "PyWPS %s: Locator: %s; Value: %s\n" % (self.code, self.locator, self.value)
+        try:
+            logFile.write(error)
+        except:
+            sys.stderr.write(error)
+        return self.document.toprettyxml(indent='\t', newl='\n', encoding="utf-8")
 
 class MissingParameterValue(WPSException):
     """MissingParameterValue WPS Exception"""
@@ -111,7 +95,7 @@ class NoApplicableCode(WPSException):
         self.message = value
         if value:
             self.ExceptionText = self.document.createElement("ExceptionText")
-            self.ExceptionText.appendChild(self.document.createTextNode(value))
+            self.ExceptionText.appendChild(self.document.createTextNode(repr(value)))
             self.Exception.appendChild(self.ExceptionText)
             self.value = str(value)
 

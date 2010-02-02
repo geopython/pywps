@@ -1,3 +1,10 @@
+"""
+.. data:: TEMPDIRPREFIX
+
+    prefix of temporary pywps directory
+
+"""
+
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
 #               jachym at les-ejk dot cz
@@ -20,11 +27,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+import pywps
+from pywps import config
 from pywps.Wps import Request
 from pywps.Template import TemplateError
 import time,os,sys,tempfile,re,types, ConfigParser, base64, traceback
 from shutil import copyfile as COPY
 from shutil import rmtree as RMTREE
+
+TEMPDIRPREFIX="pywps-instance"
 
 try:
     from mapscript import *
@@ -191,9 +202,9 @@ class Execute(Request):
     mapFileName = None
 
 
-    def __init__(self,wps):
+    def __init__(self,wps,processes=None):
 
-        Request.__init__(self,wps)
+        Request.__init__(self,wps,processes)
 
         self.wps = wps
         self.process = None
@@ -203,8 +214,8 @@ class Execute(Request):
         self.pid = os.getpid()
         self.status = None
         self.id = self.makeSessionId()
-        self.statusFileName = os.path.join(self.wps.getConfigValue("server","outputPath"),self.id+".xml")
-        self.statusLocation = self.wps.getConfigValue("server","outputUrl")+"/"+self.id+".xml"
+        self.statusFileName = os.path.join(config.getConfigValue("server","outputPath"),self.id+".xml")
+        self.statusLocation = config.getConfigValue("server","outputUrl")+"/"+self.id+".xml"
 
         # TODO: Uniform parsing in Post and Get because now they differ
         # rawDataOutput
@@ -227,9 +238,9 @@ class Execute(Request):
                 try:
                     self.statusFiles.append(open(self.statusFileName,"w"))
                 except Exception, e:
-                    traceback.print_exc(file=self.wps.logFile)
+                    traceback.print_exc(file=pywps.logFile)
                     self.cleanEnv()
-                    raise self.wps.exceptions.NoApplicableCode(e.__str__())
+                    raise pywps.NoApplicableCode(e.__str__())
                 self.storeRequired = True
 
         # is lineage required ?
@@ -245,30 +256,30 @@ class Execute(Request):
         # check rawdataoutput against process
         if self.rawDataOutput and self.rawDataOutput not in self.process.outputs:
             self.cleanEnv()
-            raise self.wps.exceptions.InvalidParameterValue("rawDataOutput")
+            raise pywps.InvalidParameterValue("rawDataOutput")
 
         # check storeExecuteResponse against process
         if self.storeRequired and not self.process.storeSupported:
             self.cleanEnv()
-            raise self.wps.exceptions.StorageNotSupported(
+            raise pywps.StorageNotSupported(
                 "storeExecuteResponse is true, but the process does not support output storage")
 
         # check status against process
         if self.statusRequired and not self.process.statusSupported:
             self.cleanEnv()
-            raise self.wps.exceptions.InvalidParameterValue(
+            raise pywps.InvalidParameterValue(
                 "status is true, but the process does not support status updates")
 
         # OGC 05-007r7 page 43
         # if status is true and storeExecuteResponse is false, raise an exception
         if self.statusRequired and not self.storeRequired:
             self.cleanEnv()
-            raise self.wps.exceptions.InvalidParameterValue(
+            raise pywps.InvalidParameterValue(
                 "status is true, but storeExecuteResponse is false")
 
         # HEAD
         self.templateProcessor.set("encoding",
-                                    self.wps.getConfigValue("wps","encoding"))
+                                    config.getConfigValue("wps","encoding"))
         self.templateProcessor.set("lang",
                                     self.wps.inputs["language"])
         self.templateProcessor.set("statuslocation",
@@ -309,8 +320,8 @@ class Execute(Request):
                         pass
 
                 except OSError, e:
-                    traceback.print_exc(file=self.wps.logFile)
-                    raise self.wps.exceptions.NoApplicableCode("Fork failed: %d (%s)\n" % (e.errno, e.strerror) )
+                    traceback.print_exc(file=pywps.logFile)
+                    raise pywps.NoApplicableCode("Fork failed: %d (%s)\n" % (e.errno, e.strerror) )
 
             # this is child process, parent is already gone away
             # redirect stdout, so that apache sends back the response immediately
@@ -334,9 +345,9 @@ class Execute(Request):
             # Execute
             self.executeProcess()
 
-        except self.wps.exceptions.WPSException,e:
+        except pywps.WPSException,e:
             # set status to failed
-            traceback.print_exc(file=self.wps.logFile)
+            traceback.print_exc(file=pywps.logFile)
             self.promoteStatus(self.failed,
                      statusMessage=e.value,
                      exceptioncode=e.code,
@@ -344,7 +355,7 @@ class Execute(Request):
         except Exception,e:
 
             # set status to failed
-            traceback.print_exc(file=self.wps.logFile)
+            traceback.print_exc(file=pywps.logFile)
             self.promoteStatus(self.failed,
                     statusMessage=str(e),
                     exceptioncode="NoApplicableCode")
@@ -365,14 +376,13 @@ class Execute(Request):
                 try:
                     self._initMapscript()
                 except Exception, e:
-                    self.wps.debug("MapScript could not be loaded, mapserver not supported: %s" %e,"Warning")
+                    pywps.debug("MapScript could not be loaded, mapserver not supported: %s" %e,"Warning")
 
                 # fill outputs
                 self.processOutputs()
 
                 if self.mapObj:
                     self.mapObj.save(self.mapFileName)
-
 
                 # Response document
                 self.response = self.templateProcessor.__str__()
@@ -387,8 +397,8 @@ class Execute(Request):
                 self.response = self.templateProcessor.__str__()
 
 
-        except self.wps.exceptions.WPSException,e:
-            traceback.print_exc(file=self.wps.logFile)
+        except pywps.WPSException,e:
+            traceback.print_exc(file=pywps.logFile)
             # set status to failed
             self.promoteStatus(self.failed,
                     statusMessage=e.value,
@@ -399,7 +409,7 @@ class Execute(Request):
 
         except Exception,e:
             # set status to failed
-            traceback.print_exc(file=self.wps.logFile)
+            traceback.print_exc(file=pywps.logFile)
             self.promoteStatus(self.failed,
                     statusMessage=str(e),
                     exceptioncode="NoApplicableCode")
@@ -420,30 +430,24 @@ class Execute(Request):
         """
 
         # import the right package
-        if self.wps.inputs["identifier"] in self.processes.__all__:
-            try:
-                module = __import__(self.processes.__name__, None, None,
-                                        [str(self.wps.inputs["identifier"])])
-                self.process = eval("module."+self.wps.inputs["identifier"]+".Process()")
-
-            except Exception, e:
-                self.cleanEnv()
-                traceback.print_exc(file=self.wps.logFile)
-                raise self.wps.exceptions.NoApplicableCode(
-                "Could not import process [%s]: %s" %\
-                        (self.wps.inputs["identifier"], e))
-                return
-        else:
+        self.process = None
+        try:
+            self.process = self.getProcess(self.wps.inputs["identifier"])
+        except Exception, e:
             self.cleanEnv()
-            raise self.wps.exceptions.InvalidParameterValue(
+            raise pywps.InvalidParameterValue(
                     self.wps.inputs["identifier"])
 
+        if not self.process:
+            self.cleanEnv()
+            raise pywps.InvalidParameterValue(
+                    self.wps.inputs["identifier"])
 
         # set proper method for status change
-        self.process.wps = self.wps
+        self.process.pywps = self.wps
         self.process.status.onStatusChanged = self.onStatusChanged
-        self.process.debug = self.wps.getConfigValue("server","debug")
-        self.process.logFile = self.wps.logFile
+        self.process.debug = config.getConfigValue("server","debug")
+        self.process.logFile = pywps.logFile
 
     def consolidateInputs(self):
         """ Donwload and control input data, defined by the client """
@@ -475,7 +479,7 @@ class Execute(Request):
                         resp = input.setValue(inp)
                         if resp:
                             self.cleanEnv()
-                            raise self.wps.exceptions.InvalidParameterValue(resp)
+                            raise pywps.InvalidParameterValue(resp)
             except KeyError,e:
                 pass
 
@@ -485,7 +489,7 @@ class Execute(Request):
 
             if not input.value and input.minOccurs > 0:
                 self.cleanEnv()
-                raise self.wps.exceptions.MissingParameterValue(identifier)
+                raise pywps.MissingParameterValue(identifier)
 
     def consolidateOutputs(self):
         """Set desired attributes (e.g. asReference) for each output"""
@@ -538,9 +542,9 @@ class Execute(Request):
         exception = None
 
         if what == "FileSizeExceeded":
-            exception = self.wps.exceptions.FileSizeExceeded
+            exception = pywps.FileSizeExceeded
         elif what == "NoApplicableCode":
-            exception = self.wps.exceptions.NoApplicableCode
+            exception = pywps.NoApplicableCode
 
         self.cleanEnv()
         raise exception(why)
@@ -556,8 +560,8 @@ class Execute(Request):
             # execute
             processError = self.process.execute()
             if processError:
-                traceback.print_exc(file=self.wps.logFile)
-                raise self.wps.exceptions.NoApplicableCode(
+                traceback.print_exc(file=pywps.logFile)
+                raise pywps.NoApplicableCode(
                         "Failed to execute WPS process [%s]: %s" %\
                                 (self.process.identifier,processError))
             else:
@@ -567,12 +571,12 @@ class Execute(Request):
                         self.process.identifier)
 
         # re-raise WPSException, will be caught outside
-        except self.wps.exceptions.WPSException,e:
+        except pywps.WPSException,e:
             raise e
 
         except Exception,e:
-            traceback.print_exc(file=self.wps.logFile)
-            raise self.wps.exceptions.NoApplicableCode(
+            traceback.print_exc(file=pywps.logFile)
+            raise pywps.NoApplicableCode(
                     "Failed to execute WPS process [%s]: %s" %\
                             (self.process.identifier,e))
 
@@ -665,10 +669,10 @@ class Execute(Request):
             self.wps.printResponse(self.statusFiles, response=self.response, )
         
         if self.status == self.started:
-            self.wps.debug("%s" % self.statusMessage,
+            pywps.debug("%s" % self.statusMessage,
                     code = "PyWPS Status [%s][%.1f]: "% (self.status,float(self.percent)))
         else:
-            self.wps.debug("%s" % self.statusMessage,
+            pywps.debug("%s" % self.statusMessage,
                         code="PyWPS Status [%s]"%self.status )
 
 
@@ -845,8 +849,8 @@ class Execute(Request):
 
             except Exception,e:
                 self.cleanEnv()
-                traceback.print_exc(file=self.wps.logFile)
-                raise self.wps.exceptions.NoApplicableCode(
+                traceback.print_exc(file=pywps.logFile)
+                raise pywps.NoApplicableCode(
                         "Process executed. Failed to build final response for output [%s]: %s" % (identifier,e))
         self.templateProcessor.set("Outputs",templateOutputs)
 
@@ -900,22 +904,22 @@ class Execute(Request):
         # literal value
         if output.type == "LiteralValue":
             f = open(os.path.join(
-                        self.wps.getConfigValue("server","outputPath"),
+                        config.getConfigValue("server","outputPath"),
                                 output.identifier+"-"+self.pid),"w")
             f.write(output.value)
             f.close()
-            templateOutput["reference"] = self.wps.getConfigValue("server","outputUrl")+\
+            templateOutput["reference"] = config.getConfigValue("server","outputUrl")+\
                     "/"+output.identifier+"-"+str(self.pid)
         # complex value
         else:
-            outName = output.value
-            outSuffix = outName.split(".")[len(outName.split("."))-1]
-            outName = output.identifier+"-"+str(self.pid)+"."+outSuffix
-            outFile = self.wps.getConfigValue("server","outputPath")+"/"+outName
+            outName = os.path.basename(output.value)
+            outSuffix = os.path.splitext(outName)[1]
+            outName = "%s-%s%s" %(output.identifier, str(self.pid),outSuffix)
+            outFile = config.getConfigValue("server","outputPath")+"/"+outName
             if not self._samefile(output.value,outFile):
-                COPY(output.value, outFile)
+                COPY(os.path.abspath(output.value), outFile)
             templateOutput["reference"] = \
-                    self.wps.getConfigValue("server","outputUrl")+"/"+outName
+                    config.getConfigValue("server","outputUrl")+"/"+outName
             output.value = outFile
 
             # mapscript supported and the mapserver should be used for this
@@ -973,7 +977,7 @@ class Execute(Request):
                             myLayerObj.type = MS_LAYER_RASTER
                             templateOutput["reference"] = self._getMapServerWCS(output)
                     except ImportError:
-                        self.wps.debug("GDAL could not be loaded, mapserver not supported","Warning")
+                        pywps.debug("GDAL could not be loaded, mapserver not supported","Warning")
 
  
         templateOutput["mimetype"] = output.format["mimeType"]
@@ -985,7 +989,7 @@ class Execute(Request):
     def _getMapServerWMS(self,output):
         """Get the URL for mapserver WMS request of the output"""
         import urllib2
-        return urllib2.quote(self.wps.getConfigValue("mapserver","mapserveraddress")+
+        return urllib2.quote(config.getConfigValue("mapserver","mapserveraddress")+
                 "?map="+self.mapFileName+
                 "&SERVICE=WMS"+ "&REQUEST=GetMap"+ "&VERSION=1.3.0"+
                 "&LAYERS="+output.identifier+"&STYLES=default&SRS="+output.projection.replace("+init=","")+
@@ -995,7 +999,7 @@ class Execute(Request):
     def _getMapServerWCS(self,output):
         """Get the URL for mapserver WCS request of the output"""
         import urllib2
-        return urllib2.quote(self.wps.getConfigValue("mapserver","mapserveraddress")+
+        return urllib2.quote(config.getConfigValue("mapserver","mapserveraddress")+
                 "?map="+self.mapFileName+
                 "&SERVICE=WCS"+ "&REQUEST=GetCoverage"+ "&VERSION=1.0.0"+
                 "&COVERAGE="+output.identifier+"&CRS="+output.projection.replace("+init=","")+
@@ -1005,7 +1009,7 @@ class Execute(Request):
     def _getMapServerWFS(self,output):
         """Get the URL for mapserver WFS request of the output"""
         import urllib2
-        return urllib2.quote(self.wps.getConfigValue("mapserver","mapserveraddress")+
+        return urllib2.quote(config.getConfigValue("mapserver","mapserveraddress")+
                 "?map="+self.mapFileName+
                 "&SERVICE=WFS"+ "&REQUEST=GetFeature"+ "&VERSION=1.0.0"+
                 "&TYPENAME="+output.identifier)
@@ -1050,7 +1054,7 @@ class Execute(Request):
 
         :return: server address
         """
-        serveraddress = self.wps.getConfigValue("wps","serveraddress")
+        serveraddress = config.getConfigValue("wps","serveraddress")
 
         if not serveraddress.endswith("?") and \
            not serveraddress.endswith("&"):
@@ -1059,7 +1063,7 @@ class Execute(Request):
             else:
                 serveraddress += "?"
 
-        serveraddress += "service=WPS&request=GetCapabilities&version="+self.wps.defaultVersion
+        serveraddress += "service=WPS&request=GetCapabilities&version="+pywps.DEFAULT_VERSION
 
         serveraddress = serveraddress.replace("&", "&amp;") # Must be done first!
         serveraddress = serveraddress.replace("<", "&lt;")
@@ -1082,24 +1086,24 @@ class Execute(Request):
         """
 
         # find out number of running sessions
-        maxOperations = int(self.wps.getConfigValue("server","maxoperations"))
-        tempPath = self.wps.getConfigValue("server","tempPath")
+        maxOperations = int(config.getConfigValue("server","maxoperations"))
+        tempPath = config.getConfigValue("server","tempPath")
 
         dirs = os.listdir(tempPath)
         pyWPSDirs = 0
         for dir in dirs:
-            if dir.find("pywps") == 0:
+            if dir.find(TEMPDIRPREFIX) == 0:
                 pyWPSDirs += 1
 
         if pyWPSDirs >= maxOperations and\
             maxOperations != 0:
-            raise self.wps.exceptions.ServerBusy(value="Maximal number of permitted operations exceeded")
+            raise pywps.ServerBusy(value="Maximal number of permitted operations exceeded")
 
         # create temp dir
-        self.workingDir = tempfile.mkdtemp(prefix="pywps", dir=tempPath)
+        self.workingDir = tempfile.mkdtemp(prefix=TEMPDIRPREFIX, dir=tempPath)
 
         self.workingDir = os.path.join(
-                self.wps.getConfigValue("server","tempPath"),self.workingDir)
+                config.getConfigValue("server","tempPath"),self.workingDir)
 
         os.chdir(self.workingDir)
         self.dirsToBeRemoved.append(self.workingDir)
@@ -1111,14 +1115,14 @@ class Execute(Request):
                 grass = Grass.Grass(self)
                 if self.process.grassLocation == True:
                     self.process.grassMapset = grass.mkMapset()
-                elif os.path.exists(os.path.join(self.wps.getConfigValue("grass","gisdbase"),self.process.grassLocation)):
+                elif os.path.exists(os.path.join(config.getConfigValue("grass","gisdbase"),self.process.grassLocation)):
                     self.process.grassMapset = grass.mkMapset(self.process.grassLocation)
                 else:
                     raise Exception("Location [%s] does not exist" % self.process.grassLocation)
         except Exception,e:
             self.cleanEnv()
-            traceback.print_exc(file=self.wps.logFile)
-            raise self.wps.exceptions.NoApplicableCode("Could not init GRASS: %s" % e)
+            traceback.print_exc(file=pywps.logFile)
+            raise pywps.NoApplicableCode("Could not init GRASS: %s" % e)
 
         return
 
@@ -1127,7 +1131,7 @@ class Execute(Request):
         """
         os.chdir(self.curdir)
         def onError(*args):
-            self.wps.debug("Could not remove temporary dir","Error")
+            pywps.debug("Could not remove temporary dir","Error")
 
         for i in range(len(self.dirsToBeRemoved)):
             dir = self.dirsToBeRemoved[0]
@@ -1143,7 +1147,7 @@ class Execute(Request):
 
         :return: maximum file size bytes
         """
-        maxSize = self.wps.getConfigValue("server","maxfilesize")
+        maxSize = config.getConfigValue("server","maxfilesize")
         maxSize = maxSize.lower()
 
         units = re.compile("[gmkb].*")
@@ -1183,30 +1187,30 @@ class Execute(Request):
         self.mapObj.setExtent(-180,-90,180,90)
         self.mapObj.setProjection("+init=epsg:4326")
         self.mapObj.name = "%s-%s"%(self.process.identifier,self.pid)
-        self.mapObj.setMetaData("ows_title", self.wps.getConfigValue("wps","title"))
-        self.mapObj.setMetaData("wms_abstract", self.wps.getConfigValue("wps","abstract"))
-        self.mapObj.setMetaData("wcs_abstract", self.wps.getConfigValue("wps","abstract"))
-        self.mapObj.setMetaData("wfs_abstract", self.wps.getConfigValue("wps","abstract"))
-        self.mapObj.setMetaData("ows_keywordlist", self.wps.getConfigValue("wps","keywords"))
-        self.mapObj.setMetaData("ows_fees", self.wps.getConfigValue("wps","fees"))
-        self.mapObj.setMetaData("ows_accessconstraints", self.wps.getConfigValue("wps","constraints"))
-        self.mapObj.setMetaData("ows_contactorganization", self.wps.getConfigValue("provider","providerName"))
-        self.mapObj.setMetaData("ows_contactperson", self.wps.getConfigValue("provider","individualName"))
-        self.mapObj.setMetaData("ows_contactposition", self.wps.getConfigValue("provider","positionName"))
-        phone =  self.wps.getConfigValue("provider","phoneVoice")
+        self.mapObj.setMetaData("ows_title", config.getConfigValue("wps","title"))
+        self.mapObj.setMetaData("wms_abstract", config.getConfigValue("wps","abstract"))
+        self.mapObj.setMetaData("wcs_abstract", config.getConfigValue("wps","abstract"))
+        self.mapObj.setMetaData("wfs_abstract", config.getConfigValue("wps","abstract"))
+        self.mapObj.setMetaData("ows_keywordlist", config.getConfigValue("wps","keywords"))
+        self.mapObj.setMetaData("ows_fees", config.getConfigValue("wps","fees"))
+        self.mapObj.setMetaData("ows_accessconstraints", config.getConfigValue("wps","constraints"))
+        self.mapObj.setMetaData("ows_contactorganization", config.getConfigValue("provider","providerName"))
+        self.mapObj.setMetaData("ows_contactperson", config.getConfigValue("provider","individualName"))
+        self.mapObj.setMetaData("ows_contactposition", config.getConfigValue("provider","positionName"))
+        phone =  config.getConfigValue("provider","phoneVoice")
         if phone:
-            self.mapObj.setMetaData("ows_contactvoicetelephone", self.wps.getConfigValue("provider","phoneVoice"))
-        phone = self.wps.getConfigValue("provider","phoneFacsimile")
+            self.mapObj.setMetaData("ows_contactvoicetelephone", config.getConfigValue("provider","phoneVoice"))
+        phone = config.getConfigValue("provider","phoneFacsimile")
         if phone:
-            self.mapObj.setMetaData("ows_contactfacsimiletelephone", self.wps.getConfigValue("provider","phoneFacsimile"))
-        self.mapObj.setMetaData("ows_address", self.wps.getConfigValue("provider","deliveryPoint"))
-        self.mapObj.setMetaData("ows_city", self.wps.getConfigValue("provider","city"))
-        self.mapObj.setMetaData("ows_country", self.wps.getConfigValue("provider","country"))
-        self.mapObj.setMetaData("ows_postcode", self.wps.getConfigValue("provider","postalCode"))
-        self.mapObj.setMetaData("ows_contactelectronicmailaddress", self.wps.getConfigValue("provider","electronicMailAddress"))
-        self.mapObj.setMetaData("ows_role", self.wps.getConfigValue("provider","role"))
+            self.mapObj.setMetaData("ows_contactfacsimiletelephone", config.getConfigValue("provider","phoneFacsimile"))
+        self.mapObj.setMetaData("ows_address", config.getConfigValue("provider","deliveryPoint"))
+        self.mapObj.setMetaData("ows_city", config.getConfigValue("provider","city"))
+        self.mapObj.setMetaData("ows_country", config.getConfigValue("provider","country"))
+        self.mapObj.setMetaData("ows_postcode", config.getConfigValue("provider","postalCode"))
+        self.mapObj.setMetaData("ows_contactelectronicmailaddress", config.getConfigValue("provider","electronicMailAddress"))
+        self.mapObj.setMetaData("ows_role", config.getConfigValue("provider","role"))
 
-        self.mapFileName = os.path.join(self.wps.getConfigValue("server","outputPath"),"wps"+str(self.pid)+".map")
+        self.mapFileName = os.path.join(config.getConfigValue("server","outputPath"),"wps"+str(self.pid)+".map")
 
-        self.mapObj.setMetaData("wms_onlineresource",self.wps.getConfigValue("mapserver","mapserveraddress")+"?map="+self.mapFileName)
+        self.mapObj.setMetaData("wms_onlineresource",config.getConfigValue("mapserver","mapserveraddress")+"?map="+self.mapFileName)
 
