@@ -37,6 +37,7 @@ server configuration file::
 
 from mod_python import apache
 import pywps
+import pywps.response
 from pywps.Exceptions import *
 import traceback
 import os
@@ -51,6 +52,11 @@ def handler(req):
     else:
         inputQuery = req
 
+    if not inputQuery:
+        err =  NoApplicableCode("No query string found.")
+        pywps.response.response(err,req)
+        return apache.OK
+
     # set PYWPS_CFG and PYWPS_PROCESSES environment variable, which can not
     # bee seen from mod_python
     env_vars = req.subprocess_env.copy()
@@ -63,13 +69,14 @@ def handler(req):
     try:
         wps = pywps.Pywps(req.method)
         if wps.parseRequest(inputQuery):
-            wps.debug(wps.inputs)
+            pywps.debug(wps.inputs)
             response = wps.performRequest()
             if response:
-                wps.printResponse(req, wps.parser.isSoap)
+                pywps.response.response(wps.response, req, wps.parser.isSoap)
                 return apache.OK
     except WPSException,e:
-        req.content_type = "text/xml"
-        traceback.print_exc(file=req)
-        e.promoteException(contentType=True)
+        pywps.response.response(e, req) 
+        return apache.OK
+    except Exception, e:
+        traceback.print_exc(file = req)
         return apache.OK
