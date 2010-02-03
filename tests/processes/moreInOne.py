@@ -25,7 +25,7 @@ class SecondProcess(WPSProcess):
                 formats=[{"mimeType":"image/tiff"}])
         self.outdata = self.addComplexOutput(identifier="outdata",
                 title="Compex out",
-                formats=[{"mimeType":"image/tiff"}]))
+                formats=[{"mimeType":"image/tiff"}])
 
     def execute(self):
         self.outdata.setValue(self.indata.getValue())
