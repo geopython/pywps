@@ -68,7 +68,7 @@ def handler(req):
     # create the WPS object
     try:
         wps = pywps.Pywps(req.method)
-         wps.parseRequest(inputQuery):
+        if wps.parseRequest(inputQuery):
             pywps.debug(wps.inputs)
             response = wps.performRequest()
             if response:
