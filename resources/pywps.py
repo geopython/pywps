@@ -7,7 +7,7 @@ server configuration file::
     SetEnv PYWPS_PROCESSES /usr/local/wps/processes/
     SetEnv PYWPS_CFG /usr/local/wps/pywps.cfg
     SetHandler python-program
-    PythonHandler pywps
+    PythonHandler wps
     PythonDebug On
     PythonPath "sys.path+['/usr/local/pywps-VERSION/']"
     PythonAutoReload On
