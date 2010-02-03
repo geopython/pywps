@@ -173,7 +173,7 @@ class Request:
                 except Exception,e:
                     processes.append(
                             "Could not import processes from %s: %s" % \
-                                    (repr(processSources.__name__), repr(e))
+                                    (repr(processSources.__name__), repr(e)))
                 
                 for member in dir(procModule):
                     member = eval("procModule."+member)
