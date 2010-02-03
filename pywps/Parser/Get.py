@@ -45,12 +45,16 @@ import urllib
 
 class Get(Parser):
     """ Main Class for parsing HTTP GET request types """
-    unparsedInputs =  {}    # temporary store for later validation
+    unparsedInputs =  None    # temporary store for later validation
     requestParser = None
 
     GET_CAPABILITIES = "getcapabilities"
     DESCRIBE_PROCESS = "describeprocess"
     EXECUTE = "execute"
+
+    def __init__(self,wps):
+        Parser.__init__(self,wps)
+        self.unparsedInputs = {}
 
     def parse(self,queryString):
         """Parse given string with parameters given in KVP encoding
@@ -100,7 +104,7 @@ class Get(Parser):
             self.checkRequestType()
 
             # parse the request
-            self.requestParser.parse(self.unparsedInputs)
+            self.inputs = self.requestParser.parse(self.unparsedInputs, self.inputs)
 
         if not self.inputs:
             raise MissingParameterValue("service")

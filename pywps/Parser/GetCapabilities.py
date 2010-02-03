@@ -26,17 +26,24 @@ This module parses OGC Web Processing Service (WPS) GetCapabilities request.
 import xml.dom.minidom
 
 import pywps
-from pywps.Parser.Post import Post
-from pywps.Parser.Get import Get
+from pywps.Parser.Post import Post as PostParser
+from pywps.Parser.Get import Get as GetParser
 
-class Post(Post):
+class Post(PostParser):
     """Parses input request obtained via HTTP POST encoding - should be XML
     file.
     """
 
-    def parse(self,document):
+    def __init__(self,wps):
+        PostParser.__init__(self,wps)
+
+
+    def parse(self,document, initInputs = None):
         """ Parse the requested XML document"""
         self.document = document  # input DOM
+
+        if initInputs:
+            self.inputs = initInputs
 
         versions = []   # accepted versions
         acceptedVersionsNodes = None
@@ -76,11 +83,17 @@ class Post(Post):
 
         return self.inputs
 
-class Get(Get):
+class Get(GetParser):
     """ Parses input request obtained via HTTP GET encoding.  """
+    
+    def __init__(self,wps):
+        GetParser.__init__(self,wps)
 
-    def parse(self,unparsedInputs):
+    def parse(self,unparsedInputs, initInputs = None):
         """ Parse rawly parsed inputs """
+
+        if initInputs:
+            self.inputs = initInputs
 
         self.unparsedInputs = unparsedInputs
 

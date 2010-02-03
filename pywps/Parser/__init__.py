@@ -52,8 +52,9 @@ class Parser:
 
     wps = None
     isSoap = False
-    inputs = {}
+    inputs = None
 
     def __init__(self,wps):
         self.wps = wps
+        self.inputs = {}
 

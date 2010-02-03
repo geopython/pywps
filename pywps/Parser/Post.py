@@ -52,6 +52,9 @@ class Post(Parser):
     DESCRIBE_PROCESS = "DescribeProcess"
     EXECUTE = "Execute"
 
+    def __init__(self,wps):
+        Parser.__init__(self,wps)
+
     def parse(self,file):
         """Parse parameters stored as XML file
 
@@ -64,7 +67,7 @@ class Post(Parser):
 
         # get the maximal input file size from configuration
         maxFileSize = self.getMaxFileSize(
-                self.wps.config.get("server","maxFileSize").lower())
+                pywps.config.getConfigValue("server","maxFileSize").lower())
 
         # read the document
         if maxFileSize > 0:
@@ -97,7 +100,7 @@ class Post(Parser):
         self.checkRequestType(firstChild)
 
         # parse the document
-        self.requestParser.parse(self.document)
+        self.inputs = self.requestParser.parse(self.document, self.inputs)
 
         return self.inputs
 
@@ -114,7 +117,7 @@ class Post(Parser):
             if value != "WPS":
                 raise pywps.InvalidParameterValue("service")
             else:
-                self.inputs["service"] = "WPS"
+                self.inputs["service"] = "wps"
         else:
             raise pywps.MissingParameterValue("service")
 
@@ -128,7 +131,7 @@ class Post(Parser):
             else:
                 self.inputs["language"] = value
         else:
-            self.inputs["language"] = self.wps.defaultLanguage
+            self.inputs["language"] = pywps.DEFAULT_LANG
 
     def checkVersion(self, node):
         """ Check optional language parameter.  """

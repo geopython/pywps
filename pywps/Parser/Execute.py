@@ -25,20 +25,27 @@ This module parses OGC Web Processing Service (WPS) Execute request.
 
 import xml.dom.minidom
 import pywps
-from pywps.Parser.Post import Post
-from pywps.Parser.Get import Get
+from pywps.Parser.Post import Post as PostParser
+from pywps.Parser.Get import Get as GetParser
 
 import string,re
 
-class Post(Post):
+class Post(PostParser):
     """ HTTP POST XML request encoding parser.  """
 
     nameSpace = None # WPS namespace
     owsNameSpace = None # OWS namespace
     xlinkNameSpace = None # OWS namespace
 
-    def parse(self,document):
+    def __init__(self,wps):
+        PostParser.__init__(self,wps)
+
+    def parse(self,document, initInputs=None):
         """ Parse given XML document """
+
+        if initInputs:
+            self.inputs = initInputs
+
         self.document = document  # input DOM
 
         firstChild = self.getFirstChildNode(self.document)  # no comments or
@@ -63,8 +70,9 @@ class Post(Post):
 
         # identifier
         try:
-            self.inputs["identifier"] =\
+            self.inputs["identifier"] = [
             firstChild.getElementsByTagNameNS(self.owsNameSpace,"Identifier")[0].firstChild.nodeValue
+            ]
         except IndexError:
                 raise pywps.MissingParameterValue("Identifier")
 
@@ -409,13 +417,20 @@ class Post(Post):
         return attributes
 
 
-class Get(Get):
+class Get(GetParser):
     """
     Parses input request obtained via HTTP GET encoding.
     """
 
-    def parse(self,unparsedInputs):
+    def __init__(self,wps):
+        GetParser.__init__(self,wps)
+
+
+    def parse(self,unparsedInputs, initInputs=None):
         """ Parse given inputs """
+
+        if initInputs:
+            self.inputs = initInputs
 
         self.unparsedInputs = unparsedInputs
 
@@ -430,7 +445,7 @@ class Get(Get):
 
         # identifier
         if "identifier" in self.unparsedInputs:
-            self.inputs["identifier"] = self.unparsedInputs["identifier"]
+            self.inputs["identifier"] = [self.unparsedInputs["identifier"]]
         else:
             raise pywps.MissingParameterValue("identifier")
 
@@ -446,7 +461,7 @@ class Get(Get):
             self.inputs["datainputs"] = self.parseDataInputs(
                         self.unparsedInputs["datainputs"])
         except KeyError:
-            self.inputs["datainputs"] = {}
+            self.inputs["datainputs"] = None
 
         # ResponseForm
 

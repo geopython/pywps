@@ -25,16 +25,22 @@ This module parses OGC Web Processing Service (WPS) DescribeProcess request.
 
 import xml.dom.minidom
 import pywps
-from pywps.Parser.Post import Post
-from pywps.Parser.Get import Get
+from pywps.Parser.Post import Post as PostParser
+from pywps.Parser.Get import Get as GetParser
 
-class Post(Post):
+class Post(PostParser):
     """
     Parses input request obtained via HTTP POST encoding - should be XML
     file.
     """
+    def __init__(self,wps):
+        PostParser.__init__(self,wps)
 
-    def parse(self,document):
+    def parse(self,document, initInputs = None):
+
+        if initInputs:
+            self.inputs = initInputs
+
         self.document = document  # input DOM
 
         firstChild = self.getFirstChildNode(self.document)
@@ -66,13 +72,18 @@ class Post(Post):
 
         return self.inputs
 
-class Get(Get):
+class Get(GetParser):
     """
     Parses input request obtained via HTTP GET encoding.
     """
+    def __init__(self,wps):
+        GetParser.__init__(self,wps)
 
-    def parse(self,unparsedInputs):
+    def parse(self,unparsedInputs, initInputs=None):
         """ Parse given raw inputs"""
+
+        if initInputs:
+            self.inputs = initInputs
 
         self.unparsedInputs = unparsedInputs
 
