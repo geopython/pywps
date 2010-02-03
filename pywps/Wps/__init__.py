@@ -167,8 +167,13 @@ class Request:
 
                 # try to identify every class, based on
                 # pywps.Process.WPSProcess
-                procModule = __import__(procModule, globals(),\
+                try:
+                    procModule = __import__(procModule, globals(),\
                                     locals(), [processSources.__name__])
+                except Exception,e:
+                    processes.append(
+                            "Could not import processes from %s: %s" % \
+                                    (repr(processSources.__name__), repr(e))
                 
                 for member in dir(procModule):
                     member = eval("procModule."+member)
