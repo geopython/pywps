@@ -78,5 +78,6 @@ def handler(req):
         pywps.response.response(e, req) 
         return apache.OK
     except Exception, e:
+        req.content_type = "text/plain"
         traceback.print_exc(file = req)
         return apache.OK
