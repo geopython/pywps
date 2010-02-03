@@ -131,7 +131,11 @@ class Request:
                                 self.templateVersionDirectory,
                                     "Wsdl.tmpl")
 
-        self.templateProcessor = TemplateProcessor(self.templateFile,compile=True)
+        try:
+            self.templateProcessor = TemplateProcessor(self.templateFile,compile=True)
+        except TemplateError,e:
+            raise NoApplicableCode("TemplateError: %s" % repr(e))
+            
 
         # set self.processes from various inputs
         #
