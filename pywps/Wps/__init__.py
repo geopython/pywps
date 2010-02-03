@@ -315,6 +315,10 @@ class Request:
 
     def getProcess(self,identifier):
         """Get single processes based on it's identifier"""
+
+        if type(identifier) == type([]):
+            identifier = identifier[0]
+
         for process in self.processes:
             if type(process) == types.StringType:
                 continue
