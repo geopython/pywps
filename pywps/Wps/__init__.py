@@ -133,7 +133,7 @@ class Request:
 
         try:
             self.templateProcessor = TemplateProcessor(self.templateFile,compile=True)
-        except TemplateError,e:
+        except pywps.Template.TemplateError,e:
             raise NoApplicableCode("TemplateError: %s" % repr(e))
             
 
