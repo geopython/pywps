@@ -1,1 +1,1 @@
-__all__ = ["returner","dummyprocess","moreInOne","moreInstancesInOne"]
+__all__ = ["returner","dummyprocess","moreInOne","moreInstancesInOne","tests"]
