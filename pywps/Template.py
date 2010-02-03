@@ -293,7 +293,7 @@ class TemplateProcessor:
             try:
                 cPickle.dump(self.tokens, open(self._cfile,"w"), True)
             except Exception,e:
-                raise TemplateError("Could not store file in compiled form: %s" % e)
+                raise TemplateError("Could not store file in compiled form: %s. Try to set permission for this directory to 777" % e)
 
     def tokenize(self, templateData):
         """Tokenize input text data.
@@ -372,7 +372,7 @@ class TemplateProcessor:
             tokenNames = ""
             for token in stack:
                 tokenNames += "type: %s, name: %s; " % (token.type.upper(), token.name)
-            raise TemplateError("Statement(s) [%s] not closed!"% tokenNames)
+            raise TemplateError("Statement(s) [%s] not closed! The document is noto well formated."% tokenNames)
 
         return tokens
 
