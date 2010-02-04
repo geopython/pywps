@@ -1,0 +1,29 @@
+<GMLFeatureClassList>
+  <GMLFeatureClass>
+    <Name>lakes</Name>
+    <ElementPath>lakes</ElementPath>
+    <DatasetSpecificInfo>
+      <FeatureCount>15</FeatureCount>
+      <ExtentXMin>-1829520.49845</ExtentXMin>
+      <ExtentXMax>967395.73710</ExtentXMax>
+      <ExtentYMin>2714990.22347</ExtentYMin>
+      <ExtentYMax>7566011.26771</ExtentYMax>
+    </DatasetSpecificInfo>
+    <PropertyDefn>
+      <Name>cat</Name>
+      <ElementPath>cat</ElementPath>
+      <Type>Integer</Type>
+    </PropertyDefn>
+    <PropertyDefn>
+      <Name>NAMES</Name>
+      <ElementPath>NAMES</ElementPath>
+      <Type>String</Type>
+      <Width>18</Width>
+    </PropertyDefn>
+    <PropertyDefn>
+      <Name>AREA_MI</Name>
+      <ElementPath>AREA_MI</ElementPath>
+      <Type>Real</Type>
+    </PropertyDefn>
+  </GMLFeatureClass>
+</GMLFeatureClassList>

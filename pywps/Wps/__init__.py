@@ -86,6 +86,10 @@ class Request:
     .. attribute:: processSources
 
         list of sources of processes
+
+    .. attribute :: contentType
+
+        Response content type, text/xml usually
     """
 
     response = None # Output document
@@ -99,6 +103,7 @@ class Request:
     templateProcessor = None
     processes = None
     processSources = None
+    contentType = "text/xml"
 
     def __init__(self,wps,processes=None):
         """Class constructor"""

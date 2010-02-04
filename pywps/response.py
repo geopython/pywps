@@ -25,7 +25,8 @@ def response(response,targets,isSoap=False,contentType="text/xml"):
     :type targets: string or list, 
     :param isSoap: print the response in SOAP envelope
     :type isSoap: bool
-    :param response: the response object. 
+    :param response: the response object 
+    :type response: file or string
     """
 
 
@@ -40,7 +41,9 @@ def response(response,targets,isSoap=False,contentType="text/xml"):
     if isinstance(response,Exceptions.WPSException):
         response = response.__str__()
 
-    response = re.sub(EMPTYPARAMREGEX,"",response)
+
+    if type(response) != types.FileType:
+        response = re.sub(EMPTYPARAMREGEX,"",response)
 
     # for each file in file descriptor
     for f in targets:
@@ -59,11 +62,20 @@ def response(response,targets,isSoap=False,contentType="text/xml"):
                 repr(f) == "<__main__.DummyHttpResponse instance at 0xc14>": 
             _printResponseJava(f,response,contentType)
 
+        # close and open again, if it is a file
+        if type(response) == types.FileType:
+            response.close()
+            response = open(response.name,"rb")
+
 def _printResponseModPython(request, response, contentType="text/xml"):
 
     if contentType:
         request.content_type = contentType
-    request.write(response)
+
+    if type(response) == types.FileType:
+        request.write(response.read())
+    else:
+        request.write(response)
 
 def _printResponseFile(fileOut, response, contentType="text/xml"):
 
@@ -72,7 +84,10 @@ def _printResponseFile(fileOut, response, contentType="text/xml"):
     elif fileOut.closed:
         fileOut = open(fileOut.name,"w")
 
-    fileOut.write(response)
+    if type(response) == types.FileType:
+        fileOut.write(response.read())
+    else:
+        fileOut.write(response)
     fileOut.flush()
 
     if fileOut != STDOUT:
@@ -82,5 +97,9 @@ def _printResponseJava( resp, response,contentType="text/xml"):
     if contentType:
         resp.setContentType(contentType)
     toClient = resp.getWriter()
-    toClient.println(response)
+
+    if type(response) == types.FileType:
+        toClient.println(response.read())
+    else:
+        toClient.println(response)
 

@@ -19,15 +19,37 @@ class LiteralProcess(WPSProcess):
                                                  title="Float data in",
                                                  type = type(0.0))
 
-        self.intOut = self.addLiteralInput(identifier="int",
+        self.intOut = self.addLiteralOutput(identifier="int",
                                                  title="Integer data out")
-        self.stringOut = self.addLiteralInput(identifier="int",
+        self.stringOut = self.addLiteralOutput(identifier="string",
                                                  title="String data out",
                                                  type = type(""))
-        self.floatOut = self.addLiteralInput(identifier="int",
+        self.floatOut = self.addLiteralOutput(identifier="float",
                                                  title="Float data out",
                                                  type = type(0.0))
     def execute(self):
         self.intOut.setValue(self.intIn.getValue())
         self.stringOut.setValue(self.stringIn.getValue())
         self.floatOut.setValue(self.floatIn.getValue())
+
+class ComplexProcess(WPSProcess):
+    def __init__(self):
+        WPSProcess.__init__(self, identifier = "complexprocess",
+            title="Complex process")
+
+        self.vectorin = self.addComplexInput(identifier="vectorin",
+                                                 title="Vector file")
+
+        self.rasterin = self.addComplexInput(identifier="rasterin",
+                                                 title="Raster file",
+                                                 formats = [{"mimeType":"image/tiff"}])
+
+        self.vectorout = self.addComplexOutput(identifier="vectorout",
+                                                 title="Vector file")
+        self.rasterout = self.addComplexOutput(identifier="rasterout",
+                                                 title="Raster file",
+                                                 formats = [{"mimeType":"image/tiff"}])
+    def execute(self):
+        self.vectorout.setValue(self.vectorin.getValue())
+        self.rasterout.setValue(self.rasterin.getValue())
+        return

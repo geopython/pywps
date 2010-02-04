@@ -9,9 +9,15 @@ import pywps.Process
 import unittest
 import os
 from xml.dom import minidom
+import urllib
+import base64
+import tempfile
+from osgeo import ogr
 
 class RequestParseTestCase(unittest.TestCase):
+    """Test case for input parsing"""
     wfsurl = "http://www2.dmsolutions.ca/cgi-bin/mswfs_gmap?version=1.0.0&request=getfeature&service=wfs&typename=park"
+    wcsurl = "http://www.bnhelp.cz/cgi-bin/crtopo?service=WMS&request=GetMap&LAYERS=sitwgs&TRANSPARENT=true&FORMAT=image%2Ftiff&EXCEPTIONS=application%2Fvnd.ogc.se_xml&VERSION=1.1.1&STYLES=default&SRS=EPSG%3A4326&BBOX=-10,-10,10,10&WIDTH=50&HEIGHT=50"
     wpsns = "http://www.opengis.net/wps/1.0.0"
     getpywps = None
     postpywps = None
@@ -83,7 +89,6 @@ class RequestParseTestCase(unittest.TestCase):
 
         self.assertEquals(getinputs["request"], "execute")
         self.assertTrue("literalprocess" in getinputs["identifier"])
-        self.assertTrue("literalprocess" in getinputs["identifier"])
         
         self.assertEquals(postinputs["request"], "execute")
         self.assertTrue("literalprocess" in postinputs["identifier"])
@@ -96,72 +101,74 @@ class RequestParseTestCase(unittest.TestCase):
         self.assertTrue(getinputs["datainputs"][1]["value"],"spam")
         self.assertTrue(getinputs["datainputs"][2]["value"],"1.1")
 
-    def _testParseExecuteComplexVectorInputs(self):
-        """Test, if pywps can parse complex vector input values, given as reference, output given directly"""
-        self._setFromEnv()
-        import urllib
-        import tempfile
-        gmlFile = tempfile.mktemp(prefix="pywps-test-wfs")
-        gmlFile = open(gmlFile,"w")
-        gmlFile.write(urllib.urlopen(self.wfsurl).read())
-        gmlFile.close()
+    def testParseExecuteComplexInputAsReference(self):
 
-        request = "service=wps&request=execute&version=1.0.0&identifier=complexVector&datainputs=[indata=%s]" % (urllib.quote(self.wfsurl))
-        self.inputs = self.pywps.parseRequest(request)
-        self.pywps.performRequest()
-        self.xmldom = minidom.parseString(self.pywps.response)
-        self.assertFalse(len(self.xmldom.getElementsByTagNameNS(self.wpsns,"ExceptionReport")), 0)
-        self.xmldom2 = minidom.parse(gmlFile.name)
+        """Test if Execute request is parsed, complex data inputs, given as reference"""
+        getpywps = pywps.Pywps(pywps.METHOD_GET)
+        postpywps = pywps.Pywps(pywps.METHOD_POST)
+        executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-complexinput-as-reference.xml"))
+        getinputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=complexprocess&datainputs=[rasterin=%s;vectorin=%s]" %\
+                (urllib.quote(self.wfsurl), urllib.quote(self.wcsurl)))
+        postinputs = postpywps.parseRequest(executeRequestFile)
+
+        self.assertEquals(getinputs["request"], "execute")
+        self.assertEquals(postinputs["request"], "execute")
+        self.assertTrue("complexprocess" in getinputs["identifier"])
+        self.assertTrue("complexprocess" in postinputs["identifier"])
         
-        # try to separte the GML file from the response document
-        outputgml = None
-        for elem in self.xmldom.getElementsByTagNameNS(self.wpsns,"ComplexData")[0].childNodes:
-            if elem.nodeName == "FeatureCollection":
-                outputgml = elem
-                break
+        #self.assertEquals(getinputs, postinputs)
+        self.assertEquals(getinputs["datainputs"][0]["value"],postinputs["datainputs"][0]["value"])
+        self.assertEquals(getinputs["datainputs"][1]["value"],postinputs["datainputs"][1]["value"])
 
-        # output GML should be the same, as input GML
-        self.assertTrue(self.xmldom, outputgml)
+    def testParseRawDataOutput(self):
+        """Test, if PyWPS parsers RawData output request correctly"""
+        postpywps = pywps.Pywps(pywps.METHOD_POST)
+        getpywps = pywps.Pywps(pywps.METHOD_GET)
+        executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-complexinput-direct-rawdata-output.xml"))
+        postinputs = postpywps.parseRequest(executeRequestFile)
+        getinputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=literalprocess&datainputs=[int=1;string=spam;float=1.1]&rawdataoutput=string")
 
-    def _testParseExecuteComplexVectorInputsAsReference(self):
-        """Test, if pywps can parse complex vector input values, given as reference"""
-        self._setFromEnv()
-        import urllib
-        import tempfile
-        gmlfile = open(tempfile.mktemp(prefix="pywps-test-wfs"),"w")
-        gmlfile.write(urllib.urlopen(self.wfsurl).read())
-        gmlfile.close()
+        self.assertFalse(postinputs["responseform"]["responsedocument"])
+        self.assertTrue(postinputs["responseform"]["rawdataoutput"]["rasterout"])
 
-        request = "service=wps&request=execute&version=1.0.0&identifier=complexVector&datainputs=[indata=%s]&responsedocument=[outdata=@asreference=true]" % (urllib.quote(self.wfsurl))
-        self.inputs = self.pywps.parseRequest(request)
-        self.pywps.performRequest()
-        self.xmldom = minidom.parseString(self.pywps.response)
-        self.assertFalse(len(self.xmldom.getElementsByTagNameNS(self.wpsns,"ExceptionReport")), 0)
+        self.assertFalse(getinputs["responseform"]["responsedocument"])
+        self.assertTrue(getinputs["responseform"]["rawdataoutput"]["string"])
 
-        # try to get out the Reference elemengt
-        self.gmlout = self.xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[0].getAttribute("xlink:href")
-            
-        # download, store, parse XML
-        gmlfile2 = open(tempfile.mktemp(prefix="pywps-test-wfs"),"w")
-        gmlfile2.write(urllib.urlopen(self.gmlout).read())
-        gmlfile2.close()
-        self.xmldom2 = minidom.parse(gmlfile2.name)
-        self.xmldom = minidom.parse(gmlfile.name)
+    def testParseExecuteComplexInputDirectly(self):
+        """Test if Execute request is parsed, complex data inputs, given as """
 
-        # check, if they fit
-        # TODO: this test failes, but no power to get it trough
-        # self.assertEquals(self.xmldom, self.xmldom2)
+        postpywps = pywps.Pywps(pywps.METHOD_POST)
+        executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-complexinput-direct.xml"))
+        postinputs = postpywps.parseRequest(executeRequestFile)
 
-    ######################################################################################
-    def _loadGetCapabilities(self):
-        self.inputs = self.pywps.parseRequest(self.getcapabilitiesrequest)
-        self.pywps.performRequest(self.inputs)
-        self.xmldom = minidom.parseString(self.pywps.response)
+        self.assertEquals(postinputs["request"], "execute")
+        self.assertTrue("complexprocess" in postinputs["identifier"])
+        rasterOrig = open(os.path.join(pywpsPath,"tests","datainputs","dem.tiff"))
+        rasterOrigData = rasterOrig.read()
+        rasterWpsData = base64.decodestring(postinputs["datainputs"][0]["value"])
 
-    def _setFromEnv(self):
-        os.putenv("PYWPS_PROCESSES", os.path.join(pywpsPath,"tests","processes"))
-        os.environ["PYWPS_PROCESSES"] = os.path.join(pywpsPath,"tests","processes")
-        
+        self.assertEquals(rasterOrigData, rasterWpsData)
+
+
+        gmlDriver = ogr.GetDriverByName("GML")
+        origDs = gmlDriver.Open(os.path.join(pywpsPath,"tests","datainputs","lakes.gml"))
+
+        wpsFile = tempfile.mktemp(prefix="pywps-test")
+        wpsFile = open(wpsFile,"w")
+        wpsFile.write(postinputs["datainputs"][1]["value"])
+        wpsFile.close()
+        wpsDs = gmlDriver.Open(wpsFile.name)
+
+        wpslayer = wpsDs.GetLayerByIndex(0)
+        origlayer = origDs.GetLayerByIndex(0)
+
+        self.assertTrue(wpslayer.GetFeatureCount(), origlayer.GetFeatureCount())
+
+        # enough  here
+        # for f in range(wpslayer.GetFeatureCount()):
+        #     origFeature = origlayer.GetFeature(f)
+        #     wpsFeature = wpslayer.GetFeature(f)
+        #     self.assertTrue(origFeature.Equal(wpsFeature))
 
 if __name__ == "__main__":
     unittest.main()

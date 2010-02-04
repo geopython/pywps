@@ -105,7 +105,9 @@ class Post(PostParser):
         # Either responseDocument or rawDataOutput should be specified, not both
         if self.inputs.has_key('responseform') and \
            (self.inputs["responseform"].has_key("rawdataoutput") and \
-            self.inputs["responseform"].has_key("responsedocument")):
+            self.inputs["responseform"].has_key("responsedocument")) and \
+            self.inputs["responseform"]["responsedocument"] and \
+            self.inputs["responseform"]["rawdataoutput"]:
             raise pywps.InvalidParameterValue(
                 "Either responseDocument or rawDataOutput should be specified, but not both")
         if not self.inputs["responseform"].has_key("rawdataoutput"):
@@ -477,9 +479,8 @@ class Get(GetParser):
 
         # RawDataOutput
         try:
-            self.inputs["responseform"]["rawdataoutput"] = \
-                                    self.parseDataInputs(
-                                    self.unparsedInputs["rawdataoutput"])
+            preparsed = self.parseDataInputs(self.unparsedInputs["rawdataoutput"])
+            self.inputs["responseform"]["rawdataoutput"] = self._paraseRawDataOutput(preparsed[0])
         except KeyError:
             self.inputs["responseform"]["rawdataoutput"] = {}
 
@@ -516,6 +517,21 @@ class Get(GetParser):
             raise pywps.InvalidParameterValue(
                 "Either responseDocument or rawDataOutput should be specified, but not both")
         return self.inputs
+
+    def _paraseRawDataOutput(self, dataInput):
+        """Parser RawDataOutput parameter according to Table 52"""
+        dataOut = {dataInput["identifier"]: {"mimetype":'', "uom":'', "encoding":'',"schema":''}}
+
+        if dataInput.has_key("mimetype"):
+            dataOut[dataInput["identifier"]]["mimetype"] = dataInput["mimetype"]
+        if dataInput.has_key("schema"):
+            dataOut[dataInput["identifier"]]["schema"] = dataInput["schema"]
+        if dataInput.has_key("uom"):
+            dataOut[dataInput["identifier"]]["uom"] = dataInput["uom"]
+        if dataInput.has_key("encoding"):
+            dataOut[dataInput["identifier"]]["encoding"] = dataInput["encoding"]
+        return dataOut
+            
 
     def parseDataInputs(self,dataInputs):
         """Parse DataInputs parameter

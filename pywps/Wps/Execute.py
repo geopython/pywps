@@ -157,6 +157,7 @@ class Execute(Request):
     .. attribute :: mapFileName
 
         Name of mapfile, wheter it's going to be stored
+
     """
 
     # status variants
@@ -217,13 +218,9 @@ class Execute(Request):
         self.statusFileName = os.path.join(config.getConfigValue("server","outputPath"),self.id+".xml")
         self.statusLocation = config.getConfigValue("server","outputUrl")+"/"+self.id+".xml"
 
-        # TODO: Uniform parsing in Post and Get because now they differ
         # rawDataOutput
         if len(self.wps.inputs["responseform"]["rawdataoutput"])>0:
-            if type(self.wps.inputs["responseform"]["rawdataoutput"]) == types.ListType:
-                self.rawDataOutput = self.wps.inputs["responseform"]["rawdataoutput"][0].values()[0]
-            elif type(self.wps.inputs["responseform"]["rawdataoutput"]) == types.DictType:
-                self.rawDataOutput = self.wps.inputs["responseform"]["rawdataoutput"].keys()[0]
+            self.rawDataOutput = self.wps.inputs["responseform"]["rawdataoutput"].keys()[0]
 
         # is status required
         self.statusRequired = False
@@ -378,19 +375,19 @@ class Execute(Request):
                 except Exception, e:
                     pywps.debug("MapScript could not be loaded, mapserver not supported: %s" %e,"Warning")
 
-                # fill outputs
-                self.processOutputs()
+                if not self.rawDataOutput:
+                    # fill outputs
+                    self.processOutputs()
 
-                if self.mapObj:
-                    self.mapObj.save(self.mapFileName)
+                    if self.mapObj:
+                        self.mapObj.save(self.mapFileName)
 
-                # Response document
-                self.response = self.templateProcessor.__str__()
+                    # Response document
+                    self.response = self.templateProcessor.__str__()
 
                 # if rawDataOutput is required
-                if self.rawDataOutput:
-                    self.response = None
-                    self.printRawData()
+                else:
+                    self.setRawData()
 
             # Failed but output lineage anyway
             elif lineageRequired:
@@ -1164,20 +1161,28 @@ class Execute(Request):
 
         return size
 
-    def printRawData(self):
-        """Prints raw data to sys.stdout with correct content-type, according
-        to mimeType attribute or output value
+    def setRawData(self):
+        """Sets response and contentType 
         """
 
         output = self.process.outputs[self.rawDataOutput]
         if output.type == "LiteralValue":
-            print "Content-type: text/plain\n"
-            print output.value
+            self.contentType ="text/plain"
+            self.response = output.value
+
         elif output.type == "ComplexValue":
-            f = open(output.value,"rb")
-            print "Content-type: %s\n" % output.format["mimeType"]
-            print f.read()
-            f.close()
+
+            # copy the file to safe place
+            outName = os.path.basename(output.value)
+            outSuffix = os.path.splitext(outName)[1]
+            outName = "%s-%s%s" %(output.identifier, str(self.pid),outSuffix)
+            outFile = config.getConfigValue("server","outputPath")+"/"+outName
+
+            if not self._samefile(output.value,outFile):
+                COPY(os.path.abspath(output.value), outFile)
+
+            self.contentType = output.format["mimeType"]
+            self.response = open(outFile,"rb")
 
 
     def _initMapscript(self):

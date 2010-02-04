@@ -95,7 +95,9 @@ try:
             # print only to standard out
             if wps.statusFiles == sys.stdout or\
                 sys.stdout in wps.statusFiles:
-                pywps.response.response(wps.response, wps.statusFiles,wps.parser.isSoap)
+                pywps.response.response(wps.response,
+                        wps.statusFiles,wps.parser.isSoap,
+                        wps.request.contentType)
 except WPSException,e:
     traceback.print_exc(file=pywps.logFile)
     pywps.response.response(e, wps.statusFiles, wps.parser.isSoap)

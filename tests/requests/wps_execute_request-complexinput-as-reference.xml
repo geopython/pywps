@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wps:Execute service="WPS" version="1.0.0" xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0/wpsExecute_request.xsd">
+	<ows:Identifier>complexprocess</ows:Identifier>
+	<wps:DataInputs>
+		<wps:Input>
+			<ows:Identifier>rasterin</ows:Identifier>
+			<ows:Title>Input</ows:Title>
+                        <wps:Reference xlink:href="http://www2.dmsolutions.ca/cgi-bin/mswfs_gmap?version=1.0.0&amp;request=getfeature&amp;service=wfs&amp;typename=park" />
+		</wps:Input>
+		<wps:Input>
+			<ows:Identifier>vectorin</ows:Identifier>
+                        <!-- wps:Reference xlink:href="http://www2.dmsolutions.ca/cgi-bin/mswfs_gmap?version=1.0.0&amp;request=getfeature&amp;service=wfs&amp;typename=park" /-->
+                        <wps:Reference xlink:href="http://www.bnhelp.cz/cgi-bin/crtopo?service=WMS&amp;request=GetMap&amp;LAYERS=sitwgs&amp;TRANSPARENT=true&amp;FORMAT=image%2Ftiff&amp;EXCEPTIONS=application%2Fvnd.ogc.se_xml&amp;VERSION=1.1.1&amp;STYLES=default&amp;SRS=EPSG%3A4326&amp;BBOX=-10,-10,10,10&amp;WIDTH=50&amp;HEIGHT=50" />
+		</wps:Input>
+	</wps:DataInputs>
+</wps:Execute>

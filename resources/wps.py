@@ -70,10 +70,10 @@ def handler(req):
         wps = pywps.Pywps(req.method)
         if wps.parseRequest(inputQuery):
             pywps.debug(wps.inputs)
-            response = wps.performRequest()
-            if response:
-                pywps.response.response(wps.response, req, wps.parser.isSoap)
-                return apache.OK
+            wps.performRequest()
+            pywps.response.response(wps.response, req,
+                    wps.parser.isSoap, contentType = wps.request.contentType)
+            return apache.OK
     except WPSException,e:
         pywps.response.response(e, req) 
         return apache.OK
