@@ -226,7 +226,6 @@ class LiteralInput(Input):
         :param input: input parsed by parsers
         :return: None or Error message
         """
-
         if type(input["value"]) == types.ListType:
             for inpt in input["value"]:
                 resp = self._setValueWithOccurence(self.value, self._control(inpt))
@@ -242,9 +241,9 @@ class LiteralInput(Input):
 
         :returns: :attr:`value`
         """
-        if self.value:
+        if self.value != None:
             return self.value
-        elif self.default:
+        elif self.default != None:
             return self.default
         else:
             return

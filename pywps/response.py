@@ -91,7 +91,7 @@ def _printResponseFile(fileOut, response, contentType="text/xml"):
     fileOut.flush()
 
     if fileOut != STDOUT:
-        f.close()
+        fileOut.close()
 
 def _printResponseJava( resp, response,contentType="text/xml"):
     if contentType:

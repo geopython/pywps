@@ -109,6 +109,7 @@ class RequestParseTestCase(unittest.TestCase):
         executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-complexinput-as-reference.xml"))
         getinputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=complexprocess&datainputs=[rasterin=%s;vectorin=%s]" %\
                 (urllib.quote(self.wfsurl), urllib.quote(self.wcsurl)))
+        #print "service=wps&version=1.0.0&request=execute&identifier=complexprocess&datainputs=[rasterin=%s;vectorin=%s]" % (urllib.quote(self.wfsurl), urllib.quote(self.wcsurl))
         postinputs = postpywps.parseRequest(executeRequestFile)
 
         self.assertEquals(getinputs["request"], "execute")

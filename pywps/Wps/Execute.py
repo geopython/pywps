@@ -177,7 +177,7 @@ class Execute(Request):
     # status location and file
     statusLocation = ''
     statusFileName = None
-    statusFiles = [sys.stdout]
+    statusFiles = None
 
     # process status
     storeRequired = False # should the request run asynchronously?
@@ -203,12 +203,14 @@ class Execute(Request):
     mapFileName = None
 
 
-    def __init__(self,wps,processes=None):
+    def __init__(self,wps, processes=None):
 
         Request.__init__(self,wps,processes)
 
         self.wps = wps
         self.process = None
+
+        self.statusFiles = []
 
         # initialization
         self.statusTime = time.time()
@@ -293,9 +295,6 @@ class Execute(Request):
             # set status to accepted
             self.promoteStatus(self.accepted,"Process %s accepted" %\
                     self.process.identifier)
-
-            # remove stdout from statusFiles
-            self.statusFiles.remove(sys.stdout)
 
             # apache 1.x requires forking for asynchronous requests
             serverSoft=os.getenv("SERVER_SOFTWARE")
@@ -415,7 +414,10 @@ class Execute(Request):
 
         # print status
         if self.storeRequired and self.statusRequired:
-            self.wps.printResponse(self.statusFiles,response=self.response)
+            pywps.response.response(self.response,
+                                    self.statusFiles,
+                                    self.wps.parser.isSoap,
+                                    self.contentType)
 
         # remove all temporary files
         self.cleanEnv()
@@ -484,7 +486,7 @@ class Execute(Request):
         for identifier in self.process.inputs:
             input = self.process.inputs[identifier]
 
-            if not input.value and input.minOccurs > 0:
+            if input.getValue() == None and input.minOccurs > 0:
                 self.cleanEnv()
                 raise pywps.MissingParameterValue(identifier)
 
@@ -663,7 +665,10 @@ class Execute(Request):
                                    self.status == self.accepted or
                                    #self.status == self.succeeded or
                                    self.status == self.failed):
-            self.wps.printResponse(self.statusFiles, response=self.response, )
+            pywps.response.response(self.response,
+                                    self.statusFiles,
+                                    self.wps.parser.isSoap,
+                                    self.contentType)
         
         if self.status == self.started:
             pywps.debug("%s" % self.statusMessage,
