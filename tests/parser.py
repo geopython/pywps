@@ -170,5 +170,22 @@ class RequestParseTestCase(unittest.TestCase):
         #     wpsFeature = wpslayer.GetFeature(f)
         #     self.assertTrue(origFeature.Equal(wpsFeature))
 
+    def testParseExecuteComplexAsReferenceOut(self):
+        """Test if Execute request is parsed, we want data outputs as reference"""
+
+        postpywps = pywps.Pywps(pywps.METHOD_POST)
+        getpywps = pywps.Pywps(pywps.METHOD_GET)
+        executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-complexinput-output-as-reference.xml"))
+        postinputs = postpywps.parseRequest(executeRequestFile)
+        getinputs = getpywps.parseRequest("service=wps&request=execute&version=1.0.0&identifier=complexprocess&datainputs=[rasterin=http://foo/bar/raster.tif;vectorin=http://foo/bar/vector.gml]&responsedocument=[rasterout=@asreference=true;vectorout=@asreference=true]")
+
+        self.assertTrue(postinputs["responseform"]["responsedocument"]["outputs"][0]["asreference"] == \
+                        postinputs["responseform"]["responsedocument"]["outputs"][0]["asreference"] == \
+                        True)
+
+        self.assertTrue(postinputs["responseform"]["responsedocument"]["outputs"][1]["asreference"] == \
+                        postinputs["responseform"]["responsedocument"]["outputs"][1]["asreference"] == \
+                        True)
+
 if __name__ == "__main__":
     unittest.main()

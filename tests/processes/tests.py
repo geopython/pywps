@@ -35,7 +35,8 @@ class LiteralProcess(WPSProcess):
 class ComplexProcess(WPSProcess):
     def __init__(self):
         WPSProcess.__init__(self, identifier = "complexprocess",
-            title="Complex process")
+            title="Complex process",
+            storeSupported=True)
 
         self.vectorin = self.addComplexInput(identifier="vectorin",
                                                  title="Vector file")

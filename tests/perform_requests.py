@@ -207,6 +207,16 @@ class RequestGetTestCase(unittest.TestCase):
         # TODO: this test failes, but no power to get it trough
         # self.assertEquals(xmldom, xmldom2)
 
+    def testParseExecuteComplexVectorAndRasterInputsAsReferenceOutpu(self):
+        """Test, if pywps can store complex values as reference"""
+        postpywps = pywps.Pywps(pywps.METHOD_POST)
+        executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-complexinput-output-as-reference.xml"))
+        postinputs = postpywps.parseRequest(executeRequestFile)
+
+        postpywps.performRequest()
+        
+        print postpywps.request.process.outputs["rasterout"].value
+
     ######################################################################################
 
     def _setFromEnv(self):
