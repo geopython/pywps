@@ -893,10 +893,10 @@ class Execute(Request):
         bboxOutput["crs"] = output.crss[0]
         bboxOutput["dimensions"] = output.dimensions
         # FIXME ve ASSUME, the coordinates are 2 dimensional
-        bboxOutput["minx"] = output.coords[0][0]
-        bboxOutput["miny"] = output.coords[0][1]
-        bboxOutput["maxx"] = output.coords[1][0]
-        bboxOutput["maxy"] = output.coords[1][1]
+        bboxOutput["minx"] = output.value[0][0]
+        bboxOutput["miny"] = output.value[0][1]
+        bboxOutput["maxx"] = output.value[1][0]
+        bboxOutput["maxy"] = output.value[1][1]
         return bboxOutput
 
     def _asReferenceOutput(self,templateOutput, output):

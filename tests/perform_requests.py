@@ -223,7 +223,8 @@ class RequestGetTestCase(unittest.TestCase):
         getpywps = pywps.Pywps(pywps.METHOD_GET)
         postpywps = pywps.Pywps(pywps.METHOD_POST)
         executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-bbox.xml"))
-        getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=bboxprocess&datainputs=[bboxin=%s]" % ("-11,-12,13,14"))
+        getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=bboxprocess&datainputs=[bboxin=%s]"
+                % ("-11,-12,13,14"))
         postpywps.parseRequest(executeRequestFile)
 
         postpywps.performRequest()
@@ -231,6 +232,8 @@ class RequestGetTestCase(unittest.TestCase):
 
         postinput = postpywps.request.process.getInput("bboxin")
         getinput = getpywps.request.process.getInput("bboxin")
+        self.assertEquals(getinput.getValue().coords,
+                          postinput.getValue().coords)
         #self.assertEquals(p
 
 

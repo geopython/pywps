@@ -658,20 +658,21 @@ class BoundingBoxInput(Input):
                 value.crs = input["value"][-1]
                 input["value"] = input["value"][:-1]
 
-            value.dimensions = int(coordsLen**(1./2.))
+            value.dimensions = int(coordsLen/2)
 
-        value.coords = self._getCoords(input["value"],value.dimensions)
+        value.coords = self._getCoords(input["value"])
 
         resp = self._setValueWithOccurence(self.value, value)
         if resp:
             return resp
 
-    def _getCoords(self,coords,dimensions):
-        newcoords = []
-        for d in range(dimensions):
-            d = d*dimensions
-            newcoords.append(coords[d:d+dimensions])
-        return newcoords
+    def _getCoords(self,coords):
+        lowercorner = []
+        uppercorner = []
+        dimensions = int(len(coords)/2)
+        lowercorner = map(lambda x: float(x), coords[:dimensions])
+        uppercorner = map(lambda x: float(x), coords[dimensions:])
+        return (lowercorner, uppercorner)
 
     def getValue(self):
         """Get this value
@@ -925,7 +926,6 @@ class BoundingBoxOutput(Output):
     crss = None
     crs = None
     dimensions = None
-    coords = None
     value = None
 
     def __init__(self,identifier,title,abstract=None,
@@ -936,7 +936,7 @@ class BoundingBoxOutput(Output):
         self.crss = crss
         self.crs = crss[0]
         self.dimensions = dimensions
-        self.coords = []
+        self.value = []
         return
 
     def setValue(self, value):
@@ -962,9 +962,9 @@ class BoundingBoxOutput(Output):
 
 
         if type([]) in map(lambda x: type(x), newvalue):
-            self.coords = newvalue
+            self.value = newvalue
         else:
-            # FIXME we do assume 2dimensional bbox
-            self.coords = [[newvalue[0],newvalue[1]],[newvalue[2],newvalue[3]]]
-
-        self.value = self.coords
+            dimensions = int(len(newvalue))
+            self.value = []
+            for i in range(dimensions):
+                self.value.append(newvalue[i*dimensions,i*dimensions+dimensions])
