@@ -16,7 +16,7 @@ from pywps import Exceptions
 
 EMPTYPARAMREGEX = re.compile('( \w+="")|( \w+="None")')
 
-def response(response,targets,isSoap=False,contentType="text/xml"):
+def response(response,targets,isSoap=False,contentType="application/xml"):
     """
     Print response to files given as input parameter.
 
@@ -67,7 +67,7 @@ def response(response,targets,isSoap=False,contentType="text/xml"):
             response.close()
             response = open(response.name,"rb")
 
-def _printResponseModPython(request, response, contentType="text/xml"):
+def _printResponseModPython(request, response, contentType="application/xml"):
 
     if contentType:
         request.content_type = contentType
@@ -77,7 +77,7 @@ def _printResponseModPython(request, response, contentType="text/xml"):
     else:
         request.write(response)
 
-def _printResponseFile(fileOut, response, contentType="text/xml"):
+def _printResponseFile(fileOut, response, contentType="application/xml"):
 
     if fileOut == STDOUT and contentType:
         print "Content-Type: %s\n" % contentType
@@ -93,7 +93,7 @@ def _printResponseFile(fileOut, response, contentType="text/xml"):
     if fileOut != STDOUT:
         fileOut.close()
 
-def _printResponseJava( resp, response,contentType="text/xml"):
+def _printResponseJava( resp, response,contentType="application/xml"):
     if contentType:
         resp.setContentType(contentType)
     toClient = resp.getWriter()

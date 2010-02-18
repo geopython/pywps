@@ -85,11 +85,11 @@ class Execute(Request):
 
         Location, where status and response files are stored
 
-    .. attribute :: statusFileName
+    .. attribute :: outputFileName
 
         Name of the file, where status informations are printed to
 
-    .. attribute :: statusFiles
+    .. attribute :: outputFile
 
         List of file objects, where status informations are printed to
 
@@ -176,8 +176,8 @@ class Execute(Request):
 
     # status location and file
     statusLocation = ''
-    statusFileName = None
-    statusFiles = None
+    outputFileName = None
+    outputFile = None
 
     # process status
     storeRequired = False # should the request run asynchronously?
@@ -210,14 +210,12 @@ class Execute(Request):
         self.wps = wps
         self.process = None
 
-        self.statusFiles = []
-
         # initialization
         self.statusTime = time.time()
         self.pid = os.getpid()
         self.status = None
         self.id = self.makeSessionId()
-        self.statusFileName = os.path.join(config.getConfigValue("server","outputPath"),self.id+".xml")
+        self.outputFileName = os.path.join(config.getConfigValue("server","outputPath"),self.id+".xml")
         self.statusLocation = config.getConfigValue("server","outputUrl")+"/"+self.id+".xml"
 
         # rawDataOutput
@@ -235,7 +233,7 @@ class Execute(Request):
         if self.wps.inputs["responseform"]["responsedocument"].has_key("storeexecuteresponse"):
             if self.wps.inputs["responseform"]["responsedocument"]["storeexecuteresponse"]:
                 try:
-                    self.statusFiles.append(open(self.statusFileName,"w"))
+                    self.outputFile = open(self.outputFileName,"w")
                 except Exception, e:
                     traceback.print_exc(file=pywps.logFile)
                     self.cleanEnv()
@@ -415,7 +413,7 @@ class Execute(Request):
         # print status
         if self.storeRequired and self.statusRequired:
             pywps.response.response(self.response,
-                                    self.statusFiles,
+                                    self.outputFile,
                                     self.wps.parser.isSoap,
                                     self.contentType)
 
@@ -666,7 +664,7 @@ class Execute(Request):
                                    #self.status == self.succeeded or
                                    self.status == self.failed):
             pywps.response.response(self.response,
-                                    self.statusFiles,
+                                    self.outputFile,
                                     self.wps.parser.isSoap,
                                     self.contentType)
         
@@ -894,10 +892,11 @@ class Execute(Request):
         bboxOutput["bboxdata"] = 1
         bboxOutput["crs"] = output.crss[0]
         bboxOutput["dimensions"] = output.dimensions
-        bboxOutput["minx"] = output.minx
-        bboxOutput["miny"] = output.miny
-        bboxOutput["maxx"] = output.maxx
-        bboxOutput["maxy"] = output.maxy
+        # FIXME ve ASSUME, the coordinates are 2 dimensional
+        bboxOutput["minx"] = output.coords[0][0]
+        bboxOutput["miny"] = output.coords[0][1]
+        bboxOutput["maxx"] = output.coords[1][0]
+        bboxOutput["maxy"] = output.coords[1][1]
         return bboxOutput
 
     def _asReferenceOutput(self,templateOutput, output):

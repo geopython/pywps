@@ -407,11 +407,11 @@ class Post(PostParser):
                                         self.owsNameSpace, "dimensions"))
 
         for coord in bboxDataNode.getElementsByTagNameNS(
-                self.owsNameSpace,"LowerCorner")[0].nodeValue.split():
-            attributes["value"].append(coord)
+                self.owsNameSpace,"LowerCorner")[0].firstChild.nodeValue.split():
+            attributes["value"].append(float(coord))
         for coord in bboxDataNode.getElementsByTagNameNS(
-                self.owsNameSpace,"UpperCorner")[0].nodeValue.split():
-            attributes["value"].append(coord)
+                self.owsNameSpace,"UpperCorner")[0].firstChild.nodeValue.split():
+            attributes["value"].append(float(coord))
 
         # reset everything, if there are not 4 coordinates
         if len(attributes["value"]) != 4:
@@ -462,6 +462,7 @@ class Get(GetParser):
         try:
             self.inputs["datainputs"] = self.parseDataInputs(
                         self.unparsedInputs["datainputs"])
+
         except KeyError:
             self.inputs["datainputs"] = None
 
@@ -480,7 +481,7 @@ class Get(GetParser):
         # RawDataOutput
         try:
             preparsed = self.parseDataInputs(self.unparsedInputs["rawdataoutput"])
-            self.inputs["responseform"]["rawdataoutput"] = self._paraseRawDataOutput(preparsed[0])
+            self.inputs["responseform"]["rawdataoutput"] = self._parseRawDataOutput(preparsed[0])
         except KeyError:
             self.inputs["responseform"]["rawdataoutput"] = {}
 
@@ -516,9 +517,10 @@ class Get(GetParser):
             len(self.inputs["responseform"]["responsedocument"])>0:
             raise pywps.InvalidParameterValue(
                 "Either responseDocument or rawDataOutput should be specified, but not both")
+
         return self.inputs
 
-    def _paraseRawDataOutput(self, dataInput):
+    def _parseRawDataOutput(self, dataInput):
         """Parser RawDataOutput parameter according to Table 52"""
         dataOut = {dataInput["identifier"]: {"mimetype":'', "uom":'', "encoding":'',"schema":''}}
 
@@ -531,6 +533,10 @@ class Get(GetParser):
         if dataInput.has_key("encoding"):
             dataOut[dataInput["identifier"]]["encoding"] = dataInput["encoding"]
         return dataOut
+
+    def _parseBBoxInput(self,dataInput):
+        """Parser of Bounding Box data input"""
+        print dataInput
             
 
     def parseDataInputs(self,dataInputs):

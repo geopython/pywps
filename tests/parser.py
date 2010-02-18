@@ -121,6 +121,21 @@ class RequestParseTestCase(unittest.TestCase):
         self.assertEquals(getinputs["datainputs"][0]["value"],postinputs["datainputs"][0]["value"])
         self.assertEquals(getinputs["datainputs"][1]["value"],postinputs["datainputs"][1]["value"])
 
+    def testParseBBoxInput(self):
+        """Parsing Bounding Box Input"""
+        getpywps = pywps.Pywps(pywps.METHOD_GET)
+        postpywps = pywps.Pywps(pywps.METHOD_POST)
+        executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-bbox.xml"))
+        getinputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=bboxprocess&datainputs=[bboxin=%s]" %\
+                ("-11,-12,13,14"))
+        postinputs = postpywps.parseRequest(executeRequestFile)
+
+        self.assertTrue("bboxprocess" in getinputs["identifier"])
+        self.assertTrue("bboxprocess" in postinputs["identifier"])
+
+        self.assertEquals(getinputs["datainputs"][0]["value"],"-11,-12,13,14")
+        self.assertEquals(postinputs["datainputs"][0]["value"],[-11,-12,13,14])
+
     def testParseRawDataOutput(self):
         """Test, if PyWPS parsers RawData output request correctly"""
         postpywps = pywps.Pywps(pywps.METHOD_POST)

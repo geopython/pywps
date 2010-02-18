@@ -130,14 +130,6 @@ class Pywps:
 
         WPS request parser
 
-    .. attribute:: statusFiles
-
-        List of files, where PYWPS status reports will be redirected
-    
-    .. attribute:: stdOutClosed
-
-        Indicates, whether standard output is closed for writing or not
-
     .. attribute:: inputs
 
         Parsed inputs object
@@ -161,8 +153,6 @@ class Pywps:
     """
 
     method = METHOD_GET                     # HTTP POST or GET
-    statusFiles = sys.stdout
-    stdOutClosed = False
 
     inputs = None # parsed input values
     request = None # object with getcapabilities/describeprocess/execute
@@ -247,6 +237,7 @@ class Pywps:
     def _setLogFile(self):
         """Set :data:`logFile`. Default is sys.stderr
         """
+        global logFile
         logFile = config.getConfigValue("server","logFile")
         if not logFile:
             logFile = sys.stderr

@@ -571,26 +571,31 @@ class BoundingBoxInput(Input):
         
         Used coordinate system
 
-    .. attribute:: minx
+    .. attribute:: coords
         
-    .. attribute:: maxx
-    
-    .. attribute:: miny
+        List of list of coordinates in form::
 
-    .. attribute:: maxy
+            (
+                (minx,miny [, minz,  [...] ] ),
+                (maxx,maxy [, minz, [...] ])
+                [, (maxx,maxy [, maxz, [...] ]),
+                    [, ...]
+                ]
+            )
+
+        So, most common case::
+
+            ((minx,miny),(maxx, maxy))
         
     """
 
     crss = None
     dimensions = None
     crs = None
-    minx = None
-    miny = None
-    maxx = None
-    maxy = None
+    coords = None
 
     def __init__(self,identifier,title,abstract=None,
-                metadata=[],minOccurs=1,maxOccurs=1,dimensions=2,
+                metadata=[],minOccurs=1,maxOccurs=1,dimensions=None,
                 crss=[]):
         """Class constructor"""
         Input.__init__(self,identifier,title,abstract=abstract,
@@ -599,43 +604,74 @@ class BoundingBoxInput(Input):
         self.crss = crss
         self.dimensions = dimensions
         self.crs = self.crss[0]
-        self.minx = None
-        self.minx = None
-        self.maxx = None
-        self.maxy = None
+
         return
 
-    def setValue(self,value):
+    def setValue(self,input):
         """Set value of this input
 
-        :param value: bounding box in format::
+        :param input: bounding box parsed input in format::
             
-            (minx,miny,maxx,maxy)
+                {identifier:"id",dimensions:2, value:(minx,miny,maxx,maxy),
+                crs:"epsg4326"}
+
+            or similar
 
         :type value: tuple
         """
 
-        resp = self._setValueWithOccurence(self.value,
-                self._control(value))
+
+        class BBOX:
+            """BBOX class is designed to contain attributes of Bounding
+            Box, such as
+
+            coords
+            dimensions
+            crs
+            """
+            coords = []
+            dimensions = None
+            crs = None
+
+        # define new instance
+        value = BBOX()
+
+
+        # convert possible string value to array
+        if type(input["value"]) == type(""):
+            input["value"] = input["value"].split(",")
+
+        # set dimensions
+        if input.has_key("crs"):
+            value.crs = input["crs"]
+            
+        # set dimensions
+        if input.has_key("dimensions"):
+            value.dimensions = int(input["dimensions"])
+        else:
+            # from the KVP
+            coordsLen = len(input["value"])
+                
+            # last one is crs, take it
+            if len(input["value"])%2 == 1:
+                coordsLen = coordsLen-1
+                value.crs = input["value"][-1]
+                input["value"] = input["value"][:-1]
+
+            value.dimensions = int(coordsLen**(1./2.))
+
+        value.coords = self._getCoords(input["value"],value.dimensions)
+
+        resp = self._setValueWithOccurence(self.value, value)
         if resp:
             return resp
 
-        if type(self.value) == type([]):
-            if len(self.value) == 1:
-                self.minx[value[0]]
-                self.minx[value[1]]
-                self.maxx[value[2]]
-                self.maxy[value[3]]
-            else:
-                self.minx.append(value[0])
-                self.minx.append(value[1])
-                self.maxx.append(value[2])
-                self.maxy.append(value[3])
-        else:
-            self.minx = value[0]
-            self.minx = value[1]
-            self.maxx = value[2]
-            self.maxy = value[3]
+    def _getCoords(self,coords,dimensions):
+        newcoords = []
+        for d in range(dimensions):
+            d = d*dimensions
+            newcoords.append(coords[d:d+dimensions])
+        return newcoords
 
     def getValue(self):
         """Get this value
@@ -645,7 +681,7 @@ class BoundingBoxInput(Input):
                 (minx, miny, maxx, maxy)
                 
         """
-        return (self.minx,self.miny,self.maxx,self.maxy)
+        return self.value
 
 class Output:
     """Class WPS Input
@@ -884,31 +920,23 @@ class BoundingBoxOutput(Output):
 
         bbox dimensions
 
-    .. attribute:: minx
-    .. attribute:: miny
-    .. attribute:: maxx
-    .. attribute:: maxy
+    .. attribute:: coords
     """
     crss = None
     crs = None
     dimensions = None
-    minx = None
-    miny = None
-    maxx = None
-    maxy = None
+    coords = None
+    value = None
 
     def __init__(self,identifier,title,abstract=None,
-                metadata=[], crss=[], dimensions=2, asReference=False):
+                metadata=[], crss=[], dimensions=None, asReference=False):
         """BoundingBox output"""
         Output.__init__(self,identifier,title,abstract=None,
                 metadata=[],type="BoundingBoxValue",asReference=asReference)
         self.crss = crss
         self.crs = crss[0]
         self.dimensions = dimensions
-        self.minx = None
-        self.miny = None
-        self.maxx = None
-        self.maxy = None
+        self.coords = []
         return
 
     def setValue(self, value):
@@ -920,11 +948,23 @@ class BoundingBoxOutput(Output):
 
         """
 
-        if len(value) != 4:
+        if len(value) != 2:
             raise Exception("Bounding box value is wrong, it has to have a form: "+
-                    "[minx,miny,maxx,maxy]")
-        self.value = value
-        self.minx  = value[0]
-        self.miny  = value[1]
-        self.maxx  = value[2]
-        self.maxy  = value[3]
+                    "[[minx,miny],[maxx,maxy]]")
+
+        # from the object
+        newval = None
+        try:
+            newvalue = value.coords
+        # directly
+        except:
+            newvalue = value
+
+
+        if type([]) in map(lambda x: type(x), newvalue):
+            self.coords = newvalue
+        else:
+            # FIXME we do assume 2dimensional bbox
+            self.coords = [[newvalue[0],newvalue[1]],[newvalue[2],newvalue[3]]]
+
+        self.value = self.coords

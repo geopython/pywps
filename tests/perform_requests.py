@@ -61,6 +61,7 @@ class RequestGetTestCase(unittest.TestCase):
     ######################################################################################
     def testParseExecute(self):
         """Test if Execute request is parsed and performed"""
+        self._setFromEnv()
         mypywps = pywps.Pywps(pywps.METHOD_GET)
         inputs = mypywps.parseRequest(self.getexecuterequest)
         self.assertEquals(mypywps.inputs["request"], "execute")
@@ -215,7 +216,24 @@ class RequestGetTestCase(unittest.TestCase):
 
         postpywps.performRequest()
         
-        print postpywps.request.process.outputs["rasterout"].value
+        #print postpywps.request.process.outputs["rasterout"].value
+
+    def testsExecuteBBox(self):
+        """Parsing Bounding Box Input"""
+        getpywps = pywps.Pywps(pywps.METHOD_GET)
+        postpywps = pywps.Pywps(pywps.METHOD_POST)
+        executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-bbox.xml"))
+        getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=bboxprocess&datainputs=[bboxin=%s]" % ("-11,-12,13,14"))
+        postpywps.parseRequest(executeRequestFile)
+
+        postpywps.performRequest()
+        getpywps.performRequest()
+
+        postinput = postpywps.request.process.getInput("bboxin")
+        getinput = getpywps.request.process.getInput("bboxin")
+        #self.assertEquals(p
+
+
 
     ######################################################################################
 

@@ -103,7 +103,7 @@ class Request:
     templateProcessor = None
     processes = None
     processSources = None
-    contentType = "text/xml"
+    contentType = "application/xml"
 
     def __init__(self,wps,processes=None):
         """Class constructor"""

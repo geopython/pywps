@@ -66,3 +66,13 @@ class ComplexProcess(WPSProcess):
                 self.status.set("Processing process",i*20)
                 time.sleep(5)
         return
+
+class BBoxProcess(WPSProcess):
+    def __init__(self):
+        WPSProcess.__init__(self, identifier = "bboxprocess",title="BBox process")
+
+        self.bboxin = self.addBBoxInput(identifier="bboxin",title="BBox in")
+        self.bboxout = self.addBBoxOutput(identifier="bboxout",title="BBox out")
+
+    def execute(self):
+        self.bboxout.setValue(self.bboxin.value.coords)
