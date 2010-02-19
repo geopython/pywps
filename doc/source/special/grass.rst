@@ -50,3 +50,41 @@ The attribute can have following values:
 
 Running GRASS modules from PyWPS
 ================================
+
+You have two possibilities: either to run GRASS modules as you would do in
+shell script (running the modules directly) or access GRASS-python
+interface.
+
+Running GRASS command line modules
+----------------------------------
+Once :meth:`pywps.Process.WPSProcess.execute` method is executed, you
+can use  :meth:`pywps.Process.WPSProcess.cmd` for calling GRASS
+modules.
+
+Using GRASS-Python interface
+----------------------------
+Since GRASS 6.4, Python interface is developed. There are both - `swig <http://www.swig.org/>`_
+interface and GRASS Modules-Python iterface. There are both described in
+`GRASS Wiki <http://grass.osgeo.org/wiki/GRASS_and_Python>`_ . There are
+:meth:`grass.run_command`, :meth:`grass.mapcalc` and other useful methods.
+For the swig interface, have a look in the GRASS-Wiki - it is perfectly
+documented.
+
+GRASS-Python interface example
+..............................
+::
+    from grass.script import core as grass
+    from pywps.Process import WPSProcess
+
+    process =  WPSProcess(identifier="grassprocess",
+                        title="GRASS Process")
+
+    def execute():
+        ret = grass.run_command("d.his", h_map = "drap_map", 
+                                         i_map = "relief_map",
+                                         brighten = 0)
+        return
+
+    process.execute = execute
+
+
