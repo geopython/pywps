@@ -5,12 +5,12 @@ How to use PyWPS with other packages and projects
 .. toctree::
    :maxdepth: 1
 
-    grass
-    mapserver
-    mod_python
-    java
-    gdal
-    proj
-    r
+   grass
+   mapserver
+   mod_python
+   java
+   gdal
+   proj
+   r
 
 

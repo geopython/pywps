@@ -1,5 +1,5 @@
 PyWPS and UMN MapServer
-*******************
+-----------------------
 There is little but maybe interesting possibility, how to use `UMN
 MapServer <http://mapserver.org>`_ for returning resuls of ComplexData back
 to the client.
@@ -14,7 +14,7 @@ e.g. instead of having GeoTIFF file (result of the calculation), obtained
 from the WCS, it can request PNG file, via WMS.
 
 Requirements
-============
+............
 For having support for UMN MapServer for ComplexOutputs in your PyWPS
 installation, following packages have to be installed:
 
@@ -23,9 +23,9 @@ installation, following packages have to be installed:
     * python-pyproj
 
 Usage
-=====
+.....
 When you are initializing new process (see :ref:`process-initialization`),
-you can add :attr:`pywps.Process.InAndOutputs.ComplexOutput.useMapScript` attribute to `True` do get it run.
+you can add :attr:`pywps.Process.InAndOutputs.ComplexOutput.useMapscript` attribute to `True` do get it run.
 Have a look at the :class:`pywps.Process.InAndOutputs.ComplexOutput`
 documentation, also for other attributes, like projection or bbox (can be set
 automatically from georeferenced file). Required format

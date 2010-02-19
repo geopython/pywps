@@ -73,6 +73,7 @@ documented.
 GRASS-Python interface example
 ..............................
 ::
+
     from grass.script import core as grass
     from pywps.Process import WPSProcess
 
