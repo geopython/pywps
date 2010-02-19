@@ -40,6 +40,8 @@ class PywspServlet(HttpServlet):
             pywps.response.response(e, response)
 
     def getProcesses(self):
+        """Create temporary Process with literal input and output"""
+
         from  pywps.Process import WPSProcess
 
         process = WPSProcess(identifier="servletProcess",
