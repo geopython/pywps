@@ -328,7 +328,7 @@ OpenLayers.WPS = OpenLayers.Class({
         var operationsMetadataNode = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(dom,this.owsNS, "OperationsMetadata")[0];
         var operationsMetadata = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(operationsMetadataNode, this.owsNS, "Operation");
         for (var i = 0; i < operationsMetadata.length; i++) {
-            var operationNameNode = operationsMetadata[i].getAttribute("name");
+            var operationName = operationsMetadata[i].getAttribute("name");
             var getNode = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(operationsMetadata[i],this.owsNS, "Get")[0];
            
             var get = OpenLayers.Format.XML.prototype.getAttributeNS(getNode,this.xlinkNS, "href");
@@ -399,6 +399,7 @@ OpenLayers.WPS = OpenLayers.Class({
      * resp - {HTTPRexuest}
      */
     parseDescribeProcess: function (resp) {
+        try{
         this.responseText = resp.responseText;
         var dom = resp.responseXML ? resp.responseXML : OpenLayers.parseXMLString(resp.responseText);
         this.responseDOM = dom;
@@ -407,6 +408,11 @@ OpenLayers.WPS = OpenLayers.Class({
         for (var i = 0; i < processes.length; i++) {
             var identifier = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(processes[i],this.owsNS,  "Identifier")[0].firstChild.nodeValue;
             var process = this.getProcess(identifier);
+
+            if (!process){
+                process = new OpenLayers.WPS.Process({identifier:identifier, title: ""});
+                this.addProcess(process);
+            }
 
             process.title = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(processes[i],this.owsNS,  "Title")[0].firstChild.nodeValue;
             process.abstract = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(processes[i],this.owsNS,  "Abstract")[0].firstChild.nodeValue;
@@ -423,6 +429,7 @@ OpenLayers.WPS = OpenLayers.Class({
             this.onDescribedProcess(process);
         }
         
+        }catch(e){console.log(e)}
     },
 
     /**

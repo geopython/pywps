@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://www.w3.org/MarkUp/SCHEMA/xhtml11.xsd"
+     xml:lang="en" >
+    <head>
+        <title>WPS Client - Execute</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <script type="text/javascript" src="http://openlayers.org/api/OpenLayers.js"></script>
+        <script type="text/javascript" src="WPS.js"></script>
+        <script type="text/javascript">
+
+            var wps;
+
+            function init() {
+
+                // set the proxy
+                OpenLayers.ProxyHost = "/cgi-bin/proxy.cgi?url=";
+                
+                // set the url
+                var url = "http://maplog.lesprojekt.cz/~jachym/wps/wps.py";
+
+                // init the client
+                wps = new OpenLayers.WPS(url,
+                        {onDescribedProcess: onDescribeProcess});
+
+                // run execute
+                wps.execute("dummyprocess");
+
+            };
+
+            /**
+             * This function is called, when DescribeProcess response
+             * arrived and was parsed
+             */
+            function onDescribeProcess(process) {
+
+                var description = "<h3>"+process.title+"</h3>";
+                description += "<h3>Abstract</h3>"+process.abstract;
+                description += "<h3>Inputs</h3><dl>";
+
+                // for each input
+                for (var i = 0; i < process.inputs.length; i++) {
+                    var input = process.inputs[i];
+                    description += "<dt>"+input.identifier+"</dt>";
+                    description += "<dd>"+"<strong>"+input.title+"</strong><br />"+
+                                    input.abstract+"</dd>";
+                }
+                description += "</dl>";
+                description += "<h3>Outputs</h3><dl>";
+
+                // for each input
+                for (var i = 0; i < process.outputs.length; i++) {
+                    var output = process.outputs[i];
+                    description += "<dt>"+output.identifier+"</dt>";
+                    description += "<dd>"+"<strong>"+output.title+"</strong><br />"+
+                                    output.abstract+"</dd>";
+                }
+                description += "</dl>";
+
+                document.getElementById("wps-result").innerHTML = description;
+            };
+        </script>
+    </head>
+    <body onload="init()">
+        <h1>WPS Client - Execute</h1>
+        <p>
+        Example of usage of the PyWPS <a href="WPS.js">WPS.js</a> client
+        Execute parser.
+        </p>
+        <div id="wps-result">
+        </div>
+    </body>
+</html>

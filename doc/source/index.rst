@@ -23,6 +23,7 @@ Contents:
    testing/index
    process/index
    special/index
+   clients/index
    api/index
 
 
