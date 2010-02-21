@@ -29,7 +29,6 @@ Example of PyWPS process
 
 .. literalinclude:: ../../../examples/returner.py
    :language: python
-   :linenos:
 
 After adding `"returner"` string to `__all__` array, in the
 :file:`__init__.py`  file in the PyWPS Processes directory, we can try

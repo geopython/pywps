@@ -120,14 +120,98 @@ Defining In- and Outputs for the process 'by hand'
 In this example, we will define In- and Outputs of the process "by hand",
 so we will not use the automatic way, via GetCapabilities and
 DescribeProcess.
+
+The 'by hand' process initialization consists out of three steps:
+
+    1. Definition of process In- and Outputs
+
+    2. Definition of the Process itself
+
+    3. Adding process to WPS instance
+
 This example can be found in :file:`wpsclient/03-execute.html`.
 
 .. code-block:: javascript
 
     // WPS object
-    wps = new OWS.WPS(url,{onSucceeded: onExecuted});
+    wps = new OpenLayers.WPS(url,{onSucceeded: onExecuted});
 
     // define inputs of the 'dummyprocess'
+    var input1 = new OpenLayers.WPS.LiteralPut({identifier:"input1",value:1});
+    var input2 = new OpenLayers.WPS.LiteralPut({identifier:"input2",value:2});
 
-FIXME to be continued
-    
+    // define outputs of the 'dummyprocess'
+    var output1 = new OpenLayers.WPS.LiteralPut({identifier:"output1"});
+    var output2 = new OpenLayers.WPS.LiteralPut({identifier:"output2"});
+
+    // define the process and append it to OpenLayers.WPS instance
+    var dummyprocess =  new
+    OpenLayers.WPS.Process({identifier:"dummyprocess", 
+                             inputs: [input1, input2],
+                             outputs: [output1, output2]});
+
+    wps.addProcess(dummyprocess);
+
+    // run Execute
+    wps.execute("dummyprocess");
+
+Of course, func:`onExecuted` has to be defined:
+
+.. code-block:: javascript
+
+    /**
+     * This function is called, when DescribeProcess response
+     * arrived and was parsed
+     **/
+    function onExecuted(process) {
+        var executed = "<h3>"+process.title+"</h3>";
+        executed += "<h3>Abstract</h3>"+process.abstract;
+
+        executed += "<h3>Outputs</h3><dl>";
+
+        // for each output
+        for (var i = 0; i < process.outputs.length; i++) {
+            var output = process.outputs[i];
+            executed += "<dt>"+output.identifier+"</dt>";
+            executed += "<dd>Title: <strong>"+output.title+"</strong><br />"+
+                            "Abstract: "+output.abstract+"</dd>";
+            executed += "<dd>"+"<strong>Value:</strong> "+
+                            output.getValue()+"</dd>";
+        }
+        executed += "</dl>";
+        document.getElementById("wps-result").innerHTML = executed;
+
+    };
+
+Defining In- and Outputs for the process automatically
+......................................................
+In this example, we will define In- and Outputs of the process
+automatically, using the  GetCapabilities and
+DescribeProcess requests.
+
+This example can be found in :file:`wpsclient/04-execute-automatic.html`.
+
+Just call DescribeProcess first:
+
+.. code-block:: javascript
+
+    // init the client
+    wps = new OpenLayers.WPS(url,{
+                onDescribedProcess: onDescribeProcess,
+                onSucceeded: onExecuted
+            });
+
+    // run Execute
+    wps.describeProcess("dummyprocess");
+
+    /**
+     * DescribeProcess and call the Execute response
+     **/
+    function onDescribeProcess(process) {
+        process.inputs[0].setValue(1);
+        process.inputs[1].setValue(2);
+
+        wps.execute("dummyprocess");
+    };
+
+The rest was already defined before.
