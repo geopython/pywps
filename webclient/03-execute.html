@@ -22,10 +22,23 @@
                 var url = "http://maplog.lesprojekt.cz/~jachym/wps/wps.py";
 
                 // init the client
-                wps = new OpenLayers.WPS(url,
-                        {onDescribedProcess: onDescribeProcess});
+                wps = new OpenLayers.WPS(url,{onSucceeded: onExecuted});
 
-                // run execute
+                // define inputs of the 'dummyprocess'
+                var input1 = new OpenLayers.WPS.LiteralPut({identifier:"input1",value:1});
+                var input2 = new OpenLayers.WPS.LiteralPut({identifier:"input2",value:2});
+
+                // define outputs of the 'dummyprocess'
+                var output1 = new OpenLayers.WPS.LiteralPut({identifier:"output1"});
+                var output2 = new OpenLayers.WPS.LiteralPut({identifier:"output2"});
+
+                // define the process and append it to OpenLayers.WPS instance
+                var dummyprocess =  new OpenLayers.WPS.Process({identifier:"dummyprocess", 
+                                        inputs: [input1, input2],
+                                        outputs: [output1, output2]});
+
+                wps.addProcess(dummyprocess);
+                // run Execute
                 wps.execute("dummyprocess");
 
             };
@@ -34,32 +47,24 @@
              * This function is called, when DescribeProcess response
              * arrived and was parsed
              */
-            function onDescribeProcess(process) {
+            function onExecuted(process) {
+                var executed = "<h3>"+process.title+"</h3>";
+                executed += "<h3>Abstract</h3>"+process.abstract;
 
-                var description = "<h3>"+process.title+"</h3>";
-                description += "<h3>Abstract</h3>"+process.abstract;
-                description += "<h3>Inputs</h3><dl>";
+                executed += "<h3>Outputs</h3><dl>";
 
-                // for each input
-                for (var i = 0; i < process.inputs.length; i++) {
-                    var input = process.inputs[i];
-                    description += "<dt>"+input.identifier+"</dt>";
-                    description += "<dd>"+"<strong>"+input.title+"</strong><br />"+
-                                    input.abstract+"</dd>";
-                }
-                description += "</dl>";
-                description += "<h3>Outputs</h3><dl>";
-
-                // for each input
+                // for each output
                 for (var i = 0; i < process.outputs.length; i++) {
                     var output = process.outputs[i];
-                    description += "<dt>"+output.identifier+"</dt>";
-                    description += "<dd>"+"<strong>"+output.title+"</strong><br />"+
-                                    output.abstract+"</dd>";
+                    executed += "<dt>"+output.identifier+"</dt>";
+                    executed += "<dd>Title: <strong>"+output.title+"</strong><br />"+
+                                    "Abstract: "+output.abstract+"</dd>";
+                    executed += "<dd>"+"<strong>Value:</strong> "+
+                                    output.getValue()+"</dd>";
                 }
-                description += "</dl>";
+                executed += "</dl>";
+                document.getElementById("wps-result").innerHTML = executed;
 
-                document.getElementById("wps-result").innerHTML = description;
             };
         </script>
     </head>
