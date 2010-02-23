@@ -23,7 +23,7 @@ def getConfigValue(*args):
     """
 
     if not config:
-        _loadConfiguration()
+        loadConfiguration()
 
     value = config.get(*args)
 
@@ -34,7 +34,7 @@ def getConfigValue(*args):
         value = True
     return value
 
-def _loadConfiguration(cfgfiles=None):
+def loadConfiguration(cfgfiles=None):
     """Load PyWPS configuration from configuration files.
     The later configuration file in the array overwrites configuration
     from the first.
