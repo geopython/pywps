@@ -114,25 +114,26 @@ class Request:
 	if os.name == "nt" or os.name == "java":
 		self.precompile = 0
 
+        # Templates can be stored in other directory
+        templates = Templates.__path__[0]
+        if os.getenv("PYWPS_TEMPLATES"):
+            templates = os.path.abspath(os.getenv("PYWPS_TEMPLATES"))
+
         if self.wps.inputs.has_key("request"):
             if self.wps.inputs["request"] == "getcapabilities":
-                self.templateFile = os.path.join(
-                                    os.path.join(Templates.__path__)[0],
+                self.templateFile = os.path.join(templates,
                                     self.templateVersionDirectory,
                                         "GetCapabilities.tmpl")
             elif self.wps.inputs["request"] == "describeprocess":
-                self.templateFile = os.path.join(
-                                    os.path.join(Templates.__path__)[0],
+                self.templateFile = os.path.join(templates,
                                     self.templateVersionDirectory,
                                         "DescribeProcess.tmpl")
             elif self.wps.inputs["request"] == "execute":
-                self.templateFile = os.path.join(
-                                    os.path.join(Templates.__path__)[0],
+                self.templateFile = os.path.join(templates,
                                     self.templateVersionDirectory,
                                         "Execute.tmpl")
         elif self.wps.inputs.has_key("wsdl"):
-            self.templateFile = os.path.join(
-                                os.path.join(Templates.__path__)[0],
+            self.templateFile = os.path.join(templates,
                                 self.templateVersionDirectory,
                                     "Wsdl.tmpl")
 
@@ -156,6 +157,7 @@ class Request:
         # remove last "/" from the path
         if dirname[-1] == os.path.sep:
             dirname = dirname[:-1]
+
 
         # try to import process from python package (directory)
         try:

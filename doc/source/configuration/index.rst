@@ -43,6 +43,17 @@ this, you have to:
     Where __all___ represents list of processes (file names) within the
     processes directory.
 
+Accepted environment variables
+------------------------------
+Following environemnt variables are accepted by PyWPS instance:
+
+    PYWPS_CFG 
+        Configuration file location
+    PYWPS_PROCESSES
+        Directory, where the processes are stored
+    PYWPS_TEMPLATES
+        Templates directory (structure should be similar to
+        file:`pywps/Templates`)
 
 Setuping the Web Server
 -----------------------
