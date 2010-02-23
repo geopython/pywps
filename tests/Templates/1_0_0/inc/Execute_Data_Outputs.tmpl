@@ -1,0 +1,24 @@
+            <TMPL_IF reference>
+            <wps:Reference mimeType="<TMPL_VAR mimeType>" encoding="<TMPL_VAR encoding>" schema="<TMPL_VAR schema>" href="<TMPL_VAR href>">
+            <TMPL_ELSE>
+            <wps:Data>
+                <TMPL_IF complexdata>
+                <wps:ComplexData mimeType="<TMPL_VAR mimeType>" schema="<TMPL_VAR schema>" encoding="<TMPL_VAR encoding>">
+                    <TMPL_IF cdata>
+                    <![CDATA[<TMPL_VAR complexdata>]]>
+                    <TMPL_ELSE>
+                    <TMPL_VAR complexdata> 
+                    </TMPL_IF>
+                </wps:ComplexData>
+                </TMPL_IF>
+                <TMPL_IF literaldata>
+                <wps:LiteralData dataType="<TMPL_VAR dataType>" uom="<TMPL_VAR uom>"><TMPL_VAR literaldata></wps:LiteralData>
+                </TMPL_IF>
+                <TMPL_IF bboxdata>
+                    <wps:BoundingBoxData crs="<TMPL_VAR crs>" dimensions="<TMPL_VAR dimensions>">
+                        <ows:LowerCorner><TMPL_VAR minx> <TMPL_VAR miny></ows:LowerCorner>
+                        <ows:UpperCorner><TMPL_VAR maxx> <TMPL_VAR maxy></ows:UpperCorner>
+                    </wps:BoundingBoxData>
+                </TMPL_IF>
+            </wps:Data>
+            </TMPL_IF>

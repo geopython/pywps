@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="<TMPL_VAR encoding>"?>
+<wps:ExecuteResponse xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsGetCapabilities_response.xsd" service="WPS" version="1.0.0" xml:lang="<TMPL_VAR lang>" serviceInstance="<TMPL_VAR serviceinstance>" statusLocation="<TMPL_VAR statuslocation>">
+    <wps:Process wps:processVersion="<TMPL_VAR processversion>">
+        <ows:Identifier><TMPL_VAR identifier></ows:Identifier>
+        <ows:Title><TMPL_VAR title></ows:Title>
+        <TMPL_IF abstract>
+        <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
+        </TMPL_IF>
+        <TMPL_LOOP Metadata>
+        <ows:Metadata xlink:title="<TMPL_VAR metadatatitle>" />
+        </TMPL_LOOP>
+        <TMPL_LOOP Profiles>
+        <wps:Profile><TMPL_VAR profile></wps:Profile>
+        </TMPL_LOOP>
+        <TMPL_IF wsdl>
+        <wps:WSDL xlink:href="<TMPL_VAR wsdl>"/>
+        </TMPL_IF>
+    </wps:Process>
+    <wps:Status creationTime="<TMPL_VAR statustime>">
+        <TMPL_IF processsucceeded>
+        <wps:ProcessSucceeded><TMPL_VAR processsucceeded></wps:ProcessSucceeded>
+        </TMPL_IF>
+        <TMPL_IF processaccepted>
+        <wps:ProcessAccepted><TMPL_VAR processaccepted></wps:ProcessAccepted>
+        </TMPL_IF>
+        <TMPL_IF processstarted>
+        <wps:ProcessStarted percentCompleted="<TMPL_VAR percentcompleted>"><TMPL_VAR processstarted></wps:ProcessStarted>
+        </TMPL_IF>
+        <TMPL_IF processpaused>
+        <wps:ProcessPaused percentCompleted="<TMPL_VAR percentcompleted>"><TMPL_VAR processpaused></wps:ProcessPaused>
+        </TMPL_IF>
+        <TMPL_IF processfailed>
+        <wps:ProcessFailed>
+            <wps:ExceptionReport>
+                <TMPL_IF exceptiontext>
+                <ows:Exception exceptionCode="<TMPL_VAR exceptioncode>" locator="<TMPL_VAR locator>">
+                    <ows:ExceptionText><TMPL_VAR exceptiontext></ows:ExceptionText>
+                </ows:Exception>
+                <TMPL_ELSE>
+                <ows:Exception exceptionCode="<TMPL_VAR exceptioncode>" locator="<TMPL_VAR locator>" />
+                </TMPL_IF>
+            </wps:ExceptionReport>
+        </wps:ProcessFailed>
+        </TMPL_IF>
+    </wps:Status>
+    <TMPL_IF lineage>
+    <wps:DataInputs>
+        <TMPL_LOOP Inputs>
+        <wps:Input>
+            <ows:Identifier><TMPL_VAR identifier></ows:Identifier>
+            <ows:Title><TMPL_VAR title></ows:Title>
+            <TMPL_IF abstract>
+            <ows:Abstract>
+                <TMPL_VAR abstract>
+            </ows:Abstract>
+            </TMPL_IF>
+            <TMPL_IF reference>
+            <wps:Reference xlink:href="<TMPL_VAR reference>" method="<TMPL_VAR method>" mimeType="<TMPL_VAR mimeType>" encoding="<TMPL_VAR encoding>" schema="<TMPL_VAR schema>"/>
+                <TMPL_IF header>
+                <wps:Header key="<TMPL_VAR key>" value="<TMPL_VAR value>" />
+                </TMPL_IF>
+                <TMPL_IF body>
+                <wps:Body>
+                    <TMPL_VAR body>
+                </wps:Body>
+                </TMPL_IF>
+                <TMPL_IF bodyReference>
+                <wps:BodyReference xlink:href="<TMPL_VAR bodyReference>" />
+                </TMPL_IF>
+            <TMPL_ELSE>
+                <TMPL_INCLUDE Execute_Data_Inputs.tmpl>
+            </TMPL_IF>
+        </wps:Input>
+        </TMPL_LOOP>
+    </wps:DataInputs>
+    <wps:OutputDefinitions>
+    <TMPL_LOOP Outputdefinitions>
+        <TMPL_IF complexdata>
+        <wps:Output mimeType="<TMPL_VAR mimetype>" encoding="<TMPL_VAR encoding>" schema="<TMPL_VAR schema>" asReference="<TMPL_VAR asreference>">
+        </TMPL_IF>
+        <TMPL_IF literaldata>
+        <wps:Output <TMPL_VAR uom>>
+        </TMPL_IF>
+        <TMPL_IF bboxdata>
+        <wps:Output>
+        </TMPL_IF>
+            <ows:Identifier><TMPL_VAR identifier></ows:Identifier>
+            <ows:Title><TMPL_VAR title></ows:Title>
+            <TMPL_IF abstract>
+            <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
+            </TMPL_IF>
+        </wps:Output>
+    </TMPL_LOOP>
+    </wps:OutputDefinitions>
+    </TMPL_IF>
+    <TMPL_IF processsucceeded>
+    <wps:ProcessOutputs>
+        <TMPL_LOOP Outputs>
+        <wps:Output>
+            <ows:Identifier><TMPL_VAR identifier></ows:Identifier>
+            <ows:Title><TMPL_VAR title></ows:Title>
+            <TMPL_IF abstract>
+            <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
+            </TMPL_IF>
+            <TMPL_IF reference>
+            <wps:Reference xlink:href="<TMPL_VAR reference>" mimeType="<TMPL_VAR mimetype>" encoding="<TMPL_VAR encoding>" schema="<TMPL_VAR schema>"/>
+            <TMPL_ELSE>
+                <TMPL_INCLUDE Execute_Data_Outputs.tmpl>
+            </TMPL_IF>
+        </wps:Output>
+        </TMPL_LOOP>
+    </wps:ProcessOutputs>
+    </TMPL_IF>
+</wps:ExecuteResponse>

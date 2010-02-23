@@ -1,0 +1,43 @@
+                    <TMPL_IF dataType>
+                    <ows:DataType ows:reference="<TMPL_VAR dataTypeReference>"><TMPL_VAR dataType></ows:DataType>
+                    </TMPL_IF>
+                    <TMPL_IF UOM>
+                    <UOMs>
+                        <Default>
+                            <ows:UOM><TMPL_VAR defaultUOM></ows:UOM>
+                        </Default>
+                        <Supported>
+                            <TMPL_LOOP supportedUOMS>
+                            <ows:UOM><TMPL_VAR uom></ows:UOM>
+                            </TMPL_LOOP>
+                            <ows:UOM />
+                        </Supported>
+                    </UOMs>
+                    </TMPL_IF>
+                    <TMPL_IF isDefaultValue>
+                    <DefaultValue><TMPL_VAR defaultValue></DefaultValue>
+                    </TMPL_IF>
+                    <TMPL_IF allowedValueslen>
+                    <ows:AllowedValues>
+                        <TMPL_LOOP allowedValues>
+                        <TMPL_IF minMax>
+                            <ows:Range ows:rangeClosure="<TMPL_VAR closure>">
+                                <ows:MinimumValue><TMPL_VAR minimumValue></ows:MinimumValue>
+                                <ows:MaximumValue><TMPL_VAR maximumValue></ows:MaximumValue>
+                                <TMPL_IF spacing>
+                                <ows:Spacing><TMPL_VAR spacing></ows:Spacing>
+                                </TMPL_IF>
+                            </ows:Range>
+                        </TMPL_IF>
+                        <TMPL_IF discrete>
+                            <ows:Value><TMPL_VAR value></ows:Value>
+                        </TMPL_IF>
+                        </TMPL_LOOP>
+                    </ows:AllowedValues>
+                    </TMPL_IF>
+                    <TMPL_IF anyvalue>
+                    <ows:AnyValue />
+                    </TMPL_IF>
+                    <TMPL_IF valueReferencelen>
+                    <ValuesReference reference="<TMPL_VAR reference>" valuesForm="<TMPL_VAR vform>"/>
+                    </TMPL_IF>

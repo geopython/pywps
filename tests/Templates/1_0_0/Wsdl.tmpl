@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+    <definitions name="<TMPL_VAR name>"
+        targetNamespace="<TMPL_VAR address>_wsdl"
+        xmlns:tns="<TMPL_VAR address>_wsdl"
+        xmlns="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:wps="http://www.opengis.net/wps/1.0.0"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:wsdl="http://schemas.xmlsoap.org/wsdl">
+        <types>
+            <xsd:schema targetNamespace="http://www.opengis.net/wps/1.0.0">
+                <xsd:include 
+                    schemaLocation="http://schemas.opengis.net/wps/1.0.0/wpsGetCapabilities_request.xsd"/>
+            </xsd:schema>
+            <xsd:schema targetNamespace="http://www.opengis.net/wps/1.0.0">
+                <xsd:include 
+                    schemaLocation="http://schemas.opengis.net/wps/1.0.0/wpsGetCapabilities_response.xsd"/>
+            </xsd:schema>
+
+            <xsd:schema targetNamespace="http://www.opengis.net/wps/1.0.0">
+                <xsd:include 
+                    schemaLocation="http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_request.xsd"/>
+            </xsd:schema>
+            <xsd:schema targetNamespace="http://www.opengis.net/wps/1.0.0">
+                <xsd:include 
+                    schemaLocation="http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd"/>
+            </xsd:schema>
+
+            <xsd:schema targetNamespace="http://www.opengis.net/wps/1.0.0">
+                <xsd:include 
+                    schemaLocation="http://schemas.opengis.net/wps/1.0.0/wpsExecute_response.xsd"/>
+            </xsd:schema>
+            <xsd:schema targetNamespace="http://www.opengis.net/wps/1.0.0">
+                <xsd:include 
+                    schemaLocation="http://schemas.opengis.net/wps/1.0.0/wpsExecute_response.xsd"/>
+            </xsd:schema>
+        </types>
+
+    <message name="GetCapabilitiesRequest">
+        <part name="msg" element="wps:GetCapabilities"/>
+    </message>
+    <message name="GetCapabilitiesResponse">
+        <part name="msg" element="wps:Capabilities"/>
+    </message>
+
+    <message name="DescribeProcessRequest">
+        <part name="msg" element="wps:DescribeProcess"/>
+    </message>
+    <message name="DescribeProcessResponse">
+        <part name="msg" element="wps:ProcessDescriptions"/>
+    </message>
+
+    <message name="ExecuteRequest">
+        <part name="msg" element="wps:Execute"/>
+    </message>
+    <message name="ExecuteResponse">
+        <part name="msg" element="wps:ExecuteResponse"/>
+    </message>
+
+    <message name="ExceptionResponse">
+        <part name="msg" element="wps:ExcepctionReport"/>
+    </message>
+
+    <portType name="<TMPL_VAR name>_PortType">
+        <operation name="GetCapabilities">
+            <input message="tns:GetCapabilitiesRequest"/>
+            <output message="tns:GetCapabilitiesResponse"/>
+            <fault name="ExceptionResponse" message="tns:ExceptionResponse" />
+        </operation>
+        <operation name="DescribeProcess">
+            <input message="tns:DescribeProcessRequest"/>
+            <output message="tns:DescribeProcessResponse"/>
+            <fault name="ExceptionResponse" message="tns:ExceptionResponse" />
+        </operation>
+        <operation name="Execute">
+            <input message="tns:ExecuteRequest"/>
+            <output message="tns:ExecuteResponse"/>
+            <fault name="ExceptionResponse" message="tns:ExceptionResponse" />
+        </operation>
+    </portType>
+
+    <binding name="<TMPL_VAR name>_Binding" type="tns:<TMPL_VAR name>_PortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="GetCapabilities">
+            <soap:operation soapAction="<TMPL_VAR address>/GetCapabilities" style="document"/>
+            <input name="GetCapabilitiesRequest">
+                <soap:body use="literal" />
+            </input>
+            <output name="GetCapabilitiesResponse">
+                <soap:body use="literal" />
+            </output>
+            <fault name="ExceptionResponse">
+                 <soap:fault name="ExceptionResponse" use="literal" />
+            </fault>
+        </operation>
+        <operation name="DescribeProcess">
+            <soap:operation soapAction="<TMPL_VAR address>/DescribeProcess" style="document"/>
+            <input name="DescribeProcessRequest">
+                <soap:body use="literal" />
+            </input>
+            <output name="DescribeProcessResponse">
+                <soap:body use="literal" />
+            </output>
+            <fault name="ExceptionResponse" >
+                 <soap:fault name="ExceptionResponse" use="literal" />
+            </fault>
+        </operation>
+        <operation name="Execute">
+            <soap:operation soapAction="<TMPL_VAR address>/Execute" style="document"/>
+            <input name="ExecuteRequest">
+                <soap:body use="literal" />
+            </input>
+            <output name="ExecuteResponse">
+                <soap:body use="literal" />
+            </output>
+            <fault name="ExceptionResponse" >
+                 <soap:fault name="ExceptionResponse" use="literal" />
+            </fault>
+        </operation>
+  </binding>
+
+  <service name="<TMPL_VAR name>">
+    <documentation><TMPL_VAR abstract></documentation>
+    <port name="<TMPL_VAR name>_Port" binding="tns:<TMPL_VAR name>_Binding">
+      <soap:address location="<TMPL_VAR address>"/>
+    </port>
+  </service>
+</definitions>
+

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="<TMPL_VAR encoding>"?>
+<wps:Capabilities service="WPS" version="1.0.0" xml:lang="<TMPL_VAR lang>" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsGetCapabilities_response.xsd" updateSequence="1">
+        <Test></Test>
+	<ows:ServiceIdentification>
+		<ows:Title><TMPL_VAR servertitle></ows:Title>
+                <TMPL_IF serverabstract>
+		<ows:Abstract><TMPL_VAR serverabstract></ows:Abstract>
+                </TMPL_IF>
+                <TMPL_IF Keywords>
+		<ows:Keywords>
+                        <TMPL_LOOP Keywords>
+			<ows:Keyword><TMPL_VAR keyword></ows:Keyword>
+                        </TMPL_LOOP>
+		</ows:Keywords>
+                </TMPL_IF>
+		<ows:ServiceType>WPS</ows:ServiceType>
+                <TMPL_LOOP Versions>
+		<ows:ServiceTypeVersion><TMPL_VAR version></ows:ServiceTypeVersion>
+                </TMPL_LOOP>
+                <TMPL_IF fees>
+		<ows:Fees><TMPL_VAR fees></ows:Fees>
+                </TMPL_IF>
+                <TMPL_IF constraints>
+		<ows:AccessConstraints><TMPL_VAR constraints></ows:AccessConstraints>
+                </TMPL_IF>
+	</ows:ServiceIdentification>
+	<ows:ServiceProvider>
+		<ows:ProviderName><TMPL_VAR providername></ows:ProviderName>
+                <TMPL_IF providersite>
+		<ows:ProviderSite xlink:href="<TMPL_VAR providersite>"/>
+                </TMPL_IF>
+		<ows:ServiceContact>
+                        <TMPL_IF individualname>
+			<ows:IndividualName><TMPL_VAR individualname></ows:IndividualName>
+                        </TMPL_IF>
+                        <TMPL_IF positionname>
+			<ows:PositionName><TMPL_VAR positionname></ows:PositionName>
+                        </TMPL_IF>
+			<ows:ContactInfo>
+                                <TMPL_IF phone>
+				<ows:Phone>
+                                        <TMPL_IF phonevoice>
+					<ows:Voice><TMPL_VAR phonevoice></ows:Voice>
+                                        </TMPL_IF>
+                                        <TMPL_IF phonefacsimile>
+					<ows:Facsimile><TMPL_VAR phonefacsimile></ows:Facsimile>
+                                        </TMPL_IF>
+				</ows:Phone>
+                                </TMPL_IF>
+                                <TMPL_IF address>
+				<ows:Address>
+                                        <TMPL_IF deliverypoint>
+					<ows:DeliveryPoint><TMPL_VAR deliverypoint></ows:DeliveryPoint>
+                                        </TMPL_IF>
+                                        <TMPL_IF city>
+					<ows:City><TMPL_VAR city></ows:City>
+                                        </TMPL_IF>
+                                        <TMPL_IF administrativearea>
+					<ows:AdministrativeArea><TMPL_VAR administrativearea></ows:AdministrativeArea>
+                                        </TMPL_IF>
+                                        <TMPL_IF postalcode>
+					<ows:PostalCode><TMPL_VAR postalcode></ows:PostalCode>
+                                        </TMPL_IF>
+                                        <TMPL_IF country>
+					<ows:Country><TMPL_VAR country></ows:Country>
+                                        </TMPL_IF>
+                                        <TMPL_IF electronicmailaddress>
+					<ows:ElectronicMailAddress><TMPL_VAR electronicmailaddress></ows:ElectronicMailAddress>
+                                        </TMPL_IF>
+				</ows:Address>
+                                </TMPL_IF>
+                                <TMPL_IF providersite>
+				<ows:OnlineResource xlink:href="<TMPL_VAR providersite>"/>
+                                </TMPL_IF>
+                                <TMPL_IF hoursofservice>
+				<ows:HoursOfService><TMPL_VAR hoursofservice></ows:HoursOfService>
+                                </TMPL_IF>
+                                <TMPL_IF contactinstructions>
+				<ows:ContactInstructions><TMPL_VAR contactinstructions></ows:ContactInstructions>
+                                </TMPL_IF>
+			</ows:ContactInfo>
+                        <TMPL_IF role>
+			<ows:Role><TMPL_VAR role></ows:Role>
+                        </TMPL_IF>
+		</ows:ServiceContact>
+	</ows:ServiceProvider>
+	<ows:OperationsMetadata>
+                <TMPL_LOOP Operations>
+		<ows:Operation name="<TMPL_VAR operation>">
+			<ows:DCP>
+				<ows:HTTP>
+					<ows:Get xlink:href="<TMPL_VAR url>?"/>
+					<ows:Post xlink:href="<TMPL_VAR url>"/>
+				</ows:HTTP>
+			</ows:DCP>
+		</ows:Operation>
+                </TMPL_LOOP>
+	</ows:OperationsMetadata>
+	<wps:ProcessOfferings>
+                <TMPL_LOOP Processes>
+                <TMPL_IF processok>
+                <TMPL_IF processversion>
+		<wps:Process wps:processVersion="<TMPL_VAR processversion>">
+                <TMPL_ELSE>
+		<wps:Process>
+                </TMPL_IF>
+			<ows:Identifier><TMPL_VAR identifier></ows:Identifier>
+			<ows:Title><TMPL_VAR title></ows:Title>
+                        <TMPL_IF abstract>
+			<ows:Abstract><TMPL_VAR abstract></ows:Abstract>
+                        </TMPL_IF>
+                        <TMPL_LOOP Metadata>
+			<ows:Metadata xlink:title="<TMPL_VAR metadatatitle>" />
+                        </TMPL_LOOP>
+                        <TMPL_LOOP Profiles>
+			<wps:Profile><TMPL_VAR profile></wps:Profile>
+                        </TMPL_LOOP>
+                        <TMPL_IF wsdl>
+			<wps:WSDL><TMPL_VAR wsdl></ows:WSDL>
+                        </TMPL_IF>
+		</wps:Process>
+                <TMPL_ELSE>
+                <!-- Process <TMPL_VAR process> failed: <TMPL_VAR exception> -->
+                </TMPL_IF>
+                </TMPL_LOOP>
+	</wps:ProcessOfferings>
+	<wps:Languages>
+		<wps:Default>
+			<ows:Language><TMPL_VAR defaultlanguage></ows:Language>
+		</wps:Default>
+		<wps:Supported>
+                <TMPL_LOOP Languages>
+			<ows:Language><TMPL_VAR language></ows:Language>
+                </TMPL_LOOP>
+		</wps:Supported>
+	</wps:Languages>
+	<wps:WSDL xlink:href="<TMPL_VAR url>?WSDL"/>
+</wps:Capabilities>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="<TMPL_VAR encoding>"?>
+<wps:ProcessDescriptions xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd" service="WPS" version="1.0.0" xml:lang="<TMPL_VAR lang>">
+    <TMPL_LOOP Processes>
+    <TMPL_IF processok>
+    <ProcessDescription wps:processVersion="<TMPL_VAR processversion>" storeSupported="<TMPL_VAR store>" statusSupported="<TMPL_VAR status>">
+        <ows:Identifier><TMPL_VAR identifier></ows:Identifier>
+        <ows:Title><TMPL_VAR title></ows:Title>
+        <TMPL_IF abstract>
+        <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
+        </TMPL_IF>
+        <TMPL_LOOP Metadata>
+        <ows:Metadata xlink:title="<TMPL_VAR metadatatitle>" />
+        </TMPL_LOOP>
+        <TMPL_LOOP Profiles>
+        <wps:Profile><TMPL_VAR profile></wps:Profile>
+        </TMPL_LOOP>
+        <TMPL_IF wsdl>
+        <wps:WSDL xlink:href="<TMPL_VAR wsdl>"/>
+        </TMPL_IF>
+        <TMPL_IF datainputslen>
+        <DataInputs>
+            <TMPL_LOOP Datainputs>
+            <Input minOccurs="<TMPL_VAR minoccurs>" maxOccurs="<TMPL_VAR maxoccurs>">
+                <ows:Identifier><TMPL_VAR identifier></ows:Identifier>
+                <ows:Title><TMPL_VAR title></ows:Title>
+                <TMPL_IF abstract>
+                <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
+                </TMPL_IF>
+                <TMPL_IF complexvalue>
+                <ComplexData>
+                    <TMPL_INCLUDE DescribeProcess_ComplexValue.tmpl>
+                </ComplexData>
+                </TMPL_IF>
+                <TMPL_IF literalvalue>
+                <LiteralData>
+                    <TMPL_INCLUDE DescribeProcess_LiteralValue.tmpl>
+                </LiteralData>
+                </TMPL_IF>
+                <TMPL_IF boundingboxvalue>
+                <BoundingBoxData>
+                    <TMPL_INCLUDE DescribeProcess_BoundingBoxValue.tmpl>
+                </BoundingBoxData>
+                </TMPL_IF>
+            </Input>
+            </TMPL_LOOP>
+        </DataInputs>
+        </TMPL_IF>
+        <TMPL_IF dataoutputslen>
+        <ProcessOutputs>
+            <TMPL_LOOP Dataoutputs>
+            <Output>
+                <ows:Identifier><TMPL_VAR identifier></ows:Identifier>
+                <ows:Title><TMPL_VAR title></ows:Title>
+                <TMPL_IF abstract>
+                <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
+                </TMPL_IF>
+                <TMPL_IF complexvalue>
+                <ComplexOutput>
+                    <TMPL_INCLUDE DescribeProcess_ComplexValue.tmpl>
+                </ComplexOutput>
+                </TMPL_IF>
+                <TMPL_IF literalvalue>
+                <LiteralOutput>
+                    <TMPL_INCLUDE DescribeProcess_LiteralValue.tmpl>
+                </LiteralOutput>
+                </TMPL_IF>
+                <TMPL_IF boundingboxvalue>
+                <BoundingBoxOutput>
+                    <TMPL_INCLUDE DescribeProcess_BoundingBoxValue.tmpl>
+                </BoundingBoxOutput>
+                </TMPL_IF>
+            </Output>
+            </TMPL_LOOP>
+        </ProcessOutputs>
+        </TMPL_IF>
+    </ProcessDescription>
+    <TMPL_ELSE>
+    <!-- Process <TMPL_VAR process> failed: <TMPL_VAR exception> -->
+    </TMPL_IF>
+    </TMPL_LOOP>
+</wps:ProcessDescriptions>
