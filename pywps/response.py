@@ -13,6 +13,7 @@ from sys import stdout as STDOUT
 from sys import stderr as STDERR
 import re
 from pywps import Exceptions
+from os import name as OSNAME
 
 EMPTYPARAMREGEX = re.compile('( \w+="")|( \w+="None")')
 
@@ -58,7 +59,7 @@ def response(response,targets,isSoap=False,contentType="application/xml"):
             _printResponseFile(f,response,contentType)
 
         # java servlet response
-        elif os.name == "java" :
+        elif OSNAME == "java" :
             _printResponseJava(f,response,contentType)
 
         # close and open again, if it is a file
