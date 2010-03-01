@@ -16,24 +16,6 @@ from pywps import Exceptions
 
 EMPTYPARAMREGEX = re.compile('( \w+="")|( \w+="None")')
 
-def responseJava(response, responseText ,isSoap=False,contentType="application/xml"):
-    """
-    Print response to resonse object given as input parameter.
-
-    :param response: file object or list of file objects. File name,
-        mod_python request or java servlet response
-    :type response: java servlet response object
-    :param isSoap: print the response in SOAP envelope
-    :type isSoap: bool
-    :param response: the text object
-    :type response: file or string
-    """
-    if isSoap:
-        soap = Soap.SOAP()
-        response = soap.getResponse(response)
-
-    _printResponseJava(responseText, response ,contentType="application/xml")
-
 def response(response,targets,isSoap=False,contentType="application/xml"):
     """
     Print response to files given as input parameter.
@@ -76,8 +58,7 @@ def response(response,targets,isSoap=False,contentType="application/xml"):
             _printResponseFile(f,response,contentType)
 
         # java servlet response
-        elif repr(type(f)).find("org.apache.catalina.connector") > -1 or \
-                repr(f) == "<__main__.DummyHttpResponse instance at 0xc14>": 
+        elif os.name == "java" :
             _printResponseJava(f,response,contentType)
 
         # close and open again, if it is a file
