@@ -82,6 +82,12 @@ class Post(Parser):
                 #if maxFileSize > 0 and\
                 #    inputXml.__sizeof__() > maxFileSize:
                 #    raise pywps.FileSizeExceeded()
+            # make DOM from XML
+            import org.xml.sax.SAXException
+            try:
+                self.document = parseString(inputXml)
+            except org.xml.sax.SAXException,e:
+                raise pywps.NoApplicableCode(e.message)
         else:
             if maxFileSize > 0:
                 inputXml = file.read(maxFileSize)
@@ -90,11 +96,11 @@ class Post(Parser):
             else:
                 inputXml = file.read()
 
-        # make DOM from XML
-        try:
-            self.document = parseString(inputXml)
-        except xml.parsers.expat.ExpatError,e:
-            raise pywps.NoApplicableCode(e.message)
+            # make DOM from XML
+            try:
+                self.document = parseString(inputXml)
+            except xml.parsers.expat.ExpatError,e:
+                raise pywps.NoApplicableCode(e.message)
         
         # get first child
         firstChild = self.getFirstChildNode(self.document)
