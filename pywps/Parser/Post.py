@@ -78,9 +78,10 @@ class Post(Parser):
                 if not line:
                     break
                 inputXml += line
-                if maxFileSize > 0 and\
-                    inputXml.__sizeof__() > maxFileSize:
-                    raise pywps.FileSizeExceeded()
+                # TODO:
+                #if maxFileSize > 0 and\
+                #    inputXml.__sizeof__() > maxFileSize:
+                #    raise pywps.FileSizeExceeded()
         else:
             if maxFileSize > 0:
                 inputXml = file.read(maxFileSize)
