@@ -30,6 +30,7 @@ import pywps
 from pywps.Parser import Parser
 from pywps.Process.Lang import Lang
 from pywps import Soap 
+from os import name as OSNAME
 
 class Post(Parser):
     """Main class for parsing of HTTP POST request types
@@ -58,7 +59,7 @@ class Post(Parser):
     def parse(self,file):
         """Parse parameters stored as XML file
 
-        :param file: input file object
+        :param file: input file object or class:`java.io.BufferedReader`
         :return: parsed input object
         """
 
@@ -70,12 +71,23 @@ class Post(Parser):
                 pywps.config.getConfigValue("server","maxFileSize").lower())
 
         # read the document
-        if maxFileSize > 0:
-            inputXml = file.read(maxFileSize)
-            if file.read() != "":
-                raise pywps.FileSizeExceeded()
+        if OSNAME == "java":
+            inputXml = ""
+            while 1:
+                line = file.readLine()
+                if line is Null:
+                    break
+                inputXml += line
+                if maxFileSize > 0 and\
+                    inputXml.__sizeof__() > maxFileSize:
+                    raise pywps.FileSizeExceeded()
         else:
-            inputXml = file.read()
+            if maxFileSize > 0:
+                inputXml = file.read(maxFileSize)
+                if file.read() != "":
+                    raise pywps.FileSizeExceeded()
+            else:
+                inputXml = file.read()
 
         # make DOM from XML
         try:
