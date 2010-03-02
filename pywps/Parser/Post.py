@@ -75,7 +75,7 @@ class Post(Parser):
             inputXml = ""
             while 1:
                 line = file.readLine()
-                if line is Null:
+                if not line:
                     break
                 inputXml += line
                 if maxFileSize > 0 and\
