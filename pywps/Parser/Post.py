@@ -71,7 +71,8 @@ class Post(Parser):
                 pywps.config.getConfigValue("server","maxFileSize").lower())
 
         # read the document
-        if OSNAME == "java":
+        if OSNAME == "java" and\
+            type(file) != types.FileType:
             inputXml = ""
             while 1:
                 line = file.readLine()

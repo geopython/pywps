@@ -159,6 +159,7 @@ class Request:
             dirname = dirname[:-1]
 
 
+        procModule = None
         # try to import process from python package (directory)
         try:
             sys.path.insert(0,os.path.split(dirname)[0])
@@ -207,7 +208,7 @@ class Request:
                         
 
         except ImportError,e:
-            traceback.print_exc(file=self.wps.logFile)
+            traceback.print_exc(file=pywps.logFile)
             processes.append("Could not import process [%s]: %s" % (repr(procModule), repr(e)))
         return processes
 
