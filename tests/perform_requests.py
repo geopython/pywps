@@ -50,6 +50,7 @@ class RequestGetTestCase(unittest.TestCase):
 
     def testT01PerformGetCapabilities(self):
         """Test if GetCapabilities request returns Capabilities document"""
+        self._setFromEnv()
         mypywps = pywps.Pywps(pywps.METHOD_GET)
         inputs = mypywps.parseRequest(self.getcapabilitiesrequest)
         mypywps.performRequest(inputs)
@@ -59,6 +60,7 @@ class RequestGetTestCase(unittest.TestCase):
     def testT02ProcessesLengthGetCapabilities(self):
         """Test, if any processes are listed in the Capabilities document
         """
+        self._setFromEnv()
         mypywps = pywps.Pywps(pywps.METHOD_GET)
         inputs = mypywps.parseRequest(self.getcapabilitiesrequest)
         mypywps.performRequest(inputs)
@@ -67,6 +69,7 @@ class RequestGetTestCase(unittest.TestCase):
 
     def testT03PerformDescribeProcess(self):
         """Test if DescribeProcess request returns ProcessDescription document"""
+        self._setFromEnv()
         mypywps = pywps.Pywps(pywps.METHOD_GET)
         mypywps.parseRequest(self.getdescribeprocessrequest)
         mypywps.performRequest()
@@ -76,6 +79,7 @@ class RequestGetTestCase(unittest.TestCase):
     def testT04ProcessesLengthDescribeProcess(self):
         """Test, if any processes are listed in the DescribeProcess document
         """
+        self._setFromEnv()
         mypywps = pywps.Pywps(pywps.METHOD_GET)
         mypywps.parseRequest(self.getdescribeprocessrequest)
         mypywps.performRequest()
