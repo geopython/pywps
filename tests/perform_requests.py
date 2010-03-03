@@ -31,7 +31,7 @@ class RequestGetTestCase(unittest.TestCase):
     wpsns = "http://www.opengis.net/wps/1.0.0"
     xmldom = None
 
-    def _testT00Assync(self):
+    def testT00Assync(self):
         """Test assynchronous mode for the first time"""
         self._setFromEnv()
         mypywps = pywps.Pywps(pywps.METHOD_GET)
