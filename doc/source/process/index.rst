@@ -25,6 +25,23 @@ Configuration via configuration file
 ------------------------------------
 Alternatively you can set the `processesPath` variable in the configuration file.
 
+Logging
+=======
+PyWPS uses Python module :mod:`logging` for logging purposes. If there is
+something, you need to log (activity, variable content for debug or
+anything else), just import the module and use it::
+
+    import logging
+    ...
+
+    logging.info("Just information message")
+    logging.debug("Variable content: %s" % variable)
+    logging.error("Error occured: %s" % e)
+
+The logs are printed to standard error, or to file set in the configuration
+file :ref:`configuration`. Log level is set with `logLevel` option, also in
+thte configuration file.
+
 .. toctree::
     :maxdepth: 1
 
