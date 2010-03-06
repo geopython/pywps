@@ -255,7 +255,9 @@ server contains server settings, constrains, safety configuration and so on.
     debug 
         true/false - makes the logs for verbose
         
-        .. note:: This option is not used so wildly, as it should maybe be.
+        .. note:: This option is not used so wildly, as it should maybe be. 
+
+        .. note:: Deprecated since 3.2. Use logLevel instead
 
     processesPath 
         path to your processes. Default is pywps/processes.
@@ -268,6 +270,10 @@ server contains server settings, constrains, safety configuration and so on.
         (since 3.0.1) File, where all logs from PyWPS are going to. If not
         set, default error.log from Web Server configuration is used.
         Sometimes, this can cause problem for the asynchronous calls.
+
+    logLevel
+        (since 3.2) one of DEBUG, INFO, WARNING, ERROR and CRITICAL,
+        default is INFO
 
 GRASS
 -----

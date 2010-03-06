@@ -56,10 +56,6 @@ example how to use this module::
 
     Configuration file parser
 
-.. data:: logFile
-
-    File object, where to write logs and erros to
-
 .. data:: responsePrinter
 
     :class:`ResponsePrinter` instance, which will print the resulting
@@ -98,7 +94,7 @@ import Exceptions
 import Wps
 from Exceptions import *
 
-import sys, os, urllib, re, traceback, types
+import sys, os, urllib, re, traceback, types, logging
 
 # global variables
 METHOD_GET="GET"
@@ -106,11 +102,12 @@ METHOD_POST="POST"
 OWS_NAMESPACE = "http://www.opengis.net/ows/1.1"
 WPS_NAMESPACE = "http://www.opengis.net/wps/1.0.0"
 XLINK_NAMESPACE = "http://www.w3.org/1999/xlink"
-logFile = None
 
 PYWPS_INSTALL_DIR = None # this working directory
 DEFAULT_LANG = "eng"
 DEFAULT_VERSION = "1.0.0"
+
+logFile = None
 
 class Pywps:
     """This is main PyWPS Class, which parses the request, performs the
@@ -149,6 +146,19 @@ class Pywps:
     .. attribute:: versions
 
         Default supported versions
+
+    .. attribute:: logFile
+
+        File objects, where some logs are written to. 
+
+        .. note:: Use ::
+            
+                import logging
+                logging.debug("hallo world") 
+
+            for any debugging information, you want to get
+
+            
 
     """
 
@@ -238,12 +248,26 @@ class Pywps:
         """Set :data:`logFile`. Default is sys.stderr
         """
         global logFile
-        logFile = config.getConfigValue("server","logFile")
-        if not logFile:
-            logFile = sys.stderr
+        fileName = config.getConfigValue("server","logFile")
+        logLevel = eval("logging."+config.getConfigValue("server","logLevel").upper())
+        format = "PyWPS [%(asctime)s] %(levelname)s: %(message)s"
+        if not fileName:
+            logging.basicConfig(level=logLevel,format=format)
+        else:
+            logging.basicConfig(filename=fileName,level=logLevel,format=format)
+            logFile = open(fileName, "a")
+
 
 def debug(debug,code="Debug"):
     """Print debug argument to standard error
+
+    .. note:: Deprecated from 3.2, use ::
+
+            import logging
+            ...
+            logging.debug("Hallo world")
+
+        or similar. See Python module :mod:`logging` for more details
 
     :param debug: debugging text, which should be printed to the
         :data:`logFile`
@@ -253,11 +277,13 @@ def debug(debug,code="Debug"):
         direct after 'PyWPS' and before the debug text
     :type code: string.
     """
-    dbg = config.getConfigValue("server","debug")
-    if dbg == True or (type(dbg) == type("") and \
-            dbg.lower() == "true") or int(dbg) != 0:
-        print >>logFile, "PyWPS %s: %s" % (code,debug.__str__()[0:160]),
-        if len(debug.__str__()) > 160:
-            print >>logFile, "...",
-        print >>logFile, "\n"
+    logging.debug(debug)
+
+    #dbg = config.getConfigValue("server","debug")
+    #if dbg == True or (type(dbg) == type("") and \
+    #        dbg.lower() == "true") or int(dbg) != 0:
+    #    print >>logFile, "PyWPS %s: %s" % (code,debug.__str__()[0:160]),
+    #    if len(debug.__str__()) > 160:
+    #        print >>logFile, "...",
+    #    print >>logFile, "\n"
 

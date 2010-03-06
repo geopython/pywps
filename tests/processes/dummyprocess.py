@@ -3,7 +3,7 @@ DummyProcess to check the WPS structure
 
 Author: Jorge de Jesus (jorge.de-jesus@jrc.it) as suggested by Kor de Jong
 """
-from pywps.Process.Process import WPSProcess                                
+from pywps.Process import WPSProcess                                
 class Process(WPSProcess):
      def __init__(self):
           # init process

@@ -38,6 +38,7 @@ from pywps import Templates
 from pywps import Soap
 import types
 import traceback
+import logging
 
 class Request:
     """WPS Request performing, and response formating
@@ -179,7 +180,7 @@ class Request:
                     procModule = __import__(procModule, globals(),\
                                     locals(), [processSources.__name__])
                 except Exception,e:
-                    processes.append(
+                    logging.warning(
                             "Could not import processes from %s: %s" % \
                                     (repr(processSources.__name__), repr(e)))
                 
@@ -197,7 +198,7 @@ class Request:
                             try:
                                 processes.append(member())
                             except Exception,e:
-                                processes.append(
+                                logging.warning(
                                         "Could not import process [%s]: %s" % \
                                                 (repr(member), repr(e)))
                     # if the member is Istance, check, if it is istnace of
@@ -295,30 +296,34 @@ class Request:
             it's instances, string with directory, where processes are
             located, ..."""
         global pywps
-
         
         if processes and type(processes) == type(""):
-            pywps.debug("Reading processes from [%s]" % processes)
+            logging.info("Reading processes from [%s]" % processes)
             self.processes  = self._initFromDirectory(processes)
 
         # processes are some list -- use them directly
         elif processes and type(processes) in [type(()), type([])]:
 
-            pywps.debug("Setting PYWPS_PROCESSES not set, we are using the processes array directly")
+            logging.info("Setting PYWPS_PROCESSES not set, we are using the processes array directly")
             self.processes = self._initFromCode(processes)
 
         # processes will be set from configuration file
         elif config.getConfigValue("server","processesPath"):
-            pywps.debug("Setting PYWPS_PROCESSES from configuration file to %s" %\
+            logging.info("Setting PYWPS_PROCESSES from configuration file to %s" %\
                         config.getConfigValue("server","processesPath"))
             self.processes = self._initFromDirectory(config.getConfigValue("server","processesPath"))
 
         # processes will be set from default directory
         else:
-            pywps.debug("Importing the processes from default (pywps/processes) location")
-            import pywps
+            logging.info("Importing the processes from default (pywps/processes) location")
             from pywps import processes as pywpsprocesses
             self.processes = self._initFromDirectory(os.path.abspath(pywpsprocesses.__path__[-1]))
+
+        if len(self.processes) == 0:
+            logging.warning("No processes found in any place. Continuing, but you can not execute anything.")
+
+        logging.info("Following processes are imported: %s" %\
+               map(lambda p: p.identifier, self.processes))
         return self.processes
 
     def getProcess(self,identifier):

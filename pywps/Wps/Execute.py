@@ -34,6 +34,7 @@ from pywps.Template import TemplateError
 import time,os,sys,tempfile,re,types, ConfigParser, base64, traceback
 from shutil import copyfile as COPY
 from shutil import rmtree as RMTREE
+import logging
 
 TEMPDIRPREFIX="pywps-instance"
 
@@ -370,7 +371,7 @@ class Execute(Request):
                 try:
                     self._initMapscript()
                 except Exception, e:
-                    pywps.debug("MapScript could not be loaded, mapserver not supported: %s" %e,"Warning")
+                    logging.info("MapScript could not be loaded, mapserver not supported: %s" %e)
 
                 if not self.rawDataOutput:
                     # fill outputs
@@ -669,11 +670,10 @@ class Execute(Request):
                                     self.contentType)
         
         if self.status == self.started:
-            pywps.debug("%s" % self.statusMessage,
-                    code = "PyWPS Status [%s][%.1f]: "% (self.status,float(self.percent)))
+            logging.info("Status [%s][%.1f]: %s" %\
+                    (self.status,float(self.percent), self.statusMessage))
         else:
-            pywps.debug("%s" % self.statusMessage,
-                        code="PyWPS Status [%s]"%self.status )
+            logging.info("Status [%s]: %s" % (self.status, self.statusMessage))
 
 
     def lineageInputs(self):
@@ -978,7 +978,7 @@ class Execute(Request):
                             myLayerObj.type = MS_LAYER_RASTER
                             templateOutput["reference"] = self._getMapServerWCS(output)
                     except ImportError:
-                        pywps.debug("GDAL could not be loaded, mapserver not supported","Warning")
+                        logging.warning("GDAL could not be loaded, mapserver not supported")
 
  
         templateOutput["mimetype"] = output.format["mimeType"]
@@ -1132,7 +1132,7 @@ class Execute(Request):
         """
         os.chdir(self.curdir)
         def onError(*args):
-            pywps.debug("Could not remove temporary dir","Error")
+            logging.error("Could not remove temporary dir")
 
         for i in range(len(self.dirsToBeRemoved)):
             dir = self.dirsToBeRemoved[0]
