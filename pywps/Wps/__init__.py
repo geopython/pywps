@@ -2,8 +2,8 @@
 Wps Request
 -----------
 """
-# Author:	Jachym Cepicky
-#        	http://les-ejk.cz
+# Author:       Jachym Cepicky
+#               http://les-ejk.cz
 #               jachym at les-ejk dot cz
 # Lince:
 #
@@ -112,8 +112,8 @@ class Request:
 
         self.templateVersionDirectory = self.wps.inputs["version"].replace(".","_")
 
-	if os.name == "nt" or os.name == "java":
-		self.precompile = 0
+        if os.name == "nt" or os.name == "java":
+            self.precompile = 0
 
         # Templates can be stored in other directory
         templates = Templates.__path__[0]
