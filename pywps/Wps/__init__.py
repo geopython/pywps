@@ -167,7 +167,10 @@ class Request:
             sys.path.insert(0,dirname)
             
             # import the main directory for processes
-            processSources =  __import__(os.path.split(dirname)[-1])
+            try:
+                processSources =  __import__(os.path.split(dirname)[-1])
+            except ImportError,e:
+                raise NoApplicableCode(e)
 
             # for each file within the directory - module within the
             # package, try to import it as well
