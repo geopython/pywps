@@ -1,9 +1,15 @@
+"""Processes for testing purposes"""
+
 from pywps.Process import WPSProcess
 class NoInputsProcess(WPSProcess):
+    """This process has no inputs and no outputs"""
     def __init__(self):
         WPSProcess.__init__(self, identifier = "noinputsprocess",title="No inputs")
 
 class LiteralProcess(WPSProcess):
+    """This process defines several types of literal type of in- and
+    outputs"""
+
     def __init__(self):
         WPSProcess.__init__(self, identifier = "literalprocess",
             title="Literal process")
@@ -17,6 +23,15 @@ class LiteralProcess(WPSProcess):
 
         self.floatIn = self.addLiteralInput(identifier="float",
                                                  title="Float data in",
+                                                 type = type(0.0))
+
+        self.zeroInDefault = self.addLiteralInput(identifier="zerodefault",
+                                                 title="Zero data input",
+                                                 default=0.0,
+                                                 type = type(0.0))
+
+        self.zeroInSet = self.addLiteralInput(identifier="zeroset",
+                                                 title="Zero data input",
                                                  type = type(0.0))
 
         self.intOut = self.addLiteralOutput(identifier="int",
@@ -33,6 +48,8 @@ class LiteralProcess(WPSProcess):
         self.floatOut.setValue(self.floatIn.getValue())
 
 class ComplexProcess(WPSProcess):
+    """This process defines raster and vector data in- and outputs"""
+
     def __init__(self):
         WPSProcess.__init__(self, identifier = "complexprocess",
             title="Complex process",
@@ -68,6 +85,8 @@ class ComplexProcess(WPSProcess):
         return
 
 class BBoxProcess(WPSProcess):
+    """This process defines bounding box in- and outputs"""
+
     def __init__(self):
         WPSProcess.__init__(self, identifier = "bboxprocess",title="BBox process")
 
@@ -78,6 +97,8 @@ class BBoxProcess(WPSProcess):
         self.bboxout.setValue(self.bboxin.value.coords)
 
 class AssyncProcess(WPSProcess):
+    """This process runs in assynchronous way"""
+
     def __init__(self):
         WPSProcess.__init__(self, identifier =
                 "assyncprocess",title="Assynchronous process",
