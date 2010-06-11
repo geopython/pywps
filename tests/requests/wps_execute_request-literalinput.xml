@@ -28,5 +28,11 @@
                     <wps:LiteralData>1.1</wps:LiteralData>
                 </wps:Data>
             </wps:Input>
+            <wps:Input>
+                <ows:Identifier>zeroset</ows:Identifier>
+                <wps:Data>
+                    <wps:LiteralData>0</wps:LiteralData>
+                </wps:Data>
+            </wps:Input>
         </wps:DataInputs>
 </wps:Execute>

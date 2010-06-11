@@ -43,13 +43,14 @@ class Post(PostParser):
     def parse(self,document, initInputs=None):
         """ Parse given XML document """
 
+
         if initInputs:
             self.inputs = initInputs
 
         self.document = document  # input DOM
-
-        firstChild = self.getFirstChildNode(self.document)  # no comments or
+        firstChild = self.isSoapFirstChild(self.document)  # no comments or
                                                             # white spaces
+
         self.nameSpace = firstChild.namespaceURI    # document namespace
         self.nameSpace = pywps.WPS_NAMESPACE
         self.owsNameSpace = pywps.OWS_NAMESPACE

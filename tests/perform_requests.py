@@ -104,7 +104,7 @@ class RequestGetTestCase(unittest.TestCase):
         """Test if Execute with LiteralInput and Output is executed"""
         getpywps = pywps.Pywps(pywps.METHOD_GET)
         postpywps = pywps.Pywps(pywps.METHOD_POST)
-        getinputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=literalprocess&datainputs=[int=1;string=spam;float=1.1]")
+        getinputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=literalprocess&datainputs=[int=1;string=spam;float=1.1;zeroset=0.0]")
         executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-literalinput.xml"))
         postinputs = postpywps.parseRequest(executeRequestFile)
 

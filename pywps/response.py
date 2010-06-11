@@ -14,6 +14,7 @@ from sys import stderr as STDERR
 import re
 from pywps import Exceptions
 from os import name as OSNAME
+from pywps import Soap 
 
 EMPTYPARAMREGEX = re.compile('( \w+="")|( \w+="None")')
 

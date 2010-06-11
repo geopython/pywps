@@ -934,6 +934,9 @@ class Execute(Request):
                         if not output.projection:
                             from osgeo import gdal
                             dataset = gdal.Open(output.value)
+                            if not dataset:
+                                from osgeo import ogr
+                                dataset = ogr.Open(output.value)
                             output.projection = dataset.GetProjection()
                         if not output.projection:
                             output.projection = self.mapObj.getProjection()

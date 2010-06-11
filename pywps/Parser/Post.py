@@ -103,15 +103,9 @@ class Post(Parser):
             except xml.parsers.expat.ExpatError,e:
                 raise pywps.NoApplicableCode(e.message)
         
-        # get first child
-        firstChild = self.getFirstChildNode(self.document)
 
-        # SOAP ??
-        if Soap.isSoap(firstChild):
-            soapCls = Soap.SOAP(firstChild)
-            firstChild = soapCls.getNode(Soap.soap_env_NS[soapCls.nsIndex],"Body")
-            firstChild = self.getFirstChildNode(firstChild)
-            self.isSoap = True
+        # get first child
+        firstChild = self.isSoapFirstChild(self.document)
 
         # check service name
         self.checkService(firstChild)
@@ -224,3 +218,19 @@ class Post(Parser):
             maxFileSize = int(maxFileSize)
         return maxFileSize
 
+    def isSoapFirstChild(self,document):
+        """Return first child of the document, if it is SOAP request,
+        return first child of the body envelope
+
+        """
+
+        # SOAP ??
+        firstChild = self.getFirstChildNode(document)
+
+        if Soap.isSoap(firstChild):
+            soapCls = Soap.SOAP(firstChild)
+            firstChild = soapCls.getNode(Soap.soap_env_NS[soapCls.nsIndex],"Body")
+            firstChild = self.getFirstChildNode(firstChild)
+            self.isSoap = True
+
+        return firstChild

@@ -115,18 +115,18 @@ faster in some cases.
 
 2 - Add this to your site configuration file::
 
-        <Directory /var/www/wps>
-            SetEnv PYWPS_PROCESSES /usr/local/wps/processes
-            SetEnv PYWPS_CFG /usr/local/wps/pywps.cfg
-            SetHandler python-program
-            PythonHandler pywps
-            PythonDebug On
-            PythonPath "sys.path+['/usr/local/pywps-VERSION/']"
-            PythonAutoReload On
-        </Directory>
+            <Directory /var/www/wps>
+                SetEnv PYWPS_PROCESSES /usr/local/wps/processes
+                SetEnv PYWPS_CFG /usr/local/wps/pywps.cfg
+                SetHandler python-program
+                PythonHandler pywps
+                PythonDebug On
+                PythonPath "sys.path+['/usr/local/pywps-VERSION/']"
+                PythonAutoReload On
+            </Directory>
 
-    or you can copy :file:`resources/.htaccess` file to `/var/www/wps` --
-    depends, what you prefer or the system administrator allows you to do.
+or you can copy :file:`resources/.htaccess` file to `/var/www/wps` --
+depends, what you prefer or the system administrator allows you to do.
 
 3 - Copy :file:`resources/pywps.py` to :file:`/var/www/wps`
 
@@ -149,7 +149,7 @@ And one special file:
     file :file:`default.cfg` in directory :file:`pywps`, located in PyWPS
     install location. This is the default configuration file.
 
-    ..note:: Never rewrite or remove this file. Use it onlyas template for
+    .. note:: Never rewrite or remove this file. Use it onlyas template for
         your custom configuration files.
 
 Local PyWPS configuration file

@@ -83,7 +83,7 @@ class SOAP:
     def getResponse(self,document):
         """Wrap document into soap envelope"""
         # very primitive, but works
-        document = document.replace("<?xml version=\"1.0\" encoding=\"utf-8\"?>","")
+        document = document.__str__().replace("<?xml version=\"1.0\" encoding=\"utf-8\"?>","")
         return SOAP_ENVELOPE.replace("$SOAPBODY$",document)
 
 

@@ -49,10 +49,10 @@ MapServer
 R  - http://www.r-project.org - is a language and environment
     for statistical computing and graphics.
 
+.. quick-and-dirty:
 ====================================
 Installation the quick 'n' dirty way
 ====================================
-:label:`Quick and dirty way`
 For installing PyWPS to your server simply unpack the archive to some
 directory. You can also use current repository version.::
 
@@ -110,11 +110,14 @@ Anyway, you have to run it in command line::
     $ ./cgiwps.py
 
 And you should get result like this (which is a mixture of standard output
-and standard error)::
+and standard error):
 
-    Content-type: text/xml
+.. code-block:: xml
+
 
     PyWPS NoApplicableCode: Locator: None; Value: No query string found.
+    Content-type: text/xml
+
     <?xml version="1.0" encoding="utf-8"?>
     <ExceptionReport version="1.0.0" xmlns="http://www.opengis.net/ows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <Exception exceptionCode="NoApplicableCode">
