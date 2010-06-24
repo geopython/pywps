@@ -28,7 +28,6 @@ import sys
 
 called = 0
 
-
 class WPSException(Exception):
     """WPSException should be base class for all exceptions
     """
@@ -40,8 +39,9 @@ class WPSException(Exception):
         # formulate XML
         self.document = Document()
         self.ExceptionReport = self.document.createElementNS("http://www.opengis.net/ows","ExceptionReport")
-        self.ExceptionReport.setAttribute("xmlns","http://www.opengis.net/ows")
+        self.ExceptionReport.setAttribute("xmlns","http://www.opengis.net/ows/1.1")
         self.ExceptionReport.setAttribute("xmlns:xsi","http://www.w3.org/2001/XMLSchema-instance")
+        self.ExceptionReport.setAttribute("xsi:schemaLocation","http://www.opengis.net/ows/1.1 http://schemas.opengis.net/ows/1.1.0/owsExceptionReport.xsd")
         self.ExceptionReport.setAttribute("version","1.0.0")
         self.document.appendChild(self.ExceptionReport)
 
