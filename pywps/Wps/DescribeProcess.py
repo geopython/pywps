@@ -91,8 +91,14 @@ class DescribeProcess(Request):
                 processData["Profiles"] = profiles
             if process.wsdl:
                 processData["wsdl"] = process.wsdl
-            processData["store"] = process.storeSupported
-            processData["status"] = process.statusSupported
+            if process.storeSupported == True:
+                processData["store"] = 'true'
+            else:
+                processData["store"] = 'false'
+            if process.statusSupported == True:
+                processData["status"] = 'true'
+            else:
+                processData["status"] = 'false'
             if process.version:
                 processData["processversion"] = process.version
 
