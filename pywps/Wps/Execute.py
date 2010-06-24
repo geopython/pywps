@@ -212,7 +212,7 @@ class Execute(Request):
         self.process = None
 
         # initialization
-        self.statusTime = time.time()
+        self.statusTime = time.localtime()
         self.pid = os.getpid()
         self.status = None
         self.id = self.makeSessionId()
@@ -615,8 +615,8 @@ class Execute(Request):
         :param exceptioncode: eventually exception
         :param locator: where the problem occurred
         """
-        self.statusTime = time.time()
-        self.templateProcessor.set("statustime", time.ctime(self.statusTime))
+        self.statusTime = time.localtime()
+        self.templateProcessor.set("statustime", time.strftime('%Y-%m-%dT%H:%M:%SZ', self.statusTime))
         self.status = status
         if statusMessage != 0: self.statusMessage = statusMessage
         if percent != 0: self.percent = percent
