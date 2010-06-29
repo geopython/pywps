@@ -23,13 +23,13 @@ WPS WSDL request handler
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-from Response import Response
-from htmltmpl import TemplateError
+from pywps.Wps import Request
+from pywps.Template import TemplateError
 import os,types
 import pywps
 from pywps import config
 
-class Wsdl(Response):
+class Wsdl(Request):
     """
     """
 
@@ -39,13 +39,7 @@ class Wsdl(Response):
            self
            wps   - parent WPS instance
         """
-        Response.__init__(self,wps)
-
-        try:
-            self.template = self.templateManager.prepare(self.templateFile)
-        except TemplateError,e:
-            self.cleanEnv()
-            raise self.wps.exceptions.NoApplicableCode(e.__str__())
+        Request.__init__(self,wps)
 
         #
         # global variables
@@ -59,7 +53,7 @@ class Wsdl(Response):
         #
         #self.templateProcessor.set("Processes",self.processesDescription())
 
-        self.response = self.templateProcessor.process(self.template)
+        self.response = self.templateProcessor.__str__()
 
         return
 

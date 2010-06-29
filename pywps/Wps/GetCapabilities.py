@@ -157,7 +157,7 @@ class GetCapabilities(Request):
                 if process.metadata:
                     metadata=[]
                     for meta in process.metadata:
-                        metadata.append({"metadatatitle":meta})
+                        metadata.append({"metadata":meta})
                     processData["Metadata"] = metadata
                 if process.profile:
                     profiles=[]

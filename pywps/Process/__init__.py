@@ -115,11 +115,11 @@ class WPSProcess:
     :type title: string
     :param abstract: process description
     :type abstract: string
-    :param metadata: List of additional metadata. See http://www.opengeospatial.org/standards/common, table 32 on page 65
+    :param metadata: List of additional metadata references. See http://www.opengeospatial.org/standards/common, table 32 on page 65
 
            Example::
             
-                ["foo":"bar"]
+                ["http://bnhelp.cz/metadata/micka_main.php?ak=detail&uuid=32e80880-c3b0-11dc-8641-873e117140a9"]
 
     :param profile: profile URN
     :type profile: [string]
@@ -145,7 +145,7 @@ class WPSProcess:
         
     .. attribute:: metadata
     
-        Metadata object
+        List of references to metadata resources
         
     .. attribute:: title
         
@@ -343,12 +343,12 @@ class WPSProcess:
                     default: types.IntType
         :type type: `types.TypeType`
         :param default: default value of this input
-        :param metadata: List of additional metadata
-        
-            Example:: 
-        
-                {"foo":"bar"}
+        :param metadata: List of additional metadata references. See http://www.opengeospatial.org/standards/common, table 32 on page 65
 
+           Example::
+            
+                {"Title of metadata link":"http://bnhelp.cz/metadata/micka_main.php?ak=detail&uuid=32e80880-c3b0-11dc-8641-873e117140a9"}
+        
             default: None
 
         :returns: :class:`pywps.Process.InAndOutputs.LiteralInput`
@@ -389,12 +389,14 @@ class WPSProcess:
         :param maxmegabites: Maximum input file size. Can not be bigger, as
                 defined in global configuration file.
 
-        :param metadata: List of additional metadata
-        
-            Example:: 
-        
-                {"foo":"bar"}
+        :param metadata: List of additional metadata references. See http://www.opengeospatial.org/standards/common, table 32 on page 65
 
+           Example::
+            
+                ["http://bnhelp.cz/metadata/micka_main.php?ak=detail&uuid=32e80880-c3b0-11dc-8641-873e117140a9"]
+        
+            default: None
+        
         :returns: :class:`pywps.Process.InAndOutputs.ComplexInput`
         """
 
@@ -417,8 +419,8 @@ class WPSProcess:
         :type title: string
         :param abstract: input description.
         :type abstract: string
-        :param metadata: List of {key:value} pairs.
-        :type metadata: object
+        :param metadata: List of metadata references.
+        :type metadata: list
         :param minOccurs: minimum number of occurrences.
         :type maxOccurs: integer
         :param maxOccurs: maximum number of occurrences.
@@ -442,7 +444,14 @@ class WPSProcess:
 
         :param identifier: output identifier
         :param title: output title
-        :param metadata: List of {key:value} pairs.
+        :param metadata: List of additional metadata references. See http://www.opengeospatial.org/standards/common, table 32 on page 65
+
+           Example::
+            
+                ["http://bnhelp.cz/metadata/micka_main.php?ak=detail&uuid=32e80880-c3b0-11dc-8641-873e117140a9"]
+        
+            default: None
+
         :param formats: List of dictionaries according to table 23 (page
             25) of the standard
             

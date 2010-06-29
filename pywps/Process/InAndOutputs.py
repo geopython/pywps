@@ -34,7 +34,7 @@ class Input:
     :param identifier: input identifier
     :param title: input title
     :param abstract: input description. 
-    :param metadata: List of {key:value} pairs. 
+    :param metadata: List of metadata references. 
     :param minOccurs: minimum number of occurrences. 
     :param maxOccurs: maximum number of occurrences. 
     :param type: one of "LiteralValue", "ComplexValue" or "BoundingBoxValue"
@@ -53,7 +53,7 @@ class Input:
 
     .. attribute :: metadata 
 
-        input metadata
+        input metadata reference
 
     .. attribute :: minOccurs 
 
@@ -298,7 +298,7 @@ class ComplexInput(Input):
     :param identifier: input identifier
     :param title: input title
     :param abstract: input description. 
-    :param metadata: List of {key:value} pairs. 
+    :param metadata: List of metadata references. 
     :param minOccurs: minimum number of occurencies. 
     :param maxOccurs: maximum number of occurencies. 
     :param formats: List of objects according to table 23 (page 25). E.g.
@@ -554,7 +554,7 @@ class BoundingBoxInput(Input):
     :param identifier: input identifier
     :param title: input title
     :param abstract: input description. 
-    :param metadata: List of {key:value} pairs. 
+    :param metadata: List of metadata references. 
     :param minOccurs: minimum number of occurrences. 
     :param maxOccurs: maximum number of occurrences. 
     :param crss: List of strings supported coordinate systems.
@@ -690,7 +690,7 @@ class Output:
     :param identifier: input identifier
     :param title: input title
     :param abstract: input description. 
-    :param metadata: List of {key:value} pairs. 
+    :param metadata: List of metadata references. 
     :param type: one of "LiteralValue", "ComplexValue"  or "BoundingBoxValue"
     :param asReference:  whether this output will be given back as
             reference or as file
@@ -753,7 +753,7 @@ class LiteralOutput(Output):
     :param identifier: input identifier
     :param title: input title
     :param abstract: input description. Default: None
-    :param metadata: List of {key:value}s additional metadata
+    :param metadata: List of meatadata references
     :param uoms: List of string values units
     :param dataType: :class:`types.TypeType` value type, e.g. Integer, String, etc. you
                 can uses the "types" module of python.
@@ -783,7 +783,7 @@ class ComplexOutput(Output):
     
     :param identifier: output identifier
     :param title: output title
-    :param metadata: List of {key:value} pairs. 
+    :param metadata: List of metadata references
     :param formats: List of format structure according to table 23 (page
         25). E.g.::
 

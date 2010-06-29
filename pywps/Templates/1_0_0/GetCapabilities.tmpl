@@ -109,7 +109,7 @@
 			<ows:Abstract><TMPL_VAR abstract></ows:Abstract>
                         </TMPL_IF>
                         <TMPL_LOOP Metadata>
-			<ows:Metadata xlink:title="<TMPL_VAR metadatatitle>" />
+                        <ows:Metadata xlink:href="<TMPL_VAR metadata>" />
                         </TMPL_LOOP>
                         <TMPL_LOOP Profiles>
 			<wps:Profile><TMPL_VAR profile></wps:Profile>

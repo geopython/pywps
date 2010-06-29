@@ -49,10 +49,7 @@ class Post(PostParser):
         acceptedVersionsNodes = None
         versionNode = None
 
-        firstChild = self.getFirstChildNode(self.document)
-        
-        if self.isSoap:
-            firstChild = self.getFirstChildNode(self.document)  # no comments or
+        firstChild = self.isSoapFirstChild(self.document)  # no comments or
         owsNameSpace = pywps.OWS_NAMESPACE
         wpsNameSpace = pywps.WPS_NAMESPACE
 

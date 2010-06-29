@@ -43,10 +43,8 @@ class Post(PostParser):
 
         self.document = document  # input DOM
 
-        firstChild = self.getFirstChildNode(self.document)
+        firstChild = self.isSoapFirstChild(self.document)  # no comments or
 
-        if self.isSoap:
-            firstChild = self.getFirstChildNode(self.document)  # no comments or
         owsNameSpace = pywps.OWS_NAMESPACE
         identifiers = []
         identifierNode = None

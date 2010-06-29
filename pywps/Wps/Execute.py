@@ -590,7 +590,7 @@ class Execute(Request):
         if self.process.metadata:
             metadata=[]
             for meta in self.process.metadata:
-                metadata.append({"metadatatitle":meta})
+                metadata.append({"metadata":meta})
             self.templateProcessor.set("Metadata", metadata)
         if self.process.profile:
             profiles=[]
