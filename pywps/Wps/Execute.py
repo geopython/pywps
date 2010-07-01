@@ -472,12 +472,13 @@ class Execute(Request):
                     input.maxFileSize = maxFileSize
 
             try:
-                for inp in self.wps.inputs["datainputs"]:
-                    if unicode(inp["identifier"]) == unicode(identifier):
-                        resp = input.setValue(inp)
-                        if resp:
-                            self.cleanEnv()
-                            raise pywps.InvalidParameterValue(resp)
+                if self.wps.inputs["datainputs"]:
+                    for inp in self.wps.inputs["datainputs"]:
+                        if unicode(inp["identifier"]) == unicode(identifier):
+                            resp = input.setValue(inp)
+                            if resp:
+                                self.cleanEnv()
+                                raise pywps.InvalidParameterValue(resp)
             except KeyError,e:
                 pass
 
@@ -588,10 +589,7 @@ class Execute(Request):
         if self.process.abstract:
             self.templateProcessor.set("abstract", self.process.i18n(self.process.abstract))
         if self.process.metadata:
-            metadata=[]
-            for meta in self.process.metadata:
-                metadata.append({"metadata":meta})
-            self.templateProcessor.set("Metadata", metadata)
+            self.templateProcessor.set("Metadata", self.formatMetadata(self.process))
         if self.process.profile:
             profiles=[]
             if type(self.process.profile) == types.ListType:

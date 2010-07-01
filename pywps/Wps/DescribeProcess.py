@@ -77,10 +77,7 @@ class DescribeProcess(Request):
             if process.abstract:
                 processData["abstract"] = process.i18n(process.abstract)
             if process.metadata:
-                metadata=[]
-                for meta in process.metadata:
-                    metadata.append({"metadata":meta})
-                processData["Metadata"] = metadata
+                processData["Metadata"] = self.formatMetadata(process)
             if process.profile:
                 profiles=[]
                 if type(process.profile) == types.ListType:

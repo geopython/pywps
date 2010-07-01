@@ -12,7 +12,11 @@ class LiteralProcess(WPSProcess):
 
     def __init__(self):
         WPSProcess.__init__(self, identifier = "literalprocess",
-                title="Literal process",metadata=["http://foo/bar","http://bar/foo"])
+                title="Literal process",
+                metadata=[{"title":"Foobar","href":"http://foo/bar"},
+                          {"title":"Barfoo","href":"http://bar/foo"},
+                          {"title":"Literal process"},
+                          {"href":"http://foobar/"}])
 
         self.intIn = self.addLiteralInput(identifier="int",
                                                  title="Integer data in")

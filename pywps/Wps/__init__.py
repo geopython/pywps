@@ -370,3 +370,33 @@ class Request:
             else:
                 return processes
 
+    def formatMetadata(self,process):
+        """Create structure suitble for template form process.metadata
+
+        :param process: :attr:`pywps.Process`
+        :returns: hash with formated metadata
+        """
+
+        metadata = process.metadata
+        if type(metadata) == type({}):
+            metadata = [metadata]
+
+        metadatas = []
+        for metad in metadata:
+            metaStructure = {}
+
+            if metad.has_key("title"):
+                metaStructure["title"] = metad["title"]
+            else:
+                metaStructure["title"] = process.title
+
+            if metad.has_key("href"):
+                metaStructure["href"] = metad["href"]
+            else:
+                metaStructure["href"] = config.getConfigValue("wps","serveraddress")+\
+                        "?service=WPS&request=DescribeProcess&version="+config.getConfigValue("wps","version")+\
+                        "&identifier="+ process.identifier
+
+            metadatas.append(metaStructure)
+
+        return metadatas

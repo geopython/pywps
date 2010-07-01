@@ -115,11 +115,17 @@ class WPSProcess:
     :type title: string
     :param abstract: process description
     :type abstract: string
-    :param metadata: List of additional metadata references. See http://www.opengeospatial.org/standards/common, table 32 on page 65
+    :param metadata: List of additional metadata references. See http://www.opengeospatial.org/standards/common, table 32 on page 65, http://schemas.opengis.net/xlink/1.0.0/xlinks.xsd
 
            Example::
             
-                ["http://bnhelp.cz/metadata/micka_main.php?ak=detail&uuid=32e80880-c3b0-11dc-8641-873e117140a9"]
+                [
+                    {
+                     "title": "Title",
+                     "href": "http://bnhelp.cz/metadata/micka_main.php?ak=detail&uuid=32e80880-c3b0-11dc-8641-873e117140a9",
+                     ... : ...
+                     }
+                ]
 
     :param profile: profile URN
     :type profile: [string]
@@ -343,11 +349,17 @@ class WPSProcess:
                     default: types.IntType
         :type type: `types.TypeType`
         :param default: default value of this input
-        :param metadata: List of additional metadata references. See http://www.opengeospatial.org/standards/common, table 32 on page 65
+        :param metadata: List of additional metadata references. See http://www.opengeospatial.org/standards/common, table 32 on page 65, http://schemas.opengis.net/xlink/1.0.0/xlinks.xsd
 
-           Example::
-            
-                {"Title of metadata link":"http://bnhelp.cz/metadata/micka_main.php?ak=detail&uuid=32e80880-c3b0-11dc-8641-873e117140a9"}
+            Example::
+                
+                    [
+                        {
+                        "title": "Title",
+                        "href": "http://bnhelp.cz/metadata/micka_main.php?ak=detail&uuid=32e80880-c3b0-11dc-8641-873e117140a9",
+                        ... : ...
+                        }
+                    ]
         
             default: None
 
@@ -389,12 +401,18 @@ class WPSProcess:
         :param maxmegabites: Maximum input file size. Can not be bigger, as
                 defined in global configuration file.
 
-        :param metadata: List of additional metadata references. See http://www.opengeospatial.org/standards/common, table 32 on page 65
+        :param metadata: List of additional metadata references. See http://www.opengeospatial.org/standards/common, table 32 on page 65, http://schemas.opengis.net/xlink/1.0.0/xlinks.xsd
 
-           Example::
-            
-                ["http://bnhelp.cz/metadata/micka_main.php?ak=detail&uuid=32e80880-c3b0-11dc-8641-873e117140a9"]
-        
+            Example::
+                
+                    [
+                        {
+                        "title": "Title",
+                        "href": "http://bnhelp.cz/metadata/micka_main.php?ak=detail&uuid=32e80880-c3b0-11dc-8641-873e117140a9",
+                        ... : ...
+                        }
+                    ]
+
             default: None
         
         :returns: :class:`pywps.Process.InAndOutputs.ComplexInput`
@@ -444,12 +462,18 @@ class WPSProcess:
 
         :param identifier: output identifier
         :param title: output title
-        :param metadata: List of additional metadata references. See http://www.opengeospatial.org/standards/common, table 32 on page 65
+        :param metadata: List of additional metadata references. See http://www.opengeospatial.org/standards/common, table 32 on page 65, http://schemas.opengis.net/xlink/1.0.0/xlinks.xsd
 
-           Example::
-            
-                ["http://bnhelp.cz/metadata/micka_main.php?ak=detail&uuid=32e80880-c3b0-11dc-8641-873e117140a9"]
-        
+            Example::
+                
+                    [
+                        {
+                        "title": "Title",
+                        "href": "http://bnhelp.cz/metadata/micka_main.php?ak=detail&uuid=32e80880-c3b0-11dc-8641-873e117140a9",
+                        ... : ...
+                        }
+                    ]
+
             default: None
 
         :param formats: List of dictionaries according to table 23 (page
