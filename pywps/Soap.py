@@ -26,8 +26,8 @@ SOAP wrapper
 
 from xml.dom import minidom
 
-soap_env_NS = ("http://www.w3.org/2003/05/soap-envelope","http://schemas.xmlsoap.org/soap/envelope/")
-soap_enc_NS = ("http://www.w3.org/2003/05/soap-encoding","http://schemas.xmlsoap.org/soap/encoding/")
+soap_env_NS = ["http://www.w3.org/2003/05/soap-envelope","http://schemas.xmlsoap.org/soap/envelope/"]
+soap_enc_NS = ["http://www.w3.org/2003/05/soap-encoding","http://schemas.xmlsoap.org/soap/encoding/"]
 
 SOAP_ENVELOPE="""<?xml version="1.0" encoding="UTF-8"?>
 <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
@@ -68,7 +68,6 @@ class SOAP:
                 self.document = minidom.parseString(document)
             else:
                 self.document = document
-
             self.nsIndex = soap_env_NS.index(document.namespaceURI)
 
     def getNode(self,namespace,nodeName):
@@ -85,5 +84,4 @@ class SOAP:
         # very primitive, but works
         document = document.__str__().replace("<?xml version=\"1.0\" encoding=\"utf-8\"?>","")
         return SOAP_ENVELOPE.replace("$SOAPBODY$",document)
-
 
