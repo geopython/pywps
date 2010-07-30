@@ -394,8 +394,8 @@ class Request:
                 metaStructure["href"] = metad["href"]
             else:
                 metaStructure["href"] = config.getConfigValue("wps","serveraddress")+\
-                        "?service=WPS&request=DescribeProcess&version="+config.getConfigValue("wps","version")+\
-                        "&identifier="+ process.identifier
+                        "?service=WPS&amp;request=DescribeProcess&amp;version="+config.getConfigValue("wps","version")+\
+                        "&amp;identifier="+ process.identifier
 
             metadatas.append(metaStructure)
 
