@@ -79,7 +79,11 @@
         <wps:Output mimeType="<TMPL_VAR mimetype>" encoding="<TMPL_VAR encoding>" schema="<TMPL_VAR schema>" asReference="<TMPL_VAR asreference>">
         </TMPL_IF>
         <TMPL_IF literaldata>
+        <TMPL_IF uom>
         <wps:Output <TMPL_VAR uom>>
+        <TMPL_ELSE>
+        <wps:Output>
+        </TMPL_IF>
         </TMPL_IF>
         <TMPL_IF bboxdata>
         <wps:Output>
