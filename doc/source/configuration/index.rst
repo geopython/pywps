@@ -75,6 +75,10 @@ your cgi-bin directory and edit the variables, which are set there::
 .. note:: Windows users, you have to script some similar script as .bat
     file or in python. This example is written as SHELL script.
 
+.. note:: This script is to be used with combination of Apache only. If you
+    want to run `wps.py` from command line, use not this script, but the
+    program itself.
+
 The file can look like this::
 
     #!/bin/sh
