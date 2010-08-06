@@ -830,6 +830,7 @@ class Execute(Request):
                 templateOutput["title"] = self.process.i18n(output.title)
                 templateOutput["abstract"] = self.process.i18n(output.abstract)
 
+
                 # Reference
                 if output.asReference:
                     templateOutput = self._asReferenceOutput(templateOutput, output)
@@ -904,11 +905,11 @@ class Execute(Request):
         if output.type == "LiteralValue":
             f = open(os.path.join(
                         config.getConfigValue("server","outputPath"),
-                                output.identifier+"-"+self.pid),"w")
-            f.write(output.value)
+                                "%s-%s" % (output.identifier,self.pid)),"w")
+            f.write(str(output.value))
             f.close()
             templateOutput["reference"] = config.getConfigValue("server","outputUrl")+\
-                    "/"+output.identifier+"-"+str(self.pid)
+                    "/"+"%s-%s" % (output.identifier, self.pid)
         # complex value
         else:
             outName = os.path.basename(output.value)
@@ -982,9 +983,9 @@ class Execute(Request):
                         logging.warning("GDAL could not be loaded, mapserver not supported")
 
  
-        templateOutput["mimetype"] = output.format["mimeType"]
-        templateOutput["schema"] = output.format["encoding"]
-        templateOutput["encoding"] = output.format["schema"]
+            templateOutput["mimetype"] = output.format["mimeType"]
+            templateOutput["schema"] = output.format["encoding"]
+            templateOutput["encoding"] = output.format["schema"]
 
         return templateOutput
 
