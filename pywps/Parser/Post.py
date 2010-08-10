@@ -3,8 +3,8 @@ Post
 ----
 """
 
-# Author:	Jachym Cepicky
-#        	http://les-ejk.cz
+# Author:    Jachym Cepicky
+#            http://les-ejk.cz
 # Lince:
 #
 # Web Processing Service implementation
@@ -180,7 +180,8 @@ class Post(Parser):
             self.inputs["request"] = "execute"
         else:
             raise self.wps.Exceptions.InvalidParameterValue("request")
-
+    
+    
     def getFirstChildNode(self,document):
         """Find first usable child node of the document (no comments)"""
 
@@ -218,6 +219,7 @@ class Post(Parser):
             maxFileSize = int(maxFileSize)
         return maxFileSize
 
+
     def isSoapFirstChild(self,document):
         """Return first child of the document, if it is SOAP request,
         return first child of the body envelope
@@ -226,11 +228,19 @@ class Post(Parser):
 
         # SOAP ??
         firstChild = self.getFirstChildNode(document)
-
+        
         if Soap.isSoap(firstChild):
             soapCls = Soap.SOAP(firstChild)
-            firstChild = soapCls.getNode(Soap.soap_env_NS[soapCls.nsIndex],"Body")
-            firstChild = self.getFirstChildNode(firstChild)
+            #firstChild = soapCls.getNode(Soap.soap_env_NS[soapCls.nsIndex],"Body")
+            firstChild=soapCls.getWPSContent()
+            
+            #pywps.debug(firstChild.toxml())
+            #firstChild = self.getFirstChildNode(firstChild)
             self.isSoap = True
+            
+            self.soapVersion=soapCls.getSOAPVersion()
 
         return firstChild
+
+
+
