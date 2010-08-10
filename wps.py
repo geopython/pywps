@@ -35,8 +35,8 @@ $Id: wps.py 871 2009-11-23 14:25:09Z jachym $
 __version__ = "3.0-svn"
 
 
-# Author:	Jachym Cepicky
-#        	http://les-ejk.cz
+# Author:    Jachym Cepicky
+#            http://les-ejk.cz
 # License:
 #
 # Web Processing Service implementation
@@ -94,7 +94,7 @@ try:
         if response:
             # print only to standard out
             pywps.response.response(wps.response,
-                    sys.stdout,wps.parser.isSoap,
+                    sys.stdout,wps.parser.soapVersion,wps.parser.isSoap,
                     wps.request.contentType)
 except WPSException,e:
     traceback.print_exc(file=pywps.logFile)
