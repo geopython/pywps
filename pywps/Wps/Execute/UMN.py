@@ -163,6 +163,9 @@ class UMN:
             myLayerObj.connection = output.value
             myLayerObj.setMetaData("wfs_title", output.title)
 
+            myClassObj=classObj(myLayerObj)
+            myStyleObj=styleObj(myClassObj)
+
             myLayerObj.setMetaData("gml_featureid","ID")
             myLayerObj.setMetaData("gml_include_items","all")
 
@@ -172,10 +175,13 @@ class UMN:
 
             if geometry.GetGeometryName().lower() == "point":
                 myLayerObj.type = MS_LAYER_POINT
+                myStyleObj.color.setRGB(0,0,0)
             elif geometry.GetGeometryName().lower() == "line":
                 myLayerObj.type = MS_LAYER_LINE
+                myStyleObj.color.setRGB(0,0,0)
             elif geometry.GetGeometryName().lower() == "polygon":
                 myLayerObj.type = MS_LAYER_POLYGON
+                myStyleObj.outlinecolor.setRGB(0,0,0)
         if self.process.abstract:
             myLayerObj.setMetaData("group_abstract",self.process.abstract)
         if output.abstract:
