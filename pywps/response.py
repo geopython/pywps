@@ -18,7 +18,7 @@ from pywps import Soap
 
 EMPTYPARAMREGEX = re.compile('( \w+="")|( \w+="None")')
 
-def response(response,targets,isSoap=False,contentType="application/xml"):
+def response(response,targets,soapVersion,isSoap=False,contentType="application/xml"):
     """
     Print response to files given as input parameter.
 
@@ -38,7 +38,7 @@ def response(response,targets,isSoap=False,contentType="application/xml"):
 
     if isSoap:
         soap = Soap.SOAP()
-        response = soap.getResponse(response)
+        response = soap.getResponse(response,soapVersion)
 
     if isinstance(response,Exceptions.WPSException):
         response = response.__str__()
@@ -103,4 +103,3 @@ def _printResponseJava( resp, response,contentType="application/xml"):
         toClient.println(response.read())
     else:
         toClient.println(response)
-
