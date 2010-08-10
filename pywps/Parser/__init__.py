@@ -5,8 +5,8 @@ Each class in the package is resposible for each type of the request.
 
 """
 
-# Author:	Jachym Cepicky
-#        	http://les-ejk.cz
+# Author:    Jachym Cepicky
+#            http://les-ejk.cz
 # Lince:
 #
 # Web Processing Service implementation
@@ -52,6 +52,7 @@ class Parser:
 
     wps = None
     isSoap = False
+    soapVersion=None
     inputs = None
 
     def __init__(self,wps):
