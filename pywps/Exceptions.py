@@ -38,8 +38,8 @@ class WPSException(Exception):
     def _make_xml(self):
         # formulate XML
         self.document = Document()
-        self.ExceptionReport = self.document.createElementNS("http://www.opengis.net/ows","ExceptionReport")
-        self.ExceptionReport.setAttribute("xmlns","http://www.opengis.net/ows/1.1")
+        self.ExceptionReport = self.document.createElementNS("http://www.opengis.net/ows","ows:ExceptionReport")
+        self.ExceptionReport.setAttribute("xmlns:ows","http://www.opengis.net/ows/1.1")
         self.ExceptionReport.setAttribute("xmlns:xsi","http://www.w3.org/2001/XMLSchema-instance")
         self.ExceptionReport.setAttribute("xsi:schemaLocation","http://www.opengis.net/ows/1.1 http://schemas.opengis.net/ows/1.1.0/owsExceptionReport.xsd")
         self.ExceptionReport.setAttribute("version","1.0.0")
@@ -47,7 +47,7 @@ class WPSException(Exception):
 
         # make exception
 
-        self.Exception = self.document.createElement("Exception")
+        self.Exception = self.document.createElement("ows:Exception")
         self.Exception.setAttribute("exceptionCode",self.code)
 
         if self.locator:
@@ -94,7 +94,7 @@ class NoApplicableCode(WPSException):
         self._make_xml()
         self.message = value
         if value:
-            self.ExceptionText = self.document.createElement("ExceptionText")
+            self.ExceptionText = self.document.createElement("ows:ExceptionText")
             self.ExceptionText.appendChild(self.document.createTextNode(repr(value)))
             self.Exception.appendChild(self.ExceptionText)
             self.value = str(value)
@@ -106,7 +106,7 @@ class VersionNegotiationFailed(WPSException):
         self.locator = None
         self._make_xml()
         if value:
-            self.ExceptionText = self.document.createElement("ExceptionText")
+            self.ExceptionText = self.document.createElement("ows:ExceptionText")
             self.ExceptionText.appendChild(self.document.createTextNode(value))
             self.Exception.appendChild(self.ExceptionText)
             self.value = str(value)
@@ -151,7 +151,7 @@ class ServerError(WPSException):
         except:
             self.locator = None
         self._make_xml()
-        self.ExceptionText = self.document.createElement("ExceptionText")
+        self.ExceptionText = self.document.createElement("ows:ExceptionText")
         self.ExceptionText.appendChild(self.document.createTextNode("General server error"))
         self.Exception.appendChild(self.ExceptionText)
 
