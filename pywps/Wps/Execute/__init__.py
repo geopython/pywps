@@ -35,13 +35,9 @@ import time,os,sys,tempfile,re,types, ConfigParser, base64, traceback
 from shutil import copyfile as COPY
 from shutil import rmtree as RMTREE
 import logging
+import UMN
 
 TEMPDIRPREFIX="pywps-instance"
-
-try:
-    from mapscript import *
-except:
-    pass
 
 class Execute(Request):
     """
@@ -150,14 +146,11 @@ class Execute(Request):
         indicates, if there is any output, which should be returned
         directly (without final xml response document)
 
-    .. attribute :: mapObj
+    .. attribute :: umn
 
-        MapServer Map object, if some output should be returned with help
-        of mapserver.
-
-    .. attribute :: mapFileName
-
-        Name of mapfile, wheter it's going to be stored
+        :class:`pywps.UMN.UMN`
+        
+        UMN MapServer - mapscript handler
 
     """
 
@@ -200,8 +193,8 @@ class Execute(Request):
 
     rawDataOutput = None
 
-    mapObj = None
-    mapFileName = None
+    umn = None
+
 
 
     def __init__(self,wps, processes=None):
@@ -218,6 +211,7 @@ class Execute(Request):
         self.id = self.makeSessionId()
         self.outputFileName = os.path.join(config.getConfigValue("server","outputPath"),self.id+".xml")
         self.statusLocation = config.getConfigValue("server","outputUrl")+"/"+self.id+".xml"
+
 
         # rawDataOutput
         if len(self.wps.inputs["responseform"]["rawdataoutput"])>0:
@@ -250,6 +244,9 @@ class Execute(Request):
 
         # setInput values
         self.initProcess()
+
+        if UMN.mapscript:
+            self.umn = UMN.UMN(self.process)
 
         # check rawdataoutput against process
         if self.rawDataOutput and self.rawDataOutput not in self.process.outputs:
@@ -367,18 +364,13 @@ class Execute(Request):
             # if succeeded
             if self.status == self.succeeded:
 
-                # mapscript support?
-                try:
-                    self._initMapscript()
-                except Exception, e:
-                    logging.info("MapScript could not be loaded, mapserver not supported: %s" %e)
 
                 if not self.rawDataOutput:
                     # fill outputs
                     self.processOutputs()
 
-                    if self.mapObj:
-                        self.mapObj.save(self.mapFileName)
+                    if self.umn:
+                        self.umn.save()
 
                     # Response document
                     self.response = self.templateProcessor.__str__()
@@ -925,97 +917,16 @@ class Execute(Request):
             # mapscript supported and the mapserver should be used for this
             # output
             # redefine the output 
-            if self.mapObj and output.useMapscript:
+            if self.umn and output.useMapscript:
+                owsreference = self.umn.getReference(output)
+                if owsreference:
+                    templateOutput["reference"] = owsreference
 
-                # get projection and bounding box
-                if not output.projection or not output.bbox:
-                    try:
-                        if not output.projection:
-                            from osgeo import gdal
-                            dataset = gdal.Open(output.value)
-                            if not dataset:
-                                from osgeo import ogr
-                                dataset = ogr.Open(output.value)
-                            output.projection = dataset.GetProjection()
-                        if not output.projection:
-                            output.projection = self.mapObj.getProjection()
-                        if not output.bbox:
-                            geotransform = dataset.GetGeoTransform()
-                            output.bbox = (geotransform[0],
-                                        geotransform[3]+geotransform[5]*dataset.RasterYSize,
-                                        geotransform[0]+geotransform[1]*dataset.RasterXSize,
-                                        geotransform[3])
-                            output.width = dataset.RasterXSize
-                            output.height = dataset.RasterYSize
-
-                        myLayerObj = layerObj(self.mapObj)
-                        myLayerObj.setMetaData("wms_title", output.title)
-                        myLayerObj.setMetaData("wcs_label", output.title)
-                        myLayerObj.setMetaData("wfs_title", output.title)
-                        myLayerObj.group = self.process.identifier
-                        myLayerObj.setMetaData("wms_group_title",self.process.title)
-                        if self.process.abstract:
-                            myLayerObj.setMetaData("group_abstract",self.process.abstract)
-                        if output.abstract:
-                            myLayerObj.setMetaData("wms_abstract", output.abstract)
-                            myLayerObj.setMetaData("wcs_abstract", output.abstract)
-                            myLayerObj.setMetaData("wfs_abstract", output.abstract)
-                        myLayerObj.data = output.value
-                        myLayerObj.name = output.identifier
-
-                        if output.projection:
-                            myLayerObj.setProjection("epsg:4326")
-                        if output.bbox:
-                            myLayerObj.setExtent(output.bbox[0],output.bbox[1],output.bbox[2],output.bbox[3])
-
-                        # set the output to be WMS
-                        if output.format["mimeType"].find("tiff") == -1:
-                            templateOutput["reference"] = self._getMapServerWMS(output)
-                            myLayerObj.type = MS_LAYER_RASTER
-                        # make it WFS
-                        elif output.format["mimeType"].find("text")  > -1:
-                            templateOutput["reference"] = self._getMapServerWFS(output)
-                        # make it WCS
-                        else:
-                            myLayerObj.type = MS_LAYER_RASTER
-                            templateOutput["reference"] = self._getMapServerWCS(output)
-                    except ImportError:
-                        logging.warning("GDAL could not be loaded, mapserver not supported")
-
- 
             templateOutput["mimetype"] = output.format["mimeType"]
             templateOutput["schema"] = output.format["encoding"]
             templateOutput["encoding"] = output.format["schema"]
 
         return templateOutput
-
-    def _getMapServerWMS(self,output):
-        """Get the URL for mapserver WMS request of the output"""
-        import urllib2
-        return urllib2.quote(config.getConfigValue("mapserver","mapserveraddress")+
-                "?map="+self.mapFileName+
-                "&SERVICE=WMS"+ "&REQUEST=GetMap"+ "&VERSION=1.3.0"+
-                "&LAYERS="+output.identifier+"&STYLES=default&SRS="+output.projection.replace("+init=","")+
-                "&BBOX=%s,%s,%s,%s&"%(output.bbox[0],output.bbox[1],output.bbox[2],output.bbox[3])+
-                "&WIDTH=%s"%output.width+"&HEIGHT=%s"%output.height+"&FORMAT=%s"%output.format["mimeType"])
-
-    def _getMapServerWCS(self,output):
-        """Get the URL for mapserver WCS request of the output"""
-        import urllib2
-        return urllib2.quote(config.getConfigValue("mapserver","mapserveraddress")+
-                "?map="+self.mapFileName+
-                "&SERVICE=WCS"+ "&REQUEST=GetCoverage"+ "&VERSION=1.0.0"+
-                "&COVERAGE="+output.identifier+"&CRS="+output.projection.replace("+init=","")+
-                "&BBOX=%s,%s,%s,%s&"%(output.bbox[0],output.bbox[1],output.bbox[2],output.bbox[3])+
-                "&WIDTH=%s"%output.width+"&HEIGHT=%s"%output.height+"&FORMAT=%s"%output.format["mimeType"])
-
-    def _getMapServerWFS(self,output):
-        """Get the URL for mapserver WFS request of the output"""
-        import urllib2
-        return urllib2.quote(config.getConfigValue("mapserver","mapserveraddress")+
-                "?map="+self.mapFileName+
-                "&SERVICE=WFS"+ "&REQUEST=GetFeature"+ "&VERSION=1.0.0"+
-                "&TYPENAME="+output.identifier)
 
     def _samefile(self, src, dst):
         # Macintosh, Unix.
@@ -1189,39 +1100,3 @@ class Execute(Request):
 
             self.contentType = output.format["mimeType"]
             self.response = open(outFile,"rb")
-
-
-    def _initMapscript(self):
-        """Create self.mapObj"""
-
-        self.mapObj = mapObj()
-        self.mapObj.setExtent(-180,-90,180,90)
-        self.mapObj.setProjection("+init=epsg:4326")
-        self.mapObj.name = "%s-%s"%(self.process.identifier,self.pid)
-        self.mapObj.setMetaData("ows_title", config.getConfigValue("wps","title"))
-        self.mapObj.setMetaData("wms_abstract", config.getConfigValue("wps","abstract"))
-        self.mapObj.setMetaData("wcs_abstract", config.getConfigValue("wps","abstract"))
-        self.mapObj.setMetaData("wfs_abstract", config.getConfigValue("wps","abstract"))
-        self.mapObj.setMetaData("ows_keywordlist", config.getConfigValue("wps","keywords"))
-        self.mapObj.setMetaData("ows_fees", config.getConfigValue("wps","fees"))
-        self.mapObj.setMetaData("ows_accessconstraints", config.getConfigValue("wps","constraints"))
-        self.mapObj.setMetaData("ows_contactorganization", config.getConfigValue("provider","providerName"))
-        self.mapObj.setMetaData("ows_contactperson", config.getConfigValue("provider","individualName"))
-        self.mapObj.setMetaData("ows_contactposition", config.getConfigValue("provider","positionName"))
-        phone =  config.getConfigValue("provider","phoneVoice")
-        if phone:
-            self.mapObj.setMetaData("ows_contactvoicetelephone", config.getConfigValue("provider","phoneVoice"))
-        phone = config.getConfigValue("provider","phoneFacsimile")
-        if phone:
-            self.mapObj.setMetaData("ows_contactfacsimiletelephone", config.getConfigValue("provider","phoneFacsimile"))
-        self.mapObj.setMetaData("ows_address", config.getConfigValue("provider","deliveryPoint"))
-        self.mapObj.setMetaData("ows_city", config.getConfigValue("provider","city"))
-        self.mapObj.setMetaData("ows_country", config.getConfigValue("provider","country"))
-        self.mapObj.setMetaData("ows_postcode", config.getConfigValue("provider","postalCode"))
-        self.mapObj.setMetaData("ows_contactelectronicmailaddress", config.getConfigValue("provider","electronicMailAddress"))
-        self.mapObj.setMetaData("ows_role", config.getConfigValue("provider","role"))
-
-        self.mapFileName = os.path.join(config.getConfigValue("server","outputPath"),"wps"+str(self.pid)+".map")
-
-        self.mapObj.setMetaData("wms_onlineresource",config.getConfigValue("mapserver","mapserveraddress")+"?map="+self.mapFileName)
-
