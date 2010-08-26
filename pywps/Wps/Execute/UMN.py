@@ -20,12 +20,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+
 from pywps import config
 import os
 import urllib2
 import logging
 
 mapscript=False
+gdal=False
 try:
     from mapscript import *
     mapscript=True
@@ -37,11 +39,13 @@ try:
     from osgeo import gdal
     from osgeo import ogr
     from osgeo import osr
-    mapscript=True
+    gdal=True
 except Exception,e:
-    mapscript=False
+    gdal=False
     logging.info("osgeo package could not be loaded, mapserver not supported: %s" %e)
 
+
+#pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
 
 class UMN:
     """
@@ -86,7 +90,7 @@ class UMN:
 
     def __init__(self,process):
 
-        if mapscript == False:
+        if ((mapscript == False) or (gdal== False)):
             return
 
         self.pid = os.getpid()
