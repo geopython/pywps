@@ -18,7 +18,7 @@ from pywps import Soap
 
 EMPTYPARAMREGEX = re.compile('( \w+="")|( \w+="None")')
 
-def response(response,targets,soapVersion,isSoap=False,contentType="application/xml"):
+def response(response,targets,soapVersion=None,isSoap=False,contentType="application/xml"):
     """
     Print response to files given as input parameter.
 
