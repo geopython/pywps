@@ -28,6 +28,8 @@ except:
     pass
 from pywps import Exceptions
 
+
+
 class Input:
     """Class WPS Input
 
@@ -276,7 +278,7 @@ class LiteralInput(Input):
         # value list
         if "*" in self.values:
             return value
-        
+        #logging.debug("allowed: %s" % str(allowed))
         for allowed in self.values:
             if type(allowed) == types.ListType:
                 if allowed[0] <= value <= allowed[-1]:
