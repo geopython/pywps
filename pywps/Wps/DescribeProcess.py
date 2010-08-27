@@ -25,6 +25,8 @@ from pywps import config
 from pywps.Template import TemplateError
 import os,types,traceback
 
+
+
 class DescribeProcess(Request):
     """
     Parses input request obtained via HTTP POST encoding - should be XML
@@ -113,11 +115,13 @@ class DescribeProcess(Request):
         :return: dictionary, which is to be used for
             :func:`pywps.Template.TemplateProcessor.set`
         """
-
+        
         processInputs = []
         for identifier in process.inputs:
             processInput = {}
-            input = process.inputs[identifier]
+           
+            input = process.inputs[identifier] #
+           
             processInput["identifier"] = identifier
             processInput["title"] =     process.i18n(input.title)
             processInput["abstract"] =  process.i18n(input.abstract)
@@ -182,6 +186,7 @@ class DescribeProcess(Request):
         processInOutput["dataTypeReference"] = dataTypeReference["reference"]
 
         # UOMs
+        
         if inoutput.uom:
             processInOutput["UOM"] = 1
             processInOutput["defaultUOM"] = inoutput.uom
@@ -200,14 +205,24 @@ class DescribeProcess(Request):
 
         # allowed values
         # NOTE: only for inputs, but does not matter
+        #logging.debug("inoutput.values test: %s",str(inoutput.values))
         try:
+            
             if "*" in inoutput.values:
                 processInOutput["anyvalue"] = 1
             else:
+               
                 processInOutput["allowedValueslen"] = 1
                 processInOutput["allowedValues"] = []
+                
+                
+                
+                
                 for val in inoutput.values:
                     valrecord = {}
+                    
+                    
+                    
                     if type(val) == type([]):
                         valrecord["minMax"] = 1
                         valrecord["minimumValue"] = val[0]
@@ -217,6 +232,7 @@ class DescribeProcess(Request):
                         valrecord["discrete"] = 1
                         valrecord["value"] = val
                     processInOutput["allowedValues"].append(valrecord)
+                    logging.debug(str(processInOutput["allowedValues"]))
         except AttributeError:
             pass
 
@@ -261,4 +277,5 @@ class DescribeProcess(Request):
             processInput["CRSs"].append({"crs":crs})
 
         return
+
 
