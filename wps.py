@@ -66,6 +66,7 @@ __version__ = "3.0-svn"
 
 import pywps
 from pywps.Exceptions import *
+import os
 #import logging
 
 # get the request method and inputs
