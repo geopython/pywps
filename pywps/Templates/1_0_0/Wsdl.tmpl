@@ -5,10 +5,17 @@
         xmlns="http://schemas.xmlsoap.org/wsdl/"
         xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
         xmlns:wps="http://www.opengis.net/wps/1.0.0"
+        xmlns:ows="http://www.opengis.net/ows/1.1"
         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
         xmlns:wsdl="http://schemas.xmlsoap.org/wsdl">
         <types>
-            <xsd:schema targetNamespace="http://www.opengis.net/wps/1.0.0">
+         
+         <xsd:schema targetNamespace="http://www.opengis.net/ows/1.1">
+                <xsd:include
+                    schemaLocation="http://schemas.opengis.net/ows/1.1.0/owsExceptionReport.xsd"/>
+            </xsd:schema>
+        
+         <xsd:schema targetNamespace="http://www.opengis.net/wps/1.0.0">
                 <xsd:include 
                     schemaLocation="http://schemas.opengis.net/wps/1.0.0/wpsGetCapabilities_request.xsd"/>
             </xsd:schema>
@@ -34,6 +41,16 @@
                 <xsd:include 
                     schemaLocation="http://schemas.opengis.net/wps/1.0.0/wpsExecute_response.xsd"/>
             </xsd:schema>
+        
+       <!-- 
+        <xsd:schema targetNamespace="http://www.opengis.net/wps/1.0.0">
+                <xsd:include 
+                    schemaLocation="ogc/wps/1.0.0/wpsAll.xsd"/>
+            </xsd:schema>
+       
+        -->
+        
+	
         </types>
 
     <message name="GetCapabilitiesRequest">
@@ -58,7 +75,7 @@
     </message>
 
     <message name="ExceptionResponse">
-        <part name="msg" element="wps:ExcepctionReport"/>
+        <part name="msg" element="ows:ExceptionReport"/>
     </message>
 
     <portType name="<TMPL_VAR name>_PortType">
@@ -83,6 +100,8 @@
         <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
         <operation name="GetCapabilities">
             <soap:operation soapAction="<TMPL_VAR address>/GetCapabilities" style="document"/>
+
+            
             <input name="GetCapabilitiesRequest">
                 <soap:body use="literal" />
             </input>
