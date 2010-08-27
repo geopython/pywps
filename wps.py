@@ -55,13 +55,25 @@ __version__ = "3.0-svn"
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+#import pycallgraph
+#filter_func = pycallgraph.GlobbingFilter(max_depth=4)
+#pycallgraph.start_trace(filter_func=filter_func)
+#import sys,os, traceback
+#sys.path.append("/users/rsg/jmdj/workspace/pywps-3.2-soap/pywps")
+#os.environ["PYWPS_CFG"]="/etc/pywps.cfg"
+#sys.path.append("/users/rsg/jmdj/.eclipse/793567567/plugins/org.python.pydev.debug_1.6.0.2010071813/pysrc/")
+#import pydevd   
+
 import pywps
 from pywps.Exceptions import *
-
-import sys,os, traceback
+#import logging
 
 # get the request method and inputs
+
 method = os.getenv("REQUEST_METHOD")
+
+
+
 if not method:  # set standard method
     method = pywps.METHOD_GET
 
@@ -81,21 +93,34 @@ if method == pywps.METHOD_GET:
 else:
     inputQuery = sys.stdin
 
+ 
 
-# create the WPS object
-wps = None
+
+
+
 try:
     wps = pywps.Pywps(method)
+   
+     
+   
     if wps.parseRequest(inputQuery):
-        pywps.debug(wps.inputs)
+        #pywps.debug(wps.inputs)
         response = wps.performRequest()
 
         # request performed, write the response back
         if response:
             # print only to standard out
+          
+            #pydevd.settrace() 
             pywps.response.response(wps.response,
                     sys.stdout,wps.parser.soapVersion,wps.parser.isSoap,
                     wps.request.contentType)
+            
+            #pywps.response.response(wps.response,
+             #       sys.stdout,wps.parser.soapVersion,wps.parser.isSoap,
+              #      wps.request.contentType)
 except WPSException,e:
-    traceback.print_exc(file=pywps.logFile)
+    #traceback.print_exc(file=pywps.logFile)
     pywps.response.response(e, sys.stdout, wps.parser.isSoap)
+
+#pycallgraph.make_dot_graph('/users/rsg/jmdj/pywps_Exception.png')
