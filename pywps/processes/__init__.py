@@ -1,6 +1,1 @@
-"""Example process, which can be used with PyWPS"""
-__all__ = []
-# __all__ = ["exampleBufferProcess", "exampleXSLTProcess",
-#            "exampleBufferNoInputsProcess",
-#            "exampleLosProcess"]
-
+__all__ = ["returner","dummyprocess","ultimatequestionprocess","moreInOne","moreInstancesInOne","tests","GMLBuffer","reducer","histogramprocess"]
