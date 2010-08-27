@@ -24,12 +24,24 @@ SOAP wrapper
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+
+#HTTP_SOAPACTION': '"http://localhost/wps.cgi/DescribeProcess"
+
 from xml.dom import minidom
 
 from xml.sax.saxutils import unescape # Very practical unescape char converted
 from xml.xpath.Context  import Context #Context setting for namespace support
 from xml.xpath import Evaluate
 from xml.xpath import Compile
+
+def getFirstChildNode(document):
+    for node in document.childNodes:
+        if node.nodeType == minidom.Element.nodeType:
+            firstChild = node
+        
+    document=firstChild
+    return document
+
 
 #For soap 1.2 -->http://www.w3.org/2003/05/soap-envelope (self.nsIndex=0)
 #For soap 1.1 -->http://schemas.xmlsoap.org/soap/envelope/ (self.nsIndex=1)
@@ -51,9 +63,10 @@ SOAP_ENVELOPE11="""<?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Body>$SOAPBODY$</SOAP-ENV:Body></SOAP-ENV:Envelope>"""
 
 WPSNamespace= {"wps":"http://www.opengis.net/wps/1.0.0"}
-
+import logging
 
 soap = False
+
 
 def isSoap(document): 
     global soap
@@ -78,18 +91,19 @@ class SOAP:
     nsIndex = 0
 
     def __init__(self,document=None):
-
+		
         if document:
             if type(input) == type(""):
                 self.document = minidom.parseString(unescape(document,entities={"&quot;":"'"}))
             else:
                 self.document = minidom.parseString(unescape(document.toxml(),entities={"&quot;":"'"})) # Not very efficient, the XML is converted to string and then back again to XML
             self.nsIndex = soap_env_NS.index(document.namespaceURI)
-            
+            logging.debug("NameSpaceURI %s" % document.namespaceURI)
             if (self.nsIndex==1):
             	self.soapVersion=11
             else:
             	self.soapVersion=12
+            #logging.debug("SoapVersion %s" % self.soapVersion)	
     #getNode has been replaced with getWPSContent()  
     #def getNode(self,namespace,nodeName):
     #    """Get XML nod from DOM of specified name and namespace"""
@@ -103,15 +117,37 @@ class SOAP:
     def getWPSContent(self):
     	    """Get the specific XWPS ML content of inside the SOAP request. The Element position may change if there is a SOAP header or if is was sent as a message inside the Body content"""   
 	    #Creating context that will be used by xpath
+        #logging.debug("Taverna is sending the following request")
+	    #logging.debug(str(self.document.toxml()))
 	    context=Context(self.document)
 	    #setting WPS name spaces
 	    context.setNamespaces(WPSNamespace)
 	    #Generating xpath expression for the 3 WPS possibilities
-	    xpathExpression = Compile("//wps:Execute | //wps:GetCapabilities | //wps:DescribeProcess")
+	    xpathExpression=Compile("//*[local-name() = 'GetCapabilities'] | //*[local-name() = 'DescribeProcess'] | //*[local-name() = 'Execute']")
+	    #xpathExpression = Compile("//wps:Execute | //wps:GetCapabilities | //wps:DescribeProcess")
 	    #Getting WPS content as first result of list
-
 	    WPSDocument=xpathExpression.evaluate(context)[0]
+	    
+	    if WPSDocument.getAttribute("service")=="":
+    	 	WPSDocument.setAttribute("service","WPS")
+        #Crap Eclpse indent
+        
+        
+            tagNameRequest=WPSDocument.localName
+            #logging.debug("LocalName tag: %s" % tagNameRequest)
+            
+         #   tagNameRequest=firstElement.tagName.split(":")[1]
+            if tagNameRequest=="DescribeProcess" or tagNameRequest=="Execute":
+                WPSDocument.setAttribute("version","1.0.0")
+       		
+	    ###Dumping server variables for checking
+            #import os
+            #logging.debug(str(os.environ))
+            
+            #logging.debug(WPSDocument.toxml())    
+            
 	    return WPSDocument
+	    #return getFirstChildNode(WPSDocument)
 
 
     def getSOAPVersion(self):
