@@ -32,6 +32,9 @@ from pywps.Process.Lang import Lang
 from pywps import Soap 
 from os import name as OSNAME
 
+
+import logging #For debuggin
+
 class Post(Parser):
     """Main class for parsing of HTTP POST request types
     
@@ -105,9 +108,13 @@ class Post(Parser):
         
 
         # get first child
+    
+        
+        
         firstChild = self.isSoapFirstChild(self.document)
-
+        logging.debug("Got this from isSOAPFirstChild: %s"% firstChild)
         # check service name
+        
         self.checkService(firstChild)
 
         # find request type
@@ -123,7 +130,7 @@ class Post(Parser):
         
         :param node: :class:`xml.dom.Node`, where to search
         """
-
+        logging.debug(str(node))
         # service name is mandatory for all requests (OWS_1-1-0 p.14 tab.3 +
         # p.46 tab.26); service must be "WPS" (WPS_1-0-0 p.17 tab.13 + p.32 tab.39)
         if node.hasAttribute("service"):
@@ -232,8 +239,10 @@ class Post(Parser):
         if Soap.isSoap(firstChild):
             soapCls = Soap.SOAP(firstChild)
             #firstChild = soapCls.getNode(Soap.soap_env_NS[soapCls.nsIndex],"Body")
+            #logging.debug("Getting WPS content from SOAP")
             firstChild=soapCls.getWPSContent()
-            
+            #logging.debug("Going to dump WPS content")
+            #logging.debug(firstChild.toxml())
             #pywps.debug(firstChild.toxml())
             #firstChild = self.getFirstChildNode(firstChild)
             self.isSoap = True
