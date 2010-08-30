@@ -40,8 +40,8 @@ class Process(WPSProcess):
         out = inLayer.GetName()
 
         # create output file
-        driver = ogr.GetDriverByName('GML')
-        outSource = driver.CreateDataSource(out)
+        driver = ogr.GetDriverByName('GML',"XSISCHEMAURI=http://schemas.opengis.net/gml/2.1.2/feature.xsd")
+        outSource = driver.CreateDataSource(out,)
         outLayer = outSource.CreateLayer(out,geom_type=ogr.wkbPolygon)
 
         # for each feature
