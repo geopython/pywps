@@ -20,8 +20,8 @@
          ...
          tomcat/webapps/wps/WEB-INF/
          tomcat/webapps/wps/WEB-INF/web.xml (this file)
-         tomcat/webapps/wps/WEB-INF/classes/
-         tomcat/webapps/wps/WEB-INF/classes/jythonlib.jar
+         tomcat/webapps/wps/WEB-INF/lib/
+         tomcat/webapps/wps/WEB-INF/lib/jythonlib.jar
 
          This should be described in the documentation more detaily.
     -->
