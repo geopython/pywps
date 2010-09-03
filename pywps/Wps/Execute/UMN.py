@@ -297,7 +297,8 @@ class UMN:
  
     def save(self):
         """Save the mapfile to disc"""
-        self.mapObj.save(self.mapFileName)
+        if self.mapObj:
+            self.mapObj.save(self.mapFileName)
 
     def getMapServerWCS(self,output):
         """Get the URL for mapserver WCS request of the output"""
