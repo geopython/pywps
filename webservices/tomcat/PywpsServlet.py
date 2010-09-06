@@ -9,9 +9,8 @@ from javax.servlet.http import HttpServlet
 import pywps
 from pywps.Exceptions import *
 import traceback
-import sys
 
-class PywspServlet(HttpServlet):
+class PywpsServlet(HttpServlet):
 
     def doGet(self,request,response):
 
