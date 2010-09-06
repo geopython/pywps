@@ -41,7 +41,7 @@ PREF = "TMPL"
 VARTYPES=[types.StringType, types.FileType,
         types.FloatType, types.IntType,
         types.NoneType,
-        types.BooleanType, types.LongType]
+        types.BooleanType, types.LongType, types.UnicodeType]
 
 class Token:
     """Base Token class. Token is snipplet of input template. Template

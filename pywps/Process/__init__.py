@@ -615,7 +615,7 @@ class WPSProcess:
                 printed. nothing happen otherwise.
         """
 
-        if self.debug or force and self.logFile:
+        if (self.debug or force) and self.logFile:
             if type(self.logFile) == type(""):
                 try:
                     f = open(self.logFile,"w")

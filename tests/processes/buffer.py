@@ -41,8 +41,8 @@ class Process(WPSProcess):
 
         # create output file
         driver = ogr.GetDriverByName('GML')
-        outSource = driver.CreateDataSource(out)
-        outLayer = outSource.CreateLayer(out,geom_type=ogr.wkbPolygon)
+        outSource = driver.CreateDataSource(out, ["XSISCHEMAURI=http://schemas.opengis.net/gml/2.1.2/ feature.xsd"])
+        outLayer = outSource.CreateLayer(out,None,ogr.wkbUnknown)
 
         # for each feature
         featureCount = inLayer.GetFeatureCount()

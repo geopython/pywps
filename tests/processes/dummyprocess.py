@@ -18,10 +18,10 @@ class Process(WPSProcess):
               
          self.Input1 = self.addLiteralInput(identifier = "input1",
                                             title = "Input1 number", 
-                                            default="100")
+                                            default=100)
          self.Input2= self.addLiteralInput(identifier="input2", 
                                            title="Input2 number", 
-                                          default="200")
+                                          default=200)
          self.Output1=self.addLiteralOutput(identifier="output1", 
                                             title="Output1 add 1 result")
          self.Output2=self.addLiteralOutput(identifier="output2",title="Output2 subtract 1 result" )                                   
