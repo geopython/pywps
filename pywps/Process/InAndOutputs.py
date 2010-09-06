@@ -388,7 +388,6 @@ class ComplexInput(Input):
 
         # download data
         if input.has_key("asReference") and input["asReference"] == True:
-            import sys
             self.downloadData(input["value"])
         else:
             self.storeData(input["value"])
@@ -827,35 +826,17 @@ class ComplexOutput(Output):
 
     .. attribute :: projection
 
-        file projection (used by mapserver, see useMapscript below), is not set, will be determined
-        automatically
+        file projection (used by mapserver)
 
     .. attribute :: bbox
 
-        data bounding box (used by mapserver, see useMapscript below)
-        if not set, will be determined automatically
+        data bounding box (used by mapserver)
 
     .. attribute :: width
-
-        (used by mapserver, see useMapscript below)
-        if not set, will be determined automatically
-        
     .. attribute :: height
-
-        (used by mapserver, see useMapscript below)
-        if not set, will be determined automatically
-
     .. attribute :: useMapscript
     
-        If set to true and asReference is set to true (by request), PyWPS
-        will gerenate UMN MapServer mapfile and point the reference URL to
-        it, so that raster layer will be accessible as OGC WCS and vector
-        layer will be accessible as OGC WFS. This enables the client more
-        flexible bindings of resulting ouput files.
-
-        Attributes projection, bbox, width and height will be used. If not
-        set, they will be determined using gdal/ogr libraries. If something
-        does not work, try to adjust them manualy.
+        create dynamicaly mapfile and setup MapServer environment
         
     """
     formats = None
@@ -890,11 +871,11 @@ class ComplexOutput(Output):
         
         self.projection = projection
         self.bbox = bbox
-        self.useMapscript = useMapscript
 
         try:
             self.ms = magic.open(magic.MAGIC_MIME)
             self.ms.load()
+            self.useMapscript = useMapscript
         except:
             pass
 

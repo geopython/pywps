@@ -88,47 +88,6 @@ class ComplexProcess(WPSProcess):
                 time.sleep(5)
         return
 
-class ComplexProcessOWS(WPSProcess):
-    def __init__(self):
-
-        WPSProcess.__init__(self, identifier = "complexprocessows",
-            title="Complex process",
-            storeSupported=True)
-
-        self.vectorin = self.addComplexInput(identifier="vectorin",
-                                                 title="Vector file")
-
-        self.rasterin = self.addComplexInput(identifier="rasterin",
-                                                 title="Raster file",
-                                                 formats = [{"mimeType":"image/tiff"}])
-
-        self.pausein = self.addLiteralInput(identifier="pause",
-                                                 title="Pause the process",
-                                                 abstract="Pause the process for several seconds, so that status=true can be tested",
-                                                 default = False,
-                                                 type = type(True))
-
-        self.vectorout = self.addComplexOutput(identifier="vectorout",
-                                                 title="Vector file",
-                                                 useMapscript=True)
-
-        self.rasterout = self.addComplexOutput(identifier="rasterout",
-                                                 title="Raster file",
-                                                 formats = [{"mimeType":"image/tiff"}],
-                                                 useMapscript=True)
-
-    def execute(self):
-        self.vectorout.setValue(self.vectorin.getValue())
-        self.rasterout.setValue(self.rasterin.getValue())
-
-
-        if self.pausein.getValue():
-            import time
-            for i in range(5):
-                self.status.set("Processing process",i*20)
-                time.sleep(5)
-        return
-
 class BBoxProcess(WPSProcess):
     """This process defines bounding box in- and outputs"""
 
