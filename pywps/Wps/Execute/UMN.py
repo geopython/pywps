@@ -39,7 +39,6 @@ try:
     from osgeo import gdal
     from osgeo import ogr
     from osgeo import osr
-    gdal=True
 except Exception,e:
     gdal=False
     logging.info("osgeo package could not be loaded, mapserver not supported: %s" %e)
