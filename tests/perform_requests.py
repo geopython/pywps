@@ -28,6 +28,7 @@ class RequestGetTestCase(unittest.TestCase):
     getdescribeprocessrequest = "service=wps&request=describeprocess&version=1.0.0&identifier=dummyprocess"
     getexecuterequest = "service=wps&request=execute&version=1.0.0&identifier=dummyprocess&datainputs=[input1=20;input2=10]"
     wfsurl = "http://www2.dmsolutions.ca/cgi-bin/mswfs_gmap?version=1.0.0&request=getfeature&service=wfs&typename=park"
+    wcsurl = "http://www.bnhelp.cz/cgi-bin/crtopo?service=WMS&request=GetMap&LAYERS=sitwgs&TRANSPARENT=true&FORMAT=image%2Ftiff&EXCEPTIONS=application%2Fvnd.ogc.se_xml&VERSION=1.1.1&STYLES=default&SRS=EPSG%3A4326&BBOX=-10,-10,10,10&WIDTH=50&HEIGHT=50"
     wpsns = "http://www.opengis.net/wps/1.0.0"
     xmldom = None
 
@@ -179,9 +180,11 @@ class RequestGetTestCase(unittest.TestCase):
 
         postpywps.performRequest(postinputs)
         origData = open(os.path.join(pywpsPath,"tests","datainputs","dem.tiff"),"rb")
-        self.assertEquals(postpywps.response.read(),origData.read())
+        rasterWpsData = base64.encodestring(origData.read())
+        resp = postpywps.response.read();
+        self.assertEquals(resp.strip(),rasterWpsData.strip())
 
-    def _test09ParseExecuteComplexVectorInputs(self):
+    def test09ParseExecuteComplexVectorInputs(self):
         """Test, if pywps can parse complex vector input values, given as reference, output given directly"""
         self._setFromEnv()
         import urllib
@@ -209,35 +212,6 @@ class RequestGetTestCase(unittest.TestCase):
         # output GML should be the same, as input GML
         self.assertTrue(xmldom, outputgml)
 
-    def _test10ParseExecuteComplexVectorInputsAsReference(self):
-        """Test, if pywps can parse complex vector input values, given as reference"""
-        self._setFromEnv()
-        import urllib
-        import tempfile
-        gmlfile = open(tempfile.mktemp(prefix="pywps-test-wfs"),"w")
-        gmlfile.write(urllib.urlopen(self.wfsurl).read())
-        gmlfile.close()
-
-        request = "service=wps&request=execute&version=1.0.0&identifier=complexVector&datainputs=[indata=%s]&responsedocument=[outdata=@asreference=true]" % (urllib.quote(self.wfsurl))
-        mypywps = pywps.Pywps(pywps.METHOD_GET)
-        inputs = mypywps.parseRequest(request)
-        mypywps.performRequest()
-        xmldom = minidom.parseString(mypywps.response)
-        self.assertFalse(len(xmldom.getElementsByTagNameNS(self.wpsns,"ExceptionReport")), 0)
-
-        # try to get out the Reference elemengt
-        gmlout = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[0].getAttribute("xlink:href")
-            
-        # download, store, parse XML
-        gmlfile2 = open(tempfile.mktemp(prefix="pywps-test-wfs"),"w")
-        gmlfile2.write(urllib.urlopen(gmlout).read())
-        gmlfile2.close()
-        xmldom2 = minidom.parse(gmlfile2.name)
-        xmldom = minidom.parse(gmlfile.name)
-
-        # check, if they fit
-        # TODO: this test failes, but no power to get it trough
-        # self.assertEquals(xmldom, xmldom2)
 
     def testT11ParseExecuteComplexVectorAndRasterInputsAsReferenceOutpu(self):
         """Test, if pywps can store complex values as reference"""
@@ -268,6 +242,31 @@ class RequestGetTestCase(unittest.TestCase):
         #self.assertEquals(p
 
     ######################################################################################
+
+    def test13ParseExecuteComplexVectorInputsAsReferenceMapServer(self):
+        """Test if PyWPS can return correct WFS and WCS services for output
+        data reference"""
+        self._setFromEnv()
+        import urllib
+        import tempfile
+
+        getpywps = pywps.Pywps(pywps.METHOD_GET)
+        inputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=complexprocessows&datainputs=[rasterin=%s;vectorin=%s]&responsedocument=[rasterout=@asreference=true;vectorout=@asreference=true]" % (urllib.quote(self.wcsurl), urllib.quote(self.wfsurl)))
+        getpywps.performRequest()
+        xmldom = minidom.parseString(getpywps.response)
+
+        self.assertFalse(len(xmldom.getElementsByTagNameNS(self.wpsns,"ExceptionReport")), 0)
+
+        # try to get out the Reference elemengt
+        wfsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[0].getAttribute("xlink:href")
+        wcsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[1].getAttribute("xlink:href")
+
+        # test, if there are WFS and WCS request strings
+        self.assertTrue(wfsurl.find("WFS") > -1)
+        self.assertTrue(wcsurl.find("WCS") > -1)
+        print urllib.unquote(wfsurl)
+        print urllib.unquote(wcsurl)
+            
 
     def _setFromEnv(self):
         os.putenv("PYWPS_PROCESSES", os.path.join(pywpsPath,"tests","processes"))
