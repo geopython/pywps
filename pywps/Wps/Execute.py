@@ -412,9 +412,14 @@ class Execute(Request):
             self.response = self.templateProcessor.__str__()
 
         # print status
+        
         if self.storeRequired and self.statusRequired:
+            import logging
+            logging.debug("isSOAP:%s" % self.wps.parser.isSoap)
+            logging.debug("soapVersion:%s" % self.wps.parser.soapVersion)
             pywps.response.response(self.response,
                                     self.outputFile,
+                                    self.wps.parser.soapVersion,
                                     self.wps.parser.isSoap,
                                     self.contentType)
 
@@ -664,6 +669,7 @@ class Execute(Request):
                                    self.status == self.failed):
             pywps.response.response(self.response,
                                     self.outputFile,
+                                    self.wps.parser.soapVersion,
                                     self.wps.parser.isSoap,
                                     self.contentType)
         
