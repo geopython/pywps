@@ -55,6 +55,7 @@ setup(
         packages = [
             'pywps',
             'pywps.Wps',
+            'pywps.Wps.Execute',
             'pywps.etc',
             'pywps.Parser',
             'pywps.Process',
@@ -65,6 +66,7 @@ setup(
         package_dir={
                     'pywps':"pywps",
                     'pywps.Wps':'pywps/Wps',
+                    'pywps.Wps.Execute':'pywps/Wps/Execute',
                     'pywps.Parser':'pywps/Parser',
                     'pywps.Process':'pywps/Process',
                     'pywps.Templates':'pywps/Templates',
