@@ -895,19 +895,21 @@ class Execute(Request):
         # copy the file to output directory
         # literal value
         if output.type == "LiteralValue":
-            f = open(os.path.join(
-                        config.getConfigValue("server","outputPath"),
-                                "%s-%s" % (output.identifier,self.pid)),"w")
+            tmp = tempfile.mkstemp(prefix="%s-%s" % (output.identifier,self.pid),dir=os.path.join(config.getConfigValue("server","outputPath")),text=True)
+            f = open(tmp[1],"w")
             f.write(str(output.value))
             f.close()
-            templateOutput["reference"] = config.getConfigValue("server","outputUrl")+\
-                    "/"+"%s-%s" % (output.identifier, self.pid)
+            templateOutput["reference"] = tmp[1]
         # complex value
         else:
             outName = os.path.basename(output.value)
             outSuffix = os.path.splitext(outName)[1]
-            outName = "%s-%s%s" %(output.identifier, str(self.pid),outSuffix)
-            outFile = config.getConfigValue("server","outputPath")+"/"+outName
+            tmp = tempfile.mkstemp(suffix=outSuffix,
+                                    prefix="%s-%s" % (output.identifier,self.pid),
+                                    dir=os.path.join(config.getConfigValue("server","outputPath")),text=True)
+            outFile = tmp[1]
+            outName = os.path.basename(outFile)
+
             if not self._samefile(output.value,outFile):
                 COPY(os.path.abspath(output.value), outFile)
             templateOutput["reference"] = \
@@ -1092,8 +1094,8 @@ class Execute(Request):
             # copy the file to safe place
             outName = os.path.basename(output.value)
             outSuffix = os.path.splitext(outName)[1]
-            outName = "%s-%s%s" %(output.identifier, str(self.pid),outSuffix)
-            outFile = config.getConfigValue("server","outputPath")+"/"+outName
+            tmp = tempfile.mkstemp(suffix=outSuffix, prefix="%s-%s" % (output.identifier,self.pid),dir=os.path.join(config.getConfigValue("server","outputPath")))
+            outFile = tmp[1]
 
             if not self._samefile(output.value,outFile):
                 COPY(os.path.abspath(output.value), outFile)

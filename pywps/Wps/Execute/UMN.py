@@ -25,6 +25,7 @@ from pywps import config
 import os
 import urllib2
 import logging
+import tempfile
 
 mapscript=False
 gdal=False
@@ -92,7 +93,8 @@ class UMN:
         if ((mapscript == False) or (gdal== False)):
             return
 
-        self.pid = os.getpid()
+        tmp = os.path.basename(tempfile.mkstemp()[1])
+        self.pid = "%s-%s"%(os.getpid(),tmp)
         self.outputs = {}
         self.process = process
 
