@@ -209,6 +209,8 @@ class Execute(Request):
         self.pid = os.getpid()
         self.status = None
         self.id = self.makeSessionId()
+        print config.getConfigValue("server","outputPath")
+        return
         self.outputFileName = os.path.join(config.getConfigValue("server","outputPath"),self.id+".xml")
         self.statusLocation = config.getConfigValue("server","outputUrl")+"/"+self.id+".xml"
 
