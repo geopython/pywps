@@ -906,14 +906,28 @@ class ComplexOutput(Output):
         :param value: value to be returned (file name or file itself)
         :type value: string or file
         """
-
+        
+        #Note: cStringIO and StringIO are totally messed up, StringIO is type instance, cString is type cStringIO.StringO
+        #Better to also use __class__.__name__ to be certain what is is
+        # StringIO => StringIO but cStringIO => StringO  
+        
         if type(value) == types.StringType:
             self.value = value
         elif type(value) == types.FileType:
             self.value = value.name
+        elif value.__class__.__name__=='StringIO' or value.__class__.__name__=='StringO': 
+            import tempfile
+            from os import curdir
+            stringIOName = tempfile.mkstemp(prefix="pywpsOutput",dir=curdir) #(5, '/tmp/pywps-instanceS2j6ve/pywpsOutputZxSM6V')
+            stringIOName=stringIOName[1]
+            
+            stringIOFile=open(stringIOName,"w")
+            stringIOFile.write(value.getvalue())
+            self.value=stringIOName
+            
         # TODO add more types, like Arrays and lists for example
         else:
-            raise Exception("Output type '%s' of '%s' output not known" %\
+            raise Exception("Output type '%s' of '%s' output not known, not FileName, File or (c)StringIO object" %\
                     (type(value),self.identifier))
 
 
