@@ -903,8 +903,8 @@ class ComplexOutput(Output):
     def setValue(self, value):
         """Set the output value
 
-        :param value: value to be returned (file name or file itself)
-        :type value: string or file
+        :param value: value to be returned (file name, file itself, or (c)StringIO)
+        :type value: string,file, stringIO.stringIO or cStringIO.StringIO
         """
         
         #Note: cStringIO and StringIO are totally messed up, StringIO is type instance, cString is type cStringIO.StringO
