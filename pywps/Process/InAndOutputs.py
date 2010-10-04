@@ -1,8 +1,8 @@
 """
 Inputs and outputs of OGC WPS Processes
 """
-# Author:	Jachym Cepicky
-#        	http://les-ejk.cz
+# Author:    Jachym Cepicky
+#            http://les-ejk.cz
 # Lince: 
 # 
 # Web Processing Service implementation
@@ -27,8 +27,6 @@ try:
 except:
     pass
 from pywps import Exceptions
-
-
 
 class Input:
     """Class WPS Input
@@ -278,7 +276,7 @@ class LiteralInput(Input):
         # value list
         if "*" in self.values:
             return value
-        #logging.debug("allowed: %s" % str(allowed))
+        
         for allowed in self.values:
             if type(allowed) == types.ListType:
                 if allowed[0] <= value <= allowed[-1]:
@@ -390,6 +388,7 @@ class ComplexInput(Input):
 
         # download data
         if input.has_key("asReference") and input["asReference"] == True:
+            import sys
             self.downloadData(input["value"])
         else:
             self.storeData(input["value"])
@@ -828,17 +827,35 @@ class ComplexOutput(Output):
 
     .. attribute :: projection
 
-        file projection (used by mapserver)
+        file projection (used by mapserver, see useMapscript below), is not set, will be determined
+        automatically
 
     .. attribute :: bbox
 
-        data bounding box (used by mapserver)
+        data bounding box (used by mapserver, see useMapscript below)
+        if not set, will be determined automatically
 
     .. attribute :: width
+
+        (used by mapserver, see useMapscript below)
+        if not set, will be determined automatically
+        
     .. attribute :: height
+
+        (used by mapserver, see useMapscript below)
+        if not set, will be determined automatically
+
     .. attribute :: useMapscript
     
-        create dynamicaly mapfile and setup MapServer environment
+        If set to true and asReference is set to true (by request), PyWPS
+        will gerenate UMN MapServer mapfile and point the reference URL to
+        it, so that raster layer will be accessible as OGC WCS and vector
+        layer will be accessible as OGC WFS. This enables the client more
+        flexible bindings of resulting ouput files.
+
+        Attributes projection, bbox, width and height will be used. If not
+        set, they will be determined using gdal/ogr libraries. If something
+        does not work, try to adjust them manualy.
         
     """
     formats = None
@@ -873,11 +890,11 @@ class ComplexOutput(Output):
         
         self.projection = projection
         self.bbox = bbox
+        self.useMapscript = useMapscript
 
         try:
             self.ms = magic.open(magic.MAGIC_MIME)
             self.ms.load()
-            self.useMapscript = useMapscript
         except:
             pass
 
@@ -889,14 +906,28 @@ class ComplexOutput(Output):
         :param value: value to be returned (file name or file itself)
         :type value: string or file
         """
-
+        
+        #Note: cStringIO and StringIO are totally messed up, StringIO is type instance, cString is type cStringIO.StringO
+        #Better to also use __class__.__name__ to be certain what is is
+        # StringIO => StringIO but cStringIO => StringO  
+        
         if type(value) == types.StringType:
             self.value = value
         elif type(value) == types.FileType:
             self.value = value.name
+        elif value.__class__.__name__=='StringIO' or value.__class__.__name__=='StringO': 
+            import tempfile
+            from os import curdir
+            stringIOName = tempfile.mkstemp(prefix="pywpsOutput",dir=curdir) #(5, '/tmp/pywps-instanceS2j6ve/pywpsOutputZxSM6V')
+            stringIOName=stringIOName[1]
+            
+            stringIOFile=open(stringIOName,"w")
+            stringIOFile.write(value.getvalue())
+            self.value=stringIOName
+            
         # TODO add more types, like Arrays and lists for example
         else:
-            raise Exception("Output type '%s' of '%s' output not known" %\
+            raise Exception("Output type '%s' of '%s' output not known, not FileName, File or (c)StringIO object" %\
                     (type(value),self.identifier))
 
 
