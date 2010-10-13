@@ -336,9 +336,10 @@ class Execute(Request):
 
             # set output data attributes defined in the request
             self.consolidateOutputs()
-
+            
             # Execute
             self.executeProcess()
+
 
         except pywps.WPSException,e:
             # set status to failed
@@ -851,7 +852,7 @@ class Execute(Request):
                         templateOutput = self._bboxOutput(output,templateOutput)
 
                 templateOutputs.append(templateOutput);
-
+               
             except Exception,e:
                 self.cleanEnv()
                 traceback.print_exc(file=pywps.logFile)
