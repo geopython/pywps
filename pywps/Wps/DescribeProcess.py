@@ -24,7 +24,7 @@ from pywps.Wps import Request
 from pywps import config
 from pywps.Template import TemplateError
 import os,types,traceback
-
+import logging
 
 
 class DescribeProcess(Request):
