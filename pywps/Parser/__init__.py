@@ -53,6 +53,7 @@ class Parser:
     wps = None
     isSoap = False
     soapVersion=None
+    isSoapExecute=None
     inputs = None
 
     def __init__(self,wps):
