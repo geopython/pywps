@@ -48,8 +48,7 @@ class Post(PostParser):
             self.inputs = initInputs
 
         self.document = document  # input DOM
-        firstChild = self.isSoapFirstChild(self.document)  # no comments or
-                                                            # white spaces
+        firstChild = self.isSoapFirstChild(self.document)  # no comments or                                          # white spaces
 
         self.nameSpace = firstChild.namespaceURI    # document namespace
         self.nameSpace = pywps.WPS_NAMESPACE
@@ -59,6 +58,7 @@ class Post(PostParser):
         identifiers = []
         identifierNode = None
         dataInputs = []
+       
 
         #
         # Mandatory options
@@ -87,8 +87,10 @@ class Post(PostParser):
         # dataInputs
         try:
             inputsNode = firstChild.getElementsByTagNameNS(
-                                            self.nameSpace,"DataInputs")[0]
+                                            self.nameSpace,"DataInputs")[0]                         
             self.inputs["datainputs"] = self.parseDataInputs(inputsNode)
+            
+            
         except IndexError:
             self.inputs["datainputs"] = None
 
