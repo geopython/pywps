@@ -56,6 +56,7 @@ setup(
             'pywps',
             'pywps.Wps',
             'pywps.Wps.Execute',
+            'pywps.XSLT'
             'pywps.etc',
             'pywps.Parser',
             'pywps.Process',
@@ -67,6 +68,7 @@ setup(
                     'pywps':"pywps",
                     'pywps.Wps':'pywps/Wps',
                     'pywps.Wps.Execute':'pywps/Wps/Execute',
+                    'pywps.XSLT':'pywps/XSLT',
                     'pywps.Parser':'pywps/Parser',
                     'pywps.Process':'pywps/Process',
                     'pywps.Templates':'pywps/Templates',
@@ -76,6 +78,7 @@ setup(
         package_data={
                     'pywps':
                     ['Templates/1_0_0/*.tmpl',
+                     'XSLT/*.xsl',
                      'processes/*.py-dist','processes/README',
                      'default.cfg'],
                     'pywps.Templates.1_0_0': ['inc/*.tmpl']
