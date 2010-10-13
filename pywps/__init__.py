@@ -63,8 +63,7 @@ example how to use this module::
 
 """
 
-__all__ = [ "Parser","processes", "Process", "Exceptions", "Wps", "Templates","Template"]
-
+__all__ = [ "Parser","processes", "Process", "Exceptions", "Wps", "Templates","Template","XSLT"]
 
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
@@ -207,8 +206,10 @@ class Pywps:
         else:
             from pywps.Parser.Post import Post
             self.parser = Post(self)
+            
 
         self.inputs = self.parser.parse(queryStringObject)
+        
         return self.inputs
 
     def performRequest(self,inputs = None, processes=None):
@@ -230,6 +231,7 @@ class Pywps:
             elif inputs["request"]  == "describeprocess":
                 from pywps.Wps.DescribeProcess import DescribeProcess
                 self.request = DescribeProcess(self,processes=processes)
+               
             elif inputs["request"]  == "execute":
                 from pywps.Wps.Execute import Execute
                 self.request = Execute(self,processes=processes)
