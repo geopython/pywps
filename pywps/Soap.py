@@ -25,14 +25,73 @@ SOAP wrapper
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 
+
+
 #HTTP_SOAPACTION': '"http://localhost/wps.cgi/DescribeProcess"
 
 from xml.dom import minidom
 
 from xml.sax.saxutils import unescape # Very practical unescape char converted
-from xml.xpath.Context  import Context #Context setting for namespace support
-from xml.xpath import Evaluate
-from xml.xpath import Compile
+
+from lxml import etree
+import StringIO
+import pywps
+import logging
+from pywps import XSLT
+
+
+
+#For soap 1.2 -->http://www.w3.org/2003/05/soap-envelope (self.nsIndex=0)
+#For soap 1.1 -->http://schemas.xmlsoap.org/soap/envelope/ (self.nsIndex=1)
+soap_env_NS = ["http://www.w3.org/2003/05/soap-envelope","http://schemas.xmlsoap.org/soap/envelope/"]
+soap_enc_NS = ["http://www.w3.org/2003/05/soap-encoding","http://schemas.xmlsoap.org/soap/encoding/"]
+
+#Envelope for soap 1.2
+SOAP_ENVELOPE_FAULT12="""<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.w3.org/2003/05/soap-envelope
+	http://www.w3.org/2003/05/soap-envelope">
+	<soap:Body><soap:Fault><soap:Code><soap:Value>soap:Sender</soap:Value></soap:Code><soap:Reason><soap:Text>$REPORT$</soap:Text></soap:Reason><soap:Detail>$REPORTEXCEPTION$</soap:Detail></soap:Fault></soap:Body>
+</soap:Envelope>"""
+
+SOAP_ENVELOPE12="""<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.w3.org/2003/05/soap-envelope
+	http://www.w3.org/2003/05/soap-envelope">
+	<soap:Body>$SOAPBODY$</soap:Body>
+</soap:Envelope>"""
+
+
+#Envelope for soap 1.1
+SOAP_ENVELOPE11="""<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/1999/XMLSchema-instance" xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/1999/XMLSchema">
+<SOAP-ENV:Body>$SOAPBODY$</SOAP-ENV:Body></SOAP-ENV:Envelope>"""
+
+#Its assumed that the fault it always caused by the client PyWPS is 100% correct :)
+#Faultstring contains a description string of the error, Taverna only show this
+#The WSDL defines the ows:ExceptionReport as fault structure inside <detail>
+SOAP_ENVELOPE_FAULT11="""<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/1999/XMLSchema-instance" xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/1999/XMLSchema">
+<SOAP-ENV:Body><SOAP-ENV:Fault><faultcode>SOAP-ENV:Client</faultcode><faultstring>$REPORT$</faultstring><detail>$REPORTEXCEPTION$</detail></SOAP-ENV:Fault></SOAP-ENV:Body></SOAP-ENV:Envelope>"""
+
+
+
+
+soap = False
+
+
+def isSoap(document): 
+    global soap
+    
+    if document.localName == "Envelope" and\
+            document.namespaceURI in soap_env_NS:
+        soap = True
+        return True
+    else:
+        soap = False
+        return False
 
 def getFirstChildNode(document):
     for node in document.childNodes:
@@ -42,41 +101,64 @@ def getFirstChildNode(document):
     document=firstChild
     return document
 
+def SOAPtoWPS(tree):
+    #NOTE: The XSLT translation has some problems concerning the XSI namespace in the ComplexData. 
+    #The etree output of ComplexData will not contain the XSI namespace since this name space is defined in the head of the WPS:Execute and
+    #during transformation and copy-of it is not passed to ComplexData element
+    XSLTDocIO=open(pywps.XSLT.__path__[0]+"/SOAP2WPS.xsl","r")
+    
+    XSLTDoc=etree.parse(XSLTDocIO,parser=None)
+    
+    transformer=etree.XSLT(XSLTDoc)
+    WPSTree = transformer(tree)
+    #MAJOR PROBLEM !!! If the namespaces aren't clean they output complex data with SOAP name spaces and drop other namespaces
+    etree.cleanup_namespaces(WPSTree)
+    
+    #NOTE: The XSLT translation has some problems concerning the XSI namespace in the ComplexData. 
+    #The etree output of ComplexData will not contain the XSI namespace since this name space is defined in the head of the WPS:Execute and
+    #during transformation and copy-of it is not passed to ComplexData element
+   
+    
+    
+    return etree.tostring(WPSTree)
 
-#For soap 1.2 -->http://www.w3.org/2003/05/soap-envelope (self.nsIndex=0)
-#For soap 1.1 -->http://schemas.xmlsoap.org/soap/envelope/ (self.nsIndex=1)
-soap_env_NS = ["http://www.w3.org/2003/05/soap-envelope","http://schemas.xmlsoap.org/soap/envelope/"]
-soap_enc_NS = ["http://www.w3.org/2003/05/soap-encoding","http://schemas.xmlsoap.org/soap/encoding/"]
+def WPStoSOAP(tree):
+	#If we have an expection then will just dump the Exception report and not the WPS failure + Exception Report
+	# This allows for the use of message ows:ExectionReport in the WSDL process description
+    XSLTDocIO=open(pywps.XSLT.__path__[0]+"/WPS2SOAP.xsl","r")
+    
+    #Output: string XML 
+    root=tree.getroot() #root is <type 'lxml.etree._Element'>
+    #Check for Exception:
+    exceptionElementList=root.xpath("//*[local-name()='Exception']")
+    if bool(exceptionElementList):
+    	#Just dump the OGC exception
+    	return etree.tostring(exceptionElementList[0])
+    
+    XSLTDoc =etree.parse(XSLTDocIO)
+    transformer=etree.XSLT(XSLTDoc)
+    SOAPTree=transformer(tree)
+    
+    return etree.tostring(SOAPTree)
 
-#Envelope for soap 1.2
-SOAP_ENVELOPE12="""<?xml version="1.0" encoding="UTF-8"?>
-<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.w3.org/2003/05/soap-envelope
-	http://www.w3.org/2003/05/soap-envelope">
-	<soap:Body>$SOAPBODY$</soap:Body>
-</soap:Envelope>"""
+def doFixTavernaBug(WPSTree):
+	#Taverna hack until version 2.3 release
+	
+	#Check that the attributes are empy
+	if not bool(WPSTree.attrib):
+		WPSTree.set("service","WPS")
+		
+		tagNameRequest=WPSTree.tag.split("}")[1]
+        #tagNameRequest=firstElement.tagName.split(":")[1]
+        if tagNameRequest=="DescribeProcess" or tagNameRequest=="Execute":
+             WPSTree.setAttribute("version","1.0.0")
+       		
+	    
 
-#Envelope for soap 1.1
-SOAP_ENVELOPE11="""<?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/1999/XMLSchema-instance" xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/1999/XMLSchema">
-<SOAP-ENV:Body>$SOAPBODY$</SOAP-ENV:Body></SOAP-ENV:Envelope>"""
+	return WPSTree
 
-WPSNamespace= {"wps":"http://www.opengis.net/wps/1.0.0"}
-import logging
+		
 
-soap = False
-
-
-def isSoap(document): 
-    global soap
-    if document.localName == "Envelope" and\
-            document.namespaceURI in soap_env_NS:
-        soap = True
-        return True
-    else:
-        soap = False
-        return False
 
 class SOAP:
     """Soap wrapper, used for parsing requests, which are in Soap envelope
@@ -84,6 +166,7 @@ class SOAP:
 
     .. note:: This class is very primitive, it does not support advanced
         Soap features, like authorization and so on.
+    .. note: The class requires the lxml package to be installed so that XSLT can be used. The xml.dom module lacks such functionality    
 
     """
 
@@ -91,80 +174,129 @@ class SOAP:
     nsIndex = 0
 
     def __init__(self,document=None):
-		
         if document:
-            if type(input) == type(""):
-                self.document = minidom.parseString(unescape(document,entities={"&quot;":"'"}))
-            else:
-                self.document = minidom.parseString(unescape(document.toxml(),entities={"&quot;":"'"})) # Not very efficient, the XML is converted to string and then back again to XML
-            self.nsIndex = soap_env_NS.index(document.namespaceURI)
-            logging.debug("NameSpaceURI %s" % document.namespaceURI)
+            try:
+               if type(input) == type(""):
+                  self.tree=etree.parse(StringIO.StringIO(unescape(document,entities={"&quot;":"'"})))
+               #<?xml version='1.0' encoding='UTF-8'?> will cause a crash
+               #lxml.etree.XMLSyntaxError: XML declaration allowed only at the start of the document, line 1, column 103
+               else:
+                  self.tree = etree.parse(StringIO.StringIO(unescape(document.toxml(),entities={"&quot;":"'"}))) # Not very efficient, the XML is converted to string and then back again to XML
+            except etree.XMLSyntaxError,e:
+                 raise pywps.NoApplicableCode(e.message)
+            
+            
+            self.root=self.tree.getroot()
+           
+            #Searching of a Envelope element (case sensitive)
+            self.envElement=self.root.xpath("//*[contains(local-name(),'Envelope')]") #It actually retunrs the node
+
+            #Check for SOAP name space
+            self.nameSpaceSet=set(self.root.nsmap.values()) & set(soap_env_NS)
+            self.nsIndex = soap_env_NS.index(self.nameSpaceSet.pop())
             if (self.nsIndex==1):
             	self.soapVersion=11
             else:
             	self.soapVersion=12
-            #logging.debug("SoapVersion %s" % self.soapVersion)	
-    #getNode has been replaced with getWPSContent()  
-    #def getNode(self,namespace,nodeName):
-    #    """Get XML nod from DOM of specified name and namespace"""
+            
+            #Check for ExecuteProcess
+          
+            self.isSoapExecute=bool(self.root.xpath("//*[contains(local-name(),'ExecuteProcess')]")) # just to be certain that is a bool
+           
 
-    #    elements = self.document.getElementsByTagNameNS(namespace, nodeName)
-    #    if len(elements) > 0:
-    #        return elements[0]
-    #    else:
-    #        return None
-    
+            
     def getWPSContent(self):
-    	    """Get the specific XWPS ML content of inside the SOAP request. The Element position may change if there is a SOAP header or if is was sent as a message inside the Body content"""   
-	    #Creating context that will be used by xpath
-        #logging.debug("Taverna is sending the following request")
-	    #logging.debug(str(self.document.toxml()))
-	    context=Context(self.document)
-	    #setting WPS name spaces
-	    context.setNamespaces(WPSNamespace)
-	    #Generating xpath expression for the 3 WPS possibilities
-	    xpathExpression=Compile("//*[local-name() = 'GetCapabilities'] | //*[local-name() = 'DescribeProcess'] | //*[local-name() = 'Execute']")
-	    #xpathExpression = Compile("//wps:Execute | //wps:GetCapabilities | //wps:DescribeProcess")
-	    #Getting WPS content as first result of list
-	    WPSDocument=xpathExpression.evaluate(context)[0]
-	    
-	    if WPSDocument.getAttribute("service")=="":
-    	 	WPSDocument.setAttribute("service","WPS")
-        #Crap Eclpse indent
+    	    """Get the specific WPS XML content of inside the SOAP request. The Element position may change if there is a SOAP header or if is was sent as a message inside the Body content
+    	    The script will check for a standard WPS request or a ExecuteProcess_ one"""   
+	   
+       
+            reqWPS=self.root.xpath("//*[local-name() = 'GetCapabilities' or local-name()='DescribeProcess' or local-name()='Execute' or contains(local-name(),'ExecuteProcess_')] ")
+            if bool(reqWPS):
+             #General WPS:
+           #print reqWPS[0].tag #getting the element's name
+                if "ExecuteProcess_" in reqWPS[0].tag:
+                   
+                   XMLStr=SOAPtoWPS(reqWPS[0])
+                   XMLDoc=minidom.parseString(XMLStr)
+                   
+            	   #import pydevd;pydevd.settrace()                   
+                   return getFirstChildNode(XMLDoc)
         
         
-            tagNameRequest=WPSDocument.localName
-            #logging.debug("LocalName tag: %s" % tagNameRequest)
-            
-         #   tagNameRequest=firstElement.tagName.split(":")[1]
-            if tagNameRequest=="DescribeProcess" or tagNameRequest=="Execute":
-                WPSDocument.setAttribute("version","1.0.0")
-       		
-	    ###Dumping server variables for checking
-            #import os
-            #logging.debug(str(os.environ))
-            
-            #logging.debug(WPSDocument.toxml())    
-            
-	    return WPSDocument
-	    #return getFirstChildNode(WPSDocument)
+    #GetCapabilites/DescribeProcess or Execute
+    #getCapabilities=root.xpath("//*[local-name() = 'GetCapabilities' or local-name()='DescribeProcess']")
+                else:
+                   #Normal WPS
+                   reqWPS=doFixTavernaBug(reqWPS[0])
+                   XMLDoc = minidom.parseString(etree.tostring(reqWPS))
+                   return getFirstChildNode(XMLDoc)
+
+            else: #if bool(reqWPS)
+                raise  pywps.NoApplicableCode("Could not deternine the WPS request type from SOAP envelope. Couldnt determine GetCapabilities/DescribeProcess/Execute/ExecuteProcess_ from XML content")
 
 
     def getSOAPVersion(self):
 		return self.soapVersion
+	
+    def getSoapExecute(self):
+		return self.isSoapExecute
 
-    def getResponse(self,document,soapVersion):
+
+    def doSOAPFault(self,exceptionReportTree,soapVersion):
+    	#Assumed standard Execption document
+    	
+    	
+        if (int(soapVersion)==11):#
+        	SOAP_ENVELOPE_FAULT=SOAP_ENVELOPE_FAULT11
+        else:
+        	SOAP_ENVELOPE_FAULT=SOAP_ENVELOPE_FAULT12
+        	
+        soapFaultResponse=SOAP_ENVELOPE_FAULT.replace('$REPORTEXCEPTION$',etree.tostring(exceptionReportTree))
+       
+        	
+        exceptionTree=exceptionReportTree.xpath("//*[local-name() = 'Exception']")
+        exceptionStr=etree.tostring(exceptionTree[0])
+        exceptionStr="<![CDATA["+exceptionStr+"]]>"
+       
+        return soapFaultResponse.replace('$REPORT$',exceptionStr)
+        	
+   	 
+        	
+
+    def getResponse(self,document,soapVersion,isSoapExecute):
         """Wrap document into soap envelope"""
         # very primitive, but works
         #SOAP 1.1 Content-type: text/xml
         # SOAP 1.2   Content-Type: application/xml maybe application/soap ?!
         
         document = document.__str__().replace("<?xml version=\"1.0\" encoding=\"utf-8\"?>","")
-        #return SOAP_ENVELOPE.replace("$SOAPBODY$",document)
        
-        if (int(soapVersion)==11):
-         	return SOAP_ENVELOPE11.replace("$SOAPBODY$",document)
+       
+       #Check if it's a isSoapFault
+        documentTree=etree.parse(StringIO.StringIO(document))
+        root=documentTree.getroot()
+        exceptionReportTree=root.xpath("//*[local-name() = 'ExceptionReport']")
+        if bool(exceptionReportTree):
+        	exceptionReportTree=exceptionReportTree[0] #getting the tree from list
+        	isSoapFaul=True
         else:
-        	return SOAP_ENVELOPE12.replace("$SOAPBODY$",document)
+        	isSoapFaul=False
+        	
+       
+        if isSoapExecute: 	 	
+        	WPSTree=documentTree
+        	#it continues as a normal document 	
+       	 	document=WPStoSOAP(WPSTree)
+       	 	      		
+       #normal response if not SOAP Fault
+        if not isSoapFaul:
+          
+           if (int(soapVersion)==11):
+         		return SOAP_ENVELOPE11.replace("$SOAPBODY$",document)
+           else:
+        		return SOAP_ENVELOPE12.replace("$SOAPBODY$",document)
+        else: #ERROR FAULT
+        	
+        	return self.doSOAPFault(exceptionReportTree,soapVersion)
         
 	
