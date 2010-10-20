@@ -117,13 +117,15 @@ if not dryRun and install and not os.environ.has_key("FAKEROOTKEY"):
     versionDirs = ['1_0_0']
 
     template_files = ['GetCapabilities', 'DescribeProcess','Execute']
-
-    for version in versionDirs:
-        for template_file in template_files:
-            print "Compiling template "+template_file
-            template_file = os.path.join(baseDir,version,
+    try:
+        for version in versionDirs:
+            for template_file in template_files:
+                print "Compiling template "+template_file
+                template_file = os.path.join(baseDir,version,
                                     template_file + '.tmpl')
-            template = TemplateProcessor(fileName=template_file,compile=True)
+                template = TemplateProcessor(fileName=template_file,compile=True)
+    except:
+        print "dry-run only, templates are not complied, "
 else:
     print "dry-run only, templates are not complied"
 
