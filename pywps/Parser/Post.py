@@ -123,7 +123,6 @@ class Post(Parser):
         self.checkRequestType(firstChild)
 
         # parse the document
-        #import pydevd;pydevd.settrace()
         self.inputs = self.requestParser.parse(self.document, self.inputs)
        
         
