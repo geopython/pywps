@@ -125,7 +125,7 @@ if not dryRun and install and not os.environ.has_key("FAKEROOTKEY"):
                                     template_file + '.tmpl')
                 template = TemplateProcessor(fileName=template_file,compile=True)
     except:
-        print "dry-run only, templates are not complied, "
+        print "dry-run only, templates are not complied, probably couldnt find the path"
 else:
     print "dry-run only, templates are not complied"
 
