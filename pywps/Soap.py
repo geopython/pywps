@@ -39,7 +39,7 @@ import pywps
 import logging
 from pywps import XSLT
 
-
+import types
 
 #For soap 1.2 -->http://www.w3.org/2003/05/soap-envelope (self.nsIndex=0)
 #For soap 1.1 -->http://schemas.xmlsoap.org/soap/envelope/ (self.nsIndex=1)
@@ -118,7 +118,7 @@ def SOAPtoWPS(tree):
     #The etree output of ComplexData will not contain the XSI namespace since this name space is defined in the head of the WPS:Execute and
     #during transformation and copy-of it is not passed to ComplexData element
    
-    
+   
     
     return etree.tostring(WPSTree)
 
@@ -157,15 +157,51 @@ def doFixTavernaBug(WPSTree):
 
 	return WPSTree
 
-		
 
+def doCleanBug5762(document):
+#Please check for ext		
+#http://bugs.python.org/issue5762
+#Problem cause by an empty XMLNS in the root element of the document
+#It's OK to have an empty attribute. Bug fixed in new python versions (2010-10-15 17:59) 	
+#Check for empty attributed in the root element and remove it:
+    
+    for node in doc_order_iter(document):
+	    attrMap=node.attributes
+	    try:
+       	    	for attrKey in attrMap.keys():
+          		attr=attrMap[attrKey]
+                  
+                #import pydevd;pydevd.settrace()
+                if (type(attr.value)==types.NoneType or len(attr.value)==0):
+            	    node.removeAttribute(attr.name)
+                   
+                    
+     	    except:
+		pass
+    return document
+
+def doc_order_iter(node):
+    """
+    Iterates over each node in document order,
+    returning each in turn
+    http://www.ibm.com/developerworks/library/x-tipgenr.html
+    """
+    #Document order returns the current node,
+    #then each of its children in turn
+    yield node
+    for child in node.childNodes:
+        #Create a generator for each child,
+        #Over which to iterate
+        for cn in doc_order_iter(child):
+            yield cn
+    return
 
 class SOAP:
     """Soap wrapper, used for parsing requests, which are in Soap envelope
     and creating Soap responses from normal XMLs.
 
     .. note:: This class is very primitive, it does not support advanced
-        Soap features, like authorization and so on.
+        Soap features, ralike authorization and so on.
     .. note: The class requires the lxml package to be installed so that XSLT can be used. The xml.dom module lacks such functionality    
 
     """
@@ -175,14 +211,22 @@ class SOAP:
 
     def __init__(self,document=None):
         if document:
+        	#http://bugs.python.org/issue5762
+            #import pydevd;pydevd.settrace()
+            #tmp=document.toxml()
+            #import pydevd;pydevd.settrace()
             try:
                if type(input) == type(""):
                   self.tree=etree.parse(StringIO.StringIO(unescape(document,entities={"&quot;":"'"})))
                #<?xml version='1.0' encoding='UTF-8'?> will cause a crash
                #lxml.etree.XMLSyntaxError: XML declaration allowed only at the start of the document, line 1, column 103
                else:
-                  self.tree = etree.parse(StringIO.StringIO(unescape(document.toxml(),entities={"&quot;":"'"}))) # Not very efficient, the XML is converted to string and then back again to XML
-            except etree.XMLSyntaxError,e:
+               	  try:
+                   		self.tree = etree.parse(StringIO.StringIO(unescape(document.toxml(),entities={"&quot;":"'"}))) # Not very efficient, the XML is converted to string and then back again to XML
+                  except:
+                  		document=doCleanBug5762(document)  
+                  		self.tree = etree.parse(StringIO.StringIO(unescape(document.toxml(),entities={"&quot;":"'"})))
+            except etree.XMLSyntaxError,e: # Generic parsing error
                  raise pywps.NoApplicableCode(e.message)
             
             
