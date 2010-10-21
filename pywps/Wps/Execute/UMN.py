@@ -45,7 +45,7 @@ except Exception,e:
     logging.info("osgeo package could not be loaded, mapserver not supported: %s" %e)
 
 
-#pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
+
 
 class UMN:
     """
