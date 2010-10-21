@@ -56,7 +56,7 @@ setup(
             'pywps',
             'pywps.Wps',
             'pywps.Wps.Execute',
-            'pywps.XSLT'
+            'pywps.XSLT',
             'pywps.etc',
             'pywps.Parser',
             'pywps.Process',
