@@ -5,6 +5,9 @@ SOAP wrapper
 """
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
+# Author:  Jorge de Jesus
+#		   http://rsg.pml.ac.uk
+#          jmdj@pml.ac.uk
 # License:
 #
 # Web Processing Service implementation
@@ -36,10 +39,11 @@ from xml.sax.saxutils import unescape # Very practical unescape char converted
 from lxml import etree
 import StringIO
 import pywps
-import logging
+
 from pywps import XSLT
 
 import types
+import re
 
 #For soap 1.2 -->http://www.w3.org/2003/05/soap-envelope (self.nsIndex=0)
 #For soap 1.1 -->http://schemas.xmlsoap.org/soap/envelope/ (self.nsIndex=1)
@@ -102,25 +106,28 @@ def getFirstChildNode(document):
     return document
 
 def SOAPtoWPS(tree):
-    #NOTE: The XSLT translation has some problems concerning the XSI namespace in the ComplexData. 
-    #The etree output of ComplexData will not contain the XSI namespace since this name space is defined in the head of the WPS:Execute and
-    #during transformation and copy-of it is not passed to ComplexData element
+    #NOTE: 
+    #The etree output of ComplexData will not contain the OWS/WPS/XSI namespace since this name space is defined in the head of the WPS:Execute
+    #The XSI is not necessary in the WPS:Execute, therefore it was deleted and its now inside the ComplexInput (if necessary)
+    #An input shouldn't have elements in with OWS/WPS namespace, nevertheless a hack was implemented that allows for their presence.
+    #The solution is a tiny hack the XSL file, the WPS/OWS namespace are different from the ComplexInput, something like this: http://REPLACEME/wps/1.0.0
+    #When etree is printed the REPLACEME is subtituted by www.opengis.net, creating the correct namespaces for the DOM parsing.
+    #The replace is done using module re and set that it has to do only 2 replaces in the beggining. Therefore the replace is independe of the since of XML content
+     
     XSLTDocIO=open(pywps.XSLT.__path__[0]+"/SOAP2WPS.xsl","r")
-    
-    XSLTDoc=etree.parse(XSLTDocIO,parser=None)
-    
+   
+    XSLTDoc=etree.parse(XSLTDocIO)
+   
     transformer=etree.XSLT(XSLTDoc)
     WPSTree = transformer(tree)
-    #MAJOR PROBLEM !!! If the namespaces aren't clean they output complex data with SOAP name spaces and drop other namespaces
+    
     etree.cleanup_namespaces(WPSTree)
     
-    #NOTE: The XSLT translation has some problems concerning the XSI namespace in the ComplexData. 
-    #The etree output of ComplexData will not contain the XSI namespace since this name space is defined in the head of the WPS:Execute and
-    #during transformation and copy-of it is not passed to ComplexData element
+    XMLOut=etree.tostring(WPSTree)
    
-   
+    XMLOut=re.sub(r'REPLACEME',"www.opengis.net",XMLOut,2)
     
-    return etree.tostring(WPSTree)
+    return XMLOut
 
 def WPStoSOAP(tree):
 	#If we have an expection then will just dump the Exception report and not the WPS failure + Exception Report
@@ -134,7 +141,7 @@ def WPStoSOAP(tree):
     if bool(exceptionElementList):
     	#Just dump the OGC exception
     	return etree.tostring(exceptionElementList[0])
-    
+   
     XSLTDoc =etree.parse(XSLTDocIO)
     transformer=etree.XSLT(XSLTDoc)
     SOAPTree=transformer(tree)
@@ -152,14 +159,13 @@ def doFixTavernaBug(WPSTree):
         #tagNameRequest=firstElement.tagName.split(":")[1]
         if tagNameRequest=="DescribeProcess" or tagNameRequest=="Execute":
              WPSTree.setAttribute("version","1.0.0")
-       		
-	    
+     
 
 	return WPSTree
 
 
 def doCleanBug5762(document):
-#Please check for ext		
+#Please check for explanation	
 #http://bugs.python.org/issue5762
 #Problem cause by an empty XMLNS in the root element of the document
 #It's OK to have an empty attribute. Bug fixed in new python versions (2010-10-15 17:59) 	
@@ -215,17 +221,18 @@ class SOAP:
             #import pydevd;pydevd.settrace()
             #tmp=document.toxml()
             #import pydevd;pydevd.settrace()
+            parser=etree.XMLParser(resolve_entities=False)
             try:
                if type(input) == type(""):
-                  self.tree=etree.parse(StringIO.StringIO(unescape(document,entities={"&quot;":"'"})))
+                  self.tree=etree.parse(StringIO.StringIO(unescape(document,entities={"&quot;":"'"})),parser)
                #<?xml version='1.0' encoding='UTF-8'?> will cause a crash
                #lxml.etree.XMLSyntaxError: XML declaration allowed only at the start of the document, line 1, column 103
                else:
                	  try:
-                   		self.tree = etree.parse(StringIO.StringIO(unescape(document.toxml(),entities={"&quot;":"'"}))) # Not very efficient, the XML is converted to string and then back again to XML
+                   		self.tree = etree.parse(StringIO.StringIO(unescape(document.toxml(),entities={"&quot;":"'"})),parser) # Not very efficient, the XML is converted to string and then back again to XML
                   except:
                   		document=doCleanBug5762(document)  
-                  		self.tree = etree.parse(StringIO.StringIO(unescape(document.toxml(),entities={"&quot;":"'"})))
+                  		self.tree = etree.parse(StringIO.StringIO(unescape(document.toxml(),entities={"&quot;":"'"})),parser)
             except etree.XMLSyntaxError,e: # Generic parsing error
                  raise pywps.NoApplicableCode(e.message)
             
@@ -262,7 +269,6 @@ class SOAP:
                    
                    XMLStr=SOAPtoWPS(reqWPS[0])
                    XMLDoc=minidom.parseString(XMLStr)
-                   
             	   #import pydevd;pydevd.settrace()                   
                    return getFirstChildNode(XMLDoc)
         
