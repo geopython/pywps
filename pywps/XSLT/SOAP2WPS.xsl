@@ -3,9 +3,14 @@
   <xsl:template match="/">
     <!-- Determine the Execute process id -->
     <!-- It gets the root element and passed the string after ExecuteProcess-->
+    <!-- PROBLEM: Namespaces in the WPS:Execute aren't passed to ComplexData (mainly OWS and WPS) -->
+    <!-- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" -->
+   <!--  xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsExecute_request.xsd" -->
+    <!-- xmlns:ows="http://www.opengis.net/ows/1.1" -->
+    <!-- xmlns:wps="http://www.opengis.net/wps/1.0.0" -->
     <xsl:variable name="processID" select="substring-after(name(./*),'ExecuteProcess_')"/>
     <xsl:variable name="HTTP_METHOD">GET</xsl:variable>
-    <wps:Execute xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" service="WPS" version="1.0.0" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsExecute_request.xsd">
+    <wps:Execute  xmlns:ows="http://REPLACEME/ows/1.1" xmlns:wps="http://REPLACEME/wps/1.0.0" service="WPS" version="1.0.0">
       <ows:Identifier>
         <xsl:value-of select="$processID"/>
       </ows:Identifier>
@@ -23,7 +28,11 @@
                 <wps:Data>
                   <wps:ComplexData>
                     <!--embedded XML begins here.-->
-                    <xsl:copy-of select="./*"/>
+                    
+                    <xsl:copy-of select="./*" />
+                   
+                 
+                    
                     <!--embedded XML ends here.-->
                   </wps:ComplexData>
                 </wps:Data>
@@ -74,4 +83,5 @@
       </wps:ResponseForm>
     </wps:Execute>
   </xsl:template>
+  
 </xsl:stylesheet>
