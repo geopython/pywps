@@ -133,10 +133,8 @@ class Request:
                 self.templateFile = os.path.join(templates,
                                     self.templateVersionDirectory,
                                         "Execute.tmpl")
-        elif self.wps.inputs.has_key("wsdl"):
-            self.templateFile = os.path.join(templates,
-                                self.templateVersionDirectory,
-                                    "Wsdl.tmpl")
+                
+     
 
         try:
             self.templateProcessor = TemplateProcessor(self.templateFile,compile=True)
