@@ -81,8 +81,6 @@ SOAP_ENVELOPE_FAULT11="""<?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Body><SOAP-ENV:Fault><faultcode>SOAP-ENV:Client</faultcode><faultstring>$REPORT$</faultstring><detail>$REPORTEXCEPTION$</detail></SOAP-ENV:Fault></SOAP-ENV:Body></SOAP-ENV:Envelope>"""
 
 
-
-
 soap = False
 
 
@@ -158,7 +156,7 @@ def doFixTavernaBug(WPSTree):
 		tagNameRequest=WPSTree.tag.split("}")[1]
         #tagNameRequest=firstElement.tagName.split(":")[1]
         if tagNameRequest=="DescribeProcess" or tagNameRequest=="Execute":
-             WPSTree.setAttribute("version","1.0.0")
+             WPSTree.set("version","1.0.0")
      
 
 	return WPSTree
