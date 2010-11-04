@@ -128,10 +128,12 @@ def SOAPtoWPS(tree):
     return XMLOut
 
 def WPStoSOAP(tree):
+	
+	
 	#If we have an expection then will just dump the Exception report and not the WPS failure + Exception Report
 	# This allows for the use of message ows:ExectionReport in the WSDL process description
     XSLTDocIO=open(pywps.XSLT.__path__[0]+"/WPS2SOAP.xsl","r")
-    
+   
     #Output: string XML 
     root=tree.getroot() #root is <type 'lxml.etree._Element'>
     #Check for Exception:
@@ -140,10 +142,12 @@ def WPStoSOAP(tree):
     	#Just dump the OGC exception
     	return etree.tostring(exceptionElementList[0])
    
+    
+
     XSLTDoc =etree.parse(XSLTDocIO)
     transformer=etree.XSLT(XSLTDoc)
     SOAPTree=transformer(tree)
-    
+   
     return etree.tostring(SOAPTree)
 
 def doFixTavernaBug(WPSTree):
@@ -216,9 +220,6 @@ class SOAP:
     def __init__(self,document=None):
         if document:
         	#http://bugs.python.org/issue5762
-            #import pydevd;pydevd.settrace()
-            #tmp=document.toxml()
-            #import pydevd;pydevd.settrace()
             parser=etree.XMLParser(resolve_entities=False)
             try:
                if type(input) == type(""):
@@ -259,15 +260,15 @@ class SOAP:
     	    The script will check for a standard WPS request or a ExecuteProcess_ one"""   
 	   
        
-            reqWPS=self.root.xpath("//*[local-name() = 'GetCapabilities' or local-name()='DescribeProcess' or local-name()='Execute' or contains(local-name(),'ExecuteProcess_')] ")
+            reqWPS=self.root.xpath("//*[local-name() = 'GetCapabilities' or local-name()='DescribeProcess' or local-name()='Execute' or contains(local-name(),'ExecuteProcess_') or contains(local-name(),'ExecuteProcessAsync_')] ")
             if bool(reqWPS):
              #General WPS:
            #print reqWPS[0].tag #getting the element's name
-                if "ExecuteProcess_" in reqWPS[0].tag:
+                if "ExecuteProcess" in reqWPS[0].tag:
                    
                    XMLStr=SOAPtoWPS(reqWPS[0])
                    XMLDoc=minidom.parseString(XMLStr)
-            	   #import pydevd;pydevd.settrace()                   
+            	  
                    return getFirstChildNode(XMLDoc)
         
         
