@@ -40,6 +40,7 @@ def response(response,targets,soapVersion=None,isSoap=False,isSoapExecute=False,
         soap = Soap.SOAP()
         
         response = soap.getResponse(response,soapVersion,isSoapExecute)
+        
 
     if isinstance(response,Exceptions.WPSException):
         response = response.__str__()
