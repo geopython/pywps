@@ -1,16 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0" xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1">
   <xsl:template match="/">
     <!-- Determine the Execute process id -->
     <!-- It gets the root element and passed the string after ExecuteProcess-->
-    <!-- PROBLEM: Namespaces in the WPS:Execute aren't passed to ComplexData (mainly OWS and WPS) -->
-    <!-- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" -->
-   <!--  xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsExecute_request.xsd" -->
-    <!-- xmlns:ows="http://www.opengis.net/ows/1.1" -->
-    <!-- xmlns:wps="http://www.opengis.net/wps/1.0.0" -->
-    <xsl:variable name="processID" select="substring-after(name(./*),'ExecuteProcess_')"/>
+    
+    <!-- Check if its sync or async -->
+    
+    <xsl:variable name="async" select="boolean(contains(name(./*),'Async'))"/>
+       
+
+    <xsl:variable name="processID" select="substring-after(name(./*),'_')"/>
+    <!-- default HTTP method  -->
     <xsl:variable name="HTTP_METHOD">GET</xsl:variable>
-    <wps:Execute  xmlns:ows="http://REPLACEME/ows/1.1" xmlns:wps="http://REPLACEME/wps/1.0.0" service="WPS" version="1.0.0">
+    <!-- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  -->
+    <!-- xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsExecute_request.xsd" -->
+    <!--  -->
+    
+    <!-- Execute element -->
+    <xsl:element name="Execute" namespace="http://www.opengis.net/wps/1.0.0">
+     <xsl:copy-of select="document('')/xsl:stylesheet/namespace::*[name()!='xsl']"/>
+    <xsl:attribute name="service"><xsl:value-of select="'WPS'"></xsl:value-of></xsl:attribute>
+     <xsl:attribute name="version"><xsl:value-of select="'1.0.0'"></xsl:value-of></xsl:attribute>
+     
+    
+  <!--  <wps:Execute xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:wps="http://www.opengis.net/wps/1.0.0" service="WPS" version="1.0.0" >  --> 
       <ows:Identifier>
         <xsl:value-of select="$processID"/>
       </ows:Identifier>
@@ -27,11 +40,11 @@
                 </ows:Identifier>
                 <wps:Data>
                   <wps:ComplexData>
-                    <!--embedded XML begins here.-->
-                    
-                    <xsl:copy-of select="./*" />
-                   
-                 
+                
+              <xsl:copy-of select="./*"/> 
+             
+            
+                    <!--embedded XML begins here.xsl:copy-of select=".*" /-->
                     
                     <!--embedded XML ends here.-->
                   </wps:ComplexData>
@@ -78,10 +91,21 @@
         </xsl:for-each>
       </wps:DataInputs>
       <wps:ResponseForm>
-        <wps:ResponseDocument lineage="false">
-        </wps:ResponseDocument>
+      <!-- Response document either sync or async -->
+      <xsl:element name="ResponseDocument">
+      <xsl:attribute name="lineage"><xsl:value-of select="'false'"></xsl:value-of></xsl:attribute>
+       <xsl:choose>
+     <xsl:when test="$async">
+     	<xsl:attribute name="storeExecuteResponse"><xsl:value-of select="'true'"></xsl:value-of></xsl:attribute>
+        <xsl:attribute name="status"><xsl:value-of select="'true'"></xsl:value-of></xsl:attribute>
+     </xsl:when><xsl:otherwise>
+        <xsl:attribute name="storeExecuteResponse"><xsl:value-of select="'false'"></xsl:value-of></xsl:attribute>
+        <xsl:attribute name="status"><xsl:value-of select="'false'"></xsl:value-of></xsl:attribute>
+     </xsl:otherwise>
+   </xsl:choose>
+      </xsl:element> <!--  end of response document -->
+
       </wps:ResponseForm>
-    </wps:Execute>
+    </xsl:element><!-- End of execute element -->   
   </xsl:template>
-  
 </xsl:stylesheet>

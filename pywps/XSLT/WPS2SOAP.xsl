@@ -1,10 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	<xsl:template match="/">
-		<!-- Getting Identifier and concerning it -->
-		<xsl:variable name="identifier" select="//*[local-name() = 'Identifier']"/>
-		<xsl:variable name="identifierSOAP" select="concat('ExecuteProcess_',$identifier,'Response')"/>
-	<xsl:value-of select="$identifierSOAP"></xsl:value-of>
+	
+	<!-- Either the response is a processAccepted (async) or ProcessSucceeded (sync or final result from async) -->
+	<!-- <wps:ProcessAccepted> then we have an async call -->
+	<xsl:variable name="async" select="boolean(//*[local-name()='ProcessAccepted'])"/>
+	
+	<xsl:variable name="identifier" select="//*[local-name() = 'Identifier']"/>
+<xsl:variable name="identifierSOAP">
+  <xsl:choose>
+    <xsl:when test="$async">
+     <xsl:value-of select="concat('ExecuteProcessAsync_',$identifier,'Response')"></xsl:value-of>
+    </xsl:when>
+    <xsl:otherwise>
+     <xsl:value-of select="concat('ExecuteProcess_',$identifier,'Response')"></xsl:value-of></xsl:otherwise>
+  </xsl:choose>
+</xsl:variable>
+	
 	<xsl:element name="{$identifierSOAP}">
+	
+	<xsl:choose>
+	<xsl:when test="$async">
+	<!-- statusURL reply -->
+	<xsl:element name="statusURLResult"><xsl:value-of select="//*[local-name()='ExecuteResponse']/@statusLocation"></xsl:value-of></xsl:element>
+	</xsl:when>
+	<xsl:otherwise>
+	    
 		<xsl:for-each select="//*[local-name()='Output']">
 			
 			<xsl:choose>
@@ -19,7 +40,7 @@
 			  <xsl:when test="./*/*/*">
 			  	<xsl:element name="{$complexIdentifier}"><xsl:copy-of select="./*/*/*" /></xsl:element>
 			  </xsl:when>
-			  <xsl:otherwise test="./*/*/text()">
+			  <xsl:otherwise>
 			    <xsl:element name="{$complexIdentifier}"><xsl:value-of select="./*/*/text()" /></xsl:element>
 			  </xsl:otherwise>
 			  </xsl:choose> <!-- End of complexData type choose -->
@@ -28,6 +49,8 @@
 			</xsl:choose> <!-- end of literal complexdata choose -->
 		
 		</xsl:for-each> <!--  end of Outoput output-->
+		</xsl:otherwise> <!-- end of sync option -->
+	</xsl:choose> <!-- end of async/sync choose -->
 	
 	</xsl:element> <!-- end of ExecuteProcess_fooResponse -->	
 	</xsl:template>
