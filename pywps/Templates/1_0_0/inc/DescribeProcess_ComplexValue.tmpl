@@ -1,6 +1,6 @@
                     <Default>
                         <Format>
-                            <ows:MimeType><TMPL_VAR mimetype></ows:MimeType>
+                            <MimeType><TMPL_VAR mimetype></MimeType>
                             <TMPL_IF encoding>
                             <Encoding><TMPL_VAR encoding></Encoding>
                             </TMPL_IF>
@@ -12,7 +12,7 @@
                     <Supported>
                         <TMPL_LOOP Formats>
                         <Format>
-                            <ows:MimeType><TMPL_VAR mimetype></ows:MimeType>
+                            <MimeType><TMPL_VAR mimetype></MimeType>
                             <TMPL_IF encoding>
                             <Encoding><TMPL_VAR encoding></Encoding>
                             </TMPL_IF>
