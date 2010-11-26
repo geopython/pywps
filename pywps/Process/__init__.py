@@ -248,7 +248,7 @@ class WPSProcess:
     pywps = None
 
     def __init__(self, identifier, title = None, abstract=None,
-            metadata=[],profile=[], version=None,
+            metadata=[],profile=[], version=1.0,
             statusSupported=True, storeSupported=False, grassLocation=None,
             logFile = sys.stderr):
         """Contructor"""
