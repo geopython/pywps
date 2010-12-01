@@ -21,7 +21,7 @@ Inputs and outputs of OGC WPS Processes
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import types,re, base64,logging
+import os,types,re, base64,logging
 try:
     import magic
 except:
@@ -416,26 +416,22 @@ class ComplexInput(Input):
         fout.write(data)
         fout.close()
 
-        
-        # check, if the file is binary or not
-        if self.format["mimeType"].find("text") == -1:
-            # it *should* be binary, is the file really binary?
-            # if so, convert it to binary using base64
-            if self.ms and self.ms.file(fout.name).find("text") > -1: 
-                rename(fout.name,fout.name+".base64")
-                try:
-                    base64.decode(open(fout.name+".base64"),
-                                open(fout.name,"w"))
-                except:
-                    self.onProblem("NoApplicableCode",
-                    "Could not convert text input to binary using base64 encoding.")
-
-                
-
         # check the mimeType again
         if self.ms:
             self.checkMimeType(fout.name,self.ms.file(fout.name))
-            
+               
+        # check, if the file is binary or not
+        # TODO: better check for non-binary mime types
+        if self.format["mimeType"].lower().split("/")[0] != "text":
+            # convert it to binary using base64
+            rename(fout.name,fout.name+".base64")
+            try:
+                base64.decode(open(fout.name+".base64"), open(fout.name,"w"))
+            except:
+                self.onProblem("NoApplicableCode", "Could not convert text input to binary using base64 encoding.")
+            finally:
+                os.remove(fout.name+".base64")
+    
         resp = self._setValueWithOccurence(self.value, outputName)
         if resp:
             return resp
