@@ -21,11 +21,9 @@ Inputs and outputs of OGC WPS Processes
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import types,re, base64,logging
-try:
-    import magic
-except:
-    pass
+import os,types,re, base64,logging
+import magic
+
 from pywps import Exceptions
 
 class Input:
@@ -363,8 +361,7 @@ class ComplexInput(Input):
                 format["schema"] = None
 
         self.formats = formats
-        self.format = self.formats[0]
-
+        self.format = None
         try:
             self.ms = magic.open(magic.MAGIC_MIME)
             self.ms.load()
@@ -388,7 +385,7 @@ class ComplexInput(Input):
 
         # download data
         if input.has_key("asReference") and input["asReference"] == True:
-            import sys
+            import sys         
             self.downloadData(input["value"])
         else:
             self.storeData(input["value"])
@@ -400,7 +397,7 @@ class ComplexInput(Input):
         
         :param data: the data, which should be stored
         :type data: string
-        """
+        """  
         import tempfile
         from os import curdir, rename
 
@@ -416,25 +413,21 @@ class ComplexInput(Input):
         fout.write(data)
         fout.close()
 
-        
-        # check, if the file is binary or not
-        if self.format["mimeType"].find("text") == -1:
-            # it *should* be binary, is the file really binary?
-            # if so, convert it to binary using base64
-            if self.ms and self.ms.file(fout.name).find("text") > -1: 
-                rename(fout.name,fout.name+".base64")
-                try:
-                    base64.decode(open(fout.name+".base64"),
-                                open(fout.name,"w"))
-                except:
-                    self.onProblem("NoApplicableCode",
-                    "Could not convert text input to binary using base64 encoding.")
-
-                
-
         # check the mimeType again
         if self.ms:
             self.checkMimeType(fout.name,self.ms.file(fout.name))
+        
+        if self.format["mimeType"].lower().split("/")[0] != "text":
+            # convert it to binary using base64
+            rename(fout.name,fout.name+".base64")
+            try:
+                base64.decode(open(fout.name+".base64"), open(fout.name,"w"))
+            except:
+                self.onProblem("NoApplicableCode", "Could not convert text input to binary using base64 encoding.")
+            finally:
+                os.remove(fout.name+".base64")
+        
+     
             
         resp = self._setValueWithOccurence(self.value, outputName)
         if resp:
@@ -503,18 +496,19 @@ class ComplexInput(Input):
         # check the mimetypes
         if self.ms:
             self.checkMimeType(fout.name,self.ms.file(fout.name))
-
+        
         resp = self._setValueWithOccurence(self.value, outputName)
         if resp:
             return resp
         return
     
     def onProblem(self,what, why):
-        """Empty method, called, when there was any problem with the input.
-        
+        """Empty method, called, when there was any problem with the input. 
+        This method is replaced in Execute.consolidateInputs, basically input.onProblem = self.onInputProblem
+        therefore Exception raise is implemented in Execute.onInputProblem()
         :param what: Message with error description
         :param why: Error code
-        """
+       """
         pass
 
     def checkMimeType(self,fileName,mimeType):
@@ -523,16 +517,18 @@ class ComplexInput(Input):
         :param fileName:
         :param mimeType:
         """
-        mimeTypes = "";
+       
         for format in self.formats:
-            mimeTypes += format["mimeType"] + " ";
-            if self.ms.file(fileName) in format["mimeType"]:
+        
+            #Note: magic output something like: 'image/tiff; charset=binary' we only need the typeContent 
+            if self.ms.file(fileName).split(';')[0] in format["mimeType"]:
                 self.format = format
                 return
+       
         if self.format == None:
-            self.onProblem("InvalidParameterValue",
-                "Files mimeType ["+ self.ms.file(fileName) +
-                " does not correspond with allowed mimeType values, which can be on from ["+ mimeTypes+"]")
+            #InvalidParameterValue requires a simple locator and doesn't support a verbose output
+            self.onProblem("InvalidParameterValue",self.identifier)
+      
 
 
     def onMaxFileSizeExceeded(self, what):
@@ -857,6 +853,9 @@ class ComplexOutput(Output):
         set, they will be determined using gdal/ogr libraries. If something
         does not work, try to adjust them manualy.
         
+        Unlike ComplexInput, the check for mimeType is done in Execute during
+        output consolidation.
+        
     """
     formats = None
     format = None
@@ -886,7 +885,7 @@ class ComplexOutput(Output):
                 format["schema"] = None
 
         self.formats = formats
-        self.format = formats[0]
+        self.format=None
         
         self.projection = projection
         self.bbox = bbox
