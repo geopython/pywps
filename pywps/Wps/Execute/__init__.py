@@ -726,6 +726,14 @@ class Execute(Request):
     def _lineageComplexInput(self, input, complexInput):
         """ Fill input of complex data
         """
+
+        # encode the input file, if it has non-text mimetype
+        if input.format["mimeType"].find("text") < 0:
+            #complexInput["cdata"] = 1
+            os.rename(input.value, input.value+".binary")
+            base64.encode(open(input.value+".binary"),open(input.value,"w"))
+
+         # set complex input
         complexInput["complexdata"] = open(input.value,"r").read()
         complexInput["encoding"] = input.format["encoding"]
         complexInput["mimetype"] = input.format["mimeType"]
@@ -847,7 +855,7 @@ class Execute(Request):
                     templateOutput["reference"] = 0
                     if output.type == "LiteralValue":
                         templateOutput = self._literalOutput(output,templateOutput)
-                        
+       
                     elif output.type == "ComplexValue":
                             templateOutput = self._complexOutput(output,templateOutput)
                     elif output.type == "BoundingBoxValue":
@@ -884,9 +892,9 @@ class Execute(Request):
             os.rename(output.value, output.value+".binary")
             base64.encode(open(output.value+".binary"),open(output.value,"w"))
             complexOutput["complexdata"] = open(output.value,"r").read()
-        else:
-            # set output value
-            complexOutput["complexdata"] = open(output.value,"r").read()
+        
+        # set output value
+        complexOutput["complexdata"] = open(output.value,"r").read()
 
         # remove <?xml version= ... part from beginning of some xml
         # documents
