@@ -194,7 +194,7 @@ class RequestParseTestCase(unittest.TestCase):
         executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-complexinput-output-as-reference.xml"))
         postinputs = postpywps.parseRequest(executeRequestFile)
         getinputs = getpywps.parseRequest("service=wps&request=execute&version=1.0.0&identifier=complexprocess&datainputs=[rasterin=http://foo/bar/raster.tif;vectorin=http://foo/bar/vector.gml]&responsedocument=[rasterout=@asreference=true;vectorout=@asreference=true]")
-
+        
         self.assertTrue(postinputs["responseform"]["responsedocument"]["outputs"][0]["asreference"] == \
                         postinputs["responseform"]["responsedocument"]["outputs"][0]["asreference"] == \
                         True)
