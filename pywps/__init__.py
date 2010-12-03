@@ -103,7 +103,7 @@ WPS_NAMESPACE = "http://www.opengis.net/wps/1.0.0"
 XLINK_NAMESPACE = "http://www.w3.org/1999/xlink"
 
 PYWPS_INSTALL_DIR = None # this working directory
-DEFAULT_LANG = "eng"
+DEFAULT_LANG = "en-CA"
 DEFAULT_VERSION = "1.0.0"
 
 logFile = None
