@@ -49,7 +49,7 @@ class WPSException(Exception):
 
         self.Exception = self.document.createElement("ows:Exception")
         self.Exception.setAttribute("exceptionCode",self.code)
-
+        
         if self.locator:
             self.Exception.setAttribute("locator",self.locator)
 
@@ -63,7 +63,7 @@ class WPSException(Exception):
             response = soapCls.getResponse(response)
 
     def __str__(self):
-
+        
         error = "PyWPS %s: Locator: %s; Value: %s\n" % (self.code, self.locator, self.value)
         try:
             logFile.write(error)
