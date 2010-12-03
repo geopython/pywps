@@ -27,6 +27,7 @@ import os
 import time, shutil, tempfile
 import sys
 from pywps import config
+import logging
 
 class Grass:
     """ GRASS initialization interface """
@@ -55,11 +56,16 @@ class Grass:
         for key in self.envs.keys():
             try:
                 self.setEnv(self.envs[key],config.getConfigValue("grass",key))
+                logging.info("GRASS environment variable %s set to %s" %\
+                        (key, config.getConfigValue("grass",key)))
             except :
+                logging.info("GRASS environment variable %s set to %s" %\
+                        (key, self.envs[key]))
                 pass
 
         # GIS_LOCK
         self.setEnv('GIS_LOCK',str(os.getpid()))
+        logging.info("GRASS GIS_LOCK set to %s" % str(os.getpid()))
 
     def mkMapset(self,location=None):
         """
@@ -134,8 +140,13 @@ class Grass:
         gisrc.write("OVERWRITE: 1\n")
         gisrc.write("GRASS_GUI: text\n")
         gisrc.close()
+        
+        logging.info("GRASS MAPSET set to %s" % self.mapsetName)
+        logging.info("GRASS LOCATION_NAME set to %s" % self.locationName)
+        logging.info("GRASS GISDBASE set to %s" % self.gisdbase)
 
         self.setEnv("GISRC",os.path.join(self.executeRequest.workingDir,"grassrc"))
+        logging.info("GRASS GISRC set to %s" % os.path.join(self.executeRequest.workingDir,"grassrc"))
 
         return self.mapsetName
 
