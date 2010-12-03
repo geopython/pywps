@@ -22,10 +22,8 @@ Inputs and outputs of OGC WPS Processes
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os,types,re, base64,logging
-try:
-    import magic
-except:
-    pass
+import magic
+
 from pywps import Exceptions
 
 class Input:
