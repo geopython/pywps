@@ -426,9 +426,7 @@ class ComplexInput(Input):
                 self.onProblem("NoApplicableCode", "Could not convert text input to binary using base64 encoding.")
             finally:
                 os.remove(fout.name+".base64")
-        
-     
-            
+    
         resp = self._setValueWithOccurence(self.value, outputName)
         if resp:
             return resp
