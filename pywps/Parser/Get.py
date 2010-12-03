@@ -105,7 +105,7 @@ class Get(Parser):
 
             # parse the request
             self.inputs = self.requestParser.parse(self.unparsedInputs, self.inputs)
-
+            
         if not self.inputs:
             raise MissingParameterValue("service")
         return self.inputs

@@ -582,7 +582,8 @@ class Get(GetParser):
             for attribute in attributes:
                 attributeKey, attributeValue = attribute.split("=")
                 parsedDataInputs[-1][attributeKey.lower()] =\
-                                                    self._trueOrFalse(attributeValue)
+                                               self._trueOrFalse(attributeValue)
+       
         return parsedDataInputs
 
     def _trueOrFalse(self,str):
