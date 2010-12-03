@@ -124,7 +124,7 @@ def SOAPtoWPS(tree):
     XMLOut=etree.tostring(WPSTree)
    
     XMLOut=re.sub(r'REPLACEME',"www.opengis.net",XMLOut,2)
-    
+   
     return XMLOut
 
 def WPStoSOAP(tree):
