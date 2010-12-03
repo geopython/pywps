@@ -891,7 +891,7 @@ class Execute(Request):
             #complexOutput["cdata"] = 1
             os.rename(output.value, output.value+".binary")
             base64.encode(open(output.value+".binary"),open(output.value,"w"))
-            complexOutput["complexdata"] = open(output.value,"r").read()
+            
         
         # set output value
         complexOutput["complexdata"] = open(output.value,"r").read()
