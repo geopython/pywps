@@ -101,7 +101,7 @@ class Post(Parser):
                     raise pywps.FileSizeExceeded()
             else:
                 inputXml = file.read()
-                
+               
             # make DOM from XML
             try:
                
