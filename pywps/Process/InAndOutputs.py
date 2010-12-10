@@ -361,8 +361,7 @@ class ComplexInput(Input):
                 format["schema"] = None
 
         self.formats = formats
-        self.format = self.formats[0]
-
+        self.format = None
         try:
             self.ms = magic.open(magic.MAGIC_MIME)
             self.ms.load()
@@ -386,7 +385,7 @@ class ComplexInput(Input):
 
         # download data
         if input.has_key("asReference") and input["asReference"] == True:
-            import sys
+            import sys         
             self.downloadData(input["value"])
         else:
             self.storeData(input["value"])
@@ -417,9 +416,7 @@ class ComplexInput(Input):
         # check the mimeType again
         if self.ms:
             self.checkMimeType(fout.name,self.ms.file(fout.name))
-               
-        # check, if the file is binary or not
-        # TODO: better check for non-binary mime types
+        
         if self.format["mimeType"].lower().split("/")[0] != "text":
             # convert it to binary using base64
             rename(fout.name,fout.name+".base64")
@@ -429,7 +426,9 @@ class ComplexInput(Input):
                 self.onProblem("NoApplicableCode", "Could not convert text input to binary using base64 encoding.")
             finally:
                 os.remove(fout.name+".base64")
-    
+        
+     
+            
         resp = self._setValueWithOccurence(self.value, outputName)
         if resp:
             return resp
@@ -504,11 +503,12 @@ class ComplexInput(Input):
         return
     
     def onProblem(self,what, why):
-        """Empty method, called, when there was any problem with the input.
-        
+        """Empty method, called, when there was any problem with the input. 
+        This method is replaced in Execute.consolidateInputs, basically input.onProblem = self.onInputProblem
+        therefore Exception raise is implemented in Execute.onInputProblem()
         :param what: Message with error description
         :param why: Error code
-        """
+       """
         pass
 
     def checkMimeType(self,fileName,mimeType):
@@ -517,16 +517,18 @@ class ComplexInput(Input):
         :param fileName:
         :param mimeType:
         """
-        mimeTypes = "";
+       
         for format in self.formats:
-            mimeTypes += format["mimeType"] + " ";
-            if self.ms.file(fileName) in format["mimeType"]:
+        
+            #Note: magic output something like: 'image/tiff; charset=binary' we only need the typeContent 
+            if self.ms.file(fileName).split(';')[0] in format["mimeType"]:
                 self.format = format
                 return
+       
         if self.format == None:
-            self.onProblem("InvalidParameterValue",
-                "Files mimeType ["+ self.ms.file(fileName) +
-                " does not correspond with allowed mimeType values, which can be on from ["+ mimeTypes+"]")
+            #InvalidParameterValue requires a simple locator and doesn't support a verbose output
+            self.onProblem("InvalidParameterValue",self.identifier)
+      
 
 
     def onMaxFileSizeExceeded(self, what):
@@ -851,6 +853,9 @@ class ComplexOutput(Output):
         set, they will be determined using gdal/ogr libraries. If something
         does not work, try to adjust them manualy.
         
+        Unlike ComplexInput, the check for mimeType is done in Execute during
+        output consolidation.
+        
     """
     formats = None
     format = None
@@ -880,7 +885,7 @@ class ComplexOutput(Output):
                 format["schema"] = None
 
         self.formats = formats
-        self.format = formats[0]
+        self.format=None
         
         self.projection = projection
         self.bbox = bbox
@@ -897,8 +902,8 @@ class ComplexOutput(Output):
     def setValue(self, value):
         """Set the output value
 
-        :param value: value to be returned (file name, file itself, or (c)StringIO)
-        :type value: string,file, stringIO.stringIO or cStringIO.StringIO
+        :param value: value to be returned (file name or file itself)
+        :type value: string or file
         """
         
         #Note: cStringIO and StringIO are totally messed up, StringIO is type instance, cString is type cStringIO.StringO

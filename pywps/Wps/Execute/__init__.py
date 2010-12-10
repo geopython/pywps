@@ -536,10 +536,20 @@ class Execute(Request):
             exception = pywps.FileSizeExceeded
         elif what == "NoApplicableCode":
             exception = pywps.NoApplicableCode
-
+        elif what == "InvalidParameterValue":
+            exception = pywps.InvalidParameterValue
+        
         self.cleanEnv()
         raise exception(why)
-
+    
+    def onOutputProblem(self,identifier):
+        """This method logs the existance of problens in the complexData output mimeType
+        :param what: locator of the problem
+        :param why: possible reason of the problem
+        """
+        pywps.debug("Incorrect mimetype in %s" % identifier)          
+    
+    
     def executeProcess(self):
         """Calls 'execute' method of the process, catches possible exceptions
         and set process failed or succeeded
@@ -800,7 +810,8 @@ class Execute(Request):
         return literalOutput
 
     def _lineageComplexOutput(self, output, complexOutput):
-
+        
+        self.checkMimeType(output)
         complexOutput["mimetype"] = output.format["mimeType"]
         complexOutput["encoding"] = output.format["encoding"]
         complexOutput["schema"] = output.format["schema"]
@@ -833,6 +844,7 @@ class Execute(Request):
 
 
                 # Reference
+                
                 if output.asReference:
                     templateOutput = self._asReferenceOutput(templateOutput, output)
                 # Data
@@ -840,6 +852,7 @@ class Execute(Request):
                     templateOutput["reference"] = 0
                     if output.type == "LiteralValue":
                         templateOutput = self._literalOutput(output,templateOutput)
+       
                     elif output.type == "ComplexValue":
                         templateOutput = self._complexOutput(output,templateOutput)
                     elif output.type == "BoundingBoxValue":
@@ -861,9 +874,11 @@ class Execute(Request):
         literalOutput["literaldata"] = output.value
 
         return literalOutput
-
+         
     def _complexOutput(self, output, complexOutput):
-
+        
+        self.checkMimeType(output)
+  
         complexOutput["mimeType"] = output.format["mimeType"]
         complexOutput["encoding"] = output.format["encoding"]
         complexOutput["schema"] = output.format["schema"]
@@ -932,6 +947,7 @@ class Execute(Request):
                 if owsreference:
                     templateOutput["reference"] = owsreference
 
+            self.checkMimeType(output)
             templateOutput["mimetype"] = output.format["mimeType"]
             templateOutput["schema"] = output.format["encoding"]
             templateOutput["encoding"] = output.format["schema"]
@@ -949,6 +965,27 @@ class Execute(Request):
         # All other platforms: check for same pathname.
         return (os.path.normcase(os.path.abspath(src)) ==
                 os.path.normcase(os.path.abspath(dst)))
+
+    def checkMimeType(self,output):
+        """
+        Checks the complexData output to determine if the mimeType is correct.
+        if mimeType is not in the list defined by the user then it will log it as an error
+        and use magic module to determine the correct mimeType, outputing the correct mimeType to the 
+        WPS document.
+        Mainly used by: _asReferenceOutput,_complexOutput,lineageComplexOutput,_lineageComplexReference
+        """
+        mimeType=output.ms.file(output.value).split(';')[0]
+        for format in output.formats:
+            if mimeType in format["mimeType"]:
+                output.format = format
+                
+       
+        if output.format == None: 
+            self.onOutputProblem(output.identifier)
+            #In mimeType is not found in the output list, We will use the one checked by magic
+            output.format={"mimeType":mimeType,"encoding":None,"schema":None}
+
+
 
     def makeSessionId(self):
         """ Returns unique Execute session ID
@@ -1099,7 +1136,8 @@ class Execute(Request):
 
         elif output.type == "ComplexValue":
 
-            # copy the file to safe place
+            self.checkMimeType(output)
+             # copy the file to safe place
             outName = os.path.basename(output.value)
             outSuffix = os.path.splitext(outName)[1]
             tmp = tempfile.mkstemp(suffix=outSuffix, prefix="%s-%s" % (output.identifier,self.pid),dir=os.path.join(config.getConfigValue("server","outputPath")))
@@ -1108,5 +1146,6 @@ class Execute(Request):
             if not self._samefile(output.value,outFile):
                 COPY(os.path.abspath(output.value), outFile)
 
+            #check 
             self.contentType = output.format["mimeType"]
             self.response = open(outFile,"rb")
