@@ -898,8 +898,7 @@ class Execute(Request):
 
         # remove <?xml version= ... part from beginning of some xml
         # documents
-        if output.format["mimeType"].find("xml") or\
-           output.format["mimeType"].find("gml") > -1:
+        if output.format["mimeType"].find("xml") > -1:
             beginXml = complexOutput["complexdata"].split("\n")[0]
             if  beginXml.find("<?xml ") > -1:
                 complexOutput["complexdata"] = complexOutput["complexdata"].replace(beginXml+"\n","")
@@ -979,17 +978,30 @@ class Execute(Request):
         Mainly used by: _asReferenceOutput,_complexOutput,lineageComplexOutput,_lineageComplexReference
         """
         mimeType=output.ms.file(output.value).split(';')[0]
-        for format in output.formats:
-            if mimeType in format["mimeType"]:
-                output.format = format
-                
-       
-        if output.format == None: 
-            self.onOutputProblem(output.identifier)
-            #In mimeType is not found in the output list, We will use the one checked by magic
+        if mimeType.find("text")==-1: # no text or xml
+            for format in output.formats:
+                if mimeType in format["mimeType"]:
+                    output.format = format
+            if output.format == None: 
+                self.onOutputProblem(output.identifier)
+            #If mimeType is not found in the output list, We will use the one checked by magic
             output.format={"mimeType":mimeType,"encoding":None,"schema":None}
-
-
+        else: #dealing with text or xml
+            #if we have < > we assume XML other wise plan text
+            f = open(output.value, 'r+')
+            startString=f.read(5)
+            f.seek(-5,2)
+            endString=f.read(5)
+            if (("<" in startString) or ("&lt;" in startString)) and ((">" in endString) or ("&gt;" in endString)):
+                #assuming text/xml
+                mimeType="text/xml"
+                for format in output.formats:
+                    if mimeType in format["mimeType"]:
+                        output.format = format  
+            else:
+                #assuming text/plain
+                mimeType="text/plain"
+                output.format={"mimeType":mimeType,"encoding":None,"schema":None}
 
     def makeSessionId(self):
         """ Returns unique Execute session ID

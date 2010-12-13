@@ -3,6 +3,7 @@ import sys
 
 pywpsPath = os.path.abspath(os.path.join(os.path.split(os.path.abspath(__file__))[0],".."))
 sys.path.append(pywpsPath)
+sys.path.append("/users/blue_rsghome/jmdj/.eclipse/793567567/plugins/org.python.pydev.debug_1.6.0.2010071813/pysrc/")
 
 import pywps
 import pywps.Process
@@ -244,7 +245,6 @@ class RequestGetTestCase(unittest.TestCase):
         postpywps = pywps.Pywps(pywps.METHOD_POST)
         executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-complexinput-output-as-reference.xml"))
         postinputs = postpywps.parseRequest(executeRequestFile)
-
         postpywps.performRequest()
         
         #print postpywps.request.process.outputs["rasterout"].value
@@ -275,4 +275,7 @@ class RequestGetTestCase(unittest.TestCase):
         
 
 if __name__ == "__main__":
-    unittest.main()
+   # unittest.main()
+   suite = unittest.TestLoader().loadTestsFromTestCase(RequestGetTestCase)
+   unittest.TextTestRunner(verbosity=2).run(suite)
+
