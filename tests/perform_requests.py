@@ -3,7 +3,7 @@ import sys
 
 pywpsPath = os.path.abspath(os.path.join(os.path.split(os.path.abspath(__file__))[0],".."))
 sys.path.append(pywpsPath)
-sys.path.append("/users/blue_rsghome/jmdj/.eclipse/793567567/plugins/org.python.pydev.debug_1.6.0.2010071813/pysrc/")
+
 
 import pywps
 import pywps.Process
