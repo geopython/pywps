@@ -60,7 +60,8 @@ class ComplexProcess(WPSProcess):
             storeSupported=True)
 
         self.vectorin = self.addComplexInput(identifier="vectorin",
-                                                 title="Vector file")
+                                                 title="Vector file",
+                                                  formats=[{"mimeType":"text/xml"},{"mimeType":"application/xml"}])
 
         self.rasterin = self.addComplexInput(identifier="rasterin",
                                                  title="Raster file",
