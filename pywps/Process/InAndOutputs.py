@@ -23,8 +23,9 @@ Inputs and outputs of OGC WPS Processes
 
 import os,types,re, base64,logging
 import magic
-
 from pywps import Exceptions
+import sys
+
 
 class Input:
     """Class WPS Input
@@ -413,19 +414,23 @@ class ComplexInput(Input):
         fout.write(data)
         fout.close()
         
-        if self.formats[0]["mimeType"].lower().split("/")[0] != "text": 
+        if  (self.formats[0]["mimeType"].lower().split("/")[0] != "text" and self.formats[0]["mimeType"].lower() != "application/xml"): 
                # convert it to binary using base64
                rename(fout.name,fout.name+".base64")
                try:
                    base64.decode(open(fout.name+".base64"), open(fout.name,"w"))
                except:
                    self.onProblem("NoApplicableCode", "Could not convert text input to binary using base64 encoding.")
-               finally:
-                   os.remove(fout.name+".base64")
+               finally:  
+                    os.remove(fout.name+".base64")
+                  
+                       
+                
+                      
          
         #MimeType can be checked, since we no longer have a base64 binary content   
         self.checkMimeType(fout.name)
-
+ 
         resp = self._setValueWithOccurence(self.value, outputName)
         if resp:
             return resp
@@ -513,13 +518,13 @@ class ComplexInput(Input):
         :param fileName:
         :param mimeType:
         """
+       
         
         
         #magic can't determine if a string is plain text of text/xml
         #so we  can only validate the content for text
          #Note: magic output something like: 'image/tiff; charset=binary' we only need the typeContent 
         mimeType=self.ms.file(fileName).split(';')[0]
-        
         if mimeType.find("text")==-1: # no text or xml
             for format in self.formats:
            
@@ -528,7 +533,8 @@ class ComplexInput(Input):
                     return
                 
             if self.format == None:
-            #InvalidParameterValue requires a simple locator and doesn't support a verbose output
+                #InvalidParameterValue requires a simple locator and doesn't support a verbose output
+                logging.debug("%s has mimeType %s according to magic. MimeType not valid according to process" % (str(self.identifier),str(mimeType)))
                 self.onProblem("InvalidParameterValue",self.identifier)
       
 

@@ -17,7 +17,8 @@ class Process(WPSProcess):
               grassLocation =False)
               
          self.Input1 = self.addLiteralInput(identifier = "input1",
-                                            title = "Input1 number", 
+                                            title = "Input1 number",
+                                             
                                             default="100")
          self.Input2= self.addLiteralInput(identifier="input2", 
                                            title="Input2 number", 

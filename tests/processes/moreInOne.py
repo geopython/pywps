@@ -8,8 +8,8 @@ class FirstProcess(WPSProcess):
                             statusSupported=True,
                             storeSupported=True)
 
-        self.indata = self.addComplexInput(identifier="indata",title="Complex in")
-        self.outdata = self.addComplexOutput(identifier="outdata", title="Compex out")
+        self.indata = self.addComplexInput(identifier="indata",title="Complex in",formats=[{"mimeType":"application/xml"}])
+        self.outdata = self.addComplexOutput(identifier="outdata", title="Complex out",formats=[{"mimeType":"application/xml"}])
 
     def execute(self):
         self.outdata.setValue(self.indata.getValue())
