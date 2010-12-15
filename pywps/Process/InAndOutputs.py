@@ -23,8 +23,9 @@ Inputs and outputs of OGC WPS Processes
 
 import os,types,re, base64,logging
 import magic
-
 from pywps import Exceptions
+import sys
+
 
 class Input:
     """Class WPS Input
@@ -397,7 +398,7 @@ class ComplexInput(Input):
         
         :param data: the data, which should be stored
         :type data: string
-        """
+        """  
         import tempfile
         from os import curdir, rename
 
@@ -412,23 +413,24 @@ class ComplexInput(Input):
         # while getting the input XML file
         fout.write(data)
         fout.close()
-
-        # check the mimeType again
-        if self.ms:
-            self.checkMimeType(fout.name,self.ms.file(fout.name))
         
-        if self.format["mimeType"].lower().split("/")[0] != "text":
-            # convert it to binary using base64
-            rename(fout.name,fout.name+".base64")
-            try:
-                base64.decode(open(fout.name+".base64"), open(fout.name,"w"))
-            except:
-                self.onProblem("NoApplicableCode", "Could not convert text input to binary using base64 encoding.")
-            finally:
-                os.remove(fout.name+".base64")
-        
-     
-            
+        if  (self.formats[0]["mimeType"].lower().split("/")[0] != "text" and self.formats[0]["mimeType"].lower() != "application/xml"): 
+               # convert it to binary using base64
+               rename(fout.name,fout.name+".base64")
+               try:
+                   base64.decode(open(fout.name+".base64"), open(fout.name,"w"))
+               except:
+                   self.onProblem("NoApplicableCode", "Could not convert text input to binary using base64 encoding.")
+               finally:  
+                    os.remove(fout.name+".base64")
+                  
+                       
+                
+                      
+         
+        #MimeType can be checked, since we no longer have a base64 binary content   
+        self.checkMimeType(fout.name)
+ 
         resp = self._setValueWithOccurence(self.value, outputName)
         if resp:
             return resp
@@ -494,9 +496,8 @@ class ComplexInput(Input):
         fout.close()
 
         # check the mimetypes
-        if self.ms:
-            self.checkMimeType(fout.name,self.ms.file(fout.name))
-
+        self.checkMimeType(fout.name)
+        
         resp = self._setValueWithOccurence(self.value, outputName)
         if resp:
             return resp
@@ -511,23 +512,30 @@ class ComplexInput(Input):
        """
         pass
 
-    def checkMimeType(self,fileName,mimeType):
+    def checkMimeType(self,fileName):
         """Check, if the given mimetype is in self.formats
 
         :param fileName:
         :param mimeType:
         """
        
-        for format in self.formats:
         
-            #Note: magic output something like: 'image/tiff; charset=binary' we only need the typeContent 
-            if self.ms.file(fileName).split(';')[0] in format["mimeType"]:
-                self.format = format
-                return
-       
-        if self.format == None:
-            #InvalidParameterValue requires a simple locator and doesn't support a verbose output
-            self.onProblem("InvalidParameterValue",self.identifier)
+        
+        #magic can't determine if a string is plain text of text/xml
+        #so we  can only validate the content for text
+         #Note: magic output something like: 'image/tiff; charset=binary' we only need the typeContent 
+        mimeType=self.ms.file(fileName).split(';')[0]
+        if mimeType.find("text")==-1: # no text or xml
+            for format in self.formats:
+           
+                if mimeType in format["mimeType"]:
+                    self.format = format
+                    return
+                
+            if self.format == None:
+                #InvalidParameterValue requires a simple locator and doesn't support a verbose output
+                logging.debug("%s has mimeType %s according to magic. MimeType not valid according to process" % (str(self.identifier),str(mimeType)))
+                self.onProblem("InvalidParameterValue",self.identifier)
       
 
 

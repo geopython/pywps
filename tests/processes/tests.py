@@ -60,7 +60,8 @@ class ComplexProcess(WPSProcess):
             storeSupported=True)
 
         self.vectorin = self.addComplexInput(identifier="vectorin",
-                                                 title="Vector file")
+                                                 title="Vector file",
+                                                 formats = [{"mimeType":"application/xml"}])
 
         self.rasterin = self.addComplexInput(identifier="rasterin",
                                                  title="Raster file",
@@ -73,7 +74,8 @@ class ComplexProcess(WPSProcess):
                                                  type = type(True))
 
         self.vectorout = self.addComplexOutput(identifier="vectorout",
-                                                 title="Vector file")
+                                                 title="Vector file",
+                                                 formats = [{"mimeType":"application/xml"}])
         self.rasterout = self.addComplexOutput(identifier="rasterout",
                                                  title="Raster file",
                                                  formats = [{"mimeType":"image/tiff"}])
@@ -96,7 +98,8 @@ class ComplexProcessOWS(WPSProcess):
             storeSupported=True)
 
         self.vectorin = self.addComplexInput(identifier="vectorin",
-                                                 title="Vector file")
+                                                 title="Vector file",
+                                                 formats =[{"mimeType":"application/xml"}])
 
         self.rasterin = self.addComplexInput(identifier="rasterin",
                                                  title="Raster file",
@@ -110,6 +113,7 @@ class ComplexProcessOWS(WPSProcess):
 
         self.vectorout = self.addComplexOutput(identifier="vectorout",
                                                  title="Vector file",
+                                                 formats =[{"mimeType":"application/xml"}],
                                                  useMapscript=True)
 
         self.rasterout = self.addComplexOutput(identifier="rasterout",

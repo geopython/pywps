@@ -5,8 +5,8 @@
 
 """
 
-# Author:	Jachym Cepicky
-#        	http://les-ejk.cz
+# Author:    Jachym Cepicky
+#            http://les-ejk.cz
 #               jachym at les-ejk dot cz
 # License:
 #
@@ -542,12 +542,12 @@ class Execute(Request):
         self.cleanEnv()
         raise exception(why)
     
-    def onOutputProblem(self,identifier):
+    def onOutputProblem(self,identifier,mimeType):
         """This method logs the existance of problens in the complexData output mimeType
         :param what: locator of the problem
         :param why: possible reason of the problem
         """
-        pywps.debug("Incorrect mimetype in %s" % identifier)          
+        pywps.debug("Incorrect mimetype in %s. Found mimeType:%s" % (identifier,mimeType))          
     
     
     def executeProcess(self):
@@ -618,6 +618,7 @@ class Execute(Request):
         self.statusTime = time.localtime()
         self.templateProcessor.set("statustime", time.strftime('%Y-%m-%dT%H:%M:%SZ', self.statusTime))
         self.status = status
+        
         if statusMessage != 0: self.statusMessage = statusMessage
         if percent != 0: self.percent = percent
         if exceptioncode != 0: self.exceptioncode = exceptioncode
@@ -731,7 +732,6 @@ class Execute(Request):
 
          # set complex input
         complexInput["complexdata"] = open(input.value,"r").read()
-
         complexInput["encoding"] = input.format["encoding"]
         complexInput["mimetype"] = input.format["mimeType"]
         complexInput["schema"] = input.format["schema"]
@@ -844,7 +844,6 @@ class Execute(Request):
 
 
                 # Reference
-                
                 if output.asReference:
                     templateOutput = self._asReferenceOutput(templateOutput, output)
                 # Data
@@ -854,7 +853,7 @@ class Execute(Request):
                         templateOutput = self._literalOutput(output,templateOutput)
        
                     elif output.type == "ComplexValue":
-                        templateOutput = self._complexOutput(output,templateOutput)
+                            templateOutput = self._complexOutput(output,templateOutput)
                     elif output.type == "BoundingBoxValue":
                         templateOutput = self._bboxOutput(output,templateOutput)
 
@@ -874,28 +873,28 @@ class Execute(Request):
         literalOutput["literaldata"] = output.value
 
         return literalOutput
-         
+
     def _complexOutput(self, output, complexOutput):
         
         self.checkMimeType(output)
-  
+
         complexOutput["mimeType"] = output.format["mimeType"]
         complexOutput["encoding"] = output.format["encoding"]
         complexOutput["schema"] = output.format["schema"]
-
+        
         # CDATA section in output
         if output.format["mimeType"].find("text") < 0:
             #complexOutput["cdata"] = 1
             os.rename(output.value, output.value+".binary")
             base64.encode(open(output.value+".binary"),open(output.value,"w"))
-
+            
+        
         # set output value
         complexOutput["complexdata"] = open(output.value,"r").read()
 
         # remove <?xml version= ... part from beginning of some xml
         # documents
-        if output.format["mimeType"].find("xml") or\
-           output.format["mimeType"].find("gml") > -1:
+        if output.format["mimeType"].find("xml") > -1:
             beginXml = complexOutput["complexdata"].split("\n")[0]
             if  beginXml.find("<?xml ") > -1:
                 complexOutput["complexdata"] = complexOutput["complexdata"].replace(beginXml+"\n","")
@@ -942,16 +941,20 @@ class Execute(Request):
             # mapscript supported and the mapserver should be used for this
             # output
             # redefine the output 
+            
+            #Mapserver needs the format information, therefore checkMimeType has to be called before
+            self.checkMimeType(output)
+            
             if self.umn and output.useMapscript:
                 owsreference = self.umn.getReference(output)
                 if owsreference:
                     templateOutput["reference"] = owsreference
 
-            self.checkMimeType(output)
+            
+            
             templateOutput["mimetype"] = output.format["mimeType"]
             templateOutput["schema"] = output.format["encoding"]
             templateOutput["encoding"] = output.format["schema"]
-
         return templateOutput
 
     def _samefile(self, src, dst):
@@ -969,24 +972,49 @@ class Execute(Request):
     def checkMimeType(self,output):
         """
         Checks the complexData output to determine if the mimeType is correct.
-        if mimeType is not in the list defined by the user then it will log it as an error
-        and use magic module to determine the correct mimeType, outputing the correct mimeType to the 
-        WPS document.
+        if mimeType is not in the list defined by the user then it will log it as an error, no further action will be taken
         Mainly used by: _asReferenceOutput,_complexOutput,lineageComplexOutput,_lineageComplexReference
+        Note: checkMimeType will set the output's format from the first 
         """
+        output.format=output.formats[0]
         mimeType=output.ms.file(output.value).split(';')[0]
-        for format in output.formats:
-            if mimeType in format["mimeType"]:
-                output.format = format
-                
+        isCorrect=False
+        
+        if mimeType.find("text")==-1 and mimeType.find("application/xml")==-1: # no text or xml
+            for format in output.formats:
+                if mimeType in format["mimeType"]:
+                    output.format=format
+                    isCorrect=True
+                    
+            if isCorrect == False: 
+                self.onOutputProblem(output.identifier,mimeType)
        
-        if output.format == None: 
-            self.onOutputProblem(output.identifier)
-            #In mimeType is not found in the output list, We will use the one checked by magic
-            output.format={"mimeType":mimeType,"encoding":None,"schema":None}
-
-
-
+        
+            #If mimeType is not found in the output list, We will use the one checked by magic
+            #output.format={"mimeType":mimeType,"encoding":None,"schema":None}
+  
+        #=======================================================================
+        # else: #dealing with text or xml
+        #    if we have < > we assume XML other wise plan text
+        #    f = open(output.value, 'r+')
+        #    startString=f.read(5)
+        #    f.seek(-5,2)
+        #    endString=f.read(5)
+        #    import pydevd;pydevd.settrace()
+        #    if (("<" in startString) or ("&lt;" in startString)) and ((">" in endString) or ("&gt;" in endString)):
+        #        #assuming text/xml
+        #        mimeType="text/xml"
+        #        import pydevd;pydevd.settrace()
+        #        for format in output.formats:
+        #            if mimeType in format["mimeType"]:
+        #                isCorrect=True
+        #    else:
+        #        assuming text/plain
+        #        self.onOutputProblem(output.identifier,mimeType)
+        #        mimeType="text/plain"
+        #        output.format={"mimeType":mimeType,"encoding":None,"schema":None}
+        #=======================================================================
+                
     def makeSessionId(self):
         """ Returns unique Execute session ID
 
