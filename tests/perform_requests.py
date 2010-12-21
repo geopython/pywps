@@ -30,6 +30,7 @@ class RequestGetTestCase(unittest.TestCase):
     wfsurl = "http://www2.dmsolutions.ca/cgi-bin/mswfs_gmap?version=1.0.0&request=getfeature&service=wfs&typename=park"
     wcsurl = "http://www.bnhelp.cz/cgi-bin/crtopo?service=WMS&request=GetMap&LAYERS=sitwgs&TRANSPARENT=true&FORMAT=image%2Ftiff&EXCEPTIONS=application%2Fvnd.ogc.se_xml&VERSION=1.1.1&STYLES=default&SRS=EPSG%3A4326&BBOX=-10,-10,10,10&WIDTH=50&HEIGHT=50"
     wpsns = "http://www.opengis.net/wps/1.0.0"
+    owsns = "http://www.opengis.net/ows/1.1"
     xmldom = None
 
 
@@ -263,23 +264,64 @@ class RequestGetTestCase(unittest.TestCase):
         import tempfile
         
         getpywps = pywps.Pywps(pywps.METHOD_GET)
-        inputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=complexprocessows&datainputs=[rasterin=%s;vectorin=%s]&responsedocument=[rasterout=@asreference=true;vectorout=@asreference=true]" % (urllib.quote(self.wcsurl), urllib.quote(self.wfsurl)))
+        #Outputs will be generated accordint to the order in responsedocument
+        inputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=complexprocessows&datainputs=[rasterin=%s;vectorin=%s]&responsedocument=[vectorout=@asreference=true;rasterout=@asreference=true]" % (urllib.quote(self.wcsurl), urllib.quote(self.wfsurl)))
         getpywps.performRequest()
         xmldom = minidom.parseString(getpywps.response)
-
+       
         self.assertFalse(len(xmldom.getElementsByTagNameNS(self.wpsns,"ExceptionReport")), 0)
 
         # try to get out the Reference elemengt
         wfsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[0].getAttribute("xlink:href")
         wcsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[1].getAttribute("xlink:href")
-
+        
         # test, if there are WFS and WCS request strings
         self.assertTrue(wfsurl.find("WFS") > -1)
         self.assertTrue(wcsurl.find("WCS") > -1)
         #print urllib.unquote(wfsurl)
         #print urllib.unquote(wcsurl)
-            
-
+    
+    def test14ParseExecuteResponseDocumentGET(self):
+         """Return a response document that only containts the requested ouputs """
+         import urllib
+        
+         getpywps = pywps.Pywps(pywps.METHOD_GET)
+         
+         #1 output only vectorout
+         inputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=complexprocess&datainputs=[rasterin=%s;vectorin=%s]&responsedocument=[vectorout=@asreference=true]" % (urllib.quote(self.wcsurl), urllib.quote(self.wfsurl)))
+         getpywps.performRequest()
+         xmldom = minidom.parseString(getpywps.response)  
+         self.assertEquals(len(xmldom.getElementsByTagNameNS(self.wpsns,"Output")),1)
+        
+         #check that it is vectorout
+         outputNodes=xmldom.getElementsByTagNameNS(self.wpsns,"Output")
+         identifierNodes=outputNodes[0].getElementsByTagNameNS(self.owsns,"Identifier")
+         self.assertEquals(identifierNodes[0].firstChild.nodeValue,"vectorout")
+         
+         
+         #all outputs --> blank responseDocument
+         inputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=complexprocess&datainputs=[rasterin=%s;vectorin=%s]&responsedocument=[]" % (urllib.quote(self.wcsurl), urllib.quote(self.wfsurl)))
+         getpywps.performRequest()
+         xmldom = minidom.parseString(getpywps.response)
+         self.assertEquals(len(xmldom.getElementsByTagNameNS(self.wpsns,"Output")),2)
+    
+    def test15ParseExecuteResponseDocumentPOST(self):
+        """Return a response document that only containts the requested ouputs, from an XML request """
+        import urllib
+        postpywps = pywps.Pywps(pywps.METHOD_POST)
+        executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-complexinput-one-output-as-reference.xml"))
+        postinputs = postpywps.parseRequest(executeRequestFile)
+        postpywps.performRequest()
+        xmldom = minidom.parseString(postpywps.response)
+        
+        #1 output only rasterout
+        self.assertEquals(len(xmldom.getElementsByTagNameNS(self.wpsns,"Output")),1)
+        
+         #check that it is rasterout
+        outputNodes=xmldom.getElementsByTagNameNS(self.wpsns,"Output")
+        identifierNodes=outputNodes[0].getElementsByTagNameNS(self.owsns,"Identifier")
+        self.assertEquals(identifierNodes[0].firstChild.nodeValue,"rasterout")
+        
     def _setFromEnv(self):
         os.putenv("PYWPS_PROCESSES", os.path.join(pywpsPath,"tests","processes"))
         os.environ["PYWPS_PROCESSES"] = os.path.join(pywpsPath,"tests","processes")

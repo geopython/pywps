@@ -862,8 +862,7 @@ class ComplexOutput(Output):
         does not work, try to adjust them manualy.
         
         Unlike ComplexInput, the check for mimeType is done in Execute during
-        output consolidation.
-        
+        output consolidation.        
     """
     formats = None
     format = None

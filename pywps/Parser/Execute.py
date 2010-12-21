@@ -476,8 +476,7 @@ class Get(GetParser):
         # ResponseDocument
         try:
             self.inputs["responseform"]["responsedocument"] = \
-                    {"outputs":  self.parseDataInputs(
-                                self.unparsedInputs["responsedocument"])}
+                    {"outputs":  self.parseDataInputs(self.unparsedInputs["responsedocument"])}  
         except KeyError:
             self.inputs["responseform"]["responsedocument"] = {}
 
@@ -520,7 +519,6 @@ class Get(GetParser):
             len(self.inputs["responseform"]["responsedocument"])>0:
             raise pywps.InvalidParameterValue(
                 "Either responseDocument or rawDataOutput should be specified, but not both")
-
         return self.inputs
 
     def _parseRawDataOutput(self, dataInput):
@@ -583,7 +581,6 @@ class Get(GetParser):
                 attributeKey, attributeValue = attribute.split("=")
                 parsedDataInputs[-1][attributeKey.lower()] =\
                                                self._trueOrFalse(attributeValue)
-       
         return parsedDataInputs
 
     def _trueOrFalse(self,str):

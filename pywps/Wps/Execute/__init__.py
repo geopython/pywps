@@ -273,6 +273,7 @@ class Execute(Request):
                 "status is true, but storeExecuteResponse is false")
 
         # HEAD
+       
         self.templateProcessor.set("encoding",
                                     config.getConfigValue("wps","encoding"))
         self.templateProcessor.set("lang",
@@ -299,7 +300,6 @@ class Execute(Request):
             # FIXME: forking is always required, unless we find some better
             # solution
             forkingRequired = True
-
             if forkingRequired:
                 try:
                     # this is the parent process
@@ -327,13 +327,12 @@ class Execute(Request):
 
             # init environment variable
             self.initEnv()
-
+            
             # download and consolidate data
             self.consolidateInputs()
-
+            
             # set output data attributes defined in the request
             self.consolidateOutputs()
-
             # Execute
             self.executeProcess()
 
@@ -367,6 +366,7 @@ class Execute(Request):
 
                 if not self.rawDataOutput:
                     # fill outputs
+                   
                     self.processOutputs()
 
                     if self.umn:
@@ -826,14 +826,36 @@ class Execute(Request):
 
         return bboxOutput
 
+    def getRequestedOutputs(self):
+        """Called from processOutputs and cross references the processe's outputs and the ones requested,
+        returning a list of ouputs that need to be present in the XML response document
+        """
+        outputsRequested=[]
+       
+        try:#Sometimes the responsedocument maybe empty, if so the  code will use outputsRequested=self.process.outputs.keys()
+            for output in self.wps.inputs["responseform"]["responsedocument"]["outputs"]:
+                outputsRequested.append(output["identifier"])
+        except:
+            pass
+         
+        #If no ouputs request is present then dump everything: Table 39 WPS 1.0.0 document    
+        if outputsRequested==[]:
+            outputsRequested=self.process.outputs.keys()
+        return outputsRequested
+
+
+
     def processOutputs(self):
         """Fill <ProcessOutputs> part in the output XML document
         This method is called if, self.status == ProcessSucceeded
         """
 
         templateOutputs = []
-
-        for identifier in self.process.outputs.keys():
+        outputsRequested=self.getRequestedOutputs()
+        
+        
+        for identifier in outputsRequested:
+        #for identifier in self.process.outputs.keys():
             try:
                 templateOutput = {}
                 output = self.process.outputs[identifier]
@@ -977,6 +999,9 @@ class Execute(Request):
         Note: checkMimeType will set the output's format from the first 
         """
         output.format=output.formats[0]
+        #import pydevd;pydevd.settrace()
+        tmp=output.ms.file(output.value)
+        
         mimeType=output.ms.file(output.value).split(';')[0]
         isCorrect=False
         
