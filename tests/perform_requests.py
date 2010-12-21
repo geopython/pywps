@@ -302,24 +302,36 @@ class RequestGetTestCase(unittest.TestCase):
          #all outputs --> blank responseDocument
          inputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=complexprocess&datainputs=[rasterin=%s;vectorin=%s]&responsedocument=[]" % (urllib.quote(self.wcsurl), urllib.quote(self.wfsurl)))
          getpywps.performRequest()
+         
          xmldom = minidom.parseString(getpywps.response)
          self.assertEquals(len(xmldom.getElementsByTagNameNS(self.wpsns,"Output")),2)
     
     def test15ParseExecuteResponseDocumentPOST(self):
-        """Return a response document that only containts the requested ouputs, from an XML request """
+        """Return a response document that only containts the requested ouputs, from an XML request 
+        lineage output will also be checked
+        """
+        
         import urllib
         postpywps = pywps.Pywps(pywps.METHOD_POST)
         executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-complexinput-one-output-as-reference.xml"))
         postinputs = postpywps.parseRequest(executeRequestFile)
         postpywps.performRequest()
-        xmldom = minidom.parseString(postpywps.response)
+        #The response linage contains URLs with & that will crash the DOM parser
+        xmldom = minidom.parseString(postpywps.response.replace("&","%26"))
         
-        #1 output only rasterout
-        self.assertEquals(len(xmldom.getElementsByTagNameNS(self.wpsns,"Output")),1)
         
-         #check that it is rasterout
-        outputNodes=xmldom.getElementsByTagNameNS(self.wpsns,"Output")
-        identifierNodes=outputNodes[0].getElementsByTagNameNS(self.owsns,"Identifier")
+        #1 OutputDefintions only and that is rasterout
+        outputDefNodes=xmldom.getElementsByTagNameNS(self.wpsns,"OutputDefinitions")
+        self.assertEquals(len(outputDefNodes),1)
+        identifierNodes=outputDefNodes[0].getElementsByTagNameNS(self.owsns,"Identifier")
+        self.assertEquals(identifierNodes[0].firstChild.nodeValue,"rasterout")
+        
+        
+        
+        #1 ProcessOutput only check that is rasterout
+        processOutNodes=xmldom.getElementsByTagNameNS(self.wpsns,"ProcessOutputs")
+        self.assertEquals(len(processOutNodes),1)
+        identifierNodes=processOutNodes[0].getElementsByTagNameNS(self.owsns,"Identifier")
         self.assertEquals(identifierNodes[0].firstChild.nodeValue,"rasterout")
         
     def _setFromEnv(self):

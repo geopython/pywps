@@ -776,8 +776,9 @@ class Execute(Request):
         output XML document.
         """
         templateOutputs = []
-
-        for identifier in self.process.outputs.keys():
+        outputsRequested=self.getRequestedOutputs()
+        
+        for identifier in outputsRequested:
             templateOutput = {}
             output = self.process.outputs[identifier]
 
