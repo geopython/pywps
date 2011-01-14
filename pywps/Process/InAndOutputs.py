@@ -362,7 +362,7 @@ class ComplexInput(Input):
                 format["schema"] = None
 
         self.formats = formats
-        self.format = None
+        self.format = {}
         try:
             self.ms = magic.open(magic.MAGIC_MIME)
             self.ms.load()
@@ -376,7 +376,6 @@ class ComplexInput(Input):
 
         :param input: parsed input value
         """
-        
         # if HTTP GET was performed, the type does not have to be set
         if not input.has_key("type") and\
                 (input["value"].find("http://") == 0 or input["value"].find("http%3A%2F%2F") == 0):
@@ -865,7 +864,7 @@ class ComplexOutput(Output):
         output consolidation.        
     """
     formats = None
-    format = None
+    format = {}
     projection = None
     bbox = None
     width = None
@@ -892,12 +891,9 @@ class ComplexOutput(Output):
                 format["schema"] = None
 
         self.formats = formats
-        self.format=None
-        
         self.projection = projection
         self.bbox = bbox
         self.useMapscript = useMapscript
-
         try:
             self.ms = magic.open(magic.MAGIC_MIME)
             self.ms.load()
@@ -916,8 +912,7 @@ class ComplexOutput(Output):
         #Note: cStringIO and StringIO are totally messed up, StringIO is type instance, cString is type cStringIO.StringO
         #Better to also use __class__.__name__ to be certain what is is
         # StringIO => StringIO but cStringIO => StringO  
-        
-        if type(value) == types.StringType:
+        if type(value) == types.StringType or type(value)==types.UnicodeType:
             self.value = value
         elif type(value) == types.FileType:
             self.value = value.name
