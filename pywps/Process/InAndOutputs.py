@@ -525,7 +525,7 @@ class ComplexInput(Input):
                     self.format = format
                     return
                 
-            if self.format == None:
+            if self.format == {}:
                 #InvalidParameterValue requires a simple locator and doesn't support a verbose output
                 logging.debug("%s has mimeType %s according to magic. MimeType not valid according to process" % (str(self.identifier),str(mimeType)))
                 self.onProblem("InvalidParameterValue",self.identifier)
