@@ -530,8 +530,8 @@ class ComplexInput(Input):
                 if mimeType in format["mimeType"]:
                     self.format = format
                     return
-                
-            if self.format == None:
+            import pydevd;pydevd.settrace()    
+            if self.format == {}:
                 #InvalidParameterValue requires a simple locator and doesn't support a verbose output
                 logging.debug("%s has mimeType %s according to magic. MimeType not valid according to process" % (str(self.identifier),str(mimeType)))
                 self.onProblem("InvalidParameterValue",self.identifier)
