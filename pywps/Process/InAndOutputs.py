@@ -334,7 +334,7 @@ class ComplexInput(Input):
     """
     maxFileSize = None
     formats = None
-    format = None
+    format = {}
 
     def __init__(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=1,maxOccurs=1,
@@ -343,7 +343,6 @@ class ComplexInput(Input):
 
         Input.__init__(self,identifier,title,abstract=abstract,
                 metadata=[],minOccurs=minOccurs,maxOccurs=maxOccurs,type="ComplexValue")
-        
         if maxmegabites:
             self.maxFileSize = float(maxmegabites)*1024*1024
         else:
@@ -362,7 +361,7 @@ class ComplexInput(Input):
                 format["schema"] = None
 
         self.formats = formats
-        self.format = None
+        self.format = {}
         try:
             self.ms = magic.open(magic.MAGIC_MIME)
             self.ms.load()
@@ -376,7 +375,6 @@ class ComplexInput(Input):
 
         :param input: parsed input value
         """
-        
         # if HTTP GET was performed, the type does not have to be set
         if not input.has_key("type") and\
                 (input["value"].find("http://") == 0 or input["value"].find("http%3A%2F%2F") == 0):
@@ -423,10 +421,7 @@ class ComplexInput(Input):
                    self.onProblem("NoApplicableCode", "Could not convert text input to binary using base64 encoding.")
                finally:  
                     os.remove(fout.name+".base64")
-                  
-                       
-                
-                      
+                     
          
         #MimeType can be checked, since we no longer have a base64 binary content   
         self.checkMimeType(fout.name)
@@ -518,8 +513,6 @@ class ComplexInput(Input):
         :param fileName:
         :param mimeType:
         """
-       
-        
         
         #magic can't determine if a string is plain text of text/xml
         #so we  can only validate the content for text
@@ -866,7 +859,7 @@ class ComplexOutput(Output):
         
     """
     formats = None
-    format = None
+    format = {}
     projection = None
     bbox = None
     width = None
@@ -893,7 +886,7 @@ class ComplexOutput(Output):
                 format["schema"] = None
 
         self.formats = formats
-        self.format=None
+        self.format={}
         
         self.projection = projection
         self.bbox = bbox
@@ -918,7 +911,7 @@ class ComplexOutput(Output):
         #Better to also use __class__.__name__ to be certain what is is
         # StringIO => StringIO but cStringIO => StringO  
         
-        if type(value) == types.StringType:
+        if type(value) == types.StringType or types.UnicodeType:
             self.value = value
         elif type(value) == types.FileType:
             self.value = value.name
