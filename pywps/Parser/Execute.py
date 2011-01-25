@@ -265,11 +265,14 @@ class Post(PostParser):
         # optional attributes
         #
 
-        # mimeType, encoding, schema - not yet supported
-
-        # method
-        attributes["method"] = \
-                   dataTypeNode.getAttributeNS(self.nameSpace,"method")
+        # mimeType, encoding, schema - are now supportd supported ^_^ #jmdj
+        
+        attributes["mimetype"]=dataTypeNode.getAttribute("mimeType")
+        attributes["encoding"]=dataTypeNode.getAttribute("encoding")
+        attributes["schema"]=dataTypeNode.getAttribute("schema")
+        
+       #jmdj GET method doesn't have a namespace
+        attributes["method"] = dataTypeNode.getAttribute("method")
         if attributes["method"] == "":
             attributes["method"] = "GET"
 
