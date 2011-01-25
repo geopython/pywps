@@ -360,14 +360,11 @@ class Post(PostParser):
         """Parse complex data node"""
 
         attributes = {}
-        attributes["mimetype"] = complexDataNode.getAttributeNS(
-                                        "*","mimeType")
-        attributes["encoding"] = complexDataNode.getAttributeNS(
-                                        "*","encoding")
-        attributes["schema"] = complexDataNode.getAttributeNS(
-                                        "*","schema")
+        #jmdj 24/Jan complexDataNode.nameSpaceURI instead "*"
+        attributes["mimetype"] = complexDataNode.getAttribute("mimeType")
+        attributes["encoding"] = complexDataNode.getAttribute("encoding")
+        attributes["schema"] = complexDataNode.getAttribute("schema")
         attributes["value"] = None
-
         for complexDataChildNode in complexDataNode.childNodes:
             # CDATA or text and the input value is empty and the Text or
             # CDATA is not empty
