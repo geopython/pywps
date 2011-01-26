@@ -252,12 +252,13 @@ class LiteralInput(Input):
 
         :param value: value to be controled
         """
-
-        # ugly characters
-        for char in self.restrictedCharacters:
-            if value.find(char) > -1:
-                raise Exceptions.InvalidParameterValue(value)
-
+        
+         # ugly characters, only if string
+        if  type(value)!= types.BooleanType:
+            for char in self.restrictedCharacters:
+                if value.find(char) > -1:
+                    raise Exceptions.InvalidParameterValue(value)
+        
         # type 
         try:
             if self.dataType == types.FloatType:
