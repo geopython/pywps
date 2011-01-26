@@ -253,10 +253,12 @@ class LiteralInput(Input):
         :param value: value to be controled
         """
 
-        # ugly characters
-        for char in self.restrictedCharacters:
-            if value.find(char) > -1:
-                raise Exceptions.InvalidParameterValue(value)
+        
+        
+        if  type(value)!= types.BooleanType:
+            for char in self.restrictedCharacters:
+                if value.find(char) > -1:
+                    raise Exceptions.InvalidParameterValue(value)
 
         # type 
         try:
@@ -529,8 +531,7 @@ class ComplexInput(Input):
            
                 if mimeType in format["mimeType"]:
                     self.format = format
-                    return
-            import pydevd;pydevd.settrace()    
+                    return   
             if self.format == {}:
                 #InvalidParameterValue requires a simple locator and doesn't support a verbose output
                 logging.debug("%s has mimeType %s according to magic. MimeType not valid according to process" % (str(self.identifier),str(mimeType)))

@@ -59,4 +59,16 @@ class Parser:
     def __init__(self,wps):
         self.wps = wps
         self.inputs = {}
+    
+    def _trueOrFalse(self,str):
+        """Return True or False, if input is "true" or "false" 
+        :param str: String to be checks and returned
+        :returns: bool or str 
+        """
+        if str.lower() == "false":
+            return False
+        elif str.lower() == "true":
+            return True
+        else:
+            return str
 

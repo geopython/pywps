@@ -392,7 +392,7 @@ class Post(PostParser):
         attributes["uom"] = literalDataNode.getAttributeNS(
                                         "*","uom")
         try:
-            attributes["value"] = (literalDataNode.firstChild.nodeValue).encode("utf-8")
+            attributes["value"] = self._trueOrFalse((literalDataNode.firstChild.nodeValue).encode("utf-8"))
         except:
             attributes["value"] = None
 
@@ -562,7 +562,6 @@ class Get(GetParser):
 
             # initial value
             parsedDataInputs.append({"identifier":key, "value":None})
-
             # additional input attributes are separated by "@"
             attributes = []
             if value.find("@") > 0:
@@ -572,22 +571,24 @@ class Get(GetParser):
                 parsedDataInputs[-1]["value"]=None
                 attributes=value.split("@")[1:]
             else:
-                parsedDataInputs[-1]["value"]=value
+                #needs to be checked for trueOrFalse
+                parsedDataInputs[-1]["value"]=self._trueOrFalse(value)
                 attributes = []
 
             # additional attribute key is separated by "=" from it's value
             for attribute in attributes:
                 attributeKey, attributeValue = attribute.split("=")
-                parsedDataInputs[-1][attributeKey.lower()] =\
-                                               self._trueOrFalse(attributeValue)
+                parsedDataInputs[-1][attributeKey.lower()] =self._trueOrFalse(attributeValue)
+        
+        
         return parsedDataInputs
-
-    def _trueOrFalse(self,str):
-        """Return True or False, if input is "true" or "false" """
-
-        if str.lower() == "false":
-            return False
-        elif str.lower() == "true":
-            return True
-        else:
-            return str
+    
+    #Moved to Parser class
+    #def _trueOrFalse(self,str):
+    #    """Return True or False, if input is "true" or "false" """
+    #    if str.lower() == "false":
+    #        return False
+    #    elif str.lower() == "true":
+    #        return True
+    #    else:
+    #        return str
