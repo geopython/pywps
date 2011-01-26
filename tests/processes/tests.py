@@ -37,7 +37,13 @@ class LiteralProcess(WPSProcess):
         self.zeroInSet = self.addLiteralInput(identifier="zeroset",
                                                  title="Zero data input",
                                                  type = type(0.0))
+        
+        self.boolIn = self.addLiteralInput(identifier="bool",
+                                                 title="Boolean input",
+                                                 type = type(False),
+                                                 allowedValues = [True, False])
 
+        
         self.intOut = self.addLiteralOutput(identifier="int",
                                                  title="Integer data out")
         self.stringOut = self.addLiteralOutput(identifier="string",
@@ -46,10 +52,15 @@ class LiteralProcess(WPSProcess):
         self.floatOut = self.addLiteralOutput(identifier="float",
                                                  title="Float data out",
                                                  type = type(0.0))
+        self.boolOut = self.addLiteralOutput(identifier="bool",
+                                                 title="Boolean data out",
+                                                 type = type(False))
+        
     def execute(self):
         self.intOut.setValue(self.intIn.getValue())
         self.stringOut.setValue(self.stringIn.getValue())
         self.floatOut.setValue(self.floatIn.getValue())
+        self.boolOut.setValue(self.boolIn.getValue())
 
 class ComplexProcess(WPSProcess):
     """This process defines raster and vector data in- and outputs"""
