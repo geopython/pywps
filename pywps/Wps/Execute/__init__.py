@@ -892,7 +892,7 @@ class Execute(Request):
 
         literalOutput["uom"] = str(output.uom)
         literalOutput["dataType"]= self.getDataTypeReference(output)["type"]
-        literalOutput["literaldata"] = output.value
+        literalOutput["literaldata"] = str(output.value)
 
         return literalOutput
 
