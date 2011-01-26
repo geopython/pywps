@@ -112,9 +112,13 @@ class RequestGetTestCase(unittest.TestCase):
 
     def testT06ParseExecuteLiteralInput(self):
         """Test if Execute with LiteralInput and Output is executed"""
+        
+        #Note, bool input should be checked for False, if there is something like this in the code: bool("False")
+        #Then the output will be True and the test will fail
+        
         getpywps = pywps.Pywps(pywps.METHOD_GET)
         postpywps = pywps.Pywps(pywps.METHOD_POST)
-        getinputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=literalprocess&datainputs=[int=1;string=spam;float=1.1;zeroset=0.0]")
+        getinputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=literalprocess&datainputs=[int=1;string=spam;float=1.1;zeroset=0.0;bool=False]")
         executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-literalinput.xml"))
         postinputs = postpywps.parseRequest(executeRequestFile)
 
@@ -125,8 +129,8 @@ class RequestGetTestCase(unittest.TestCase):
 
         getliteraldata = getxmldom.getElementsByTagNameNS(self.wpsns,"LiteralData")
         postliteraldata = postxmldom.getElementsByTagNameNS(self.wpsns,"LiteralData")
-        self.assertEquals(len(getliteraldata),3)
-        self.assertEquals(len(postliteraldata),3)
+        self.assertEquals(len(getliteraldata),4)
+        self.assertEquals(len(postliteraldata),4)
 
         self.assertEquals(getliteraldata[0].firstChild.nodeValue,
                 postliteraldata[0].firstChild.nodeValue)
@@ -134,10 +138,13 @@ class RequestGetTestCase(unittest.TestCase):
                 postliteraldata[1].firstChild.nodeValue)
         self.assertEquals(getliteraldata[2].firstChild.nodeValue,
                 postliteraldata[2].firstChild.nodeValue)
-
+        self.assertEquals(getliteraldata[3].firstChild.nodeValue,
+                postliteraldata[3].firstChild.nodeValue)
+        #1,1.1,False,spam
         self.assertEquals(getliteraldata[0].firstChild.nodeValue, "1")
-        self.assertEquals(getliteraldata[2].firstChild.nodeValue, "spam")
         self.assertEquals(getliteraldata[1].firstChild.nodeValue, "1.1")
+        self.assertEquals(getliteraldata[2].firstChild.nodeValue, "False")
+        self.assertEquals(getliteraldata[3].firstChild.nodeValue, "spam")
     
 
     def testT07ParseExecuteComplexInput(self):
