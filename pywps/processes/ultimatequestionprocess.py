@@ -18,10 +18,10 @@ class Process(WPSProcess):
          # init process
          WPSProcess.__init__(self,
                              identifier="ultimatequestionprocess", #the same as the file name
-                             title="Answer to Life, the Universe and Everything",
                              version = "2.0",
-                             storeSupported = "true",
-                             statusSupported = "true",
+                             title="Answer to Life, the Universe and Everything",
+                             storeSupported = "false",
+                             statusSupported = "false",
                             abstract="Numerical solution that is the answer to Life, Universe and Everything. The process is an improvement to Deep Tought computer (therefore version 2.0) since it no longer takes 7.5 milion years, but only a few seconds to give a response, with an update of status every 10 seconds.",
                             grassLocation =False)
             #No need for inputs since Execute will start the process
@@ -31,9 +31,10 @@ class Process(WPSProcess):
                                            
      def execute(self):
          import time
+         
          self.status.set("Preparing....", 0)
          for i in xrange(1, 11):
-             time.sleep(1)
+             time.sleep(5)
              self.status.set("Thinking.....", float(i*10)) 
          #The final answer    
          self.Answer.setValue("42")

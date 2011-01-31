@@ -376,7 +376,7 @@ class WPSProcess:
 
     def addComplexInput(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=1,maxOccurs=1,
-                formats=[{"mimeType":"text/xml"}],maxmegabites=5):
+                formats=[{"mimeType":None}],maxmegabites=5):
         """Add complex input to this process
 
         :param identifier: input identifier
@@ -456,7 +456,7 @@ class WPSProcess:
     # --------------------------------------------------------------------
 
     def addComplexOutput(self,identifier,title,abstract=None,
-            metadata=[],formats=[{"mimeType":"text/xml"}],
+            metadata=[],formats=[{"mimeType":None}],
             useMapscript=False):
         """Add complex output to this process
 

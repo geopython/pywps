@@ -35,8 +35,13 @@ class LiteralProcess(WPSProcess):
                                                  type = type(0.0))
 
         self.zeroInSet = self.addLiteralInput(identifier="zeroset",
-                                                 title="Zero data input",
-                                                 type = type(0.0))
+                                                 title="Zero data input",type = type(0.0))
+
+        self.boolIn = self.addLiteralInput(identifier="bool",
+                                                 title="Boolean input",
+                                                 type = type(False),
+                                                 allowedValues = [True, False])
+
 
         self.intOut = self.addLiteralOutput(identifier="int",
                                                  title="Integer data out")
@@ -46,10 +51,16 @@ class LiteralProcess(WPSProcess):
         self.floatOut = self.addLiteralOutput(identifier="float",
                                                  title="Float data out",
                                                  type = type(0.0))
+        
+        self.boolOut = self.addLiteralOutput(identifier="bool",
+                                                 title="Boolean data out",
+                                                 type = type(False))
     def execute(self):
         self.intOut.setValue(self.intIn.getValue())
         self.stringOut.setValue(self.stringIn.getValue())
         self.floatOut.setValue(self.floatIn.getValue())
+        
+        self.boolOut.setValue(self.boolIn.getValue())
 
 class ComplexProcess(WPSProcess):
     """This process defines raster and vector data in- and outputs"""
@@ -60,11 +71,12 @@ class ComplexProcess(WPSProcess):
             storeSupported=True)
 
         self.vectorin = self.addComplexInput(identifier="vectorin",
-                                                 title="Vector file")
+                                                 title="Vector file",
+                                                 formats=[{"mimeType":"text/xml"},{"mimeType":"application/xml"}])
 
         self.rasterin = self.addComplexInput(identifier="rasterin",
                                                  title="Raster file",
-                                                 formats = [{"mimeType":"image/tiff"}])
+                                                 formats = [{'mimeType': 'image/tiff'}, {'mimeType': 'image/geotiff'}, {'mimeType': 'application/geotiff'}, {'mimeType': 'application/x-geotiff'}, {'mimeType': 'image/png'}, {'mimeType': 'image/gif'}, {'mimeType': 'image/jpeg'}, {'mimeType': 'application/x-erdas-hfa'}, {'mimeType': 'application/netcdf'}, {'mimeType': 'application/x-netcdf'}])
 
         self.pausein = self.addLiteralInput(identifier="pause",
                                                  title="Pause the process",
@@ -73,14 +85,15 @@ class ComplexProcess(WPSProcess):
                                                  type = type(True))
 
         self.vectorout = self.addComplexOutput(identifier="vectorout",
-                                                 title="Vector file")
+                                                 title="Vector file",
+                                                 formats = [{"mimeType":"text/xml"}])
         self.rasterout = self.addComplexOutput(identifier="rasterout",
                                                  title="Raster file",
                                                  formats = [{"mimeType":"image/tiff"}])
     def execute(self):
+        
         self.vectorout.setValue(self.vectorin.getValue())
         self.rasterout.setValue(self.rasterin.getValue())
-
         if self.pausein.getValue():
             import time
             for i in range(5):
@@ -94,7 +107,7 @@ class BBoxProcess(WPSProcess):
     def __init__(self):
         WPSProcess.__init__(self, identifier = "bboxprocess",title="BBox process")
 
-        self.bboxin = self.addBBoxInput(identifier="bboxin",title="BBox in",crss=["EPSG:4326"])
+        self.bboxin = self.addBBoxInput(identifier="bboxin",title="BBox in")
         self.bboxout = self.addBBoxOutput(identifier="bboxout",title="BBox out")
 
     def execute(self):

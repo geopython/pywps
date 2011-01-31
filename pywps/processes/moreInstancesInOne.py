@@ -5,3 +5,5 @@ myFirstProcess = WPSProcess(identifier="firstInstance",
 
 mySecondProcess = WPSProcess(identifier="secondInstance",
                             title="Second instance process")
+
+#WPSProcess(identifier="firstInstance", title="First instance process")
