@@ -1,8 +1,8 @@
 """
 Inputs and outputs of OGC WPS Processes
 """
-# Author:	Jachym Cepicky
-#        	http://les-ejk.cz
+# Author:    Jachym Cepicky
+#            http://les-ejk.cz
 # Lince: 
 # 
 # Web Processing Service implementation
@@ -116,7 +116,6 @@ class Input:
 
     def _setValueWithOccurence(self,oldValues, newValue):
         """Check min and max occurrence and set this.value"""
-
         if self.maxOccurs > 1:
             if not oldValues:
                 oldValues =  [newValue]
@@ -335,15 +334,16 @@ class ComplexInput(Input):
     """
     maxFileSize = None
     formats = None
-    format = {}
+    format = None
 
     def __init__(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=1,maxOccurs=1,
-                maxmegabites=5,formats=[{"mimeType":"text/xml"}]):
+                maxmegabites=5,formats=[{"mimeType":None}]):
         """Class constructor"""
 
         Input.__init__(self,identifier,title,abstract=abstract,
                 metadata=[],minOccurs=minOccurs,maxOccurs=maxOccurs,type="ComplexValue")
+        
         if maxmegabites:
             self.maxFileSize = float(maxmegabites)*1024*1024
         else:
@@ -380,16 +380,40 @@ class ComplexInput(Input):
         if not input.has_key("type") and\
                 (input["value"].find("http://") == 0 or input["value"].find("http%3A%2F%2F") == 0):
             input["asReference"] = True
-
+            
         #self.value = input["value"]
 
         # download data
-        if input.has_key("asReference") and input["asReference"] == True:
-            import sys         
+        
+        if input.has_key("asReference") and input["asReference"] == True:      
             self.downloadData(input["value"])
         else:
             self.storeData(input["value"])
         return
+    
+    def setMimeType(self,input):
+        """Sets the MimeType from input before going to setValue() this allows 
+        for some self.format to be filled febore base64 decoding. URL inputs done have an input[], since they are just URLs.
+        There is the need a mimeType implementation from downloaded objects"""
+         # if HTTP GET was performed, the type does not have to be set
+        #copy from setvalue
+        if not input.has_key("type") and (input["value"].find("http://") == 0 or input["value"].find("http%3A%2F%2F") == 0):
+            #jmd this needs to be changed, the self.format sould be set from the download stream
+            #For now 
+            self.format["mimetype"]=None
+            self.format["schema"]=None
+            self.format["encoding"]=None
+        else:
+            try:     
+                self.format["mimetype"]=input["mimetype"]
+                self.format["schema"]=input["schema"]
+                self.format["encoding"]=input["encoding"]
+           
+            except Exception,e:
+                logging.debug("Passing mimeType/schema/encoding to process object failed,Exception in next line")
+                logging.debug(e)
+        
+        
 
     def storeData(self,data):
         """Store data from given file. Not bigger, then
@@ -406,14 +430,16 @@ class ComplexInput(Input):
         try:
             fout=open(outputName,'wb')
         except IOError, what:
-            self.onProblem("NoApplicableCode","Could not open file for writing")
-
+            self.onProblem("NoApplicableCode","Could not open file for writing") 
         # NOTE: the filesize should be already checked in pywps/Post.py,
         # while getting the input XML file
         fout.write(data)
         fout.close()
         
-        if  (self.formats[0]["mimeType"].lower().split("/")[0] != "text" and self.formats[0]["mimeType"].lower() != "application/xml"): 
+        self.checkMimeTypeIn(fout.name)
+        
+        #self.format already set
+        if  (self.format["mimetype"].lower().split("/")[0] != "text" and self.format["mimetype"].lower() != "application/xml"): 
                # convert it to binary using base64
                rename(fout.name,fout.name+".base64")
                try:
@@ -422,11 +448,15 @@ class ComplexInput(Input):
                    self.onProblem("NoApplicableCode", "Could not convert text input to binary using base64 encoding.")
                finally:  
                     os.remove(fout.name+".base64")
-                     
-         
-        #MimeType can be checked, since we no longer have a base64 binary content   
-        self.checkMimeType(fout.name)
- 
+        #Checking what is actu
+        try:
+            mimeTypeMagic=self.ms.file(fileName).split(';')[0]
+            if self.format["mimetype"]!=mimeTypeMagic:
+                logging.debug("ComplexDataInput defines mimeType %s (default set) but libMagic detects %s" % (str(self.format["mimetype"]),mimeTypeMagic))            
+        except:
+            pass
+        
+        
         resp = self._setValueWithOccurence(self.value, outputName)
         if resp:
             return resp
@@ -490,10 +520,7 @@ class ComplexInput(Input):
                         str(self.maxFileSize/1024/1024)+" MB for input "+
                         url)
         fout.close()
-
-        # check the mimetypes
-        self.checkMimeType(fout.name)
-        
+        self.checkMimeTypeIn(fout.name)
         resp = self._setValueWithOccurence(self.value, outputName)
         if resp:
             return resp
@@ -508,29 +535,40 @@ class ComplexInput(Input):
        """
         pass
 
-    def checkMimeType(self,fileName):
+    def checkMimeTypeIn(self,fileName):
+        
         """Check, if the given mimetype is in self.formats
-
+        checkMimeType is done after process.format is set by parsing user's content. 
+        1) if process.format[mimetype] has content it will be check in formats
+        2) if process.format[mimetype]-->None assume process.format as first in list
+            a) no exceptions should be risen
+        3) If formats dict is empty then there is nothing that can be done, and self.format=None    
         :param fileName:
         :param mimeType:
         """
+         
         
-        #magic can't determine if a string is plain text of text/xml
-        #so we  can only validate the content for text
+        
          #Note: magic output something like: 'image/tiff; charset=binary' we only need the typeContent 
-        mimeType=self.ms.file(fileName).split(';')[0]
-        if mimeType.find("text")==-1: # no text or xml
-            for format in self.formats:
-           
-                if mimeType in format["mimeType"]:
-                    self.format = format
-                    return
-                
-            if self.format == {}:
-                #InvalidParameterValue requires a simple locator and doesn't support a verbose output
-                logging.debug("%s has mimeType %s according to magic. MimeType not valid according to process" % (str(self.identifier),str(mimeType)))
-                self.onProblem("InvalidParameterValue",self.identifier)
-      
+        if (self.format["mimetype"] is None) or (self.format["mimetype"]==""): 
+            #No mimeType let's set it from default
+            logging.debug("Missing ComplexDataInput mimeType, adopting default mimeType (first in formats list)")
+            self.format["mimetype"]=self.formats[0]["mimeType"]
+            
+            #checking format with libmagic
+            #--> new funcion aget base64 change
+            #mimeTypeMagic=self.ms.file(fileName).split(';')[0]
+            #if self.format["mimetype"]!=mimeTypeMagic:
+            #    logging.debug("ComplexDataInput defines mimeType %s (default set) but libMagic detects %s" % (str(self.format["mimetype"]),mimeTypeMagic))            
+        else:
+            #Checking is mimeType is in the acceptable formats        
+            if self.format["mimetype"] not in [dic["mimeType"] for dic in self.formats]:
+                #ATTENTION: False positive if dictionary is not set in process/empty 
+                if (len(self.formats)==1) and (type(self.formats[0]["mimeType"])==types.NoneType):
+                    logging.debug("Process without mimetype list, cant check if ComplexDataInput mimtype is correct or not")
+                else:
+                    logging.debug("ComplexDataInputXML defines mimeType %s  which is not in process %s formats list" % (str(self.format["mimetype"]),str(self.identifier)))
+                    self.onProblem("InvalidParameterValue",self.identifier)
 
 
     def onMaxFileSizeExceeded(self, what):
@@ -856,11 +894,10 @@ class ComplexOutput(Output):
         does not work, try to adjust them manualy.
         
         Unlike ComplexInput, the check for mimeType is done in Execute during
-        output consolidation.
-        
+        output consolidation.        
     """
     formats = None
-    format = {}
+    format = {"mimetype":None,"encoding":None,"schema":None}
     projection = None
     bbox = None
     width = None
@@ -868,7 +905,7 @@ class ComplexOutput(Output):
     useMapscript = False
 
     def __init__(self,identifier,title,abstract=None,
-                metadata=[], formats=[{"mimeType":"text/xml"}],
+                metadata=[], formats=[{"mimeType":None}],
                 asReference=False, projection=None, bbox=None, useMapscript
                 =  False):
         """Class constructor"""
@@ -885,14 +922,13 @@ class ComplexOutput(Output):
                 format["encoding"] = None
             if not "schema" in format.keys():
                 format["schema"] = None
-
+        
         self.formats = formats
         self.format={}
-        
+    
         self.projection = projection
         self.bbox = bbox
         self.useMapscript = useMapscript
-
         try:
             self.ms = magic.open(magic.MAGIC_MIME)
             self.ms.load()
@@ -911,8 +947,7 @@ class ComplexOutput(Output):
         #Note: cStringIO and StringIO are totally messed up, StringIO is type instance, cString is type cStringIO.StringO
         #Better to also use __class__.__name__ to be certain what is is
         # StringIO => StringIO but cStringIO => StringO  
-        
-        if type(value) == types.StringType or types.UnicodeType:
+        if type(value) == types.StringType or type(value)==types.UnicodeType:
             self.value = value
         elif type(value) == types.FileType:
             self.value = value.name
@@ -930,7 +965,38 @@ class ComplexOutput(Output):
         else:
             raise Exception("Output type '%s' of '%s' output not known, not FileName, File or (c)StringIO object" %\
                     (type(value),self.identifier))
-
+    
+    
+    
+    def checkMimeTypeIn(self):
+            #Checking the mimeType
+            #0) check if format has mimetype key, if input request has no mimeType then the key will be missing
+            #1) If missing mimeType, pick the default one from list
+            #2) check if mimeType is in the output.formats list, if not raise exception
+            #3) if no mimeType and no outputs.formats then do nothin
+        if (self.format["mimetype"] is None) or (self.format["mimetype"]==""):
+                logging.debug("Missing ComplexDataOutput mimeType in %s, adopting default mimeType %s (first in formats list)" % (self.identifier,self.formats[0]["mimeType"])) 
+                self.format["mimetype"]=self.formats[0]["mimeType"]             
+                
+        else:
+            #Checking is mimeType is in the acceptable formats    
+            if self.format["mimetype"] not in [dic["mimeType"] for dic in self.formats]:
+                #ATTENTION: False positive if dictionary is not set in process/empty formats list 
+                if (len(self.formats)==1) and (type(self.formats[0]["mimeType"])==types.NoneType):
+                    logging.debug("Process without mimetype list, cant check if ComplexDataOutput mimtype is correct or not")
+                else:
+                    logging.debug("ComplexDataOutputXML defines mimeType %s  which is not in process %s formats list" % (str(self.format["mimetype"]),str(self.identifier)))
+                    self.onProblem("InvalidParameterValue",self.identifier)
+    
+    
+    def onProblem(self,what, why):    
+        """Empty method, called, when there was any problem with the input. 
+        This method is replaced in Execute.consolidateInputs, basically output.onProblem = self.onOutputProblem
+        therefore Exception raise is implemented in Execute.onInputProblem()
+        :param what: Message with error description
+        :param why: Error code
+       """
+        pass        
 
 class BoundingBoxOutput(Output):
     """Bounding box ouput 

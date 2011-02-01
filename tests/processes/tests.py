@@ -76,7 +76,7 @@ class ComplexProcess(WPSProcess):
 
         self.rasterin = self.addComplexInput(identifier="rasterin",
                                                  title="Raster file",
-                                                 formats = [{"mimeType":"image/tiff"}])
+                                                 formats = [{'mimeType': 'image/tiff'}, {'mimeType': 'image/geotiff'}, {'mimeType': 'application/geotiff'}, {'mimeType': 'application/x-geotiff'}, {'mimeType': 'image/png'}, {'mimeType': 'image/gif'}, {'mimeType': 'image/jpeg'}, {'mimeType': 'application/x-erdas-hfa'}, {'mimeType': 'application/netcdf'}, {'mimeType': 'application/x-netcdf'}])
 
         self.pausein = self.addLiteralInput(identifier="pause",
                                                  title="Pause the process",
@@ -86,7 +86,7 @@ class ComplexProcess(WPSProcess):
 
         self.vectorout = self.addComplexOutput(identifier="vectorout",
                                                  title="Vector file",
-                                                 formats = [{"mimeType":"application/xml"}])
+                                                 formats = [{"mimeType":"text/xml"}])
         self.rasterout = self.addComplexOutput(identifier="rasterout",
                                                  title="Raster file",
                                                  formats = [{"mimeType":"image/tiff"}])
@@ -135,7 +135,6 @@ class ComplexProcessOWS(WPSProcess):
     def execute(self):
         self.vectorout.setValue(self.vectorin.getValue())
         self.rasterout.setValue(self.rasterin.getValue())
-
 
         if self.pausein.getValue():
             import time

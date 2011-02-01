@@ -27,7 +27,8 @@ class RequestGetTestCase(unittest.TestCase):
     getcapabilitiesrequest = "service=wps&request=getcapabilities"
     getdescribeprocessrequest = "service=wps&request=describeprocess&version=1.0.0&identifier=dummyprocess"
     getexecuterequest = "service=wps&request=execute&version=1.0.0&identifier=dummyprocess&datainputs=[input1=20;input2=10]"
-    wfsurl = "http://www2.dmsolutions.ca/cgi-bin/mswfs_gmap?version=1.0.0&request=getfeature&service=wfs&typename=park"
+    #wfsurl = "http://www2.dmsolutions.ca/cgi-bin/mswfs_gmap?version=1.0.0&request=getfeature&service=wfs&typename=park"
+    wfsurl = "http://rsg.pml.ac.uk/geoserver2/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=rsg:areas_pw&maxFeatures=1"
     wcsurl = "http://www.bnhelp.cz/cgi-bin/crtopo?service=WMS&request=GetMap&LAYERS=sitwgs&TRANSPARENT=true&FORMAT=image%2Ftiff&EXCEPTIONS=application%2Fvnd.ogc.se_xml&VERSION=1.1.1&STYLES=default&SRS=EPSG%3A4326&BBOX=-10,-10,10,10&WIDTH=50&HEIGHT=50"
     wpsns = "http://www.opengis.net/wps/1.0.0"
     owsns = "http://www.opengis.net/ows/1.1"
@@ -145,6 +146,7 @@ class RequestGetTestCase(unittest.TestCase):
         self.assertEquals(getliteraldata[1].firstChild.nodeValue, "1.1")
         self.assertEquals(getliteraldata[2].firstChild.nodeValue, "False")
         self.assertEquals(getliteraldata[3].firstChild.nodeValue, "spam")
+        
     
 
     def testT07ParseExecuteComplexInput(self):
@@ -271,17 +273,17 @@ class RequestGetTestCase(unittest.TestCase):
         import tempfile
         
         getpywps = pywps.Pywps(pywps.METHOD_GET)
-        #With new ResponseDocument the outputs get by the same order as indicated in the responseDocument
+        #Outputs will be generated accordint to the order in responsedocument
         inputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=complexprocessows&datainputs=[rasterin=%s;vectorin=%s]&responsedocument=[vectorout=@asreference=true;rasterout=@asreference=true]" % (urllib.quote(self.wcsurl), urllib.quote(self.wfsurl)))
         getpywps.performRequest()
         xmldom = minidom.parseString(getpywps.response)
-
+       
         self.assertFalse(len(xmldom.getElementsByTagNameNS(self.wpsns,"ExceptionReport")), 0)
 
         # try to get out the Reference elemengt
         wfsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[0].getAttribute("xlink:href")
         wcsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[1].getAttribute("xlink:href")
-
+        
         # test, if there are WFS and WCS request strings
         self.assertTrue(wfsurl.find("WFS") > -1)
         self.assertTrue(wcsurl.find("WCS") > -1)
@@ -309,6 +311,7 @@ class RequestGetTestCase(unittest.TestCase):
          #all outputs --> blank responseDocument
          inputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=complexprocess&datainputs=[rasterin=%s;vectorin=%s]&responsedocument=[]" % (urllib.quote(self.wcsurl), urllib.quote(self.wfsurl)))
          getpywps.performRequest()
+         
          xmldom = minidom.parseString(getpywps.response)
          self.assertEquals(len(xmldom.getElementsByTagNameNS(self.wpsns,"Output")),2)
     
@@ -324,6 +327,7 @@ class RequestGetTestCase(unittest.TestCase):
         postpywps.performRequest()
         #The response linage contains URLs with & that will crash the DOM parser
         xmldom = minidom.parseString(postpywps.response.replace("&","%26"))
+        
         
         #1 OutputDefintions only and that is rasterout
         outputDefNodes=xmldom.getElementsByTagNameNS(self.wpsns,"OutputDefinitions")
