@@ -5,7 +5,8 @@
 		<wps:Input>
 			<ows:Identifier>vectorin</ows:Identifier>
 			<ows:Title>Input</ows:Title>
-                        <wps:Reference xlink:href="http://www2.dmsolutions.ca/cgi-bin/mswfs_gmap?version=1.0.0&amp;request=getfeature&amp;service=wfs&amp;typename=park" />
+							<wps:Reference xlink:href="http://rsg.pml.ac.uk/geoserver2/ows?service=WFS&amp;version=1.0.0&amp;request=GetFeature&amp;typeName=rsg:areas_pw&amp;maxFeatures=1" />  
+            <!--            <wps:Reference xlink:href="http://www2.dmsolutions.ca/cgi-bin/mswfs_gmap?version=1.0.0&amp;request=getfeature&amp;service=wfs&amp;typename=park" />  --> 
 		</wps:Input>
 		<wps:Input>
 			<ows:Identifier>rasterin</ows:Identifier>
