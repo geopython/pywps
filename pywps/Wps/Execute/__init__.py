@@ -366,9 +366,8 @@ class Execute(Request):
 
                 if not self.rawDataOutput:
                     # fill outputs
-                   
                     self.processOutputs()
-
+                    
                     if self.umn:
                         self.umn.save()
 
@@ -453,10 +452,9 @@ class Execute(Request):
                     (identifier, self.process.identifier))
 
             input = self.process.inputs[identifier]
-
+            
             # exceptions handler
             input.onProblem = self.onInputProblem
-
             # maximum input file size must not be greater, than the one,
             # defined in the global config file
             if input.type == "ComplexValue":
@@ -467,6 +465,12 @@ class Execute(Request):
                 if self.wps.inputs["datainputs"]:
                     for inp in self.wps.inputs["datainputs"]:
                         if unicode(inp["identifier"]) == unicode(identifier):
+                             #In complexValue trying to set the mimeType from user definition
+                            # --> cant be here
+                            if input.type == "ComplexValue": 
+                                input.setMimeType(inp)
+                            
+                            #Passing value/content
                             resp = input.setValue(inp)
                             if resp:
                                 self.cleanEnv()
@@ -476,8 +480,8 @@ class Execute(Request):
 
         # make sure, all inputs do have values
         for identifier in self.process.inputs:
+           
             input = self.process.inputs[identifier]
-
             if input.getValue() == None and input.minOccurs > 0:
                 self.cleanEnv()
                 raise pywps.MissingParameterValue(identifier)
@@ -499,29 +503,46 @@ class Execute(Request):
                         "asReference" in dir(poutput):
                         poutput.asReference = respOut["asreference"]
 
-                    # mimetype
+                    #jmdj mimetype and not mimeType
                     if respOut.has_key("mimetype") and \
                         "format" in dir(poutput):
                         if respOut["mimetype"] != '':
-                            poutput.format["mimeType"] = respOut["mimetype"]
+                            poutput.format["mimetype"] = respOut["mimetype"]
 
                     # schema
                     if respOut.has_key("schema") and \
                         "format" in dir(poutput):
                         if respOut["schema"] != '':
                             poutput.format["schema"] = respOut["schema"]
-
+                   
                     # encoding
                     if respOut.has_key("encoding") and \
                         "format" in dir(poutput):
                         if respOut["encoding"] != '':
                             poutput.format["encoding"] = respOut["encoding"]
-
+                    
                     # uom
                     if respOut.has_key("uom") and \
                         "uom" in dir(poutput):
                         if respOut["uom"] != '':
                             poutput.uom = respOut["uom"]
+                     
+        #Even if the document response is not set
+        #self.format has to be created and filled
+        #Checking/resetting mimetype
+        #poutput --> ComplexOutputObject
+        for identifier in self.process.outputs:
+            
+            poutput = self.process.outputs[identifier]
+            if poutput.type == "ComplexValue":
+               
+                poutput.format["mimetype"]=None
+                poutput.format["schema"]=None
+                poutput.format["encoding"]=None
+                poutput.checkMimeTypeIn()
+                
+              
+                    
 
     def onInputProblem(self,what,why):
         """This method is used for rewriting onProblem method of each input
@@ -542,12 +563,22 @@ class Execute(Request):
         self.cleanEnv()
         raise exception(why)
     
-    def onOutputProblem(self,identifier,mimeType):
-        """This method logs the existance of problens in the complexData output mimeType
+    def onOutputProblem(self,what,why):
+        """This method logs the existance of problens in the complexData mainly (output mimeType?)
         :param what: locator of the problem
         :param why: possible reason of the problem
         """
-        pywps.debug("Incorrect mimetype in %s" % identifier)          
+        exception = None
+
+        if what == "FileSizeExceeded":
+            exception = pywps.FileSizeExceeded
+        elif what == "NoApplicableCode":
+            exception = pywps.NoApplicableCode
+        elif what == "InvalidParameterValue":
+            exception = pywps.InvalidParameterValue
+        
+        self.cleanEnv()
+        raise exception(why)
     
     
     def executeProcess(self):
@@ -725,15 +756,17 @@ class Execute(Request):
         """
 
         # encode the input file, if it has non-text mimetype
-        if input.format["mimeType"].find("text") < 0:
+        if input.format["mimetype"].find("text") < 0:
             #complexInput["cdata"] = 1
             os.rename(input.value, input.value+".binary")
             base64.encode(open(input.value+".binary"),open(input.value,"w"))
 
          # set complex input
         complexInput["complexdata"] = open(input.value,"r").read()
+        
+        
         complexInput["encoding"] = input.format["encoding"]
-        complexInput["mimetype"] = input.format["mimeType"]
+        complexInput["mimetype"] = input.format["mimetype"]
         complexInput["schema"] = input.format["schema"]
         return complexInput
 
@@ -748,7 +781,7 @@ class Execute(Request):
         if wpsInput.has_key("method"):
             method = wpsInput["method"]
         complexInput["method"] = method
-        complexInput["mimeType"] = processInput.format["mimeType"]
+        complexInput["mimeType"] = processInput.format["mimetype"]
         complexInput["encoding"] = processInput.format["encoding"]
         if wpsInput.has_key("header") and wpsInput["header"]:
             complexInput["header"] = 1
@@ -812,11 +845,12 @@ class Execute(Request):
 
     def _lineageComplexOutput(self, output, complexOutput):
         
-        self.checkMimeType(output)
-        complexOutput["mimetype"] = output.format["mimeType"]
+         #Checks for the correct output and logs 
+        self.checkMimeTypeOutput(output)
+        complexOutput["mimeType"] = output.format["mimetype"]
         complexOutput["encoding"] = output.format["encoding"]
         complexOutput["schema"] = output.format["schema"]
-
+        
         return complexOutput
 
     def _lineageBBoxOutput(self, output, bboxOutput):
@@ -899,17 +933,20 @@ class Execute(Request):
 
     def _complexOutput(self, output, complexOutput):
         
-        self.checkMimeType(output)
-
-        complexOutput["mimeType"] = output.format["mimeType"]
+        #Checks for the correct output and logs 
+        self.checkMimeTypeOutput(output)
+        #In complexOutput the variable is mimeType
+        complexOutput["mimeType"] = output.format["mimetype"]
         complexOutput["encoding"] = output.format["encoding"]
         complexOutput["schema"] = output.format["schema"]
-        
+       
+        if output.format["mimetype"] is not None:
         # CDATA section in output
-        if output.format["mimeType"].find("text") < 0:
+            #attention to application/xml
+            if output.format["mimetype"].find("text") < 0 and output.format["mimetype"].find("xml")<0:
             #complexOutput["cdata"] = 1
-            os.rename(output.value, output.value+".binary")
-            base64.encode(open(output.value+".binary"),open(output.value,"w"))
+                os.rename(output.value, output.value+".binary")
+                base64.encode(open(output.value+".binary"),open(output.value,"w"))
             
         
         # set output value
@@ -917,10 +954,15 @@ class Execute(Request):
 
         # remove <?xml version= ... part from beginning of some xml
         # documents
-        if output.format["mimeType"].find("xml") > -1:
-            beginXml = complexOutput["complexdata"].split("\n")[0]
-            if  beginXml.find("<?xml ") > -1:
-                complexOutput["complexdata"] = complexOutput["complexdata"].replace(beginXml+"\n","")
+        #Better <?xml search due to problems with \n
+        if output.format["mimetype"] is not None:
+            if output.format["mimetype"].find("xml") > -1:
+                beginXMLidx=complexOutput["complexdata"].find("?>")
+                #All <?xml..?> will be beginXMLidx + 2 
+                
+                #beginXml = complexOutput["complexdata"].split("\n")[0]
+                if beginXMLidx > -1:
+                    complexOutput["complexdata"] = complexOutput["complexdata"].replace(complexOutput["complexdata"][:(beginXMLidx+2)],"")
 
         return complexOutput
 
@@ -966,7 +1008,7 @@ class Execute(Request):
             # redefine the output 
             
             #Mapserver needs the format information, therefore checkMimeType has to be called before
-            self.checkMimeType(output)
+            self.checkMimeTypeOutput(output)
             
             if self.umn and output.useMapscript:
                 owsreference = self.umn.getReference(output)
@@ -974,10 +1016,10 @@ class Execute(Request):
                     templateOutput["reference"] = owsreference
 
             
-            
-            templateOutput["mimetype"] = output.format["mimeType"]
+            templateOutput["mimetype"] = output.format["mimetype"]
             templateOutput["schema"] = output.format["encoding"]
-            templateOutput["encoding"] = output.format["schema"]
+            templateOutput["schema"]=output.format["schema"]
+          
         return templateOutput
 
     def _samefile(self, src, dst):
@@ -992,55 +1034,26 @@ class Execute(Request):
         return (os.path.normcase(os.path.abspath(src)) ==
                 os.path.normcase(os.path.abspath(dst)))
 
-    def checkMimeType(self,output):
+    def checkMimeTypeOutput(self,output):
         """
         Checks the complexData output to determine if the mimeType is correct.
         if mimeType is not in the list defined by the user then it will log it as an error, no further action will be taken
-        Mainly used by: _asReferenceOutput,_complexOutput,lineageComplexOutput,_lineageComplexReference
-        Note: checkMimeType will set the output's format from the first 
+        Mainly used by: _asReferenceOutput,_complexOutput,_lineageComplexOutput,_lineageComplexReference
+        Note: checkMimeTypeIn will set the output's format from the first time 
         """
-        output.format=output.formats[0]
-        #import pydevd;pydevd.settrace()
-        tmp=output.ms.file(output.value)
         
-        mimeType=output.ms.file(output.value).split(';')[0]
-        isCorrect=False
-        
-        if mimeType.find("text")==-1 and mimeType.find("application/xml")==-1: # no text or xml
-            for format in output.formats:
-                if mimeType in format["mimeType"]:
-                    output.format=format
-                    isCorrect=True
+        try: # problem with exceptions ?! 
+            mimeType=output.ms.file(output.value).split(';')[0]
+    
+            if (output.format["mimetype"] is None) or (output.format["mimetype"]==""):
+                output.format["mimetype"]=mimeType
+                logging.debug("Since there is absolutely no mimeType information for %s, using libmagic mimeType %s " % (output.identifier,mimeType))
+            else:
+                if (mimeType.lower()!=output.format["mimetype"].lower()):
+                    logging.debug("ComplexOut %s has libMagic mimeType: %s but its format is %s" % (output.identifier,mimeType,output.format["mimetype"]))
+        except:
+            pass
                     
-            if isCorrect == False: 
-                self.onOutputProblem(output.identifier,mimeType)
-       
-        
-            #If mimeType is not found in the output list, We will use the one checked by magic
-            #output.format={"mimeType":mimeType,"encoding":None,"schema":None}
-  
-        #=======================================================================
-        # else: #dealing with text or xml
-        #    if we have < > we assume XML other wise plan text
-        #    f = open(output.value, 'r+')
-        #    startString=f.read(5)
-        #    f.seek(-5,2)
-        #    endString=f.read(5)
-        #    import pydevd;pydevd.settrace()
-        #    if (("<" in startString) or ("&lt;" in startString)) and ((">" in endString) or ("&gt;" in endString)):
-        #        #assuming text/xml
-        #        mimeType="text/xml"
-        #        import pydevd;pydevd.settrace()
-        #        for format in output.formats:
-        #            if mimeType in format["mimeType"]:
-        #                isCorrect=True
-        #    else:
-        #        assuming text/plain
-        #        self.onOutputProblem(output.identifier,mimeType)
-        #        mimeType="text/plain"
-        #        output.format={"mimeType":mimeType,"encoding":None,"schema":None}
-        #=======================================================================
-                
     def makeSessionId(self):
         """ Returns unique Execute session ID
 
@@ -1190,7 +1203,7 @@ class Execute(Request):
 
         elif output.type == "ComplexValue":
 
-            self.checkMimeType(output)
+            #self.checkMimeTypeIn(output)
              # copy the file to safe place
             outName = os.path.basename(output.value)
             outSuffix = os.path.splitext(outName)[1]
@@ -1201,5 +1214,5 @@ class Execute(Request):
                 COPY(os.path.abspath(output.value), outFile)
 
             #check 
-            self.contentType = output.format["mimeType"]
+            self.contentType = output.format["mimetype"]
             self.response = open(outFile,"rb")
