@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="<TMPL_VAR encoding>"?>
 <wps:Capabilities service="WPS" version="1.0.0" xml:lang="<TMPL_VAR lang>" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsGetCapabilities_response.xsd" updateSequence="1">
-        <Test></Test>
 	<ows:ServiceIdentification>
 		<ows:Title><TMPL_VAR servertitle></ows:Title>
                 <TMPL_IF serverabstract>
@@ -110,7 +109,7 @@
 			<ows:Abstract><TMPL_VAR abstract></ows:Abstract>
                         </TMPL_IF>
                         <TMPL_LOOP Metadata>
-			<ows:Metadata xlink:title="<TMPL_VAR metadatatitle>" />
+                        <ows:Metadata xlink:title="<TMPL_VAR title>" xlink:href="<TMPL_VAR href>" />
                         </TMPL_LOOP>
                         <TMPL_LOOP Profiles>
 			<wps:Profile><TMPL_VAR profile></wps:Profile>

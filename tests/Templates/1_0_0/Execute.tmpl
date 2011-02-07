@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="<TMPL_VAR encoding>"?>
-<wps:ExecuteResponse xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsGetCapabilities_response.xsd" service="WPS" version="1.0.0" xml:lang="<TMPL_VAR lang>" serviceInstance="<TMPL_VAR serviceinstance>" statusLocation="<TMPL_VAR statuslocation>">
+<wps:ExecuteResponse xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsExecute_response.xsd" service="WPS" version="1.0.0" xml:lang="<TMPL_VAR lang>" serviceInstance="<TMPL_VAR serviceinstance>" statusLocation="<TMPL_VAR statuslocation>">
     <wps:Process wps:processVersion="<TMPL_VAR processversion>">
         <ows:Identifier><TMPL_VAR identifier></ows:Identifier>
         <ows:Title><TMPL_VAR title></ows:Title>
@@ -7,7 +7,7 @@
         <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
         </TMPL_IF>
         <TMPL_LOOP Metadata>
-        <ows:Metadata xlink:title="<TMPL_VAR metadatatitle>" />
+        <ows:Metadata xlink:title="<TMPL_VAR title>" xlink:href="<TMPL_VAR href>" />
         </TMPL_LOOP>
         <TMPL_LOOP Profiles>
         <wps:Profile><TMPL_VAR profile></wps:Profile>
@@ -79,7 +79,11 @@
         <wps:Output mimeType="<TMPL_VAR mimetype>" encoding="<TMPL_VAR encoding>" schema="<TMPL_VAR schema>" asReference="<TMPL_VAR asreference>">
         </TMPL_IF>
         <TMPL_IF literaldata>
+        <TMPL_IF uom>
         <wps:Output <TMPL_VAR uom>>
+        <TMPL_ELSE>
+        <wps:Output>
+        </TMPL_IF>
         </TMPL_IF>
         <TMPL_IF bboxdata>
         <wps:Output>
