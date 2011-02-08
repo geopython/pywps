@@ -1,9 +1,9 @@
             <TMPL_IF reference>
-            <wps:Reference mimeType="<TMPL_VAR mimeType>" encoding="<TMPL_VAR encoding>" schema="<TMPL_VAR schema>" href="<TMPL_VAR href>">
+            <wps:Reference mimeType="<TMPL_VAR mimetype>" encoding="<TMPL_VAR encoding>" schema="<TMPL_VAR schema>" href="<TMPL_VAR href>">
             <TMPL_ELSE>
             <wps:Data>
                 <TMPL_IF complexdata>
-                <wps:ComplexData mimeType="<TMPL_VAR mimeType>" schema="<TMPL_VAR schema>" encoding="<TMPL_VAR encoding>">
+                <wps:ComplexData mimeType="<TMPL_VAR mimetype>" schema="<TMPL_VAR schema>" encoding="<TMPL_VAR encoding>">
                     <TMPL_IF cdata>
                     <![CDATA[<TMPL_VAR complexdata>]]>
                     <TMPL_ELSE>
