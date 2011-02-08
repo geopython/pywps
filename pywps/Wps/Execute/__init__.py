@@ -31,7 +31,7 @@ import pywps
 from pywps import config
 from pywps.Wps import Request
 from pywps.Template import TemplateError
-import time,os,sys,tempfile,re,types, ConfigParser, base64, traceback,urllib
+import time,os,sys,tempfile,re,types, ConfigParser, base64, traceback
 from shutil import copyfile as COPY
 from shutil import rmtree as RMTREE
 import logging
