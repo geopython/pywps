@@ -54,7 +54,6 @@ class DescribeProcess(Request):
         #
 
         self.templateProcessor.set("Processes",self.processesDescription())
-
         self.response = self.templateProcessor.__str__()
 
         return
@@ -107,6 +106,7 @@ class DescribeProcess(Request):
             processData["Dataoutputs"] = self.processOutputs(process)
             processData["dataoutputslen"] = len(processData["Dataoutputs"])
             processesData.append(processData)
+            
         return processesData
 
     def processInputs(self,process):
@@ -239,7 +239,7 @@ class DescribeProcess(Request):
         return
 
     def complexValue(self,inoutput,processInOutput):
-        """Format complex value attributes
+        """Format complex value attributes, it also changes None format to application/x-empty
 
         :param inoutput: :class:`pywps.Process.InAndOutputs.Input` or 
             :class:`pywps.Process.InAndOutputs.Output`
@@ -247,7 +247,8 @@ class DescribeProcess(Request):
         :param processInOutput: dictionary, where to store the parameters
             in 
         """
-
+        
+        
         processInOutput["mimetype"] = inoutput.formats[0]["mimeType"]
         processInOutput["encoding"] = inoutput.formats[0]["encoding"]
         processInOutput["schema"] = inoutput.formats[0]["schema"]
@@ -259,6 +260,14 @@ class DescribeProcess(Request):
                                         "encoding":format["encoding"],
                                         "schema":format["schema"]
                                             })
+        #Check for None values, that are replaces by application/x-empty
+        if processInOutput["mimetype"] is None:
+            processInOutput["mimetype"]="application/x-empty"
+        
+        #Jmdj: format["mimetype"] is None --> FILTER ; for format in processInOutput["Formats"] --> INTERACTOR
+        #format.__setitem__("mimetype","application/x-empty") --> SETTING KEY,VALUE (it cant'be format["mimetype"]="foo")
+        [format.__setitem__("mimetype","application/x-empty") for format in processInOutput["Formats"] if format["mimetype"] is None]
+        
         return
 
     def bboxValue(self,input,processInput):
