@@ -31,13 +31,18 @@ import pywps
 from pywps import config
 from pywps.Wps import Request
 from pywps.Template import TemplateError
-import time,os,sys,tempfile,re,types, ConfigParser, base64, traceback
+import time,os,sys,tempfile,re,types, ConfigParser, base64, traceback,urllib
 from shutil import copyfile as COPY
 from shutil import rmtree as RMTREE
 import logging
 import UMN
 
+from xml.sax.saxutils import escape
+
 TEMPDIRPREFIX="pywps-instance"
+
+#Note: saxutils to escape &,< and > from URLs. Applied to _lineageComplexRerenceInput,_asReferenceOutput. in the last case
+# it as been applied to ALL references, just as precausion
 
 class Execute(Request):
     """
@@ -776,7 +781,8 @@ class Execute(Request):
         :param wpsInput: associative field of self.wps.inputs["datainputs"]
         :param processInput: self.process.inputs
         """
-        complexInput["reference"] = wpsInput["value"]
+        #URLS need to be quoted otherwise XML is not valid
+        complexInput["reference"] = escape(wpsInput["value"])
         method = "GET"
         if wpsInput.has_key("method"):
             method = wpsInput["method"]
@@ -986,7 +992,7 @@ class Execute(Request):
             f = open(tmp[1],"w")
             f.write(str(output.value))
             f.close()
-            templateOutput["reference"] = tmp[1]
+            templateOutput["reference"] = escape(tmp[1])
         # complex value
         else:
             outName = os.path.basename(output.value)
@@ -999,8 +1005,7 @@ class Execute(Request):
 
             if not self._samefile(output.value,outFile):
                 COPY(os.path.abspath(output.value), outFile)
-            templateOutput["reference"] = \
-                    config.getConfigValue("server","outputUrl")+"/"+outName
+            templateOutput["reference"] = escape(config.getConfigValue("server","outputUrl")+"/"+outName)
             output.value = outFile
 
             # mapscript supported and the mapserver should be used for this
@@ -1013,12 +1018,12 @@ class Execute(Request):
             if self.umn and output.useMapscript:
                 owsreference = self.umn.getReference(output)
                 if owsreference:
-                    templateOutput["reference"] = owsreference
+                    templateOutput["reference"] = escape(owsreference)
 
             
-            templateOutput["mimetype"] = output.format["mimetype"]
-            templateOutput["schema"] = output.format["encoding"]
-            templateOutput["schema"]=output.format["schema"]
+            templateOutput["mimeType"] = output.format["mimetype"]
+            templateOutput["schema"] = output.format["schema"]
+            templateOutput["encoding"]=output.format["encoding"]
           
         return templateOutput
 
