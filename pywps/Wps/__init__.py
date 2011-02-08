@@ -119,7 +119,6 @@ class Request:
         templates = Templates.__path__[0]
         if os.getenv("PYWPS_TEMPLATES"):
             templates = os.path.abspath(os.getenv("PYWPS_TEMPLATES"))
-
         if self.wps.inputs.has_key("request"):
             if self.wps.inputs["request"] == "getcapabilities":
                 self.templateFile = os.path.join(templates,
@@ -148,7 +147,7 @@ class Request:
         if not processes:
             processes = os.getenv("PYWPS_PROCESSES")
         self.initProcesses(processes)
-
+        
     def _initFromDirectory(self,dirname):
 
         import sys

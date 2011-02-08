@@ -787,7 +787,7 @@ class Execute(Request):
         if wpsInput.has_key("method"):
             method = wpsInput["method"]
         complexInput["method"] = method
-        complexInput["mimeType"] = processInput.format["mimetype"]
+        complexInput["mimetype"] = processInput.format["mimetype"]
         complexInput["encoding"] = processInput.format["encoding"]
         if wpsInput.has_key("header") and wpsInput["header"]:
             complexInput["header"] = 1
@@ -853,10 +853,9 @@ class Execute(Request):
         
          #Checks for the correct output and logs 
         self.checkMimeTypeOutput(output)
-        complexOutput["mimeType"] = output.format["mimetype"]
+        complexOutput["mimetype"] = output.format["mimetype"]
         complexOutput["encoding"] = output.format["encoding"]
         complexOutput["schema"] = output.format["schema"]
-        
         return complexOutput
 
     def _lineageBBoxOutput(self, output, bboxOutput):
@@ -941,11 +940,11 @@ class Execute(Request):
         
         #Checks for the correct output and logs 
         self.checkMimeTypeOutput(output)
-        #In complexOutput the variable is mimeType
-        complexOutput["mimeType"] = output.format["mimetype"]
+       
+        complexOutput["mimetype"] = output.format["mimetype"]
         complexOutput["encoding"] = output.format["encoding"]
         complexOutput["schema"] = output.format["schema"]
-       
+        
         if output.format["mimetype"] is not None:
         # CDATA section in output
             #attention to application/xml
@@ -1021,10 +1020,9 @@ class Execute(Request):
                     templateOutput["reference"] = escape(owsreference)
 
             
-            templateOutput["mimeType"] = output.format["mimetype"]
+            templateOutput["mimetype"] = output.format["mimetype"]
             templateOutput["schema"] = output.format["schema"]
             templateOutput["encoding"]=output.format["encoding"]
-          
         return templateOutput
 
     def _samefile(self, src, dst):
@@ -1046,10 +1044,8 @@ class Execute(Request):
         Mainly used by: _asReferenceOutput,_complexOutput,_lineageComplexOutput,_lineageComplexReference
         Note: checkMimeTypeIn will set the output's format from the first time 
         """
-        
         try: # problem with exceptions ?! 
             mimeType=output.ms.file(output.value).split(';')[0]
-    
             if (output.format["mimetype"] is None) or (output.format["mimetype"]==""):
                 output.format["mimetype"]=mimeType
                 logging.debug("Since there is absolutely no mimeType information for %s, using libmagic mimeType %s " % (output.identifier,mimeType))
