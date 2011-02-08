@@ -107,7 +107,7 @@
             <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
             </TMPL_IF>
             <TMPL_IF reference>
-            <wps:Reference xlink:href="<TMPL_VAR reference>" mimeType="<TMPL_VAR mimetype>" encoding="<TMPL_VAR encoding>" schema="<TMPL_VAR schema>"/>
+            <wps:Reference xlink:href="<TMPL_VAR reference>" mimeType="<TMPL_VAR mimeType>" encoding="<TMPL_VAR encoding>" schema="<TMPL_VAR schema>"/>
             <TMPL_ELSE>
                 <TMPL_INCLUDE Execute_Data_Outputs.tmpl>
             </TMPL_IF>
