@@ -787,7 +787,7 @@ class Execute(Request):
         if wpsInput.has_key("method"):
             method = wpsInput["method"]
         complexInput["method"] = method
-        complexInput["mimeType"] = processInput.format["mimetype"]
+        complexInput["mimetype"] = processInput.format["mimetype"]
         complexInput["encoding"] = processInput.format["encoding"]
         if wpsInput.has_key("header") and wpsInput["header"]:
             complexInput["header"] = 1
@@ -853,7 +853,7 @@ class Execute(Request):
         
          #Checks for the correct output and logs 
         self.checkMimeTypeOutput(output)
-        complexOutput["mimeType"] = output.format["mimetype"]
+        complexOutput["mimetype"] = output.format["mimetype"]
         complexOutput["encoding"] = output.format["encoding"]
         complexOutput["schema"] = output.format["schema"]
         
@@ -942,7 +942,7 @@ class Execute(Request):
         #Checks for the correct output and logs 
         self.checkMimeTypeOutput(output)
         #In complexOutput the variable is mimeType
-        complexOutput["mimeType"] = output.format["mimetype"]
+        complexOutput["mimetype"] = output.format["mimetype"]
         complexOutput["encoding"] = output.format["encoding"]
         complexOutput["schema"] = output.format["schema"]
        
@@ -1021,7 +1021,7 @@ class Execute(Request):
                     templateOutput["reference"] = escape(owsreference)
 
             
-            templateOutput["mimeType"] = output.format["mimetype"]
+            templateOutput["mimetype"] = output.format["mimetype"]
             templateOutput["schema"] = output.format["schema"]
             templateOutput["encoding"]=output.format["encoding"]
           
@@ -1049,7 +1049,6 @@ class Execute(Request):
         
         try: # problem with exceptions ?! 
             mimeType=output.ms.file(output.value).split(';')[0]
-    
             if (output.format["mimetype"] is None) or (output.format["mimetype"]==""):
                 output.format["mimetype"]=mimeType
                 logging.debug("Since there is absolutely no mimeType information for %s, using libmagic mimeType %s " % (output.identifier,mimeType))
