@@ -8,7 +8,7 @@ The processes shoul be requested as follows:
 &status=true
 &storeExecuteResponse=true
 
-Done by Jorge de Jesus (jorge.de-jesus@jrc.it) as suggested by Kor de Jong
+Done by Jorge de Jesus (jmdj@pml.ac.uk) as suggested by Kor de Jong
 
 """
 
@@ -33,8 +33,8 @@ class Process(WPSProcess):
          import time
          self.status.set("Preparing....", 0)
          for i in xrange(1, 11):
-             time.sleep(10)
-             self.status.set("Thinking.....", float(i*10)) 
+             time.sleep(1)
+             self.status.set("Thinking.....", i*10) 
          #The final answer    
          self.Answer.setValue("42")
         

@@ -70,10 +70,13 @@ class Status:
         :type propagate: boolean
         """
         self.code = "processstarted"
-        if (type(percentDone) == types.StringType):
-            self.percentCompleted += int(percentDone)
-        else:
-            self.percentCompleted = percentDone
+         #percentageDone has to be int. The trick below will cast str-->float-->int
+        
+        self.percentCompleted=int(float(percentDone))
+        #if (type(percentDone) == types.StringType):
+        #    self.percentCompleted += int(percentDone)
+        #else:
+        #    self.percentCompleted = percentDone
 
         if not msg:
             msg = "True"
