@@ -750,9 +750,9 @@ class Execute(Request):
         self.templateProcessor.set("Inputs",templateInputs)
 
     def _lineageLiteralInput(self, input, wpsInput, literalInput):
-        """ Fill input of literal data
+        """ Fill input of literal data, boolean value will be cast to str
         """
-        literalInput["literaldata"] = wpsInput["value"]
+        literalInput["literaldata"] = str(wpsInput["value"])
         literalInput["uom"] = str(input.uom)
         return literalInput
 
@@ -845,6 +845,7 @@ class Execute(Request):
         self.templateProcessor.set("Outputdefinitions",templateOutputs)
 
     def _lineageLiteralOutput(self, output, literalOutput):
+        
         if len(output.uoms):
                 literalOutput["uom"] = str(output.uoms[0])
         return literalOutput
