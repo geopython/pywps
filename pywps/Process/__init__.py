@@ -64,16 +64,19 @@ class Status:
 
         :param msg: message for the client
         :type msg: string
-        :param percentDone: percent > 0
-        :type percentDone: float
+        :param percentDone: percent > 0 [0-99]
+        :type percentDone: int
         :param propagate: call onStatusChanged method
         :type propagate: boolean
         """
         self.code = "processstarted"
-        if (type(percentDone) == types.StringType):
-            self.percentCompleted += int(percentDone)
-        else:
-            self.percentCompleted = percentDone
+        #percentageDone has to be int. The trick below will cast str-->float-->int
+        
+        self.percentCompleted=int(float(percentDone))
+        #if (type(percentDone) == types.StringType):
+        #    self.percentCompleted += int(percentDone)
+        #else:
+        #    self.percentCompleted = percentDone
 
         if not msg:
             msg = "True"
