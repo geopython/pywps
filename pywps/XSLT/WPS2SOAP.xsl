@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+xmlns:fn="http://pywps.wald.intevation.org/functions">
 	<xsl:template match="/">
 	
 	<!-- Either the response is a processAccepted (async) or ProcessSucceeded (sync or final result from async) -->
@@ -30,11 +31,11 @@
 			
 			<xsl:choose>
 			<xsl:when test="count(./*/*[local-name()='LiteralData'])>0"> <!--LiteralData type -->
-				<xsl:variable name="literalIdentifier" select="concat(./*[local-name()='Identifier']/text(),'Result')"/>
+				<xsl:variable name="literalIdentifier" select="concat(fn:flagRemover(string(./*[local-name()='Identifier']/text())),'Result')"/>
 				<xsl:element name="{$literalIdentifier}"><xsl:value-of select="./*/*[local-name()='LiteralData']/text()"/></xsl:element>			
 			</xsl:when>
 			<xsl:otherwise> <!--  ComplexData -->
-			<xsl:variable name="complexIdentifier" select="concat(./*[local-name()='Identifier']/text(),'Result')"/>
+			<xsl:variable name="complexIdentifier" select="concat(fn:flagRemover(string(./*[local-name()='Identifier']/text())),'Result')"/>
 			  <!--ComplexData may contain XML or string -->
 			  <xsl:choose>
 			  <xsl:when test="./*/*/*">

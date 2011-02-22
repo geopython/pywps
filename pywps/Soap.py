@@ -45,6 +45,29 @@ from pywps import XSLT
 import types
 import re
 
+########### START OF XSLT FUNCTIONS ##################
+def getCorrectInputID(dummy,identifier):
+	"""XSLT function that converts the I/O identifier into a correct process I/O identifier. This is necessary
+	to deal with cases like <ows:Identifier>--flag<ows:Identifier> that get converted into <flag> elements, in the WSDL description. 
+	Function will do a reverse mapping"""
+	
+	correctInput=[input for input in inputKeys if input.find(identifier)>-1][0]
+	return correctInput
+
+# http://www.w3.org/TR/REC-xml/#charsets (only ":" | [A-Z] | "_" | [a-z])
+regExp=re.compile(r"[^a-zA-Z_:]*") 
+def flagRemover(dummy,strXML):
+    """Remove any char that is not allowed as Element name only (":" | [A-Z] | "_" | [a-z]) allowed as start char. Same function as describeProcess2WSDL"""
+    endN=regExp.match(strXML).end()
+    return strXML[endN:]
+
+
+ns=etree.FunctionNamespace("http://pywps.wald.intevation.org/functions")
+ns.prefix='fn'
+ns["getCorrectInputID"]=getCorrectInputID
+ns["flagRemover"]=flagRemover
+########### END OF XSLT FUNCTIONS ##################
+
 #For soap 1.2 -->http://www.w3.org/2003/05/soap-envelope (self.nsIndex=0)
 #For soap 1.1 -->http://schemas.xmlsoap.org/soap/envelope/ (self.nsIndex=1)
 soap_env_NS = ["http://www.w3.org/2003/05/soap-envelope","http://schemas.xmlsoap.org/soap/envelope/"]
@@ -82,7 +105,7 @@ SOAP_ENVELOPE_FAULT11="""<?xml version="1.0" encoding="UTF-8"?>
 
 
 soap = False
-
+inputKeys=None #filled in SOAP2WPS and then used by getCorrectInputID
 
 def isSoap(document): 
     global soap
@@ -111,21 +134,42 @@ def SOAPtoWPS(tree):
     #The solution is a tiny hack the XSL file, the WPS/OWS namespace are different from the ComplexInput, something like this: http://REPLACEME/wps/1.0.0
     #When etree is printed the REPLACEME is subtituted by www.opengis.net, creating the correct namespaces for the DOM parsing.
     #The replace is done using module re and set that it has to do only 2 replaces in the beggining. Therefore the replace is independe of the since of XML content
-     
+    global inputKeys
+    
+    processID=tree.tag.rsplit("_",1)[-1]
+    wps2=pywps.Pywps()
+    wps2.inputs={'request': 'getCapabilities', 'version': '1.0.0', 'service': 'wps'}
+    from pywps.Wps import Request
+    request=Request(wps2)
+    process=[process for process in request.processes if process.identifier in [processID]][0]
+    #These global variables will be used getCorrectInputID()
+    inputKeys=process.inputs.keys()
+    #outputKeys=process.outputs.keys()
+    
+    #processIDInputs=
+    #ns=etree.FunctionNamespace("http://pywps.wald.intevation.org/functions")
+    #ns.prefix='fn'
+    #ns["getCorrectInputID"]=getCorrectInputID
+    
+   # {http://www.opengis.net/wps/1.0.0}ExecuteProcess_gdalinfo
+    
     XSLTDocIO=open(pywps.XSLT.__path__[0]+"/SOAP2WPS.xsl","r")
    
     XSLTDoc=etree.parse(XSLTDocIO)
    
     transformer=etree.XSLT(XSLTDoc)
     WPSTree = transformer(tree)
-    
     etree.cleanup_namespaces(WPSTree)
     
     XMLOut=etree.tostring(WPSTree)
-   
+    
     XMLOut=re.sub(r'REPLACEME',"www.opengis.net",XMLOut,2)
-   
+
+    
     return XMLOut
+
+
+	
 
 def WPStoSOAP(tree):
 	
@@ -142,7 +186,7 @@ def WPStoSOAP(tree):
     	#Just dump the OGC exception
     	return etree.tostring(exceptionElementList[0])
    
-    
+     
 
     XSLTDoc =etree.parse(XSLTDocIO)
     transformer=etree.XSLT(XSLTDoc)
@@ -265,7 +309,6 @@ class SOAP:
              #General WPS:
            #print reqWPS[0].tag #getting the element's name
                 if "ExecuteProcess" in reqWPS[0].tag:
-                   
                    XMLStr=SOAPtoWPS(reqWPS[0])
                    XMLDoc=minidom.parseString(XMLStr)
             	  

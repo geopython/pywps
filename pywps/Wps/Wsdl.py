@@ -33,7 +33,23 @@ from lxml import etree
 import StringIO
 import re
 
+########### START OF XSLT FUNCTIONS ##################
 
+
+# http://www.w3.org/TR/REC-xml/#charsets (only ":" | [A-Z] | "_" | [a-z])
+regExp=re.compile(r"[^a-zA-Z_:]*") 
+def flagRemover(dummy,strXML):
+    """Function called from describeProcess2WSDL.xsl and necessary
+    to remove any char that is not allowed as Element name only (":" | [A-Z] | "_" | [a-z]) allowed as start char"""
+    endN=regExp.match(strXML).end()
+    return strXML[endN:]
+
+#Registering necessary etree functions
+ns=etree.FunctionNamespace("http://pywps.wald.intevation.org/functions")
+ns.prefix='fn'
+ns["flagRemover"]=flagRemover
+
+########### END OF XSLT FUNCTIONS ##################
 
 class Wsdl(Request):
     """
@@ -46,7 +62,6 @@ class Wsdl(Request):
            wps   - parent WPS instance
         """
         Request.__init__(self,wps)
-
         #
         # global variables
         #
@@ -54,13 +69,17 @@ class Wsdl(Request):
         #self.templateProcessor.set("name",name)
         #self.templateProcessor.set("address",config.getConfigValue("wps","serveraddress"))
         
+        
+        
         serverURL=config.getConfigValue("wps","serveraddress")
-   
+        
         #Generating a describeProcess for all processes
         wps2=pywps.Pywps()
         wps2.inputs={'identifier': ['all'], 'version': '1.0.0', 'request': 'describeprocess', 'language': 'eng', 'service': 'wps'}
         requestDescribeProcess=DescribeProcess(wps2)
         describeProcessXML=requestDescribeProcess.response
+        
+        
         
         #Transforming the describeProcessXML into WSDL document
         describeProcess2WSDLXSL=open(pywps.XSLT.__path__[0]+"/describeProcess2WSDL.xsl","r")

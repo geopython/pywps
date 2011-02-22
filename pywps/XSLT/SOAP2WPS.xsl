@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0" xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1">
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0" 
+xmlns:wps="http://www.opengis.net/wps/1.0.0" 
+xmlns:ows="http://www.opengis.net/ows/1.1"
+xmlns:fn="http://pywps.wald.intevation.org/functions">
   <xsl:template match="/">
     <!-- Determine the Execute process id -->
     <!-- It gets the root element and passed the string after ExecuteProcess-->
@@ -15,10 +18,10 @@
     <!-- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  -->
     <!-- xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsExecute_request.xsd" -->
     <!--  -->
-    
+
     <!-- Execute element -->
     <xsl:element name="Execute" namespace="http://www.opengis.net/wps/1.0.0">
-     <xsl:copy-of select="document('')/xsl:stylesheet/namespace::*[name()!='xsl']"/>
+     <xsl:copy-of select="document('')/xsl:stylesheet/namespace::*[name()!='xsl' and name()!='fn']"/>
     <xsl:attribute name="service"><xsl:value-of select="'WPS'"></xsl:value-of></xsl:attribute>
      <xsl:attribute name="version"><xsl:value-of select="'1.0.0'"></xsl:value-of></xsl:attribute>
      
@@ -36,7 +39,7 @@
               <!-- ComplexData-->
               <wps:Input>
                 <ows:Identifier>
-                  <xsl:value-of select="name(.)"/>
+                  <xsl:value-of select="fn:getCorrectInputID(name(.))"/>
                 </ows:Identifier>
                 <wps:Data>
                   <wps:ComplexData>
@@ -59,7 +62,7 @@
                   <!--ComplexData URLReference -->
                   <wps:Input xmlns:xlink="http://www.w3.org/1999/xlink">
                     <ows:Identifier>
-                      <xsl:value-of select="name(.)"/>
+                      <xsl:value-of select="fn:getCorrectInputID(name(.))"/>
                     </ows:Identifier>
                     <wps:Reference>
                       <xsl:attribute name="xlink:href">
@@ -75,7 +78,7 @@
                   <!-- Simple LiteralData -->
                   <wps:Input xmlns:xlink="http://www.w3.org/1999/xlink">
                     <ows:Identifier>
-                      <xsl:value-of select="name(.)"/>
+                      <xsl:value-of select="fn:getCorrectInputID(name(.))"/>
                     </ows:Identifier>
                     <wps:Data>
                       <wps:LiteralData>
