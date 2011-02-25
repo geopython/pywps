@@ -281,8 +281,8 @@ class RequestGetTestCase(unittest.TestCase):
         self.assertFalse(len(xmldom.getElementsByTagNameNS(self.wpsns,"ExceptionReport")), 0)
 
         # try to get out the Reference elemengt
-        wfsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[0].getAttribute("xlink:href")
-        wcsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[1].getAttribute("xlink:href")
+        wfsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[0].getAttribute("href")
+        wcsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[1].getAttribute("href")
         
         # test, if there are WFS and WCS request strings
         self.assertTrue(wfsurl.find("WFS") > -1)
@@ -321,13 +321,13 @@ class RequestGetTestCase(unittest.TestCase):
         """
         
         import urllib
+        self._setFromEnv()
         postpywps = pywps.Pywps(pywps.METHOD_POST)
         executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-complexinput-one-output-as-reference.xml"))
         postinputs = postpywps.parseRequest(executeRequestFile)
         postpywps.performRequest()
         #The response linage contains URLs with & that will crash the DOM parser
         xmldom = minidom.parseString(postpywps.response.replace("&","%26"))
-        
         
         #1 OutputDefintions only and that is rasterout
         outputDefNodes=xmldom.getElementsByTagNameNS(self.wpsns,"OutputDefinitions")
@@ -341,14 +341,12 @@ class RequestGetTestCase(unittest.TestCase):
         identifierNodes=processOutNodes[0].getElementsByTagNameNS(self.owsns,"Identifier")
         self.assertEquals(identifierNodes[0].firstChild.nodeValue,"rasterout")
     
-         
-
     def _setFromEnv(self):
         os.putenv("PYWPS_PROCESSES", os.path.join(pywpsPath,"tests","processes"))
         os.environ["PYWPS_PROCESSES"] = os.path.join(pywpsPath,"tests","processes")
         
 
 if __name__ == "__main__":
-   # unittest.main()
+   #unittest.main()
    suite = unittest.TestLoader().loadTestsFromTestCase(RequestGetTestCase)
    unittest.TextTestRunner(verbosity=2).run(suite)
