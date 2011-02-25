@@ -13,19 +13,19 @@
         xmlns:fn="http://pywps.wald.intevation.org/functions">
 <xsl:output method="xml" indent="yes" omit-xml-declaration="no"/>        
 <!-- External variables passed by Python to the XSLT transformer -->                
-<!-- <xsl:param name="serverURL"/> -->
-<!-- <xsl:param name="serverName"/>  -->
+ <xsl:param name="serverURL"/> 
+ <xsl:param name="serverName"/>  
 
 <!-- No longer necessary to set serverURL and serverName -->
-
+<!-- <xsl:variable name="serverURL"><xsl:value-of select="'http://localhost/wps.cgi'"></xsl:value-of></xsl:variable> -->
+<!-- <xsl:variable name="serverName"><xsl:value-of select="'PywpsServer'"></xsl:value-of></xsl:variable>  -->
 <!--  Example of regex with EXSTL -->
 <!--   
  <xsl:attribute name="name"><xsl:value-of select="concat(regexp:replace(./*[local-name()='Identifier'],'^[^_:A-Za-z]','g',''),'Result')"></xsl:value-of></xsl:attribute>
  -->
 
   
-<xsl:variable name="serverURL"><xsl:value-of select="'http://localhost/wps.cgi'"></xsl:value-of></xsl:variable>
-<xsl:variable name="serverName"><xsl:value-of select="'PywpsServer'"></xsl:value-of></xsl:variable> 
+
 
 	
 	<xsl:template match="/">
