@@ -412,6 +412,7 @@ class Execute(Request):
             pywps.response.response(self.response,
                                     self.outputFile,
                                     self.wps.parser.isSoap,
+                                    self.wps.parser.isSoapExecute,
                                     self.contentType)
 
         # remove all temporary files
