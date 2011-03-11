@@ -704,8 +704,9 @@ class Execute(Request):
             pywps.response.response(self.response,
                                     self.outputFile,
                                     self.wps.parser.isSoap,
+                                    self.wps.parser.isSoapExecute,
                                     self.contentType)
-        
+
         if self.status == self.started:
             logging.info("Status [%s][%.1f]: %s" %\
                     (self.status,float(self.percent), self.statusMessage))
