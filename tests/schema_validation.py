@@ -25,7 +25,7 @@ else:
     os.environ["PYWPS_PROCESSES"] = os.path.join(pywpsPath,"tests","processes")
 
 
-class RequestGetTestCase(unittest.TestCase):
+class SchemaTestCase(unittest.TestCase):
    #The class takes some time to load since it's in here where the schema objects are created and the schema's URL contacted
    
     getCapabilitiesRequest = "service=wps&request=getcapabilities"
@@ -256,6 +256,6 @@ class RequestGetTestCase(unittest.TestCase):
      
 if __name__ == "__main__":
    # unittest.main()
-   suite = unittest.TestLoader().loadTestsFromTestCase(RequestGetTestCase)
+   suite = unittest.TestLoader().loadTestsFromTestCase(SchemaTestCase)
    unittest.TextTestRunner(verbosity=2).run(suite)
         
