@@ -93,14 +93,14 @@ SOAP_ENVELOPE12="""<?xml version="1.0" encoding="UTF-8"?>
 
 #Envelope for soap 1.1
 SOAP_ENVELOPE11="""<?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/1999/XMLSchema-instance" xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/1999/XMLSchema">
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/1999/XMLSchema-instance" xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/1999/XMLSchema">
 <SOAP-ENV:Body>$SOAPBODY$</SOAP-ENV:Body></SOAP-ENV:Envelope>"""
 
 #Its assumed that the fault it always caused by the client PyWPS is 100% correct :)
 #Faultstring contains a description string of the error, Taverna only show this
 #The WSDL defines the ows:ExceptionReport as fault structure inside <detail>
 SOAP_ENVELOPE_FAULT11="""<?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/1999/XMLSchema-instance" xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/1999/XMLSchema">
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/1999/XMLSchema-instance" xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/1999/XMLSchema">
 <SOAP-ENV:Body><SOAP-ENV:Fault><faultcode>SOAP-ENV:Client</faultcode><faultstring>$REPORT$</faultstring><detail>$REPORTEXCEPTION$</detail></SOAP-ENV:Fault></SOAP-ENV:Body></SOAP-ENV:Envelope>"""
 
 
