@@ -33,7 +33,7 @@ class Process(WPSProcess):
          import time
          self.status.set("Preparing....", 0)
          for i in xrange(1, 11):
-             time.sleep(10)
+             time.sleep(2)
              self.status.set("Thinking.....", i*10) 
          #The final answer    
          self.Answer.setValue("42")

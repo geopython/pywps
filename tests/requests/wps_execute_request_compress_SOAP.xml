@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	<!-- WPS ExecuteProcess_ request using soap version 1.1 for Dummy process-->
+	
+	<!--  No header present  -->
+<SOAP-ENV:Envelope
+	xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/1999/XMLSchema-instance"
+	xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/1999/XMLSchema">
+	<SOAP-ENV:Body>
+		<ExecuteProcess_dummyprocess>
+			<input1>100</input1>
+			<input2>200</input2>
+	</ExecuteProcess_dummyprocess>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

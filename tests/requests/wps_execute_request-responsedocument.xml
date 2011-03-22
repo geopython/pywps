@@ -28,7 +28,7 @@
 		</wps:Input>
 	</wps:DataInputs>
 	<wps:ResponseForm>
-                <wps:ResponseDocument wps:lineage="true" wps:storeExecuteResponse="true" wps:status="frue">
+                <wps:ResponseDocument lineage="true" storeExecuteResponse="true" status="frue">
                     <wps:Output asReference="false">
                         <ows:Identifier>buffer</ows:Identifier>
                     </wps:Output>

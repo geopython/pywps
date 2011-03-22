@@ -14,7 +14,7 @@
 		</wps:Input>
 	</wps:DataInputs>
         <wps:ResponseForm>
-            <wps:ResponseDocument wps:lineage="false" storeExecuteResponse="true" status="false">
+            <wps:ResponseDocument lineage="false" storeExecuteResponse="true" status="false">
                 <wps:Output asReference="true">
                     <ows:Identifier>rasterout</ows:Identifier>
                 </wps:Output>
