@@ -201,7 +201,7 @@ def doFixTavernaBug(WPSTree):
 	if not bool(WPSTree.attrib):
 		WPSTree.set("service","WPS")
 		
-		tagNameRequest=WPSTree.tag.split("}")[1]
+	tagNameRequest=WPSTree.tag.split("}")[1]
         #tagNameRequest=firstElement.tagName.split(":")[1]
         if tagNameRequest=="DescribeProcess" or tagNameRequest=="Execute":
              WPSTree.set("version","1.0.0")
@@ -223,7 +223,6 @@ def doCleanBug5762(document):
        	    	for attrKey in attrMap.keys():
           		attr=attrMap[attrKey]
                   
-                #import pydevd;pydevd.settrace()
                 if (type(attr.value)==types.NoneType or len(attr.value)==0):
             	    node.removeAttribute(attr.name)
                    

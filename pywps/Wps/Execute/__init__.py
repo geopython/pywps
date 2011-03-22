@@ -704,6 +704,7 @@ class Execute(Request):
                                    self.status == self.failed):
             pywps.response.response(self.response,
                                     self.outputFile,
+                                    self.wps.parser.soapVersion,
                                     self.wps.parser.isSoap,
                                     self.wps.parser.isSoapExecute,
                                     self.contentType)
