@@ -165,3 +165,16 @@ class AssyncProcess(WPSProcess):
     def execute(self):
         import time
         time.sleep(2)
+
+class FlagsProcess(WPSProcess):
+    """Dummy process with --flags to test WSDL special char removal"""
+    def __init__(self):
+        WPSProcess.__init__(self, identifier ="flagsprocess",title="Dummy process with flags as InputOutput",storeSupported=True, statusSupported=True)
+        self.flag1In = self.addLiteralInput(identifier="-flag1In",title="Literal input flag1")
+        self.flag2In = self.addLiteralInput(identifier="--flag2In",title="Literal input flag2")
+        self.flag1Out = self.addLiteralOutput(identifier="-flag1Out",title="Literal output flag1")
+        self.flag2Out = self.addLiteralOutput(identifier="--flag2Out",title="Literal output flag2")
+    
+    def execute(self):
+        self.flag1Out.setValue(self.flag1In.getValue())
+        self.flag2Out.setValue(self.flag2In.getValue())
