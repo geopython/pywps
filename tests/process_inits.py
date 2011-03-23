@@ -19,6 +19,9 @@ class RequestGetTestCase(unittest.TestCase):
     wpsns = "http://www.opengis.net/wps/1.0.0"
     xmldom = None
 
+    def setUp(self):
+        sys.stderr=open("/dev/null","w")
+        
     def testLoadProcessesFromClass(self):
         """Test, if we can load process as classes"""
         class newClassProcess(pywps.Process.WPSProcess):
@@ -51,7 +54,7 @@ class RequestGetTestCase(unittest.TestCase):
         inputs = mypywps.parseRequest(self.getcapabilitiesrequest)
         mypywps.performRequest(inputs)
         xmldom = minidom.parseString(mypywps.response)
-        self.assertEquals(len(mypywps.request.processes), 9)
+        self.assertEquals(len(mypywps.request.processes), 14)
         self.assertTrue(mypywps.request.getProcess("dummyprocess"))
 
     def _setFromEnv(self):
@@ -60,4 +63,6 @@ class RequestGetTestCase(unittest.TestCase):
         
 
 if __name__ == "__main__":
-    unittest.main()
+    # unittest.main()
+   suite = unittest.TestLoader().loadTestsFromTestCase(RequestGetTestCase)
+   unittest.TextTestRunner(verbosity=2).run(suite)

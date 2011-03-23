@@ -2,6 +2,7 @@ import os
 import sys
 
 pywpsPath = os.path.abspath(os.path.join(os.path.split(os.path.abspath(__file__))[0],".."))
+
 sys.path.append(pywpsPath)
 
 import pywps
@@ -22,6 +23,7 @@ else:
 
 import tempfile
 
+
 class RequestGetTestCase(unittest.TestCase):
     inputs = None
     getcapabilitiesrequest = "service=wps&request=getcapabilities"
@@ -34,6 +36,9 @@ class RequestGetTestCase(unittest.TestCase):
     owsns = "http://www.opengis.net/ows/1.1"
     xmldom = None
 
+    def setUp(self):
+        #Silence PyWPS Warning:       from pywps.Process.Process import WPSProcess
+        sys.stderr=open("/dev/null","w")
 
     def testT00Assync(self):
         """Test assynchronous mode for the first time"""
@@ -281,8 +286,8 @@ class RequestGetTestCase(unittest.TestCase):
         self.assertFalse(len(xmldom.getElementsByTagNameNS(self.wpsns,"ExceptionReport")), 0)
 
         # try to get out the Reference elemengt
-        wfsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[0].getAttribute("xlink:href")
-        wcsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[1].getAttribute("xlink:href")
+        wfsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[0].getAttribute("href")
+        wcsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[1].getAttribute("href")
         
         # test, if there are WFS and WCS request strings
         self.assertTrue(wfsurl.find("WFS") > -1)
@@ -307,7 +312,6 @@ class RequestGetTestCase(unittest.TestCase):
          identifierNodes=outputNodes[0].getElementsByTagNameNS(self.owsns,"Identifier")
          self.assertEquals(identifierNodes[0].firstChild.nodeValue,"vectorout")
          
-         
          #all outputs --> blank responseDocument
          inputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=complexprocess&datainputs=[rasterin=%s;vectorin=%s]&responsedocument=[]" % (urllib.quote(self.wcsurl), urllib.quote(self.wfsurl)))
          getpywps.performRequest()
@@ -328,14 +332,11 @@ class RequestGetTestCase(unittest.TestCase):
         #The response linage contains URLs with & that will crash the DOM parser
         xmldom = minidom.parseString(postpywps.response.replace("&","%26"))
         
-        
         #1 OutputDefintions only and that is rasterout
         outputDefNodes=xmldom.getElementsByTagNameNS(self.wpsns,"OutputDefinitions")
         self.assertEquals(len(outputDefNodes),1)
         identifierNodes=outputDefNodes[0].getElementsByTagNameNS(self.owsns,"Identifier")
         self.assertEquals(identifierNodes[0].firstChild.nodeValue,"rasterout")
-        
-        
         
         #1 ProcessOutput only check that is rasterout
         processOutNodes=xmldom.getElementsByTagNameNS(self.wpsns,"ProcessOutputs")
@@ -343,6 +344,8 @@ class RequestGetTestCase(unittest.TestCase):
         identifierNodes=processOutNodes[0].getElementsByTagNameNS(self.owsns,"Identifier")
         self.assertEquals(identifierNodes[0].firstChild.nodeValue,"rasterout")
                
+  
+ 
         
     def _setFromEnv(self):
         os.putenv("PYWPS_PROCESSES", os.path.join(pywpsPath,"tests","processes"))

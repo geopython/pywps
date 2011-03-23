@@ -12,6 +12,8 @@ import time
 from lxml import etree
 import urllib
 import StringIO
+from pywps import Soap
+
 
 if os.name != "java":
     from osgeo import ogr
@@ -30,7 +32,6 @@ class SchemaTestCase(unittest.TestCase):
     getCapabilitiesRequest = "service=wps&request=getcapabilities"
     getDescribeProcessRequest = "service=wps&request=describeprocess&version=1.0.0&identifier=bboxprocess,complexprocess,literalprocess,complexRaster,complexVector"
     
-    
     postExecuteBBOXRequest=open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-bbox.xml"))
     #1 raster + 1 vector output No def of response doc
     postExecuteComplexInputRequest=open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-complexinput-direct.xml"))
@@ -38,35 +39,35 @@ class SchemaTestCase(unittest.TestCase):
     
     postExecuteLiteraDataRequest=open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-literalinput-responsedocument.xml"))
     
-    #getCapabilitiesRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request.xml"))
-    #describeProcessRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_describeprocess_request_all.xml"))
-     
     base_url="http://schemas.opengis.net/wps/1.0.0/"
     
     getCapabilitiesSchemaResponse="http://schemas.opengis.net/wps/1.0.0/wpsGetCapabilities_response.xsd"
     describeProcessSchemaResponse="http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd"
     executeSchemaResponse="http://schemas.opengis.net/wps/1.0.0/wpsExecute_response.xsd"
-    
-    #parser, schema structure for getCapabilities/DescribeProcess/Execute 
+    wsdlSchema="http://schemas.xmlsoap.org/wsdl/"
+    soap11Schema="http://schemas.xmlsoap.org/soap/envelope/"
+    soap12Schema="http://www.w3.org/2003/05/soap-envelope/"
+     
     parser=etree.XMLParser(no_network=False)
-    #getCapabilities
-    
-    #describeProcess
-    
-    #execute
-    
 
+    def setUp(self):
+        #Silence PyWPS Warning: Usage of....
+        sys.stderr=open("/dev/null","w")
+        
     def testAssync(self):
         """Test assync status document"""
         
         self._setFromEnv()
-        
+        pid=os.getpid()
         schemaDocExecute=etree.XML(urllib.urlopen(self.executeSchemaResponse).read(),parser=self.parser,base_url=self.base_url)
         schemaExecute=etree.XMLSchema(schemaDocExecute)
         
         mypywps = pywps.Pywps(pywps.METHOD_GET)
         inputs = mypywps.parseRequest("service=wps&request=execute&version=1.0.0&identifier=ultimatequestionprocess&status=true&storeExecuteResponse=true")
         mypywps.performRequest()
+        #Killing the child from os.fork in pywps
+        if (os.getpid() != pid):
+            os._exit(0)
         
         #First parse
         executeAssyncGET=etree.XML(mypywps.response,self.parser)
@@ -96,8 +97,6 @@ class SchemaTestCase(unittest.TestCase):
                 break
         if counter>=20:
             self.assertEquals("The assync process is taking to long",None)
-                
-
  
     def testGetCapabilities(self):
         """Test if GetCapabilities request returns a valid XML document"""
@@ -209,8 +208,8 @@ class SchemaTestCase(unittest.TestCase):
         executeComplexInputOneOutputPOST=etree.XML(postpywps.response,self.parser)
         self.assertEquals(schemaExecute.assertValid(executeComplexInputOneOutputPOST),None)
     
-
-
+ 
+ 
    
     def testExecuteComplexInputOneOutputReference(self):
         """Test lineage and output as reference"""
@@ -226,9 +225,9 @@ class SchemaTestCase(unittest.TestCase):
         postpywps.performRequest(postinputs)
         executeComplexInputOneOutputPOST=etree.XML(postpywps.response,self.parser)
         self.assertEquals(schemaExecute.assertValid(executeComplexInputOneOutputPOST),None)
-
-
-
+ 
+ 
+ 
     def testExecuteLiteraData(self):
         """Test literaldata lineage and response document"""
         #Literal data doesnt support reference output, yet
@@ -245,14 +244,83 @@ class SchemaTestCase(unittest.TestCase):
         
         executeComplexInputOneOutputPOST=etree.XML(postpywps.response,self.parser)
         self.assertEquals(schemaExecute.assertValid(executeComplexInputOneOutputPOST),None)
+ 
+    def testWSDL(self):
+        """Test WSDL output content"""
+        self._setFromEnv()
+        schemaDocWSDL=etree.XML(urllib.urlopen(self.wsdlSchema).read(),parser=self.parser,base_url=self.base_url)
+        schemaWSDL=etree.XMLSchema(schemaDocWSDL)
+        
+        getpywps = pywps.Pywps(pywps.METHOD_GET)
+        inputs=getpywps.parseRequest("WSDL")
+        #print inputs
+        getpywps.performRequest()
+     
+        wsdlDoc=etree.XML(getpywps.response,self.parser)
+        self.assertEquals(schemaWSDL.assertValid(wsdlDoc),None)
 
-
+    
+    def testSOAP11(self):
+        """Test SOAP1.1 returned envelope"""
+        #Same as testGetCapabilities is soap_tests
+        self._setFromEnv()
+        
+        schemaDocSOAP=etree.XML(urllib.urlopen(self.soap11Schema).read(),parser=self.parser,base_url=self.base_url)
+        schemaSOAP=etree.XMLSchema(schemaDocSOAP)
+        
+        postpywps = pywps.Pywps(pywps.METHOD_POST)
+        getCapabilitiesSOAP11RequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request_SOAP11.xml"))
+        postpywps.parseRequest(getCapabilitiesSOAP11RequestFile)
+         
+        postpywps.performRequest()
+        soap = Soap.SOAP()
+        response = soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute) 
+        soapDoc=etree.XML(response,self.parser)
+        self.assertEquals(schemaSOAP.assertValid(soapDoc),None)
+      
+    def testSOAP12(self):
+        """Test SOAP1.2 returned envelope"""
+        self._setFromEnv()
+        
+        schemaDocSOAP=etree.XML(urllib.urlopen(self.soap12Schema).read(),parser=self.parser,base_url=self.base_url)
+        schemaSOAP=etree.XMLSchema(schemaDocSOAP)
+        
+        postpywps = pywps.Pywps(pywps.METHOD_POST)
+        getCapabilitiesSOAP12RequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request_SOAP12.xml"))
+        postpywps.parseRequest(getCapabilitiesSOAP12RequestFile)
+         
+        postpywps.performRequest()
+        
+        soap = Soap.SOAP()
+        response = soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute) 
+        soapDoc=etree.XML(response,self.parser)
+        self.assertEquals(schemaSOAP.assertValid(soapDoc),None)
+    
+    def testSOAP11Fault(self):
+        """Test Fault SOAP1.1"""
+        
+        schemaDocSOAP=etree.XML(urllib.urlopen(self.soap11Schema).read(),parser=self.parser,base_url=self.base_url)
+        schemaSOAP=etree.XMLSchema(schemaDocSOAP)
+        
+        postpywps = pywps.Pywps(pywps.METHOD_POST)
+        exceptionFile = open(os.path.join(pywpsPath,"tests","requests","wps_describeprocess_exception_SOAP11.xml"))
+        postpywps.parseRequest(exceptionFile)
+        try:
+            postpywps.performRequest()
+        except pywps.Exceptions.InvalidParameterValue,e:
+            postpywps.response=e.getResponse()
+        
+        soap=Soap.SOAP()
+        response=soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute)
+       
+        soapDoc=etree.XML(response,self.parser)
+        self.assertEquals(schemaSOAP.assertValid(soapDoc),None)   
 
     def _setFromEnv(self):
         os.putenv("PYWPS_PROCESSES", os.path.join(pywpsPath,"tests","processes"))
         os.environ["PYWPS_PROCESSES"] = os.path.join(pywpsPath,"tests","processes")
-
-     
+    
+   
 if __name__ == "__main__":
    # unittest.main()
    suite = unittest.TestLoader().loadTestsFromTestCase(SchemaTestCase)

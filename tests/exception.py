@@ -2,7 +2,7 @@ import os
 import sys
 
 pywpsPath = os.path.abspath(os.path.join(os.path.split(os.path.abspath(__file__))[0],".."))
-
+#sys.path.append(pywpsPath)
 sys.path[0]=pywpsPath
 
 import pywps
@@ -21,18 +21,27 @@ class ExceptionTestCase(unittest.TestCase):
     wfsurl = "http://rsg.pml.ac.uk/geoserver2/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=rsg:areas_pw&maxFeatures=1"
     owsns = "http://www.opengis.net/ows/1.1"
     xmldom= None
+
+#NOTE: Depending on the code position where the exception is raised, the pywps.response maybe filled or not
+#for proper Exception debug it should be better to use a try: exception. See: soap_testes.testSOAP11Fault
+    
+    def setUp(self):
+        #Silence sterr otherwise the promopt is flooded with error message from exceptions
+        sys.stderr = open('/dev/null',"w") 
+    
     
     def testMaxFile(self):
         """Text exception raise from MaxFileSize"""
-        #Silence sterr otherwise the promopt is flooded with error message from exceptions
-        sys.stderr = open('/dev/null',"w") 
-        
         #Calling complexRaster process that has datainput with maxfilezie=2.0megas below 3mega of pywps.cfg
+        
+        
         self._setFromEnv()
         
         mypywps = pywps.Pywps(pywps.METHOD_GET)
         inputs = mypywps.parseRequest("service=wps&request=execute&version=1.0.0&identifier=complexRaster&datainputs=[indata=%s]" % self.tiffurl)
+        
         mypywps.performRequest()
+       
         xmldom = minidom.parseString(mypywps.response)
         #Check that is an exception
         exceptionDOM=xmldom.getElementsByTagNameNS(self.owsns,"Exception")
@@ -56,7 +65,7 @@ class ExceptionTestCase(unittest.TestCase):
         self.assertEqual(exceptionDOM[0].getAttribute("exceptionCode"),"FileSizeExceeded")
         #Maximum file size is 3.0 MB for input
         self.assertTrue("3.0" in exceptionDOM[0].getAttribute("locator"))
-        sys.stderr = sys.__stderr__ 
+        
         
     def _setFromEnv(self):
         os.putenv("PYWPS_PROCESSES", os.path.join(pywpsPath,"tests","processes"))

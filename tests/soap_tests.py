@@ -6,13 +6,11 @@ import StringIO
 import time
 import signal
 pywpsPath = os.path.abspath(os.path.join(os.path.split(os.path.abspath(__file__))[0],".."))
-
 #sys.path.append(pywpsPath)
 sys.path[0]=pywpsPath
-sys.path.append("/users/blue_rsghome/jmdj/.eclipse/793567567/plugins/org.python.pydev.debug_1.6.0.2010071813/pysrc/")
 import pywps
 import pywps.Process
-#from  pywps.Parser import Post
+
 import unittest
 from pywps.Parser import Post
 
@@ -20,119 +18,14 @@ from xml.dom import minidom
 from xml.dom.ext import c14n
 from pywps import Soap
 import types
-from pywps.Exceptions import *
+
 
 #Note the postpywps.response should be an WSP response without SOAP envelope
- #SOAP envelope is then added in soap.getResponse that is called from response() accordinf the soap needs
+#SOAP envelope is then added in soap.getResponse that is called from response() accordinf the soap needs
 
 #Note2: incorrect SOAP envelope posting is normally due to incorrect/bad order function arguments
 #def response(response,targets,soapVersion=None,isSoap=False,isSoapExecute=False,contentType="application/xml"):
 
-#Stolen from Parser.Post.getFirstChildNode()
-def getFirstChildNode(document):
-    for node in document.childNodes:
-        if node.nodeType == minidom.Element.nodeType:
-            firstChild = node
-        
-    document=firstChild
-    return document
-
-
-class SOAPTestCase(unittest.TestCase):
-    """Test case that checks if SOAP is properly working, detection of SOAP, getting envelope content, version detection, SOAPpy parsing and creationf of SOAPpy.Types.structType """
-   #def __init__(self):
-    #    pass
-    soapVersion=None
-    
-
-    
-    def setUp(self):
-        pass
-    
-    #def testIsSOAP(self):
-    #    """Testing SOAP detection, wps.parser.isSoap"""
-        #postpywps = pywps.Pywps(pywps.METHOD_POST)
-    #    getCapabilitiesSOAP11RequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request_SOAP11.xml"))
-    #    document = minidom.parse(getCapabilitiesSOAP11RequestFile)
-
-        #Stolen from Parser.Post.getFirstChildNode()
-    #    for node in document.childNodes:
-    #        if node.nodeType == minidom.Element.nodeType:
-     #           firstChild = node
-    #    
-      #  document=getFirstChildNode(document)
-       # self.assertTrue(Soap.isSoap(document))
-        
-
-    def testGetWPSGetCapabilitiesContent(self):
-        """Testing if GetCapabilties can be fetch from SOAP envelope""" 
-        getCapabilitiesSOAP11RequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request_SOAP11.xml"))
-        getCapabilitiesRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request.xml"))
-        
-        SOAPRequestDoc=minidom.parse(getCapabilitiesSOAP11RequestFile)
-        getCapabilitiesRequestDoc=minidom.parse(getCapabilitiesRequestFile) 
-        
-        SOAPRequestDoc=getFirstChildNode(SOAPRequestDoc)
-     
-        testSOAP=Soap.SOAP(SOAPRequestDoc)
-        outputDoc=testSOAP.getWPSContent()
-        
-        SOAPTestCase.soapVersion=testSOAP.getSOAPVersion()
-        
-        self.assert_((outputDoc.__class__.__name__=='Element'), 'Output from Soap.getWPSContent() is not a DOM-Element')
- 
-        
-         #Checking if both arguments are dom objects, using assert technique (if  false things will stop)
-        #self.assert_((xml1.__class__.__name__=='Document'), 'First argument is not an XML Document')
-        outputDoc=minidom.parseString(outputDoc.toxml())
-        xml1Cano,xml2Cano=c14n.Canonicalize(getCapabilitiesRequestDoc), c14n.Canonicalize(outputDoc)
-        self.assertTrue(str(xml1Cano)==str(xml2Cano))
-    
-    def testSOAPVersionResponse(self):
-        """Testing the correct version reply"""
-        getCapabilitiesSOAP11RequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request_SOAP11.xml"))
-        mypywps = pywps.Pywps(pywps.METHOD_POST)
-        inputs= mypywps.parseRequest(getCapabilitiesSOAP11RequestFile)
-        response=mypywps.performRequest(inputs)
-        
-        soapTest=Soap.SOAP()
-        soapResponse=soapTest.getResponse(response,self.soapVersion)
-      
- 
-        #s = StdOut(sys.stdout)
-        #sys.stdout = s
-        
-        #redirecting stdout
-        #import cStringIO
-        #dummyIO=StringIO.StringIO()
-        #sys.stdout=dummyIO=StringIO.StringIO()
-        #sys.stderr=dummyIO
-        
-        #pywps.response.response(response,sys.stdout,mypywps.parser.soapVersion,mypywps.parser.isSoap,mypywps.request.contentType)
-        #print dir(dummyIO)
-        #response = soap.getResponse(response,soapVersion=11)
-        #sys.stdout=sys.__stdout__
-        #'sys.stderr=sys.__stderr__
-        #print dummyIO.len
-        #print (dummyIO.getvalue())
-        
-        #print dummyIO.getvalue()
-        #sys.stderr = sys.__stderr__ 
-        #print dummyIO.read()
-        #print responseSOAP
-        #Check if string contains "SOAP-ENV:Envelope"
-        self.assertTrue("soap-env:envelope" in soapResponse.lower())
-        #Check if string contains "SOAP-ENV:Envelope"
-        
-        
-        
-        #xmldom = minidom.parseString(mypywps.response)
-        #print xmldom.toxml()
-        
-    def testSOAPSocket(self):
-        pass
-  
-  
   
 class SOAPSchemaTestCase(unittest.TestCase):
     #For soap 1.2 -->http://www.w3.org/2003/05/soap-envelope (self.nsIndex=0)
@@ -292,6 +185,7 @@ class SOAPSchemaTestCase(unittest.TestCase):
         
         postpywps.parseRequest(executeSOAPRequestFile)
         postpywps.performRequest()
+        
         soap = Soap.SOAP()
         response=soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute)
         
@@ -299,7 +193,7 @@ class SOAPSchemaTestCase(unittest.TestCase):
         responseDoc = minidom.parseString(response)
         self.assertTrue(responseDoc.getElementsByTagNameNS(self.soapEnvNS[1],"Envelope")>0)
         self.assertTrue(responseDoc.getElementsByTagNameNS(self.soapEnvNS[1],"Body")>0)
-        #print os.getpid()
+        
         #GetStatus from <statusURLResult>
         time.sleep(2)        
         #Killing the child from os.fork in pywps
@@ -333,11 +227,13 @@ class SOAPSchemaTestCase(unittest.TestCase):
         #checking content  
         addressNode=wsdlDoc.getElementsByTagName("address")[0]
         #check 4 correct server adress
+       
         self.assertTrue(addressNode.getAttribute("location")==pywps.config.getConfigValue("wps","serveraddress"))
             
         #check for Response/Request in input/output message
         port=wsdlDoc.getElementsByTagName("portType")
         inputs=port[0].getElementsByTagName("input")
+       
         outputs=port[0].getElementsByTagName("output")
         self.assertTrue("Request" in inputs[0].getAttribute("message"))
         self.assertTrue("Response" in outputs[0].getAttribute("message"))
@@ -352,28 +248,96 @@ class SOAPSchemaTestCase(unittest.TestCase):
             
             
             
-    def testFaultSOAP(self):
-        "Testing WPS exception to SOAP fault"
+    def testSOAP11Fault(self):
+        "Testing WPS exception to SOAP11 fault"
         #here a silent stderr does not work, the exception is raised and a try will catch it
         self._setFromEnv()
         
         postpywps = pywps.Pywps(pywps.METHOD_POST)
-        exceptionFile = open(os.path.join(pywpsPath,"tests","requests","wps_describeprocess_exception_SOAP.xml"))    
+        exceptionFile = open(os.path.join(pywpsPath,"tests","requests","wps_describeprocess_exception_SOAP11.xml"))    
         postpywps.parseRequest(exceptionFile)
         try:
             postpywps.performRequest()
-        except InvalidParameterValue,e:
+        except pywps.Exceptions.InvalidParameterValue,e:
             postpywps.response=e.getResponse()
 
         soap = Soap.SOAP()
         response=soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute)
         xmlDoc=minidom.parseString(response)
-        xmlDoc.getElementsByTagNameNS(self.soapEnvNS[1],"Fault")
+        #xmlDoc.getElementsByTagNameNS(self.soapEnvNS[1],"Fault")
         self.assertTrue(len(xmlDoc.getElementsByTagNameNS(self.soapEnvNS[1],"Fault"))>0)
         #check for SOAP-ENV:Server as fault code as in WCS2.0
         self.assertTrue(len(xmlDoc.getElementsByTagName("faultcode"))>0)
         exceptionDoc=xmlDoc.getElementsByTagName("detail")[0]
         self.assertTrue(len(exceptionDoc.getElementsByTagNameNS(self.owsns,"ExceptionReport"))>0)
+        
+        
+    def testSOAP12Fault(self):
+        "Testing WPS exception to SOAP12 fault"
+        
+        self._setFromEnv()
+        
+        postpywps = pywps.Pywps(pywps.METHOD_POST)
+        exceptionFile = open(os.path.join(pywpsPath,"tests","requests","wps_describeprocess_exception_SOAP12.xml"))    
+        postpywps.parseRequest(exceptionFile)
+        try:
+            postpywps.performRequest()
+        except pywps.Exceptions.InvalidParameterValue,e:
+            postpywps.response=e.getResponse()
+
+        soap = Soap.SOAP()
+        response=soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute)
+        xmlDoc=minidom.parseString(response)
+        
+        self.assertTrue(len(xmlDoc.getElementsByTagNameNS(self.soapEnvNS[0],"Fault"))>0)
+        #check for SOAP-ENV:Server as fault code as in WCS2.0
+        self.assertTrue(len(xmlDoc.getElementsByTagNameNS(self.soapEnvNS[0],"Value"))>0)
+        exceptionDoc=xmlDoc.getElementsByTagNameNS(self.soapEnvNS[0],"Detail")[0]
+        self.assertTrue(len(exceptionDoc.getElementsByTagNameNS(self.owsns,"ExceptionReport"))>0)        
+        
+    def testWSDLStartChar(self):
+        """Testing the flag removal from I/O (WSDL)"""
+        getpywps = pywps.Pywps(pywps.METHOD_GET)
+        getpywps.parseRequest("WSDL")
+    
+        getpywps.performRequest()     
+        wsdlDoc = minidom.parseString(getpywps.response)
+        #getting all schema elements
+        schemaEl=wsdlDoc.getElementsByTagName("schema")
+        #getting all nodes called elements
+        elementEl=[node.firstChild for node in schemaEl if node.firstChild.localName=="element"]
+        #filter everython so that elements that contain the flag process are picked
+        flagEl=[node.firstChild for node in elementEl if "flag" in node.getAttributeNode("name").nodeValue]
+        #secon element fetch this time elements inside process
+        element2El=[node.getElementsByTagName("element") for node in flagEl]
+        #flatting the list
+        element2El=[item2 for item1 in element2El for item2 in item1]
+        #list of strings
+        names=[node.getAttributeNode("name").nodeValue for node in element2El]
+        #check for presence of "-"
+        self.assertTrue(len([name for name in names if "-" in name])==0)
+    
+    def testIOmappingSOAP(self):
+        """Test correct mapping of I/O identifier from SOAP compress to WPS"""
+        #This is related to the start char problem, the SOAP flag1 need to be 
+        # --flag1
+        postpywps = pywps.Pywps(pywps.METHOD_POST) 
+        executeSOAPRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request_flags_compress_SOAP.xml")) 
+        postpywps.parseRequest(executeSOAPRequestFile)
+        
+        #Need to check the SOAP-->WPS convertion
+        inputsList=postpywps.inputs["datainputs"]
+        textIdentifier=[dic["identifier"] for dic in inputsList]
+        self.assertTrue("-flag1In" in textIdentifier)
+        self.assertTrue("--flag2In" in textIdentifier)
+        
+        postpywps.performRequest()
+        
+        xmlDoc=minidom.parseString(postpywps.response)
+        identifierEl=xmlDoc.getElementsByTagNameNS(self.owsns,"Identifier")
+        textIdentifier=[item.firstChild.nodeValue for item in identifierEl]
+        self.assertTrue("-flag1Out" in textIdentifier)
+        self.assertTrue("--flag2Out" in textIdentifier)
         
     def _setFromEnv(self):
         os.putenv("PYWPS_PROCESSES", os.path.join(pywpsPath,"tests","processes"))
