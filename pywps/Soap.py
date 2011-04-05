@@ -49,9 +49,14 @@ import re
 def getCorrectInputID(dummy,identifier):
 	"""XSLT function that converts the I/O identifier into a correct process I/O identifier. This is necessary
 	to deal with cases like <ows:Identifier>--flag<ows:Identifier> that get converted into <flag> elements, in the WSDL description. 
-	Function will do a reverse mapping"""
+	Function will do a reverse mapping. Simple flags like -r are problematic to map since they are only one char"""
 	
-	correctInput=[input for input in inputKeys if input.find(identifier)>-1][0]
+	#Note it's not very efficient to generate a dictionary everything pywps checks an input.I/O are very small (5,6 elements in a process)
+	#The use oh a key:value instead of a loop like  correctInput=[input for input in inputKeys if input.find(identifier)>-1][0] , managed to deal
+	# with processes that have flags with one char that would return any inputs that would contain the char
+	inputMap={}
+	[inputMap.__setitem__(flagRemover("dummy",input),input) for input in inputKeys]
+	correctInput=inputMap[identifier] #get the correct input
 	return correctInput
 
 # http://www.w3.org/TR/REC-xml/#charsets (only ":" | [A-Z] | "_" | [a-z])
@@ -135,7 +140,7 @@ def SOAPtoWPS(tree):
     #When etree is printed the REPLACEME is subtituted by www.opengis.net, creating the correct namespaces for the DOM parsing.
     #The replace is done using module re and set that it has to do only 2 replaces in the beggining. Therefore the replace is independe of the since of XML content
     global inputKeys
-    
+  
     processID=tree.tag.rsplit("_",1)[-1]
     wps2=pywps.Pywps()
     wps2.inputs={'request': 'getCapabilities', 'version': '1.0.0', 'service': 'wps'}
@@ -164,8 +169,6 @@ def SOAPtoWPS(tree):
     XMLOut=etree.tostring(WPSTree)
     
     XMLOut=re.sub(r'REPLACEME',"www.opengis.net",XMLOut,2)
-
-    
     return XMLOut
 
 
