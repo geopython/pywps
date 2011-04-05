@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Author:  Author:  Jorge de Jesus, http://rsg.pml.ac.uk,jmdj@pml.ac.uk -->
+<!-- License: GPL -->
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0" 
 xmlns:wps="http://www.opengis.net/wps/1.0.0" 
 xmlns:ows="http://www.opengis.net/ows/1.1"

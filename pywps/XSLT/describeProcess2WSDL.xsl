@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Author:  Author:  Jorge de Jesus, http://rsg.pml.ac.uk,jmdj@pml.ac.uk -->
+<!-- License: GPL -->
 <!-- ${workspace_loc:/GetCapabilities2WSDL/getCapabilities.xml} -->
 
 <!-- REPLACEME == serverURL  and it needs to be done externaly-->
