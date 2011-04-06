@@ -55,7 +55,8 @@ def getCorrectInputID(dummy,identifier):
 	#The use oh a key:value instead of a loop like  correctInput=[input for input in inputKeys if input.find(identifier)>-1][0] , managed to deal
 	# with processes that have flags with one char that would return any inputs that would contain the char
 	inputMap={}
-	[inputMap.__setitem__(flagRemover("dummy",input),input) for input in inputKeys]
+	processInputKeys=process.inputs.keys()
+	[inputMap.__setitem__(flagRemover("dummy",input),input) for input in processInputKeys]
 	correctInput=inputMap[identifier] #get the correct input
 	return correctInput
 
@@ -108,9 +109,10 @@ SOAP_ENVELOPE_FAULT11="""<?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/1999/XMLSchema-instance" xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/1999/XMLSchema">
 <SOAP-ENV:Body><SOAP-ENV:Fault><faultcode>SOAP-ENV:Client</faultcode><faultstring>$REPORT$</faultstring><detail>$REPORTEXCEPTION$</detail></SOAP-ENV:Fault></SOAP-ENV:Body></SOAP-ENV:Envelope>"""
 
-
+###### GLOBALS #######
 soap = False
-inputKeys=None #filled in SOAP2WPS and then used by getCorrectInputID
+process=None #filled in SOAP2WPS and then used by getCorrectInputID isComplexInput
+######################
 
 def isSoap(document): 
     global soap
@@ -139,24 +141,14 @@ def SOAPtoWPS(tree):
     #The solution is a tiny hack the XSL file, the WPS/OWS namespace are different from the ComplexInput, something like this: http://REPLACEME/wps/1.0.0
     #When etree is printed the REPLACEME is subtituted by www.opengis.net, creating the correct namespaces for the DOM parsing.
     #The replace is done using module re and set that it has to do only 2 replaces in the beggining. Therefore the replace is independe of the since of XML content
-    global inputKeys
-  
+    global process
+    
     processID=tree.tag.rsplit("_",1)[-1]
     wps2=pywps.Pywps()
     wps2.inputs={'request': 'getCapabilities', 'version': '1.0.0', 'service': 'wps'}
     from pywps.Wps import Request
     request=Request(wps2)
     process=[process for process in request.processes if process.identifier in [processID]][0]
-    #These global variables will be used getCorrectInputID()
-    inputKeys=process.inputs.keys()
-    #outputKeys=process.outputs.keys()
-    
-    #processIDInputs=
-    #ns=etree.FunctionNamespace("http://pywps.wald.intevation.org/functions")
-    #ns.prefix='fn'
-    #ns["getCorrectInputID"]=getCorrectInputID
-    
-   # {http://www.opengis.net/wps/1.0.0}ExecuteProcess_gdalinfo
     
     XSLTDocIO=open(pywps.XSLT.__path__[0]+"/SOAP2WPS.xsl","r")
    
@@ -167,12 +159,9 @@ def SOAPtoWPS(tree):
     etree.cleanup_namespaces(WPSTree)
     
     XMLOut=etree.tostring(WPSTree)
-    
     XMLOut=re.sub(r'REPLACEME',"www.opengis.net",XMLOut,2)
     return XMLOut
 
-
-	
 
 def WPStoSOAP(tree):
 	
