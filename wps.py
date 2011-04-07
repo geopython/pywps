@@ -55,7 +55,6 @@ __version__ = "3.0-svn"
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
- 
 
 import pywps
 from pywps.Exceptions import *
@@ -65,7 +64,6 @@ import os
 # get the request method and inputs
 
 method = os.getenv("REQUEST_METHOD")
-
 
 
 if not method:  # set standard method
@@ -88,30 +86,22 @@ if method == pywps.METHOD_GET:
 else:
     inputQuery = sys.stdin
     
-
-
-
 try:
     wps = pywps.Pywps(method)
     
    
     if wps.parseRequest(inputQuery):
-        #pywps.debug(wps.inputs)
-        
         response = wps.performRequest()
-  
-
         # request performed, write the response back
         if response:
             # print only to standard out
-          
-            
-            pywps.response.response(wps.response,
-                    sys.stdout,wps.parser.soapVersion,wps.parser.isSoap,wps.parser.isSoapExecute,
-                    wps.request.contentType)
+ 
+                pywps.response.response(wps.response,
+                    sys.stdout,wps.parser.soapVersion,wps.parser.isSoap,wps.parser.isSoapExecute, wps.request.contentType)
 
 except WPSException,e:
     #traceback.print_exc(file=pywps.logFile)
-    pywps.response.response(e, sys.stdout, wps.parser.soapVersion,wps.parser.isSoap,wps.parser.isSoapExecute)
-
+    pywps.response.response(e, sys.stdout, wps.parser.soapVersion,
+                            wps.parser.isSoap,
+                            wps.parser.isSoapExecute)
 

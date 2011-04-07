@@ -3,7 +3,7 @@ import sys
 
 pywpsPath = os.path.abspath(os.path.join(os.path.split(os.path.abspath(__file__))[0],".."))
 #sys.path.append(pywpsPath)
-sys.path[0]=pywpsPath
+sys.path.insert(0,pywpsPath)
 import pywps
 import pywps.Process
 import unittest
@@ -274,7 +274,7 @@ class SchemaTestCase(unittest.TestCase):
          
         postpywps.performRequest()
         soap = Soap.SOAP()
-        response = soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute) 
+        response = soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute,isPromoteStatus=False) 
         soapDoc=etree.XML(response,self.parser)
         self.assertEquals(schemaSOAP.assertValid(soapDoc),None)
       
@@ -292,7 +292,7 @@ class SchemaTestCase(unittest.TestCase):
         postpywps.performRequest()
         
         soap = Soap.SOAP()
-        response = soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute) 
+        response = soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute,isPromoteStatus=False) 
         soapDoc=etree.XML(response,self.parser)
         self.assertEquals(schemaSOAP.assertValid(soapDoc),None)
     
@@ -311,7 +311,7 @@ class SchemaTestCase(unittest.TestCase):
             postpywps.response=e.getResponse()
         
         soap=Soap.SOAP()
-        response=soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute)
+        response=soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute,isPromoteStatus=False)
        
         soapDoc=etree.XML(response,self.parser)
         self.assertEquals(schemaSOAP.assertValid(soapDoc),None)   

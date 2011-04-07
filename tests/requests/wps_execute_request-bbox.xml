@@ -6,7 +6,7 @@
 			<ows:Identifier>bboxin</ows:Identifier>
 			<ows:Title>BBOx in</ows:Title>
                         <wps:Data>
-                            <wps:BoundingBoxData ows:crs="epsg:4326" ows:dimensions="2">
+                            <wps:BoundingBoxData ows:crs="urn:ogc:def:crs:EPSG:6.6:4326" ows:dimensions="2">
                                 <ows:LowerCorner>-11 -12</ows:LowerCorner>
                                 <ows:UpperCorner>13 14</ows:UpperCorner>
                             </wps:BoundingBoxData>

@@ -200,7 +200,7 @@ class Execute(Request):
 
     umn = None
 
-
+ 
 
     def __init__(self,wps, processes=None):
 
@@ -313,8 +313,8 @@ class Execute(Request):
                         return
                     # this is the child process
                     else:
-                        # continue execution
                         pass
+                        # continue execution
 
                 except OSError, e:
                     traceback.print_exc(file=pywps.logFile)
@@ -413,7 +413,7 @@ class Execute(Request):
                                     self.outputFile,
                                     self.wps.parser.isSoap,
                                     self.wps.parser.isSoapExecute,
-                                    self.contentType)
+                                    self.contentType,isPromoteStatus=False)
 
         # remove all temporary files
         self.cleanEnv()
@@ -486,7 +486,6 @@ class Execute(Request):
 
         # make sure, all inputs do have values
         for identifier in self.process.inputs:
-           
             input = self.process.inputs[identifier]
             if input.getValue() == None and input.minOccurs > 0:
                 self.cleanEnv()
@@ -707,8 +706,8 @@ class Execute(Request):
                                     self.wps.parser.soapVersion,
                                     self.wps.parser.isSoap,
                                     self.wps.parser.isSoapExecute,
-                                    self.contentType)
-
+                                    self.contentType,isPromoteStatus=True)
+            #self.wps.parser.isSoapExecute
         if self.status == self.started:
             logging.info("Status [%s][%.1f]: %s" %\
                     (self.status,float(self.percent), self.statusMessage))

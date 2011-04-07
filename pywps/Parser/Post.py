@@ -101,18 +101,15 @@ class Post(Parser):
                     raise pywps.FileSizeExceeded()
             else:
                 inputXml = file.read()
-               
+            
             # make DOM from XML
             try:
                
                 self.document = parseString(inputXml)
             except xml.parsers.expat.ExpatError,e:
                 raise pywps.NoApplicableCode(e.message)
-        
 
         # get first child
-        
-       
         firstChild = self.isSoapFirstChild(self.document)
         
         # check service name

@@ -67,11 +67,19 @@ def flagRemover(dummy,strXML):
     endN=regExp.match(strXML).end()
     return strXML[endN:]
 
+def isComplexData(dummy,inputName):
+    
+    inputInstance=process.inputs[inputName]
+    #Checking if the input is of complexInput type
+    return isinstance(inputInstance,pywps.Process.InAndOutputs.ComplexInput("foo","foo").__class__)
+
+
 
 ns=etree.FunctionNamespace("http://pywps.wald.intevation.org/functions")
 ns.prefix='fn'
 ns["getCorrectInputID"]=getCorrectInputID
 ns["flagRemover"]=flagRemover
+ns["isComplexData"]=isComplexData
 ########### END OF XSLT FUNCTIONS ##################
 
 #For soap 1.2 -->http://www.w3.org/2003/05/soap-envelope (self.nsIndex=0)
@@ -346,7 +354,7 @@ class SOAP:
    	 
         	
 
-    def getResponse(self,document,soapVersion,isSoapExecute):
+    def getResponse(self,document,soapVersion,isSoapExecute,isPromoteStatus):
         """Wrap document into soap envelope"""
         # very primitive, but works
         #SOAP 1.1 Content-type: text/xml
@@ -365,15 +373,22 @@ class SOAP:
         else:
         	isSoapFaul=False
         	
+        #Check if it is a status response: in this case we juist output this with soap envelope
+        #if we have processAccepted we will only pass the result, otherwise the WPS with soap 
+        #import traceback
+        #f1=open("/tmp/tmp.xml","w")
+        #traceback.print_stack(file=f1)
        
-        if isSoapExecute: 	 	
+        #and not bool(isAsync)
+        if (isSoapExecute and not bool(isPromoteStatus)):
+        	
         	WPSTree=documentTree
         	#it continues as a normal document 	
        	 	document=WPStoSOAP(WPSTree)
        	 	      		
        #normal response if not SOAP Fault
         if not isSoapFaul:
-          
+           
            if (int(soapVersion)==11):
          		return SOAP_ENVELOPE11.replace("$SOAPBODY$",document)
            else:

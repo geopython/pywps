@@ -91,7 +91,7 @@ class SOAPSchemaTestCase(unittest.TestCase):
         postpywps.performRequest()
         
         soap = Soap.SOAP()
-        response = soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute) 
+        response = soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute,isPromoteStatus=False) 
         
         xmldom=minidom.parseString(response)
         self.assertTrue(xmldom.getElementsByTagNameNS(self.soapEnvNS[1],"Envelope")>0)
@@ -118,7 +118,7 @@ class SOAPSchemaTestCase(unittest.TestCase):
         
         
         soap = Soap.SOAP()
-        response = soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute) 
+        response = soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute,isPromoteStatus=False) 
         
         #Check SOAP content in response
         postxmldom = minidom.parseString(response)
@@ -152,7 +152,7 @@ class SOAPSchemaTestCase(unittest.TestCase):
         if (os.getpid() != pid):
             os._exit(0)
         soap = Soap.SOAP()
-        response = soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute)
+        response = soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute,isPromoteStatus=False)
         
         #Check SOAP content in response
         postxmldom = minidom.parseString(response)
@@ -185,14 +185,13 @@ class SOAPSchemaTestCase(unittest.TestCase):
         
         postpywps.parseRequest(executeSOAPRequestFile)
         postpywps.performRequest()
-        
+      
+
         soap = Soap.SOAP()
-        response=soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute)
+        response=soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute,isPromoteStatus=False)
         
         #Check SOAP content in response
         responseDoc = minidom.parseString(response)
-        self.assertTrue(responseDoc.getElementsByTagNameNS(self.soapEnvNS[1],"Envelope")>0)
-        self.assertTrue(responseDoc.getElementsByTagNameNS(self.soapEnvNS[1],"Body")>0)
         
         #GetStatus from <statusURLResult>
         time.sleep(2)        
@@ -200,16 +199,43 @@ class SOAPSchemaTestCase(unittest.TestCase):
         if (os.getpid() != pid):
             os._exit(0)
         
+        
+        self.assertTrue(responseDoc.getElementsByTagNameNS(self.soapEnvNS[1],"Envelope")>0)
+        self.assertTrue(responseDoc.getElementsByTagNameNS(self.soapEnvNS[1],"Body")>0)
+        
         statusEl=responseDoc.getElementsByTagName("statusURLResult")
+        #Check that the statusURLResult is present (compressed soap)
+        self.assertTrue(len(statusEl)>0)
         
         fileName=os.path.basename(statusEl[0].firstChild.toxml())
         filePath=pywps.config.getConfigValue("server","outputPath")+"/"+fileName
         
-        #check that the status file also has a SOAP envelope
-    
+        #check that the new status file also has a SOAP envelope
         statusDoc = minidom.parse(filePath) 
         self.assertTrue(statusDoc.getElementsByTagNameNS(self.soapEnvNS[1],"Envelope")>0)
         self.assertTrue(statusDoc.getElementsByTagNameNS(self.soapEnvNS[1],"Body")>0)
+        self.assertTrue(statusDoc.getElementsByTagNameNS(self.wpsns,"ExecuteResponse")>0)
+        
+        #loop until we have a result
+        counter=0
+        while counter<20:
+            statusDoc = minidom.parse(filePath) 
+            executeEl=statusDoc.getElementsByTagNameNS(self.wpsns,"ExecuteResponse")
+            if len(executeEl) > 0: 
+                counter=counter+1
+                time.sleep(5)
+            else:
+                break
+        if counter>=20:
+            self.fail("The assync process it taking to long, something is wrong")
+        
+        #result should be in compressed SOAP
+        resultDoc=minidom.parse(filePath)
+        
+        self.assertTrue(len(resultDoc.getElementsByTagName("answerResult"))>0)
+        self.assertEqual(int(resultDoc.getElementsByTagName("answerResult")[0].firstChild.nodeValue),42)
+        print resultDoc.getElementsByTagName("answerResult")[0].firstChild.nodeValue
+        
         
     def testWSDLGenerator(self):
         """Testing WSDL generation"""
@@ -262,7 +288,7 @@ class SOAPSchemaTestCase(unittest.TestCase):
             postpywps.response=e.getResponse()
 
         soap = Soap.SOAP()
-        response=soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute)
+        response=soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute,isPromoteStatus=False)
         xmlDoc=minidom.parseString(response)
         #xmlDoc.getElementsByTagNameNS(self.soapEnvNS[1],"Fault")
         self.assertTrue(len(xmlDoc.getElementsByTagNameNS(self.soapEnvNS[1],"Fault"))>0)
@@ -286,7 +312,7 @@ class SOAPSchemaTestCase(unittest.TestCase):
             postpywps.response=e.getResponse()
 
         soap = Soap.SOAP()
-        response=soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute)
+        response=soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute,isPromoteStatus=False)
         xmlDoc=minidom.parseString(response)
         
         self.assertTrue(len(xmlDoc.getElementsByTagNameNS(self.soapEnvNS[0],"Fault"))>0)

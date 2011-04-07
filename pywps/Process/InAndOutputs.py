@@ -549,7 +549,7 @@ class ComplexInput(Input):
         """
          
         
-        
+       
          #Note: magic output something like: 'image/tiff; charset=binary' we only need the typeContent 
         if (self.format["mimetype"] is None) or (self.format["mimetype"]==""): 
             #No mimeType let's set it from default
