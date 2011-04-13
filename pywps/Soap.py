@@ -361,11 +361,13 @@ class SOAP:
         # SOAP 1.2   Content-Type: application/xml maybe application/soap ?!
         
         document = document.__str__().replace("<?xml version=\"1.0\" encoding=\"utf-8\"?>","")
-       
-       
-       #Check if it's a isSoapFault
-        documentTree=etree.parse(StringIO.StringIO(document))
+        
+        #sometime there is some binary trash in the stream (e.g. r.fillnulls) and we
+        #set the parser to try to fix it
+	    #http://papeltank.blogspot.com/2010/12/lxmletreexmlsyntaxerror-pcdata-invalid.html      
+        documentTree=etree.parse(StringIO.StringIO(document), etree.XMLParser(ns_clean=True, recover=True))
         root=documentTree.getroot()
+        # #Check if it's a isSoapFault
         exceptionReportTree=root.xpath("//*[local-name() = 'ExceptionReport']")
         if bool(exceptionReportTree):
         	exceptionReportTree=exceptionReportTree[0] #getting the tree from list
