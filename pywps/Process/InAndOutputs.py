@@ -224,6 +224,7 @@ class LiteralInput(Input):
         :param input: input parsed by parsers
         :return: None or Error message
         """
+        
         if type(input["value"]) == types.ListType:
             for inpt in input["value"]:
                 resp = self._setValueWithOccurence(self.value, self._control(inpt))
@@ -252,8 +253,7 @@ class LiteralInput(Input):
         :param value: value to be controled
         """
 
-        
-        
+       
         if  type(value)!= types.BooleanType:
             for char in self.restrictedCharacters:
                 if value.find(char) > -1:
@@ -544,18 +544,26 @@ class ComplexInput(Input):
         2) if process.format[mimetype]-->None assume process.format as first in list
             a) no exceptions should be risen
         3) If formats dict is empty then there is nothing that can be done, and self.format=None    
+        4) As request by wps-grass-process, in case of missing information even schema is passed. This is necessary
+        for vector processes and to differenciate between text/xml from GML and KML
         :param fileName:
         :param mimeType:
         """
          
-        
-       
+      
          #Note: magic output something like: 'image/tiff; charset=binary' we only need the typeContent 
         if (self.format["mimetype"] is None) or (self.format["mimetype"]==""): 
             #No mimeType let's set it from default
-            logging.debug("Missing ComplexDataInput mimeType, adopting default mimeType (first in formats list)")
+            logging.debug("Missing ComplexDataInput mimeType in: %s, adopting default mimeType (first in formats list)" % self.identifier)
             self.format["mimetype"]=self.formats[0]["mimeType"]
-            
+            #wps-grass bridge, default schema and encoding
+            try:
+                self.format["schema"]=self.formats[0]["schema"]
+                logging.debug("Adding schema: %s" % self.format["schema"])
+                self.format["encoding"]=self.formats[0]["encoding"]
+                logging.debug("Adding encoding: %s" % self.format["encoding"])
+            except:
+                logging.debug("Adding schema and/or encoding failed, ")
             #checking format with libmagic
             #--> new funcion aget base64 change
             #mimeTypeMagic=self.ms.file(fileName).split(';')[0]
@@ -566,9 +574,9 @@ class ComplexInput(Input):
             if self.format["mimetype"] not in [dic["mimeType"] for dic in self.formats]:
                 #ATTENTION: False positive if dictionary is not set in process/empty 
                 if (len(self.formats)==1) and (type(self.formats[0]["mimeType"])==types.NoneType):
-                    logging.debug("Process without mimetype list, cant check if ComplexDataInput mimtype is correct or not")
+                    logging.debug("Input %s without mimetype list, cant check if ComplexDataInput mimtype is correct or not" % self.identifier)
                 else:
-                    logging.debug("ComplexDataInputXML defines mimeType %s  which is not in process %s formats list" % (str(self.format["mimetype"]),str(self.identifier)))
+                    logging.debug("ComplexDataInputXML defines mimeType %s  which is not in Input %s formats list" % (str(self.format["mimetype"]),str(self.identifier)))
                     self.onProblem("InvalidParameterValue",self.identifier)
 
 
@@ -975,10 +983,18 @@ class ComplexOutput(Output):
             #1) If missing mimeType, pick the default one from list
             #2) check if mimeType is in the output.formats list, if not raise exception
             #3) if no mimeType and no outputs.formats then do nothin
+            #4) Adding schema and encondig passing for wps-grass-bridge
         if (self.format["mimetype"] is None) or (self.format["mimetype"]==""):
                 logging.debug("Missing ComplexDataOutput mimeType in %s, adopting default mimeType %s (first in formats list)" % (self.identifier,self.formats[0]["mimeType"])) 
                 self.format["mimetype"]=self.formats[0]["mimeType"]             
-                
+                #wps-grass-bridge
+                try:
+                    self.format["schema"]=self.formats[0]["schema"]
+                    logging.debug("Adding schema: %s" % self.format["schema"])
+                    self.format["encoding"]=self.formats[0]["encoding"]
+                    logging.debug("Adding encoding: %s" % self.format["encoding"])
+                except:
+                    logging.debug("Adding schema and/or encoding failed, ") 
         else:
             #Checking is mimeType is in the acceptable formats    
             if self.format["mimetype"] not in [dic["mimeType"] for dic in self.formats]:
