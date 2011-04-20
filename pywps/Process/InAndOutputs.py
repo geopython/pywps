@@ -909,7 +909,7 @@ class ComplexOutput(Output):
                 asReference=False, projection=None, bbox=None, useMapscript
                 =  False):
         """Class constructor"""
-        Output.__init__(self,identifier,title,abstract=None,
+        Output.__init__(self,identifier,title,abstract=abstract,
                 metadata=[],type="ComplexValue", asReference=asReference)
         
         if type(formats) == types.StringType:
