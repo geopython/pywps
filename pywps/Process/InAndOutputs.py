@@ -803,7 +803,7 @@ class LiteralOutput(Output):
                 metadata=[], uoms=(), dataType = types.StringType, 
                 default=None, asReference=False):
         """Class Constructor"""
-        Output.__init__(self,identifier,title,abstract=None,
+        Output.__init__(self,identifier,title,abstract=abstract,
                 metadata=[],type="LiteralValue",asReference=asReference)
         
         self.uoms = uoms
@@ -1031,7 +1031,7 @@ class BoundingBoxOutput(Output):
     def __init__(self,identifier,title,abstract=None,
                 metadata=[], crss=[], dimensions=None, asReference=False):
         """BoundingBox output"""
-        Output.__init__(self,identifier,title,abstract=None,
+        Output.__init__(self,identifier,title,abstract=abstract,
                 metadata=[],type="BoundingBoxValue",asReference=asReference)
         self.crss = crss
         self.crs = crss[0]
