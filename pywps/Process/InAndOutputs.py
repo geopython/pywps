@@ -812,7 +812,7 @@ class LiteralOutput(Output):
                 metadata=[], uoms=(), dataType = types.StringType, 
                 default=None, asReference=False):
         """Class Constructor"""
-        Output.__init__(self,identifier,title,abstract=None,
+        Output.__init__(self,identifier,title,abstract=abstract,
                 metadata=[],type="LiteralValue",asReference=asReference)
         
         self.uoms = uoms
@@ -918,7 +918,7 @@ class ComplexOutput(Output):
                 asReference=False, projection=None, bbox=None, useMapscript
                 =  False):
         """Class constructor"""
-        Output.__init__(self,identifier,title,abstract=None,
+        Output.__init__(self,identifier,title,abstract=abstract,
                 metadata=[],type="ComplexValue", asReference=asReference)
         
         if type(formats) == types.StringType:
@@ -1048,7 +1048,7 @@ class BoundingBoxOutput(Output):
     def __init__(self,identifier,title,abstract=None,
                 metadata=[], crss=[], dimensions=None, asReference=False):
         """BoundingBox output"""
-        Output.__init__(self,identifier,title,abstract=None,
+        Output.__init__(self,identifier,title,abstract=abstract,
                 metadata=[],type="BoundingBoxValue",asReference=asReference)
         self.crss = crss
         self.crs = crss[0]
