@@ -204,7 +204,7 @@ class Post(Parser):
         """
 
         if maxFileSize.find("kb") > 0:
-            maxFileSize = float(maxFileSize[:maxFileSize.find("gb")])
+            maxFileSize = float(maxFileSize[:maxFileSize.find("kb")])
             maxFileSize = int(maxFileSize*1024)
         elif maxFileSize.find("mb") > 0:
             maxFileSize = float(maxFileSize[:maxFileSize.find("mb")])
