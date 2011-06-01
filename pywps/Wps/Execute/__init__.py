@@ -540,10 +540,8 @@ class Execute(Request):
             
             poutput = self.process.outputs[identifier]
             if poutput.type == "ComplexValue":
-               
-                poutput.format["mimetype"]=None
-                poutput.format["schema"]=None
-                poutput.format["encoding"]=None
+                #Only None if information is lacking
+                [poutput.format.__setitem__(missing,None) for missing in [item for item in ("mimetype","schema","encoding") if item not in poutput.format.keys()]]
                 poutput.checkMimeTypeIn()
                 
               
