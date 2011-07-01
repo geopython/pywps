@@ -168,15 +168,18 @@ OpenLayers.WPS = OpenLayers.Class({
 
     /**
      * Property: status
+     * ProcessAccepted, ProcessStarted, ProcessSucceeded, ProcessFailed
      * {String}
      */
     status: null,
 
     /**
      * Property: assync
-     * {Boolean} status = true
+     * Should the process run in asynchronous mode?
+     * default: false
+     * {Boolean}
      */
-    assync: false,
+    async: false,
 
     /**
      * Property: statusMessage
@@ -501,22 +504,21 @@ OpenLayers.WPS = OpenLayers.Class({
         cmplxData = (cmplxData.length ? cmplxData : dom.getElementsByTagName("ComplexOutput"));
 
 
-
-        if (cmplxData.length > 0) {
+	 if (cmplxData.length > 0) {
             // default format first
             var formatsNode = cmplxData[0].getElementsByTagName("Default")[0].getElementsByTagName("Format")[0];
-            var frmts = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(formatsNode,this.owsNS,  "MimeType")[0].firstChild.nodeValue;
+            var frmts = formatsNode.getElementsByTagName("MimeType")[0].firstChild.nodeValue;
             formats.push(frmts);
-            
             // all otheres afterwards
             var supportedFormats = cmplxData[0].getElementsByTagName("Supported")[0].getElementsByTagName("Format");
             for (var i = 0; i < supportedFormats.length; i++) {
-                var format = OpenLayers.Format.XML.prototype.getElementsByTagNameNS(supportedFormats[i],this.owsNS,  "MimeType")[0].firstChild.nodeValue;
+                var format = supportedFormats[i].getElementsByTagName("MimeType")[0].firstChild.nodeValue;
                 if (OpenLayers.WPS.Utils.isIn(formats,format) == false) {
                     formats.push(format);
                 }
             }
-        }
+	 }
+
 
         var asReference = true;
         if (formats[0].search("text") > -1) {
@@ -661,7 +663,7 @@ OpenLayers.WPS = OpenLayers.Class({
         var process = this.getProcess(identifier);
 
         var data = OpenLayers.WPS.executeRequestTemplate.replace("$IDENTIFIER$",identifier);
-        data = data.replace("$STORE_AND_STATUS$",process.assync);
+        data = data.replace("$STORE_AND_STATUS$",process.async);
 
         // inputs
         var inputs = "";
@@ -737,6 +739,7 @@ OpenLayers.WPS = OpenLayers.Class({
      * Parameters:
      * response - {XMLHTTP}
      */
+    //NOTE: Problem, In case of ExceptionReport the code just crashes in line 757
     parseExecute: function(resp) {
         var text = resp.responseText;
         this.responseText = text;
@@ -810,7 +813,7 @@ OpenLayers.WPS = OpenLayers.Class({
 	
 
 	if (reference.length > 0) {
-            output.setValue(OpenLayers.Format.XML.prototype.getAttributeNS(reference[0],this.xlinkNS, "href"));
+            output.setValue(OpenLayers.Format.XML.prototype.getAttributeNS(reference[0],"", "href"));
         }
         else if(literalData.length > 0) {
             output.setValue(literalData[0].firstChild.nodeValue);
@@ -991,7 +994,7 @@ OpenLayers.WPS = OpenLayers.Class({
      * process
      */
     onStatusChanged: function(status,process) {
-
+ 
     },
 
     CLASS_NAME : "OpenLayers.WPS"
