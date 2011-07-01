@@ -813,7 +813,7 @@ OpenLayers.WPS = OpenLayers.Class({
 	
 
 	if (reference.length > 0) {
-            output.setValue(OpenLayers.Format.XML.prototype.getAttributeNS(reference[0],null, "href"));
+            output.setValue(OpenLayers.Format.XML.prototype.getAttributeNS(reference[0],"", "href"));
         }
         else if(literalData.length > 0) {
             output.setValue(literalData[0].firstChild.nodeValue);
