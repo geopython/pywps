@@ -717,8 +717,8 @@ class Execute(Request):
         """Called, if lineage request was set. Fills the <DataInputs> part of
         output XML document.
         """
+        
         templateInputs = []
-
         for identifier in self.process.inputs.keys():
             input = self.process.inputs[identifier]
 
@@ -729,11 +729,11 @@ class Execute(Request):
 
                 templateInput = {}
                 wpsInput["lineaged"] = True
-
+                
                 templateInput["identifier"] = input.identifier
                 templateInput["title"] = self.process.i18n(input.title)
                 templateInput["abstract"] = self.process.i18n(input.abstract)
-
+                
                 if input.type == "LiteralValue":
                     templateInput = self._lineageLiteralInput(input,wpsInput,templateInput)
                 elif input.type == "ComplexValue" and \
@@ -744,6 +744,7 @@ class Execute(Request):
                     templateInput = self._lineageComplexInput(input,templateInput)
                 elif input.type == "BoundingBoxValue":
                     templateInput = self._lineageBBoxInput(input,templateInput)
+
 
                 templateInputs.append(templateInput)
 
@@ -804,10 +805,17 @@ class Execute(Request):
         bboxInput["bboxdata"] = 1
         bboxInput["crss"] = [input.crs]
         bboxInput["dimensions"] = input.dimensions
-        bboxInput["minx"] = input.minx
-        bboxInput["miny"] = input.miny
-        bboxInput["maxx"] = input.maxx
-        bboxInput["maxy"] = input.maxy
+        
+        #bboxInput["minx"] = input.minx
+        #bboxInput["miny"] = input.miny
+        #bboxInput["maxx"] = input.maxx
+        #bboxInput["maxy"] = input.maxy
+        
+        #((minx,miny),(maxx, maxy))
+        bboxInput["minx"] = input.value.coords[0][0]
+        bboxInput["miny"] = input.value.coords[0][1]
+        bboxInput["maxx"] = input.value.coords[1][0]
+        bboxInput["maxy"] = input.value.coords[1][1]
         return bboxInput
 
     def outputDefinitions(self):
@@ -984,7 +992,7 @@ class Execute(Request):
         return bboxOutput
 
     def _asReferenceOutput(self,templateOutput, output):
-
+        
         # copy the file to output directory
         # literal value
         if output.type == "LiteralValue":
