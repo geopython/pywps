@@ -802,10 +802,16 @@ class Execute(Request):
         bboxInput["bboxdata"] = 1
         bboxInput["crss"] = [input.crs]
         bboxInput["dimensions"] = input.dimensions
-        bboxInput["minx"] = input.minx
-        bboxInput["miny"] = input.miny
-        bboxInput["maxx"] = input.maxx
-        bboxInput["maxy"] = input.maxy
+        #bboxInput["minx"] = input.minx
+        #bboxInput["miny"] = input.miny
+        #bboxInput["maxx"] = input.maxx
+        #bboxInput["maxy"] = input.maxy
+        
+         #((minx,miny),(maxx, maxy))
+        bboxInput["minx"] = input.value.coords[0][0]
+        bboxInput["miny"] = input.value.coords[0][1]
+        bboxInput["maxx"] = input.value.coords[1][0]
+        bboxInput["maxy"] = input.value.coords[1][1]
         return bboxInput
 
     def outputDefinitions(self):
