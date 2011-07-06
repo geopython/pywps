@@ -803,14 +803,9 @@ class Execute(Request):
     def _lineageBBoxInput(self,input,bboxInput):
         """ Fill input of bbox data """
         bboxInput["bboxdata"] = 1
-        bboxInput["crss"] = [input.crs]
-        bboxInput["dimensions"] = input.dimensions
-        
-        #bboxInput["minx"] = input.minx
-        #bboxInput["miny"] = input.miny
-        #bboxInput["maxx"] = input.maxx
-        #bboxInput["maxy"] = input.maxy
-        
+        bboxInput["crs"] = input.crs
+        bboxInput["dimensions"] = input.value.dimensions
+       
         #((minx,miny),(maxx, maxy))
         bboxInput["minx"] = input.value.coords[0][0]
         bboxInput["miny"] = input.value.coords[0][1]
