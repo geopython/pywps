@@ -8,7 +8,7 @@
                     <wps:LiteralData dataType="<TMPL_VAR type>" uom="<TMPL_VAR uom>"><TMPL_VAR literaldata></wps:LiteralData>
                 </TMPL_IF>
                 <TMPL_IF bboxdata>
-                    <wps:BoundingBoxData ows:crs="<TMPL_VAR crs>" ows:dimensions="<TMPL_VAR dimensions>">
+                    <wps:BoundingBoxData crs="<TMPL_VAR crs>" dimensions="<TMPL_VAR dimensions>">
                         <ows:LowerCorner><TMPL_VAR minx> <TMPL_VAR miny></ows:LowerCorner>
                         <ows:UpperCorner><TMPL_VAR maxx> <TMPL_VAR maxy></ows:UpperCorner>
                     </wps:BoundingBoxData>
