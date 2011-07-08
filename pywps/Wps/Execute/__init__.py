@@ -39,6 +39,7 @@ import UMN
 
 from xml.sax.saxutils import escape
 
+
 TEMPDIRPREFIX="pywps-instance"
 
 #Note: saxutils to escape &,< and > from URLs. Applied to _lineageComplexRerenceInput,_asReferenceOutput. in the last case
@@ -721,7 +722,6 @@ class Execute(Request):
         templateInputs = []
         for identifier in self.process.inputs.keys():
             input = self.process.inputs[identifier]
-
             for wpsInput in self.wps.inputs["datainputs"]:
                 if wpsInput["identifier"] != identifier or\
                         wpsInput.has_key("lineaged"):
@@ -741,13 +741,11 @@ class Execute(Request):
                     templateInput = self._lineageComplexReferenceInput(wpsInput,
                                                                 input,templateInput)
                 elif input.type == "ComplexValue":
-                    templateInput = self._lineageComplexInput(input,templateInput)
+                    templateInput = self._lineageComplexInput(wpsInput,templateInput)
                 elif input.type == "BoundingBoxValue":
                     templateInput = self._lineageBBoxInput(input,templateInput)
 
-
                 templateInputs.append(templateInput)
-
         self.templateProcessor.set("Inputs",templateInputs)
 
     def _lineageLiteralInput(self, input, wpsInput, literalInput):
@@ -757,23 +755,16 @@ class Execute(Request):
         literalInput["uom"] = str(input.uom)
         return literalInput
 
-    def _lineageComplexInput(self, input, complexInput):
+    def _lineageComplexInput(self, wpsInput,complexInput):
         """ Fill input of complex data
         """
-
-        # encode the input file, if it has non-text mimetype
-        if input.format["mimetype"].find("text") < 0:
-            #complexInput["cdata"] = 1
-            os.rename(input.value, input.value+".binary")
-            base64.encode(open(input.value+".binary"),open(input.value,"w"))
-
-         # set complex input
-        complexInput["complexdata"] = open(input.value,"r").read()
+       
+        #complexInput needs to be replicated
+        complexInput["encoding"]=wpsInput["encoding"]
+        complexInput["mimetype"]=wpsInput["mimetype"]
+        complexInput["schema"]=wpsInput["schema"]
+        complexInput["complexdata"]=wpsInput["value"]
         
-        
-        complexInput["encoding"] = input.format["encoding"]
-        complexInput["mimetype"] = input.format["mimetype"]
-        complexInput["schema"] = input.format["schema"]
         return complexInput
 
     def _lineageComplexReferenceInput(self, wpsInput, processInput, complexInput):
@@ -802,8 +793,9 @@ class Execute(Request):
 
     def _lineageBBoxInput(self,input,bboxInput):
         """ Fill input of bbox data """
+        
         bboxInput["bboxdata"] = 1
-        bboxInput["crs"] = input.crs
+        bboxInput["crs"] = input.value.crs
         bboxInput["dimensions"] = input.value.dimensions
        
         #((minx,miny),(maxx, maxy))
@@ -843,8 +835,7 @@ class Execute(Request):
                 templateOutput["complexdata"] = 1
             else:
                 templateOutput = self._lineageBBoxOutput(output,templateOutput)
-                templateOutput["bboxdata"] = 1
-
+                templateOutput["bboxdata"] = 1   
         self.templateProcessor.set("Outputdefinitions",templateOutputs)
 
     def _lineageLiteralOutput(self, output, literalOutput):
@@ -863,7 +854,7 @@ class Execute(Request):
         return complexOutput
 
     def _lineageBBoxOutput(self, output, bboxOutput):
-
+        
         bboxOutput["bboxdata"] = 1
         bboxOutput["crs"] = output.crs
         bboxOutput["dimensions"] = output.dimensions

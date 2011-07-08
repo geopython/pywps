@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wps:Execute service="WPS" version="1.0.0"
+	xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1"
+	xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.opengis.net/wps/1.0.0/wpsExecute_request.xsd">
+	<ows:Identifier>lineagereturn</ows:Identifier>
+	<wps:DataInputs>
+		<wps:Input>
+			<ows:Identifier>vectorin</ows:Identifier>
+			<ows:Title>Input</ows:Title>
+			<wps:Data>
+				<wps:ComplexData mimeType="text/xml">
+					<ogr:FeatureCollection xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+						xsi:schemaLocation="http://ogr.maptools.org/ singlePoint.xsd"
+						xmlns:ogr="http://ogr.maptools.org/" xmlns:gml="http://www.opengis.net/gml">
+						<gml:boundedBy>
+							<gml:Box>
+								<gml:coord>
+									<gml:X>348757.095296754</gml:X>
+									<gml:Y>239942.9447343307</gml:Y>
+								</gml:coord>
+								<gml:coord>
+									<gml:X>348757.095296754</gml:X>
+									<gml:Y>239942.9447343307</gml:Y>
+								</gml:coord>
+							</gml:Box>
+						</gml:boundedBy>
+						<gml:featureMember>
+							<ogr:singlePoint fid="F0">
+								<ogr:geometryProperty>
+									<gml:Point>
+										<gml:coordinates>348757.095296754036099,239942.944734330725623,741.989222523751437</gml:coordinates>
+									</gml:Point>
+								</ogr:geometryProperty>
+								<ogr:cat>1</ogr:cat>
+							</ogr:singlePoint>
+						</gml:featureMember>
+					</ogr:FeatureCollection>
+				</wps:ComplexData>
+			</wps:Data>
+		</wps:Input>
+		<wps:Input>
+		<ows:Identifier>vectorin</ows:Identifier>
+			<ows:Title>Input</ows:Title>
+			<wps:Data>
+			<!-- different mimetype for testing -->
+				<wps:ComplexData mimeType="application/xml">
+					<ogr:FeatureCollection xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+						xsi:schemaLocation="http://ogr.maptools.org/ singlePoint.xsd"
+						xmlns:ogr="http://ogr.maptools.org/" xmlns:gml="http://www.opengis.net/gml">
+						<gml:boundedBy>
+							<gml:Box>
+								<gml:coord>
+									<gml:X>348757.095296754</gml:X>
+									<gml:Y>239942.9447343307</gml:Y>
+								</gml:coord>
+								<gml:coord>
+									<gml:X>348757.095296754</gml:X>
+									<gml:Y>239942.9447343307</gml:Y>
+								</gml:coord>
+							</gml:Box>
+						</gml:boundedBy>
+						<gml:featureMember>
+							<ogr:singlePoint fid="F0">
+								<ogr:geometryProperty>
+									<gml:Point>
+										<gml:coordinates>348757.095296754036099,239942.944734330725623,741.989222523751437</gml:coordinates>
+									</gml:Point>
+								</ogr:geometryProperty>
+								<ogr:cat>1</ogr:cat>
+							</ogr:singlePoint>
+						</gml:featureMember>
+					</ogr:FeatureCollection>
+				</wps:ComplexData>
+			</wps:Data>
+		</wps:Input>
+	<wps:Input>
+			<ows:Identifier>rasterin</ows:Identifier>
+			<ows:Title>Input</ows:Title>
+			<wps:Data>
+				<wps:ComplexData mimeType="image/png">iVBORw0KGgoAAAANSUhEUgAAAA0AAAAGCAYAAAAYLBS/AAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAK6wAACusBgosNWgAAAAd0SU1FB9sHBwkUGkfHt0UAAACgSURBVBhXVc+9DgFBFEDhWTTiJyIqYStRSVQalYK30HlGnVqppliFqCSIRgTBOTIFN/lm7uzMnTubhP9IWL5/PlXIR6jhiDN2OYY2JqjDAg+aGwP0sUEB7pfyDFNcUMYeTYzR8QC2qGIOLxta1IJxQy/mFhZxgF18thc2sHbRRYoFZrhiCZ+TxdncS79hpzse8CdPsMMqrpnCC08TwibhA3BzHkfz5rzlAAAAAElFTkSuQmCC</wps:ComplexData>
+			</wps:Data>
+	</wps:Input>
+	<wps:Input>
+			<ows:Identifier>rasterin</ows:Identifier>
+			<ows:Title>Input</ows:Title>
+			<wps:Data>
+				<wps:ComplexData mimeType="image/bmp">Qk3uAAAAAAAAAEYAAAA4AAAADQAAAAYAAAABABAAAwAAAKgAAADrCgAA6woAAAAAAAAAAAAAAPgAAOAHAAAfAAAAAAAAAAAAAAD//wAAAAD///////////////8AAP//AAAAAAAA//8AAAAAAAAAAP//AAAAAP///////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAAAAAAAAAAAAAAAP//AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAAAAD//wAAAAAAAAAAAAAAAAAA////////AAD///////8AAAAAAAAAAAAAAAAAAA==</wps:ComplexData>
+			</wps:Data>
+	</wps:Input>
+	<wps:Input>
+			<ows:Identifier>bboxin</ows:Identifier>
+			<ows:Title>BBOx in</ows:Title>
+                        <wps:Data>
+                            <wps:BoundingBoxData ows:crs="urn:ogc:def:crs:EPSG:6.6:4326" ows:dimensions="2">
+                                <ows:LowerCorner>-11 -12</ows:LowerCorner>
+                                <ows:UpperCorner>13 14</ows:UpperCorner>
+                            </wps:BoundingBoxData>
+                        </wps:Data>
+		</wps:Input>
+		<wps:Input>
+			<ows:Identifier>bboxin</ows:Identifier>
+			<ows:Title>BBOx in</ows:Title>
+                        <wps:Data>
+                            <wps:BoundingBoxData ows:crs="urn:ogc:def:crs:EPSG:6.6:4326" ows:dimensions="2">
+                                <ows:LowerCorner>-9 -3</ows:LowerCorner>
+                                <ows:UpperCorner>11 13</ows:UpperCorner>
+                            </wps:BoundingBoxData>
+                        </wps:Data>
+		</wps:Input>				
+	</wps:DataInputs>
+	<wps:ResponseForm>
+		<wps:ResponseDocument storeExecuteResponse="false" lineage="true" />
+	</wps:ResponseForm>
+</wps:Execute>

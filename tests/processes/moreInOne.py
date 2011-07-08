@@ -8,11 +8,17 @@ class FirstProcess(WPSProcess):
                             statusSupported=True,
                             storeSupported=True)
 
-        self.indata = self.addComplexInput(identifier="indata",title="Complex in",formats=[{"mimeType":"application/xml"}])
-        self.outdata = self.addComplexOutput(identifier="outdata", title="Complex out",formats=[{"mimeType":"application/xml"}])
-
+        self.indata = self.addComplexInput(identifier="indata",title="Complex in",formats=[{"mimeType":"text/xml"},{"mimeType":"application/xml"}],minOccurs=0,maxOccurs=1024)
+        self.outdata = self.addComplexOutput(identifier="outdata", title="Complex out",formats=[{"mimeType":"text/xml"}])
+        self.outdata2 = self.addComplexOutput(identifier="outdata2", title="Complex out",formats=[{"mimeType":"application/xml"}])
     def execute(self):
-        self.outdata.setValue(self.indata.getValue())
+        #tmp=self.indata.getValue()
+       # import pydevd;pydevd.settrace()
+        #self.outdata.setValue(tmp)
+       
+        #import pydevd;pydevd.settrace()
+        self.outdata.setValue(self.indata.getValue()[0])
+        self.outdata2.setValue(self.indata.getValue()[0])
 
 
 
