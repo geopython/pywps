@@ -3,7 +3,6 @@ import sys
 
 pywpsPath = os.path.abspath(os.path.join(os.path.split(os.path.abspath(__file__))[0],".."))
 sys.path.append(pywpsPath)
-
 import pywps
 import pywps.Process
 import unittest
@@ -32,6 +31,7 @@ class RequestGetTestCase(unittest.TestCase):
     wcsurl = "http://www.bnhelp.cz/cgi-bin/crtopo?service=WMS&request=GetMap&LAYERS=sitwgs&TRANSPARENT=true&FORMAT=image%2Ftiff&EXCEPTIONS=application%2Fvnd.ogc.se_xml&VERSION=1.1.1&STYLES=default&SRS=EPSG%3A4326&BBOX=-10,-10,10,10&WIDTH=50&HEIGHT=50"
     wpsns = "http://www.opengis.net/wps/1.0.0"
     owsns = "http://www.opengis.net/ows/1.1"
+    ogrns = "http://ogr.maptools.org/"
     xmldom = None
 
 
@@ -340,7 +340,63 @@ class RequestGetTestCase(unittest.TestCase):
         self.assertEquals(len(processOutNodes),1)
         identifierNodes=processOutNodes[0].getElementsByTagNameNS(self.owsns,"Identifier")
         self.assertEquals(identifierNodes[0].firstChild.nodeValue,"rasterout")
-    
+               
+    def test16ParseLineageResponseDocumentPost(self):
+        """if Return response document contain lineage, lineage shall be identical to Execute input, even for multiple inputs"""
+        
+        self._setFromEnv()
+        import hashlib
+
+        imgPNGHashOriginal="b95e7e25c8c3897452a1f164da6d8c83"
+        imgBMPHashOriginal="ed3a7fa929dc5236dd12667eb19c6a6c"
+        
+        postpywps = pywps.Pywps(pywps.METHOD_POST)
+        executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request_lineage.xml"))
+        postpywps.parseRequest(executeRequestFile)
+        postpywps.performRequest()
+        postxmldom = minidom.parseString(postpywps.response)
+        dataInputsDom=postxmldom.getElementsByTagNameNS(self.wpsns,"DataInputs")
+        #Check lineage presence
+        self.assertTrue(len(dataInputsDom)>0)
+        
+        inputDom=dataInputsDom[0].getElementsByTagNameNS(self.wpsns,"Input")
+        print postxmldom.toxml()         
+        #Check lineage size (number elements)
+        self.assertEquals(len(inputDom),6)
+        
+        idNameList=[input.getElementsByTagNameNS(self.owsns,"Identifier")[0].childNodes[0].nodeValue for input in  inputDom ]
+        
+        #Check number lineage for raster,vector,bboxin (2 of each)
+        len([id for id in idNameList if id=="rasterin"])
+        self.assertEquals(len([id for id in idNameList if id=="rasterin"]),2)
+        self.assertEquals(len([id for id in idNameList if id=="vectorin"]),2)
+        self.assertEquals(len([id for id  in idNameList if id=="bboxin"]),2)
+        
+        complexDataDom=dataInputsDom[0].getElementsByTagNameNS(self.wpsns,"ComplexData")
+        xmlNodes=[item for item in complexDataDom if (item.getAttribute("mimeType")=="text/xml" or item.getAttribute("mimeType")=="application/xml")]
+        ogrNodes=[node.getElementsByTagNameNS(self.ogrns,"FeatureCollection") for node in xmlNodes]
+
+        #Checking FeatureCollection in XML payload
+        self.assertEquals(len(ogrNodes),2)
+        
+        #getting png image
+        imgPNGLineage=[item.childNodes[0].toxml().strip() for item in complexDataDom if item.getAttribute("mimeType")=="image/png"][0]
+        imgBMPLineage=[item.childNodes[0].toxml().strip() for item in complexDataDom if item.getAttribute("mimeType")=="image/bmp"][0]
+        imgPNGHash=hashlib.md5(imgPNGLineage).hexdigest() #b95e7e25c8c3897452a1f164da6d8c83
+        imgBMPHash=hashlib.md5(imgBMPLineage).hexdigest() #ed3a7fa929dc5236dd12667eb19c6a6c
+        
+        self.assertEquals(imgPNGHash,imgPNGHashOriginal)
+        self.assertEquals(imgBMPHash,imgBMPHashOriginal)
+        
+        #ATTENTION BUG with ticket #2551 not checked in unittest
+        bboxDom=dataInputsDom[0].getElementsByTagNameNS(self.wpsns,"BoundingBoxData")
+        #dimSet has to be identifical to LowerCorner/UpperCorner dim
+        dimSet=set(map(int,[item.getAttribute("dimensions") for item in bboxDom]) )
+        lowerSet=set([len(coord.split(" ")) for coord in [item.getElementsByTagNameNS(self.owsns,"LowerCorner")[0].childNodes[0].nodeValue for item in bboxDom]])
+        upperSet=set([len(coord.split(" ")) for coord in [item.getElementsByTagNameNS(self.owsns,"UpperCorner")[0].childNodes[0].nodeValue for item in bboxDom]])
+        self.assertEquals(len(dimSet.difference(lowerSet)),0) #0
+        self.assertEquals(len(dimSet.difference(upperSet)),0) #0
+  
     def _setFromEnv(self):
         os.putenv("PYWPS_PROCESSES", os.path.join(pywpsPath,"tests","processes"))
         os.environ["PYWPS_PROCESSES"] = os.path.join(pywpsPath,"tests","processes")

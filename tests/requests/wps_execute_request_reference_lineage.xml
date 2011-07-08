@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wps:Execute service="WPS" version="1.0.0"
+	xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1"
+	xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.opengis.net/wps/1.0.0/wpsExecute_request.xsd">
+	<ows:Identifier>lineagereturn</ows:Identifier>
+	<wps:DataInputs>
+		<wps:Input>
+			<ows:Identifier>vectorin</ows:Identifier>
+				<wps:Reference xlink:href="http://rsg.pml.ac.uk/wps/testdata/single_point.gml" />
+		</wps:Input>
+		<wps:Input>
+		<ows:Identifier>vectorin</ows:Identifier>
+			<ows:Title>Input</ows:Title>
+			<wps:Reference xlink:href="http://rsg.pml.ac.uk/wps/testdata/single_point.gml" />
+		</wps:Input>
+	<wps:Input>
+			<ows:Identifier>rasterin</ows:Identifier>
+			<ows:Title>Input</ows:Title>
+			<wps:Reference xlink:href="http://rsg.pml.ac.uk/wps/testdata/pywps_small.png.base64" />
+	</wps:Input>
+	<wps:Input>
+			<ows:Identifier>rasterin</ows:Identifier>
+			<ows:Title>Input</ows:Title>
+			<wps:Reference xlink:href="http://rsg.pml.ac.uk/wps/testdata/pywps_small.bmp.base64" />
+	</wps:Input>
+	<wps:Input>
+			<ows:Identifier>bboxin</ows:Identifier>
+			<ows:Title>BBOx in</ows:Title>
+             <wps:Data>
+                 <wps:BoundingBoxData ows:crs="urn:ogc:def:crs:EPSG:6.6:4326" ows:dimensions="2">
+                 <ows:LowerCorner>-9 -3</ows:LowerCorner>
+                 <ows:UpperCorner>11 13</ows:UpperCorner>
+                 </wps:BoundingBoxData>
+            </wps:Data>
+		</wps:Input>				
+	</wps:DataInputs>
+	<wps:ResponseForm>
+		<wps:ResponseDocument storeExecuteResponse="false" lineage="true" />
+	</wps:ResponseForm>
+</wps:Execute>
