@@ -165,3 +165,22 @@ class AssyncProcess(WPSProcess):
     def execute(self):
         import time
         time.sleep(2)
+
+class LineageReturn(WPSProcess):
+    """Lineage returning process, testing lineage with multiple inputs per identifier """
+    def __init__(self):
+         WPSProcess.__init__(self, identifier="lineagereturn",title="Dummy process with flags as InputOutput",storeSupported=False, statusSupported=False)
+         self.vectorIn = self.addComplexInput(identifier="vectorin",
+                                                 title="Vector file",
+                                                 formats =[{"mimeType":"application/xml"},{"mimeType":"text/xml"}],
+                                                 minOccurs=1,
+                                                 maxOccurs=1)
+         self.rasterIn = self.addComplexInput(identifier="rasterin",
+                                                 title="Vector file",
+                                                 formats =[{"mimeType":"image/png"},{"mimeType":"image/bmp"}],
+                                                 minOccurs=1,
+                                                 maxOccurs=1)
+         self.bboxin = self.addBBoxInput(identifier="bboxin",title="BBox in")
+    def execute(self):
+        pass
+        
