@@ -194,9 +194,5 @@ class LineageReturn(WPSProcess):
                                                  minOccurs=1,
                                                  maxOccurs=1)
          self.bboxin = self.addBBoxInput(identifier="bboxin",title="BBox in")
-         #self.vectorIn=self.addComplexInput(self,identifier="vectorin",title="vector input data",formats =[{"mimeType":"application/xml"},{"mimeType":"text/xml"}])
-         #self.rasterIn=self.addComplexInput(self,identifier="rasterin",title="raster input data",formats =[{"mimeType":"image/png"},{"mimeType":"image/bmp"}])
-         #self.literalOut=self.addLiteralOutput(self,identifier="literalout",title="dummy output")
     def execute(self):
         pass
-        #self.literalOut.setValue("dummy")
