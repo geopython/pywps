@@ -199,10 +199,10 @@ class DescribeProcess(Request):
             processInOutput["UOM"] = 1
 
         # default values
-        if inoutput.default:
+        if type(inoutput.default)!=type(None):
             processInOutput["isDefaultValue"] = 1
             processInOutput["defaultValue"] = inoutput.default
-
+        
         # allowed values
         # NOTE: only for inputs, but does not matter
         #logging.debug("inoutput.values test: %s",str(inoutput.values))
