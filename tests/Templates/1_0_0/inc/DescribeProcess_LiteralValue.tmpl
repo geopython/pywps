@@ -14,9 +14,6 @@
                         </Supported>
                     </UOMs>
                     </TMPL_IF>
-                    <TMPL_IF isDefaultValue>
-                    <DefaultValue><TMPL_VAR defaultValue></DefaultValue>
-                    </TMPL_IF>
                     <TMPL_IF allowedValueslen>
                     <ows:AllowedValues>
                         <TMPL_LOOP allowedValues>
@@ -40,4 +37,7 @@
                     </TMPL_IF>
                     <TMPL_IF valueReferencelen>
                     <ValuesReference reference="<TMPL_VAR reference>" valuesForm="<TMPL_VAR vform>"/>
+                    </TMPL_IF>
+                     <TMPL_IF isDefaultValue>
+                    <DefaultValue><TMPL_VAR defaultValue></DefaultValue>
                     </TMPL_IF>
