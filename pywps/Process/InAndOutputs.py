@@ -396,7 +396,7 @@ class ComplexInput(Input):
         There is the need a mimeType implementation from downloaded objects"""
          # if HTTP GET was performed, the type does not have to be set
         #copy from setvalue
-        if not input.has_key("type") and (input["value"].find("http://") == 0 or input["value"].find("http%3A%2F%2F") == 0):
+        if not input.has_key("type") or (input["value"].find("http://") == 0 or input["value"].find("http%3A%2F%2F") == 0):
             #jmd this needs to be changed, the self.format sould be set from the download stream
             #For now 
             self.format["mimetype"]=None
