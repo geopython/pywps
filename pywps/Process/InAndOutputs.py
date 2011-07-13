@@ -224,7 +224,6 @@ class LiteralInput(Input):
         :param input: input parsed by parsers
         :return: None or Error message
         """
-        
         if type(input["value"]) == types.ListType:
             for inpt in input["value"]:
                 resp = self._setValueWithOccurence(self.value, self._control(inpt))
@@ -252,13 +251,13 @@ class LiteralInput(Input):
 
         :param value: value to be controled
         """
-
-       
+        
+         # ugly characters, only if string
         if  type(value)!= types.BooleanType:
             for char in self.restrictedCharacters:
                 if value.find(char) > -1:
                     raise Exceptions.InvalidParameterValue(value)
-
+        
         # type 
         try:
             if self.dataType == types.FloatType:
@@ -384,10 +383,8 @@ class ComplexInput(Input):
             
         #self.value = input["value"]
         # download data
-        
         if input.has_key("asReference") and input["asReference"] == True:      
             self.downloadData(input["value"])
-           
         else:
             self.storeData(input["value"])
         return
@@ -398,14 +395,16 @@ class ComplexInput(Input):
         There is the need a mimeType implementation from downloaded objects"""
          # if HTTP GET was performed, the type does not have to be set
         #copy from setvalue
-        if not input.has_key("type") and (input["value"].find("http://") == 0 or input["value"].find("http%3A%2F%2F") == 0):
+        
+        if not input.has_key("type") or (input["value"].find("http://") == 0 or input["value"].find("http%3A%2F%2F") == 0):
             #jmd this needs to be changed, the self.format sould be set from the download stream
             #For now 
             self.format["mimetype"]=None
             self.format["schema"]=None
             self.format["encoding"]=None
         else:
-            try:     
+            try:
+                
                 self.format["mimetype"]=input["mimetype"]
                 self.format["schema"]=input["schema"]
                 self.format["encoding"]=input["encoding"]
@@ -428,6 +427,7 @@ class ComplexInput(Input):
 
         outputName = tempfile.mktemp(prefix="pywpsInput",dir=curdir)
         fout = None
+        
         try:
             fout=open(outputName,'wb')
         except IOError, what:
@@ -436,19 +436,19 @@ class ComplexInput(Input):
         # while getting the input XML file
         fout.write(data)
         fout.close()
-        
         self.checkMimeTypeIn(fout.name)
-        
         #self.format already set
         if  (self.format["mimetype"].lower().split("/")[0] != "text" and self.format["mimetype"].lower() != "application/xml"): 
                # convert it to binary using base64
-               rename(fout.name,fout.name+".base64")#
+               rename(fout.name,fout.name+".base64")
                try:
                    base64.decode(open(fout.name+".base64"), open(fout.name,"w"))
                except:
                    self.onProblem("NoApplicableCode", "Could not convert text input to binary using base64 encoding.")
                finally:  
                     os.remove(fout.name+".base64")
+        
+        
         #Checking what is actu
         try:
             mimeTypeMagic=self.ms.file(fileName).split(';')[0]
@@ -550,10 +550,11 @@ class ComplexInput(Input):
         :param mimeType:
         """
          
-      
+        
          #Note: magic output something like: 'image/tiff; charset=binary' we only need the typeContent 
         if (self.format["mimetype"] is None) or (self.format["mimetype"]==""): 
             #No mimeType let's set it from default
+          
             logging.debug("Missing ComplexDataInput mimeType in: %s, adopting default mimeType (first in formats list)" % self.identifier)
             self.format["mimetype"]=self.formats[0]["mimeType"]
             #wps-grass bridge, default schema and encoding
@@ -570,7 +571,7 @@ class ComplexInput(Input):
             #if self.format["mimetype"]!=mimeTypeMagic:
             #    logging.debug("ComplexDataInput defines mimeType %s (default set) but libMagic detects %s" % (str(self.format["mimetype"]),mimeTypeMagic))            
         else:
-            #Checking is mimeType is in the acceptable formats        
+            #Checking is mimeType is in the acceptable formats   
             if self.format["mimetype"] not in [dic["mimeType"] for dic in self.formats]:
                 #ATTENTION: False positive if dictionary is not set in process/empty 
                 if (len(self.formats)==1) and (type(self.formats[0]["mimeType"])==types.NoneType):
@@ -689,8 +690,7 @@ class BoundingBoxInput(Input):
 
         # set dimensions
         if input.has_key("crs"):
-            value.crs = input["crs"]
-            
+            value.crs = input["crs"]  
         # set dimensions
         if input.has_key("dimensions"):
             value.dimensions = int(input["dimensions"])
