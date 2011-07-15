@@ -155,12 +155,12 @@ class BBoxProcess(WPSProcess):
     def execute(self):
         self.bboxout.setValue(self.bboxin.value.coords)
 
-class AssyncProcess(WPSProcess):
-    """This process runs in assynchronous way"""
+class AsyncProcess(WPSProcess):
+    """This process runs in asynchronous way"""
 
     def __init__(self):
         WPSProcess.__init__(self, identifier =
-                "assyncprocess",title="Assynchronous process",
+                "asyncprocess",title="Asynchronous process",
                 storeSupported=True, statusSupported=True)
     def execute(self):
         import time
