@@ -27,6 +27,7 @@ class RequestGetTestCase(unittest.TestCase):
     inputs = None
     getcapabilitiesrequest = "service=wps&request=getcapabilities"
     getdescribeprocessrequest = "service=wps&request=describeprocess&version=1.0.0&identifier=dummyprocess"
+    getdescribeprocessallrequest = "service=wps&request=describeprocess&version=1.0.0&identifier=all"
     getexecuterequest = "service=wps&request=execute&version=1.0.0&identifier=dummyprocess&datainputs=[input1=20;input2=10]"
     #wfsurl = "http://www2.dmsolutions.ca/cgi-bin/mswfs_gmap?version=1.0.0&request=getfeature&service=wfs&typename=park"
     wfsurl = "http://rsg.pml.ac.uk/geoserver2/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=rsg:areas_pw&maxFeatures=1"
@@ -63,10 +64,18 @@ class RequestGetTestCase(unittest.TestCase):
     def testT01PerformGetCapabilities(self):
         """Test if GetCapabilities request returns Capabilities document"""
         self._setFromEnv()
-        mypywps = pywps.Pywps(pywps.METHOD_GET)
-        inputs = mypywps.parseRequest(self.getcapabilitiesrequest)
-        mypywps.performRequest(inputs)
-        xmldom = minidom.parseString(mypywps.response)
+        getpywps = pywps.Pywps(pywps.METHOD_GET)
+        postpywps = pywps.Pywps(pywps.METHOD_POST)
+        
+        getCapabilitiesRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request.xml"))
+        postinputs = postpywps.parseRequest(getCapabilitiesRequestFile)
+        postpywps.performRequest(postinputs)
+        xmldom = minidom.parseString(postpywps.response)
+        self.assertEquals(xmldom.firstChild.nodeName, "wps:Capabilities")
+        
+        inputs = getpywps.parseRequest(self.getcapabilitiesrequest)
+        getpywps.performRequest(inputs)
+        xmldom = minidom.parseString(getpywps.response)
         self.assertEquals(xmldom.firstChild.nodeName, "wps:Capabilities")
 
 
@@ -84,24 +93,52 @@ class RequestGetTestCase(unittest.TestCase):
     def testT03PerformDescribeProcess(self):
         """Test if DescribeProcess request returns ProcessDescription document"""
         self._setFromEnv()
-        mypywps = pywps.Pywps(pywps.METHOD_GET)
-        mypywps.parseRequest(self.getdescribeprocessrequest)
-        mypywps.performRequest()
-        xmldom = minidom.parseString(mypywps.response)
+        getpywps = pywps.Pywps(pywps.METHOD_GET)
+        getpywps.parseRequest(self.getdescribeprocessrequest)
+        getpywps.performRequest()
+        xmldom = minidom.parseString(getpywps.response)
         self.assertEquals(xmldom.firstChild.nodeName, "wps:ProcessDescriptions")
-    
+
+        postpywps = pywps.Pywps(pywps.METHOD_POST)
+        getCapabilitiesRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request.xml"))
+        postinputs = postpywps.parseRequest(getCapabilitiesRequestFile)
+        postpywps.performRequest(postinputs)
+        xmldom = minidom.parseString(postpywps.response)
+        self.assertTrue(len(xmldom.getElementsByTagNameNS(self.wpsns,"Process"))>0)
 
     def testT04ProcessesLengthDescribeProcess(self):
         """Test, if any processes are listed in the DescribeProcess document
         """
         self._setFromEnv()
-        mypywps = pywps.Pywps(pywps.METHOD_GET)
-        mypywps.parseRequest(self.getdescribeprocessrequest)
-        mypywps.performRequest()
-        xmldom = minidom.parseString(mypywps.response)
+        getpywps = pywps.Pywps(pywps.METHOD_GET)
+        getpywps.parseRequest(self.getdescribeprocessrequest)
+        getpywps.performRequest()
+        xmldom = minidom.parseString(getpywps.response)
         self.assertTrue(len(xmldom.getElementsByTagName("ProcessDescription"))>0)
         self.assertEquals(len(xmldom.getElementsByTagName("ProcessDescription")),
-                len(mypywps.inputs["identifier"]))
+                len(getpywps.inputs["identifier"]))
+        
+        getpywps = pywps.Pywps(pywps.METHOD_GET)
+        getpywps.parseRequest(self.getdescribeprocessallrequest)
+        getpywps.performRequest()
+        xmldom = minidom.parseString(getpywps.response)
+        self.assertEquals(len(xmldom.getElementsByTagName("ProcessDescription")),len(getpywps.request.processes))
+        
+        postpywps = pywps.Pywps(pywps.METHOD_POST)
+        describeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_describeprocess_request_dummyprocess.xml"))
+        postinputs = postpywps.parseRequest(describeRequestFile)
+        postpywps.performRequest(postinputs)
+        xmldom = minidom.parseString(postpywps.response)
+        self.assertTrue(len(xmldom.getElementsByTagName("ProcessDescription"))>0)
+        self.assertEquals(len(xmldom.getElementsByTagName("ProcessDescription")),
+                len(getpywps.inputs["identifier"]))
+        
+        postpywps = pywps.Pywps(pywps.METHOD_POST)
+        describeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_describeprocess_request_all.xml"))
+        postinputs = postpywps.parseRequest(describeRequestFile)
+        postpywps.performRequest(postinputs)
+        xmldom = minidom.parseString(postpywps.response)
+        self.assertEquals(len(xmldom.getElementsByTagName("ProcessDescription")),len(postpywps.request.processes))
 
     ######################################################################################)
     def testT05ParseExecute(self):
