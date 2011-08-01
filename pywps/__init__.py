@@ -236,10 +236,10 @@ class Pywps:
         elif inputs.has_key("wsdl"):
             inputs["version"]="1.0.0"
             from pywps.Wps.Wsdl import Wsdl
+            self.request = Wsdl(self)
         else:
             raise Exceptions.InvalidParameterValue(
                     "request: "+inputs["request"])
-
         self.response = self.request.response
         return self.response
 
