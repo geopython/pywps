@@ -2,7 +2,8 @@ import os
 import sys
 
 pywpsPath = os.path.abspath(os.path.join(os.path.split(os.path.abspath(__file__))[0],".."))
-sys.path.append(pywpsPath)
+sys.path.insert(0,pywpsPath)
+#sys.path.append(pywpsPath)
 
 import pywps
 import pywps.Process
@@ -80,11 +81,14 @@ class RequestParseTestCase(unittest.TestCase):
         self.assertEquals(getinputs, postinputs,"Get and Post inputs are not same:\n%s\n%s" % (getinputs,postinputs))
 
     def testParseExecuteLiteralInput(self):
-        """Test if Execute request is parsed, literal data inputs"""
+        """Test if Execute request is parsed, literal data inputs, including '@' in GET """
+        
+        #NOTE: Unittest changed after SVN: 1146 to check for the parsing of "@"
+        
         getpywps = pywps.Pywps(pywps.METHOD_GET)
         postpywps = pywps.Pywps(pywps.METHOD_POST)
         executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-literalinput.xml"))
-        getinputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=literalprocess&datainputs=[int=1;string=spam;float=1.1]")
+        getinputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=literalprocess&datainputs=[int=1;string=spam%40foo.com@mimetype=text/plain@xlink:href=http%3A//www.w3.org/TR/xmlschema-2/%23string;float=1.1]")
         postinputs = postpywps.parseRequest(executeRequestFile)
 
         self.assertEquals(getinputs["request"], "execute")
@@ -98,7 +102,7 @@ class RequestParseTestCase(unittest.TestCase):
         self.assertEquals(getinputs["datainputs"][1]["value"],postinputs["datainputs"][1]["value"])
         self.assertEquals(getinputs["datainputs"][2]["value"],postinputs["datainputs"][2]["value"])
         self.assertTrue(getinputs["datainputs"][0]["value"],1)
-        self.assertTrue(getinputs["datainputs"][1]["value"],"spam")
+        self.assertTrue(getinputs["datainputs"][1]["value"],"spam%40foo.com")
         self.assertTrue(getinputs["datainputs"][2]["value"],"1.1")
 
     def testParseExecuteComplexInputAsReference(self):

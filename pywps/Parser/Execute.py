@@ -28,7 +28,7 @@ import pywps
 from pywps.Parser.Post import Post as PostParser
 from pywps.Parser.Get import Get as GetParser
 
-import string,re
+import string,re,urllib
 
 class Post(PostParser):
     """ HTTP POST XML request encoding parser.  """
@@ -59,6 +59,7 @@ class Post(PostParser):
         identifiers = []
         identifierNode = None
         dataInputs = []
+       
 
         #
         # Mandatory options
@@ -310,7 +311,6 @@ class Post(PostParser):
 
         attributes["type"] = "ComplexValue"
         attributes["asReference"] = True
-
         return attributes
 
     def parseHeaderDataInput(self,headerNode):
@@ -365,7 +365,6 @@ class Post(PostParser):
         attributes["encoding"] = complexDataNode.getAttribute("encoding")
         attributes["schema"] = complexDataNode.getAttribute("schema")
         attributes["value"] = None
-
         for complexDataChildNode in complexDataNode.childNodes:
             # CDATA or text and the input value is empty and the Text or
             # CDATA is not empty
@@ -474,8 +473,7 @@ class Get(GetParser):
         # ResponseDocument
         try:
             self.inputs["responseform"]["responsedocument"] = \
-                    {"outputs":  self.parseDataInputs(
-                                self.unparsedInputs["responsedocument"])}
+                    {"outputs":  self.parseDataInputs(self.unparsedInputs["responsedocument"])}  
         except KeyError:
             self.inputs["responseform"]["responsedocument"] = {}
 
@@ -518,7 +516,6 @@ class Get(GetParser):
             len(self.inputs["responseform"]["responsedocument"])>0:
             raise pywps.InvalidParameterValue(
                 "Either responseDocument or rawDataOutput should be specified, but not both")
-
         return self.inputs
 
     def _parseRawDataOutput(self, dataInput):
@@ -553,39 +550,45 @@ class Get(GetParser):
         for dataInput in dataInputs.split(";"):
             try:
                 # key is separated by "=" from value
-                key,value = string.split(dataInput,"=",maxsplit=1)
+                key,valueAndAttrs = string.split(dataInput,"=",maxsplit=1)
             except ValueError,e:
                 key = dataInput
-                value = ""
+                valueAndAttrs = ""
 
-            if not key and not value:
+            if not key and not valueAndAttrs:
                 continue
-
+          
             # initial value
-            parsedDataInputs.append({"identifier":key, "value":None})
-
+            parsed={"identifier":key, "value":None}
             # additional input attributes are separated by "@"
             attributes = []
-            if value.find("@") > 0:
-                parsedDataInputs[-1]["value"]=value.split("@")[0]
-                attributes=value.split("@")[1:]
-            elif value.find("@") == 0:
-                parsedDataInputs[-1]["value"]=None
-                attributes=value.split("@")[1:]
+            if valueAndAttrs.find("@") > 0:
+                
+                encodedValue=valueAndAttrs.split("@")[0]
+                parsed["value"]=urllib.unquote(encodedValue)
+                attributes=valueAndAttrs.split("@")[1:]
+                
+            elif valueAndAttrs.find("@") == 0:
+                parsed["value"]=None
+                attributes=valueAndAttrs.split("@")[1:]
             else:
-                parsedDataInputs[-1]["value"]=self._trueOrFalse(value)
+                #needs to be checked for trueOrFalse
+                encodedValue=valueAndAttrs
+                parsed["value"]=self._trueOrFalse(urllib.unquote(valueAndAttrs))
                 attributes = []
-
+         
             # additional attribute key is separated by "=" from it's value
             for attribute in attributes:
                 attributeKey, attributeValue = attribute.split("=")
-                parsedDataInputs[-1][attributeKey.lower()] =self._trueOrFalse(attributeValue)
+               
+                parsed[attributeKey.lower()]=self._trueOrFalse(urllib.unquote(attributeValue))
+        
+            parsedDataInputs.append(parsed)
         return parsedDataInputs
-
-    # Moved to Parser class
+    
+    #Moved to Parser class
     #def _trueOrFalse(self,str):
     #    """Return True or False, if input is "true" or "false" """
-    #
     #    if str.lower() == "false":
     #        return False
     #    elif str.lower() == "true":
