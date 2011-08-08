@@ -41,7 +41,7 @@ from pywps.Exceptions import *
 import pywps.config
 from pywps.Parser import Parser
 from pywps.Process.Lang import Lang
-import urllib
+
 
 class Get(Parser):
     """ Main Class for parsing HTTP GET request types """
@@ -83,7 +83,6 @@ class Get(Parser):
                 else:
                     try:
                         key,value = split(feature,"=",maxsplit=1)
-                        value = urllib.unquote(value)
                     except:
                         raise NoApplicableCode(\
                                                     'Invalid Key-Value-Pair: "' + \

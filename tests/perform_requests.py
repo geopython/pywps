@@ -437,7 +437,8 @@ class RequestGetTestCase(unittest.TestCase):
         upperSet=set([len(coord.split(" ")) for coord in [item.getElementsByTagNameNS(self.owsns,"UpperCorner")[0].childNodes[0].nodeValue for item in bboxDom]])
         self.assertEquals(len(dimSet.difference(lowerSet)),0) #0
         self.assertEquals(len(dimSet.difference(upperSet)),0) #0
-  
+    
+ 
     def _setFromEnv(self):
         os.putenv("PYWPS_PROCESSES", os.path.join(pywpsPath,"tests","processes"))
         os.environ["PYWPS_PROCESSES"] = os.path.join(pywpsPath,"tests","processes")

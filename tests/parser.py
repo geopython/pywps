@@ -2,6 +2,7 @@ import os
 import sys
 
 pywpsPath = os.path.abspath(os.path.join(os.path.split(os.path.abspath(__file__))[0],".."))
+sys.path.insert(0,pywpsPath)
 sys.path.append(pywpsPath)
 
 import pywps
@@ -14,6 +15,7 @@ import base64
 import tempfile
 from osgeo import ogr
 
+
 class RequestParseTestCase(unittest.TestCase):
     """Test case for input parsing"""
     wfsurl = "http://www2.dmsolutions.ca/cgi-bin/mswfs_gmap?version=1.0.0&request=getfeature&service=wfs&typename=park"
@@ -21,9 +23,6 @@ class RequestParseTestCase(unittest.TestCase):
     wpsns = "http://www.opengis.net/wps/1.0.0"
     getpywps = None
     postpywps = None
-
-    def setUp(self):
-        pass
 
     def testParseGetCapabilities(self):
         """Test if GetCapabilities request is parsed and if POST and GET methods do get the same result"""
@@ -83,12 +82,14 @@ class RequestParseTestCase(unittest.TestCase):
         self.assertEquals(getinputs, postinputs,"Get and Post inputs are not same:\n%s\n%s" % (getinputs,postinputs))
 
     def testParseExecuteLiteralInput(self):
-        """Test if Execute request is parsed, literal data inputs"""
+        """Test if Execute request is parsed, literal data inputs, including '@' in GET """
+        
+        #NOTE: Unittest changed after SVN: 1146 to check for the parsing of "@"
         
         getpywps = pywps.Pywps(pywps.METHOD_GET)
         postpywps = pywps.Pywps(pywps.METHOD_POST)
         executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-literalinput.xml"))
-        getinputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=literalprocess&datainputs=[int=1;string=spam;float=1.1]")
+        getinputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=literalprocess&datainputs=[int=1;string=spam%40foo.com@mimetype=text/plain@xlink:href=http%3A//www.w3.org/TR/xmlschema-2/%23string;float=1.1]")
         postinputs = postpywps.parseRequest(executeRequestFile)
 
         self.assertEquals(getinputs["request"], "execute")
@@ -102,8 +103,9 @@ class RequestParseTestCase(unittest.TestCase):
         self.assertEquals(getinputs["datainputs"][1]["value"],postinputs["datainputs"][1]["value"])
         self.assertEquals(getinputs["datainputs"][2]["value"],postinputs["datainputs"][2]["value"])
         self.assertTrue(getinputs["datainputs"][0]["value"],1)
-        self.assertTrue(getinputs["datainputs"][1]["value"],"spam")
+        self.assertTrue(getinputs["datainputs"][1]["value"],"spam%40foo.com")
         self.assertTrue(getinputs["datainputs"][2]["value"],"1.1")
+
 
     def testParseExecuteComplexInputAsReference(self):
         """Test if Execute request is parsed, complex data inputs, given as reference"""
@@ -192,7 +194,7 @@ class RequestParseTestCase(unittest.TestCase):
 
     def testParseExecuteComplexAsReferenceOut(self):
         """Test if Execute request is parsed, we want data outputs as reference"""
-
+        self._setFromEnv()
         postpywps = pywps.Pywps(pywps.METHOD_POST)
         getpywps = pywps.Pywps(pywps.METHOD_GET)
         executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-complexinput-output-as-reference.xml"))
@@ -207,7 +209,13 @@ class RequestParseTestCase(unittest.TestCase):
                         postinputs["responseform"]["responsedocument"]["outputs"][1]["asreference"] == \
                         True)
 
+
+    def _setFromEnv(self):
+        os.putenv("PYWPS_PROCESSES", os.path.join(pywpsPath,"tests","processes"))
+        os.environ["PYWPS_PROCESSES"] = os.path.join(pywpsPath,"tests","processes")
+  
+
+    
 if __name__ == "__main__":
-   # unittest.main()
    suite = unittest.TestLoader().loadTestsFromTestCase(RequestParseTestCase)
    unittest.TextTestRunner(verbosity=2).run(suite)

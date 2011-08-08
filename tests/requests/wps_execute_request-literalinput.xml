@@ -19,7 +19,7 @@
             <wps:Input>
                 <ows:Identifier>string</ows:Identifier>
                 <wps:Data>
-                    <wps:LiteralData>spam</wps:LiteralData>
+                    <wps:LiteralData>spam@foo.com</wps:LiteralData>
                 </wps:Data>
             </wps:Input>
             <wps:Input>

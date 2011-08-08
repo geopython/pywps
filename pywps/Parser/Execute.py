@@ -28,7 +28,7 @@ import pywps
 from pywps.Parser.Post import Post as PostParser
 from pywps.Parser.Get import Get as GetParser
 
-import string,re
+import string,re,urllib
 
 class Post(PostParser):
     """ HTTP POST XML request encoding parser.  """
@@ -552,35 +552,40 @@ class Get(GetParser):
         for dataInput in dataInputs.split(";"):
             try:
                 # key is separated by "=" from value
-                key,value = string.split(dataInput,"=",maxsplit=1)
+                key,valueAndAttrs = string.split(dataInput,"=",maxsplit=1)
             except ValueError,e:
                 key = dataInput
-                value = ""
+                valueAndAttrs = ""
 
-            if not key and not value:
+            if not key and not valueAndAttrs:
                 continue
-
+          
             # initial value
-            parsedDataInputs.append({"identifier":key, "value":None})
+            parsed={"identifier":key, "value":None}
             # additional input attributes are separated by "@"
             attributes = []
-            if value.find("@") > 0:
-                parsedDataInputs[-1]["value"]=value.split("@")[0]
-                attributes=value.split("@")[1:]
-            elif value.find("@") == 0:
-                parsedDataInputs[-1]["value"]=None
-                attributes=value.split("@")[1:]
+            if valueAndAttrs.find("@") > 0:
+                
+                encodedValue=valueAndAttrs.split("@")[0]
+                parsed["value"]=urllib.unquote(encodedValue)
+                attributes=valueAndAttrs.split("@")[1:]
+                
+            elif valueAndAttrs.find("@") == 0:
+                parsed["value"]=None
+                attributes=valueAndAttrs.split("@")[1:]
             else:
                 #needs to be checked for trueOrFalse
-                parsedDataInputs[-1]["value"]=self._trueOrFalse(value)
+                encodedValue=valueAndAttrs
+                parsed["value"]=self._trueOrFalse(urllib.unquote(valueAndAttrs))
                 attributes = []
-
+         
             # additional attribute key is separated by "=" from it's value
             for attribute in attributes:
                 attributeKey, attributeValue = attribute.split("=")
-                parsedDataInputs[-1][attributeKey.lower()] =self._trueOrFalse(attributeValue)
+               
+                parsed[attributeKey.lower()]=self._trueOrFalse(urllib.unquote(attributeValue))
         
-        
+            parsedDataInputs.append(parsed)
         return parsedDataInputs
     
     #Moved to Parser class
