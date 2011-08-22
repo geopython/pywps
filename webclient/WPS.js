@@ -670,6 +670,8 @@ OpenLayers.WPS = OpenLayers.Class({
         for (var i  = 0; i < process.inputs.length; i++ ) {
             var input = process.inputs[i];
             var tmpl = "";
+            var format = (input.format ? input.format : input.formats[0]);
+            var formatStr ="";
             if (input.CLASS_NAME.search("Complex")>-1) {
                 if (input.asReference) {
                     tmpl = OpenLayers.WPS.complexInputReferenceTemplate.replace("$REFERENCE$",escape(input.getValue()));
@@ -677,7 +679,19 @@ OpenLayers.WPS = OpenLayers.Class({
                 else {
                     tmpl = OpenLayers.WPS.complexInputDataTemplate.replace("$DATA$",input.getValue());
                 }
-            }
+                if (format) {
+                    if (format.mimeType) {
+                        formatStr += " mimeType=\""+format.mimeType+"\"";
+                    }
+                    if (format.schema) {
+                        formatStr += " schema=\""+format.schema+"\"";
+                    }
+                    if (format.encoding) {
+                        formatStr += " encoding=\""+format.encoding+"\"";
+                    }
+                }
+                tmpl = tmpl.replace("$FORMAT$",formatStr);
+            }       
             else if (input.CLASS_NAME.search("Literal") > -1) {
                 tmpl = OpenLayers.WPS.literalInputTemplate.replace("$DATA$",input.getValue());
             }
@@ -819,7 +833,7 @@ OpenLayers.WPS = OpenLayers.Class({
             output.setValue(literalData[0].firstChild.nodeValue);
         }
         else if (complexData.length > 0) {
-        	// set output do DOM
+            // set output do DOM
         	nodes=new Array();
             for (var i = 0; i < complexData[0].childNodes.length; i++) {
                 var node = complexData[0].childNodes[i];
@@ -1338,7 +1352,7 @@ OpenLayers.WPS.literalInputTemplate  = "<wps:Input>"+
 OpenLayers.WPS.complexInputReferenceTemplate = "<wps:Input>"+
                                 "<ows:Identifier>$IDENTIFIER$</ows:Identifier>"+
                                 "<wps:Data>"+
-                                '<wps:Reference xlink:href="$REFERENCE$"/>'+
+                                '<wps:Reference xlink:href="$REFERENCE$" $FORMAT$ />'+
                                 "</wps:Data>"+
                                 "</wps:Input>";
 
@@ -1349,7 +1363,7 @@ OpenLayers.WPS.complexInputReferenceTemplate = "<wps:Input>"+
 OpenLayers.WPS.complexInputDataTemplate = "<wps:Input>"+
                                 "<ows:Identifier>$IDENTIFIER$</ows:Identifier>"+
                                 "<wps:Data>"+
-				"<wps:ComplexData>"+
+				"<wps:ComplexData $FORMAT$>"+
                                 "$DATA$"+
 				"</wps:ComplexData>"+
                                 "</wps:Data>"+
