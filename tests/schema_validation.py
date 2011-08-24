@@ -97,7 +97,6 @@ class SchemaTestCase(unittest.TestCase):
                 break
         if counter>=20:
             self.assertEquals("The assync process is taking to long",None)
-                
 
  
     def testGetCapabilities(self):
@@ -156,6 +155,8 @@ class SchemaTestCase(unittest.TestCase):
         getinputs = getpywps.parseRequest(self.getDescribeProcessRequest)
         getpywps.performRequest(getinputs)
      
+        #print getpywps.response
+
         describeProcessGET=etree.XML(getpywps.response,self.parser)
         self.assertEquals(schemaDescribeProcess.assertValid(describeProcessGET),None)
         
