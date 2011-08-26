@@ -37,7 +37,6 @@ class BenchMarkWPS(object):
     def __init__(self):
         self.getCapabilitiesReq = "service=wps&request=getcapabilities"
         self.getDescribeProcessReq = "service=wps&request=describeprocess&version=1.0.0&identifier=all"
-        self.results = None
         #To silence  WPS warnings. Note this will silence any error in the code!!
         sys.stderr = open('/dev/null',"w") 
     
