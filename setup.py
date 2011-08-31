@@ -37,9 +37,9 @@ import sys,os
 doclines = __doc__.split("\n")
 
 
-setup(
+dist =  setup(
         name = name,
-        version = '3.0.1',
+        version = 'trunk',
         maintainer="Jachym Cepicky",
         maintainer_email = 'jachym@les-ejk.cz',
         author = 'Jachym Cepicky',
@@ -86,8 +86,6 @@ setup(
         scripts=['wps.py']
 )
 
-
-
 # check, if we are really installing
 dryRun = False
 install = False
@@ -97,7 +95,6 @@ for arg in sys.argv:
     if arg == "install":
         install = True
 
-import os
 # post installation part
 if not dryRun and install and not os.environ.has_key("FAKEROOTKEY"):
     # compile templates
@@ -105,27 +102,21 @@ if not dryRun and install and not os.environ.has_key("FAKEROOTKEY"):
     # webserver has not the permission to create new files in the 
     # python site-packages directory
     from pywps.Template import TemplateProcessor
-    from distutils import sysconfig
 
-    baseDir =  os.path.join(sysconfig.get_python_lib(),
-                            name,'Templates')
+    # make sure, we will not import pywps from  local directory
+    baseDir = os.path.join(dist.command_obj["install_egg_info"].install_dir,
+            name,"Templates")
 
-    for i in range(len(sys.path)):
-        if os.path.split(sys.path[i])[1] == "dist-packages":
-            baseDir =  os.path.join(sys.path[i],
-                                name,'Templates')
     versionDirs = ['1_0_0']
 
     template_files = ['GetCapabilities', 'DescribeProcess','Execute']
-    try:
-        for version in versionDirs:
-            for template_file in template_files:
-                print "Compiling template "+template_file
-                template_file = os.path.join(baseDir,version,
+
+    for version in versionDirs:
+        for template_file in template_files:
+            print "Compiling template "+template_file+" in "+baseDir
+            template_file = os.path.join(baseDir,version,
                                     template_file + '.tmpl')
-                template = TemplateProcessor(fileName=template_file,compile=True)
-    except:
-        print "dry-run only, templates are not complied, probably couldnt find the path"
+            template = TemplateProcessor(fileName=template_file,compile=True)
 else:
     print "dry-run only, templates are not complied"
 
