@@ -12,8 +12,8 @@ class Process(WPSProcess):
             abstract="""This is demonstration process of PyWPS, returns
             the same file, it gets on input, as the output.""",
             version = "1.0",
-            storeSupported = "true",
-            statusSupported = "true")
+            storeSupported = True,
+            statusSupported = True)
 
         ##
         # Adding process inputs
