@@ -21,6 +21,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 from xml.dom.minidom import Document
+from xml.sax.saxutils import escape
 import pywps
 from pywps.Soap import SOAP
 import pywps.Soap
@@ -34,7 +35,6 @@ class WPSException(Exception):
     code = "NoApplicableCode"
     value = None
     locator = None
-
     def _make_xml(self):
         # formulate XML
         self.document = Document()
@@ -46,7 +46,6 @@ class WPSException(Exception):
         self.document.appendChild(self.ExceptionReport)
 
         # make exception
-
         self.Exception = self.document.createElement("ows:Exception")
         self.Exception.setAttribute("exceptionCode",self.code)
         
@@ -95,9 +94,9 @@ class NoApplicableCode(WPSException):
         self.message = value
         if value:
             self.ExceptionText = self.document.createElement("ows:ExceptionText")
-            self.ExceptionText.appendChild(self.document.createTextNode(repr(value)))
+            self.ExceptionText.appendChild(self.document.createTextNode((repr(value))))
             self.Exception.appendChild(self.ExceptionText)
-            self.value = str(value)
+            self.value = str(escape(value))
 
 class VersionNegotiationFailed(WPSException):
     """VersionNegotiationFailed WPS Exception"""
@@ -109,7 +108,7 @@ class VersionNegotiationFailed(WPSException):
             self.ExceptionText = self.document.createElement("ows:ExceptionText")
             self.ExceptionText.appendChild(self.document.createTextNode(value))
             self.Exception.appendChild(self.ExceptionText)
-            self.value = str(value)
+            self.value = value
 
 class NotEnoughStorage(WPSException):
     """NotEnoughStorage WPS Exception"""
