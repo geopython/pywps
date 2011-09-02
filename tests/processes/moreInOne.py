@@ -22,7 +22,7 @@ class SecondProcess(WPSProcess):
                             title="Second Process")
 
         self.indata = self.addComplexInput(identifier="indata",title="Complex in",
-                formats=[{"mimeType":"image/tiff"}])
+                formats=[{"mimeType":"image/tiff"}],maxmegabites=2)
         self.outdata = self.addComplexOutput(identifier="outdata",
                 title="Compex out",
                 formats=[{"mimeType":"image/tiff"}])

@@ -21,6 +21,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 from xml.dom.minidom import Document
+from xml.sax.saxutils import escape
 import pywps
 from pywps.Soap import SOAP
 import pywps.Soap
@@ -97,7 +98,7 @@ class NoApplicableCode(WPSException):
             self.ExceptionText = self.document.createElement("ExceptionText")
             self.ExceptionText.appendChild(self.document.createTextNode(repr(value)))
             self.Exception.appendChild(self.ExceptionText)
-            self.value = str(value)
+            self.value = str(escape(value))
 
 class VersionNegotiationFailed(WPSException):
     """VersionNegotiationFailed WPS Exception"""
