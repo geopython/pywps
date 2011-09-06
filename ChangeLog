@@ -1,3 +1,13 @@
+2011-09-06  Jachym Cepicky <jachym@bnhelp.cz>
+    PyWPS 3.2.0
+    New stable release
+
+    * Bugs:
+	- Many
+
+    * Features:
+	- Many
+
 2009-06-01  Jachym Cepicky <jachym@bnhelp.cz>
     PyWPS 3.1.0
     New stable release
