@@ -16,11 +16,10 @@ name = 'pywps'
 #   END of SETUP
 
 classifiers=[
-          'Development Status :: 0.1',
-          'Environment :: CGI',
+           'Development Status :: 5 - Production/Stable',
           'Environment :: Web Environment',
           'Intended Audience :: Developers',
-          'License :: OSI Approved :: GNU/GPL',
+          'License :: OSI Approved :: GNU General Public License (GPL)',
           'Operating System :: MacOS :: MacOS X',
           'Operating System :: Microsoft :: Windows',
           'Operating System :: POSIX',
@@ -31,7 +30,8 @@ classifiers=[
           ]
 
 
-from distutils.core import setup
+#from distutils.core import setup
+from setuptools import setup
 import sys,os
 
 doclines = __doc__.split("\n")
