@@ -298,6 +298,8 @@ class Execute(Request):
             self.promoteStatus(self.accepted,"Process %s accepted" %\
                     self.process.identifier)
 
+            logging.debug("Store and Status are both set to True, let's be async")
+
             # apache 1.x requires forking for asynchronous requests
             serverSoft=os.getenv("SERVER_SOFTWARE")
             forkingRequired=serverSoft and serverSoft.lower().startswith("apache/1.")
@@ -308,24 +310,33 @@ class Execute(Request):
             if forkingRequired:
                 try:
                     # this is the parent process
-                    if os.fork():
+                    pid = os.fork()
+                    if pid:
+                        logging.debug("Main thread with pid %s ends here" % pid)
                         # exit here
                         return
                     # this is the child process
                     else:
+                        logging.debug("Child thread with pid %s contintues" % self.pid)
                         pass
                         # continue execution
 
                 except OSError, e:
+                    logging.debug("Forking failed")
                     traceback.print_exc(file=pywps.logFile)
                     raise pywps.NoApplicableCode("Fork failed: %d (%s)\n" % (e.errno, e.strerror) )
 
             # this is child process, parent is already gone away
             # redirect stdout, so that apache sends back the response immediately
-            si = open(os.devnull, 'r')
-            so = open(os.devnull, 'a+')
+            logging.debug("Redirecting standard input and standard output to devnull")
+
+            si = file(os.devnull, 'r')
+            so = file(os.devnull, 'a+')
+            se = file(os.devnull, 'a+', 0)
             os.dup2(si.fileno(), sys.stdin.fileno())
             os.dup2(so.fileno(), sys.stdout.fileno())
+            os.dup2(se.fileno(), sys.stderr.fileno())
+
 
         # attempt to execute
         try:
