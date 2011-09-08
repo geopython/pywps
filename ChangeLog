@@ -1,12 +1,17 @@
-2011-09-06  Jachym Cepicky <jachym@bnhelp.cz>
+2011-09-06 Jachym Cepicky <jachym@bnhelp.cz>
     PyWPS 3.2.0
-    New stable release
+    New stable releas
 
-    * Bugs:
-	- Many
-
-    * Features:
-	- Many
+    - Updated JavaScript client (Which is going to be developed right now by me as well for some other project)
+    - Introduced base64 data input and output encoding
+    - Basic support for UMN MapServer, which generates OGC WFS and WCS services on top of resulting data
+    - Documentation updates (API and workshops)
+    - mod_python possible
+    - Jython possible (pywps can run as Java servlet)
+    - Tested with GRASS Bridge from Sören
+    - Tests, tests, tests (and more will come soon)
+    - setup.py fixed
+    - logging using pythonish logging
 
 2009-06-01  Jachym Cepicky <jachym@bnhelp.cz>
     PyWPS 3.1.0
