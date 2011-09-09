@@ -37,6 +37,7 @@ class BenchMarkWPS(object):
     def __init__(self):
         self.getCapabilitiesReq = "service=wps&request=getcapabilities"
         self.getDescribeProcessReq = "service=wps&request=describeprocess&version=1.0.0&identifier=all"
+        self.getWSDL="WSDL"
         #To silence  WPS warnings. Note this will silence any error in the code!!
         sys.stderr = open('/dev/null',"w") 
     
@@ -51,9 +52,11 @@ class BenchMarkWPS(object):
             stats=Stats(profile,stream=tmpBuffer)
             stats.sort_stats('time','calls')
             stats.print_stats(1)
-            match=re.findall(r'\bin\b(.*?)\bCPU\b',tmpBuffer.getvalue())
-           
-            print str(test[1].__doc__ )+":"+str(match[0])+" CPU Time"
+            #match=re.findall(r'\bin\b(.*?)\bCPU\b',tmpBuffer.getvalue())
+            match=re.findall(r'\bin\b(.*?)\bseconds\b',tmpBuffer.getvalue())
+            #There is some difference between 2.6 and 2.7, re with seconds fits both version
+            #but in 2.6 it returns CPU string, the filter will clean it 
+            print str(test[1].__doc__ )+":"+filter(lambda x: x.isdigit() or x==".", str(match[0]))+" CPU Time"
         
     def tests(self):
         """filters class methods and returns methods that will be run"""
@@ -92,6 +95,12 @@ class BenchMarkWPS(object):
         executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-complexinput-direct.xml"))
         postinputs = postpywps.parseRequest(executeRequestFile)
         postpywps.performRequest(postinputs)
+    
+    def testWSDL(self):
+        """WSDL request"""
+        getpywps = pywps.Pywps(pywps.METHOD_GET)
+        inputs = getpywps.parseRequest(self.getWSDL)
+        getpywps.performRequest(inputs)
             
 if __name__ == "__main__":
     bench = BenchMarkWPS()
