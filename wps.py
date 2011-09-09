@@ -32,7 +32,7 @@ Enjoy and happy GISing!
 
 $Id: wps.py 871 2009-11-23 14:25:09Z jachym $
 """
-__version__ = "3.2"
+__version__ = "3.2.1"
 
 
 # Author:	Jachym Cepicky
