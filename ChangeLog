@@ -1,6 +1,17 @@
+2011-09-09 Jachym cepicky <jachym@bnhelp.cz>
+    PyWPS 3.2.1
+    New Stable release
+
+    - Fix for UMN MapServer support (vector data)
+    - Fix for Java 
+    - Fix for asynchronous mode
+    - Fix in tests for python 2.7
+
+    NOTE: MapServer will need further work
+
 2011-09-06 Jachym Cepicky <jachym@bnhelp.cz>
     PyWPS 3.2.0
-    New stable releas
+    New stable release
 
     - Updated JavaScript client (Which is going to be developed right now by me as well for some other project)
     - Introduced base64 data input and output encoding
