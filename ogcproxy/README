@@ -1,0 +1,6 @@
+12/Sep/2011
+- Script inside ./src folder
+- Information on install at bottom of script (ogcproxy.py)
+- w3c.tar.gz contains the folder structure/schemas necessary to validate WPS
+- ogc.tar.gz contains all the OGC schemas 
+- Decompress w3c.tar.gz and ogc.tar.gz and configure proxy to point to them
