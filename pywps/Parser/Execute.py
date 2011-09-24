@@ -166,7 +166,8 @@ class Post(PostParser):
                                     "Identifier")[0].firstChild.nodeValue
                     outputs.append({"identifier": identifier})
                 except IndexError:
-                    raise pywps.MissingParameterValue("Identifier")
+                    continue
+                    # raise pywps.MissingParameterValue("Identifier")
                 # Abstract, Title are not supported yet
                 # is it necessary ?
 
@@ -190,22 +191,25 @@ class Post(PostParser):
             responseFormNode.getElementsByTagNameNS(self.nameSpace,
                                                     "RawDataOutput")
             form["rawdataoutput"] = {}
+            identifier = None
             try:
                 # identifier
                 identifier = responseFormNode.getElementsByTagNameNS(
                                 self.owsNameSpace,
                                 "Identifier")[0].firstChild.nodeValue
                 form["rawdataoutput"][identifier] = {}
+
+                form["rawdataoutput"][identifier]["mimetype"] = \
+                        responseFormNode.getAttribute("mimeType")
+                form["rawdataoutput"][identifier]["encoding"] = \
+                        responseFormNode.getAttribute("encoding")
+                form["rawdataoutput"][identifier]["schema"] = \
+                        responseFormNode.getAttribute("schema")
+                form["rawdataoutput"][identifier]["uom"] = \
+                        responseFormNode.getAttributeNS(self.nameSpace,"uom")
             except IndexError:
-                raise pywps.MissingParameterValue("Identifier")
-            form["rawdataoutput"][identifier]["mimetype"] = \
-                    responseFormNode.getAttribute("mimeType")
-            form["rawdataoutput"][identifier]["encoding"] = \
-                    responseFormNode.getAttribute("encoding")
-            form["rawdataoutput"][identifier]["schema"] = \
-                    responseFormNode.getAttribute("schema")
-            form["rawdataoutput"][identifier]["uom"] = \
-                    responseFormNode.getAttributeNS(self.nameSpace,"uom")
+                 #raise pywps.MissingParameterValue("Identifier")
+                 pass
         return form
 
     def parseDataInputs(self,inputsNode):
