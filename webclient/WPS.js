@@ -174,14 +174,6 @@ OpenLayers.WPS = OpenLayers.Class({
     status: null,
 
     /**
-     * Property: assync
-     * Should the process run in asynchronous mode?
-     * default: false
-     * {Boolean}
-     */
-    async: false,
-
-    /**
      * Property: statusMessage
      * {String} 
      */
@@ -432,7 +424,7 @@ OpenLayers.WPS = OpenLayers.Class({
             this.onDescribedProcess(process);
         }
         
-        }catch(e){console.log(e)}
+        }catch(e){console.log(e);};
     },
 
     /**
@@ -659,9 +651,8 @@ OpenLayers.WPS = OpenLayers.Class({
      * identifier - {String} 
      */
     executePost : function(identifier) {
-        var uri = this.executeUrlPost
+        var uri = this.executeUrlPost;
         var process = this.getProcess(identifier);
-
         var data = OpenLayers.WPS.executeRequestTemplate.replace("$IDENTIFIER$",identifier);
         data = data.replace("$STORE_AND_STATUS$",process.async);
 
@@ -1135,6 +1126,15 @@ OpenLayers.WPS.Process = OpenLayers.Class({
      * {Boolean}
      */
     status: false,
+    
+    /**
+     * Property: async
+     * Should the process run in asynchronous mode?
+     * default: false
+     * {Boolean}
+     */
+    async: false,
+
 
     /**
      * Property: wps
@@ -1158,6 +1158,7 @@ OpenLayers.WPS.Process = OpenLayers.Class({
         this.metadata= {};
         this.version= null;
         this.status= false;
+        this.async=false;
         this.wps= null;
         OpenLayers.Util.extend(this, options);
     },
@@ -1326,7 +1327,7 @@ OpenLayers.WPS.executeRequestTemplate = '<?xml version="1.0" encoding="UTF-8" st
                                 "$DATA_INPUTS$"+
                                 '</wps:DataInputs>'+
                                 '<wps:ResponseForm>'+
-                                '<wps:ResponseDocument wps:lineage="false" '+
+                                '<wps:ResponseDocument lineage="false" '+
                                 'storeExecuteResponse="true" '+
                                 'status="$STORE_AND_STATUS$">'+
                                 "$OUTPUT_DEFINITIONS$"+
@@ -1351,9 +1352,7 @@ OpenLayers.WPS.literalInputTemplate  = "<wps:Input>"+
  */
 OpenLayers.WPS.complexInputReferenceTemplate = "<wps:Input>"+
                                 "<ows:Identifier>$IDENTIFIER$</ows:Identifier>"+
-                                "<wps:Data>"+
                                 '<wps:Reference xlink:href="$REFERENCE$" $FORMAT$ />'+
-                                "</wps:Data>"+
                                 "</wps:Input>";
 
 /**
