@@ -661,9 +661,9 @@ OpenLayers.WPS = OpenLayers.Class({
         for (var i  = 0; i < process.inputs.length; i++ ) {
             var input = process.inputs[i];
             var tmpl = "";
-            var format = (input.format ? input.format : input.formats[0]);
-            var formatStr ="";
             if (input.CLASS_NAME.search("Complex")>-1) {
+            	var format = (input.format ? input.format : input.formats[0]);
+                var formatStr ="";
                 if (input.asReference) {
                     tmpl = OpenLayers.WPS.complexInputReferenceTemplate.replace("$REFERENCE$",escape(input.getValue()));
                 }
