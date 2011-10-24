@@ -156,8 +156,11 @@ def SOAPtoWPS(tree):
     wps2.inputs={'request': 'getCapabilities', 'version': '1.0.0', 'service': 'wps'}
     from pywps.Wps import Request
     request=Request(wps2)
-    process=[process for process in request.processes if process.identifier in [processID]][0]
-    
+    try:
+     	process=[process for process in request.processes if process.identifier in [processID]][0]
+    except IndexError:
+    #	#If the server url is incorrect the process request will not be found in the WPS process list
+    	raise pywps.NoApplicableCode("The requested process is not part of the instance. Check pywps conf file and WSDL. WSDL has to point to the correct wrapper, please check location attribute in address element of WSDL document")	
     XSLTDocIO=open(pywps.XSLT.__path__[0]+"/SOAP2WPS.xsl","r")
    
     XSLTDoc=etree.parse(XSLTDocIO)
