@@ -151,10 +151,11 @@ def SOAPtoWPS(tree):
     #The replace is done using module re and set that it has to do only 2 replaces in the beggining. Therefore the replace is independe of the since of XML content
     global process
     
-    processID=tree.tag.rsplit("_",1)[-1]
+    processID=tree.tag.split("_",1)[-1]
     wps2=pywps.Pywps()
     wps2.inputs={'request': 'getCapabilities', 'version': '1.0.0', 'service': 'wps'}
     from pywps.Wps import Request
+    
     request=Request(wps2)
     try:
      	process=[process for process in request.processes if process.identifier in [processID]][0]
