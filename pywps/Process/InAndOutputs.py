@@ -440,9 +440,15 @@ class ComplexInput(Input):
         #self.format already set
         if  (self.format["mimetype"].lower().split("/")[0] != "text" and self.format["mimetype"].lower() != "application/xml"): 
                # convert it to binary using base64
+               #Python problem: The file object has to be closed after base64.decode, so that ALL content is flushed, otherwise the binary files are corrupted
+               #This happens if the base64 has some 'trash' before and after the string. Better to use close() to be certain
                rename(fout.name,fout.name+".base64")
                try:
-                   base64.decode(open(fout.name+".base64"), open(fout.name,"w"))
+                   f1=open(fout.name+".base64","r")
+                   f2=open(fout.name,"w")
+                   base64.decode(f1, f2)
+                   f1.close()
+                   f2.close()
                except:
                    self.onProblem("NoApplicableCode", "Could not convert text input to binary using base64 encoding.")
                finally:  

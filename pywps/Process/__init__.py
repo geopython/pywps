@@ -600,7 +600,9 @@ class WPSProcess:
             raise Exception("Could not perform command [%s]: %s" % (cmd,e))
 
         (stdout, stderr) = p.communicate(stdin)
-
+        self.message(stderr)
+        self.message(stdout)
+        
         retcode = p.wait()
 
         if retcode != 0:
