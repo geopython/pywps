@@ -176,10 +176,10 @@ class Grass:
 
     def setEnv(self,key,value):
         """Set GRASS environmental variables """
-
         origValue = os.getenv(key)
-        if origValue:
-            value  += ":"+origValue
+        #REMOVED: It doesnt seem necessary
+        #if origValue:
+        #    value  += ":"+origValue
         os.putenv(key,value)
         os.environ[key] = value
         return
