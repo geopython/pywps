@@ -379,7 +379,7 @@ class WPSProcess:
 
     def addComplexInput(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=1,maxOccurs=1,
-                formats=[{"mimeType":None}],maxmegabites=5):
+                formats=[{"mimeType":None}],maxmegabites=None):
         """Add complex input to this process
 
         :param identifier: input identifier

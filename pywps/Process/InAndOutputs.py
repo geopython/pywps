@@ -338,17 +338,16 @@ class ComplexInput(Input):
 
     def __init__(self,identifier,title,abstract=None,
                 metadata=[],minOccurs=1,maxOccurs=1,
-                maxmegabites=5,formats=[{"mimeType":None}]):
+                maxmegabites=None,formats=[{"mimeType":None}]):
         """Class constructor"""
 
         Input.__init__(self,identifier,title,abstract=abstract,
                 metadata=[],minOccurs=minOccurs,maxOccurs=maxOccurs,type="ComplexValue")
-        
+        #If maxmegabites not present, then it will be set in  consolidateInputs()
         if maxmegabites:
             self.maxFileSize = float(maxmegabites)*1024*1024
         else:
             self.maxFileSize = None
-
 
         if type(formats) == types.StringType:
             formats = [{"mimeType":formats,"encoding":None,"schema":None}]
@@ -377,10 +376,11 @@ class ComplexInput(Input):
         :param input: parsed input value
         """
         # if HTTP GET was performed, the type does not have to be set
-        if not input.has_key("type") and\
-                (input["value"].find("http://") == 0 or input["value"].find("http%3A%2F%2F") == 0):
-            input["asReference"] = True
-            
+        #if not input.has_key("type") and\
+        #        (input["value"].find("http://") == 0 or input["value"].find("http%3A%2F%2F") == 0):
+        #    input["asReference"] = True
+        if input["value"].find("http://") == 0 or input["value"].find("http%3A") == 0:
+            input["asReference"] = True    
         #self.value = input["value"]
         # download data
         if input.has_key("asReference") and input["asReference"] == True:      
