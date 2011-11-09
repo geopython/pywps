@@ -376,12 +376,10 @@ class ComplexInput(Input):
         :param input: parsed input value
         """
         # if HTTP GET was performed, the type does not have to be set
-        #if not input.has_key("type") and\
-        #        (input["value"].find("http://") == 0 or input["value"].find("http%3A%2F%2F") == 0):
-        #    input["asReference"] = True
-        if input["value"].find("http://") == 0 or input["value"].find("http%3A") == 0:
-            input["asReference"] = True    
-        #self.value = input["value"]
+        if not input.has_key("type") and\
+                (input["value"].find("http://") == 0 or input["value"].find("http%3A%2F%2F") == 0):
+            input["asReference"] = True
+
         # download data
         if input.has_key("asReference") and input["asReference"] == True:      
             self.downloadData(input["value"])
