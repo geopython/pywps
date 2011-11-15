@@ -32,6 +32,7 @@ import pywps.Ftp
 from pywps import config
 from pywps.Wps import Request
 from pywps.Template import TemplateError
+from pywps.Template import TemplateProcessor
 import time,os,sys,tempfile,re,types, ConfigParser, base64, traceback
 from shutil import copyfile as COPY
 from shutil import rmtree as RMTREE
@@ -579,8 +580,7 @@ class Execute(Request):
             if poutput.type == "ComplexValue":
                 #Only None if information is lacking
                 [poutput.format.__setitem__(missing,None) for missing in [item for item in ("mimetype","schema","encoding") if item not in poutput.format.keys()]]
-                poutput.checkMimeTypeIn()
-                
+                poutput.checkMimeTypeIn()         
         
                     
 
@@ -1020,8 +1020,6 @@ class Execute(Request):
         ftp.login(ftplogin, ftppasswd)
         file = open(filePath, "r")
         file2=open(filePath, "r")
-        tmp=file2.read()
-        import pydevd;pydevd.settrace()
         ftp.storbinary("STOR " + fileName, file)
         ftp.quit()
         file.close()
@@ -1051,25 +1049,45 @@ class Execute(Request):
 
             # copy the file to output directory or send it to an ftp server
             # literal value
-        if output.type == "LiteralValue":
-
+        #str: BoundingBoxValue
+        #ATTENTION to the FTP code
+        if output.type == "LiteralValue" or output.type== "BoundingBoxValue":
+                #if BounfingBoxValue we'll apply the Execute_Data_Outputs.tml
+                if output.type=="BoundingBoxValue":
+                    bboxTemplateFileOut = os.path.join(os.path.split(self.templateFile)[0],"inc","Execute_Data_Outputs.tmpl")
+                    bboxTemplateProcessor = TemplateProcessor(bboxTemplateFileOut,compile=True)
+                    #Call private method to generate a proper dictionary
+                    bboxOutput=self._bboxOutput(output,bboxOutput={})
+                    [bboxTemplateProcessor.set(key, value) for (key,value) in bboxOutput.items()]
+                    #No prettyprint to avoid problem with re
+                    bboxXMLOut=bboxTemplateProcessor.__str__().replace("  ","").replace("\n","")
+                    #The template will generete bboxXML wrapped in the data tag
+                    try:
+                        output.value=re.findall(r'<wps:Data>(.*?)</wps:Data>', bboxXMLOut)[0]
+                    except Exception,e:
+                        #log the error and continue as simple string
+                        logging.debug("Problems generating the BBOX XML content asReference")
+                        traceback.print_exc(file=pywps.logFile)
                 if outputType == "ftp":
                     tmp = tempfile.mkstemp(prefix="%s-%s" % (output.identifier,self.pid),text=True)
                     f = open(tmp[1],"w")
                     f.write(str(output.value))
                     f.close()
                     self._storeFileOnFTPServer(tmp[1], os.path.basename(tmp[1]),ftpURL, ftplogin, ftppasswd)
+                    templateOutput["reference"] = escape(tmp[1])
                 else:
                     tmp = tempfile.mkstemp(prefix="%s-%s" % (output.identifier,self.pid),dir=os.path.join(config.getConfigValue("server","outputPath")),text=True)
                     f = open(tmp[1],"w")
                     f.write(str(output.value))
                     f.close()
-                templateOutput["reference"] = escape(tmp[1])
+                    outFile = tmp[1]
+                    outName = os.path.basename(outFile)
+                    templateOutput["reference"] = escape(config.getConfigValue("server","outputUrl")+"/" +outName)
+                
             # complex value
         else:
                 outName = os.path.basename(output.value)
                 outSuffix = os.path.splitext(outName)[1]
-
                 if outputType == "ftp":
                     tmp = tempfile.mkstemp(suffix=outSuffix, prefix="%s-%s" % (output.identifier,self.pid),text=True)
                 else:
@@ -1079,7 +1097,6 @@ class Execute(Request):
 
                 outFile = tmp[1]
                 outName = os.path.basename(outFile)
-
                 if outputType == "ftp":
                     self._storeFileOnFTPServer(os.path.abspath(output.value), outName + outSuffix, ftpURL, ftplogin, ftppasswd)
                 elif not self._samefile(output.value,outFile):
