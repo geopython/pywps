@@ -103,15 +103,12 @@ class Post(Parser):
                 inputXml = file.read()
             # make DOM from XML
             try:
-               
                 self.document = parseString(inputXml)
             except xml.parsers.expat.ExpatError,e:
                 raise pywps.NoApplicableCode(e.message)
         # get first child
         firstChild = self.isSoapFirstChild(self.document)
-        
         # check service name
-        
         self.checkService(firstChild)
 
         # find request type
@@ -235,14 +232,10 @@ class Post(Parser):
         firstChild = self.getFirstChildNode(document)
         
         if Soap.isSoap(firstChild):
-            soapCls = Soap.SOAP(firstChild)
-            
-            firstChild=soapCls.getWPSContent()
-            
-          
             self.isSoap = True
-            
+            soapCls = Soap.SOAP(firstChild)
             self.soapVersion=soapCls.getSOAPVersion()
+            firstChild=soapCls.getWPSContent()
            
             self.isSoapExecute=soapCls.getSoapExecute()
          
