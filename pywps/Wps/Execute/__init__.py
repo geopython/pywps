@@ -31,7 +31,6 @@ import pywps
 import pywps.Ftp
 from pywps import config
 from pywps.Wps import Request
-from pywps.Template import TemplateError
 from pywps.Template import TemplateProcessor
 import time,os,sys,tempfile,re,types, ConfigParser, base64, traceback
 from shutil import copyfile as COPY
