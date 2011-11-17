@@ -35,20 +35,22 @@ class WPSException(Exception):
     code = "NoApplicableCode"
     value = None
     locator = None
+
     def _make_xml(self):
         # formulate XML
         self.document = Document()
-        self.ExceptionReport = self.document.createElementNS("http://www.opengis.net/ows","ows:ExceptionReport")
-        self.ExceptionReport.setAttribute("xmlns:ows","http://www.opengis.net/ows/1.1")
+        self.ExceptionReport = self.document.createElementNS("http://www.opengis.net/ows","ExceptionReport")
+        self.ExceptionReport.setAttribute("xmlns","http://www.opengis.net/ows/1.1")
         self.ExceptionReport.setAttribute("xmlns:xsi","http://www.w3.org/2001/XMLSchema-instance")
         self.ExceptionReport.setAttribute("xsi:schemaLocation","http://www.opengis.net/ows/1.1 http://schemas.opengis.net/ows/1.1.0/owsExceptionReport.xsd")
         self.ExceptionReport.setAttribute("version","1.0.0")
         self.document.appendChild(self.ExceptionReport)
 
         # make exception
-        self.Exception = self.document.createElement("ows:Exception")
+
+        self.Exception = self.document.createElement("Exception")
         self.Exception.setAttribute("exceptionCode",self.code)
-        
+
         if self.locator:
             self.Exception.setAttribute("locator",self.locator)
 
@@ -62,12 +64,12 @@ class WPSException(Exception):
             response = soapCls.getResponse(response)
 
     def __str__(self):
-        
         error = "PyWPS %s: Locator: %s; Value: %s\n" % (self.code, self.locator, self.value)
         try:
             logFile.write(error)
         except:
             sys.stderr.write(error)
+
         return self.document.toprettyxml(indent='\t', newl='\n', encoding="utf-8")
 
 class MissingParameterValue(WPSException):
@@ -93,8 +95,8 @@ class NoApplicableCode(WPSException):
         self._make_xml()
         self.message = value
         if value:
-            self.ExceptionText = self.document.createElement("ows:ExceptionText")
-            self.ExceptionText.appendChild(self.document.createTextNode((repr(value))))
+            self.ExceptionText = self.document.createElement("ExceptionText")
+            self.ExceptionText.appendChild(self.document.createTextNode(repr(value)))
             self.Exception.appendChild(self.ExceptionText)
             self.value = str(escape(value))
 
@@ -105,10 +107,10 @@ class VersionNegotiationFailed(WPSException):
         self.locator = None
         self._make_xml()
         if value:
-            self.ExceptionText = self.document.createElement("ows:ExceptionText")
+            self.ExceptionText = self.document.createElement("ExceptionText")
             self.ExceptionText.appendChild(self.document.createTextNode(value))
             self.Exception.appendChild(self.ExceptionText)
-            self.value = value
+            self.value = str(value)
 
 class NotEnoughStorage(WPSException):
     """NotEnoughStorage WPS Exception"""
@@ -150,7 +152,7 @@ class ServerError(WPSException):
         except:
             self.locator = None
         self._make_xml()
-        self.ExceptionText = self.document.createElement("ows:ExceptionText")
+        self.ExceptionText = self.document.createElement("ExceptionText")
         self.ExceptionText.appendChild(self.document.createTextNode("General server error"))
         self.Exception.appendChild(self.ExceptionText)
 

@@ -35,7 +35,7 @@ class PywspServlet(HttpServlet):
                 pywps.debug(wps.inputs)
                 wpsresponse = wps.performRequest(processes=[self.getProcesses()])
                 if wpsresponse:
-                    pywps.response.response(wps.response, response, wps.parser.isSoap)
+                    pywps.response.response(wps.response, response, wps.parser.isSoap,self.wps.parser.isSoapExecute)
         except WPSException,e:
             pywps.response.response(e, response)
 

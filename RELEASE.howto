@@ -1,40 +1,62 @@
 SOURCE
 ======
-1 - Make new branch
-2 - Edit setup.py
-3 - run setup.py
+1 - Make new branch/tag
 
-cd pywps/
-svn copy trunk branches/pywps-x.x
-svn ci -m"Creating new branch"
+svn copy svn+ssh://$DEVELOPER@svn.wald.intevation.org/pywps/trunk version_name
 
-cd branches/pywps-x.x
+Fix versions in the source
+==========================
+cd version_name
+edit setup.py <- fix version
+edit wps.py <- fix version
 
-python setup.py sdist --manifest-only
-python setup.py sdist
+svn ci -m"Releasing new version of PyWPS: X.Y.X" .
 
-DEBIAN PACKAGE
-==============
-1 - Edit debian/control - fix new dependences
-2 - Edit debian/changelog
-3 - generate debian package
+Make the package
+================
+cd /tmp
+svn export svn copy svn+ssh://$DEVELOPER@svn.wald.intevation.org/pywps/branches/branch
 
-dpkg-buildpackage -r fakeroot
+tar czf branch.tgz branch
 
-RPM PACKAGE
-===========
+Upload file to file repository
+==============================
 
-python setup.py bdist_rpm
+http://wald.intevation.org/frs/?group_id=22
 
 WEB PAGES
 =========
-1 - get them
-2 - modify
-3 - upload them to the server
+1 - source/index.rst <- new version
+2 - source/download/index.rst
 
-svn co svn checkout https://svn.wald.intevation.org/svn/pywps/branches/web
-pywps_web
-cd pywps_web
-$EDITOR index.psp
-rsync . $USER@wald.intevation.org:/pywps/htdocs/
+Maling List
+===========
 
+PyWPS [VERSION]
+###############
+
+PyWPS Development team announces new stable version of
+PyWPS[1] with number [VERSION]
+
+Features of this version:
+ - [SHOULD COPY THIS FROM Changelog]
+
+For download this version,  please follow the
+link below [2] or download PyWPS from subversion directly [3].
+
+NOTE:  [IF ANY]
+
+What is PyWPS:
+--------------
+PyWPS (Python Web Processing Service) is implementation of Web
+Processing Service standard from Open Geospatial Consortium (OGC(R)). 
+Processes can be written using GRASS GIS, but usage of other programs, like
+R package, GDAL or PROJ tools, is possible as well.
+
+Happy GISing!
+
+PyWPS Development team
+
+[1] http://pywps.wald.intevation.org
+[2] http://wald.intevation.org/frs/download.php/[FIX THE LINK]
+[3] svn checkout https://svn.wald.intevation.org/svn/pywps/tags/pywps-[FIX THE VERSION]

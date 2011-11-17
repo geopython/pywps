@@ -1,11 +1,8 @@
+#!/usr/bin/env python
+
 """
-PyWPS mod_python script
+PyWPS wsgi script
 
-Do not forget to add following configuration to your .htaccess file or
-server configuration file::
-
-    SetEnv PYWPS_PROCESSES /usr/local/wps/processes/
-    SetEnv PYWPS_CFG /usr/local/wps/pywps.cfg
     SetHandler python-program
     PythonHandler wps
     PythonDebug On
@@ -35,49 +32,55 @@ server configuration file::
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-from mod_python import apache
+import sys
+
+sys.path.append("/home/jachym/usr/src/pywps/trunk/")
+
 import pywps
-import pywps.response
 from pywps.Exceptions import *
-import traceback
-import os
 
-#from pywps.Exceptions import *
+def dispatchWps(environ, start_response):
 
-def handler(req):
+    status = '200 OK'
+    response_headers = [('Content-type','text/xml')]
+    start_response(status, response_headers)
 
     inputQuery = None
-    if req.method == "GET":
-        inputQuery = req.args
-    else:
-        inputQuery = req
+    if "REQUEST_METHOD" in environ and environ["REQUEST_METHOD"] == "GET":
+        inputQuery = environ["QUERY_STRING"]
+    elif "wsgi.input" in environ:
+        inputQuery = environ['wsgi.input']
 
     if not inputQuery:
         err =  NoApplicableCode("No query string found.")
-        pywps.response.response(err,req)
-        return apache.OK
+        return [err.getResponse()]
 
-    # set PYWPS_CFG and PYWPS_PROCESSES environment variable, which can not
-    # bee seen from mod_python
-    env_vars = req.subprocess_env.copy()
-    if env_vars.has_key("PYWPS_CFG"):
-        os.environ["PYWPS_CFG"] = env_vars["PYWPS_CFG"]
-    if env_vars.has_key("PYWPS_PROCESSES"):
-        os.environ["PYWPS_PROCESSES"] = env_vars["PYWPS_PROCESSES"]
 
     # create the WPS object
     try:
-        wps = pywps.Pywps(req.method)
+        wps = pywps.Pywps(environ["REQUEST_METHOD"])
         if wps.parseRequest(inputQuery):
             pywps.debug(wps.inputs)
             wps.performRequest()
-            pywps.response.response(wps.response, req,
-                    wps.parser.isSoap, self.wps.parser.isSoapExecute,contentType = wps.request.contentType)
-            return apache.OK
+            return wps.response
     except WPSException,e:
-        pywps.response.response(e, req) 
-        return apache.OK
+        return [e]
     except Exception, e:
-        req.content_type = "text/plain"
-        traceback.print_exc(file = req)
-        return apache.OK
+        return [e]
+
+
+if __name__ == '__main__':
+
+    import os
+
+    # import processes from the tests directory
+    os.environ["PYWPS_PROCESSES"] =  os.path.join(
+            os.path.split(
+                os.path.dirname(
+                    pywps.__file__
+            )
+        )[0],"tests","processes")
+
+    from wsgiref.simple_server import make_server
+    srv = make_server('localhost', 8081, dispatchWps)
+    srv.serve_forever()

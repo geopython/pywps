@@ -52,7 +52,7 @@ def loadConfiguration(cfgfiles=None):
 
     config = ConfigParser.ConfigParser()
     config.read(cfgfiles)
-
+   
 def _getDefaultConfigFilesLocation():
     """Get the locations of the standard configuration files. This are
 

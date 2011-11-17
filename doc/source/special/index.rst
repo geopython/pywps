@@ -8,6 +8,7 @@ How to use PyWPS with other packages and projects
    grass
    mapserver
    mod_python
+   wsgi
    java
    gdal
    proj

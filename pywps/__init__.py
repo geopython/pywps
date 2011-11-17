@@ -93,7 +93,7 @@ import Exceptions
 import Wps
 from Exceptions import *
 
-import sys, os, urllib, re, traceback, types, logging
+import logging, uuid
 
 # global variables
 METHOD_GET="GET"
@@ -169,13 +169,15 @@ class Pywps:
 
     languages = [DEFAULT_LANG]
     versions=[DEFAULT_VERSION]
+    UUID = None
 
     def __init__(self, method=METHOD_GET, configFiles=None):
         """Class constructor
         """
 
         # get settings
-        self._setLogFile()
+        self.setLogFile()
+        self.UUID = uuid.uuid1().__str__()
 
         self.languages = config.getConfigValue("wps","lang").split(",")
         DEFAULT_LANG = self.languages[0]
@@ -205,11 +207,9 @@ class Pywps:
             self.parser = Get(self)
         else:
             from pywps.Parser.Post import Post
-            self.parser = Post(self)
-            
+            self.parser = Post(self)      
 
         self.inputs = self.parser.parse(queryStringObject)
-        
         return self.inputs
 
     def performRequest(self,inputs = None, processes=None):
@@ -230,8 +230,7 @@ class Pywps:
                 self.request = GetCapabilities(self,processes=processes)
             elif inputs["request"]  == "describeprocess":
                 from pywps.Wps.DescribeProcess import DescribeProcess
-                self.request = DescribeProcess(self,processes=processes)
-               
+                self.request = DescribeProcess(self,processes=processes)              
             elif inputs["request"]  == "execute":
                 from pywps.Wps.Execute import Execute
                 self.request = Execute(self,processes=processes)
@@ -242,11 +241,10 @@ class Pywps:
         else:
             raise Exceptions.InvalidParameterValue(
                     "request: "+inputs["request"])
-
         self.response = self.request.response
         return self.response
 
-    def _setLogFile(self):
+    def setLogFile(self):
         """Set :data:`logFile`. Default is sys.stderr
         """
         global logFile

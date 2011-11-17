@@ -11,13 +11,12 @@ future
 import types
 from sys import stdout as STDOUT
 from sys import stderr as STDERR
-import re
+import re, logging, cStringIO
 from pywps import Exceptions
 from os import name as OSNAME
 from pywps import Soap 
 import pywps.Ftp
-import logging
-import cStringIO
+
 
 
 def response(response,targets,soapVersion=None,isSoap=False,isSoapExecute=False,contentType="application/xml",isPromoteStatus=False):
@@ -32,6 +31,8 @@ def response(response,targets,soapVersion=None,isSoap=False,isSoapExecute=False,
     :param response: the response object 
     :type response: file or string
     """
+
+
     # convert single file to array
     if type(targets) != type([]):
         targets = [targets]
@@ -43,7 +44,7 @@ def response(response,targets,soapVersion=None,isSoap=False,isSoapExecute=False,
         response = response.__str__()
 
 
-   
+
     # for each file in file descriptor
     for f in targets:
 
@@ -51,7 +52,7 @@ def response(response,targets,soapVersion=None,isSoap=False,isSoapExecute=False,
         # mod_python here
         if repr(type(f)) == "<type 'mp_request'>":
             _printResponseModPython(f,response,contentType)
-            
+
         # file object (output, or sys.stdout)
         elif types.FileType == type(f):
             _printResponseFile(f,response,contentType)
@@ -81,14 +82,13 @@ def _printResponseModPython(request, response, contentType="application/xml"):
         request.write(response)
 
 def _printResponseFile(fileOut, response, contentType="application/xml"):
-    
+
     if fileOut == STDOUT and contentType:
         print "Content-Type: %s\n" % contentType
     elif fileOut.closed:
         fileOut = open(fileOut.name,"w")
 
     if type(response) == types.FileType:
-        
         fileOut.write(response.read())
     else:
         fileOut.write(response)
