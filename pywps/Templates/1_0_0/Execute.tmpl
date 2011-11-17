@@ -50,14 +50,12 @@
             <ows:Identifier><TMPL_VAR identifier></ows:Identifier>
             <ows:Title><TMPL_VAR title></ows:Title>
             <TMPL_IF abstract>
-            <ows:Abstract>
-                <TMPL_VAR abstract>
-            </ows:Abstract>
+            <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
             </TMPL_IF>
             <TMPL_IF reference>
-            <wps:Reference xlink:href="<TMPL_VAR reference>" method="<TMPL_VAR method>" mimeType="<TMPL_VAR mimetype>" encoding="<TMPL_VAR encoding>" schema="<TMPL_VAR schema>"/>
+            <wps:Reference xlink:href="<TMPL_VAR reference>"<TMPL_IF method> method="<TMPL_VAR method>"</TMPL_IF><TMPL_IF mimetype> mimeType="<TMPL_VAR mimetype>"</TMPL_IF><TMPL_IF encoding> encoding="<TMPL_VAR encoding>"</TMPL_IF><TMPL_IF encoding> schema="<TMPL_VAR encoding>"</TMPL_IF encoding>/>
                 <TMPL_IF header>
-                <wps:Header key="<TMPL_VAR key>" value="<TMPL_VAR value>" />
+                <wps:Header<TMPL_IF key> key="<TMPL_VAR key>"</TMPL_IF><TMPL_IF value> value="<TMPL_VAR value>"</TMPL_IF>/>
                 </TMPL_IF>
                 <TMPL_IF body>
                 <wps:Body>
@@ -76,11 +74,11 @@
     <wps:OutputDefinitions>
     <TMPL_LOOP Outputdefinitions>
         <TMPL_IF complexdata>
-        <wps:Output mimeType="<TMPL_VAR mimetype>" encoding="<TMPL_VAR encoding>" schema="<TMPL_VAR schema>" asReference="<TMPL_VAR asreference>">
+        <wps:Output<TMPL_IF mimetype> mimeType="<TMPL_VAR mimetype>"</TMPL_IF><TMPL_IF encoding> encoding="<TMPL_VAR encoding>"</TMPL_IF><TMPL_IF schema> schema="<TMPL_VAR schema>"</TMPL_IF><TMPL_IF asreference> asReference="<TMPL_VAR asreference>"</TMPL_IF>>
         </TMPL_IF>
         <TMPL_IF literaldata>
         <TMPL_IF uom>
-        <wps:Output <TMPL_VAR uom>>
+        <wps:Output uom="<TMPL_VAR uom>">
         <TMPL_ELSE>
         <wps:Output>
         </TMPL_IF>
@@ -107,7 +105,7 @@
             <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
             </TMPL_IF>
             <TMPL_IF reference>
-            <wps:Reference href="<TMPL_VAR reference>" mimeType="<TMPL_VAR mimetype>" encoding="<TMPL_VAR encoding>" schema="<TMPL_VAR schema>"/>
+            <wps:Reference<TMPL_IF reference> href="<TMPL_VAR reference>"</TMPL_IF><TMPL_IF mimetype> mimeType="<TMPL_VAR mimetype>"</TMPL_IF><TMPL_IF encoding> encoding="<TMPL_VAR encoding>"</TMPL_IF><TMPL_IF schema> schema="<TMPL_VAR schema>"</TMPL_IF> />
             <TMPL_ELSE>
                 <TMPL_INCLUDE Execute_Data_Outputs.tmpl>
             </TMPL_IF>

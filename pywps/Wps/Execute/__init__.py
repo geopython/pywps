@@ -787,7 +787,7 @@ class Execute(Request):
         """ Fill input of literal data, boolean value will be cast to str
         """
         literalInput["literaldata"] = str(wpsInput["value"])
-        literalInput["uom"] = str(input.uom)
+        literalInput["uom"] = input.uom
         return literalInput
 
     def _lineageComplexInput(self, wpsInput,complexInput):
@@ -905,7 +905,7 @@ class Execute(Request):
         try:#Sometimes the responsedocument maybe empty, if so the  code will use outputsRequested=self.process.outputs.keys()
             for output in self.wps.inputs["responseform"]["responsedocument"]["outputs"]:
                 outputsRequested.append(output["identifier"])
-        except:
+        except Exception, e:
             pass
          
         #If no ouputs request is present then dump everything: Table 39 WPS 1.0.0 document    
@@ -958,7 +958,7 @@ class Execute(Request):
 
     def _literalOutput(self, output, literalOutput):
 
-        literalOutput["uom"] = str(output.uom)
+        literalOutput["uom"] = output.uom
         literalOutput["dataType"]= self.getDataTypeReference(output)["type"]
         literalOutput["literaldata"] = str(output.value)
 
@@ -1121,6 +1121,7 @@ class Execute(Request):
                 templateOutput["schema"] = output.format["schema"]
                 templateOutput["encoding"]=output.format["encoding"]
       
+
         return templateOutput
 
     def _samefile(self, src, dst):
