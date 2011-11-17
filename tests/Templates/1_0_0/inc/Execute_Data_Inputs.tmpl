@@ -1,11 +1,11 @@
             <wps:Data>
                 <TMPL_IF complexdata>
-                <wps:ComplexData mimeType="<TMPL_VAR mimetype>" schema="<TMPL_VAR schema>" encoding="<TMPL_VAR encoding>">
-                    <TMPL_VAR complexdata> 
+                <wps:ComplexData<TMPL_IF mimetype> mimeType="<TMPL_VAR mimetype>"</TMPL_IF><TMPL_IF schema> schema="<TMPL_VAR schema>"</TMPL_IF><TMPL_IF encoding> encoding="<TMPL_VAR encoding>"</TMPL_IF>>
+                <TMPL_VAR complexdata> 
                 </wps:ComplexData>
                 </TMPL_IF>
                 <TMPL_IF literaldata>
-                    <wps:LiteralData dataType="<TMPL_VAR type>" uom="<TMPL_VAR uom>"><TMPL_VAR literaldata></wps:LiteralData>
+                    <wps:LiteralData<TMPL_IF dataType> dataType="<TMPL_VAR type>"</TMPL_IF><TMPL_IF uom> uom="<TMPL_VAR uom>"</TMPL_IF>><TMPL_VAR literaldata></wps:LiteralData>
                 </TMPL_IF>
                 <TMPL_IF bboxdata>
                     <wps:BoundingBoxData crs="<TMPL_VAR crs>" dimensions="<TMPL_VAR dimensions>">
