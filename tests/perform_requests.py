@@ -369,7 +369,6 @@ class RequestGetTestCase(unittest.TestCase):
         postpywps.performRequest()
         #The response linage contains URLs with & that will crash the DOM parser
         xmldom = minidom.parseString(postpywps.response.replace("&","%26"))
-        
         #1 OutputDefintions only and that is rasterout
         outputDefNodes=xmldom.getElementsByTagNameNS(self.wpsns,"OutputDefinitions")
         self.assertEquals(len(outputDefNodes),1)
@@ -438,7 +437,37 @@ class RequestGetTestCase(unittest.TestCase):
         self.assertEquals(len(dimSet.difference(lowerSet)),0) #0
         self.assertEquals(len(dimSet.difference(upperSet)),0) #0
     
- 
+    def test17LiteralBBOXasReference(self):
+        """BBOX and Literal as ReferenceOutput"""
+        self._setFromEnv()
+        #Testing BBOX as reference
+        getpywps=pywps.Pywps(pywps.METHOD_GET)
+        getinputs = getpywps.parseRequest("service=wps&version=1.0.0&request=Execute&identifier=bboxprocess&datainputs=[bboxin=12,45,56,67]&responsedocument=bboxout=@asReference=true")
+        getpywps.performRequest(getinputs)
+        xmldom = minidom.parseString(getpywps.response)
+        self.assertTrue(len(xmldom.getElementsByTagNameNS(self.wpsns,"Reference"))>0)
+        #Testing 2 string output
+        getinputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=literalprocess&datainputs=[int=1;string=spam%40foo.com;float=1.1;zeroset=0.0;bool=False]&responsedocument=bool=@asReference=True;string=@asReference=True")
+        getpywps.performRequest(getinputs)
+
+        xmldom = minidom.parseString(getpywps.response)
+        self.assertTrue(len(xmldom.getElementsByTagNameNS(self.wpsns,"Reference"))==2)
+    
+    def test18ReferenceAsDefault(self):
+        """asReference output as default and user overwrite"""
+        self._setFromEnv()
+        getpywps=pywps.Pywps(pywps.METHOD_GET)
+        getinputs = getpywps.parseRequest("service=wps&version=1.0.0&request=Execute&identifier=referencedefault")
+        getpywps.performRequest(getinputs)
+        xmldom = minidom.parseString(getpywps.response)
+        self.assertTrue(len(xmldom.getElementsByTagNameNS(self.wpsns,"Reference"))==3)
+
+        #Testing overwrite by responsedocument
+        getinputs = getpywps.parseRequest("service=wps&version=1.0.0&request=Execute&identifier=referencedefault&responsedocument=vectorout=@asReference=False;string=@asReference=False;bboxout=@asReference=False")
+        getpywps.performRequest(getinputs)
+        xmldom = minidom.parseString(getpywps.response)
+        self.assertTrue(len(xmldom.getElementsByTagNameNS(self.wpsns,"Reference"))==0)
+
     def _setFromEnv(self):
         os.putenv("PYWPS_PROCESSES", os.path.join(pywpsPath,"tests","processes"))
         os.environ["PYWPS_PROCESSES"] = os.path.join(pywpsPath,"tests","processes")

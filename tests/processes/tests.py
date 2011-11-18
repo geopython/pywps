@@ -150,7 +150,7 @@ class BBoxProcess(WPSProcess):
     """This process defines bounding box in- and outputs"""
 
     def __init__(self):
-        WPSProcess.__init__(self, identifier = "bboxprocess",title="BBox process")
+        WPSProcess.__init__(self, identifier = "bboxprocess",title="BBox process",storeSupported=True, statusSupported=True)
 
         self.bboxin = self.addBBoxInput(identifier="bboxin",title="BBox in")
         self.bboxout = self.addBBoxOutput(identifier="bboxout",title="BBox out")
@@ -199,3 +199,18 @@ class LineageReturn(WPSProcess):
          self.bboxin = self.addBBoxInput(identifier="bboxin",title="BBox in")
     def execute(self):
         pass
+
+class ReferenceDefaultReturn(WPSProcess):
+    """Returns contents as Reference if not indicated by user"""
+    def __init__(self):
+        WPSProcess.__init__(self, identifier="referencedefault",title="Returns ouputs as references, unless defined by the user in the request",storeSupported=True, statusSupported=True)
+        self.vectorOut = self.addComplexOutput(identifier="vectorout",title="Vector file",formats = [{"mimeType":"text/xml"}],asReference=True)
+        self.stringOut = self.addLiteralOutput(identifier="string",title="String data out",type = type(""),asReference=True)
+        self.bboxOut = self.addBBoxOutput(identifier="bboxout",title="BBox out",asReference=True)
+        
+    def execute(self):
+        import StringIO
+        self.vectorOut.setValue(StringIO.StringIO("<foo><bacon/></foo>"))
+        self.stringOut.setValue("stringTest")
+        self.bboxOut.setValue([[-11,-12],[13,14]])
+        
