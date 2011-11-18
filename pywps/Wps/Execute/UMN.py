@@ -1,5 +1,5 @@
-# Author:    Jachym Cepicky
-#            http://les-ejk.cz
+# Author:	Jachym Cepicky
+#        	http://les-ejk.cz
 #               jachym at les-ejk dot cz
 # License:
 #
@@ -113,7 +113,10 @@ class UMN:
         self.mapObj.setMetaData("ows_contactorganization", config.getConfigValue("provider","providerName"))
         self.mapObj.setMetaData("ows_contactperson", config.getConfigValue("provider","individualName"))
         self.mapObj.setMetaData("ows_contactposition", config.getConfigValue("provider","positionName"))
-        self.mapObj.debug = MS_ON
+        self.mapObj.setMetaData("ows_enable_request", "*")
+        self.mapObj.debug = 5
+        self.mapObj.setConfigOption("MS_ERRORFILE", "stderr")
+        
         phone =  config.getConfigValue("provider","phoneVoice")
         if phone:
             self.mapObj.setMetaData("ows_contactvoicetelephone", config.getConfigValue("provider","phoneVoice"))
@@ -178,10 +181,12 @@ class UMN:
             feature = layer.GetNextFeature()
             geometry = feature.GetGeometryRef()
 
+            myLayerObj.data = layer.GetName()
+
             if geometry.GetGeometryName().lower() == "point":
                 myLayerObj.type = MS_LAYER_POINT
                 myStyleObj.color.setRGB(0,0,0)
-            elif geometry.GetGeometryName().lower() == "line":
+            elif geometry.GetGeometryName().lower() in ["line","linestring"]:
                 myLayerObj.type = MS_LAYER_LINE
                 myStyleObj.color.setRGB(0,0,0)
             elif geometry.GetGeometryName().lower() == "polygon":

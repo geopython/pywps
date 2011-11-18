@@ -27,20 +27,26 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+# set the sys.path to pywps
+import sys,os
+sys.path.append(
+    os.path.join(
+        os.path.dirname( os.path.abspath(__file__)) ,"..","..","..")
+    )
+
 import pywps
 import pywps.Ftp
 from pywps import config
 from pywps.Wps import Request
 from pywps.Template import TemplateProcessor
-import time,os,sys,tempfile,re,types, ConfigParser, base64, traceback
+import time,tempfile,re,types, base64, traceback,string
 from shutil import copyfile as COPY
 from shutil import rmtree as RMTREE
 import logging
 import UMN
-import string
+import pickle, subprocess
 
 from xml.sax.saxutils import escape
-
 
 TEMPDIRPREFIX="pywps-instance"
 
@@ -160,6 +166,11 @@ class Execute(Request):
         
         UMN MapServer - mapscript handler
 
+    .. attribute :: spawned
+
+        Indicates, wheather this is running as child process of the main
+        process
+
     """
 
     # status variants
@@ -192,6 +203,8 @@ class Execute(Request):
     locator = 0
     statusTime = None
 
+    __pickleFileName = "state"
+
     # directories, which should be removed
     dirsToBeRemoved = []
 
@@ -205,7 +218,7 @@ class Execute(Request):
 
  
 
-    def __init__(self,wps, processes=None):
+    def __init__(self,wps, processes=None, spawned=False):
 
         Request.__init__(self,wps,processes)
 
@@ -216,10 +229,9 @@ class Execute(Request):
         self.statusTime = time.localtime()
         self.pid = os.getpid()
         self.status = None
-        self.id = self.makeSessionId()
-        self.outputFileName = os.path.join(config.getConfigValue("server","outputPath"),self.id+".xml")
-        self.statusLocation = config.getConfigValue("server","outputUrl")+"/"+self.id+".xml"
-
+        self.spawned = spawned
+        self.outputFileName = os.path.join(config.getConfigValue("server","outputPath"),self.getSessionId()+".xml")
+        self.statusLocation = config.getConfigValue("server","outputUrl")+"/"+self.getSessionId()+".xml"
 
         # rawDataOutput
         if len(self.wps.inputs["responseform"]["rawdataoutput"])>0:
@@ -308,13 +320,14 @@ class Execute(Request):
        #check storeExecuteResponse agains asReference=true
         if not self.process.storeSupported and "outputs" in self.wps.inputs["responseform"]["responsedocument"]:
            #check the array for asreference': True
-        
                if len([item for item in  self.wps.inputs["responseform"]["responsedocument"]["outputs"] if ("asreference" in item and item["asreference"]==True) ]):
                    self.cleanEnv()
                    raise pywps.InvalidParameterValue("storeExecuteResponse is false, but output(s) are requested as reference(s)")
-            #No outputs or responsedocument, no problem
            
-         # HEAD
+        
+            
+        # HEAD
+       
         self.templateProcessor.set("encoding",
                                     config.getConfigValue("wps","encoding"))
         self.templateProcessor.set("lang",
@@ -326,6 +339,7 @@ class Execute(Request):
         # Description
         self.processDescription()
 
+
         # Asynchronous request
         # OGC 05-007r7 page 36, Table 50, note (a)
         # OGC 05-007r7 page 42
@@ -334,34 +348,27 @@ class Execute(Request):
             self.promoteStatus(self.accepted,"Process %s accepted" %\
                     self.process.identifier)
 
-            # apache 1.x requires forking for asynchronous requests
-            serverSoft=os.getenv("SERVER_SOFTWARE")
-            forkingRequired=serverSoft and serverSoft.lower().startswith("apache/1.")
+            logging.debug("Store and Status are both set to True, let's be async")
 
-            # FIXME: forking is always required, unless we find some better
-            # solution
-            forkingRequired = True
-            if forkingRequired:
-                try:
-                    # this is the parent process
-                    if os.fork():
-                        # exit here
-                        return
-                    # this is the child process
-                    else:
-                        pass
-                        # continue execution
+            # save the WPS object the the file
+            self.pickleFile = open(os.path.join(self.workingDir, self.__pickleFileName),"w")
+            pickle.dump(wps,self.pickleFile)
+            self.pickleFile.close()
 
-                except OSError, e:
-                    traceback.print_exc(file=pywps.logFile)
-                    raise pywps.NoApplicableCode("Fork failed: %d (%s)\n" % (e.errno, e.strerror) )
+            # spawn this process
+            logging.info("Spawning process to the background")
+            subprocess.Popen([sys.executable,__file__,
+                os.path.join(self.workingDir, self.__pickleFileName)],
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.PIPE
+            )
 
-            # this is child process, parent is already gone away
-            # redirect stdout, so that apache sends back the response immediately
-            si = open(os.devnull, 'r')
-            so = open(os.devnull, 'a+')
-            os.dup2(si.fileno(), sys.stdin.fileno())
-            os.dup2(so.fileno(), sys.stdout.fileno())
+            logging.info("This is parent process, end.")
+
+            # close the outputs ..
+
+            # this is the end of parent process
+            return
 
         # attempt to execute
         try:
@@ -371,7 +378,6 @@ class Execute(Request):
             
             # download and consolidate data
             self.consolidateInputs()
-            
             # set output data attributes defined in the request
             self.consolidateOutputs()
             # Execute
@@ -392,8 +398,10 @@ class Execute(Request):
                     statusMessage=str(e),
                     exceptioncode="NoApplicableCode")
 
+
         # attempt to fill-in lineage and outputs
         try:
+
             # lineage in and outputs
             if lineageRequired:
                 self.templateProcessor.set("lineage",1)
@@ -413,7 +421,6 @@ class Execute(Request):
 
                     # Response document
                     self.response = self.templateProcessor.__str__()
-
                 # if rawDataOutput is required
                 else:
                     self.setRawData()
@@ -443,7 +450,7 @@ class Execute(Request):
             self.response = self.templateProcessor.__str__()
 
         # print status
-        if self.storeRequired and self.statusRequired:
+        if self.storeRequired and (self.statusRequired or self.spawned):
             pywps.response.response(self.response,
                                     self.outputFile,
                                     self.wps.parser.isSoap,
@@ -483,6 +490,7 @@ class Execute(Request):
         """ Donwload and control input data, defined by the client """
         # calculate maximum allowed input size
         maxFileSize = self.calculateMaxInputSize()
+
         # set input values
         for identifier in self.process.inputs:
 
@@ -537,35 +545,36 @@ class Execute(Request):
                 for out in respOutputs:
                     if out["identifier"] == identifier:
                         respOut = out
+                
+                
                 if respOut:
-                    
-                #Note: 
+                    poutputList=dir(poutput)
                     # asReference
                     if respOut.has_key("asreference") and \
-                        "asReference" in dir(poutput):
+                        "asReference" in poutputList:
                         poutput.asReference = respOut["asreference"]
 
                     #jmdj mimetype and not mimeType
                     if respOut.has_key("mimetype") and \
-                        "format" in dir(poutput):
+                        "format" in poutputList:
                         if respOut["mimetype"] != '':
                             poutput.format["mimetype"] = respOut["mimetype"]
 
                     # schema
                     if respOut.has_key("schema") and \
-                        "format" in dir(poutput):
+                        "format" in poutputList:
                         if respOut["schema"] != '':
                             poutput.format["schema"] = respOut["schema"]
                    
                     # encoding
                     if respOut.has_key("encoding") and \
-                        "format" in dir(poutput):
+                        "format" in poutputList:
                         if respOut["encoding"] != '':
                             poutput.format["encoding"] = respOut["encoding"]
                     
                     # uom
                     if respOut.has_key("uom") and \
-                        "uom" in dir(poutput):
+                        "uom" in poutputList:
                         if respOut["uom"] != '':
                             poutput.uom = respOut["uom"]
                      
@@ -579,8 +588,9 @@ class Execute(Request):
             if poutput.type == "ComplexValue":
                 #Only None if information is lacking
                 [poutput.format.__setitem__(missing,None) for missing in [item for item in ("mimetype","schema","encoding") if item not in poutput.format.keys()]]
-                poutput.checkMimeTypeIn()         
-        
+                poutput.checkMimeTypeIn()
+                
+              
                     
 
     def onInputProblem(self,what,why):
@@ -729,12 +739,13 @@ class Execute(Request):
 
         # update response
         self.response = self.templateProcessor.__str__()
-        
+
         # print status
         if self.storeRequired and (self.statusRequired or
                                    self.status == self.accepted or
                                    #self.status == self.succeeded or
-                                   self.status == self.failed):
+                                   self.status == self.failed or
+                                   self.spawned):
             pywps.response.response(self.response,
                                     self.outputFile,
                                     self.wps.parser.soapVersion,
@@ -753,8 +764,8 @@ class Execute(Request):
         """Called, if lineage request was set. Fills the <DataInputs> part of
         output XML document.
         """
-        
         templateInputs = []
+
         for identifier in self.process.inputs.keys():
             input = self.process.inputs[identifier]
             for wpsInput in self.wps.inputs["datainputs"]:
@@ -876,7 +887,7 @@ class Execute(Request):
     def _lineageLiteralOutput(self, output, literalOutput):
         
         if len(output.uoms):
-                literalOutput["uom"] = str(output.uoms[0])
+                literalOutput["uom"] = output.uoms[0]
         return literalOutput
 
     def _lineageComplexOutput(self, output, complexOutput):
@@ -905,9 +916,10 @@ class Execute(Request):
         try:#Sometimes the responsedocument maybe empty, if so the  code will use outputsRequested=self.process.outputs.keys()
             for output in self.wps.inputs["responseform"]["responsedocument"]["outputs"]:
                 outputsRequested.append(output["identifier"])
-        except Exception, e:
+        except Exception,e:
             pass
          
+
         #If no ouputs request is present then dump everything: Table 39 WPS 1.0.0 document    
         if outputsRequested==[]:
             outputsRequested=self.process.outputs.keys()
@@ -923,15 +935,17 @@ class Execute(Request):
         templateOutputs = []
         outputsRequested=self.getRequestedOutputs()
         
-       
+        
         for identifier in outputsRequested:
         #for identifier in self.process.outputs.keys():
             try:
                 templateOutput = {}
                 output = self.process.outputs[identifier]
+
                 templateOutput["identifier"] = output.identifier
                 templateOutput["title"] = self.process.i18n(output.title)
                 templateOutput["abstract"] = self.process.i18n(output.abstract)
+
 
                 # Reference
                 if output.asReference:
@@ -972,7 +986,7 @@ class Execute(Request):
         complexOutput["mimetype"] = output.format["mimetype"]
         complexOutput["encoding"] = output.format["encoding"]
         complexOutput["schema"] = output.format["schema"]
-        
+       
         if output.format["mimetype"] is not None:
         # CDATA section in output
             #attention to application/xml
@@ -1154,16 +1168,16 @@ class Execute(Request):
         except:
             pass
                     
-    def makeSessionId(self):
+    def getSessionId(self):
         """ Returns unique Execute session ID
 
         :rtype: string
         :return: unique id::
 
-            "pywps-"+str(int(time.time()*100))
+            "pywps-"+uuid.uuid1()
 
         """
-        return "pywps-"+str(int(time.time()*100))
+        return "pywps-"+self.wps.UUID
 
     def getSessionIdFromStatusLocation(self,statusLocation):
         """ Parses the statusLocation, and gets the unique session ID from it
@@ -1316,3 +1330,29 @@ class Execute(Request):
             #check 
             self.contentType = output.format["mimetype"]
             self.response = open(outFile,"rb")
+        
+"""
+Initialize Execute method with existing WPS instance
+
+This basicaly is used for asynchronous WPS executions
+"""
+if __name__ == "__main__":
+
+    # load the pickeled file from the disc
+    if len(sys.argv) and os.path.exists(sys.argv[1]):
+
+        wps = pickle.load(open(sys.argv[1]))
+        wps.setLogFile()
+
+        logging.info("Spawn process started, continuting to execute the process")
+
+        # fix some inputs
+        wps.inputs["responseform"]["responsedocument"]["status"] = False
+            
+        # create Execute instance, that's all
+        if isinstance(wps,pywps.Pywps):
+            try:
+                ex = Execute(wps,spawned = True)
+            except Exception,e:
+                logging.warning(e)
+            # that's all folks

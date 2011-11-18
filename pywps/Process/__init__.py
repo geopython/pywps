@@ -460,7 +460,7 @@ class WPSProcess:
 
     def addComplexOutput(self,identifier,title,abstract=None,
             metadata=[],formats=[{"mimeType":None}],
-            useMapscript=False):
+            useMapscript=False,asReference=False):
         """Add complex output to this process
 
         :param identifier: output identifier
@@ -493,17 +493,18 @@ class WPSProcess:
                         }
                     ]
 
+        :param asReference: output default asReference
         :returns: :class:`pywps.Process.InAndOutputs.ComplexOutput`
         """
 
         self.outputs[identifier] = InAndOutputs.ComplexOutput(identifier=identifier,
                 title=title,abstract=abstract, metadata=metadata,
-                formats=formats,useMapscript = useMapscript)
+                formats=formats,useMapscript = useMapscript,asReference=asReference)
 
         return self.outputs[identifier]
 
     def addLiteralOutput(self, identifier, title, abstract=None,
-            uoms=(), type=types.IntType, default=None):
+            uoms=(), type=types.IntType, default=None,asReference=False):
         """
         Add new output item of type LiteralValue to this process
 
@@ -514,16 +515,17 @@ class WPSProcess:
         :param type: :class:`types.TypeType` value type, e.g. Integer, String, etc. you
                     can uses the :mod:`types` module of python.
         :param default: default value, if any
+        :param asReference: output default asReference
         :returns: :class:`pywps.Process.InAndOutputs.LiteralOutput`
         """
 
         self.outputs[identifier] = InAndOutputs.LiteralOutput(identifier=identifier,
-                title=title, abstract=abstract, dataType=type, uoms=uoms)
+                title=title, abstract=abstract, dataType=type, uoms=uoms,asReference=asReference)
 
         return self.outputs[identifier]
 
     def addBBoxOutput(self, identifier, title, abstract=None,
-            crs="EPSG:4326", dimensions=2):
+            crs="EPSG:4326", dimensions=2,asReference=False):
         """Add new output item of type BoundingBoxValue to this process
 
         :param identifier: input identifier
@@ -531,11 +533,12 @@ class WPSProcess:
         :param abstract: input description.
         :param crss: List of strings supported coordinate systems.
         :param dimensions: number of dimensions
+        :param asReference: output default asReference
         :returns: :class:`pywps.Process.InAndOutputs.BoundingBoxOutput`
         """
 
         self.outputs[identifier] = InAndOutputs.BoundingBoxOutput(identifier=identifier,
-                title=title, abstract=abstract, crss=[crs], dimensions=dimensions)
+                title=title, abstract=abstract, crss=[crs], dimensions=dimensions,asReference=asReference)
 
         return self.outputs[identifier]
 

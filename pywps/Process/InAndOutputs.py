@@ -26,6 +26,10 @@ import magic
 from pywps import Exceptions
 import sys
 
+try:
+    import magic
+except:
+    logging.debug("Could not import magic module")
 
 class Input:
     """Class WPS Input
@@ -349,6 +353,7 @@ class ComplexInput(Input):
         else:
             self.maxFileSize = None
 
+
         if type(formats) == types.StringType:
             formats = [{"mimeType":formats,"encoding":None,"schema":None}]
         elif type(formats) == types.DictType:
@@ -381,6 +386,7 @@ class ComplexInput(Input):
             input["asReference"] = True
 
         # download data
+        
         if input.has_key("asReference") and input["asReference"] == True:      
             self.downloadData(input["value"])
         else:
@@ -393,7 +399,6 @@ class ComplexInput(Input):
         There is the need a mimeType implementation from downloaded objects"""
          # if HTTP GET was performed, the type does not have to be set
         #copy from setvalue
-        
         if not input.has_key("type") or (input["value"].find("http://") == 0 or input["value"].find("http%3A%2F%2F") == 0):
             #jmd this needs to be changed, the self.format sould be set from the download stream
             #For now 
@@ -401,8 +406,7 @@ class ComplexInput(Input):
             self.format["schema"]=None
             self.format["encoding"]=None
         else:
-            try:
-                
+            try:     
                 self.format["mimetype"]=input["mimetype"]
                 self.format["schema"]=input["schema"]
                 self.format["encoding"]=input["encoding"]
@@ -425,7 +429,6 @@ class ComplexInput(Input):
 
         outputName = tempfile.mktemp(prefix="pywpsInput",dir=curdir)
         fout = None
-        
         try:
             fout=open(outputName,'wb')
         except IOError, what:
@@ -434,7 +437,9 @@ class ComplexInput(Input):
         # while getting the input XML file
         fout.write(data)
         fout.close()
+        
         self.checkMimeTypeIn(fout.name)
+        
         #self.format already set
         if  (self.format["mimetype"].lower().split("/")[0] != "text" and self.format["mimetype"].lower() != "application/xml"): 
                # convert it to binary using base64
@@ -451,8 +456,6 @@ class ComplexInput(Input):
                    self.onProblem("NoApplicableCode", "Could not convert text input to binary using base64 encoding.")
                finally:  
                     os.remove(fout.name+".base64")
-        
-        
         #Checking what is actu
         try:
             mimeTypeMagic=self.ms.file(fileName).split(';')[0]
@@ -554,11 +557,10 @@ class ComplexInput(Input):
         :param mimeType:
         """
          
-        
+      
          #Note: magic output something like: 'image/tiff; charset=binary' we only need the typeContent 
         if (self.format["mimetype"] is None) or (self.format["mimetype"]==""): 
             #No mimeType let's set it from default
-          
             logging.debug("Missing ComplexDataInput mimeType in: %s, adopting default mimeType (first in formats list)" % self.identifier)
             self.format["mimetype"]=self.formats[0]["mimeType"]
             #wps-grass bridge, default schema and encoding
@@ -575,7 +577,7 @@ class ComplexInput(Input):
             #if self.format["mimetype"]!=mimeTypeMagic:
             #    logging.debug("ComplexDataInput defines mimeType %s (default set) but libMagic detects %s" % (str(self.format["mimetype"]),mimeTypeMagic))            
         else:
-            #Checking is mimeType is in the acceptable formats   
+            #Checking is mimeType is in the acceptable formats        
             if self.format["mimetype"] not in [dic["mimeType"] for dic in self.formats]:
                 #ATTENTION: False positive if dictionary is not set in process/empty 
                 if (len(self.formats)==1) and (type(self.formats[0]["mimeType"])==types.NoneType):
@@ -694,7 +696,8 @@ class BoundingBoxInput(Input):
 
         # set dimensions
         if input.has_key("crs"):
-            value.crs = input["crs"]  
+            value.crs = input["crs"]
+            
         # set dimensions
         if input.has_key("dimensions"):
             value.dimensions = int(input["dimensions"])
@@ -814,7 +817,7 @@ class LiteralOutput(Output):
 
     def __init__(self,identifier,title,abstract=None,
                 metadata=[], uoms=(), dataType = types.StringType, 
-                default=None, asReference=False):
+                default=None,asReference=False):
         """Class Constructor"""
         Output.__init__(self,identifier,title,abstract=abstract,
                 metadata=[],type="LiteralValue",asReference=asReference)
@@ -978,7 +981,6 @@ class ComplexOutput(Output):
         else:
             raise Exception("Output type '%s' of '%s' output not known, not FileName, File or (c)StringIO object" %\
                     (type(value),self.identifier))
-    
     
     
     def checkMimeTypeIn(self):
