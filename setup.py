@@ -101,11 +101,13 @@ if not dryRun and install and not os.environ.has_key("FAKEROOTKEY"):
     # compiling before installing is necessary, because the apache
     # webserver has not the permission to create new files in the 
     # python site-packages directory
-    from pywps.Template import TemplateProcessor
 
+    #prevent loading from current path
+    sys.path=sys.path[1:]
+    from pywps.Template import TemplateProcessor
+    import pywps
+    baseDir=os.path.join(pywps.__path__[0],"Templates")
     # make sure, we will not import pywps from  local directory
-    baseDir = os.path.join(dist.command_obj["install_egg_info"].install_dir,
-            name,"Templates")
 
     versionDirs = ['1_0_0']
 
