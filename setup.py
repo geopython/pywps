@@ -32,7 +32,7 @@ classifiers=[
 
 #from distutils.core import setup
 from setuptools import setup
-import sys,os
+import sys,os,traceback
 
 doclines = __doc__.split("\n")
 
@@ -56,7 +56,6 @@ dist =  setup(
             'pywps',
             'pywps.Wps',
             'pywps.Wps.Execute',
-            'pywps.XSLT',
             'pywps.etc',
             'pywps.Parser',
             'pywps.Process',
@@ -68,7 +67,6 @@ dist =  setup(
                     'pywps':"pywps",
                     'pywps.Wps':'pywps/Wps',
                     'pywps.Wps.Execute':'pywps/Wps/Execute',
-                    'pywps.XSLT':'pywps/XSLT',
                     'pywps.Parser':'pywps/Parser',
                     'pywps.Process':'pywps/Process',
                     'pywps.Templates':'pywps/Templates',
@@ -78,7 +76,6 @@ dist =  setup(
         package_data={
                     'pywps':
                     ['Templates/1_0_0/*.tmpl',
-                     'XSLT/*.xsl',
                      'processes/*.py-dist','processes/README',
                      'default.cfg'],
                     'pywps.Templates.1_0_0': ['inc/*.tmpl']
@@ -102,25 +99,32 @@ if not dryRun and install and not os.environ.has_key("FAKEROOTKEY"):
     # webserver has not the permission to create new files in the 
     # python site-packages directory
 
+    #setup.py can't load pywps automatically, the egg path needs to be added to 
+    #python path
+
     #prevent loading from current path
     sys.path=sys.path[1:]
-    from pywps.Template import TemplateProcessor
-    import pywps
-    baseDir=os.path.join(pywps.__path__[0],"Templates")
-    # make sure, we will not import pywps from  local directory
 
-    versionDirs = ['1_0_0']
+    eggPath=os.path.join(dist.command_obj['install'].install_lib,os.path.basename(dist.command_obj['bdist_egg'].egg_output))
+    sys.path.append(eggPath)
+    baseDir=os.path.join(eggPath,"pywps","Templates")
+    try:
+        from pywps.Template import TemplateProcessor
+        versionDirs = ['1_0_0']
 
-    template_files = ['GetCapabilities', 'DescribeProcess','Execute']
+        template_files = ['GetCapabilities', 'DescribeProcess','Execute']
 
-    for version in versionDirs:
-        for template_file in template_files:
-            print "Compiling template "+template_file+" in "+baseDir
-            template_file = os.path.join(baseDir,version,
-                                    template_file + '.tmpl')
-            template = TemplateProcessor(fileName=template_file,compile=True)
+        for version in versionDirs:
+            for template_file in template_files:
+                print "Compiling template "+template_file+" in "+baseDir
+                template_file = os.path.join(baseDir,version,template_file + '.tmpl')
+                print template_file
+                template = TemplateProcessor(fileName=template_file,compile=True)
+    except Exception,e:
+        print "dry-run only, templates are not complied"
+        print "----------------"
+        traceback.print_exc(file=sys.stdout)
+        print "----------------"
+        print "Please run pywps to compile templates"
 else:
     print "dry-run only, templates are not complied"
-
-
-
