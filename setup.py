@@ -48,6 +48,7 @@ dist =  setup(
         license = "http://www.gnu.org/licenses/gpl.html",
         download_url="http://pywps.wald.intevation.org",
         description=doclines[0],
+        zip_safe=False,
         platforms=["any"],
         classifiers= classifiers,
         long_description = "\n".join(doclines[1:]),
