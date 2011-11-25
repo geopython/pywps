@@ -34,6 +34,29 @@ def getConfigValue(*args):
         value = True
     return value
 
+def setConfigValue(*args):
+    """set desired value from  configuration files
+
+    :param section: section in configuration files
+    :type section: string
+    :param option: option in the section
+    :type option: string
+    :param value: option in the section
+    :type value: string
+    :returns: value found in the configuration file
+    :rtype: string
+    """
+    #Note this function is mainly used in the unnitest
+    #RawConfigParser.set(section, option, value)
+    if not config:
+        loadConfiguration()
+
+    value = config.set(*args)
+
+    # Convert Boolean string to real Boolean values
+
+
+
 def loadConfiguration(cfgfiles=None):
     """Load PyWPS configuration from configuration files.
     The later configuration file in the array overwrites configuration
@@ -102,4 +125,5 @@ def _getDefaultConfigFilesLocation():
                 cfgfiles = (os.path.join(pywps.__path__[0],"default.cfg"),
                         os.path.join(pywps.__path__[0],"etc",
                             "pywps.cfg"), "/etc/pywps.cfg")
+
     return cfgfiles
