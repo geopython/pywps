@@ -975,8 +975,8 @@ class ComplexOutput(Output):
             
             stringIOFile=open(stringIOName,"w")
             stringIOFile.write(value.getvalue())
+            stringIOFile.close()
             self.value=stringIOName
-            
         # TODO add more types, like Arrays and lists for example
         else:
             raise Exception("Output type '%s' of '%s' output not known, not FileName, File or (c)StringIO object" %\
