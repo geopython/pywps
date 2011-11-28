@@ -63,8 +63,6 @@ class LiteralProcess(WPSProcess):
         self.floatOut.setValue(self.floatIn.getValue())
         self.boolOut.setValue(self.boolIn.getValue())
 
-   
-
 class ComplexProcess(WPSProcess):
     """This process defines raster and vector data in- and outputs"""
 
