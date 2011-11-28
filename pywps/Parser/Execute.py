@@ -48,7 +48,8 @@ class Post(PostParser):
             self.inputs = initInputs
 
         self.document = document  # input DOM
-        firstChild = self.isSoapFirstChild(self.document)  # no comments or                                          # white spaces
+        firstChild = self.isSoapFirstChild(self.document)  # no comments or
+                                                            # white spaces
 
         self.nameSpace = firstChild.namespaceURI    # document namespace
         self.nameSpace = pywps.WPS_NAMESPACE
@@ -87,10 +88,8 @@ class Post(PostParser):
         # dataInputs
         try:
             inputsNode = firstChild.getElementsByTagNameNS(
-                                            self.nameSpace,"DataInputs")[0]                         
+                                            self.nameSpace,"DataInputs")[0]
             self.inputs["datainputs"] = self.parseDataInputs(inputsNode)
-            
-            
         except IndexError:
             self.inputs["datainputs"] = None
 
@@ -167,7 +166,8 @@ class Post(PostParser):
                                     "Identifier")[0].firstChild.nodeValue
                     outputs.append({"identifier": identifier})
                 except IndexError:
-                    raise pywps.MissingParameterValue("Identifier")
+                    continue
+                    # raise pywps.MissingParameterValue("Identifier")
                 # Abstract, Title are not supported yet
                 # is it necessary ?
 
@@ -191,22 +191,25 @@ class Post(PostParser):
             responseFormNode.getElementsByTagNameNS(self.nameSpace,
                                                     "RawDataOutput")
             form["rawdataoutput"] = {}
+            identifier = None
             try:
                 # identifier
                 identifier = responseFormNode.getElementsByTagNameNS(
                                 self.owsNameSpace,
                                 "Identifier")[0].firstChild.nodeValue
                 form["rawdataoutput"][identifier] = {}
+
+                form["rawdataoutput"][identifier]["mimetype"] = \
+                        responseFormNode.getAttribute("mimeType")
+                form["rawdataoutput"][identifier]["encoding"] = \
+                        responseFormNode.getAttribute("encoding")
+                form["rawdataoutput"][identifier]["schema"] = \
+                        responseFormNode.getAttribute("schema")
+                form["rawdataoutput"][identifier]["uom"] = \
+                        responseFormNode.getAttributeNS(self.nameSpace,"uom")
             except IndexError:
-                raise pywps.MissingParameterValue("Identifier")
-            form["rawdataoutput"][identifier]["mimetype"] = \
-                    responseFormNode.getAttribute("mimeType")
-            form["rawdataoutput"][identifier]["encoding"] = \
-                    responseFormNode.getAttribute("encoding")
-            form["rawdataoutput"][identifier]["schema"] = \
-                    responseFormNode.getAttribute("schema")
-            form["rawdataoutput"][identifier]["uom"] = \
-                    responseFormNode.getAttributeNS(self.nameSpace,"uom")
+                 #raise pywps.MissingParameterValue("Identifier")
+                 pass
         return form
 
     def parseDataInputs(self,inputsNode):
@@ -362,7 +365,6 @@ class Post(PostParser):
         """Parse complex data node"""
 
         attributes = {}
-        #jmdj 24/Jan complexDataNode.nameSpaceURI instead "*"
         attributes["mimetype"] = complexDataNode.getAttribute("mimeType")
         attributes["encoding"] = complexDataNode.getAttribute("encoding")
         attributes["schema"] = complexDataNode.getAttribute("schema")

@@ -3,8 +3,8 @@ Post
 ----
 """
 
-# Author:    Jachym Cepicky
-#            http://les-ejk.cz
+# Author:	Jachym Cepicky
+#        	http://les-ejk.cz
 # Lince:
 #
 # Web Processing Service implementation
@@ -31,11 +31,6 @@ from pywps.Parser import Parser
 from pywps.Process.Lang import Lang
 from pywps import Soap 
 from os import name as OSNAME
-
-import sys
-
-
-import logging #For debuggin
 
 class Post(Parser):
     """Main class for parsing of HTTP POST request types
@@ -101,13 +96,17 @@ class Post(Parser):
                     raise pywps.FileSizeExceeded()
             else:
                 inputXml = file.read()
+
             # make DOM from XML
             try:
                 self.document = parseString(inputXml)
             except xml.parsers.expat.ExpatError,e:
                 raise pywps.NoApplicableCode(e.message)
+        
+
         # get first child
         firstChild = self.isSoapFirstChild(self.document)
+
         # check service name
         self.checkService(firstChild)
 
@@ -116,8 +115,7 @@ class Post(Parser):
 
         # parse the document
         self.inputs = self.requestParser.parse(self.document, self.inputs)
-       
-        
+
         return self.inputs
 
     def checkService(self, node):
@@ -125,7 +123,7 @@ class Post(Parser):
         
         :param node: :class:`xml.dom.Node`, where to search
         """
-       
+
         # service name is mandatory for all requests (OWS_1-1-0 p.14 tab.3 +
         # p.46 tab.26); service must be "WPS" (WPS_1-0-0 p.17 tab.13 + p.32 tab.39)
         if node.hasAttribute("service"):
@@ -182,8 +180,7 @@ class Post(Parser):
             self.inputs["request"] = "execute"
         else:
             raise self.wps.Exceptions.InvalidParameterValue("request")
-    
-    
+
     def getFirstChildNode(self,document):
         """Find first usable child node of the document (no comments)"""
 
@@ -207,7 +204,7 @@ class Post(Parser):
         """
 
         if maxFileSize.find("kb") > 0:
-            maxFileSize = float(maxFileSize[:maxFileSize.find("gb")])
+            maxFileSize = float(maxFileSize[:maxFileSize.find("kb")])
             maxFileSize = int(maxFileSize*1024)
         elif maxFileSize.find("mb") > 0:
             maxFileSize = float(maxFileSize[:maxFileSize.find("mb")])
@@ -221,7 +218,6 @@ class Post(Parser):
             maxFileSize = int(maxFileSize)
         return maxFileSize
 
-
     def isSoapFirstChild(self,document):
         """Return first child of the document, if it is SOAP request,
         return first child of the body envelope
@@ -230,7 +226,7 @@ class Post(Parser):
 
         # SOAP ??
         firstChild = self.getFirstChildNode(document)
-        
+
         if Soap.isSoap(firstChild):
             self.isSoap = True
             soapCls = Soap.SOAP(firstChild)
@@ -240,6 +236,3 @@ class Post(Parser):
             self.isSoapExecute=soapCls.getSoapExecute()
          
         return firstChild
-
-
-

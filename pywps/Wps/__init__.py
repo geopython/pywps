@@ -162,7 +162,6 @@ class Request:
         try:
             sys.path.insert(0,os.path.split(dirname)[0])
             sys.path.insert(0,dirname)
-            
             # import the main directory for processes
             try:
                 processSources =  __import__(os.path.split(dirname)[-1])
@@ -172,14 +171,15 @@ class Request:
             # for each file within the directory - module within the
             # package, try to import it as well
             for procModule in processSources.__all__:
-
-
+                
                 # try to identify every class, based on
                 # pywps.Process.WPSProcess
                 try:
                     procModule = __import__(procModule, globals(),\
                                     locals(), [processSources.__name__])
                 except Exception,e:
+                    #async process has problems reporting missing modules.
+                    traceback.print_exc(file=pywps.logFile)
                     logging.warning(
                             "Could not import processes from %s: %s" % \
                                     (repr(processSources.__name__), repr(e)))

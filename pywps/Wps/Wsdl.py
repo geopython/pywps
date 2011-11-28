@@ -80,7 +80,6 @@ class Wsdl(Request):
         describeProcessXML=requestDescribeProcess.response
         
         
-        
         #Transforming the describeProcessXML into WSDL document
         describeProcess2WSDLXSL=open(pywps.XSLT.__path__[0]+"/describeProcess2WSDL.xsl","r")
         transformerXSLT=etree.XSLT(etree.parse(describeProcess2WSDLXSL))

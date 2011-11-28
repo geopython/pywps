@@ -63,7 +63,7 @@ example how to use this module::
 
 """
 
-__all__ = [ "Parser","processes", "Process", "Exceptions", "Wps", "Templates","Template","XSLT"]
+__all__ = [ "Parser","processes", "Process", "Exceptions", "Wps", "Templates","Template","XSLT","Ftp"]
 
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
