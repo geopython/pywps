@@ -252,10 +252,20 @@ server contains server settings, constrains, safety configuration and so on.
     outputPath 
         Path. where output files are stored, from the server point of view.
         This should point to `outputUrl` parameter (described below). For
-        example http://foo/bar/wpsputputs
+        example http://foo/bar/wpsputputs. If outputPath starts with ftp:// it's assumed that FTP support shall be used.
     outputUrl 
         Url where the outputs are stored, from the client point of view. On
         Debian, it would be for example :file:`/var/www/wpsoutputs`
+    ftplogin
+    	FTP user login, if variable is empty it will use anonymous login. 
+    	
+    	.. note:: FTP support activated buy FTP:// in outputPath
+    
+    ftppasswd
+    	FTP user password
+    ftpport
+    	Default FTP port 21 is used if variable not defined.
+    
     debug 
         true/false - makes the logs for verbose
         

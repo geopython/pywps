@@ -20,7 +20,7 @@ Web Server
     computers. PyWPS was tested with Apache 1.1 and 2.x versions.
 
 GIS GRASS  
-    http://grass.itc.it - Geographical Resources
+    http://grass.osgeo.it - Geographical Resources
     Analysis Support System (GRASS) is Open Source GIS, which provides more
     then 350 modules for raster and vector (2D, 3D) data analysis. PyWPS is
     written with native support for GRASS and it's functions. GRASS has

@@ -6,14 +6,14 @@ Web Processing Service (OpenGIS(r) Web Processing Service - OGC 05-007r7)
 version 1.0.0 from 2007-06-08
 
 Target of this application is to bring functionality of GIS GRASS
-[http://grass.itc.it] to the World Wide Web - it should work like
+[http://grass.osgeo.it] to the World Wide Web - it should work like
 wrapper for modules of this GIS. Though GRASS was at the first place in the
 focus, it is not necessary to use it's modules - you can use any program
 you can script in Python or other language.
 
-The first version was written with support of Deutsche Bundesstiftung
-Umwelt, Osnabrueck, Germany on the spring 2006. SVN server is hosted by
-GDF-Hannover, Hannover, Germany.
+This first version was written with support of Deutsche Bundesstiftung
+Umwelt, Osnabrueck, Germany on the spring 2006. SVN server was hosted by
+GDF-Hannover, Hannover, Germany; today at Intevation GmbH, Germany.
 
 Current development is supported mainly by:
 Help Service - Remote Sensing s.r.o
@@ -55,7 +55,13 @@ __version__ = "3.0-svn"
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-
+#import pycallgraph
+#filter_func = pycallgraph.GlobbingFilter(max_depth=4)
+#pycallgraph.start_trace(filter_func=filter_func)
+#import sys,os, traceback
+#sys.path.append("/users/rsg/jmdj/workspace/pywps-3.2-soap/pywps")
+#os.environ["PYWPS_CFG"]="/etc/pywps.cfg"
+import sys
 import pywps
 from pywps.Exceptions import *
 import os
@@ -95,10 +101,9 @@ try:
         # request performed, write the response back
         if response:
             # print only to standard out
- 
                 pywps.response.response(wps.response,
                     sys.stdout,wps.parser.soapVersion,wps.parser.isSoap,wps.parser.isSoapExecute, wps.request.contentType)
-
+                
 except WPSException,e:
     #traceback.print_exc(file=pywps.logFile)
     pywps.response.response(e, sys.stdout, wps.parser.soapVersion,

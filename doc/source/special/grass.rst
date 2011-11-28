@@ -63,12 +63,10 @@ modules.
 
 Using GRASS-Python interface
 ----------------------------
-Since GRASS 6.4, Python interface is developed. There are both - `swig <http://www.swig.org/>`_
-interface and GRASS Modules-Python iterface. There are both described in
+Since GRASS 6.4, Python interface is developed. There are both a ctypes
+interface and GRASS Modules-Python interface. There are both described in
 `GRASS Wiki <http://grass.osgeo.org/wiki/GRASS_and_Python>`_ . There are
 :meth:`grass.run_command`, :meth:`grass.mapcalc` and other useful methods.
-For the swig interface, have a look in the GRASS-Wiki - it is perfectly
-documented.
 
 GRASS-Python interface example
 ..............................

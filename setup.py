@@ -5,7 +5,7 @@ PyWPS is simple cgi set of scripts, which (nearly) fills standard of OGC
 way how geoinformation operations should be served via networks.
 
 PyWPS provides environment for writing own scripts with help of GIS GRASS
-modules (http://grass.itc.it). User of PyWPS can easily focuse on writing
+modules (http://grass.osgeo.it). User of PyWPS can easily focuse on writing
 own GRASS-scripts, without taking care on how the data will be imported and
 served back to the client. Providing GRASS funktionality on the Internet
 should be as easy as possible.
