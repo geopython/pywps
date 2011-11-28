@@ -3,7 +3,8 @@ import sys
 
 pywpsPath = os.path.abspath(os.path.join(os.path.split(os.path.abspath(__file__))[0],".."))
 #sys.path.append(pywpsPath)
-sys.path[0]=pywpsPath
+sys.path.insert(0,pywpsPath)
+
 import pywps
 import pywps.Process
 import unittest
@@ -66,13 +67,13 @@ class RequestGetTestCase(unittest.TestCase):
         sys.stderr=open("/dev/null","w")
 
     def testT00Assync(self):
-        """Test assynchronous mode for the first time"""
+        """Test asynchronous mode for the first time"""
 
         self._setFromEnv()
         mypywps = pywps.Pywps(pywps.METHOD_GET)
-        inputs = mypywps.parseRequest("service=wps&request=execute&version=1.0.0&identifier=assyncprocess&status=true&storeExecuteResponse=true")
+        inputs = mypywps.parseRequest("service=wps&request=execute&version=1.0.0&identifier=asyncprocess&status=true&storeExecuteResponse=true")
         self.assertEquals(mypywps.inputs["request"], "execute")
-        self.assertTrue("assyncprocess" in mypywps.inputs["identifier"])
+        self.assertTrue("asyncprocess" in mypywps.inputs["identifier"])
         mypywps.performRequest()
         xmldom = minidom.parseString(mypywps.response)
         self.assertTrue(mypywps.response)
@@ -102,15 +103,24 @@ class RequestGetTestCase(unittest.TestCase):
         self.assertEquals(xmldom.firstChild.nodeName, "wps:Capabilities")
 
 
+
     def testT02ProcessesLengthGetCapabilities(self):
         """Test, if any processes are listed in the Capabilities document
         """
         self._setFromEnv()
-        mypywps = pywps.Pywps(pywps.METHOD_GET)
-        inputs = mypywps.parseRequest(self.getcapabilitiesrequest)
-        mypywps.performRequest(inputs)
-        xmldom = minidom.parseString(mypywps.response)
+        getpywps = pywps.Pywps(pywps.METHOD_GET)
+        inputs = getpywps.parseRequest(self.getcapabilitiesrequest)
+        getpywps.performRequest(inputs)
+        xmldom = minidom.parseString(getpywps.response)
         self.assertTrue(len(xmldom.getElementsByTagNameNS(self.wpsns,"Process"))>0)
+        
+        postpywps = pywps.Pywps(pywps.METHOD_POST)
+        getCapabilitiesRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request.xml"))
+        postinputs = postpywps.parseRequest(getCapabilitiesRequestFile)
+        postpywps.performRequest(postinputs)
+        xmldom = minidom.parseString(postpywps.response)
+        self.assertTrue(len(xmldom.getElementsByTagNameNS(self.wpsns,"Process"))>0)
+        
     
 
     def testT03PerformDescribeProcess(self):
@@ -121,13 +131,13 @@ class RequestGetTestCase(unittest.TestCase):
         getpywps.performRequest()
         xmldom = minidom.parseString(getpywps.response)
         self.assertEquals(xmldom.firstChild.nodeName, "wps:ProcessDescriptions")
-
+        
         postpywps = pywps.Pywps(pywps.METHOD_POST)
-        getCapabilitiesRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request.xml"))
-        postinputs = postpywps.parseRequest(getCapabilitiesRequestFile)
+        describeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_describeprocess_request_dummyprocess.xml"))
+        postinputs = postpywps.parseRequest(describeRequestFile)
         postpywps.performRequest(postinputs)
         xmldom = minidom.parseString(postpywps.response)
-        self.assertTrue(len(xmldom.getElementsByTagNameNS(self.wpsns,"Process"))>0)
+        self.assertEquals(xmldom.firstChild.nodeName, "wps:ProcessDescriptions")
 
     def testT04ProcessesLengthDescribeProcess(self):
         """Test, if any processes are listed in the DescribeProcess document
@@ -140,7 +150,7 @@ class RequestGetTestCase(unittest.TestCase):
         self.assertTrue(len(xmldom.getElementsByTagName("ProcessDescription"))>0)
         self.assertEquals(len(xmldom.getElementsByTagName("ProcessDescription")),
                 len(getpywps.inputs["identifier"]))
-        
+       
         getpywps = pywps.Pywps(pywps.METHOD_GET)
         getpywps.parseRequest(self.getdescribeprocessallrequest)
         getpywps.performRequest()
@@ -154,7 +164,7 @@ class RequestGetTestCase(unittest.TestCase):
         xmldom = minidom.parseString(postpywps.response)
         self.assertTrue(len(xmldom.getElementsByTagName("ProcessDescription"))>0)
         self.assertEquals(len(xmldom.getElementsByTagName("ProcessDescription")),
-                len(getpywps.inputs["identifier"]))
+                len(postpywps.inputs["identifier"]))
         
         postpywps = pywps.Pywps(pywps.METHOD_POST)
         describeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_describeprocess_request_all.xml"))
@@ -162,6 +172,8 @@ class RequestGetTestCase(unittest.TestCase):
         postpywps.performRequest(postinputs)
         xmldom = minidom.parseString(postpywps.response)
         self.assertEquals(len(xmldom.getElementsByTagName("ProcessDescription")),len(postpywps.request.processes))
+        
+        
 
     ######################################################################################)
     def testT05ParseExecute(self):
@@ -373,6 +385,7 @@ class RequestGetTestCase(unittest.TestCase):
          identifierNodes=outputNodes[0].getElementsByTagNameNS(self.owsns,"Identifier")
          self.assertEquals(identifierNodes[0].firstChild.nodeValue,"vectorout")
          
+         
          #all outputs --> blank responseDocument
          inputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=complexprocess&datainputs=[rasterin=%s;vectorin=%s]&responsedocument=[]" % (urllib.quote(self.wcsurl), urllib.quote(self.wfsurl)))
          getpywps.performRequest()
@@ -384,6 +397,7 @@ class RequestGetTestCase(unittest.TestCase):
         """Return a response document that only containts the requested ouputs, from an XML request 
         lineage output will also be checked
         """
+        
         self._setFromEnv()
         import urllib
         postpywps = pywps.Pywps(pywps.METHOD_POST)
@@ -392,6 +406,7 @@ class RequestGetTestCase(unittest.TestCase):
         postpywps.performRequest()
         #The response linage contains URLs with & that will crash the DOM parser
         xmldom = minidom.parseString(postpywps.response.replace("&","%26"))
+        
         #1 OutputDefintions only and that is rasterout
         outputDefNodes=xmldom.getElementsByTagNameNS(self.wpsns,"OutputDefinitions")
         self.assertEquals(len(outputDefNodes),1)
@@ -578,7 +593,6 @@ class RequestGetTestCase(unittest.TestCase):
     def _setFromEnv(self):
         os.putenv("PYWPS_PROCESSES", os.path.join(pywpsPath,"tests","processes"))
         os.environ["PYWPS_PROCESSES"] = os.path.join(pywpsPath,"tests","processes")
-
 
 if __name__ == "__main__":
    # unittest.main()
