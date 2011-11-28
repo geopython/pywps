@@ -7,7 +7,7 @@ import time
 import signal
 pywpsPath = os.path.abspath(os.path.join(os.path.split(os.path.abspath(__file__))[0],".."))
 #sys.path.append(pywpsPath)
-sys.path[0]=pywpsPath
+sys.path.insert(0,pywpsPath)
 import pywps
 import pywps.Process
 
@@ -247,8 +247,7 @@ class SOAPSchemaTestCase(unittest.TestCase):
         #print inputs
         getpywps.performRequest()
      
-        #print pywps.config.getConfigValue("wps","serveraddress")
-            
+        #print pywps.config.getConfigValue("wps","serveraddress")  
         wsdlDoc = minidom.parseString(getpywps.response)
         #checking content  
         addressNode=wsdlDoc.getElementsByTagName("address")[0]
@@ -268,11 +267,8 @@ class SOAPSchemaTestCase(unittest.TestCase):
         operation=port[0].getElementsByTagName("operation")
         self.assertTrue("ExecuteProcessAsync_ultimatequestionprocess" in [item.getAttribute("name") for item in operation])
         self.assertTrue("ExecuteProcess_ultimatequestionprocess" in [item.getAttribute("name") for item in operation])
-        self.assertFalse("ExecuteProcessAsync_literalprocess" in [item.getAttribute("name") for item in operation])
-            
+        self.assertTrue("ExecuteProcessAsync_literalprocess" in [item.getAttribute("name") for item in operation])
         #probably more WSDL content tests are necessary
-            
-            
             
     def testSOAP11Fault(self):
         "Testing WPS exception to SOAP11 fault"

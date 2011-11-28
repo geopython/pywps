@@ -20,8 +20,8 @@ class Process(WPSProcess):
                              identifier="ultimatequestionprocess", #the same as the file name
                              title="Answer to Life, the Universe and Everything",
                              version = "2.0",
-                             storeSupported = "true",
-                             statusSupported = "true",
+                             storeSupported = True,
+                             statusSupported = True,
                             abstract="Numerical solution that is the answer to Life, Universe and Everything. The process is an improvement to Deep Tought computer (therefore version 2.0) since it no longer takes 7.5 milion years, but only a few seconds to give a response, with an update of status every 10 seconds.",
                             grassLocation =False)
             #No need for inputs since Execute will start the process

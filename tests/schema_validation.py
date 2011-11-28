@@ -63,23 +63,20 @@ class SchemaTestCase(unittest.TestCase):
         schemaExecute=etree.XMLSchema(schemaDocExecute)
         
         mypywps = pywps.Pywps(pywps.METHOD_GET)
-        inputs = mypywps.parseRequest("service=wps&request=execute&version=1.0.0&identifier=ultimatequestionprocess&status=false&storeExecuteResponse=false")
+        inputs = mypywps.parseRequest("service=wps&request=execute&version=1.0.0&identifier=ultimatequestionprocess&status=false&storeExecuteResponse=true")
         mypywps.performRequest()
         
         #First parse
         executeAssyncGET=etree.XML(mypywps.response,self.parser)
         self.assertEquals(schemaExecute.assertValid(executeAssyncGET),None)
-        
         #get path to status document
         fileName=os.path.basename(executeAssyncGET.xpath("//*[local-name()='ExecuteResponse']/@statusLocation")[0])
         filePath=pywps.config.getConfigValue("server","outputPath")+"/"+fileName
- 
         self.assertEquals(True,os.path.exists(filePath))
         fileOpen = open(filePath)
         
         self.assertEquals(fileOpen.read(), mypywps.response)
 
-        
     def testAssync(self):
         """Test assync status document"""
         
