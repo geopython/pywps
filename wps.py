@@ -61,25 +61,21 @@ __version__ = "3.0-svn"
 #import sys,os, traceback
 #sys.path.append("/users/rsg/jmdj/workspace/pywps-3.2-soap/pywps")
 #os.environ["PYWPS_CFG"]="/etc/pywps.cfg"
-import sys
 import pywps
 from pywps.Exceptions import *
-import os
+
+import sys,os,traceback
 
 
 # get the request method and inputs
-
 method = os.getenv("REQUEST_METHOD")
-
-
 if not method:  # set standard method
     method = pywps.METHOD_GET
 
 inputQuery = None
 if method == pywps.METHOD_GET:
     try:
-        inputQuery = os.environ["QUERY_STRING"]
-       
+        inputQuery = os.environ["QUERY_STRING"]     
     except KeyError:
         # if QUERY_STRING isn't found in env-dictionary, try to read
         # query from command line:
@@ -91,12 +87,13 @@ if method == pywps.METHOD_GET:
         sys.exit(1)
 else:
     inputQuery = sys.stdin
-    
+
+# create the WPS object
+wps = None
 try:
     wps = pywps.Pywps(method)
-    
-   
     if wps.parseRequest(inputQuery):
+        pywps.debug(wps.inputs)
         response = wps.performRequest()
         # request performed, write the response back
         if response:
@@ -105,7 +102,7 @@ try:
                     sys.stdout,wps.parser.soapVersion,wps.parser.isSoap,wps.parser.isSoapExecute, wps.request.contentType)
                 
 except WPSException,e:
-    #traceback.print_exc(file=pywps.logFile)
+    traceback.print_exc(file=pywps.logFile)
     pywps.response.response(e, sys.stdout, wps.parser.soapVersion,
                             wps.parser.isSoap,
                             wps.parser.isSoapExecute)
