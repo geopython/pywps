@@ -466,10 +466,9 @@ class Get(GetParser):
         try:
             self.inputs["datainputs"] = self.parseDataInputs(
                         self.unparsedInputs["datainputs"])
-
+        
         except KeyError:
             self.inputs["datainputs"] = None
-
         # ResponseForm
 
         self.inputs["responseform"] = {}
@@ -567,26 +566,33 @@ class Get(GetParser):
             # additional input attributes are separated by "@"
             attributes = []
             if valueAndAttrs.find("@") > 0:
-                
                 encodedValue=valueAndAttrs.split("@")[0]
                 parsed["value"]=urllib.unquote(encodedValue)
                 attributes=valueAndAttrs.split("@")[1:]
-                
+                    
             elif valueAndAttrs.find("@") == 0:
-                parsed["value"]=None
-                attributes=valueAndAttrs.split("@")[1:]
+                #example: @xlink:href=http://rsg.pml.ac.uk/wps/testdata/elev_srtm_30m.img
+                if ("@xlink:href" in valueAndAttrs):
+                    #This attribute is actually a value
+                    valueAndAttrs=valueAndAttrs.replace("@xlink:href=","")
+                    encodedValue=valueAndAttrs.split("@")[0]
+                    parsed["value"]=urllib.unquote(encodedValue)
+                    attributes=valueAndAttrs.split("@")[1:]
+                else:
+                    attributes=valueAndAttrs.split("@")[1:]
+                    #just passing the attributes
+                    parsed["value"]=None
             else:
                 #needs to be checked for trueOrFalse
                 encodedValue=valueAndAttrs
                 parsed["value"]=self._trueOrFalse(urllib.unquote(valueAndAttrs))
                 attributes = []
-         
+           
+            
             # additional attribute key is separated by "=" from it's value
             for attribute in attributes:
                 attributeKey, attributeValue = attribute.split("=")
-               
                 parsed[attributeKey.lower()]=self._trueOrFalse(urllib.unquote(attributeValue))
-        
             parsedDataInputs.append(parsed)
         return parsedDataInputs
     

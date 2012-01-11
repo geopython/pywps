@@ -42,11 +42,14 @@ class RequestGetTestCase(unittest.TestCase):
     getdescribeprocessallrequest = "service=wps&request=describeprocess&version=1.0.0&identifier=all"
     getexecuterequest = "service=wps&request=execute&version=1.0.0&identifier=dummyprocess&datainputs=[input1=20;input2=10]"
     #wfsurl = "http://www2.dmsolutions.ca/cgi-bin/mswfs_gmap?version=1.0.0&request=getfeature&service=wfs&typename=park"
-    wfsurl = "http://rsg.pml.ac.uk/geoserver2/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=rsg:areas_pw&maxFeatures=1"
+    wfsurl = "http://rsg.pml.ac.uk/geoserver2/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=rsg:areas&maxFeatures=1"
     wcsurl = "http://www.bnhelp.cz/cgi-bin/crtopo?service=WMS&request=GetMap&LAYERS=sitwgs&TRANSPARENT=true&FORMAT=image%2Ftiff&EXCEPTIONS=application%2Fvnd.ogc.se_xml&VERSION=1.1.1&STYLES=default&SRS=EPSG%3A4326&BBOX=-10,-10,10,10&WIDTH=50&HEIGHT=50"
     wpsns = "http://www.opengis.net/wps/1.0.0"
     owsns = "http://www.opengis.net/ows/1.1"
     ogrns = "http://ogr.maptools.org/"
+    
+    #Generic external data
+    simplePolyURL="http://rsg.pml.ac.uk/wps/testdata/single_point.gml"
     
     #FTP parameters for test20FTPSupport
     #Pure PyWPS ftp configuration
@@ -589,6 +592,38 @@ class RequestGetTestCase(unittest.TestCase):
         #assertFalse (empty array)
         self.assertFalse(bool([item in outputFTP for item in outputFTPMD5 if not item]))
 
+    def test21GetParseXLinkURL(self):
+        """check for correct parsing of input as reference"""
+        
+        self._setFromEnv()
+        import urllib
+        import types
+        #[simple URL,SimpleURL+aatributes,xlink=URL,xlink=URL+attributes,]
+        requests=["service=wps&request=execute&version=1.0.0&identifier=complexVector&datainputs=[indata=%s]" % (urllib.quote_plus(self.simplePolyURL)),
+                  "service=wps&request=execute&version=1.0.0&identifier=complexVector&datainputs=[indata=%s@method=POST@mimeType=%s]" % (urllib.quote_plus(self.simplePolyURL),urllib.quote_plus("text/xml")),
+                  "service=wps&request=execute&version=1.0.0&identifier=complexVector&datainputs=[indata=@xlink:href=%s]" % (urllib.quote_plus(self.simplePolyURL)),
+                  "service=wps&request=execute&version=1.0.0&identifier=complexVector&datainputs=[indata=@xlink:href=%s@method=POST@mimeType=%s]" % (urllib.quote_plus(self.simplePolyURL),urllib.quote_plus("text/xml"))]
+        keysAtt=[None,['method','mimetype'],None,['method','mimetype']]
+        valueAtt=[None,['POST','text/xml'],None,['POST','text/xml']]
+        zipRequests=zip(requests,keysAtt,valueAtt)
+        
+        for index,requestStructure in enumerate(zipRequests):
+            
+            mypywps = pywps.Pywps(pywps.METHOD_GET)    
+            inputs = mypywps.parseRequest(requestStructure[0])
+            mypywps.performRequest()
+            xmldom = minidom.parseString(mypywps.response)
+            self.assertFalse(len(xmldom.getElementsByTagNameNS(self.wpsns,"ExceptionReport")),msg="request number %s failed" % index)
+            outputGML=xmldom.getElementsByTagNameNS(self.ogrns,"FeatureCollection")
+            self.assertTrue(bool(outputGML))
+            #Check if the attributes are being passed
+            if not (type(requestStructure[1]) is types.NoneType):
+                inputKeys=set(inputs["datainputs"][0].keys())
+                inputValues=set(inputs["datainputs"][0].values())
+                #Any missing elements in inputKey will raise a FALSE statment
+                self.assertTrue((inputKeys & set(requestStructure[1])) == set(requestStructure[1]))
+                self.assertTrue((inputValues & set(requestStructure[2])) == set(requestStructure[2]))
+        
             
     def _setFromEnv(self):
         os.putenv("PYWPS_PROCESSES", os.path.join(pywpsPath,"tests","processes"))
