@@ -623,6 +623,35 @@ class RequestGetTestCase(unittest.TestCase):
                 #Any missing elements in inputKey will raise a FALSE statment
                 self.assertTrue((inputKeys & set(requestStructure[1])) == set(requestStructure[1]))
                 self.assertTrue((inputValues & set(requestStructure[2])) == set(requestStructure[2]))
+    
+    def test23GetInputReferenceMimeType(self):
+        """mimeType included in reference input, validated and understood"""
+        
+        #USE urllib.quote_lus
+        #'urllib.quote_plus("http://rsg.pml.ac.uk/wps/testdata/single_point.gml")
+        
+        self._setFromEnv()
+        import urllib
+        import tempfile
+        getpywps=pywps.Pywps(pywps.METHOD_GET)  
+        #raise exception if sending wrong mimetype  
+        inputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=complexVector&datainputs=[indata=%s@method=POST@mimeType=%s]&responsedocument=[outdata=@asreference=true;outdata2=@asreference=true]" % (self.simplePolyURL,urllib.quote_plus("image/tiff")))
+        getpywps.performRequest()
+        xmldom = minidom.parseString(getpywps.response)
+        self.assertTrue(len(xmldom.getElementsByTagNameNS(self.wpsns,"ExceptionReport"))==1)
+        
+        #Correct mimetype process goes as normal
+        inputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=complexVector&datainputs=[indata=%s@method=POST@mimeType=%s]&responsedocument=[outdata=@asreference=true;outdata2=@asreference=true]" % (self.simplePolyURL,urllib.quote_plus("text/xml")))
+        getpywps.performRequest()
+        xmldom = minidom.parseString(getpywps.response)
+        self.assertTrue(len(xmldom.getElementsByTagNameNS(self.wpsns,"Reference"))>0)
+        #<wps:Reference href="http://localhost/wpsoutputs/outdata-163877NiZFb" mimeType="text/xml" />
+        
+        #no mimetype
+        inputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=complexVector&datainputs=[indata=%s]&responsedocument=[outdata=@asreference=true;outdata2=@asreference=true]" % self.simplePolyURL)
+        getpywps.performRequest()
+        xmldom = minidom.parseString(getpywps.response)
+        self.assertTrue(len(xmldom.getElementsByTagNameNS(self.wpsns,"Reference"))>0)
         
             
     def _setFromEnv(self):

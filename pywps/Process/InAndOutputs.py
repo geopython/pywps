@@ -22,7 +22,6 @@ Inputs and outputs of OGC WPS Processes
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os,types,re, base64,logging
-import magic
 from pywps import Exceptions
 import sys
 
@@ -387,7 +386,7 @@ class ComplexInput(Input):
 
         # download data
         
-        if input.has_key("asReference") and input["asReference"] == True:      
+        if input.has_key("asReference") and input["asReference"] == True:  
             self.downloadData(input["value"])
         else:
             self.storeData(input["value"])
@@ -395,27 +394,30 @@ class ComplexInput(Input):
     
     def setMimeType(self,input):
         """Sets the MimeType from input before going to setValue() this allows 
-        for some self.format to be filled febore base64 decoding. URL inputs done have an input[], since they are just URLs.
-        There is the need a mimeType implementation from downloaded objects"""
-         # if HTTP GET was performed, the type does not have to be set
-        #copy from setvalue
+        for some self.format to be filled febore base64 decoding. URL inputs don't have an input[], since they are just URLs.
+        There mimeType was implemented to URL references, basically it sets a self.format based on the input provided by the user e.g:http://localhost/wps.cgi?request=Execute&service=wps&version=1.0.0&identifier=geotiff2png&datainputs=[input=@xlink:href=http://rsg.pml.ac.uk/wps/testdata/elev_srtm_30m.tif@method=POST@mimeType=text%2Fxml]
+        this example shall raise an exception"""
+        
+        #NOTE: setting mimeType in URL and direct input should be the same, this if structure is here 
+        #for historical reasons and allows to differencite between the 2 types or requests if in the future
+        # changes need to be done e.g setting mimetypes from HTTP stream etc
+        keys=["mimetype","schema","encoding"]
         if not input.has_key("type") or (input["value"].find("http://") == 0 or input["value"].find("http%3A%2F%2F") == 0):
-            #jmd this needs to be changed, the self.format sould be set from the download stream
-            #For now 
-            self.format["mimetype"]=None
-            self.format["schema"]=None
-            self.format["encoding"]=None
+            for key in keys:
+                if key in input.keys():
+                    self.format[key]=input[key]
+                else:
+                    logging.debug("input define by user didnt contain %s" % key)
+                    self.format[key]=None
         else:
-            try:     
-                self.format["mimetype"]=input["mimetype"]
-                self.format["schema"]=input["schema"]
-                self.format["encoding"]=input["encoding"]
-           
-            except Exception,e:
-                logging.debug("Passing mimeType/schema/encoding to process object failed,Exception in next line")
-                logging.debug(e)
+            for key in keys:
+                if key in input.keys():
+                    self.format[key]=input[key]
+                else:
+                    logging.debug("input define by user didnt contain %s" % key)
+                    self.format[key]=None
         
-        
+        return  
 
     def storeData(self,data):
         """Store data from given file. Not bigger, then
@@ -528,6 +530,7 @@ class ComplexInput(Input):
                         str(self.maxFileSize/1024/1024)+" MB for input "+
                         url)
         fout.close()
+        
         self.checkMimeTypeIn(fout.name)
         resp = self._setValueWithOccurence(self.value, outputName)
         if resp:
@@ -556,8 +559,6 @@ class ComplexInput(Input):
         :param fileName:
         :param mimeType:
         """
-         
-      
          #Note: magic output something like: 'image/tiff; charset=binary' we only need the typeContent 
         if (self.format["mimetype"] is None) or (self.format["mimetype"]==""): 
             #No mimeType let's set it from default
