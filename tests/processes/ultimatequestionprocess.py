@@ -12,7 +12,7 @@ Done by Jorge de Jesus (jmdj@pml.ac.uk) as suggested by Kor de Jong
 
 """
 
-from pywps.Process.Process import WPSProcess                                
+from pywps.Process import WPSProcess                               
 class Process(WPSProcess):
      def __init__(self):
          # init process
