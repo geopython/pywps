@@ -188,12 +188,25 @@ class UMN:
             if geometry.GetGeometryName().lower() == "point":
                 myLayerObj.type = MS_LAYER_POINT
                 myStyleObj.color.setRGB(0,0,0)
-            elif geometry.GetGeometryName().lower() in ["line","linestring"]:
-                myLayerObj.type = MS_LAYER_LINE
-                myStyleObj.color.setRGB(0,0,0)
-            elif geometry.GetGeometryName().lower() == "polygon":
-                myLayerObj.type = MS_LAYER_POLYGON
-                myStyleObj.outlinecolor.setRGB(0,0,0)
+            else:
+                myStyleObj.outlinecolor= colorObj(134,81,0)
+                myStyleObj.color= colorObj(238,153,0)
+                myStyleObj.size=5
+                myStyleObj.width=5
+                if geometry.GetGeometryName().lower() in ["line","linestring"]:
+                    myLayerObj.type = MS_LAYER_LINE
+                elif geometry.GetGeometryName().lower() == "polygon":
+                    myLayerObj.type = MS_LAYER_POLYGON
+                else:
+                    myLayerObj.type = MS_LAYER_POINT
+
+            #elif geometry.GetGeometryName().lower() in ["line","linestring"]:
+            #    myLayerObj.type = MS_LAYER_LINE
+            #    myStyleObj.color.setRGB(0,0,0)
+            #elif geometry.GetGeometryName().lower() == "polygon":
+            #    myLayerObj.type = MS_LAYER_POLYGON
+            #    myStyleObj.outlinecolor.setRGB(0,0,0)
+
         if self.process.abstract:
             myLayerObj.setMetaData("group_abstract",self.process.abstract)
         if output.abstract:
