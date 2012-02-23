@@ -1153,8 +1153,8 @@ class Execute(Request):
                 self.checkMimeTypeOutput(output)
                 
                 if self.umn and output.useMapscript:
-                    self.umn.save()
                     owsreference = self.umn.getReference(output)
+                    self.umn.save()
                     if owsreference:
                         templateOutput["reference"] = escape(owsreference)
 
