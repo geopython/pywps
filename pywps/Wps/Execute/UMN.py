@@ -87,16 +87,18 @@ class UMN:
     pid = None
     outputs = None
     process = None
+    sessionId = None
 
-    def __init__(self,process):
+    def __init__(self,process,sessId):
 
         if ((mapscript == False) or (gdal== False)):
             return
-
+        
         tmp = os.path.basename(tempfile.mkstemp()[1])
         self.pid = "%s-%s"%(os.getpid(),tmp)
         self.outputs = {}
         self.process = process
+        self.sessionId = sessId
 
         self.mapObj = mapObj()
         self.mapObj.setExtent(-180,-90,180,90)
@@ -130,7 +132,7 @@ class UMN:
         self.mapObj.setMetaData("ows_contactelectronicmailaddress", config.getConfigValue("provider","electronicMailAddress"))
         self.mapObj.setMetaData("ows_role", config.getConfigValue("provider","role"))
 
-        self.mapFileName = os.path.join(config.getConfigValue("server","outputPath"),"wps"+str(self.pid)+".map")
+        self.mapFileName = os.path.join(config.getConfigValue("server","outputPath"),self.sessionId+".map")
         self.mapObj.setMetaData("wms_onlineresource",config.getConfigValue("mapserver","mapserveraddress")+"?map="+self.mapFileName)
 
     def getReference(self,output):

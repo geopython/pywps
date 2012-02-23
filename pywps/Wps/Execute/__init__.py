@@ -35,7 +35,6 @@ import sys,os
 #        os.path.dirname( os.path.abspath(__file__)) ,"..","..","..")
 #    )
 
-
 sys.path[0]= os.path.join(os.path.dirname( os.path.abspath(__file__)) ,"..","..","..")
 import pywps
 import pywps.Ftp
@@ -47,7 +46,6 @@ from shutil import copyfile as COPY
 from shutil import rmtree as RMTREE
 import logging
 from pywps.Wps.Execute import UMN
-#import UMN
 import pickle, subprocess
 
 from xml.sax.saxutils import escape
@@ -235,7 +233,7 @@ class Execute(Request):
         self.status = None
         self.spawned = spawned
         self.outputFileName = os.path.join(config.getConfigValue("server","outputPath"),self.getSessionId()+".xml")
-        self.statusLocation = config.getConfigValue("server","outputUrl")+"/"+self.getSessionId()+".xml"
+    
 
         # rawDataOutput
         if len(self.wps.inputs["responseform"]["rawdataoutput"])>0:
@@ -285,6 +283,8 @@ class Execute(Request):
 
 
                 self.storeRequired = True
+        if self.storeRequired:
+            self.statusLocation = config.getConfigValue("server","outputUrl")+"/"+self.getSessionId()+".xml"
 
         # is lineage required ?
         lineageRequired = False
@@ -295,9 +295,9 @@ class Execute(Request):
 
         # setInput values
         self.initProcess()
+
         if UMN.mapscript:
-            
-            self.umn = UMN.UMN(self.process)
+            self.umn = UMN.UMN(self.process,self.getSessionId())
 
         # check rawdataoutput against process
         if self.rawDataOutput and self.rawDataOutput not in self.process.outputs:
@@ -364,9 +364,7 @@ class Execute(Request):
 
             # spawn this process
             logging.info("Spawning process to the background")
-            #subprocess.Popen([sys.executable,__file__,os.path.join(tmpPath, self.__pickleFileName+"-"+str(self.wps.UUID))])
             self.outputFile.name
-            #import pydevd;pydevd.settrace()
             subprocess.Popen([sys.executable,__file__,
                 os.path.join(tmpPath, self.__pickleFileName+"-"+str(self.wps.UUID)),self.outputFile.name],
                 stdout=subprocess.PIPE, 
@@ -439,6 +437,8 @@ class Execute(Request):
 
 
         except pywps.WPSException,e:
+        
+            
             traceback.print_exc(file=pywps.logFile)
             # set status to failed
             self.promoteStatus(self.failed,
@@ -458,7 +458,7 @@ class Execute(Request):
             self.response = self.templateProcessor.__str__()
 
         # print status
-        if self.storeRequired and (self.statusRequired or self.spawned):
+        if self.storeRequired or self.spawned:
             pywps.response.response(self.response,
                                     self.outputFile,
                                     self.wps.parser.isSoap,
@@ -529,6 +529,7 @@ class Execute(Request):
                                 input.setMimeType(inp)
                             
                             #Passing value/content
+                           
                             resp = input.setValue(inp)
                             if resp:
                                 self.cleanEnv()
@@ -553,8 +554,7 @@ class Execute(Request):
                 for out in respOutputs:
                     if out["identifier"] == identifier:
                         respOut = out
-                
-                
+
                 if respOut:
                     poutputList=dir(poutput)
                     # asReference
@@ -749,8 +749,7 @@ class Execute(Request):
         self.response = self.templateProcessor.__str__()
 
         # print status
-        if self.storeRequired and (self.statusRequired or
-                                   self.status == self.accepted or
+        if self.storeRequired and (self.status == self.accepted or
                                    #self.status == self.succeeded or
                                    self.status == self.failed or
                                    self.spawned):
@@ -927,7 +926,6 @@ class Execute(Request):
         except Exception,e:
             pass
          
-
         #If no ouputs request is present then dump everything: Table 39 WPS 1.0.0 document    
         if outputsRequested==[]:
             outputsRequested=self.process.outputs.keys()
@@ -971,11 +969,19 @@ class Execute(Request):
 
                 templateOutputs.append(templateOutput);
 
+            except pywps.WPSException,e:
+               #In case we have a specific WPS exception e.g incorrect mimeType etc
+                traceback.print_exc(file=pywps.logFile)
+                self.promoteStatus(self.failed,statusMessage=e.value,exceptioncode=e.code, locator=e.locator)
+
             except Exception,e:
                 self.cleanEnv()
                 traceback.print_exc(file=pywps.logFile)
                 raise pywps.NoApplicableCode(
                         "Process executed. Failed to build final response for output [%s]: %s" % (identifier,e))
+            
+        
+        
         self.templateProcessor.set("Outputs",templateOutputs)
 
     def _literalOutput(self, output, literalOutput):
@@ -1173,22 +1179,42 @@ class Execute(Request):
                 os.path.normcase(os.path.abspath(dst)))
 
     def checkMimeTypeOutput(self,output):
-        """
+            """
         Checks the complexData output to determine if the mimeType is correct.
         if mimeType is not in the list defined by the user then it will log it as an error, no further action will be taken
         Mainly used by: _asReferenceOutput,_complexOutput,_lineageComplexOutput,_lineageComplexReference
-        Note: checkMimeTypeIn will set the output's format from the first time 
-        """
-        try: # problem with exceptions ?! 
-            mimeType=output.ms.file(output.value).split(';')[0]
-            if (output.format["mimetype"] is None) or (output.format["mimetype"]==""):
-                output.format["mimetype"]=mimeType
-                logging.debug("Since there is absolutely no mimeType information for %s, using libmagic mimeType %s " % (output.identifier,mimeType))
-            else:
-                if (mimeType.lower()!=output.format["mimetype"].lower()):
-                    logging.debug("ComplexOut %s has libMagic mimeType: %s but its format is %s" % (output.identifier,mimeType,output.format["mimetype"]))
-        except:
-            pass
+        Note: checkMimeTypeIn will set the output's format from the first time, if the user doesnt define an outputmimetype,
+        we'll use the first one in the list (set by CheckMimeTypeIn), the mimeType will then be validate using ligmagic 
+            """
+            ######## TESTING CODE #############
+            #mimeType=output.ms.file(output.value).split(';')[0]
+            #if (output.format["mimetype"] is None) or (output.format["mimetype"]==""):
+            #    output.format["mimetype"]=mimeType
+            #    logging.debug("Since there is absolutely no mimeType information for %s, using libmagic mimeType %s " % (output.identifier,mimeType))
+            #else:
+            #    #check if output.format is in output.formats
+            #    if output.format["mimetype"] in [item["mimeType"] for item in output.formats]:
+                    #things are ok, copy all the contet to output.format
+            #        output.format=[item for item in output.formats if item["mimeType"]==output.format["mimetype"]][0]
+            #        output.format["mimetype"]=output.format["mimeType"]
+            #        del output.format["mimeType"]
+            #    else:
+            #         logging.debug("ComplexOut %s has libMagic mimeType: %s but its format is %s (not in output list)" % (output.identifier,mimeType,output.format["mimetype"]))
+            #         raise pywps.InvalidParameterValue(output.identifier)
+     
+            #return
+            try: # problem with exceptions ?!
+                mimeType=output.ms.file(output.value).split(';')[0]
+                if (output.format["mimetype"] is None) or (output.format["mimetype"]==""):
+                    output.format["mimetype"]=mimeType
+                    logging.debug("Since there is absolutely no mimeType information for %s, using libmagic mimeType %s " % (output.identifier,mimeType))
+                else:
+                    if (mimeType.lower()!=output.format["mimetype"].lower()):
+                        logging.debug("ComplexOut %s has libMagic mimeType: %s but its format is %s" % (output.identifier,mimeType,output.format["mimetype"]))
+            except:
+                pass
+
+
                     
     def getSessionId(self):
         """ Returns unique Execute session ID
@@ -1368,7 +1394,6 @@ This basicaly is used for asynchronous WPS executions
 """
 if __name__ == "__main__":
     # load the pickeled file from the disc
-
     if len(sys.argv) and os.path.exists(sys.argv[1]):
         wps = pickle.load(open(sys.argv[1]))
         wps.setLogFile()
@@ -1389,4 +1414,3 @@ if __name__ == "__main__":
             raise pywps.NoApplicableCode("Problems loading the pickeled file:%s check if path is correct" % sys.argv[1])
         except Exception,e:
             open(sys.argv[2],"w").write(e.getResponse())
-            
