@@ -84,7 +84,6 @@ class UMN:
 
     mapObj = None
     mapFileName = None
-    pid = None
     outputs = None
     process = None
     sessionId = None
@@ -95,7 +94,6 @@ class UMN:
             return
         
         tmp = os.path.basename(tempfile.mkstemp()[1])
-        self.pid = "%s-%s"%(os.getpid(),tmp)
         self.outputs = {}
         self.process = process
         self.sessionId = sessId
@@ -103,7 +101,7 @@ class UMN:
         self.mapObj = mapObj()
         self.mapObj.setExtent(-180,-90,180,90)
         self.mapObj.setProjection("+init=epsg:4326")
-        self.mapObj.name = "%s-%s"%(self.process.identifier,self.pid)
+        self.mapObj.name = "%s-%s"%(self.process.identifier,self.sessionId)
         self.mapObj.setMetaData("ows_title", config.getConfigValue("wps","title"))
         self.mapObj.setMetaData("wms_abstract", config.getConfigValue("wps","abstract"))
         self.mapObj.setMetaData("wcs_abstract", config.getConfigValue("wps","abstract"))
