@@ -65,9 +65,9 @@ class UMN:
 
         map file name
 
-    .. attribute :: pid
+    .. attribute :: sessionId
 
-        process id
+        process id from getSessionId()
 
     .. attribute :: dataset
 
