@@ -39,7 +39,7 @@ doclines = __doc__.split("\n")
 
 dist =  setup(
         name = name,
-        version = 'trunk',
+        version = 'soap-branch',
         maintainer="Jachym Cepicky",
         maintainer_email = 'jachym@les-ejk.cz',
         author = 'Jachym Cepicky',
@@ -57,6 +57,7 @@ dist =  setup(
             'pywps',
             'pywps.Wps',
             'pywps.Wps.Execute',
+            'pywps.XSLT',
             'pywps.etc',
             'pywps.Parser',
             'pywps.Process',
@@ -68,6 +69,7 @@ dist =  setup(
                     'pywps':"pywps",
                     'pywps.Wps':'pywps/Wps',
                     'pywps.Wps.Execute':'pywps/Wps/Execute',
+                    'pywps.XSLT':'pywps/XSLT',
                     'pywps.Parser':'pywps/Parser',
                     'pywps.Process':'pywps/Process',
                     'pywps.Templates':'pywps/Templates',
@@ -77,6 +79,7 @@ dist =  setup(
         package_data={
                     'pywps':
                     ['Templates/1_0_0/*.tmpl',
+                     'XSLT/*.xsl',
                      'processes/*.py-dist','processes/README',
                      'default.cfg'],
                     'pywps.Templates.1_0_0': ['inc/*.tmpl']
