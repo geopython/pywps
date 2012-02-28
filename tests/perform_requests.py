@@ -50,6 +50,8 @@ class RequestGetTestCase(unittest.TestCase):
     
     #Generic external data
     simplePolyURL="http://rsg.pml.ac.uk/wps/testdata/single_point.gml"
+    simpleJPG="http://rsg.pml.ac.uk/wps/testdata/basin_50K_nc.jpg"
+    simpleLine="http://openlayers.org/dev/examples/gml/line.xml"
     
     #FTP parameters for test20FTPSupport
     #Pure PyWPS ftp configuration
@@ -196,7 +198,7 @@ class RequestGetTestCase(unittest.TestCase):
         
         #Note, bool input should be checked for False, if there is something like this in the code: bool("False")
         #Then the output will be True and the test will fail
-        
+        self._setFromEnv()
         getpywps = pywps.Pywps(pywps.METHOD_GET)
         postpywps = pywps.Pywps(pywps.METHOD_POST)
         getinputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=literalprocess&datainputs=[int=1;string=spam%40foo.com;float=1.1;zeroset=0.0;bool=False]")
@@ -231,13 +233,12 @@ class RequestGetTestCase(unittest.TestCase):
 
     def testT07ParseExecuteComplexInput(self):
         """Test if Execute with ComplexInput and Output, given directly with input XML request is executed"""
-        
+        self._setFromEnv()
         postpywps = pywps.Pywps(pywps.METHOD_POST)
         executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-complexinput-direct.xml"))
         postinputs = postpywps.parseRequest(executeRequestFile)
 
         postpywps.performRequest(postinputs)
-
         postxmldom = minidom.parseString(postpywps.response)
         # compare the raster files
         rasterOrig = open(os.path.join(pywpsPath,"tests","datainputs","dem.tiff"))
@@ -271,7 +272,7 @@ class RequestGetTestCase(unittest.TestCase):
     def testT08ParseExecuteComplexInputRawDataOutput(self):
         """Test if Execute with ComplexInput and Output, given directly with input XML request is executed, with raster file requested as
         raw data output"""
-        
+        self._setFromEnv()
         postpywps = pywps.Pywps(pywps.METHOD_POST)
         executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-complexinput-direct-rawdata-output.xml"))
         postinputs = postpywps.parseRequest(executeRequestFile)
@@ -561,13 +562,13 @@ class RequestGetTestCase(unittest.TestCase):
         
         p=Process(target=ftpServer,args=(self.ftpHost,self.ftpPort,self.ftpLogin,self.ftpPasswd,self.ftpPath,self.ftpPerm,))
         p.start()
-        time.sleep(2)
+        time.sleep(20)
         #running the WPS
         getpywps=pywps.Pywps(pywps.METHOD_GET)
         getinputs = getpywps.parseRequest("service=wps&version=1.0.0&request=Execute&identifier=referencedefault&responsedocument=vectorout=@asReference=True;string=@asReference=True;bboxout=@asReference=True")
         getpywps.performRequest(getinputs)
         xmldom = minidom.parseString(getpywps.response)
-        #time.sleep(40)# give some time to sync all code, maybe it's not necessary
+        time.sleep(3)# give some time to sync all code, maybe it's not necessary
         p.terminate()
         #SEE: if there is some error
         exceptionText=xmldom.getElementsByTagNameNS(self.owsns,"Reference")
@@ -580,7 +581,8 @@ class RequestGetTestCase(unittest.TestCase):
         
         #ASSIGNED PROCESS OUTPUT
         # 2nd part output interactor, 1st part lambda case ComplexOutput then open file and read content
-        processOutputs=list(map(lambda output:open(output.value).read() if isinstance(output,pywps.Process.InAndOutputs.ComplexOutput) else output.value,getpywps.request.process.outputs.values() ))
+        
+        processOutputs=list(map(lambda output:open(os.path.join(self.ftpPath,output.value)).read() if isinstance(output,pywps.Process.InAndOutputs.ComplexOutput) else output.value,getpywps.request.process.outputs.values() ))
         processOutputsMD5=[hashlib.md5(item).hexdigest() for item in processOutputs]
         
         #FTP PROCESS OUTPUT
@@ -652,7 +654,104 @@ class RequestGetTestCase(unittest.TestCase):
         getpywps.performRequest()
         xmldom = minidom.parseString(getpywps.response)
         self.assertTrue(len(xmldom.getElementsByTagNameNS(self.wpsns,"Reference"))>0)
+
+
+    def test24OutputMimeType(self):
+        """mimeType output validated and understood mimeTypeOut()"""
         
+        #USE urllib.quote_lus
+        #'urllib.quote_plus("http://rsg.pml.ac.uk/wps/testdata/single_point.gml")
+        
+        self._setFromEnv()
+        import urllib
+        import tempfile
+        getpywps=pywps.Pywps(pywps.METHOD_GET)  
+        #everything ok  
+        
+        inputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=complexVector&datainputs=[indata=%s@method=POST@mimeType=%s]&responsedocument=[outdata=@mimeType=%s;outdata2=@asreference=true@mimeType=%s]" % (self.simplePolyURL,urllib.quote_plus("text/xml"),urllib.quote_plus("application/xml"),urllib.quote_plus("application/xml")))
+        #ALL INPUTS CORRECT
+        getpywps.performRequest()
+        xmldom = minidom.parseString(getpywps.response)
+        self.assertTrue(len(xmldom.getElementsByTagNameNS(self.ogrns,"FeatureCollection"))==1)
+        self.assertTrue(len(xmldom.getElementsByTagNameNS(self.wpsns,"Reference"))==1)
+        
+        #ONE INPUT WRONG
+        
+        inputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=complexVector&datainputs=[indata=%s@method=POST@mimeType=%s]&responsedocument=[outdata=@mimeType=%s;outdata2=@asreference=true@mimeType=%s]" % (self.simplePolyURL,urllib.quote_plus("text/xml"),urllib.quote_plus("application/xml"),urllib.quote_plus("image/png")))
+        getpywps.performRequest()
+        xmldom = minidom.parseString(getpywps.response)
+        try:
+            nodeValue=xmldom.getElementsByTagNameNS("http://www.opengis.net/ows/1.1","Exception")[0].getAttributeNode("locator").nodeValue
+
+        except:
+            nodeValue=None
+       
+        self.assertTrue(nodeValue=="outdata2");
+        
+        #NO OUTPUT MIMETYPE, but process has a list of processes ()
+        inputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=complexVector&datainputs=[indata=%s@method=POST@mimeType=%s]&responsedocument=[outdata;outdata2=@asreference=true]" % (self.simplePolyURL,urllib.quote_plus("text/xml")))
+        getpywps.performRequest()
+        xmldom=minidom.parseString(getpywps.response)
+        self.assertTrue(len(xmldom.getElementsByTagNameNS(self.wpsns,"Reference"))==1)
+        self.assertTrue(len(xmldom.getElementsByTagNameNS(self.ogrns,"FeatureCollection"))==1)
+        #<wps:Reference href="http://localhost/wpsoutputs/outdata-163877NiZFb" mimeType="text/xml" />
+        #NO MIMETYPE NO PROBLEM
+        getpywps.parseRequest("service=wps&version=1.0.0&request=Execute&identifier=nomimetypesprocess&datainputs=[rasterin=%s;pause=1;vectorin=%s]&responsedocument=[vectorout=@asreference=true;rasterout=@asreference=true]" % (self.simpleJPG,self.simplePolyURL))
+        getpywps.performRequest()
+        xmldom=minidom.parseString(getpywps.response)
+        self.assertTrue(len(xmldom.getElementsByTagNameNS(self.wpsns,"Reference"))==2)
+        
+    def test25WFSComplexOutput(self):
+        """Test if PyWPS can return correct WFS service"""
+       #XML being checked by GDAL will raise an error, the unttest wil still be ok
+       #ERROR 4: `/var/www/html/wpsoutputs/vectorout-26317EUFxeb' not recognised as a supported file format. 
+        self._setFromEnv()
+        import urllib
+        import tempfile
+        import osgeo.ogr 
+        
+        getpywps = pywps.Pywps(pywps.METHOD_GET)
+        #Outputs will be generated accordint to the order in responsedocument
+        inputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=ogrbuffer&datainputs=[data=%s;size=0.1]&responsedocument=[buffer=@asreference=true]" % urllib.quote(self.simpleLine))
+        getpywps.performRequest()
+        
+        xmldom = minidom.parseString(getpywps.response)
+        self.assertFalse(len(xmldom.getElementsByTagNameNS(self.wpsns,"ExceptionReport")), 0)
+
+        # try to get out the Reference elemengt
+        wfsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[0].getAttribute("href")
+        #wcsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[1].getAttribute("href")
+        inSource=osgeo.ogr.Open(urllib.unquote(wfsurl))
+        self.assertTrue(isinstance(inSource,osgeo.ogr.DataSource))
+        inLayer=inSource.GetLayer()
+        self.assertTrue(isinstance(inLayer,osgeo.ogr.Layer))
+        self.assertTrue(isinstance(inLayer.GetNextFeature(),osgeo.ogr.Feature))
+        
+    def test26WCSComplexOutput(self):
+        """Test if PyWPS can return a correct WCS service"""
+       #XML being checked by GDAL will raise an error, the unttest wil still be ok
+       #ERROR 4: `/var/www/html/wpsoutputs/vectorout-26317EUFxeb' not recognised as a supported file format. 
+        
+        self._setFromEnv()
+        import urllib
+        import tempfile
+        import osgeo.gdal 
+        self.simpleGeoTiff="http://rsg.pml.ac.uk/wps/testdata/elev_srtm_30m.tif"
+        getpywps = pywps.Pywps(pywps.METHOD_GET)
+        #Outputs will be generated accordint to the order in responsedocument
+        inputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=returnWCS&datainputs=[input=%s]&responsedocument=[output=@asreference=true]" % urllib.quote(self.simpleGeoTiff))
+        #getpywps.UUID 
+        getpywps.performRequest()
+        #import pydevd;pydevd.settrace()
+        xmldom = minidom.parseString(getpywps.response)
+        self.assertFalse(len(xmldom.getElementsByTagNameNS(self.wpsns,"ExceptionReport")), 0)
+
+        # try to get out the Reference elemengt
+        #wfsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[0].getAttribute("href")
+        wcsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[0].getAttribute("href")
+        inSource=osgeo.gdal.Open(urllib.unquote(wcsurl))
+        self.assertTrue(isinstance(inSource,osgeo.gdal.Dataset))
+        self.assertTrue(isinstance(inSource.GetRasterBand(1),osgeo.gdal.Band))        
             
     def _setFromEnv(self):
         os.putenv("PYWPS_PROCESSES", os.path.join(pywpsPath,"tests","processes"))

@@ -141,8 +141,9 @@ class UMN:
         :rtype: String
         :returns: URL pointing to OGC OWS (WCS/WFS)
         """
-
         # try to determine the data type
+        #need to silence error like: ERROR 4: `/var/www/html/wpsoutputs/vectorout-24363CH3zxi' not recognised as a supported file format.
+        #caused by wrong opendataset from gdal or ogr
         datatype = self.getDataset(output)
         
         if not datatype:
@@ -259,6 +260,7 @@ class UMN:
         """
 
         logging.debug("Importing given output [%s] using gdal" % output.value)
+        #If dataset is XML it will make an error like ERROR 4: `/var/www/html/wpsoutputs/vectorout-26317EUFxeb' not recognised as a supported file format.
         self.dataset = gdal.Open(output.value)
 
         if self.dataset:

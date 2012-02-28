@@ -1099,37 +1099,34 @@ class Execute(Request):
                         logging.debug("Problems generating the BBOX XML content asReference")
                         traceback.print_exc(file=pywps.logFile)
                 if outputType == "ftp":
-                    tmp = tempfile.mkstemp(prefix="%s-%s" % (output.identifier,self.pid),text=True)
-                    f = open(tmp[1],"w")
+                    
+                    tmpFileName = "%s-%s" % (output.identifier,self.wps.UUID)
+                    f = open(tmpFileName,"w")
                     f.write(str(output.value))
                     f.close()
-                    outFile = tmp[1]
-                    outName = os.path.basename(outFile)
-                    self._storeFileOnFTPServer(tmp[1], os.path.basename(tmp[1]),ftpURL, ftpPort, ftpLogin, ftpPasswd)
-                    #templateOutput["reference"] = escape(tmp[1])
-                    templateOutput["reference"] = escape(config.getConfigValue("server","outputPath")+"/" +outName)
+                    self._storeFileOnFTPServer(tmpFileName, tmpFileName,ftpURL, ftpPort, ftpLogin, ftpPasswd)
+                    templateOutput["reference"] = escape(config.getConfigValue("server","outputPath")+"/" +tmpFileName)
                 else:
-                    tmp = tempfile.mkstemp(prefix="%s-%s" % (output.identifier,self.pid),dir=os.path.join(config.getConfigValue("server","outputPath")),text=True)
-                    f = open(tmp[1],"w")
+                    tmpFileName = os.path.join(os.path.join(config.getConfigValue("server","outputPath")),"%s-%s" % (output.identifier,self.wps.UUID))
+                    f = open(tmpFileName,"w")
                     f.write(str(output.value))
                     f.close()
-                    outFile = tmp[1]
-                    outName = os.path.basename(outFile)
-                    templateOutput["reference"] = escape(config.getConfigValue("server","outputUrl")+"/" +outName)
+                    templateOutput["reference"] = escape(config.getConfigValue("server","outputUrl")+"/" +os.path.basename(tmpFileName))
                 
             # complex value
         else:
-                outName = os.path.basename(output.value)
-                outSuffix = os.path.splitext(outName)[1]
+                #outName = os.path.basename(output.value)
+                #outSuffix = os.path.splitext(outName)[1]
+                outSuffix = os.path.splitext(os.path.basename(output.value))[1]
+                #recall that splittext already includes .
                 if outputType == "ftp":
-                    tmp = tempfile.mkstemp(suffix=outSuffix, prefix="%s-%s" % (output.identifier,self.pid),text=True)
+                    tmpFileName="%s-%s%s" % (output.identifier,self.wps.UUID,outSuffix)
                 else:
-                    tmp = tempfile.mkstemp(suffix=outSuffix,
-                                        prefix="%s-%s" % (output.identifier,self.pid),
-                                        dir=os.path.join(config.getConfigValue("server","outputPath")),text=True)
+                    tmpFileName=os.path.join(os.path.join(config.getConfigValue("server","outputPath")),"%s-%s%s" % (output.identifier,self.wps.UUID,outSuffix))
 
-                outFile = tmp[1]
-                outName = os.path.basename(outFile)
+                
+                outFile = tmpFileName
+                outName = os.path.basename(tmpFileName)
                 if outputType == "ftp":
                     self._storeFileOnFTPServer(os.path.abspath(output.value), outName + outSuffix, ftpURL, ftpPort,ftpLogin, ftpPasswd)
                     #data sent to FTP and stored in the local output
