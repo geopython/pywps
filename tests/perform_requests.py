@@ -8,9 +8,8 @@ sys.path.insert(0,pywpsPath)
 import pywps
 import pywps.Process
 import unittest
-import os
 from xml.dom import minidom
-import base64
+import base64,re,urllib,tempfile
 if os.name != "java":
     from osgeo import ogr
 else:
@@ -403,7 +402,6 @@ class RequestGetTestCase(unittest.TestCase):
         """
         
         self._setFromEnv()
-        import urllib
         postpywps = pywps.Pywps(pywps.METHOD_POST)
         executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-complexinput-one-output-as-reference.xml"))
         postinputs = postpywps.parseRequest(executeRequestFile)
@@ -702,14 +700,13 @@ class RequestGetTestCase(unittest.TestCase):
         self.assertTrue(len(xmldom.getElementsByTagNameNS(self.wpsns,"Reference"))==2)
         
     def test25WFSComplexOutput(self):
-        """Test if PyWPS can return correct WFS service"""
+        """Test if PyWPS can return a correct WFS service content with projs"""
        #XML being checked by GDAL will raise an error, the unttest wil still be ok
        #ERROR 4: `/var/www/html/wpsoutputs/vectorout-26317EUFxeb' not recognised as a supported file format. 
+        #USE urllib.quote_lus
+        #'urllib.quote_plus("http://rsg.pml.ac.uk/wps/testdata/single_point.gml")
         self._setFromEnv()
-        import urllib
-        import tempfile
-        import osgeo.ogr 
-        
+        import osgeo.ogr
         getpywps = pywps.Pywps(pywps.METHOD_GET)
         #Outputs will be generated accordint to the order in responsedocument
         inputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=ogrbuffer&datainputs=[data=%s;size=0.1]&responsedocument=[buffer=@asreference=true]" % urllib.quote(self.simpleLine))
@@ -721,21 +718,37 @@ class RequestGetTestCase(unittest.TestCase):
         # try to get out the Reference elemengt
         wfsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[0].getAttribute("href")
         #wcsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[1].getAttribute("href")
-        inSource=osgeo.ogr.Open(urllib.unquote(wfsurl))
+        wfsurl=urllib.unquote(wfsurl)
+        inSource=osgeo.ogr.Open(wfsurl)
         self.assertTrue(isinstance(inSource,osgeo.ogr.DataSource))
         inLayer=inSource.GetLayer()
         self.assertTrue(isinstance(inLayer,osgeo.ogr.Layer))
         self.assertTrue(isinstance(inLayer.GetNextFeature(),osgeo.ogr.Feature))
         
+        #check for mutiple projections from config file
+        projs=pywps.config.getConfigValue("mapserver","projs")
+        #convert to list 
+        projs=re.findall(r'\d+',projs)
+        wfs110url=wfsurl.lower().replace("1.0.0","1.1.0").replace("getfeature","getcapabilities")
+        try:
+            wfsDom=minidom.parse(urllib.urlopen(wfs110url))
+            defaultProj=wfsDom.getElementsByTagName("DefaultSRS")[0].firstChild.nodeValue #urn:ogc:def:crs:EPSG::4326
+        except:
+            assert False
+        
+        self.assertTrue(projs[0] in defaultProj)
+        try:
+            otherProjs=wfsDom.getElementsByTagName("OtherSRS") #urn:ogc:def:crs:EPSG::4326
+        except:
+            assert False
+        self.assertTrue(len(otherProjs)==(len(projs)-1))    
+        
     def test26WCSComplexOutput(self):
         """Test if PyWPS can return a correct WCS service"""
        #XML being checked by GDAL will raise an error, the unttest wil still be ok
        #ERROR 4: `/var/www/html/wpsoutputs/vectorout-26317EUFxeb' not recognised as a supported file format. 
-        
         self._setFromEnv()
-        import urllib
-        import tempfile
-        import osgeo.gdal 
+        import osgeo.gdal
         self.simpleGeoTiff="http://rsg.pml.ac.uk/wps/testdata/elev_srtm_30m.tif"
         getpywps = pywps.Pywps(pywps.METHOD_GET)
         #Outputs will be generated accordint to the order in responsedocument
@@ -749,9 +762,18 @@ class RequestGetTestCase(unittest.TestCase):
         # try to get out the Reference elemengt
         #wfsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[0].getAttribute("href")
         wcsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[0].getAttribute("href")
-        inSource=osgeo.gdal.Open(urllib.unquote(wcsurl))
+        wcsurl=urllib.unquote(wcsurl)
+        inSource=osgeo.gdal.Open(wcsurl)
         self.assertTrue(isinstance(inSource,osgeo.gdal.Dataset))
-        self.assertTrue(isinstance(inSource.GetRasterBand(1),osgeo.gdal.Band))        
+        self.assertTrue(isinstance(inSource.GetRasterBand(1),osgeo.gdal.Band))    
+        
+        #check multiple projections
+        projs=pywps.config.getConfigValue("mapserver","projs")
+        projs=re.findall(r'\d+',projs)    
+        wcsDom=minidom.parse(urllib.urlopen(wcsurl.lower().replace("getcoverage","describecoverage")))
+        projNodes=wcsDom.getElementsByTagName("requestResponseCRSs")
+        self.assertTrue(len(projs)==len(projNodes))
+        
             
     def _setFromEnv(self):
         os.putenv("PYWPS_PROCESSES", os.path.join(pywpsPath,"tests","processes"))

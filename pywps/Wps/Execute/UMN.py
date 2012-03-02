@@ -97,10 +97,10 @@ class UMN:
         self.outputs = {}
         self.process = process
         self.sessionId = sessId
-
+        self.projs=self.getProjs()
         self.mapObj = mapObj()
-        self.mapObj.setExtent(-180,-90,180,90)
-        self.mapObj.setProjection("+init=epsg:4326")
+        self.mapObj.setExtent(-180,-90,180,90)# irrelevant for WCS/WFS
+        #self.mapObj.setProjection("+init=%s" % self.projs[0])
         self.mapObj.name = "%s-%s"%(self.process.identifier,self.sessionId)
         self.mapObj.setMetaData("ows_title", config.getConfigValue("wps","title"))
         self.mapObj.setMetaData("wms_abstract", config.getConfigValue("wps","abstract"))
@@ -171,10 +171,9 @@ class UMN:
             myLayerObj.setConnectionType(MS_OGR,output.value)
             myLayerObj.connection = output.value
             myLayerObj.setMetaData("wfs_title", output.title)
-
             myClassObj=classObj(myLayerObj)
             myStyleObj=styleObj(myClassObj)
-
+            myLayerObj.setMetaData("wfs_title", output.title)
             myLayerObj.setMetaData("gml_featureid","ID")
             myLayerObj.setMetaData("gml_include_items","all")
 
@@ -214,37 +213,57 @@ class UMN:
         myLayerObj.name = output.identifier
 
         # either the output has projection already, use it
+        
+        
         if output.projection:
-            myLayerObj.setProjection(output.projection)
+            #output.projection=epsg:4326,epsg:102067,epsg:3059,epsg:900913 like cfg file
+            firstEPSG=output.projection.lower().split(",")[0]
+            myLayerObj.setProjection(firstEPSG)
         else:
+            #do we have info from self.projs
+            if len(self.projs)>0:
+                myLayerObj.setProjection(self.projs[0])
+            else:
             # try to determine dataset projection using gdal/ogr
-            spatialReference = self.getSpatialReference(output,datatype)
-            if spatialReference:
-                if  datatype == "raster":
-                    authority = spatialReference.GetAuthorityName("GEOGCS")
-                    code = spatialReference.GetAuthorityCode("GEOGCS")
-                else:
-                    authority = spatialReference.GetAuthorityName("PROJCS")
-                    code = spatialReference.GetAuthorityCode("PROJCS")
+                spatialReference = self.getSpatialReference(output,datatype)
+                if spatialReference:
+                    
+                    if spatialReference.IsProjected():
+                        authority = spatialReference.GetAuthorityName("PROJCS")
+                        code = spatialReference.GetAuthorityCode("PROJCS")
+                    else:
+                        authority = spatialReference.GetAuthorityName("GEOGCS")
+                        code = spatialReference.GetAuthorityCode("GEOGCS")
+                        #authority = spatialReference.GetAuthorityName("PROJCS")
+                        #code = spatialReference.GetAuthorityCode("PROJCS")
 
                 # we are able to construct something like "epsg:4326"
-                if authority and code:
-                    myLayerObj.setProjection("init=%s:%s"% (authority.lower(),code))
-                    output.projection = myLayerObj.getProjection()
+                    if authority and code:
+                        myLayerObj.setProjection("init=%s:%s"% (authority.lower(),code))
+                      
                 # we will have at least PROJ4 parameters, but no
                 # AUTHORITY:CODE, the dataset will obtain projection from
                 # the map object
-                else:
-                    myLayerObj.setProjection(spatialReference.ExportToProj4())
-                    output.projection = self.mapObj.getProjection()
-            # use projection of the whole map object
+        
+        #setting wfs_srs, wms_srs and wcs_srs
+        if output.projection:
+                epsgList=output.projection.split(",")
+                ows_srs=" ".join(epsgList).upper()
+                output.projection=epsgList[0]
+        else: 
+            #check for output.projection
+            if len(self.projs)>0:
+                ows_srs=" ".join(self.projs).upper()
+                output.projection=self.projs[0]
             else:
-                myLayerObj.setProjection(self.mapObj.getProjection())
-                output.projection = self.mapObj.getProjection()
-        #if output.bbox:
-        #    myLayerObj.setExtent(output.bbox[0],output.bbox[1],output.bbox[2],output.bbox[3])
-
-        # set the output to be WMS
+                #try to get from data otherwise give up on it
+                if ("authority" and "code" in locals()) and (authority and code):
+                    ows_srs=authority.upper()+":"+code
+                    output.projection=authority.upper()+":"+code  
+       #if we have ows_srs then set it
+        if "ows_srs" in locals():
+            myLayerObj.setMetaData("ows_srs",ows_srs)
+                  
         if datatype == "raster":
             return self.getMapServerWCS(output)
             myLayerObj.type = MS_LAYER_RASTER
@@ -320,6 +339,12 @@ class UMN:
         """Save the mapfile to disc"""
         if self.mapObj:
             self.mapObj.save(self.mapFileName)
+    
+    def getProjs(self):
+        """Gets projections from config file and it returns a len=0 list if no projs present"""
+        projs=config.getConfigValue("mapserver","projs").lower().split(",") #List with projs
+        projs=[item for item in projs if 'epsg' in item] #cleaning a bit (specially from '')
+        return projs
 
     def getMapServerWCS(self,output):
         """Get the URL for mapserver WCS request of the output"""

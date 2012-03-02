@@ -87,7 +87,7 @@ class ComplexProcess(WPSProcess):
 
         self.vectorout = self.addComplexOutput(identifier="vectorout",
                                                  title="Vector file",
-                                                 formats = [{"mimeType":"text/xml"}])
+                                                 formats = [{"mimeType":"application/xml"},{"mimeType":"text/plain"},{"mimeType":"text/xml"}])
         self.rasterout = self.addComplexOutput(identifier="rasterout",
                                                  title="Raster file",
                                                  formats = [{"mimeType":"image/tiff"}])
@@ -101,6 +101,41 @@ class ComplexProcess(WPSProcess):
                 self.status.set("Processing process",i*20)
                 time.sleep(5)
         return
+
+class NoMimeTypeComplexProcess(WPSProcess):
+    """This process defines raster and vector data in- and outputs, without any reference to mimetypes"""
+    def __init__(self):
+        WPSProcess.__init__(self, identifier = "nomimetypesprocess",
+            title="Complex process without mimetypes",
+            storeSupported=True)
+
+        self.vectorin = self.addComplexInput(identifier="vectorin",
+                                                 title="Vector file")
+
+        self.rasterin = self.addComplexInput(identifier="rasterin",
+                                                 title="Raster file")
+
+        self.pausein = self.addLiteralInput(identifier="pause",
+                                                 title="Pause the process",
+                                                 abstract="Pause the process for several seconds, so that status=true can be tested",
+                                                 default = False,
+                                                 type = type(True))
+
+        self.vectorout = self.addComplexOutput(identifier="vectorout",
+                                                 title="Vector file")
+        self.rasterout = self.addComplexOutput(identifier="rasterout",
+                                                 title="Raster file")
+    def execute(self):
+        self.vectorout.setValue(self.vectorin.getValue())
+        self.rasterout.setValue(self.rasterin.getValue())
+
+        if self.pausein.getValue():
+            import time
+            for i in range(5):
+                self.status.set("Processing process",i*20)
+                time.sleep(5)
+        return
+
 
 class ComplexProcessOWS(WPSProcess):
     def __init__(self):
@@ -202,13 +237,35 @@ class ReferenceDefaultReturn(WPSProcess):
     """Returns contents as Reference if not indicated by user"""
     def __init__(self):
         WPSProcess.__init__(self, identifier="referencedefault",title="Returns ouputs as references, unless defined by the user in the request",storeSupported=True, statusSupported=True)
-        self.vectorOut = self.addComplexOutput(identifier="vectorout",title="Vector file",formats = [{"mimeType":"text/xml"}],asReference=True)
+        self.vectorOut = self.addComplexOutput(identifier="vectorout",title="Vector file",formats = [{"mimeType":"application/xml"}],asReference=True)
         self.stringOut = self.addLiteralOutput(identifier="string",title="String data out",type = type(""),asReference=True)
         self.bboxOut = self.addBBoxOutput(identifier="bboxout",title="BBox out",asReference=True)
         
     def execute(self):
         import StringIO
-        self.vectorOut.setValue(StringIO.StringIO("<foo><bacon/></foo>"))
+        self.vectorOut.setValue(StringIO.StringIO('<?xml version="1.0" encoding="utf-8" ?><foo><bacon/></foo>'))
         self.stringOut.setValue("stringTest")
         self.bboxOut.setValue([[-11,-12],[13,14]])
+
+
+
+class returnWCS(WPSProcess):
+    def __init__(self):
+        ##
+        # Process initialization
+        WPSProcess.__init__(self,
+            identifier = "returnWCS",
+            title="Returns image as a WCS",
+            abstract="""Returns image as a WCS reference using mapscript""",
+            version = "1.0",
+            storeSupported = True,
+            statusSupported = True)
+         
+        self.dataIn=self.addComplexInput(identifier = 'input', title = 'Raster image to return was WCS', minOccurs = 1, maxOccurs = 1024, formats = [{'mimeType': 'image/tiff'}, {'mimeType': 'image/geotiff'}, {'mimeType': 'application/geotiff'}, {'mimeType': 'application/x-geotiff'}, {'mimeType': 'image/png'}, {'mimeType': 'image/gif'}, {'mimeType': 'image/jpeg'}, {'mimeType': 'application/x-erdas-hfa'}, {'mimeType': 'application/netcdf'}, {'mimeType': 'application/x-netcdf'}])
+        self.dataOut=self.addComplexOutput(identifier= 'output',title="Returned WCS. No need to set asReference=True, since process ",useMapscript=True,formats = [{'mimeType': 'image/tiff'}, {'mimeType': 'image/geotiff'}, {'mimeType': 'application/geotiff'}, {'mimeType': 'application/x-geotiff'}, {'mimeType': 'image/png'}, {'mimeType': 'image/gif'}, {'mimeType': 'image/jpeg'}, {'mimeType': 'application/x-erdas-hfa'}, {'mimeType': 'application/netcdf'}, {'mimeType': 'application/x-netcdf'}]) 
+        
+    def execute(self):
+        self.dataOut.setValue(self.dataIn.getValue()[0])
+        return
+   
         
