@@ -3,9 +3,7 @@
                 <wps:ComplexData<TMPL_IF mimetype> mimeType="<TMPL_VAR mimetype>"</TMPL_IF><TMPL_IF schema> schema="<TMPL_VAR schema>"</TMPL_IF><TMPL_IF encoding> encoding="<TMPL_VAR encoding>"</TMPL_IF>>
                     <TMPL_IF cdata>
                     <![CDATA[<TMPL_VAR complexdata>]]>
-                    <TMPL_ELSE>
-                    <TMPL_VAR complexdata> 
-                    </TMPL_IF>
+                    <TMPL_ELSE><TMPL_VAR complexdata></TMPL_IF>
                 </wps:ComplexData>
                 </TMPL_IF>
                 <TMPL_IF literaldata>
