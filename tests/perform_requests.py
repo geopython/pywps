@@ -744,7 +744,7 @@ class RequestGetTestCase(unittest.TestCase):
         self.assertTrue(len(otherProjs)==(len(projs)-1))    
         
     def test26WCSComplexOutput(self):
-        """Test if PyWPS can return a correct WCS service"""
+        """Test if PyWPS can return a correct WCS service contents with proj"""
        #XML being checked by GDAL will raise an error, the unttest wil still be ok
        #ERROR 4: `/var/www/html/wpsoutputs/vectorout-26317EUFxeb' not recognised as a supported file format. 
         self._setFromEnv()
@@ -773,7 +773,23 @@ class RequestGetTestCase(unittest.TestCase):
         wcsDom=minidom.parse(urllib.urlopen(wcsurl.lower().replace("getcoverage","describecoverage")))
         projNodes=wcsDom.getElementsByTagName("requestResponseCRSs")
         self.assertTrue(len(projs)==len(projNodes))
-        
+
+    def test27NoLimitInput(self):  
+        """Test if PyWPS accepts inputs without size limit"""
+        self._setFromEnv()
+        pywps.config.setConfigValue("server","maxfilesize", str(0))
+        getpywps = pywps.Pywps(pywps.METHOD_GET) 
+         #1 output only vectorout
+        inputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=complexprocess&datainputs=[rasterin=%s;vectorin=%s]&responsedocument=[vectorout=@asreference=true]" % (urllib.quote(self.wcsurl), urllib.quote(self.wfsurl)))
+        getpywps.performRequest()
+        try:
+            xmldom = minidom.parseString(getpywps.response)
+        except:
+            assert False , "Raised a WPSException, not possible to use maxfilesize=0"  
+        #reset
+        listNode=xmldom.getElementsByTagNameNS(self.wpsns,"Reference")
+        self.assertTrue(len(listNode)==1)
+        pywps.config.loadConfiguration()          
             
     def _setFromEnv(self):
         os.putenv("PYWPS_PROCESSES", os.path.join(pywpsPath,"tests","processes"))

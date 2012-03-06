@@ -437,7 +437,7 @@ class ComplexInput(Input):
             self.onProblem("NoApplicableCode","Could not open file for writing") 
         # NOTE: the filesize should be already checked in pywps/Post.py,
         # while getting the input XML file
-        fout.write(data)
+        fout.write(data.encode("utf-8","utf-8"))
         fout.close()
         
         self.checkMimeTypeIn(fout.name)
@@ -525,7 +525,7 @@ class ComplexInput(Input):
             fout.write (chunk)
 
             # TOO BIG! STOP THIS
-            if size > self.maxFileSize: 
+            if (self.maxFileSize!=0 and (size > self.maxFileSize)): 
                 self.onProblem("FileSizeExceeded","Maximum file size is "+
                         str(self.maxFileSize/1024/1024)+" MB for input "+
                         url)

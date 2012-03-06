@@ -283,6 +283,7 @@ class Execute(Request):
 
 
                 self.storeRequired = True
+
         if self.storeRequired:
             self.statusLocation = config.getConfigValue("server","outputUrl")+"/"+self.getSessionId()+".xml"
 
@@ -297,7 +298,7 @@ class Execute(Request):
         self.initProcess()
 
         if UMN.mapscript:
-            self.umn = UMN.UMN(self.process,self.getSessionId())
+            self.umn = UMN.UMN(self.process, self.getSessionId())
 
         # check rawdataoutput against process
         if self.rawDataOutput and self.rawDataOutput not in self.process.outputs:
@@ -368,8 +369,7 @@ class Execute(Request):
             subprocess.Popen([sys.executable,__file__,
                 os.path.join(tmpPath, self.__pickleFileName+"-"+str(self.wps.UUID)),self.outputFile.name],
                 stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE
-            )
+                stderr=subprocess.PIPE)
             logging.info("This is parent process, end.")
 
             # close the outputs ..
@@ -437,8 +437,6 @@ class Execute(Request):
 
 
         except pywps.WPSException,e:
-        
-            
             traceback.print_exc(file=pywps.logFile)
             # set status to failed
             self.promoteStatus(self.failed,
@@ -515,9 +513,13 @@ class Execute(Request):
             # defined in the global config file
             
             if input.type == "ComplexValue":
+                #if maxfile == 0 then we have no limits
+                if maxFileSize==0:
+                    input.maxFileSize=0
+                else:
+                    if not input.maxFileSize or input.maxFileSize > maxFileSize:
+                        input.maxFileSize = maxFileSize
                 #if maxFile not present or bigger than value in config value
-                if not input.maxFileSize or input.maxFileSize > maxFileSize:
-                    input.maxFileSize = maxFileSize
 
             try:
                 if self.wps.inputs["datainputs"]:
@@ -529,7 +531,6 @@ class Execute(Request):
                                 input.setMimeType(inp)
                             
                             #Passing value/content
-                           
                             resp = input.setValue(inp)
                             if resp:
                                 self.cleanEnv()
@@ -979,9 +980,6 @@ class Execute(Request):
                 traceback.print_exc(file=pywps.logFile)
                 raise pywps.NoApplicableCode(
                         "Process executed. Failed to build final response for output [%s]: %s" % (identifier,e))
-            
-        
-        
         self.templateProcessor.set("Outputs",templateOutputs)
 
     def _literalOutput(self, output, literalOutput):
@@ -1115,8 +1113,6 @@ class Execute(Request):
                 
             # complex value
         else:
-                #outName = os.path.basename(output.value)
-                #outSuffix = os.path.splitext(outName)[1]
                 outSuffix = os.path.splitext(os.path.basename(output.value))[1]
                 #recall that splittext already includes .
                 if outputType == "ftp":
