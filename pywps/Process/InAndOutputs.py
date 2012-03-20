@@ -986,22 +986,26 @@ class ComplexOutput(Output):
     
     def checkMimeTypeIn(self):
             #Checking the mimeType
+            #-1)Easier to set the schema and utf if present then deal with mimetype
             #0) check if format has mimetype key, if input request has no mimeType then the key will be missing
             #1) If missing mimeType, pick the default one from list
             #2) check if mimeType is in the output.formats list, if not raise exception
             #3) if no mimeType and no outputs.formats then do nothin
             #4) Adding schema and encondig passing for wps-grass-bridge
+        try:
+            if (self.format["schema"] is None) or (self.format["schema"]==""):
+                self.format["schema"]=self.formats[0]["schema"]
+                logging.debug("Adding schema: %s" % self.format["schema"])
+            if (self.format["encoding"] is None) or (self.format["schema"]==""):
+                self.format["encoding"]=self.formats[0]["encoding"]
+                logging.debug("Adding encoding: %s" % self.format["encoding"])
+        except:
+            logging.debug("Adding schema and/or encoding failed, ")     
+            
         if (self.format["mimetype"] is None) or (self.format["mimetype"]==""):
                 logging.debug("Missing ComplexDataOutput mimeType in %s, adopting default mimeType %s (first in formats list)" % (self.identifier,self.formats[0]["mimeType"])) 
                 self.format["mimetype"]=self.formats[0]["mimeType"]             
                 #wps-grass-bridge
-                try:
-                    self.format["schema"]=self.formats[0]["schema"]
-                    logging.debug("Adding schema: %s" % self.format["schema"])
-                    self.format["encoding"]=self.formats[0]["encoding"]
-                    logging.debug("Adding encoding: %s" % self.format["encoding"])
-                except:
-                    logging.debug("Adding schema and/or encoding failed, ") 
         else:
             #Checking is mimeType is in the acceptable formats    
             if self.format["mimetype"] not in [dic["mimeType"] for dic in self.formats]:
