@@ -26,7 +26,6 @@ from pywps.Template import TemplateError
 import os,types,traceback
 import logging
 
-
 class DescribeProcess(Request):
     """
     Parses input request obtained via HTTP POST encoding - should be XML
@@ -106,7 +105,6 @@ class DescribeProcess(Request):
             processData["Dataoutputs"] = self.processOutputs(process)
             processData["dataoutputslen"] = len(processData["Dataoutputs"])
             processesData.append(processData)
-            
         return processesData
 
     def processInputs(self,process):
@@ -119,13 +117,13 @@ class DescribeProcess(Request):
         processInputs = []
         for identifier in process.inputs:
             processInput = {}
-           
-            input = process.inputs[identifier] #
-           
+            input = process.inputs[identifier]
             processInput["identifier"] = identifier
-            processInput["title"] =     process.i18n(input.title)
-            processInput["abstract"] =  process.i18n(input.abstract)
+            processInput["title"] =  process.i18n(input.title)
+            processInput["abstract"] = process.i18n(input.abstract)
             processInput["minoccurs"] = input.minOccurs
+            if input.metadata:
+                processInput["metadata"]=input.metadata
             try:
                 if input.default:
                     processInput["minoccurs"] = 0
@@ -158,6 +156,8 @@ class DescribeProcess(Request):
             processOutput["identifier"] = identifier
             processOutput["title"] =     process.i18n(output.title)
             processOutput["abstract"] =  process.i18n(output.abstract)
+            if output.metadata:
+                processOutput["metadata"]=output.metadata
             if output.type == "LiteralValue":
                 processOutput["literalvalue"] = 1
                 self.literalValue(output,processOutput)
@@ -186,7 +186,6 @@ class DescribeProcess(Request):
         processInOutput["dataTypeReference"] = dataTypeReference["reference"]
 
         # UOMs
-        
         if inoutput.uom:
             processInOutput["UOM"] = 1
             processInOutput["defaultUOM"] = inoutput.uom
@@ -202,27 +201,17 @@ class DescribeProcess(Request):
         if type(inoutput.default)!=type(None):
             processInOutput["isDefaultValue"] = 1
             processInOutput["defaultValue"] = inoutput.default
-        
+            
         # allowed values
         # NOTE: only for inputs, but does not matter
-        #logging.debug("inoutput.values test: %s",str(inoutput.values))
         try:
-            
             if "*" in inoutput.values:
                 processInOutput["anyvalue"] = 1
             else:
-               
                 processInOutput["allowedValueslen"] = 1
                 processInOutput["allowedValues"] = []
-                
-                
-                
-                
                 for val in inoutput.values:
                     valrecord = {}
-                    
-                    
-                    
                     if type(val) == type([]):
                         valrecord["minMax"] = 1
                         valrecord["minimumValue"] = val[0]
@@ -247,8 +236,7 @@ class DescribeProcess(Request):
         :param processInOutput: dictionary, where to store the parameters
             in 
         """
-        
-        
+
         processInOutput["mimetype"] = inoutput.formats[0]["mimeType"]
         processInOutput["encoding"] = inoutput.formats[0]["encoding"]
         processInOutput["schema"] = inoutput.formats[0]["schema"]

@@ -325,7 +325,7 @@ class WPSProcess:
     def addLiteralInput(self, identifier, title, abstract=None,
             uoms=(), minOccurs=1, maxOccurs=1,
             allowedValues=("*"), type=types.IntType ,
-            default=None, metadata= []):
+            default=None, metadata=[]):
         """
         Add new input item of type LiteralValue to this process
 
@@ -374,7 +374,6 @@ class WPSProcess:
                 minOccurs=minOccurs,maxOccurs=maxOccurs,
                 dataType=type, uoms=uoms, values=allowedValues,
                 default=default)
-
         return self.inputs[identifier]
 
     def addComplexInput(self,identifier,title,abstract=None,
@@ -503,7 +502,7 @@ class WPSProcess:
 
         return self.outputs[identifier]
 
-    def addLiteralOutput(self, identifier, title, abstract=None,
+    def addLiteralOutput(self, identifier, title, abstract=None,metadata=[],
             uoms=(), type=types.IntType, default=None,asReference=False):
         """
         Add new output item of type LiteralValue to this process
@@ -515,12 +514,15 @@ class WPSProcess:
         :param type: :class:`types.TypeType` value type, e.g. Integer, String, etc. you
                     can uses the :mod:`types` module of python.
         :param default: default value, if any
+        :param metadata: List of additional metadata references. See http://www.opengeospatial.org/standards/common, table 32 on page 65, http://schemas.opengis.net/xlink/1.0.0/xlinks.xsd
         :param asReference: output default asReference
         :returns: :class:`pywps.Process.InAndOutputs.LiteralOutput`
         """
 
+
+
         self.outputs[identifier] = InAndOutputs.LiteralOutput(identifier=identifier,
-                title=title, abstract=abstract, dataType=type, uoms=uoms,asReference=asReference)
+                title=title, abstract=abstract, metadata=metadata,dataType=type, uoms=uoms,asReference=asReference)
 
         return self.outputs[identifier]
 
@@ -605,7 +607,6 @@ class WPSProcess:
         (stdout, stderr) = p.communicate(stdin)
         self.message(stderr)
         self.message(stdout)
-        
         retcode = p.wait()
 
         if retcode != 0:
@@ -623,7 +624,7 @@ class WPSProcess:
                 printed. nothing happen otherwise.
         """
 
-        if self.debug or force and self.logFile:
+        if (self.debug or force) and self.logFile:
             if type(self.logFile) == type(""):
                 try:
                     f = open(self.logFile,"w")

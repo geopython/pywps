@@ -873,7 +873,7 @@ class Execute(Request):
             templateOutput["identifier"] = output.identifier
             templateOutput["title"] = self.process.i18n(output.title)
             templateOutput["abstract"] = self.process.i18n(output.abstract)
-
+            
             if self.process.storeSupported and output.asReference:
                 templateOutput["asreference"] = "true"
             else:
@@ -952,7 +952,7 @@ class Execute(Request):
                 templateOutput["identifier"] = output.identifier
                 templateOutput["title"] = self.process.i18n(output.title)
                 templateOutput["abstract"] = self.process.i18n(output.abstract)
-
+                templateOutput["metadata"] = output.metadata
 
                 # Reference
                 if output.asReference:

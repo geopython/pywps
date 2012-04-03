@@ -44,7 +44,7 @@ class Request:
     """WPS Request performing, and response formating
 
     :param wps: instance of :class:`Pywps`
-
+http://wiki.rsg.pml.ac.uk/pywps/Introduction
     .. attribute:: response
         
         formated response output
@@ -119,6 +119,7 @@ class Request:
         templates = Templates.__path__[0]
         if os.getenv("PYWPS_TEMPLATES"):
             templates = os.path.abspath(os.getenv("PYWPS_TEMPLATES"))
+
         if self.wps.inputs.has_key("request"):
             if self.wps.inputs["request"] == "getcapabilities":
                 self.templateFile = os.path.join(templates,
@@ -147,7 +148,7 @@ class Request:
         if not processes:
             processes = os.getenv("PYWPS_PROCESSES")
         self.initProcesses(processes)
-        
+
     def _initFromDirectory(self,dirname):
 
         import sys
@@ -183,7 +184,6 @@ class Request:
                     logging.warning(
                             "Could not import processes from %s: %s" % \
                                     (repr(processSources.__name__), repr(e)))
-                
                 for member in dir(procModule):
                     member = eval("procModule."+member)
 
@@ -296,9 +296,9 @@ class Request:
             it's instances, string with directory, where processes are
             located, ..."""
         global pywps
-        
+
         if processes and type(processes) == type(""):
-            logging.info("Reading processes from [%s]" % processes)
+            logging.info("Reading processes from directory [%s]" % processes)
             self.processes  = self._initFromDirectory(processes)
 
         # processes are some list -- use them directly
@@ -373,7 +373,7 @@ class Request:
         :param process: :attr:`pywps.Process`
         :returns: hash with formated metadata
         """
-
+        
         metadata = process.metadata
         if type(metadata) == type({}):
             metadata = [metadata]
@@ -395,5 +395,5 @@ class Request:
                         "&amp;identifier="+ process.identifier
 
             metadatas.append(metaStructure)
-
+            
         return metadatas

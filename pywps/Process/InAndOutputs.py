@@ -207,7 +207,7 @@ class LiteralInput(Input):
                 uoms=(),values=("*"),spacing=None,default=None):
         """Class constructor"""
         Input.__init__(self,identifier,title,abstract=abstract,
-                metadata=[],minOccurs=minOccurs,maxOccurs=maxOccurs,type="LiteralValue")
+                metadata=metadata,minOccurs=minOccurs,maxOccurs=maxOccurs,type="LiteralValue")
         
         self.dataType = dataType
         self.uoms = uoms
@@ -345,7 +345,7 @@ class ComplexInput(Input):
         """Class constructor"""
 
         Input.__init__(self,identifier,title,abstract=abstract,
-                metadata=[],minOccurs=minOccurs,maxOccurs=maxOccurs,type="ComplexValue")
+                metadata=metadata,minOccurs=minOccurs,maxOccurs=maxOccurs,type="ComplexValue")
         #If maxmegabites not present, then it will be set in  consolidateInputs()
         if maxmegabites:
             self.maxFileSize = float(maxmegabites)*1024*1024
@@ -821,7 +821,7 @@ class LiteralOutput(Output):
                 default=None,asReference=False):
         """Class Constructor"""
         Output.__init__(self,identifier,title,abstract=abstract,
-                metadata=[],type="LiteralValue",asReference=asReference)
+                metadata=metadata,type="LiteralValue",asReference=asReference)
         
         self.uoms = uoms
         if len(self.uoms) > 0:
@@ -927,7 +927,7 @@ class ComplexOutput(Output):
                 =  False):
         """Class constructor"""
         Output.__init__(self,identifier,title,abstract=abstract,
-                metadata=[],type="ComplexValue", asReference=asReference)
+                metadata=metadata,type="ComplexValue", asReference=asReference)
         
         if type(formats) == types.StringType:
             formats = [{"mimeType":formats,"encoding":None,"schema":None}]
@@ -1060,7 +1060,7 @@ class BoundingBoxOutput(Output):
                 metadata=[], crss=[], dimensions=None, asReference=False):
         """BoundingBox output"""
         Output.__init__(self,identifier,title,abstract=abstract,
-                metadata=[],type="BoundingBoxValue",asReference=asReference)
+                metadata=metadata,type="BoundingBoxValue",asReference=asReference)
         self.crss = crss
         self.crs = crss[0]
         self.dimensions = dimensions

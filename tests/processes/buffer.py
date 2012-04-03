@@ -21,14 +21,17 @@ class Process(WPSProcess):
               
          self.data = self.addComplexInput(identifier = "data",
                                             title = "Input vector file",
-                                            formats = [{'mimeType': 'text/xml', 'schema': 'http://schemas.opengis.net/gml/2.1.2/feature.xsd', 'encoding': 'UTF-8'}])
+                                            formats = [{'mimeType': 'text/xml', 'schema': 'http://schemas.opengis.net/gml/2.1.2/feature.xsd', 'encoding': 'UTF-8'}],
+                                            metadata=[{'title':'buffer' ,'href':"http://foo/bar"}])
          self.size = self.addLiteralInput(identifier="size", 
                                            title="Buffer area size",
                                            type=type(0.0),
-                                           allowedValues = [[0,10000]])
+                                           allowedValues = [[0,10000]],
+                                           metadata=[{'title':'number','href':'http://integer'}])
          self.output =self.addComplexOutput(identifier="buffer", 
                                             title="Buffered data",
                                             formats = [{'mimeType': 'text/xml', 'schema': 'http://schemas.opengis.net/gml/2.1.2/feature.xsd', 'encoding': 'UTF-8'}],
+                                            metadata=[{'title':'bufferOut','href':'http://buffer/out'}],
                                             useMapscript=True)
      def execute(self):
 
@@ -77,7 +80,6 @@ class Process(WPSProcess):
             #buff.Destroy()
             #outFeature.Destroy()
             index = index +1
-        
         outLayer.SyncToDisk()
         self.output.setValue(out)
         return

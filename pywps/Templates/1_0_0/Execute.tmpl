@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="<TMPL_VAR encoding>"?>
+<TMPL_IF statuslocation>
 <wps:ExecuteResponse xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsExecute_response.xsd" service="WPS" version="1.0.0" xml:lang="<TMPL_VAR lang>" serviceInstance="<TMPL_VAR serviceinstance>" statusLocation="<TMPL_VAR statuslocation>">
+<TMPL_ELSE>
+<wps:ExecuteResponse xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsExecute_response.xsd" service="WPS" version="1.0.0" xml:lang="<TMPL_VAR lang>" serviceInstance="<TMPL_VAR serviceinstance>">
+</TMPL_IF>
     <wps:Process wps:processVersion="<TMPL_VAR processversion>">
         <ows:Identifier><TMPL_VAR identifier></ows:Identifier>
         <ows:Title><TMPL_VAR title></ows:Title>
@@ -89,7 +93,7 @@
             <ows:Identifier><TMPL_VAR identifier></ows:Identifier>
             <ows:Title><TMPL_VAR title></ows:Title>
             <TMPL_IF abstract>
-            <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
+            	<ows:Abstract><TMPL_VAR abstract></ows:Abstract>
             </TMPL_IF>
         </wps:Output>
     </TMPL_LOOP>
@@ -103,6 +107,11 @@
             <ows:Title><TMPL_VAR title></ows:Title>
             <TMPL_IF abstract>
             <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
+             <TMPL_IF metadata>
+                	<TMPL_LOOP metadata>
+        			<ows:Metadata xlink:title="<TMPL_VAR title>" xlink:href="<TMPL_VAR href>" />
+        		</TMPL_LOOP>
+              </TMPL_IF>
             </TMPL_IF>
             <TMPL_IF reference>
             <wps:Reference<TMPL_IF reference> href="<TMPL_VAR reference>"</TMPL_IF><TMPL_IF mimetype> mimeType="<TMPL_VAR mimetype>"</TMPL_IF><TMPL_IF encoding> encoding="<TMPL_VAR encoding>"</TMPL_IF><TMPL_IF schema> schema="<TMPL_VAR schema>"</TMPL_IF> />
