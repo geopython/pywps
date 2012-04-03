@@ -9,6 +9,7 @@ import pywps
 import pywps.Process
 import unittest
 from xml.dom import minidom
+from lxml import etree
 import base64,re,urllib,tempfile
 if os.name != "java":
     from osgeo import ogr
@@ -717,6 +718,7 @@ class RequestGetTestCase(unittest.TestCase):
 
         # try to get out the Reference elemengt
         wfsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[0].getAttribute("href")
+        print wfsurl
         #wcsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[1].getAttribute("href")
         wfsurl=urllib.unquote(wfsurl)
         inSource=osgeo.ogr.Open(wfsurl)
@@ -790,6 +792,24 @@ class RequestGetTestCase(unittest.TestCase):
         listNode=xmldom.getElementsByTagNameNS(self.wpsns,"Reference")
         self.assertTrue(len(listNode)==1)
         pywps.config.loadConfiguration()          
+
+    def test28MetadataOutputDescribeProcessAndExecute(self):
+        """Test if Metatadata Output in describeProcess and Execute"""
+        self._setFromEnv()
+        getpywps = pywps.Pywps(pywps.METHOD_GET) 
+        getpywps.parseRequest("service=wps&version=1.0.0&request=describeProcess&identifier=ogrbuffer")
+        wpsTree=etree.fromstring(getpywps.performRequest())
+        #metadata in processdescriont, and I/O
+        self.assertTrue(len(wpsTree.xpath("//ProcessDescription/ows:Metadata",namespaces=wpsTree.nsmap))>0)
+        self.assertTrue(len(wpsTree.xpath("//Input/ows:Metadata",namespaces=wpsTree.nsmap))>0)
+        self.assertTrue(len(wpsTree.xpath("//Output/ows:Metadata",namespaces=wpsTree.nsmap))>0)
+        
+        getpywps.parseRequest("service=wps&version=1.0.0&request=Execute&identifier=ogrbuffer&datainputs=[data=%s;size=0.1]" % urllib.quote(self.simpleLine))
+        wpsTree=etree.fromstring(getpywps.performRequest())
+        self.assertTrue(len(wpsTree.xpath("//wps:Process/ows:Metadata",namespaces=wpsTree.nsmap))>0)
+        self.assertTrue(len(wpsTree.xpath("//wps:ProcessOutputs/wps:Output/ows:Metadata",namespaces=wpsTree.nsmap))>0)
+
+
             
     def _setFromEnv(self):
         os.putenv("PYWPS_PROCESSES", os.path.join(pywpsPath,"tests","processes"))
