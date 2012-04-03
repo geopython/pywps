@@ -30,7 +30,7 @@ class SchemaTestCase(unittest.TestCase):
    #The class takes some time to load since it's in here where the schema objects are created and the schema's URL contacted
    
     getCapabilitiesRequest = "service=wps&request=getcapabilities"
-    getDescribeProcessRequest = "service=wps&request=describeprocess&version=1.0.0&identifier=bboxprocess,complexprocess,literalprocess,complexRaster,complexVector"
+    getDescribeProcessRequest = "service=wps&request=describeprocess&version=1.0.0&identifier=bboxprocess,complexprocess,literalprocess,complexRaster,complexVector,ogrbuffer"
     
     postExecuteBBOXRequest=open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-bbox.xml"))
     #1 raster + 1 vector output No def of response doc
@@ -141,7 +141,7 @@ class SchemaTestCase(unittest.TestCase):
           
         getpywps = pywps.Pywps(pywps.METHOD_GET)
         getinputs=getpywps.parseRequest(self.getCapabilitiesRequest)
-        
+    
         getpywps.performRequest(getinputs)
         getCapabilitiesGET=etree.XML(getpywps.response,self.parser)
        
