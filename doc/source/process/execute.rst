@@ -1,8 +1,8 @@
 Execution of the process
 ========================
-Each process has to define :meth:`pywps.Process.WPSProcess.execute` method,
+Each process has to define a :meth:`pywps.Process.WPSProcess.execute` method,
 which makes the calculation and sets the output values. This method is
-called, when Execute request comes to PyWPS.
+called via a WPS Execute request. 
 
 In principle, you can do what ever you need within this method. It is
 advised, to use python bindings to popular GIS packages, like `GRASS GIS
@@ -10,13 +10,13 @@ advised, to use python bindings to popular GIS packages, like `GRASS GIS
 <http://proj.remotesensing.org>`_, or any other 
 `Python-GIS package <http://pypi.python.org/pypi?:action=browse&show=all&c=391>`_.
 
-In the :ref:`special` chapter, we should give you quick intro to some of
-this packages. Some examples are also distributed along with PyWPS source.
+In the :ref:`special` chapter, we give you a quick intro to some of
+these packages. Some examples are also distributed along with the PyWPS source.
 
-If you need to run some shell programs, you should use
-:meth:`pywps.Process.WPSProcess.cmd` method for such purpose.
+If you need to run some shell programs, you should use the
+:meth:`pywps.Process.WPSProcess.cmd` method.
 
-Example of simple execute method. Method will transform raster file from
+Below is an example of a simple execute method which transforms a raster file from
 one coordinate system to another, using Python bindings to GDAL.::
 
     from osgeo import gdal

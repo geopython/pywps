@@ -1,35 +1,34 @@
 Testing PyWPS
 *************
-Testing PyWPS can be done in the command line -- it is the easier way, how
+Testing PyWPS can be done on the command line -- it is the easier way, how
 to get both -- standard error and standard output -- at once. Testing in
 the web server environment can be done later.
 
-Before we start to test, be aware, that we are assuming following
-presumptions:
+Before we start to test, be aware that we assume the following:
 
     1 - PyWPS is installed properly, see :ref:`installation`
     2 - Configuration file is stored in :file:`/usr/local/wps/pywps.cfg`,
         see :ref:`configuration`
     3 - At least one process is stored in the
         :file:`/usr/local/wps/processes` directory.
-    4 - There is :file:`/usr/local/wps/processes/__init__.py` file, with at
+    4 - There is a :file:`/usr/local/wps/processes/__init__.py` file, with at
         least::
 
             __all__ = ['yourProcess']
 
-        text in it. For testing purposes, we do assume, that `yourProcess`
+        text in it. For testing purposes, we assume that `yourProcess`
         is `ultimatequestionprocess`. For further reading about how to setup
         custom processes, see :ref:`custom-processes`.
 
 For testing, we are using HTTP GET KVP encoding of OGC WPS request
-parameters. If you are not able to follow the meaning of some parameter,
-you should have a look at `OGC WPS 1.0.0 <http://opengeospatial.org/standards/wps>`_ standard.
+parameters. If you require clarification of WPS request parameters,
+please consult the `OGC WPS 1.0.0 <http://opengeospatial.org/standards/wps>`_ standard.
 
-.. note:: Be aware, that this document describes PyWPS, which is *server*
+.. note:: Be aware that this document describes PyWPS, which is a *server*
     implementation of OGC WPS. There is some graphical user interface to
     the server (WPS Clients), but for testing purposes, they are not
     suitable. That is the reason, why following section will use command
-    line tools and direct XLM outputs.
+    line tools and direct XML outputs.
 
 Testing PyWPS installation
 ==========================
@@ -62,16 +61,16 @@ configuration file and location of processes directory::
     $ export PYWPS_CFG=/usr/local/wps/pywps.cfg
     $ export PYWPS_PROCESSES=/usr/local/wps/processes
 
-Afterwards, you can run PyWPS CGI script. We will use  HTTP GET requests,
+Afterwards, you can run the PyWPS CGI script. We will use HTTP GET requests,
 because they are easy to follow and faster to construct.
 
 GetCapabilities
 ---------------
-In the command line::
+On the command line::
 
     $ ./cgiwps.py "service=wps&request=getcapabilities"
 
-You should obtain Capabilities response::
+You should obtain a Capabilities response::
 
     Content-Type: text/xml
 
@@ -85,11 +84,11 @@ You should obtain Capabilities response::
 
 DescribeProcess
 ---------------
-In the command line::
+On the command line::
 
     $ ./cgiwps.py "service=wps&version=1.0.0&request=describeprocess&identifier=Process"
 
-You should obtain ProcessDescriptions response::
+You should obtain a ProcessDescriptions response::
 
     <?xml version="1.0" encoding="utf-8"?>
     <wps:ProcessDescriptions xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd" service="WPS" version="1.0.0" xml:lang="eng">                                                                             
@@ -100,11 +99,11 @@ You should obtain ProcessDescriptions response::
 
 Execute
 -------
-In the command line::
+On the command line::
     
     $ ./cgiwps.py "service=wps&version=1.0.0&request=execute&identifier=ultimatequestionprocess"
 
-And after some while (it really takes so long, just wait)::
+You should obtain an ExecuteResponse response (this may take some time)::
 
     <?xml version="1.0" encoding="utf-8"?>
     <wps:ExecuteResponse xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsGetCapabilities_response.xsd" service="WPS" version="1.0.0" xml:lang="eng" serviceInstance="http://78.156.32.132/cgi-bin/wps?service=WPS&amp;request=GetCapabilities&amp;version=1.0.0" statusLocation="http://78.156.32.132/tmp/pywps/pywps-126450573849.xml">
@@ -129,8 +128,8 @@ And after some while (it really takes so long, just wait)::
 
 Issues
 ======
-.. note:: List of known problems follows. If you have seen something
-    different, please let us know via mailing list.
+.. note:: A list of known problems follows. If you have seen something
+    different, please let us know via the mailing list.
 
 .. note:: Every error you get, should have standard error and standard
     output part, but they are mixed together. We describe here the most
@@ -152,7 +151,7 @@ Issues
 *[Errno 2] No such file or directory: '/tmp/'*
 *[Errno 13] Permission denied: '/tmp/'*
     PyWPS did not find some directory or file, configured in the
-    configuration file, or th permissions are not set.
+    configuration file, or the appropriate permissions are not set.
     
 *No process in ProcessOfferings listed*
     The :envvar:`PYWPS_PROCESSES` is not set properly or there is no::
