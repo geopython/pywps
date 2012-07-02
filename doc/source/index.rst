@@ -1,17 +1,16 @@
 PyWPS |version| Documentation
 =============================
 Documentation for `PyWPS <http://pywps.wald.intevaton.org>`_. PyWPS is
-implementation of `OGC WPS <http://opengeospatil.org/standards/wps>`_ in
-it's 1.0.0 version. 
+implementation of `OGC Web Processing Service (WPS) <http://opengeospatil.org/standards/wps>`_,
+version 1.0.0. 
 
-PyWPS is written in `Python programming language <http://python.org>`_. It
-is possible to run it as CGI, Mod-Python environemnt, as well as Java
-servlet.
+PyWPS is written in `Python <http://python.org>`_. It
+is possible to run it as CGI, `Mod_python <http://www.modpython.org/>`_ environemnt, as well as Java
+servlet via `jython <http://jython.org/>`_.
 
 PyWPS should be between server-side application and WPS clients. The
-application can be written with Python, Java or it can be executable binary
-from command line. PyWPS  was ritten with direct support for `GRASS GIS
-<http://grass.osgeo.org>`_. 
+application can be written with Python, Java or executabed from the command line.
+PyWPS was written with direct support for `GRASS GIS <http://grass.osgeo.org>`_. 
 
 Contents:
 
