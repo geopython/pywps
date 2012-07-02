@@ -1,7 +1,6 @@
 PyWPS  API
 **********
-The `pywps` package consists from several sub-packages and classes. Here
-they are:
+The `pywps` package consists of several sub-packages and classes:
 
 .. toctree::
    :maxdepth: 2

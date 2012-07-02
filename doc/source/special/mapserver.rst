@@ -1,22 +1,21 @@
 PyWPS and UMN MapServer
 -----------------------
-There is little but maybe interesting possibility, how to use `UMN
-MapServer <http://mapserver.org>`_ for returning resuls of ComplexData back
+PyWPS can integrate `MapServer <http://mapserver.org>`_ to return results of ComplexData back
 to the client.
 
-The idea is following: if the client requires
+The idea is as follows: if the client requires
 :class:`pywps.Process.InAndOutputs.ComplexOutput` to be returned, `as
-reference`, usually, direct link to the produced file is returned. But with
-MapServer, WFS, WMS or WCS URL could be returned.
+reference`, usually, a direct link to the produced file is returned. But with
+MapServer, a WFS, WMS or WCS URL could be returned.
 
-The client, can later parse the URL of resulting `ComplexValue` file and
-e.g. instead of having GeoTIFF file (result of the calculation), obtained
-from the WCS, it can request PNG file, via WMS.
+The client can later parse the URL of the resulting `ComplexValue` file and
+e.g. instead of having a GeoTIFF file (result of the calculation), obtained
+from the WCS, it can request a PNG file via WMS.
 
 Requirements
 ............
-For having support for UMN MapServer for ComplexOutputs in your PyWPS
-installation, following packages have to be installed:
+To support MapServer for ComplexOutputs in your PyWPS
+installation, the following packages have to be installed:
 
     * python-mapscript
     * python-gdal
@@ -24,16 +23,15 @@ installation, following packages have to be installed:
 
 Usage
 .....
-When you are initializing new process (see :ref:`process-initialization`),
-you can add :attr:`pywps.Process.InAndOutputs.ComplexOutput.useMapscript` attribute to `True` do get it run.
+When you are initializing a new process (see :ref:`process-initialization`),
+you can set the :attr:`pywps.Process.InAndOutputs.ComplexOutput.useMapscript` attribute to `True` to get it run.
 Have a look at the :class:`pywps.Process.InAndOutputs.ComplexOutput`
 documentation, also for other attributes, like projection or bbox (can be set
 automatically from georeferenced file). Required format
-(:attr:`pywps.Process.InAndOutputs.ComplexOutput.format`  decides, if WCS
-(GeoTIFF and similar), WFS (format contains "xml" or "text") or WMS (PNG,
-JPEG, GIF) is returned.::
+(:attr:`pywps.Process.InAndOutputs.ComplexOutput.format` decides on the output
+service type (WCS for GeoTIFF and similar, WFS for xml or text, WMS for PNG, JPEG, GIF).::
 
-    
+
     self.outputMap = self.addComplexOutput(identifier = "map",
                     title = "Resulting output map",
                     formats = [

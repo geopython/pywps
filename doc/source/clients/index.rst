@@ -3,8 +3,7 @@
 WPS Clients
 ***********
 In this chapter, several (Py)WPS clients will be described. Some of them
-are part of PyWPS distribution, others not, but they can be found on the
-internet.
+are part of the PyWPS distribution, others can be found on the Internet.
 
 .. toctree::
    :maxdepth: 2
