@@ -19,7 +19,6 @@ from xml.dom.ext import c14n
 from pywps import Soap
 import types
 
-
 #Note the postpywps.response should be an WSP response without SOAP envelope
 #SOAP envelope is then added in soap.getResponse that is called from response() accordinf the soap needs
 
@@ -40,93 +39,127 @@ class SOAPSchemaTestCase(unittest.TestCase):
         sys.stderr=open("/dev/null","w")
     
     def testIsSOAP(self):
-        """Testing SOAP detection, wps.parser.isSoap"""
-        #Test using getCapabilities
-        
-        self._setFromEnv()
-        
-        postpywps = pywps.Pywps(pywps.METHOD_POST)
-        getCapabilitiesSOAP11RequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request_SOAP11.xml"))
-        postpywps.parseRequest(getCapabilitiesSOAP11RequestFile)
-        self.assertTrue(postpywps.parser.isSoap)
-        
-        getCapabilitiesSOAP12RequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request_SOAP12.xml"))
-        postpywps.parseRequest(getCapabilitiesSOAP12RequestFile)#
-        self.assertTrue(postpywps.parser.isSoap)
-        
-        #NonSOAP content
-        getCapabilitiesRequestFile=open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request.xml"))
-        postpywps.parseRequest(getCapabilitiesRequestFile)#
-        
-        self.assertFalse(postpywps.parser.isSoap)
-        
+       """Testing SOAP detection, wps.parser.isSoap"""
+       #Test using getCapabilities
+       
+       self._setFromEnv()
+       
+       postpywps = pywps.Pywps(pywps.METHOD_POST)
+       getCapabilitiesSOAP11RequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request_SOAP11.xml"))
+       postpywps.parseRequest(getCapabilitiesSOAP11RequestFile)
+       self.assertTrue(postpywps.parser.isSoap)
+       
+       getCapabilitiesSOAP12RequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request_SOAP12.xml"))
+       postpywps.parseRequest(getCapabilitiesSOAP12RequestFile)#
+       self.assertTrue(postpywps.parser.isSoap)
+       
+       #NonSOAP content
+       getCapabilitiesRequestFile=open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request.xml"))
+       postpywps.parseRequest(getCapabilitiesRequestFile)#
+       
+       self.assertFalse(postpywps.parser.isSoap)
+       
     
     def testSOAPVersion(self):
-        """Testing correct wps.parser.soapVersion"""
-        self._setFromEnv()
-        
-        postpywps = pywps.Pywps(pywps.METHOD_POST)
-        getCapabilitiesSOAP11RequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request_SOAP11.xml"))
-        postpywps.parseRequest(getCapabilitiesSOAP11RequestFile)
-        self.assertEqual(int(postpywps.parser.soapVersion), int(11))
-        
-        getCapabilitiesSOAP11RequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request_SOAP12.xml"))
-        postpywps.parseRequest(getCapabilitiesSOAP11RequestFile)
-        self.assertEqual(int(postpywps.parser.soapVersion), int(12))
-        
-        #Non soap
-        getCapabilitiesRequestFile=open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request.xml"))
-        postpywps.parseRequest(getCapabilitiesRequestFile)#
-        self.assertTrue(type(postpywps.parser.soapVersion) is types.NoneType)
-        
+       """Testing correct wps.parser.soapVersion"""
+       self._setFromEnv()
+       
+       postpywps = pywps.Pywps(pywps.METHOD_POST)
+       getCapabilitiesSOAP11RequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request_SOAP11.xml"))
+       postpywps.parseRequest(getCapabilitiesSOAP11RequestFile)
+       self.assertEqual(int(postpywps.parser.soapVersion), int(11))
+       
+       getCapabilitiesSOAP11RequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request_SOAP12.xml"))
+       postpywps.parseRequest(getCapabilitiesSOAP11RequestFile)
+       self.assertEqual(int(postpywps.parser.soapVersion), int(12))
+       
+       #Non soap
+       getCapabilitiesRequestFile=open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request.xml"))
+       postpywps.parseRequest(getCapabilitiesRequestFile)#
+       self.assertTrue(type(postpywps.parser.soapVersion) is types.NoneType)
+       
     def testSOAPExecute(self):
-        """Testing Execute SOAP postpywps.parser.isSoapExecute"""
-        self._setFromEnv()
+       """Testing Execute SOAP postpywps.parser.isSoapExecute"""
+       self._setFromEnv()
+       
+       postpywps = pywps.Pywps(pywps.METHOD_POST)
+       executeSOAPRequestFile=open(os.path.join(pywpsPath,"tests","requests","wps_execute_request_compress_SOAP.xml"))
+       postpywps.parseRequest(executeSOAPRequestFile)#
+       self.assertTrue(postpywps.parser.isSoapExecute)
+       
+       postpywps.performRequest()
+       
+       soap = Soap.SOAP()
+       response = soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute,isPromoteStatus=False) 
+       
+       xmldom=minidom.parseString(response)
+       self.assertTrue(xmldom.getElementsByTagNameNS(self.soapEnvNS[1],"Envelope")>0)
+       self.assertTrue(xmldom.getElementsByTagNameNS(self.soapEnvNS[1],"Body")>0)
+       self.assertTrue(xmldom.getElementsByTagName("output2Result")>1)
+       self.assertTrue(xmldom.getElementsByTagName("output1Result")>1)
+                 
+    def testGetCapabilitiesXML(self):
+       """Testing a complete getCapabilities using SOAP1.1, based on WPS XMl content"""
+       
+       #tmp.xml:2: element Envelope: Schemas validity error : 
+       #Element '{http://schemas.xmlsoap.org/soap/envelope/}Envelope', attribute 
+       #'{http://schemas.xmlsoap.org/soap/envelope/}encodingStyle': The attribute 
+       #'{http://schemas.xmlsoap.org/soap/envelope/}encodingStyle' is not allowed.
+       
+       self._setFromEnv()
+     
+       postpywps = pywps.Pywps(pywps.METHOD_POST)
+       getCapabilitiesSOAP11RequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request_SOAP11.xml"))
+       postpywps.parseRequest(getCapabilitiesSOAP11RequestFile)
         
-        postpywps = pywps.Pywps(pywps.METHOD_POST)
-        executeSOAPRequestFile=open(os.path.join(pywpsPath,"tests","requests","wps_execute_request_compress_SOAP.xml"))
-        postpywps.parseRequest(executeSOAPRequestFile)#
-        self.assertTrue(postpywps.parser.isSoapExecute)
-        
-        postpywps.performRequest()
-        
-        soap = Soap.SOAP()
-        response = soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute,isPromoteStatus=False) 
-        
-        xmldom=minidom.parseString(response)
-        self.assertTrue(xmldom.getElementsByTagNameNS(self.soapEnvNS[1],"Envelope")>0)
-        self.assertTrue(xmldom.getElementsByTagNameNS(self.soapEnvNS[1],"Body")>0)
-        self.assertTrue(xmldom.getElementsByTagName("output2Result")>1)
-        self.assertTrue(xmldom.getElementsByTagName("output1Result")>1)
-                  
-    def testGetCapabilities(self):
-        """Testing a complete getCapabilities using SOAP1.1"""
-        
-        #tmp.xml:2: element Envelope: Schemas validity error : 
-        #Element '{http://schemas.xmlsoap.org/soap/envelope/}Envelope', attribute 
-        #'{http://schemas.xmlsoap.org/soap/envelope/}encodingStyle': The attribute 
-        #'{http://schemas.xmlsoap.org/soap/envelope/}encodingStyle' is not allowed.
-        
-        self._setFromEnv()
-      
-        
-        postpywps = pywps.Pywps(pywps.METHOD_POST)
-        getCapabilitiesSOAP11RequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request_SOAP11.xml"))
-        postpywps.parseRequest(getCapabilitiesSOAP11RequestFile)
+       postpywps.performRequest()
          
+       soap = Soap.SOAP()
+       response = soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute,isPromoteStatus=False) 
+       
+       #Check SOAP content in response
+       postxmldom = minidom.parseString(response)
+       self.assertTrue(postxmldom.getElementsByTagNameNS(self.soapEnvNS[1],"Envelope")>0)
+       self.assertTrue(postxmldom.getElementsByTagNameNS(self.soapEnvNS[1],"Body")>0)
+       
+    def testGetCapabilitiesRPC(self):
+       """Testing a complete getCapabilities using SOAP1.1, using RPC"""
+       #SUDS SOAP client  https://fedorahosted.org/suds/
+       self._setFromEnv()
+       postpywps=pywps.Pywps(pywps.METHOD_POST)
+       getCapabilitiesRPC=open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request_SOAP11RPC.xml"))
+       postpywps.parseRequest(getCapabilitiesRPC)
+       postpywps.performRequest()
+       xmldoc=minidom.parseString(postpywps.response)
+       #no need to generate soap response, just testing to get the getCapabilities document
+       self.assertTrue(xmldoc.getElementsByTagNameNS(self.wpsns,"Capabilities")>0)
+       #using some alternative version number
+       getCapabilitiesRPC.seek(0)
+       doc=minidom.parse(getCapabilitiesRPC)
+       doc.getElementsByTagNameNS(self.owsns,'Version')[0].firstChild.nodeValue="3.0.0"
+       try:
+           postpywps.parseRequest(StringIO.StringIO(doc.toxml()))
+       #<Exception exceptionCode="VersionNegotiationFailed">
+       except Exception as e:
+           self.assertTrue("VersionNegotiationFailed" in e.code) 
+           
+    def testDescribeProcessRPC(self):
+        """Testing a complete describeProcess using SOAP1.1, using RPC"""
+        #Note in RPC DescribeProcess is as follows
+        #DescribeProcess(ns0:CodeType[] Identifier, )
+        #This CodeType is not the best defintion 
+        #<ns1:Body><ns0:DescribeProcess><ns0:Identifier xsi:type="ns2:CodeType">ultimatequestionprocess</ns0:Identifier></ns0:DescribeProcess></ns1:Body>
+        self._setFromEnv()
+        postpywps=pywps.Pywps(pywps.METHOD_POST)
+        describeProcessRPC=open(os.path.join(pywpsPath,"tests","requests","wps_describeprocess_request_SOAP11RPC.xml"))
+        postpywps.parseRequest(describeProcessRPC)
         postpywps.performRequest()
+        xmldoc=minidom.parseString(postpywps.response)
+        self.assertTrue(xmldoc.getElementsByTagNameNS(self.wpsns,"ProcessDescriptions")>0)
         
         
-        soap = Soap.SOAP()
-        response = soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute,isPromoteStatus=False) 
-        
-        #Check SOAP content in response
-        postxmldom = minidom.parseString(response)
-        self.assertTrue(postxmldom.getElementsByTagNameNS(self.soapEnvNS[1],"Envelope")>0)
-        self.assertTrue(postxmldom.getElementsByTagNameNS(self.soapEnvNS[1],"Body")>0)
-        
-    def testDescribeProcess(self):
-         """Testing a complete describeProcess using SOAP1.1"""
+    def testDescribeProcessXML(self):
+         """Testing a complete describeProcess using SOAP1.1 based on WPS XML content"""
         
          self._setFromEnv()
          postpywps = pywps.Pywps(pywps.METHOD_POST)
@@ -137,7 +170,7 @@ class SOAPSchemaTestCase(unittest.TestCase):
          xmldoc=minidom.parseString(postpywps.response)
          
          self.assertTrue(xmldoc.getElementsByTagNameNS(self.wpsns,"ProcessDescriptions")>0)
-    
+     
     def testAsyncProcess(self):
         """Testing SOAP env in asycn req with normal document"""
         self._setFromEnv()
@@ -177,7 +210,6 @@ class SOAPSchemaTestCase(unittest.TestCase):
         #in the first run the unittest will get the statusURLResult, in the second run it will parse the 
         #response content with answerResult
         
-        
         self._setFromEnv()
         pid=os.getpid()
         postpywps = pywps.Pywps(pywps.METHOD_POST)
@@ -186,7 +218,7 @@ class SOAPSchemaTestCase(unittest.TestCase):
         postpywps.parseRequest(executeSOAPRequestFile)
         postpywps.performRequest()
       
-
+ 
         soap = Soap.SOAP()
         response=soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute,isPromoteStatus=False)
         
@@ -282,7 +314,7 @@ class SOAPSchemaTestCase(unittest.TestCase):
             postpywps.performRequest()
         except pywps.Exceptions.InvalidParameterValue,e:
             postpywps.response=e.getResponse()
-
+ 
         soap = Soap.SOAP()
         response=soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute,isPromoteStatus=False)
         xmlDoc=minidom.parseString(response)
@@ -306,7 +338,7 @@ class SOAPSchemaTestCase(unittest.TestCase):
             postpywps.performRequest()
         except pywps.Exceptions.InvalidParameterValue,e:
             postpywps.response=e.getResponse()
-
+ 
         soap = Soap.SOAP()
         response=soap.getResponse(postpywps.response,soapVersion=postpywps.parser.soapVersion,isSoapExecute=postpywps.parser.isSoapExecute,isPromoteStatus=False)
         xmlDoc=minidom.parseString(response)

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- RPC getCapabilities with version object, based on suds client debug -->
+<SOAP-ENV:Envelope xmlns:ns0="http://www.opengis.net/wps/1.0.0" 
+xmlns:ns1="http://schemas.xmlsoap.org/soap/envelope/" 
+xmlns:ns2="http://www.opengis.net/ows/1.1" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+   <SOAP-ENV:Header/>
+   <ns1:Body>
+      <ns0:GetCapabilities>
+         <ns0:AcceptVersions>
+            <ns2:Version>1.0.0</ns2:Version>
+         </ns0:AcceptVersions>
+      </ns0:GetCapabilities>
+   </ns1:Body>
+</SOAP-ENV:Envelope>
