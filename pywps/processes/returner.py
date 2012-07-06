@@ -53,28 +53,5 @@ class Process(WPSProcess):
     def execute(self):
         self.dataOut.setValue(self.dataIn.getValue())
         self.textOut.setValue(self.textIn.getValue())
-        
-       
-#===============================================================================
-#        import gc
-#        gc.collect()
-#        
-#        gc.set_debug(gc.DEBUG_LEAK)
-# 
-#        del gc.garbage[:]
-#        self.dataOut.setValue( self.dataIn.getValue() )
-#        
-#        self.textOut.setValue( self.textIn.getValue() )
-#        from guppy import hpy
-#        hp=hpy()
-#        f1=open("/users/rsg/jmdj/tmp.xml","w")
-#        h=hp.heap()
-#        f1.write(str(h.byrcs))
-#        f1.write(" ")
-#        f1.write(str(gc.collect())+"unreachable objects")
-#        f1.write(str(gc.collect())+"unreachable objects")
-# 
-#===============================================================================
-
 
         return

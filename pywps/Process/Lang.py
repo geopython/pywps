@@ -71,9 +71,8 @@ class Lang:
     def getCode(langString):
        
         for lang in Lang.codes:
-            if langString in [code.lower() for code in lang]:
+            if langString.lower() in [code.lower() for code in lang]:
                 return lang[0]
-
         # return None if nothing found
         return None
 
@@ -88,7 +87,7 @@ class Lang:
 
     def setCode(self, code):
         """ Set chosen language code """
-
+        
         self.code = Lang.getCode(code)
         if not self.code:
             self.code = self.defaultCode
@@ -110,10 +109,10 @@ class Lang:
 
     def get(self,key):
         """ Will return desired string in selected language """
+       
+        if self.strings[self.code].has_key(key):
+            return self.strings[self.code][key]
+        
 
-        for string in self.strings:
-            if self.strings[self.code].has_key(key):
-                return self.strings[self.code][key]
-        # return key, if not found
         return key
 

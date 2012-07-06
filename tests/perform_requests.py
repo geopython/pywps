@@ -73,7 +73,7 @@ class RequestGetTestCase(unittest.TestCase):
 
     def testT00Assync(self):
         """Test asynchronous mode for the first time"""
-
+  
         self._setFromEnv()
         mypywps = pywps.Pywps(pywps.METHOD_GET)
         inputs = mypywps.parseRequest("service=wps&request=execute&version=1.0.0&identifier=asyncprocess&status=true&storeExecuteResponse=true")
@@ -82,14 +82,14 @@ class RequestGetTestCase(unittest.TestCase):
         mypywps.performRequest()
         xmldom = minidom.parseString(mypywps.response)
         self.assertTrue(mypywps.response)
-
+  
         if len(xmldom.getElementsByTagNameNS(self.wpsns,"ProcessAccepted")) == 1:
             self.assertTrue(len(xmldom.getElementsByTagNameNS(self.wpsns,"ProcessAccepted")) == 1)
         else:
             self.assertTrue(len(xmldom.getElementsByTagNameNS(self.wpsns,"ProcessSucceeded")))
             self.assertTrue(len(xmldom.getElementsByTagNameNS(self.wpsns,"ProcessSucceeded")))
     
-
+  
     def testT01PerformGetCapabilities(self):
         """Test if GetCapabilities request returns Capabilities document"""
         self._setFromEnv()
@@ -106,9 +106,9 @@ class RequestGetTestCase(unittest.TestCase):
         getpywps.performRequest(inputs)
         xmldom = minidom.parseString(getpywps.response)
         self.assertEquals(xmldom.firstChild.nodeName, "wps:Capabilities")
-
-
-
+  
+  
+  
     def testT02ProcessesLengthGetCapabilities(self):
         """Test, if any processes are listed in the Capabilities document
         """
@@ -127,7 +127,7 @@ class RequestGetTestCase(unittest.TestCase):
         self.assertTrue(len(xmldom.getElementsByTagNameNS(self.wpsns,"Process"))>0)
         
     
-
+  
     def testT03PerformDescribeProcess(self):
         """Test if DescribeProcess request returns ProcessDescription document"""
         self._setFromEnv()
@@ -143,7 +143,7 @@ class RequestGetTestCase(unittest.TestCase):
         postpywps.performRequest(postinputs)
         xmldom = minidom.parseString(postpywps.response)
         self.assertEquals(xmldom.firstChild.nodeName, "wps:ProcessDescriptions")
-
+  
     def testT04ProcessesLengthDescribeProcess(self):
         """Test, if any processes are listed in the DescribeProcess document
         """
@@ -179,7 +179,7 @@ class RequestGetTestCase(unittest.TestCase):
         self.assertEquals(len(xmldom.getElementsByTagName("ProcessDescription")),len(postpywps.request.processes))
         
         
-
+  
     ######################################################################################)
     def testT05ParseExecute(self):
         """Test if Execute request is parsed and performed"""
@@ -192,7 +192,7 @@ class RequestGetTestCase(unittest.TestCase):
         xmldom = minidom.parseString(mypywps.response)
         self.assertEquals(len(xmldom.getElementsByTagNameNS(self.wpsns,"LiteralData")),2)
     
-
+  
     def testT06ParseExecuteLiteralInput(self):
         """Test if Execute with LiteralInput and Output is executed"""
         
@@ -204,17 +204,17 @@ class RequestGetTestCase(unittest.TestCase):
         getinputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=literalprocess&datainputs=[int=1;string=spam%40foo.com;float=1.1;zeroset=0.0;bool=False]")
         executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-literalinput.xml"))
         postinputs = postpywps.parseRequest(executeRequestFile)
-
+  
         getpywps.performRequest(getinputs)
         postpywps.performRequest(postinputs)
         getxmldom = minidom.parseString(getpywps.response)
         postxmldom = minidom.parseString(postpywps.response)
-
+  
         getliteraldata = getxmldom.getElementsByTagNameNS(self.wpsns,"LiteralData")
         postliteraldata = postxmldom.getElementsByTagNameNS(self.wpsns,"LiteralData")
         self.assertEquals(len(getliteraldata),4)
         self.assertEquals(len(postliteraldata),4)
-
+  
         self.assertEquals(getliteraldata[0].firstChild.nodeValue,
                 postliteraldata[0].firstChild.nodeValue)
         self.assertEquals(getliteraldata[1].firstChild.nodeValue,
@@ -230,14 +230,14 @@ class RequestGetTestCase(unittest.TestCase):
         self.assertEquals(getliteraldata[3].firstChild.nodeValue, "spam@foo.com")
         
     
-
+  
     def testT07ParseExecuteComplexInput(self):
         """Test if Execute with ComplexInput and Output, given directly with input XML request is executed"""
         self._setFromEnv()
         postpywps = pywps.Pywps(pywps.METHOD_POST)
         executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-complexinput-direct.xml"))
         postinputs = postpywps.parseRequest(executeRequestFile)
-
+  
         postpywps.performRequest(postinputs)
         postxmldom = minidom.parseString(postpywps.response)
         # compare the raster files
@@ -246,23 +246,23 @@ class RequestGetTestCase(unittest.TestCase):
         outputs =  postxmldom.getElementsByTagNameNS(self.wpsns,"ComplexData")
         rasterWpsData = base64.decodestring(outputs[1].firstChild.nodeValue)
         self.assertTrue(rasterWpsData, rasterOrigData)
-
+  
         if os.name != "java":
             # compare the vector files
             gmlDriver = ogr.GetDriverByName("GML")
             origDs = gmlDriver.Open(os.path.join(pywpsPath,"tests","datainputs","lakes.gml"))
-
+  
             wpsFile = tempfile.mktemp(prefix="pywps-test")
             wpsFile = open(wpsFile,"w")
             wpsFile.write(postinputs["datainputs"][1]["value"])
             wpsFile.close()
             wpsDs = gmlDriver.Open(wpsFile.name)
-
+  
             wpslayer = wpsDs.GetLayerByIndex(0)
             origlayer = origDs.GetLayerByIndex(0)
-
+  
             self.assertTrue(wpslayer.GetFeatureCount(), origlayer.GetFeatureCount())
-
+  
             # enough  here
             # for f in range(wpslayer.GetFeatureCount()):
             #     origFeature = origlayer.GetFeature(f)
@@ -276,7 +276,7 @@ class RequestGetTestCase(unittest.TestCase):
         postpywps = pywps.Pywps(pywps.METHOD_POST)
         executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-complexinput-direct-rawdata-output.xml"))
         postinputs = postpywps.parseRequest(executeRequestFile)
-
+  
         postpywps.performRequest(postinputs)
         origData = open(os.path.join(pywpsPath,"tests","datainputs","dem.tiff"),"rb")
         rasterWpsData = base64.encodestring(origData.read())
@@ -293,7 +293,7 @@ class RequestGetTestCase(unittest.TestCase):
         gmlFile = open(gmlFile,"w")
         gmlFile.write(urllib.urlopen(self.wfsurl).read())
         gmlFile.close()
-
+  
         mypywps = pywps.Pywps(pywps.METHOD_GET)
         request = "service=wps&request=execute&version=1.0.0&identifier=complexVector&datainputs=[indata=%s]" % (urllib.quote(self.wfsurl))
         inputs = mypywps.parseRequest(request)
@@ -310,21 +310,21 @@ class RequestGetTestCase(unittest.TestCase):
             if elem.nodeName == "FeatureCollection":
                 outputgml = elem
                 break
-
+  
         # output GML should be the same, as input GML
         self.assertTrue(xmldom, outputgml)
-
+  
    
     def testT11ParseExecuteComplexVectorAndRasterInputsAsReferenceOutpu(self):
         """Test, if pywps can store complex values as reference"""
         postpywps = pywps.Pywps(pywps.METHOD_POST)
         executeRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_execute_request-complexinput-output-as-reference.xml"))
         postinputs = postpywps.parseRequest(executeRequestFile)
-
+  
         postpywps.performRequest()
         
         #print postpywps.request.process.outputs["rasterout"].value
-
+  
     def testsT12ExecuteBBox(self):
         """Parsing Bounding Box Input"""
         getpywps = pywps.Pywps(pywps.METHOD_GET)
@@ -333,16 +333,16 @@ class RequestGetTestCase(unittest.TestCase):
         getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=bboxprocess&datainputs=[bboxin=%s]"
                 % ("-11,-12,13,14"))
         postpywps.parseRequest(executeRequestFile)
-
+  
         postpywps.performRequest()
         getpywps.performRequest()
-
+  
         postinput = postpywps.request.process.getInput("bboxin")
         getinput = getpywps.request.process.getInput("bboxin")
         self.assertEquals(getinput.getValue().coords,
                           postinput.getValue().coords)
   
-
+  
     ######################################################################################
     
     def test13ParseExecuteComplexVectorInputsAsReferenceMapServer(self):
@@ -360,7 +360,7 @@ class RequestGetTestCase(unittest.TestCase):
         xmldom = minidom.parseString(getpywps.response)
        
         self.assertFalse(len(xmldom.getElementsByTagNameNS(self.wpsns,"ExceptionReport")), 0)
-
+  
         # try to get out the Reference elemengt
         wfsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[0].getAttribute("href")
         wcsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[1].getAttribute("href")
@@ -427,7 +427,7 @@ class RequestGetTestCase(unittest.TestCase):
         
         self._setFromEnv()
         import hashlib
-
+  
         imgPNGHashOriginal="b95e7e25c8c3897452a1f164da6d8c83"
         imgBMPHashOriginal="ed3a7fa929dc5236dd12667eb19c6a6c"
         
@@ -456,7 +456,7 @@ class RequestGetTestCase(unittest.TestCase):
         complexDataDom=dataInputsDom[0].getElementsByTagNameNS(self.wpsns,"ComplexData")
         xmlNodes=[item for item in complexDataDom if (item.getAttribute("mimeType")=="text/xml" or item.getAttribute("mimeType")=="application/xml")]
         ogrNodes=[node.getElementsByTagNameNS(self.ogrns,"FeatureCollection") for node in xmlNodes]
-
+  
         #Checking FeatureCollection in XML payload
         self.assertEquals(len(ogrNodes),2)
         
@@ -490,7 +490,7 @@ class RequestGetTestCase(unittest.TestCase):
         #Testing 2 string output
         getinputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=literalprocess&datainputs=[int=1;string=spam%40foo.com;float=1.1;zeroset=0.0;bool=False]&responsedocument=bool=@asReference=True;string=@asReference=True")
         getpywps.performRequest(getinputs)
-
+  
         xmldom = minidom.parseString(getpywps.response)
         self.assertTrue(len(xmldom.getElementsByTagNameNS(self.wpsns,"Reference"))==2)
     
@@ -503,13 +503,13 @@ class RequestGetTestCase(unittest.TestCase):
         getpywps.performRequest(getinputs)
         xmldom = minidom.parseString(getpywps.response)
         self.assertTrue(len(xmldom.getElementsByTagNameNS(self.wpsns,"Reference"))==3)
-
+  
         #Testing overwrite by responsedocument
         getinputs = getpywps.parseRequest("service=wps&version=1.0.0&request=Execute&identifier=referencedefault&responsedocument=vectorout=@asReference=False;string=@asReference=False;bboxout=@asReference=False")
         getpywps.performRequest(getinputs)
         xmldom = minidom.parseString(getpywps.response)
         self.assertTrue(len(xmldom.getElementsByTagNameNS(self.wpsns,"Reference"))==0)
-
+  
     def test19AssyncSpawned(self):
         """Spawned async subprocess"""
         #NOTE: testT00Assync, just checks the status document. If the spawned failed the status document will retain in ProcessAccepted
@@ -592,7 +592,7 @@ class RequestGetTestCase(unittest.TestCase):
         outputFTPMD5=[hashlib.md5(item).hexdigest() for item in outputFTP]
         #assertFalse (empty array)
         self.assertFalse(bool([item in outputFTP for item in outputFTPMD5 if not item]))
-
+  
     def test21GetParseXLinkURL(self):
         """check for correct parsing of input as reference"""
         
@@ -653,8 +653,8 @@ class RequestGetTestCase(unittest.TestCase):
         getpywps.performRequest()
         xmldom = minidom.parseString(getpywps.response)
         self.assertTrue(len(xmldom.getElementsByTagNameNS(self.wpsns,"Reference"))>0)
-
-
+  
+  
     def test24OutputMimeType(self):
         """mimeType output validated and understood mimeTypeOut()"""
         
@@ -681,7 +681,7 @@ class RequestGetTestCase(unittest.TestCase):
         xmldom = minidom.parseString(getpywps.response)
         try:
             nodeValue=xmldom.getElementsByTagNameNS("http://www.opengis.net/ows/1.1","Exception")[0].getAttributeNode("locator").nodeValue
-
+  
         except:
             nodeValue=None
        
@@ -715,7 +715,7 @@ class RequestGetTestCase(unittest.TestCase):
         
         xmldom = minidom.parseString(getpywps.response)
         self.assertFalse(len(xmldom.getElementsByTagNameNS(self.wpsns,"ExceptionReport")), 0)
-
+  
         # try to get out the Reference elemengt
         wfsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[0].getAttribute("href")
         print wfsurl
@@ -757,16 +757,17 @@ class RequestGetTestCase(unittest.TestCase):
         inputs = getpywps.parseRequest("service=wps&version=1.0.0&request=execute&identifier=returnWCS&datainputs=[input=%s]&responsedocument=[output=@asreference=true]" % urllib.quote(self.simpleGeoTiff))
         #getpywps.UUID 
         getpywps.performRequest()
-        #import pydevd;pydevd.settrace()
-        xmldom = minidom.parseString(getpywps.response)
+        
+        tmp=getpywps.response
+        xmldom = minidom.parseString(tmp)
         self.assertFalse(len(xmldom.getElementsByTagNameNS(self.wpsns,"ExceptionReport")), 0)
-
+  
         # try to get out the Reference elemengt
         #wfsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[0].getAttribute("href")
         wcsurl = xmldom.getElementsByTagNameNS(self.wpsns,"Reference")[0].getAttribute("href")
         wcsurl=urllib.unquote(wcsurl)
         inSource=osgeo.gdal.Open(wcsurl)
-        self.assertTrue(isinstance(inSource,osgeo.gdal.Dataset))
+        self.assertTrue(isinstance(inSource,osgeo.gdal.Dataset),msg="Check if server path is correct in the conf file")
         self.assertTrue(isinstance(inSource.GetRasterBand(1),osgeo.gdal.Band))    
         
         #check multiple projections
@@ -775,7 +776,7 @@ class RequestGetTestCase(unittest.TestCase):
         wcsDom=minidom.parse(urllib.urlopen(wcsurl.lower().replace("getcoverage","describecoverage")))
         projNodes=wcsDom.getElementsByTagName("requestResponseCRSs")
         self.assertTrue(len(projs)==len(projNodes))
-
+  
     def test27NoLimitInput(self):  
         """Test if PyWPS accepts inputs without size limit"""
         self._setFromEnv()
@@ -792,7 +793,7 @@ class RequestGetTestCase(unittest.TestCase):
         listNode=xmldom.getElementsByTagNameNS(self.wpsns,"Reference")
         self.assertTrue(len(listNode)==1)
         pywps.config.loadConfiguration()          
-
+  
     def test28MetadataOutputDescribeProcessAndExecute(self):
         """Test if Metatadata Output in describeProcess and Execute"""
         self._setFromEnv()
@@ -806,11 +807,62 @@ class RequestGetTestCase(unittest.TestCase):
         
         getpywps.parseRequest("service=wps&version=1.0.0&request=Execute&identifier=ogrbuffer&datainputs=[data=%s;size=0.1]" % urllib.quote(self.simpleLine))
         wpsTree=etree.fromstring(getpywps.performRequest())
+        
         self.assertTrue(len(wpsTree.xpath("//wps:Process/ows:Metadata",namespaces=wpsTree.nsmap))>0)
         self.assertTrue(len(wpsTree.xpath("//wps:ProcessOutputs/wps:Output/ows:Metadata",namespaces=wpsTree.nsmap))>0)
-
-
-            
+    
+    def test29LanguageTranslation(self):
+        """Test if title,abstract of process and I/O is translated"""
+        self._setFromEnv()
+        pywps.config.setConfigValue("wps","lang","en-CA,pt-PT")
+        from pywps.Wps import Request
+        
+        wps=pywps.Pywps(pywps.METHOD_GET)
+        wps.inputs={'request': 'getCapabilities', 'version': '1.0.0', 'service': 'wps'}
+        request=Request(wps)
+        returnerProcess=request.getProcess("returner")
+        #process related
+        returnerProcess.lang.strings["pt-PT"]["Return process"]="Processo de retorno"
+        returnerProcess.lang.strings["pt-PT"]["This is demonstration process of PyWPS, returns the same file, it gets on input, as the output."]="Este eh um processo de demonstracao de PyWPS, retorna o mesmo ficheiro, o que ele recebe como entrada sai como saida"
+        #inputs: data-->ComplexInput, text--: literal
+        returnerProcess.lang.strings["pt-PT"]["Input vector data"]="Dados vectoriais de entrada"
+        returnerProcess.lang.strings["pt-PT"]["Some width"]="Alguma largura"
+        
+        returnerProcess.inputs["data"].abstract="Complex data abstract dummy"
+        returnerProcess.inputs["text"].abstract="Literal abstract dummy"
+        returnerProcess.lang.strings["pt-PT"]["Complex data abstract dummy"]="Resumo teste de dados complexos"
+        returnerProcess.lang.strings["pt-PT"]["Literal abstract dummy"]="Resumo teste de sequencia de caracteres"
+        
+        #outputs: output-->complexOutput, text-->literal data
+        returnerProcess.lang.strings["pt-PT"]["Output vector data"]="Dados vectoriais de saida"
+        returnerProcess.lang.strings["pt-PT"]["Output literal data"]="Sequencia de caracteres de saida"
+        
+        returnerProcess.outputs["output"].abstract="Complex output data abstract dummy"
+        returnerProcess.outputs["text"].abstract="Literal output data abstract dummy"
+        returnerProcess.lang.strings["pt-PT"]["Complex output data abstract dummy"]="Resumo teste de dados de saida complexos"
+        returnerProcess.lang.strings["pt-PT"]["Literal output data abstract dummy"]="Resumo teste de sequencia de caracteres de saida"
+           
+        ptTranslations=[]
+        for key in returnerProcess.lang.strings["pt-PT"].keys():
+            ptTranslations.append(returnerProcess.lang.strings["pt-PT"][key])
+    
+        resultWPS=wps.performRequest(wps.parseRequest("service=wps&version=1.0.0&request=describeProcess&identifier=returner&language=pt-PT"),processes=[returnerProcess])
+        wpsTree=etree.fromstring(resultWPS)
+        
+        #print wps.performRequest(wps.parseRequest("service=wps&version=1.0.0&request=describeProcess&identifier=returner&language=pt-PT"),processes=[returnerProcess])
+        
+        self.assertTrue(wpsTree.xpath("//ProcessDescription/ows:Title/text()",namespaces=wpsTree.nsmap)[0] in ptTranslations)
+        self.assertTrue(wpsTree.xpath("//ProcessDescription/ows:Abstract/text()",namespaces=wpsTree.nsmap)[0] in ptTranslations)
+        inputTitles=wpsTree.xpath("//DataInputs/Input/ows:Title/text()",namespaces=wpsTree.nsmap)
+        inputAbstracts=wpsTree.xpath("//DataInputs/Input/ows:Abstract/text()",namespaces=wpsTree.nsmap)
+        self.assertTrue((set(inputTitles) <= set(ptTranslations)) and len(inputTitles)!=0)
+        self.assertTrue((set(inputAbstracts) <= set(ptTranslations)) and len(inputAbstracts)!=0)
+        outputTitles=wpsTree.xpath("//ProcessOutputs/Output/ows:Title/text()",namespaces=wpsTree.nsmap)
+        outputAbstracts=wpsTree.xpath("//DataInputs/Input/ows:Abstract/text()",namespaces=wpsTree.nsmap)
+        self.assertTrue((set(outputTitles) <= set(ptTranslations)) and len(outputTitles)!=0)
+        
+        
+           
     def _setFromEnv(self):
         os.putenv("PYWPS_PROCESSES", os.path.join(pywpsPath,"tests","processes"))
         os.environ["PYWPS_PROCESSES"] = os.path.join(pywpsPath,"tests","processes")
