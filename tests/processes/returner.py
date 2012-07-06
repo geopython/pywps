@@ -9,8 +9,7 @@ class Process(WPSProcess):
         WPSProcess.__init__(self,
             identifier = "returner",
             title="Return process",
-            abstract="""This is demonstration process of PyWPS, returns
-            the same file, it gets on input, as the output.""",
+            abstract="""This is demonstration process of PyWPS, returns the same file, it gets on input, as the output.""",
             version = "1.0",
             storeSupported = True,
             statusSupported = True)

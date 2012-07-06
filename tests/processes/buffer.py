@@ -17,6 +17,7 @@ class Process(WPSProcess):
               version = "0.1",
               storeSupported = "true",
               statusSupported = "true",
+              metadata=[{'title':'buffer' ,'href':"http://foo/bar"}],
               abstract="Process demonstrating how to work with OGR inside PyWPS: e.g: http%3A//localhost/wps.cgi%3Frequest%3DExecute%26service%3Dwps%26version%3D1.0.0%26identifier%3Dogrbuffer%26datainputs%3D%5Bdata%3Dhttp%3A//openlayers.org/dev/examples/gml/line.xml%3Bsize%3D0.1%5D%26responsedocument%3D%5Bbuffer%3D%40asreference%3Dtrue%5D")
               
          self.data = self.addComplexInput(identifier = "data",

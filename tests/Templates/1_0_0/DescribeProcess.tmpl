@@ -26,6 +26,11 @@
                 <TMPL_IF abstract>
                 <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
                 </TMPL_IF>
+                <TMPL_IF metadata>
+                	<TMPL_LOOP metadata>
+        			<ows:Metadata xlink:title="<TMPL_VAR title>" xlink:href="<TMPL_VAR href>" />
+        			</TMPL_LOOP>
+                </TMPL_IF>
                 <TMPL_IF complexvalue>
                 <ComplexData>
                     <TMPL_INCLUDE DescribeProcess_ComplexValue.tmpl>
@@ -53,6 +58,11 @@
                 <ows:Title><TMPL_VAR title></ows:Title>
                 <TMPL_IF abstract>
                 <ows:Abstract><TMPL_VAR abstract></ows:Abstract>
+                </TMPL_IF>
+                <TMPL_IF metadata>
+                	<TMPL_LOOP metadata>
+        			<ows:Metadata xlink:title="<TMPL_VAR title>" xlink:href="<TMPL_VAR href>" />
+        			</TMPL_LOOP>
                 </TMPL_IF>
                 <TMPL_IF complexvalue>
                 <ComplexOutput>
