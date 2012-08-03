@@ -55,97 +55,195 @@
 					</xsd:complexType></xsd:schema>
 				-->
 				<!-- Exception report -->
-				<xsl:element name="schema" namespace="http://www.w3.org/2001/XMLSchema">
-					<xsl:attribute name="targetNamespace">
-            <xsl:value-of select="'http://www.opengis.net/ows/1.1'" />
-          </xsl:attribute>
-					<xsl:element name="include" namespace="http://www.w3.org/2001/XMLSchema">
-						<xsl:attribute name="schemaLocation">
-              <xsl:value-of
-							select="'http://schemas.opengis.net/ows/1.1.0/owsExceptionReport.xsd'" />
-            </xsl:attribute>
-					</xsl:element>
-				</xsl:element>
-				<!-- GetCapabilities report -->
-				<xsl:element name="schema" namespace="http://www.w3.org/2001/XMLSchema">
-					<xsl:attribute name="targetNamespace">
-            <xsl:value-of select="'http://www.opengis.net/wps/1.0.0'" />
-          </xsl:attribute>
-					<xsl:element name="include" namespace="http://www.w3.org/2001/XMLSchema">
-						<xsl:attribute name="schemaLocation">
-              <xsl:value-of
-							select="'http://schemas.opengis.net/wps/1.0.0/wpsGetCapabilities_request.xsd'" />
-            </xsl:attribute>
-					</xsl:element>
-				</xsl:element>
-				<xsl:element name="schema" namespace="http://www.w3.org/2001/XMLSchema">
-					<xsl:attribute name="targetNamespace">
-            <xsl:value-of select="'http://www.opengis.net/wps/1.0.0'" />
-          </xsl:attribute>
-					<xsl:element name="include" namespace="http://www.w3.org/2001/XMLSchema">
-						<xsl:attribute name="schemaLocation">
-              <xsl:value-of
-							select="'http://schemas.opengis.net/wps/1.0.0/wpsGetCapabilities_response.xsd'" />
-            </xsl:attribute>
-					</xsl:element>
-				</xsl:element>
+
+				<!-- REMOVED DUE TO OGC RECURSIVE LOOP -->
+				<!--
+
+					<xsl:element name="schema"
+					namespace="http://www.w3.org/2001/XMLSchema"> <xsl:attribute
+					name="targetNamespace"> <xsl:value-of
+					select="'http://www.opengis.net/ows/1.1'" /> </xsl:attribute>
+					<xsl:element name="include"
+					namespace="http://www.w3.org/2001/XMLSchema"> <xsl:attribute
+					name="schemaLocation"> <xsl:value-of
+					select="'http://schemas.opengis.net/ows/1.1.0/owsExceptionReport.xsd'"
+					/> </xsl:attribute> </xsl:element> </xsl:element>
+				--><!-- GetCapabilities report -->
+				<!-- REMOVED DUE TO OGC RECURSIVE LOOP -->
+				<!--
+					<xsl:element name="schema"
+					namespace="http://www.w3.org/2001/XMLSchema"> <xsl:attribute
+					name="targetNamespace"> <xsl:value-of
+					select="'http://www.opengis.net/wps/1.0.0'" /> </xsl:attribute>
+					<xsl:element name="include"
+					namespace="http://www.w3.org/2001/XMLSchema"> <xsl:attribute
+					name="schemaLocation"> <xsl:value-of
+					select="'http://schemas.opengis.net/wps/1.0.0/wpsGetCapabilities_request.xsd'"
+					/> </xsl:attribute> </xsl:element> </xsl:element> <xsl:element
+					name="schema" namespace="http://www.w3.org/2001/XMLSchema">
+					<xsl:attribute name="targetNamespace"> <xsl:value-of
+					select="'http://www.opengis.net/wps/1.0.0'" /> </xsl:attribute>
+					<xsl:element name="include"
+					namespace="http://www.w3.org/2001/XMLSchema"> <xsl:attribute
+					name="schemaLocation"> <xsl:value-of
+					select="'http://schemas.opengis.net/wps/1.0.0/wpsGetCapabilities_response.xsd'"
+					/> </xsl:attribute> </xsl:element> </xsl:element>
+				-->
+				<!-- REMOVED DUE TO OGC RECURSIVE LOOP -->
 				<!-- DescribeProcess report -->
-				<xsl:element name="schema" namespace="http://www.w3.org/2001/XMLSchema">
-					<xsl:attribute name="targetNamespace">
-            <xsl:value-of select="'http://www.opengis.net/wps/1.0.0'" />
-          </xsl:attribute>
-					<xsl:element name="include" namespace="http://www.w3.org/2001/XMLSchema">
-						<xsl:attribute name="schemaLocation">
-              <xsl:value-of
-							select="'http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_request.xsd'" />
-            </xsl:attribute>
-					</xsl:element>
-				</xsl:element>
-				<xsl:element name="schema" namespace="http://www.w3.org/2001/XMLSchema">
-					<xsl:attribute name="targetNamespace">
-            <xsl:value-of select="'http://www.opengis.net/wps/1.0.0'" />
-          </xsl:attribute>
-					<xsl:element name="include" namespace="http://www.w3.org/2001/XMLSchema">
-						<xsl:attribute name="schemaLocation">
-              <xsl:value-of
-							select="'http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd'" />
-            </xsl:attribute>
-					</xsl:element>
-				</xsl:element>
+				<!--
+					<xsl:element name="schema"
+					namespace="http://www.w3.org/2001/XMLSchema"> <xsl:attribute
+					name="targetNamespace"> <xsl:value-of
+					select="'http://www.opengis.net/wps/1.0.0'" /> </xsl:attribute>
+					<xsl:element name="include"
+					namespace="http://www.w3.org/2001/XMLSchema"> <xsl:attribute
+					name="schemaLocation"> <xsl:value-of
+					select="'http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_request.xsd'"
+					/> </xsl:attribute> </xsl:element> </xsl:element> <xsl:element
+					name="schema" namespace="http://www.w3.org/2001/XMLSchema">
+					<xsl:attribute name="targetNamespace"> <xsl:value-of
+					select="'http://www.opengis.net/wps/1.0.0'" /> </xsl:attribute>
+					<xsl:element name="include"
+					namespace="http://www.w3.org/2001/XMLSchema"> <xsl:attribute
+					name="schemaLocation"> <xsl:value-of
+					select="'http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd'"
+					/> </xsl:attribute> </xsl:element> </xsl:element>
+				-->
 				<!-- Execute report -->
-				<xsl:element name="schema" namespace="http://www.w3.org/2001/XMLSchema">
-					<xsl:attribute name="targetNamespace">
-            <xsl:value-of select="'http://www.opengis.net/wps/1.0.0'" />
-          </xsl:attribute>
-					<xsl:element name="include" namespace="http://www.w3.org/2001/XMLSchema">
-						<xsl:attribute name="schemaLocation">
-              <xsl:value-of
-							select="'http://schemas.opengis.net/wps/1.0.0/wpsExecute_request.xsd'" />
-            </xsl:attribute>
-					</xsl:element>
-				</xsl:element>
-				<xsl:element name="schema" namespace="http://www.w3.org/2001/XMLSchema">
-					<xsl:attribute name="targetNamespace">
-            <xsl:value-of select="'http://www.opengis.net/wps/1.0.0'" />
-          </xsl:attribute>
-					<xsl:element name="include" namespace="http://www.w3.org/2001/XMLSchema">
-						<xsl:attribute name="schemaLocation">
-              <xsl:value-of
-							select="'http://schemas.opengis.net/wps/1.0.0/wpsExecute_response.xsd'" />
-            </xsl:attribute>
-					</xsl:element>
-				</xsl:element>
-				<xsl:element name="schema" namespace="http://www.w3.org/2001/XMLSchema">
-					<xsl:attribute name="targetNamespace">
-            <xsl:value-of select="'http://www.opengis.net/ows/1.1'" />
-          </xsl:attribute>
-					<xsl:element name="include" namespace="http://www.w3.org/2001/XMLSchema">
-						<xsl:attribute name="schemaLocation">
-              <xsl:value-of
-							select="'http://schemas.opengis.net/ows/1.1.0/owsExceptionReport.xsd'" />
-            </xsl:attribute>
-					</xsl:element>
-				</xsl:element>
+				<!-- REMOVED DUE TO OGC RECURSIVE LOOP -->
+				<!--
+					<xsl:element name="schema"
+					namespace="http://www.w3.org/2001/XMLSchema"> <xsl:attribute
+					name="targetNamespace"> <xsl:value-of
+					select="'http://www.opengis.net/wps/1.0.0'" /> </xsl:attribute>
+					<xsl:element name="include"
+					namespace="http://www.w3.org/2001/XMLSchema"> <xsl:attribute
+					name="schemaLocation"> <xsl:value-of
+					select="'http://schemas.opengis.net/wps/1.0.0/wpsExecute_request.xsd'"
+					/> </xsl:attribute> </xsl:element> </xsl:element> <xsl:element
+					name="schema" namespace="http://www.w3.org/2001/XMLSchema">
+					<xsl:attribute name="targetNamespace"> <xsl:value-of
+					select="'http://www.opengis.net/wps/1.0.0'" /> </xsl:attribute>
+					<xsl:element name="include"
+					namespace="http://www.w3.org/2001/XMLSchema"> <xsl:attribute
+					name="schemaLocation"> <xsl:value-of
+					select="'http://schemas.opengis.net/wps/1.0.0/wpsExecute_response.xsd'"
+					/> </xsl:attribute> </xsl:element> </xsl:element> <xsl:element
+					name="schema" namespace="http://www.w3.org/2001/XMLSchema">
+					<xsl:attribute name="targetNamespace"> <xsl:value-of
+					select="'http://www.opengis.net/ows/1.1'" /> </xsl:attribute>
+					<xsl:element name="include"
+					namespace="http://www.w3.org/2001/XMLSchema"> <xsl:attribute
+					name="schemaLocation"> <xsl:value-of
+					select="'http://schemas.opengis.net/ows/1.1.0/owsExceptionReport.xsd'"
+					/> </xsl:attribute> </xsl:element> </xsl:element>
+				-->
+
+				<!-- ADDED EXCEPTION DESCRIPTION DUE TO OGC RECURSIVE LOOP -->
+				<schema xmlns="http://www.w3.org/2001/XMLSchema"
+					targetNamespace="http://www.opengis.net/ows/1.1"
+					elementFormDefault="qualified" xmlns:ows="http://www.opengis.net/ows/1.1"
+					version="1.1.0 2011-02-07" xml:lang="en">
+					<element name="ExceptionReport">
+						<annotation>
+							<documentation>Report message returned to the client that
+								requested any OWS operation when the server detects an error
+								while processing that operation request. </documentation>
+						</annotation>
+						<complexType>
+							<sequence>
+								<element ref="ows:Exception" maxOccurs="unbounded">
+									<annotation>
+										<documentation>Unordered list of one or more Exception
+											elements that each describes an error. These Exception
+											elements shall be interpreted by clients as being independent
+											of one another (not hierarchical). </documentation>
+									</annotation>
+								</element>
+							</sequence>
+							<attribute name="version" use="required">
+								<annotation>
+									<documentation>Specification version for OWS operation. The
+										string value shall contain one x.y.z "version" value (e.g.,
+										"2.1.3"). A version number shall contain three non-negative
+										integers separated by decimal points, in the form "x.y.z". The
+										integers y and z shall not exceed 99. Each version shall be
+										for the Implementation Specification (document) and the
+										associated XML Schemas to which requested operations will
+										conform. An Implementation Specification version normally
+										specifies XML Schemas against which an XML encoded operation
+										response must conform and should be validated. See Version
+										negotiation subclause for more information. </documentation>
+								</annotation>
+								<simpleType>
+									<restriction base="string">
+										<pattern value="\d+\.\d?\d\.\d?\d" />
+									</restriction>
+								</simpleType>
+							</attribute>
+							<attribute ref="xml:lang" use="optional">
+								<annotation>
+									<documentation>Identifier of the language used by all included
+										exception text values. These language identifiers shall be as
+										specified in IETF RFC 4646. When this attribute is omitted,
+										the language used is not identified. </documentation>
+								</annotation>
+							</attribute>
+						</complexType>
+					</element>
+					<!--
+						=======================================================
+					-->
+					<element name="Exception" type="ows:ExceptionType" />
+					<!--
+						=======================================================
+					-->
+					<complexType name="ExceptionType">
+						<annotation>
+							<documentation>An Exception element describes one detected error
+								that a server chooses to convey to the client. </documentation>
+						</annotation>
+						<sequence>
+							<element name="ExceptionText" type="string" minOccurs="0"
+								maxOccurs="unbounded">
+								<annotation>
+									<documentation>Ordered sequence of text strings that describe
+										this specific exception or error. The contents of these
+										strings are left open to definition by each server
+										implementation. A server is strongly encouraged to include at
+										least one ExceptionText value, to provide more information
+										about the detected error than provided by the exceptionCode.
+										When included, multiple ExceptionText values shall provide
+										hierarchical information about one detected error, with the
+										most significant information listed first. </documentation>
+								</annotation>
+							</element>
+						</sequence>
+						<attribute name="exceptionCode" type="string" use="required">
+							<annotation>
+								<documentation>A code representing the type of this exception,
+									which shall be selected from a set of exceptionCode values
+									specified for the specific service operation and server.
+								</documentation>
+							</annotation>
+						</attribute>
+						<attribute name="locator" type="string" use="optional">
+							<annotation>
+								<documentation>When included, this locator shall indicate to the
+									client where an exception was encountered in servicing the
+									client's operation request. This locator should be included
+									whenever meaningful information can be provided by the server.
+									The contents of this locator will depend on the specific
+									exceptionCode and OWS service, and shall be specified in the
+									OWS Implementation Specification. </documentation>
+							</annotation>
+						</attribute>
+					</complexType>
+
+
+				</schema>
+
 				<!-- End of General WPS support -->
 				<!-- ExecuteProcess support -->
 				<!-- loop thru processes and set the xsd types -->
@@ -169,97 +267,59 @@
 			<!-- End of types element -->
 			<!-- message sections -->
 			<!-- Default WPS request/response messages -->
-			<xsl:element name="message">
-				<xsl:attribute name="name">
-          <xsl:value-of select="'GetCapabilitiesRequest'" />
-        </xsl:attribute>
-				<xsl:element name="part">
-					<xsl:attribute name="name">
-            <xsl:value-of select="'msg'" />
-          </xsl:attribute>
-					<xsl:attribute name="element">
-            <xsl:value-of select="'wps:GetCapabilities'" />
-          </xsl:attribute>
-				</xsl:element>
-			</xsl:element>
-			<xsl:element name="message">
-				<xsl:attribute name="name">
-          <xsl:value-of select="'GetCapabilitiesResponse'" />
-        </xsl:attribute>
-				<xsl:element name="part">
-					<xsl:attribute name="name">
-            <xsl:value-of select="'msg'" />
-          </xsl:attribute>
-					<xsl:attribute name="element">
-            <xsl:value-of select="'wps:Capabilities'" />
-          </xsl:attribute>
-				</xsl:element>
-			</xsl:element>
-			<xsl:element name="message">
-				<xsl:attribute name="name">
-          <xsl:value-of select="'DescribeProcessRequest'" />
-        </xsl:attribute>
-				<xsl:element name="part">
-					<xsl:attribute name="name">
-            <xsl:value-of select="'msg'" />
-          </xsl:attribute>
-					<xsl:attribute name="element">
-            <xsl:value-of select="'wps:DescribeProcess'" />
-          </xsl:attribute>
-				</xsl:element>
-			</xsl:element>
-			<xsl:element name="message">
-				<xsl:attribute name="name">
-          <xsl:value-of select="'DescribeProcessResponse'" />
-        </xsl:attribute>
-				<xsl:element name="part">
-					<xsl:attribute name="name">
-            <xsl:value-of select="'msg'" />
-          </xsl:attribute>
-					<xsl:attribute name="element">
-            <xsl:value-of select="'wps:ProcessDescriptions'" />
-          </xsl:attribute>
-				</xsl:element>
-			</xsl:element>
-			<xsl:element name="message">
-				<xsl:attribute name="name">
-          <xsl:value-of select="'ExecuteRequest'" />
-        </xsl:attribute>
-				<xsl:element name="part">
-					<xsl:attribute name="name">
-            <xsl:value-of select="'msg'" />
-          </xsl:attribute>
-					<xsl:attribute name="element">
-            <xsl:value-of select="'wps:Execute'" />
-          </xsl:attribute>
-				</xsl:element>
-			</xsl:element>
-			<xsl:element name="message">
-				<xsl:attribute name="name">
-          <xsl:value-of select="'ExecuteResponse'" />
-        </xsl:attribute>
-				<xsl:element name="part">
-					<xsl:attribute name="name">
-            <xsl:value-of select="'msg'" />
-          </xsl:attribute>
-					<xsl:attribute name="element">
-            <xsl:value-of select="'wps:ExecuteResponse'" />
-          </xsl:attribute>
-				</xsl:element>
-			</xsl:element>
-			<xsl:element name="message">
-				<xsl:attribute name="name">
-          <xsl:value-of select="'ExceptionResponse'" />
-        </xsl:attribute>
-				<xsl:element name="part">
-					<xsl:attribute name="name">
-            <xsl:value-of select="'msg'" />
-          </xsl:attribute>
-					<xsl:attribute name="element">
-            <xsl:value-of select="'ows:Exception'" />
-          </xsl:attribute>
-				</xsl:element>
-			</xsl:element>
+
+
+			<!-- REMOVED DUE TO OGC RECURSIVE LOOP -->
+			<!--
+				<xsl:element name="message"> <xsl:attribute name="name">
+				<xsl:value-of select="'GetCapabilitiesRequest'" /> </xsl:attribute>
+				<xsl:element name="part"> <xsl:attribute name="name"> <xsl:value-of
+				select="'msg'" /> </xsl:attribute> <xsl:attribute name="element">
+				<xsl:value-of select="'wps:GetCapabilities'" /> </xsl:attribute>
+				</xsl:element> </xsl:element> <xsl:element name="message">
+				<xsl:attribute name="name"> <xsl:value-of
+				select="'GetCapabilitiesResponse'" /> </xsl:attribute> <xsl:element
+				name="part"> <xsl:attribute name="name"> <xsl:value-of
+				select="'msg'" /> </xsl:attribute> <xsl:attribute name="element">
+				<xsl:value-of select="'wps:Capabilities'" /> </xsl:attribute>
+				</xsl:element> </xsl:element> <xsl:element name="message">
+				<xsl:attribute name="name"> <xsl:value-of
+				select="'DescribeProcessRequest'" /> </xsl:attribute> <xsl:element
+				name="part"> <xsl:attribute name="name"> <xsl:value-of
+				select="'msg'" /> </xsl:attribute> <xsl:attribute name="element">
+				<xsl:value-of select="'wps:DescribeProcess'" /> </xsl:attribute>
+				</xsl:element> </xsl:element> <xsl:element name="message">
+				<xsl:attribute name="name"> <xsl:value-of
+				select="'DescribeProcessResponse'" /> </xsl:attribute> <xsl:element
+				name="part"> <xsl:attribute name="name"> <xsl:value-of
+				select="'msg'" /> </xsl:attribute> <xsl:attribute name="element">
+				<xsl:value-of select="'wps:ProcessDescriptions'" /> </xsl:attribute>
+				</xsl:element> </xsl:element>
+			-->
+			<!--
+				<xsl:element name="message"> <xsl:attribute name="name">
+				<xsl:value-of select="'ExecuteRequest'" /> </xsl:attribute>
+				<xsl:element name="part"> <xsl:attribute name="name"> <xsl:value-of
+				select="'msg'" /> </xsl:attribute> <xsl:attribute name="element">
+				<xsl:value-of select="'wps:Execute'" /> </xsl:attribute>
+				</xsl:element> </xsl:element> <xsl:element name="message">
+				<xsl:attribute name="name"> <xsl:value-of select="'ExecuteResponse'"
+				/> </xsl:attribute> <xsl:element name="part"> <xsl:attribute
+				name="name"> <xsl:value-of select="'msg'" /> </xsl:attribute>
+				<xsl:attribute name="element"> <xsl:value-of
+				select="'wps:ExecuteResponse'" /> </xsl:attribute> </xsl:element>
+				</xsl:element> 
+				
+				-->
+				<xsl:element name="message">
+	<xsl:attribute name="name"> <xsl:value-of select="'ExceptionResponse'" />
+				</xsl:attribute>
+	<xsl:element name="part">
+		<xsl:attribute name="name"> <xsl:value-of select="'msg'" /> </xsl:attribute>
+		<xsl:attribute name="element"> <xsl:value-of select="'ows:Exception'" /> </xsl:attribute>
+	</xsl:element>
+</xsl:element>
+			
 			<!-- End of default WPS request/response messages -->
 			<!--  Process loop to fetch name -->
 			<!--
@@ -288,77 +348,46 @@
         </xsl:attribute>
 				<!-- Loop operations -->
 				<!-- General WPS compliance -->
-				<xsl:element name="operation">
-					<xsl:attribute name="name">
-            <xsl:value-of select="'GetCapabilities'" />
-          </xsl:attribute>
-					<xsl:element name="input">
-						<xsl:attribute name="message">
-              <xsl:value-of select="'tns:GetCapabilitiesRequest'" />
-            </xsl:attribute>
+
+				<!-- REMOVED DUE TO OGC RECURSIVE LOOP -->
+				<!--
+					<xsl:element name="operation"> <xsl:attribute name="name">
+					<xsl:value-of select="'GetCapabilities'" /> </xsl:attribute>
+					<xsl:element name="input"> <xsl:attribute name="message">
+					<xsl:value-of select="'tns:GetCapabilitiesRequest'" />
+					</xsl:attribute> </xsl:element> <xsl:element name="output">
+					<xsl:attribute name="message"> <xsl:value-of
+					select="'tns:GetCapabilitiesResponse'" /> </xsl:attribute>
+					</xsl:element> <xsl:element name="fault"> <xsl:attribute
+					name="name"> <xsl:value-of select="'ExceptionResponse'" />
+					</xsl:attribute> <xsl:attribute name="message"> <xsl:value-of
+					select="'tns:ExceptionResponse'" /> </xsl:attribute> </xsl:element>
 					</xsl:element>
-					<xsl:element name="output">
-						<xsl:attribute name="message">
-              <xsl:value-of select="'tns:GetCapabilitiesResponse'" />
-            </xsl:attribute>
-					</xsl:element>
-					<xsl:element name="fault">
-						<xsl:attribute name="name">
-              <xsl:value-of select="'ExceptionResponse'" />
-            </xsl:attribute>
-						<xsl:attribute name="message">
-              <xsl:value-of select="'tns:ExceptionResponse'" />
-            </xsl:attribute>
-					</xsl:element>
-				</xsl:element>
-				<!--  end of operation -->
-				<xsl:element name="operation">
-					<xsl:attribute name="name">
-            <xsl:value-of select="'DescribeProcess'" />
-          </xsl:attribute>
-					<xsl:element name="input">
-						<xsl:attribute name="message">
-              <xsl:value-of select="'tns:DescribeProcessRequest'" />
-            </xsl:attribute>
-					</xsl:element>
-					<xsl:element name="output">
-						<xsl:attribute name="message">
-              <xsl:value-of select="'tns:DescribeProcessResponse'" />
-            </xsl:attribute>
-					</xsl:element>
-					<xsl:element name="fault">
-						<xsl:attribute name="name">
-              <xsl:value-of select="'ExceptionResponse'" />
-            </xsl:attribute>
-						<xsl:attribute name="message">
-              <xsl:value-of select="'tns:ExceptionResponse'" />
-            </xsl:attribute>
-					</xsl:element>
-				</xsl:element>
-				<!--  end of operation -->
-				<xsl:element name="operation">
-					<xsl:attribute name="name">
-            <xsl:value-of select="'Execute'" />
-          </xsl:attribute>
-					<xsl:element name="input">
-						<xsl:attribute name="message">
-              <xsl:value-of select="'tns:ExecuteRequest'" />
-            </xsl:attribute>
-					</xsl:element>
-					<xsl:element name="output">
-						<xsl:attribute name="message">
-              <xsl:value-of select="'tns:ExceptionResponse'" />
-            </xsl:attribute>
-					</xsl:element>
-					<xsl:element name="fault">
-						<xsl:attribute name="name">
-              <xsl:value-of select="'ExceptionResponse'" />
-            </xsl:attribute>
-						<xsl:attribute name="message">
-              <xsl:value-of select="'tns:ExceptionResponse'" />
-            </xsl:attribute>
-					</xsl:element>
-				</xsl:element>
+				-->
+				<!--
+					<xsl:element name="operation"> <xsl:attribute name="name">
+					<xsl:value-of select="'DescribeProcess'" /> </xsl:attribute>
+					<xsl:element name="input"> <xsl:attribute name="message">
+					<xsl:value-of select="'tns:DescribeProcessRequest'" />
+					</xsl:attribute> </xsl:element> <xsl:element name="output">
+					<xsl:attribute name="message"> <xsl:value-of
+					select="'tns:DescribeProcessResponse'" /> </xsl:attribute>
+					</xsl:element> <xsl:element name="fault"> <xsl:attribute
+					name="name"> <xsl:value-of select="'ExceptionResponse'" />
+					</xsl:attribute> <xsl:attribute name="message"> <xsl:value-of
+					select="'tns:ExceptionResponse'" /> </xsl:attribute> </xsl:element>
+					</xsl:element> <xsl:element name="operation"> <xsl:attribute
+					name="name"> <xsl:value-of select="'Execute'" /> </xsl:attribute>
+					<xsl:element name="input"> <xsl:attribute name="message">
+					<xsl:value-of select="'tns:ExecuteRequest'" /> </xsl:attribute>
+					</xsl:element> <xsl:element name="output"> <xsl:attribute
+					name="message"> <xsl:value-of select="'tns:ExceptionResponse'" />
+					</xsl:attribute> </xsl:element> <xsl:element name="fault">
+					<xsl:attribute name="name"> <xsl:value-of
+					select="'ExceptionResponse'" /> </xsl:attribute> <xsl:attribute
+					name="message"> <xsl:value-of select="'tns:ExceptionResponse'" />
+					</xsl:attribute> </xsl:element> </xsl:element>
+				-->
 				<!--  end of operation -->
 				<!-- Processes operations -->
 				<xsl:for-each select="//*[local-name()='ProcessDescription']">
@@ -398,167 +427,82 @@
 				</xsl:element>
 				<!-- Operations inside SOAP -->
 				<!-- Standard WPS SOAP operations -->
-				<xsl:element name="operation">
-					<xsl:attribute name="name">
-            <xsl:value-of select="'GetCapabilities'" />
-          </xsl:attribute>
+				<!-- REMOVED DUE TO OGC RECURSIVE LOOP -->
+				<!--
+					<xsl:element name="operation"> <xsl:attribute name="name">
+					<xsl:value-of select="'GetCapabilities'" /> </xsl:attribute>
 					<xsl:element name="operation"
-						namespace="http://schemas.xmlsoap.org/wsdl/soap/">
-						<xsl:attribute name="soapAction">
-              <xsl:value-of select="concat($serverURL,'/GetCapabilities')" />
-            </xsl:attribute>
-						<xsl:attribute name="style">
-              <xsl:value-of select="'document'" />
-            </xsl:attribute>
-					</xsl:element>
-					<xsl:element name="input">
-						<xsl:attribute name="name">
-              <xsl:value-of select="'GetCapabilitiesRequest'" />
-            </xsl:attribute>
-						<xsl:element name="body"
-							namespace="http://schemas.xmlsoap.org/wsdl/soap/">
-							<xsl:attribute name="use">
-                <xsl:value-of select="'literal'" />
-              </xsl:attribute>
-						</xsl:element>
-					</xsl:element>
-					<!-- end input -->
-					<xsl:element name="output">
-						<xsl:attribute name="name">
-              <xsl:value-of select="'GetCapabilitiesResponse'" />
-            </xsl:attribute>
-						<xsl:element name="body"
-							namespace="http://schemas.xmlsoap.org/wsdl/soap/">
-							<xsl:attribute name="use">
-                <xsl:value-of select="'literal'" />
-              </xsl:attribute>
-						</xsl:element>
-					</xsl:element>
-					<!-- end input -->
-					<xsl:element name="fault">
-						<xsl:attribute name="name">
-              <xsl:value-of select="'ExceptionResponse'" />
-            </xsl:attribute>
-						<xsl:element name="fault"
-							namespace="http://schemas.xmlsoap.org/wsdl/soap/">
-							<xsl:attribute name="name">
-                <xsl:value-of select="'ExceptionResponse'" />
-              </xsl:attribute>
-							<xsl:attribute name="use">
-                <xsl:value-of select="'literal'" />
-              </xsl:attribute>
-						</xsl:element>
-					</xsl:element>
-					<!-- end input -->
-				</xsl:element>
-				<!-- end operation  -->
-				<xsl:element name="operation">
-					<xsl:attribute name="name">
-            <xsl:value-of select="'DescribeProcess'" />
-          </xsl:attribute>
-					<xsl:element name="operation"
-						namespace="http://schemas.xmlsoap.org/wsdl/soap/">
-						<xsl:attribute name="soapAction">
-              <xsl:value-of select="concat($serverURL,'/DescribeProcess')" />
-            </xsl:attribute>
-						<xsl:attribute name="style">
-              <xsl:value-of select="'document'" />
-            </xsl:attribute>
-					</xsl:element>
-					<xsl:element name="input">
-						<xsl:attribute name="name">
-              <xsl:value-of select="'DescribeProcessRequest'" />
-            </xsl:attribute>
-						<xsl:element name="body"
-							namespace="http://schemas.xmlsoap.org/wsdl/soap/">
-							<xsl:attribute name="use">
-                <xsl:value-of select="'literal'" />
-              </xsl:attribute>
-						</xsl:element>
-					</xsl:element>
-					<!-- end input -->
-					<xsl:element name="output">
-						<xsl:attribute name="name">
-              <xsl:value-of select="'DescribeProcessResponse'" />
-            </xsl:attribute>
-						<xsl:element name="body"
-							namespace="http://schemas.xmlsoap.org/wsdl/soap/">
-							<xsl:attribute name="use">
-                <xsl:value-of select="'literal'" />
-              </xsl:attribute>
-						</xsl:element>
-					</xsl:element>
-					<!-- end input -->
-					<xsl:element name="fault">
-						<xsl:attribute name="name">
-              <xsl:value-of select="'ExceptionResponse'" />
-            </xsl:attribute>
-						<xsl:element name="fault"
-							namespace="http://schemas.xmlsoap.org/wsdl/soap/">
-							<xsl:attribute name="name">
-                <xsl:value-of select="'ExceptionResponse'" />
-              </xsl:attribute>
-							<xsl:attribute name="use">
-                <xsl:value-of select="'literal'" />
-              </xsl:attribute>
-						</xsl:element>
-					</xsl:element>
-					<!-- end input -->
-				</xsl:element>
-				<!-- end operation  -->
-				<xsl:element name="operation">
-					<xsl:attribute name="name">
-            <xsl:value-of select="'Execute'" />
-          </xsl:attribute>
-					<xsl:element name="operation"
-						namespace="http://schemas.xmlsoap.org/wsdl/soap/">
-						<xsl:attribute name="soapAction">
-              <xsl:value-of select="concat($serverURL,'/Execute')" />
-            </xsl:attribute>
-						<xsl:attribute name="style">
-              <xsl:value-of select="'document'" />
-            </xsl:attribute>
-					</xsl:element>
-					<xsl:element name="input">
-						<xsl:attribute name="name">
-              <xsl:value-of select="'ExecuteRequest'" />
-            </xsl:attribute>
-						<xsl:element name="body"
-							namespace="http://schemas.xmlsoap.org/wsdl/soap/">
-							<xsl:attribute name="use">
-                <xsl:value-of select="'literal'" />
-              </xsl:attribute>
-						</xsl:element>
-					</xsl:element>
-					<!-- end input -->
-					<xsl:element name="output">
-						<xsl:attribute name="name">
-              <xsl:value-of select="'ExecuteResponse'" />
-            </xsl:attribute>
-						<xsl:element name="body"
-							namespace="http://schemas.xmlsoap.org/wsdl/soap/">
-							<xsl:attribute name="use">
-                <xsl:value-of select="'literal'" />
-              </xsl:attribute>
-						</xsl:element>
-					</xsl:element>
-					<!-- end input -->
-					<xsl:element name="fault">
-						<xsl:attribute name="name">
-              <xsl:value-of select="'ExceptionResponse'" />
-            </xsl:attribute>
-						<xsl:element name="fault"
-							namespace="http://schemas.xmlsoap.org/wsdl/soap/">
-							<xsl:attribute name="name">
-                <xsl:value-of select="'ExceptionResponse'" />
-              </xsl:attribute>
-							<xsl:attribute name="use">
-                <xsl:value-of select="'literal'" />
-              </xsl:attribute>
-						</xsl:element>
-					</xsl:element>
-					<!-- end input -->
-				</xsl:element>
+					namespace="http://schemas.xmlsoap.org/wsdl/soap/"> <xsl:attribute
+					name="soapAction"> <xsl:value-of
+					select="concat($serverURL,'/GetCapabilities')" /> </xsl:attribute>
+					<xsl:attribute name="style"> <xsl:value-of select="'document'" />
+					</xsl:attribute> </xsl:element> <xsl:element name="input">
+					<xsl:attribute name="name"> <xsl:value-of
+					select="'GetCapabilitiesRequest'" /> </xsl:attribute> <xsl:element
+					name="body" namespace="http://schemas.xmlsoap.org/wsdl/soap/">
+					<xsl:attribute name="use"> <xsl:value-of select="'literal'" />
+					</xsl:attribute> </xsl:element> </xsl:element> <xsl:element
+					name="output"> <xsl:attribute name="name"> <xsl:value-of
+					select="'GetCapabilitiesResponse'" /> </xsl:attribute> <xsl:element
+					name="body" namespace="http://schemas.xmlsoap.org/wsdl/soap/">
+					<xsl:attribute name="use"> <xsl:value-of select="'literal'" />
+					</xsl:attribute> </xsl:element> </xsl:element> <xsl:element
+					name="fault"> <xsl:attribute name="name"> <xsl:value-of
+					select="'ExceptionResponse'" /> </xsl:attribute> <xsl:element
+					name="fault" namespace="http://schemas.xmlsoap.org/wsdl/soap/">
+					<xsl:attribute name="name"> <xsl:value-of
+					select="'ExceptionResponse'" /> </xsl:attribute> <xsl:attribute
+					name="use"> <xsl:value-of select="'literal'" /> </xsl:attribute>
+					</xsl:element> </xsl:element> </xsl:element> <xsl:element
+					name="operation"> <xsl:attribute name="name"> <xsl:value-of
+					select="'DescribeProcess'" /> </xsl:attribute> <xsl:element
+					name="operation" namespace="http://schemas.xmlsoap.org/wsdl/soap/">
+					<xsl:attribute name="soapAction"> <xsl:value-of
+					select="concat($serverURL,'/DescribeProcess')" /> </xsl:attribute>
+					<xsl:attribute name="style"> <xsl:value-of select="'document'" />
+					</xsl:attribute> </xsl:element> <xsl:element name="input">
+					<xsl:attribute name="name"> <xsl:value-of
+					select="'DescribeProcessRequest'" /> </xsl:attribute> <xsl:element
+					name="body" namespace="http://schemas.xmlsoap.org/wsdl/soap/">
+					<xsl:attribute name="use"> <xsl:value-of select="'literal'" />
+					</xsl:attribute> </xsl:element> </xsl:element> <xsl:element
+					name="output"> <xsl:attribute name="name"> <xsl:value-of
+					select="'DescribeProcessResponse'" /> </xsl:attribute> <xsl:element
+					name="body" namespace="http://schemas.xmlsoap.org/wsdl/soap/">
+					<xsl:attribute name="use"> <xsl:value-of select="'literal'" />
+					</xsl:attribute> </xsl:element> </xsl:element> <xsl:element
+					name="fault"> <xsl:attribute name="name"> <xsl:value-of
+					select="'ExceptionResponse'" /> </xsl:attribute> <xsl:element
+					name="fault" namespace="http://schemas.xmlsoap.org/wsdl/soap/">
+					<xsl:attribute name="name"> <xsl:value-of
+					select="'ExceptionResponse'" /> </xsl:attribute> <xsl:attribute
+					name="use"> <xsl:value-of select="'literal'" /> </xsl:attribute>
+					</xsl:element> </xsl:element> </xsl:element> <xsl:element
+					name="operation"> <xsl:attribute name="name"> <xsl:value-of
+					select="'Execute'" /> </xsl:attribute> <xsl:element
+					name="operation" namespace="http://schemas.xmlsoap.org/wsdl/soap/">
+					<xsl:attribute name="soapAction"> <xsl:value-of
+					select="concat($serverURL,'/Execute')" /> </xsl:attribute>
+					<xsl:attribute name="style"> <xsl:value-of select="'document'" />
+					</xsl:attribute> </xsl:element> <xsl:element name="input">
+					<xsl:attribute name="name"> <xsl:value-of select="'ExecuteRequest'"
+					/> </xsl:attribute> <xsl:element name="body"
+					namespace="http://schemas.xmlsoap.org/wsdl/soap/"> <xsl:attribute
+					name="use"> <xsl:value-of select="'literal'" /> </xsl:attribute>
+					</xsl:element> </xsl:element> <xsl:element name="output">
+					<xsl:attribute name="name"> <xsl:value-of
+					select="'ExecuteResponse'" /> </xsl:attribute> <xsl:element
+					name="body" namespace="http://schemas.xmlsoap.org/wsdl/soap/">
+					<xsl:attribute name="use"> <xsl:value-of select="'literal'" />
+					</xsl:attribute> </xsl:element> </xsl:element> <xsl:element
+					name="fault"> <xsl:attribute name="name"> <xsl:value-of
+					select="'ExceptionResponse'" /> </xsl:attribute> <xsl:element
+					name="fault" namespace="http://schemas.xmlsoap.org/wsdl/soap/">
+					<xsl:attribute name="name"> <xsl:value-of
+					select="'ExceptionResponse'" /> </xsl:attribute> <xsl:attribute
+					name="use"> <xsl:value-of select="'literal'" /> </xsl:attribute>
+					</xsl:element> </xsl:element> </xsl:element>
+				-->
 				<!-- end operation  -->
 				<!-- Loop for each operation -->
 				<xsl:for-each select="//*[local-name()='ProcessDescription']">

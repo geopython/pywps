@@ -32,7 +32,6 @@ def response(response,targets,soapVersion=None,isSoap=False,isSoapExecute=False,
     :type response: file or string
     """
 
-
     # convert single file to array
     if type(targets) != type([]):
         targets = [targets]

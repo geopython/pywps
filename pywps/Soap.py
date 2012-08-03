@@ -150,6 +150,7 @@ def SOAPtoWPS(tree):
     #When etree is printed the REPLACEME is subtituted by www.opengis.net, creating the correct namespaces for the DOM parsing.
     #The replace is done using module re and set that it has to do only 2 replaces in the beggining. Therefore the replace is independe of the since of XML content
     global process
+    from pywps import processes
     
     processID=tree.tag.split("_",1)[-1]
     wps2=pywps.Pywps()
