@@ -55,12 +55,6 @@ __version__ = "3.0-svn"
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#import pycallgraph
-#filter_func = pycallgraph.GlobbingFilter(max_depth=4)
-#pycallgraph.start_trace(filter_func=filter_func)
-#import sys,os, traceback
-#sys.path.append("/users/rsg/jmdj/workspace/pywps-3.2-soap/pywps")
-#os.environ["PYWPS_CFG"]="/etc/pywps.cfg"
 import pywps
 from pywps.Exceptions import *
 
