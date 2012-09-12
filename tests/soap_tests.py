@@ -13,9 +13,7 @@ import pywps.Process
 
 import unittest
 from pywps.Parser import Post
-
 from xml.dom import minidom
-from xml.dom.ext import c14n
 from pywps import Soap
 import types
 
