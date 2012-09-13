@@ -8,7 +8,7 @@ The processes shoul be requested as follows:
 &status=true
 &storeExecuteResponse=true
 
-Done by Jorge de Jesus (jorge.de-jesus@jrc.it) as suggested by Kor de Jong
+Done by Jorge de Jesus (jorge.mendesdejesus@wur.nl) as suggested by Kor de Jong
 
 """
 
@@ -22,8 +22,8 @@ class Process(WPSProcess):
                              title="Answer to Life, the Universe and Everything",
                              storeSupported = "false",
                              statusSupported = "false",
-                            abstract="Numerical solution that is the answer to Life, Universe and Everything. The process is an improvement to Deep Tought computer (therefore version 2.0) since it no longer takes 7.5 milion years, but only a few seconds to give a response, with an update of status every 10 seconds.",
-                            grassLocation =False)
+                             abstract="Numerical solution that is the answer to Life, Universe and Everything. The process is an improvement to Deep Tought computer (therefore version 2.0) since it no longer takes 7.5 milion years, but only a few seconds to give a response, with an update of status every 10 seconds.",
+                             grassLocation =False)
             #No need for inputs since Execute will start the process
          self.Answer=self.addLiteralOutput(identifier = "answer",
                                             title = "The numerical answer to Life, Universe and Everything")
