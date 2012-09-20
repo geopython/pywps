@@ -182,6 +182,8 @@
 									</restriction>
 								</simpleType>
 							</attribute>
+							<!-- REMOVED PROBLEMS  WITH SUDS DUE TO LACK OF DEFINITON -->
+							<!-- 
 							<attribute ref="xml:lang" use="optional">
 								<annotation>
 									<documentation>Identifier of the language used by all included
@@ -190,6 +192,7 @@
 										the language used is not identified. </documentation>
 								</annotation>
 							</attribute>
+							 -->
 						</complexType>
 					</element>
 					<!--
