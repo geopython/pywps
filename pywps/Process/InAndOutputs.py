@@ -24,6 +24,7 @@ Inputs and outputs of OGC WPS Processes
 import os,types,re, base64,logging
 from pywps import Exceptions
 import sys
+import urllib, tempfile
 
 try:
     import magic
@@ -380,8 +381,7 @@ class ComplexInput(Input):
         :param input: parsed input value
         """
         # if HTTP GET was performed, the type does not have to be set
-        if not input.has_key("type") and\
-                (input["value"].find("http://") == 0 or input["value"].find("http%3A%2F%2F") == 0):
+        if not input.has_key("type") and self._isURL(input["value"]):
             input["asReference"] = True
 
         # download data
@@ -402,7 +402,7 @@ class ComplexInput(Input):
         #for historical reasons and allows to differencite between the 2 types or requests if in the future
         # changes need to be done e.g setting mimetypes from HTTP stream etc
         keys=["mimetype","schema","encoding"]
-        if not input.has_key("type") or (input["value"].find("http://") == 0 or input["value"].find("http%3A%2F%2F") == 0):
+        if not input.has_key("type") or self._isURL(input["value"]):
             for key in keys:
                 if key in input.keys():
                     self.format[key]=input[key]
@@ -491,7 +491,6 @@ class ComplexInput(Input):
 
         :param url: URL where the data are lying
         """
-        import urllib, tempfile
         from os import curdir
 
         try:
@@ -601,6 +600,21 @@ class ComplexInput(Input):
         :param what: Error code
         """
         pass
+
+    def _isURL(self,text):
+        """Check wheather given text is url or not
+        """
+        
+        try:
+            (urltype, opaquestring) = urllib.splittype(text)
+
+            if urltype in ["http","https","ftp"]:
+                return True
+            else:
+                return False
+        except:
+            return False
+
 
 class BoundingBoxInput(Input):
     """Add BoundingBox input
