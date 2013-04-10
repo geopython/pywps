@@ -37,6 +37,18 @@ Contributors (individuals)
 
         Homepage: http://pskintzos.net
 
+* **Jorge de Jesus**
+        Role: CoreDeveloper
+
+        Contact: jmdj at pml.ac.uk
+
+        Homepage: http://rsg.pml.ac.uk/
+
+* **Tom Kralidis**
+        Role: CoreDeveloper, Github support
+
+        Homepage: http://kralidis.ca/
+
 * **You**
     Did we forget you? Tell us!
 

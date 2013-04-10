@@ -37,7 +37,7 @@ Most of the developers are avaliable at IRC channels `#grass` and sometime even 
 ****
 Wiki
 ****
-Wiki of PyWPS is at http://pywps.ominiverdi.org.
+Wiki of PyWPS is at http://wiki.rsg.pml.ac.uk/pywps/Main_Page
 
 Topics like user addons, documentation in development, development thoughts and other are discussed there.
 

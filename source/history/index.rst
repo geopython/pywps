@@ -32,7 +32,7 @@ possible to speak about `PyWPS Development Team <contributors>`_.
     on Web User Interface for WPS. They lunched two projects: 
     `WUIW and Embrio <http://pywps.ominiverdi.org>`_. WUIW should be
     general web interace able to handle any WPS server. Embrio is bringing
-    functionality of `GRASS GIS <http://grass.itc.it>`_ to the
+    functionality of `GRASS GIS <http://grass.osgeo.org>`_ to the
     Internet. WUIW and Embrio are part of PyWPS's subversion repository.
 
 **2007-10-08** version *2.0.0* has been released.
@@ -44,3 +44,11 @@ possible to speak about `PyWPS Development Team <contributors>`_.
 **2008-11-06** version *3.0.0* has been released.
     New version improved stability, new code structure, implementation of **WPS
     1.0.0** 
+
+**2009-06-01** version *3.1.0* has been release.
+    Improves 3.x branch. New generic JavaScript WPS Client library and
+    more.
+
+**2012-06-27**  Moved from Wald to Github
+    After several years, we are moved from `Wald <http://wald.intevation.com>`_ 
+    to Geopython group on `Github <https://geopython.github.com>`_
