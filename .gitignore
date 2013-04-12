@@ -1,4 +1,9 @@
 *.py[cod]
+__pycache__
+
+
+# vim
+.sw*
 
 # C extensions
 *.so
@@ -10,7 +15,7 @@ dist
 build
 eggs
 parts
-bin
+bin/*
 var
 sdist
 develop-eggs
