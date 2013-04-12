@@ -16,7 +16,6 @@ class Request:
     validate = False
     lang = "en"
 
-
     def parse(self,data):
         """Parses given data
         """

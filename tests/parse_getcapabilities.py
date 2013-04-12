@@ -15,6 +15,7 @@ class RequestParseGetCapabilitiesTestCase(unittest.TestCase):
     
     def setUp(self):
         self.gc = GetCapabilities()
+        self.gc.validate = True
 
     def testParseGetCapabilitiesGET(self):
         """Test if GetCapabilities request is parsed and if GET methods do get the same result"""
