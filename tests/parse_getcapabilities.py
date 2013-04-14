@@ -13,6 +13,13 @@ from pywps.request.getcapabilities import GetCapabilities
 class RequestParseGetCapabilitiesTestCase(unittest.TestCase):
     """Test case for input parsing"""
     
+    test_values = {
+            "version":"1.0.0",
+            "service":"wps",
+            "request":"getcapabilities",
+            "language":"eng"
+    }
+    
     def setUp(self):
         self.gc = GetCapabilities()
         self.gc.validate = True
@@ -23,9 +30,9 @@ class RequestParseGetCapabilitiesTestCase(unittest.TestCase):
 
         self.gc.parse("service=wps&request=getcapabilities")
 
-        self.assertEquals(self.gc.version, "1.0.0")
-        self.assertEquals(self.gc.request, "getcapabilities")
-        self.assertEquals(self.gc.service, "wps")
+        self.assertEquals(self.gc.version, self.test_values["version"])
+        self.assertEquals(self.gc.request, self.test_values["request"])
+        self.assertEquals(self.gc.service, self.test_values["service"])
 
     def testParseGetCapabilitiesPOST(self):
         """Test if GetCapabilities request is parsed and if POST methods do get the same result"""
@@ -34,9 +41,9 @@ class RequestParseGetCapabilitiesTestCase(unittest.TestCase):
 
         self.gc.parse(getCapabilitiesRequestFile)
 
-        self.assertEquals(self.gc.version, "1.0.0")
-        self.assertEquals(self.gc.request, "getcapabilities")
-        self.assertEquals(self.gc.service, "wps")
+        self.assertEquals(self.gc.version, self.test_values["version"])
+        self.assertEquals(self.gc.request, self.test_values["request"])
+        self.assertEquals(self.gc.service, self.test_values["service"])
 #
 #    ######################################################################################
 #    def testParseExecuteNoInput(self):
