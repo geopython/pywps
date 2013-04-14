@@ -11,30 +11,27 @@ from pywps.request.describeprocess import DescribeProcess
 
 class RequestParseDescribeProcessTestCase(unittest.TestCase):
 
+    test_values = {
+            "version":"1.0.0",
+            "language":"eng",
+            "request":"describeprocess",
+            "service":"wps",
+            "identifier":"all"
+    }
+
     def setUp(self):
         self.dp = DescribeProcess()
-
+        self.dp.validate = True
 
     def testParseDescribeProcessGET(self):
         """Test if DescribeProcess request is parsed and if GET
         methods are producing the same result"""
 
-        return
-        getpywps = pywps.Pywps(pywps.METHOD_GET)
-        postpywps = pywps.Pywps(pywps.METHOD_POST)
-        getinputs = getpywps.parseRequest("service=wps&request=describeprocess&version=1.0.0&identifier=dummyprocess")
-        describeProcessFile = open(os.path.join(pywpsPath,"tests","requests","wps_describeprocess_request_dummyprocess.xml"))
-        postinputs = postpywps.parseRequest(describeProcessFile)
+        self.dp.parse("service=wps&request=describeprocess&version=1.0.0&identifier=all")
 
-        self.assertEquals(getpywps.inputs["request"], "describeprocess")
-        self.assertTrue("dummyprocess" in getpywps.inputs["identifier"])
-        self.assertFalse("returner" in getpywps.inputs["identifier"])
-
-        self.assertEquals(postpywps.inputs["request"], "describeprocess")
-        self.assertTrue("dummyprocess" in postpywps.inputs["identifier"])
-        self.assertFalse("returner" in postpywps.inputs["identifier"])
-
-        self.assertEquals(getinputs, postinputs)
+        self.assertEquals(self.dp.service, self.test_values["service"])
+        self.assertEquals(self.dp.version, self.test_values["version"])
+        self.assertEquals(self.dp.identifier, self.test_values["identifier"])
 
 
 if __name__ == "__main__":

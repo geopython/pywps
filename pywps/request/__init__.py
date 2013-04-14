@@ -1,5 +1,6 @@
 import types
 import logging
+import io
 
 namespaces = {
     "ows":"http://www.opengis.net/ows/1.1",
@@ -12,14 +13,24 @@ class Request:
 
     version = None
     request = None
-    service = "wps"
+    service = None
+    request = None
+
     validate = False
     lang = "en"
 
     def parse(self,data):
         """Parses given data
         """
-        pass
+
+        # parse get request
+        if isinstance(data, str):
+            kvs = self._parse_params(data)
+            self._set_from_url(kvs)
+            
+        elif isinstance(data, io.IOBase):
+            root = self._parse_xml(data)
+            self._set_from_xml(root)
 
     def is_valid(self):
         """Returns  self-control of the reuquest - if all necessary variables
@@ -51,3 +62,27 @@ class Request:
 
         params = parse_qs(data)
         return params
+
+    def _set_from_url(self,pairs):
+        """Set local values from key-value-pairs
+        """
+
+        # convert keys to lowercase
+        pairs = dict((k.lower(), v) for k, v in pairs.items())
+        keys = pairs.keys()
+        if "version" in keys:
+            self.version = self.pairs["version"]
+        else:
+            # set default value
+            self.version = "1.0.0"
+
+        if "service" in keys:
+            self.service = self.pairs["service"]
+
+        if "version" in keys:
+            self.version = self.pairs["version"]
+
+        if "language" in keys:
+            self.language = keys["language"].lower()
+
+        return pairs

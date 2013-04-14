@@ -4,23 +4,11 @@ class GetCapabilities(Request):
     """Parser of GetCapabilities
     """
 
-    request="getcapabilities"
-    acceptversions = None
-
     def parse(self,data):
         """Parse given data
         """
+        return super(GetCapabilities, self).parse(data)
         
-        import io
-
-        # parse get request
-        if isinstance(data, str):
-            kvs = self._parse_params(data)
-            self.__set_from_url(kvs)
-            
-        elif isinstance(data, io.IOBase):
-            root = self._parse_xml(data)
-            self.__set_from_xml(root)
 
     def is_valid(self):
         """Returns  self-control of the reuquest - if all necessary variables
@@ -32,10 +20,11 @@ class GetCapabilities(Request):
             return False
 
 
-    def __set_from_url(self,pairs):
+    def _set_from_url(self,pairs):
         """Set local values from key-value-pairs
         """
 
+        pairs = super(GetCapabilities,self)._set_from_url(pairs)
         # convert keys to lowercase
         pairs = dict((k.lower(), v) for k, v in pairs.items())
         keys = pairs.keys()
@@ -51,7 +40,9 @@ class GetCapabilities(Request):
         if "language" in keys:
             self.language = keys["language"].lower()
 
-    def __set_from_xml(self,root):
+        return pairs
+
+    def _set_from_xml(self,root):
         """Set local values from xml encoded request (using objectify)
         """
         global namespaces
