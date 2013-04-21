@@ -8,7 +8,7 @@ sys.path.append(pywpsPath)
 import unittest
 
 from pywps.request.getcapabilities import GetCapabilities
-
+from pywps import request
 
 class RequestParseGetCapabilitiesTestCase(unittest.TestCase):
     """Test case for input parsing"""
@@ -28,7 +28,7 @@ class RequestParseGetCapabilitiesTestCase(unittest.TestCase):
         """Test if GetCapabilities request is parsed and if GET methods do get the same result"""
         
 
-        self.gc.parse("service=wps&request=getcapabilities")
+        self.gc.set_from_url(request.parse_params("service=wps&request=getcapabilities"))
 
         self.assertEquals(self.gc.version, self.test_values["version"])
         self.assertEquals(self.gc.request, self.test_values["request"])
@@ -39,7 +39,7 @@ class RequestParseGetCapabilitiesTestCase(unittest.TestCase):
 
         getCapabilitiesRequestFile = open(os.path.join(pywpsPath,"tests","requests","wps_getcapabilities_request.xml"))
 
-        self.gc.parse(getCapabilitiesRequestFile)
+        self.gc.set_from_xml(request.parse_xml(getCapabilitiesRequestFile))
 
         self.assertEquals(self.gc.version, self.test_values["version"])
         self.assertEquals(self.gc.request, self.test_values["request"])

@@ -4,11 +4,8 @@ class GetCapabilities(Request):
     """Parser of GetCapabilities
     """
 
-    def parse(self,data):
-        """Parse given data
-        """
-        return super(GetCapabilities, self).parse(data)
-        
+    request = "getcapabilities"
+    version = "1.0.0"
 
     def is_valid(self):
         """Returns  self-control of the reuquest - if all necessary variables
@@ -20,13 +17,10 @@ class GetCapabilities(Request):
             return False
 
 
-    def _set_from_url(self,pairs):
+    def set_from_url(self,pairs):
         """Set local values from key-value-pairs
         """
 
-        pairs = super(GetCapabilities,self)._set_from_url(pairs)
-        # convert keys to lowercase
-        pairs = dict((k.lower(), v) for k, v in pairs.items())
         keys = pairs.keys()
         if "version" in keys:
             self.version = self.pairs["version"]
@@ -42,7 +36,7 @@ class GetCapabilities(Request):
 
         return pairs
 
-    def _set_from_xml(self,root):
+    def set_from_xml(self,root):
         """Set local values from xml encoded request (using objectify)
         """
         global namespaces

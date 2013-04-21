@@ -7,82 +7,127 @@ namespaces = {
     "wps": "http://www.opengis.net/wps/1.0.0"
 }
 
+# indicates, if xsd-based validation of the request should return
+VALIDATE = False
+
 class Request:
     """ Base request class
     """
 
     version = None
     request = None
-    service = None
+    service = "wps"
     request = None
 
     validate = False
     lang = "en"
 
-    def parse(self,data):
-        """Parses given data
+    def set_from_url(self,pairs):
+        """Set values of this request based on url key-value pairs
         """
+        pass
 
-        # parse get request
-        if isinstance(data, str):
-            kvs = self._parse_params(data)
-            self._set_from_url(kvs)
-            
-        elif isinstance(data, io.IOBase):
-            root = self._parse_xml(data)
-            self._set_from_xml(root)
+    def set_from_xml(self,root):
+        """Set values of this request based on url ETree root 
+        """
+        pass
+
 
     def is_valid(self):
         """Returns  self-control of the reuquest - if all necessary variables
         are set"""
         return True
 
-    def _parse_xml(self,data):
-        """Parse xml tree
-        """
+def get_request(data):
+    """returns request object in for of key-value pairs (for HTTP GET) or Tree
+    (POST)
+    """
 
-        from lxml import etree
-        from lxml import objectify
-        logging.debug("Continuing with lxml xml etree parser")
+    # parse get request
+    if isinstance(data, str):
+        kvs = parse_params(data)
+        return __get_request_from_url(kvs)
+        
+    # post request is supposed to be file object
+    elif isinstance(data, io.IOBase):
+        root =  parse_xml(data)
+        return __get_request_from_xml(root)
+    else:
+        pass
 
-        schema = None
-        if self.validate:
-            schema = etree.XMLSchema(file="pywps/resources/schemas/wps_all.xsd")
-        parser = objectify.makeparser(remove_blank_text = True,
-                                    remove_comments = True,
-                                 schema = schema)
-        objects = objectify.parse(data,parser)
+def parse_xml(data):
+    """Parse xml tree
+    """
 
-        return objects.getroot()
+    from lxml import etree
+    from lxml import objectify
+    logging.debug("Continuing with lxml xml etree parser")
 
-    def _parse_params(self,data):
-        """Parse params
-        """
-        from urllib.parse import parse_qs
+    schema = None
+    if VALIDATE:
+        schema = etree.XMLSchema(file="pywps/resources/schemas/wps_all.xsd")
+    parser = objectify.makeparser(remove_blank_text = True,
+                                remove_comments = True,
+                             schema = schema)
+    objects = objectify.parse(data,parser)
 
-        params = parse_qs(data)
-        return params
+    return objects.getroot()
 
-    def _set_from_url(self,pairs):
-        """Set local values from key-value-pairs
-        """
+def parse_params(data):
+    """Parse params
+    """
+    from urllib.parse import parse_qs
+    logging.debug("Continuing with urllib.parse parser")
 
-        # convert keys to lowercase
-        pairs = dict((k.lower(), v) for k, v in pairs.items())
-        keys = pairs.keys()
-        if "version" in keys:
-            self.version = self.pairs["version"]
-        else:
-            # set default value
-            self.version = "1.0.0"
+    params = parse_qs(data)
+    return params
 
-        if "service" in keys:
-            self.service = self.pairs["service"]
+def __get_request_from_url(pairs):
+    """return Request object based on url key-value pairs params
+    """
 
-        if "version" in keys:
-            self.version = self.pairs["version"]
+    # convert keys to lowercase
+    pairs = dict((k.lower(), v) for k, v in pairs.items())
+    keys = pairs.keys()
+    request = None
 
-        if "language" in keys:
-            self.language = keys["language"].lower()
+    if "request" in keys:
+        if pairs["request"][0].lower() == "getcapabilities":
+            from pywps.request import getcapabilities
+            request = getcapabilities.GetCapabilities()
+        elif pairs["request"][0].lower() == "describeprocess":
+            from pywps.request import describeprocess
+            request = describeprocess.DescribeProcess
+        elif pairs["request"][0].lower() == "execute":
+            from pywps.request import execute
+            request = execute.Execute()
 
-        return pairs
+    if request:
+        request.set_from_url(pairs)
+
+    # return request, whatever it may be
+    return request
+
+def __get_request_from_xml(root):
+    """return Request object based on xml etree root node
+    """
+    global namespaces
+
+    # convert keys to lowercase
+    request = None
+
+    if root.tag == "{%s}GetCapabilities"%namespaces["wps"]:
+        from pywps.request import getcapabilities
+        request = getcapabilities.GetCapabilities()
+    elif root.tag == "{%s}DescribeProcess"%namespaces["wps"]:
+        import describeprocess
+        request = describeprocess.DescribeProcess
+    elif root.tag == "{%s}Execute"%namespaces["wps"]:
+        import execute
+        request = execute.Execute()
+
+    if request:
+        request.set_from_xml(root)
+
+    # return request, whatever it may be
+    return request
