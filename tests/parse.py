@@ -29,26 +29,43 @@ class RequestParse(unittest.TestCase):
         self.assertTrue(isinstance(r,getcapabilities.GetCapabilities))
 
     def test_describeprocess_request(self):
-        root = objectify.Element("{http://www.opengis.net/wps/1.0./}GetCapabilities")
+        root = objectify.Element("{http://www.opengis.net/wps/1.0.0}DescribeProcess")
         url = "requesT=DescribePROCESS"
 
-        #self.assertTrue(request isinstance DescribeProcess)
+        from pywps.request import describeprocess
+
+        # test xml
+        r = request.get_request(io.BytesIO(etree.tostring(root)))
+        self.assertTrue(isinstance(r,describeprocess.DescribeProcess))
+
+        # test url
+        r = request.get_request(url)
+        self.assertTrue(isinstance(r,describeprocess.DescribeProcess))
 
     def test_execute_request(self):
-        root = objectify.Element("{http://www.opengis.net/wps/1.0./}GetCapabilities")
+        root = objectify.Element("{http://www.opengis.net/wps/1.0.0}Execute")
         url = "requesT=ExecuTe"
 
-        #self.assertTrue(request isinstance Execute)
+        from pywps.request import execute
+
+        # test xml
+        r = request.get_request(io.BytesIO(etree.tostring(root)))
+        self.assertTrue(isinstance(r,execute.Execute))
+
+        # test url
+        r = request.get_request(url)
+        self.assertTrue(isinstance(r,execute.Execute))
         
 
-suite = unittest.TestLoader().loadTestsFromTestCase(RequestParse)
-unittest.TextTestRunner(verbosity=2).run(suite)
+if __name__ == "__main__":
+    suite = unittest.TestLoader().loadTestsFromTestCase(RequestParse)
+    unittest.TextTestRunner(verbosity=2).run(suite)
 
-from parse_getcapabilities import *
+    #from parse_getcapabilities import *
+    #
+    #suite = unittest.TestLoader().loadTestsFromTestCase(RequestParseGetCapabilitiesTestCase)
+    #unittest.TextTestRunner(verbosity=2).run(suite)
 
-suite = unittest.TestLoader().loadTestsFromTestCase(RequestParseGetCapabilitiesTestCase)
-unittest.TextTestRunner(verbosity=2).run(suite)
-
-#from parse_describeprocess import *
-#suite = unittest.TestLoader().loadTestsFromTestCase(RequestParseDescribeProcessTestCase)
-#unittest.TextTestRunner(verbosity=2).run(suite)
+    #from parse_describeprocess import *
+    #suite = unittest.TestLoader().loadTestsFromTestCase(RequestParseDescribeProcessTestCase)
+    #unittest.TextTestRunner(verbosity=2).run(suite)

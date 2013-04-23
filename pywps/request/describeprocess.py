@@ -5,10 +5,5 @@ class DescribeProcess(Request):
     """
 
     request="describeprocess"
-    identifier=None
+    identifiers=None
 
-    def parse(self, data):
-        """Parse given data
-        """
-        super(DescribeProcess, self).parse(data)
-    

@@ -97,7 +97,7 @@ def __get_request_from_url(pairs):
             request = getcapabilities.GetCapabilities()
         elif pairs["request"][0].lower() == "describeprocess":
             from pywps.request import describeprocess
-            request = describeprocess.DescribeProcess
+            request = describeprocess.DescribeProcess()
         elif pairs["request"][0].lower() == "execute":
             from pywps.request import execute
             request = execute.Execute()
@@ -120,10 +120,10 @@ def __get_request_from_xml(root):
         from pywps.request import getcapabilities
         request = getcapabilities.GetCapabilities()
     elif root.tag == "{%s}DescribeProcess"%namespaces["wps"]:
-        import describeprocess
-        request = describeprocess.DescribeProcess
+        from pywps.request import describeprocess
+        request = describeprocess.DescribeProcess()
     elif root.tag == "{%s}Execute"%namespaces["wps"]:
-        import execute
+        from pywps.request import execute
         request = execute.Execute()
 
     if request:
