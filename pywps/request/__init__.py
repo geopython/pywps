@@ -25,11 +25,20 @@ class Request:
     def set_from_url(self,pairs):
         """Set values of this request based on url key-value pairs
         """
+
+        if "version" in pairs:
+            self.version = pairs["version"][0]
+        self.request=pairs["request"][0].lower()
+        if "language" in pairs:
+            self.lang=pairs["language"][0]
         pass
 
     def set_from_xml(self,root):
         """Set values of this request based on url ETree root 
         """
+        global namespaces
+        self.request=root.tag.lower().replace("{%s}"%namespaces["wps"],"")
+        self.lang=root.attrib["language"]
         pass
 
 

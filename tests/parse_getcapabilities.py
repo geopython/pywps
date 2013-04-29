@@ -17,7 +17,7 @@ class RequestParseGetCapabilitiesTestCase(unittest.TestCase):
             "version":"1.0.0",
             "service":"wps",
             "request":"getcapabilities",
-            "language":"eng"
+            "language":"cz"
     }
     
     def setUp(self):
@@ -25,14 +25,17 @@ class RequestParseGetCapabilitiesTestCase(unittest.TestCase):
         self.gc.validate = True
 
     def testParseGetCapabilitiesGET(self):
-        """Test if GetCapabilities request is parsed and if GET methods do get the same result"""
+        """Test if GetCapabilities request is parsed and if GET methods do 
+        get the same result"""
         
 
-        self.gc.set_from_url(request.parse_params("service=wps&request=getcapabilities"))
+        self.gc.set_from_url(request.parse_params(
+                                "service=wps&request=getcapabilities&language=cz"))
 
         self.assertEquals(self.gc.version, self.test_values["version"])
         self.assertEquals(self.gc.request, self.test_values["request"])
         self.assertEquals(self.gc.service, self.test_values["service"])
+        self.assertEquals(self.gc.lang,self.test_values["language"])
 
     def testParseGetCapabilitiesPOST(self):
         """Test if GetCapabilities request is parsed and if POST methods do get the same result"""
@@ -44,6 +47,7 @@ class RequestParseGetCapabilitiesTestCase(unittest.TestCase):
         self.assertEquals(self.gc.version, self.test_values["version"])
         self.assertEquals(self.gc.request, self.test_values["request"])
         self.assertEquals(self.gc.service, self.test_values["service"])
+        self.assertEquals(self.gc.lang,self.test_values["language"])
 #
 #    ######################################################################################
 #    def testParseExecuteNoInput(self):
