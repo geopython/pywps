@@ -7,25 +7,36 @@ sys.path.append(pywpsPath)
 
 import unittest
 
-from pywps.request.describeprocess import DescribeProcess
+from pywps.request.execute import Execute
 
 class RequestParseExecuteTestCase(unittest.TestCase):
 
-    def setUp(self):
-        self.dp = DescribeProcess()
-        self.dp.validate = True
+    test_values = {
+            "version":"1.0.0",
+            "language":"en",
+            "request":"execute",
+            "service":"wps"
+    }
 
-    def testParseExecuteProcessPOST(self):
-        """Test if DescribeProcess request is parsed and if GET
+    def setUp(self):
+        self.ex = Execute()
+        self.ex.validate = True
+
+    def testParseExecuteProcessGET_rawdataoutput(self):
+        """Test if Execute request is parsed and if GET
         methods are producing the same result"""
 
-        self.dp.parse("service=wps&request=describeprocess&version=1.0.0&identifier=all")
+        TODO: fix this request (remove brackets from DataInputs
+        #HEREIAM
+        self.ex.set_from_url(request.parse_params("Service=WPS&Version=1.0.0&Language=en&Request=Execute&Identifier=Buffer&DataInputs=[InputPolygon=@xlink:href=http%3A%2F%2Ffoo.bar%2Fsome_WFS_request.xml;BufferDistance=400]&RawDataOutput=[BufferedPolygon]"))
 
-        self.assertEquals(self.dp.service, self.test_values["service"])
-        self.assertEquals(self.dp.version, self.test_values["version"])
-        self.assertEquals(self.dp.identifier, self.test_values["identifier"])
+        self.__test_vals(self.test_values)
+
+    def __test_vals(self, vals):
+        for key in vals:
+            self.assertEquals(eval("self.ex.%s"%key), vals[key])
 
 
 if __name__ == "__main__":
-   suite = unittest.TestLoader().loadTestsFromTestCase(RequestParseDescribeProcessTestCase)
+   suite = unittest.TestLoader().loadTestsFromTestCase(RequestParseExecuteTestCase)
    unittest.TextTestRunner(verbosity=4).run(suite)
