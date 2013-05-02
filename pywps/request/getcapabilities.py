@@ -21,7 +21,7 @@ class GetCapabilities(Request):
         """Set local values from key-value-pairs
         """
 
-        super(GetCapabilities, self).set_from_url(pairs)
+        Request.set_from_url(self,pairs)
 
         return pairs
 
@@ -30,7 +30,7 @@ class GetCapabilities(Request):
         """
         global namespaces
 
-        super(GetCapabilities, self).set_from_xml(root)
+        Request.set_from_xml(self,root)
 
         if hasattr(root,"AcceptVersions"):
             self.acceptversions = root.AcceptVersions.xpath("ows:Version",

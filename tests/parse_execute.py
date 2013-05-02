@@ -8,12 +8,13 @@ sys.path.append(pywpsPath)
 import unittest
 
 from pywps.request.execute import Execute
+from pywps import request
 
 class RequestParseExecuteTestCase(unittest.TestCase):
 
     test_values = {
             "version":"1.0.0",
-            "language":"en",
+            "lang":"en",
             "request":"execute",
             "service":"wps"
     }
@@ -26,9 +27,7 @@ class RequestParseExecuteTestCase(unittest.TestCase):
         """Test if Execute request is parsed and if GET
         methods are producing the same result"""
 
-        TODO: fix this request (remove brackets from DataInputs
-        #HEREIAM
-        self.ex.set_from_url(request.parse_params("Service=WPS&Version=1.0.0&Language=en&Request=Execute&Identifier=Buffer&DataInputs=[InputPolygon=@xlink:href=http%3A%2F%2Ffoo.bar%2Fsome_WFS_request.xml;BufferDistance=400]&RawDataOutput=[BufferedPolygon]"))
+        self.ex.set_from_url(request.parse_params("Service=WPS&Version=1.0.0&Language=en&Request=Execute&Identifier=Buffer&DataInputs=InputPolygon=@xlink:href=http%3A%2F%2Ffoo.bar%2Fsome_WFS_request.xml;BufferDistance=400&RawDataOutput=BufferedPolygon"))
 
         self.__test_vals(self.test_values)
 

@@ -27,10 +27,10 @@ class Request:
         """
 
         if "version" in pairs:
-            self.version = pairs["version"][0]
-        self.request=pairs["request"][0].lower()
+            self.version = pairs["version"]
+        self.request=pairs["request"].lower()
         if "language" in pairs:
-            self.lang=pairs["language"][0]
+            self.lang=pairs["language"]
         pass
 
     def set_from_xml(self,root):
@@ -85,10 +85,11 @@ def parse_xml(data):
 def parse_params(data):
     """Parse params
     """
-    from urllib.parse import parse_qs
     logging.debug("Continuing with urllib.parse parser")
 
-    params = parse_qs(data)
+    pairs = data.split("&")
+    params = dict(p.split("=",1) for p in pairs)
+    params = dict((k.lower(), v) for k, v in params.items())
     return params
 
 def __get_request_from_url(pairs):
@@ -101,13 +102,13 @@ def __get_request_from_url(pairs):
     request = None
 
     if "request" in keys:
-        if pairs["request"][0].lower() == "getcapabilities":
+        if pairs["request"].lower() == "getcapabilities":
             from pywps.request import getcapabilities
             request = getcapabilities.GetCapabilities()
-        elif pairs["request"][0].lower() == "describeprocess":
+        elif pairs["request"].lower() == "describeprocess":
             from pywps.request import describeprocess
             request = describeprocess.DescribeProcess()
-        elif pairs["request"][0].lower() == "execute":
+        elif pairs["request"].lower() == "execute":
             from pywps.request import execute
             request = execute.Execute()
 

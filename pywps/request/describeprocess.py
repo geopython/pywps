@@ -12,9 +12,9 @@ class DescribeProcess(Request):
         """Set local values from key-value-pairs
         """
 
-        super(DescribeProcess, self).set_from_url(pairs)
+        Request.set_from_url(self,pairs)
 
-        self.identifiers = pairs["identifier"][0].split(",")
+        self.identifiers = pairs["identifier"].split(",")
 
         return pairs
 
@@ -23,7 +23,7 @@ class DescribeProcess(Request):
         """
         global namespaces
 
-        super(DescribeProcess, self).set_from_xml(root)
+        Request.set_from_xml(self,root)
 
         self.identifiers = []
 
