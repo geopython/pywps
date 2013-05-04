@@ -3,7 +3,7 @@ __pycache__
 
 
 # vim
-.sw*
+*.sw*
 
 # C extensions
 *.so
