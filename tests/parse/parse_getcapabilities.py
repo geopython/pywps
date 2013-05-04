@@ -1,7 +1,7 @@
 import os
 import sys
 
-pywpsPath = os.path.abspath(os.path.join(os.path.split(os.path.abspath(__file__))[0],".."))
+pywpsPath = os.path.abspath(os.path.join(os.path.split(os.path.abspath(__file__))[0],"..",".."))
 sys.path.insert(0,pywpsPath)
 sys.path.append(pywpsPath)
 

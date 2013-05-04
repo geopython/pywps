@@ -1,13 +1,13 @@
 import os
 import sys
 
-pywpsPath = os.path.abspath(os.path.join(os.path.split(os.path.abspath(__file__))[0],".."))
+pywpsPath = os.path.abspath(os.path.join(os.path.split(os.path.abspath(__file__))[0],"..",".."))
 sys.path.insert(0,pywpsPath)
 sys.path.append(pywpsPath)
 
 import unittest
 
-from pywps.request.execute.input import *
+from pywps.process.inout import *
 
 class RequestInputTestCase(unittest.TestCase):
     """Test case for input parsing"""
@@ -15,7 +15,7 @@ class RequestInputTestCase(unittest.TestCase):
     inpt = None
 
     def setUp(self):
-        self.inpt = Input()
+        self.inpt = Input("idn")
 
     def test_set_from_url_literal(self):
         pass
