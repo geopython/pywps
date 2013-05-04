@@ -38,7 +38,8 @@ class Request:
         """
         global namespaces
         self.request=root.tag.lower().replace("{%s}"%namespaces["wps"],"")
-        self.lang=root.attrib["language"]
+        if "language" in root.attrib.keys():
+            self.lang=root.attrib["language"]
         pass
 
 

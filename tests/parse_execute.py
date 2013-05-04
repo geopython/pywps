@@ -16,7 +16,8 @@ class RequestParseExecuteTestCase(unittest.TestCase):
             "version":"1.0.0",
             "lang":"en",
             "request":"execute",
-            "service":"wps"
+            "service":"wps",
+            "identifier":"Buffer"
     }
 
     def setUp(self):
@@ -33,7 +34,7 @@ class RequestParseExecuteTestCase(unittest.TestCase):
 
     def __test_vals(self, vals):
         for key in vals:
-            self.assertEquals(eval("self.ex.%s"%key), vals[key])
+            self.assertEquals(eval("self.ex.%s"%key), vals[key],"Testing %s"%key)
 
 
 if __name__ == "__main__":

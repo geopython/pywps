@@ -10,6 +10,11 @@ sys.path.append(pywpsPath)
 
 from pywps import request
 
+from parse_getcapabilities import *
+from parse_describeprocess import *
+from parse_describeprocess import *
+from parse_input import *
+
 class RequestParse(unittest.TestCase):
     """Test input parsing"""
 
@@ -29,8 +34,8 @@ class RequestParse(unittest.TestCase):
         self.assertTrue(isinstance(r,getcapabilities.GetCapabilities))
 
     def test_describeprocess_request(self):
-        root = objectify.Element("{http://www.opengis.net/wps/1.0.0}DescribeProcess")
-        url = "requesT=DescribePROCESS"
+        root = objectify.Element("{http://www.opengis.net/wps/1.0.0}DescribeProcess",version="1.0.0")
+        url = "requesT=DescribePROCESS&identifier=all"
 
         from pywps.request import describeprocess
 
@@ -44,7 +49,7 @@ class RequestParse(unittest.TestCase):
 
     def test_execute_request(self):
         root = objectify.Element("{http://www.opengis.net/wps/1.0.0}Execute")
-        url = "requesT=ExecuTe"
+        url = "requesT=ExecuTe&identifier=all"
 
         from pywps.request import execute
 
@@ -56,16 +61,22 @@ class RequestParse(unittest.TestCase):
         r = request.get_request(url)
         self.assertTrue(isinstance(r,execute.Execute))
         
-
-if __name__ == "__main__":
+def main():
     suite = unittest.TestLoader().loadTestsFromTestCase(RequestParse)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
-    from parse_getcapabilities import *
     
     suite = unittest.TestLoader().loadTestsFromTestCase(RequestParseGetCapabilitiesTestCase)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
-    from parse_describeprocess import *
     suite = unittest.TestLoader().loadTestsFromTestCase(RequestParseDescribeProcessTestCase)
     unittest.TextTestRunner(verbosity=2).run(suite)
+
+    suite = unittest.TestLoader().loadTestsFromTestCase(RequestParseDescribeProcessTestCase)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+
+    suite = unittest.TestLoader().loadTestsFromTestCase(RequestInputTestCase)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+
+if __name__ == "__main__":
+    main()

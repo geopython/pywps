@@ -1,4 +1,10 @@
 import unittest
 
-from parse import *
+import parse
+import extent
+
+parse.main()
+extent.main()
+
+
 

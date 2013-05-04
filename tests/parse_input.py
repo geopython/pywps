@@ -7,14 +7,14 @@ sys.path.append(pywpsPath)
 
 import unittest
 
-from pywps.request.execute.input import Input
+from pywps.request.execute.input import *
 
 class RequestInputTestCase(unittest.TestCase):
     """Test case for input parsing"""
     
     inpt = None
 
-    def setUp():
+    def setUp(self):
         self.inpt = Input()
 
     def test_set_from_url_literal(self):
@@ -31,6 +31,9 @@ class RequestInputTestCase(unittest.TestCase):
     def test_set_from_node_bbox(self):
         pass
 
-if __name__ == "__main__":
+def main():
    suite = unittest.TestLoader().loadTestsFromTestCase(RequestInputTestCase)
    unittest.TextTestRunner(verbosity=4).run(suite)
+
+if __name__ == "__main__":
+    main()

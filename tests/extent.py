@@ -1,3 +1,7 @@
+"""
+Tests for pywps.extent.Extent class
+"""
+
 import os
 import sys
 
@@ -19,6 +23,9 @@ class ExtentTestCase(unittest.TestCase):
         self.assertTupleEqual(extent.toArray(),(1,2,3,4))
         self.assertEqual(extent.toString(),"1,2,3,4")
     
-if __name__ == "__main__":
+def main():
    suite = unittest.TestLoader().loadTestsFromTestCase(ExtentTestCase)
    unittest.TextTestRunner(verbosity=4).run(suite)
+
+if __name__ == "__main__":
+    main()
