@@ -6,8 +6,10 @@ class Inout:
     abstract = None
     value = None
 
-    def __init__(self,identifier):
+    def __init__(self,identifier,value=None):
         self.identifier = identifier
+        if value:
+            self.set_value(value)
 
     def set_title(self,title):
         self.title =  title

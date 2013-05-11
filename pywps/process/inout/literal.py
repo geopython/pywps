@@ -65,6 +65,19 @@ class LiteralInput(Literal,Input):
 
         self.set_value(value)
 
+    def set_from_xml(self,node):
+        """Set input value based on input node
+        """
+        value = node.Data.LiteralData
+        if "uom" in node.Data.LiteralData.attrib:
+            self.uom = node.Data.LiteralData.attrib["uom"]
+
+        # TODO: datatype should be set by process author - not by the client
+        #if "dataType" in node.Data.LiteralData.attrib:
+        #    self.dataType = node.Data.LiteralData.attrib["dataType"]
+
+        self.set_value(value)
+
 class LiteralOutput(Literal,Output):
     """Literal output object"""
     pass
