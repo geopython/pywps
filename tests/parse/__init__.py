@@ -12,7 +12,6 @@ from pywps import request
 
 from parse.parse_getcapabilities import *
 from parse.parse_describeprocess import *
-from parse.parse_describeprocess import *
 from parse.parse_input import *
 from parse.parse_literal_input import *
 
