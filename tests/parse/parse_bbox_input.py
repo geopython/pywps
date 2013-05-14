@@ -33,7 +33,47 @@ class ParseBBoxInputTestCase(unittest.TestCase):
         self.assertEquals("EPSG:4326",self.inpt.crs.getcode())
 
     def test_parse_bbox_input_POST(self):
-        TODO FIXME
+        """Parse bounding box input XML"""
+
+        req_str = StringIO("""<wps:Input xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1">
+			<ows:Identifier>BoundingBox</ows:Identifier>
+			<ows:Title>Bounding box title</ows:Title>
+                        <ows:BoundingBox xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                            xsi:schemaLocation="http://www.opengis.net/ows/1.1 owsCommon.xsd"
+                            crs="urn:ogc:crs:EPSG:6.3:26986" dimensions="2">
+                            <!-- Example. Primary editor: Arliss Whiteside. Last updated 2005- 01-25 -->
+                            <ows:LowerCorner>189000 834000</ows:LowerCorner>
+                            <ows:UpperCorner>285000 962000</ows:UpperCorner>
+                            </ows:BoundingBox>
+                        </wps:Input>""")
+
+        request = objectify.parse(req_str)
+        self.inpt.set_from_xml(request.getroot())
+        self.assertEquals(189000,self.inpt.left)
+        self.assertEquals(962000,self.inpt.top)
+        self.assertEquals(26986,self.inpt.crs.code)
+        self.assertEquals(2,self.inpt.dimensions)
+        pass
+
+    def test_parse_bbox_wgs84_POST(self):
+        """Parse bounding box input XML as WGS84"""
+
+        req_str = StringIO("""<wps:Input xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1">
+			<ows:Identifier>WGS84BoundingBox</ows:Identifier>
+			<ows:Title>Bounding box WGS84 title</ows:Title>
+             <ows:WGS84BoundingBox xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.opengis.net/ows/1.1 owsCommon.xsd">
+            <!-- Example. Primary editor: Arliss Whiteside. Last updated 2004/10/13. -->
+            <ows:LowerCorner>-71.63 41.75</ows:LowerCorner>
+            <ows:UpperCorner>-70.78 42.90</ows:UpperCorner>
+            </ows:WGS84BoundingBox>
+            </wps:Input>""")
+
+        request = objectify.parse(req_str)
+        self.inpt.set_from_xml(request.getroot())
+        self.assertEquals(-71.63,self.inpt.left)
+        self.assertEquals(42.90,self.inpt.top)
+        self.assertEquals("EPSG:4326",self.inpt.crs.getcode())
         pass
 
 

@@ -20,6 +20,7 @@ class ParseLiteralInputTestCase(unittest.TestCase):
         self.inpt = LiteralInput("BufferDistance")
 
     def test_parse_literal_input_GET(self):
+        """Parse GET KVP literal input"""
 
         # testing basic parsing
         request="BufferDistance=400"
@@ -37,7 +38,7 @@ class ParseLiteralInputTestCase(unittest.TestCase):
         self.assertEquals("400",self.inpt.value)
 
     def test_parse_literal_input_POST(self):
-        """TO BE DONE - parse node
+        """parse xml POST literal input
         """
 
         # test basic parsing
