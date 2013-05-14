@@ -3,6 +3,12 @@ pywps-4
 
 New version of PyWPS - written from scratch
 
+Dependencies
+============
+
+lxml - http://lxml.de
+owslib - https://github.com/geopython/OWSLib
+
 Run tests
 =========
 
