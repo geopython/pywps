@@ -65,7 +65,6 @@ def main():
     suite = unittest.TestLoader().loadTestsFromTestCase(RequestParse)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
-    
     suite = unittest.TestLoader().loadTestsFromTestCase(RequestParseGetCapabilitiesTestCase)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
@@ -79,6 +78,12 @@ def main():
     unittest.TextTestRunner(verbosity=2).run(suite)
 
     suite = unittest.TestLoader().loadTestsFromTestCase(ParseLiteralInputTestCase)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+
+    suite = unittest.TestLoader().loadTestsFromTestCase(ParseBoundingBoxInputTestCase)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+
+    suite = unittest.TestLoader().loadTestsFromTestCase(ParseComplexTestCase)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
 if __name__ == "__main__":

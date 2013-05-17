@@ -10,7 +10,8 @@ import unittest
 from pywps.process.inout import *
 
 class RequestInputTestCase(unittest.TestCase):
-    """Test case for input parsing"""
+    """Test case for input parsing - tests, if the parser finds the propper
+    input, based on it's identifier"""
     
     inpt = None
 
