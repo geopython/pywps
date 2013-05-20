@@ -57,7 +57,7 @@ class BoundingBoxInput(BoundingBox,Input):
         self.set_value(vals,crs)
 
     def set_from_xml(self,node):
-        """Set input vlaue based on input node
+        """Set input value based on input node
         """
 
         vals = None

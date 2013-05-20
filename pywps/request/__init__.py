@@ -4,7 +4,8 @@ import io
 
 namespaces = {
     "ows":"http://www.opengis.net/ows/1.1",
-    "wps": "http://www.opengis.net/wps/1.0.0"
+    "wps": "http://www.opengis.net/wps/1.0.0",
+    "xlink":"http://www.w3.org/1999/xlink"
 }
 
 # indicates, if xsd-based validation of the request should return
