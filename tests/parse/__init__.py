@@ -10,12 +10,13 @@ sys.path.append(pywpsPath)
 
 from pywps import request
 
-from parse_getcapabilities import *
-from parse_describeprocess import *
-from parse_input import *
-from parse_literal_input import *
-from parse_bbox_input import *
-from parse_complex_input import *
+from parse.parse_getcapabilities import *
+from parse.parse_describeprocess import *
+from parse.parse_input import *
+from parse.parse_literal_input import *
+from parse.parse_bbox_input import *
+from parse.parse_complex_input import *
+from parse.parse_reference import *
 
 class RequestParse(unittest.TestCase):
     """Test input parsing"""
@@ -86,6 +87,9 @@ def main():
     unittest.TextTestRunner(verbosity=2).run(suite)
 
     suite = unittest.TestLoader().loadTestsFromTestCase(ParseComplexInputTestCase)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+
+    suite = unittest.TestLoader().loadTestsFromTestCase(ParseReferenceTestCase)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
 if __name__ == "__main__":

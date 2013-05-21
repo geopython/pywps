@@ -1,4 +1,5 @@
-from pywps.request import *
+from pywps.request import Request
+from pywps import namespaces
 
 class DescribeProcess(Request):
     """Parser of DescribeProcess

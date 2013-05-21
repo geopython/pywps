@@ -8,6 +8,12 @@ import os,sys
 
 PYWPS_INSTALL_DIR = os.path.dirname(os.path.abspath(__file__))
 
+namespaces = {
+    "ows":"http://www.opengis.net/ows/1.1",
+    "wps": "http://www.opengis.net/wps/1.0.0",
+    "xlink":"http://www.w3.org/1999/xlink"
+}
+
 class PyWPS:
     """OGC Web Processsing Service  implementation
     """

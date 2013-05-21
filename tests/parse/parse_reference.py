@@ -59,35 +59,36 @@ class ParseReferenceTestCase(unittest.TestCase):
         self.assertEquals(self.ref.href,"http://foo/bar.tif")
         self.assertEquals(self.ref.method,"GET")
 
-    def _test_parse_reference_POST_body(self):
+    def test_parse_reference_POST_body(self):
         """Parse complex input XML reference, post method"""
         
         strin = StringIO("""<wps:Reference xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:wps="http://www.opengis.net/wps/1.0.0" xlink:href="http://foo/bar.tif" method="GET">
                             <wps:Header key1="value1" key2="value2" key3="value3" />
                             <wps:Body><body /></wps:Body>
+                            </wps:Reference>
                 """)
 
         req = objectify.parse(strin)
         self.ref.set_from_xml(req.getroot())
 
         self.assertEquals(self.ref.href,"http://foo/bar.tif")
-        self.assertEquals(self.ref.method,"GET")
-
+        self.assertDictEqual({"key1":"value1",'key2': 'value2','key3': 'value3'}, self.ref.header)
+        self.assertEquals(b"""<wps:Body xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:xlink="http://www.w3.org/1999/xlink"><body/></wps:Body>""", self.ref.body)
 
         pass
 
-    def _test_parse_reference_POST_bodyref(self):
+    def test_parse_reference_POST_bodyref(self):
         """Parse complex input XML reference, post method, body reference"""
         
-        strin = StringIO("""<wps:Reference xmlns:xlink="" xmlns:wps="" xlink:href="http://foo/bar.tif" method="GET">
-                            <wps:BodyReference href="http://foo/bar/reference" />
+        strin = StringIO("""<wps:Reference xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:wps="http://www.opengis.net/wps/1.0.0" xlink:href="http://foo/bar.tif" method="GET">
+                            <wps:BodyReference xlink:href="http://foo/bar/reference" />
+                        </wps:Reference>
                 """)
 
         req = objectify.parse(strin)
         self.ref.set_from_xml(req.getroot())
 
-        self.assertEquals(self.ref.href,"http://foo/bar.tif")
-        self.assertEquals(self.ref.method,"GET")
+        self.assertEqual("http://foo/bar/reference", self.ref.bodyref)
 
 if __name__ == "__main__":
    suite = unittest.TestLoader().loadTestsFromTestCase(ParseReferenceTestCase)
