@@ -12,39 +12,38 @@ sys.path.append(pywpsPath)
 
 import unittest
 
-from pywps.process.inout.reference import Reference
+from pywps.process.inout.complex import ComplexInput
 
 class ParseReferenceTestCase(unittest.TestCase):
 
     def setUp(self):
 
-        self.ref = Reference()
+        self.inpt = ComplexInput("input")
 
     def test_parse_reference_GET(self):
         """Parse complex input KVP reference"""
 
         url = "http://foo/bar.tif@schema=http://foo/xsd@encoding=utf-8@mimetype=image/tiff"
-        self.ref.set_from_url(url)
+        self.inpt.set_from_url(url)
 
-        self.assertEquals(self.ref.schema,"http://foo/xsd")
-        self.assertEquals(self.ref.encoding,"utf-8")
-        self.assertEquals(self.ref.mimetype,"image/tiff")
-        self.assertEquals(self.ref.href,"http://foo/bar.tif")
-        self.assertEquals(self.ref.method,"GET")
-
+        self.assertEquals(self.inpt.reference.href,"http://foo/bar.tif")
+        self.assertEquals(self.inpt.reference.method,"GET")
+        self.assertEquals(self.inpt.schema,"http://foo/xsd")
+        self.assertEquals(self.inpt.encoding,"utf-8")
+        self.assertEquals(self.inpt.mimetype,"image/tiff")
         pass
 
     def test_parse_reference_GET_href(self):
         """Parse complex input KVP reference with href attribut"""
 
         url = "@schema=http://foo/xsd@encoding=utf-8@mimetype=image/tiff@href=http://foo/bar.tif"
-        self.ref.set_from_url(url)
+        self.inpt.set_from_url(url)
 
-        self.assertEquals(self.ref.schema,"http://foo/xsd")
-        self.assertEquals(self.ref.encoding,"utf-8")
-        self.assertEquals(self.ref.mimetype,"image/tiff")
-        self.assertEquals(self.ref.href,"http://foo/bar.tif")
-        self.assertEquals(self.ref.method,"GET")
+        self.assertEquals(self.inpt.schema,"http://foo/xsd")
+        self.assertEquals(self.inpt.encoding,"utf-8")
+        self.assertEquals(self.inpt.mimetype,"image/tiff")
+        self.assertEquals(self.inpt.reference.href,"http://foo/bar.tif")
+        self.assertEquals(self.inpt.reference.method,"GET")
 
         pass
 
@@ -54,10 +53,10 @@ class ParseReferenceTestCase(unittest.TestCase):
         strin = StringIO("""<wps:Reference xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:wps="http://www.opengis.net/wps/1.0.0" xlink:href="http://foo/bar.tif" method="GET"/>""")
 
         req = objectify.parse(strin)
-        self.ref.set_from_xml(req.getroot())
+        self.inpt.set_from_xml(req.getroot())
 
-        self.assertEquals(self.ref.href,"http://foo/bar.tif")
-        self.assertEquals(self.ref.method,"GET")
+        self.assertEquals(self.inpt.reference.href,"http://foo/bar.tif")
+        self.assertEquals(self.inpt.reference.method,"GET")
 
     def test_parse_reference_POST_body(self):
         """Parse complex input XML reference, post method"""
@@ -69,11 +68,11 @@ class ParseReferenceTestCase(unittest.TestCase):
                 """)
 
         req = objectify.parse(strin)
-        self.ref.set_from_xml(req.getroot())
+        self.inpt.set_from_xml(req.getroot())
 
-        self.assertEquals(self.ref.href,"http://foo/bar.tif")
-        self.assertDictEqual({"key1":"value1",'key2': 'value2','key3': 'value3'}, self.ref.header)
-        self.assertEquals(b"""<wps:Body xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:xlink="http://www.w3.org/1999/xlink"><body/></wps:Body>""", self.ref.body)
+        self.assertEquals(self.inpt.reference.href,"http://foo/bar.tif")
+        self.assertDictEqual({"key1":"value1",'key2': 'value2','key3': 'value3'}, self.inpt.reference.header)
+        self.assertEquals(b"""<wps:Body xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:xlink="http://www.w3.org/1999/xlink"><body/></wps:Body>""", self.inpt.reference.body)
 
         pass
 
@@ -82,13 +81,12 @@ class ParseReferenceTestCase(unittest.TestCase):
         
         strin = StringIO("""<wps:Reference xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:wps="http://www.opengis.net/wps/1.0.0" xlink:href="http://foo/bar.tif" method="GET">
                             <wps:BodyReference xlink:href="http://foo/bar/reference" />
-                        </wps:Reference>
-                """)
+                        </wps:Reference>""")
 
         req = objectify.parse(strin)
-        self.ref.set_from_xml(req.getroot())
+        self.inpt.set_from_xml(req.getroot())
 
-        self.assertEqual("http://foo/bar/reference", self.ref.bodyref)
+        self.assertEqual("http://foo/bar/reference", self.inpt.reference.bodyref)
 
 if __name__ == "__main__":
    suite = unittest.TestLoader().loadTestsFromTestCase(ParseReferenceTestCase)
