@@ -8,6 +8,8 @@ class Literal:
     datatype = "int"
     uom = None
 
+    type = "literal"
+
     def set_value(self,value):
         """Set local value
         datatype is taken into account

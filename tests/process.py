@@ -13,6 +13,9 @@ sys.path.append(pywpsPath)
 import unittest
 
 from pywps.process import Process
+from pywps.process.inout.standards import LiteralLengthInput
+from pywps.process.inout.standards import BBoxInput
+from pywps.process.inout.standards import ComplexVectorInput
 
 class ProcessTestCase(unittest.TestCase):
 
@@ -21,7 +24,14 @@ class ProcessTestCase(unittest.TestCase):
 
         # configure
         process = Process("process")
+        process.add_input(LiteralLengthInput())
+        process.add_input(BBoxInput())
+        process.add_input(ComplexVectorInput())
         
-        # TODO: get_input_type should return one of 
-        # 'literal', 'bbox', 'complex'
-        process.get_input_type("literalinput")
+        self.assertEquals("literal",process.get_input_type("length"))
+        self.assertEquals("bbox",process.get_input_type("bbox"))
+        self.assertEquals("complex",process.get_input_type("vector"))
+
+if __name__ == "__main__":
+   suite = unittest.TestLoader().loadTestsFromTestCase(ProcessTestCase)
+   unittest.TextTestRunner(verbosity=4).run(suite)

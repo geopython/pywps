@@ -6,6 +6,7 @@ from pywps import namespaces
 
 class Complex:
     """Basic complex input or output object"""
+    type = "complex"
     pass
 
 class ComplexInput(Complex,Input):

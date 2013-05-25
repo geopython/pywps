@@ -15,6 +15,8 @@ class BoundingBox:
     crs = None
     dimensions = None
 
+    type = "bbox"
+
     def set_value(self,value, crs=None):
         """Set bbox
         

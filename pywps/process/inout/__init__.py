@@ -5,17 +5,20 @@ class Inout:
     title = None
     abstract = None
     value = None
+    language = None
+    maxoccures = 1
 
-    def __init__(self,identifier,value=None):
-        self.identifier = identifier
+    def __init__(self,identifier=None,value=None):
+        if identifier:
+            self.identifier = identifier
         if value:
             self.set_value(value)
 
     def set_title(self,title):
-        self.title =  title
+        self.title = title
 
-    def set_abstract(self,abstract):
-        self.abstract =  abstract
+    def set_abstract(self,abstract, language=None):
+        self.abstract = abstract
 
     def set_value(self,value):
         self.value = value
@@ -36,7 +39,8 @@ class Inout:
         pass
 
 class Input(Inout):
-    pass
+
+    default = None
 
     def set_from_url(self,inpt_str):
         pass

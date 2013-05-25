@@ -2,7 +2,7 @@ from pywps.request import Request
 from pywps import namespaces
 
 class Execute(Request):
-    """Parser of Execute
+    """Parser of Execute request
     """
 
     request="execute"
@@ -19,6 +19,8 @@ class Execute(Request):
         Request.set_from_url(self,pairs)
 
         self.identifier = pairs["identifier"]
+
+        self.set_proces(self.get_process(self.identifier))
         if "datainputs" in pairs.keys():
             self.inputs = self.__get_inputs_url(pairs["datainputs"])
         else:
