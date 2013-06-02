@@ -12,31 +12,31 @@ sys.path.append(pywpsPath)
 
 import unittest
 
-from pywps.process.inout.bbox import BoundingBoxInput
+from pywps.request.execute.bbox import BoundingBoxInput
 
 class ParseBBoxInputTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.inpt = BoundingBoxInput("BufferDistance")
+        self.inpt = BoundingBoxInput("bbox")
 
     def test_parse_bbox_input_GET(self):
 
         # testing basic parsing
         request="bbox=1,2,3,4"
-        self.inpt.set_from_url(request)
-        self.assertEquals(1,self.inpt.left)
-        self.assertEquals(2,self.inpt.dimensions)
+        self.inpt.parse_url(request)
+        self.assertEquals(1,self.inpt.get_value().left)
+        self.assertEquals(2,self.inpt.get_value().dimensions)
 
         # parse crs
         request="bbox=1,2,3,4,epsg:4326"
-        self.inpt.set_from_url(request)
-        self.assertEquals("EPSG:4326",self.inpt.crs.getcode())
+        self.inpt.parse_url(request)
+        self.assertEquals("EPSG:4326",self.inpt.get_crs(1).getcode())
 
     def test_parse_bbox_input_POST(self):
         """Parse bounding box input XML"""
 
         req_str = StringIO("""<wps:Input xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1">
-			<ows:Identifier>BoundingBox</ows:Identifier>
+			<ows:Identifier>bbox</ows:Identifier>
 			<ows:Title>Bounding box title</ows:Title>
                         <ows:BoundingBox xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                             xsi:schemaLocation="http://www.opengis.net/ows/1.1 owsCommon.xsd"
@@ -48,18 +48,18 @@ class ParseBBoxInputTestCase(unittest.TestCase):
                         </wps:Input>""")
 
         request = objectify.parse(req_str)
-        self.inpt.set_from_xml(request.getroot())
-        self.assertEquals(189000,self.inpt.left)
-        self.assertEquals(962000,self.inpt.top)
-        self.assertEquals(26986,self.inpt.crs.code)
-        self.assertEquals(2,self.inpt.dimensions)
+        self.inpt.parse_xml(request.getroot())
+        self.assertEquals(189000,self.inpt.get_value(2).left)
+        self.assertEquals(962000,self.inpt.get_value(2).top)
+        self.assertEquals(26986,self.inpt.get_crs(2).code)
+        self.assertEquals(2,self.inpt.get_dimensions(2))
         pass
 
     def test_parse_bbox_wgs84_POST(self):
         """Parse bounding box input XML as WGS84"""
 
         req_str = StringIO("""<wps:Input xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1">
-			<ows:Identifier>WGS84BoundingBox</ows:Identifier>
+			<ows:Identifier>bbox</ows:Identifier>
 			<ows:Title>Bounding box WGS84 title</ows:Title>
              <ows:WGS84BoundingBox xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.opengis.net/ows/1.1 owsCommon.xsd">
@@ -70,10 +70,10 @@ class ParseBBoxInputTestCase(unittest.TestCase):
             </wps:Input>""")
 
         request = objectify.parse(req_str)
-        self.inpt.set_from_xml(request.getroot())
-        self.assertEquals(-71.63,self.inpt.left)
-        self.assertEquals(42.90,self.inpt.top)
-        self.assertEquals("EPSG:4326",self.inpt.crs.getcode())
+        self.inpt.parse_xml(request.getroot())
+        self.assertEquals(-71.63,self.inpt.get_value(3).left)
+        self.assertEquals(42.90,self.inpt.get_value(3).top)
+        self.assertEquals("EPSG:4326",self.inpt.get_value(3).get_crs().getcode())
         pass
 
 

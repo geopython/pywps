@@ -1,5 +1,6 @@
 from pywps.request import Request
 from pywps import namespaces
+from pywps.inout import Input as InoutInput
 
 class Execute(Request):
     """Parser of Execute request
@@ -13,7 +14,7 @@ class Execute(Request):
 
         self.inputs = {}
 
-    def set_from_url(self,pairs):
+    def parse_url(self,pairs):
         """Set local values from key-value-pairs
         """
         Request.set_from_url(self,pairs)
@@ -21,10 +22,21 @@ class Execute(Request):
         self.identifier = pairs["identifier"]
 
         self.set_proces(self.get_process(self.identifier))
+
         if "datainputs" in pairs.keys():
             self.inputs = self.__get_inputs_url(pairs["datainputs"])
         else:
             self.inputs = {}
+
+    def get_process(self, identifier):
+        """returns Process object registered to PyWPS
+        this process than has inputs and outputs and so it can be use as helper
+        for parsing
+        """
+        pass
+        # FIXME TODO
+
+        
 
     def __get_inputs_url(self,datainputs):
         """Create list of inputs based on datainputs parameter strings
@@ -39,47 +51,67 @@ class Execute(Request):
             intype = self.process.get_input_type(identifier)
 
             # get parser
-            parsed_input = self.process.get_input_parser(intype)
-            parsed_input.set_from_url(val)
+            parser = self.process.get_input_parser(intype)
 
             # create Input
-            if not parsed_input.identifier in inputs.keys():
-                inputs[parsed_input.identifier] = Input()
+            if not identifier in inputs.keys():
+                inputs[identifier] = parser(identifier)
 
             # add input to Inputs
-            # TODO: check for maxOccurs
-            inputs[parsed_input.identifier].append(parsed_input)
+            inputs[identifier].parse_url(inpt)
 
         return inputs
 
 
-    def set_from_xml(self,root):
+    def parse_xml(self,root):
         """Set local values from key-value-pairs
         """
 
         global namespaces
-        Request.set_from_xml(self,root)
+        Request.parse_xml(self,root)
 
-class Input():
+class Input(InoutInput):
 
-    identifier = None
-    inputs = None
+    max_occurs = None
+    inputs = []
+    value = None
 
-    def __init__(self,identifier, inputs=[])
+    def __init__(self,identifier=None,value=None, title=None, abstract=None):
+        super().__init__(identifier=identifier , value=value, title=title, abstract= abstract)
 
-        self.inputs = inputs
+    def append(self,inpt):
+        self.inputs.append(inpt)
 
-    def append(self, inpt):
-        self.inpts.append(self.inpts)
-    
-    def __len__():
+    def get_value(self,idx=0):
+        """Get one (or first) value of this input
+        """
+        return self.inputs[idx].get_value()
+
+    def get_values(self):
+        """Get all inputs
+        """
+        
+        return map(lambda item: item.get_value(), self)
+
+    def get_input(self,idx=0):
+
+        return self.inputs[idx]
+
+    def check_maxoccurs(self):
+        """Check, if the max_occurs parameter was reached
+        """
+
+        if self.max_occurs == None:
+            return True
+        elif self.max_occurs > len(self):
+            logging.info("max_occurs %d for input %s reached" % \
+                   (self.max_occurs, self.identifier))
+            return True
+        else: 
+            return False
+
+    def __len__(self):
         return len(self.inputs)
 
-    def __getitem__(self,key):
-        return self.inputs[key]
-
-    def __setitem__(self,key,val):
-        self.inputs[key] = val
-
-    def __iter__():
-        return self.inputs
+    def __iter__(self):
+        return self.inputs.__iter__()
