@@ -20,7 +20,8 @@ class ComplexInput(Input):
         # check for max occurs
         if self.check_maxoccurs():
 
-            attribs = inpt_str.split("@")
+            ( identifier,attribs ) = inpt_str.split("=",1)
+            attribs = attribs.split("@")
 
             parsed_vals = {}
 
@@ -38,7 +39,7 @@ class ComplexInput(Input):
 
                 if not a: continue # there might be empty value
 
-                (k,v) = a.split("=")
+                (k,v) = a.split("=",1)
 
                 if k.lower() == "href" or\
                    k.lower() == "xlink:href":
@@ -61,10 +62,11 @@ class ComplexInput(Input):
                 single_complex.encoding = parsed_vals["encoding"]
 
             if "mimetype" in parsed_keys:
-                single_complex.mimetype = parsed_vals["mimetype"]
-            
+                single_complex.set_mimetype(parsed_vals["mimetype"])
+
             if "value" in parsed_keys:
                 single_complex.set_value(parsed_vals["value"])
+            
 
             self.append(single_complex)
 
@@ -170,6 +172,10 @@ class ComplexInputSingle(Complex):
     def set_reference(self, reference):
 
         self.reference = reference
+
+    def get_reference(self):
+
+        return self.reference
 
     def get_reference(self):
 
