@@ -1,5 +1,10 @@
 from pywps.inout import *
-from urllib.parse import unquote
+from pywps._compat import PY2
+
+if PY2:
+    from urllib import unquote
+else:
+    from urllib.parse import unquote
 
 class Complex:
     """Basic complex input or output object"""
