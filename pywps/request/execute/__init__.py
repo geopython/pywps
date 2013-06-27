@@ -73,11 +73,11 @@ class Execute(Request):
 class Input(InoutInput):
 
     max_occurs = None
-    inputs = []
     value = None
 
     def __init__(self,identifier=None,value=None, title=None, abstract=None):
         super(Input, self).__init__(identifier=identifier , value=value, title=title, abstract= abstract)
+        self.inputs = []
 
     def append(self,inpt):
         self.inputs.append(inpt)
