@@ -77,7 +77,7 @@ class Input(InoutInput):
     value = None
 
     def __init__(self,identifier=None,value=None, title=None, abstract=None):
-        super().__init__(identifier=identifier , value=value, title=title, abstract= abstract)
+        super(Input, self).__init__(identifier=identifier , value=value, title=title, abstract= abstract)
 
     def append(self,inpt):
         self.inputs.append(inpt)
