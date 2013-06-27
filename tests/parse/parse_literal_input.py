@@ -82,8 +82,8 @@ class ParseLiteralInputTestCase(unittest.TestCase):
         		</wps:Data>
         	</wps:Input>""")
         request = objectify.parse(requeststr)
-        self.inpt.parse_xml(request.getroot())
         self.inpt.set_datatype("string")
+        self.inpt.parse_xml(request.getroot())
         self.assertEquals("400",self.inpt.get_value(2))
 
 if __name__ == "__main__":
