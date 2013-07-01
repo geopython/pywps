@@ -7,7 +7,7 @@ sys.path.append(pywpsPath)
 
 import unittest
 
-from pywps.process.inout import *
+from pywps.inout import *
 
 class RequestInputTestCase(unittest.TestCase):
     """Test case for input parsing - tests, if the parser finds the propper

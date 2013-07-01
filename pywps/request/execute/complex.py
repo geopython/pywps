@@ -11,7 +11,7 @@ class ComplexInput(Input):
 
 
     def __init__(self,identifier=None,value=None, title=None, abstract=None):
-        super(Input,self).__init__(identifier=identifier , value=value, title=title, abstract= abstract)
+        super(ComplexInput,self).__init__(identifier=identifier , value=value, title=title, abstract= abstract)
 
     def parse_url(self, inpt_str):
         """Parse reference input from KVP http GET

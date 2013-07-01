@@ -9,7 +9,7 @@ class BoundingBoxInput(Input):
     """BoundingBox input object"""
 
     def __init__(self,identifier=None,value=None, title=None, abstract=None):
-        super(Input,self).__init__(identifier=identifier , value=value, title=title, abstract= abstract)
+        super(BoundingBox,self).__init__(identifier=identifier , value=value, title=title, abstract= abstract)
 
     def parse_url(self,inpt_str):
         """Set input vlaue based on input string

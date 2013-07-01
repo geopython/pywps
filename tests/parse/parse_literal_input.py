@@ -50,7 +50,7 @@ class ParseLiteralInputTestCase(unittest.TestCase):
         """
 
         # test basic parsing
-        requeststr=StringIO("""<wps:Input xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1">
+        requeststr=StringIO(u"""<wps:Input xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1">
         		<ows:Identifier>BufferDistance</ows:Identifier>
         		<ows:Title>Distance which people will walk to get to a playground .</ows:Title>
         		<wps:Data>
@@ -62,7 +62,7 @@ class ParseLiteralInputTestCase(unittest.TestCase):
         self.assertEquals(400,self.inpt.get_value())
 
         # parse uoms
-        requeststr=StringIO("""<wps:Input xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1">
+        requeststr=StringIO(u"""<wps:Input xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1">
         		<ows:Identifier>BufferDistance</ows:Identifier>
         		<ows:Title>Distance which people will walk to get to a playground .</ows:Title>
         		<wps:Data>
@@ -74,7 +74,7 @@ class ParseLiteralInputTestCase(unittest.TestCase):
         self.assertEquals("m",self.inpt.get_uom(1))
 
         # check input type
-        requeststr=StringIO("""<wps:Input xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1">
+        requeststr=StringIO(u"""<wps:Input xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1">
         		<ows:Identifier>BufferDistance</ows:Identifier>
         		<ows:Title>Distance which people will walk to get to a playground .</ows:Title>
         		<wps:Data>
@@ -82,8 +82,8 @@ class ParseLiteralInputTestCase(unittest.TestCase):
         		</wps:Data>
         	</wps:Input>""")
         request = objectify.parse(requeststr)
-        self.inpt.parse_xml(request.getroot())
         self.inpt.set_datatype("string")
+        self.inpt.parse_xml(request.getroot())
         self.assertEquals("400",self.inpt.get_value(2))
 
 if __name__ == "__main__":

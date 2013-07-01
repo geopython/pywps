@@ -1,4 +1,4 @@
-class Inout:
+class Inout(object):
     """Basic input-outpu class
     """
     identifier = None

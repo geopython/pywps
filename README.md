@@ -12,18 +12,11 @@ owslib - https://github.com/geopython/OWSLib
 Run tests
 =========
 
-Python 3
---------
-    python3 tests/__init__.py
+Install and run [tox](http://testrun.org/tox/latest/):
 
-or
+    $ pip install tox
+    $ tox
 
-    python3 tests/parse.py
-    
-Python 2(.7)
-------------
-    python2 tests/__init__.py
+Or run the tests by hand, with either python 2 or 3:
 
-or
-
-    python2 tests/parse.py
+    $ python tests/__init__.py

@@ -10,7 +10,7 @@ class LiteralInput(Input):
     uom = None
 
     def __init__(self,identifier=None,value=None, title=None, abstract=None):
-        super(Input,self).__init__(identifier=identifier , value=value, title=title, abstract= abstract)
+        super(LiteralInput,self).__init__(identifier=identifier , value=value, title=title, abstract= abstract)
 
     def parse_url(self,inpt_str):
         """Set input value based on input string

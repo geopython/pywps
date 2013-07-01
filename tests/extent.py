@@ -22,10 +22,12 @@ class ExtentTestCase(unittest.TestCase):
 
         self.assertTupleEqual(extent.toArray(),(1,2,3,4))
         self.assertEqual(extent.toString(),"1,2,3,4")
-    
+
+def load_tests():
+    return unittest.TestLoader().loadTestsFromTestCase(ExtentTestCase)
+
 def main():
-   suite = unittest.TestLoader().loadTestsFromTestCase(ExtentTestCase)
-   unittest.TextTestRunner(verbosity=4).run(suite)
+   unittest.TextTestRunner(verbosity=4).run(load_tests())
 
 if __name__ == "__main__":
     main()

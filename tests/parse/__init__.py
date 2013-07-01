@@ -63,34 +63,24 @@ class RequestParse(unittest.TestCase):
         # test url
         r = request.get_request(url)
         self.assertTrue(isinstance(r,execute.Execute))
-        
+
+def load_tests():
+    loader = unittest.TestLoader()
+    suite_list = [
+        loader.loadTestsFromTestCase(RequestParse),
+        loader.loadTestsFromTestCase(RequestParseGetCapabilitiesTestCase),
+        loader.loadTestsFromTestCase(RequestParseDescribeProcessTestCase),
+        loader.loadTestsFromTestCase(RequestParseDescribeProcessTestCase),
+        loader.loadTestsFromTestCase(RequestInputTestCase),
+        loader.loadTestsFromTestCase(ParseLiteralInputTestCase),
+        loader.loadTestsFromTestCase(ParseBBoxInputTestCase),
+        loader.loadTestsFromTestCase(ParseComplexInputTestCase),
+        loader.loadTestsFromTestCase(ParseReferenceTestCase),
+    ]
+    return unittest.TestSuite(suite_list)
+
 def main():
-    suite = unittest.TestLoader().loadTestsFromTestCase(RequestParse)
-    unittest.TextTestRunner(verbosity=2).run(suite)
-
-    suite = unittest.TestLoader().loadTestsFromTestCase(RequestParseGetCapabilitiesTestCase)
-    unittest.TextTestRunner(verbosity=2).run(suite)
-
-    suite = unittest.TestLoader().loadTestsFromTestCase(RequestParseDescribeProcessTestCase)
-    unittest.TextTestRunner(verbosity=2).run(suite)
-
-    suite = unittest.TestLoader().loadTestsFromTestCase(RequestParseDescribeProcessTestCase)
-    unittest.TextTestRunner(verbosity=2).run(suite)
-
-    suite = unittest.TestLoader().loadTestsFromTestCase(RequestInputTestCase)
-    unittest.TextTestRunner(verbosity=2).run(suite)
-
-    suite = unittest.TestLoader().loadTestsFromTestCase(ParseLiteralInputTestCase)
-    unittest.TextTestRunner(verbosity=2).run(suite)
-
-    suite = unittest.TestLoader().loadTestsFromTestCase(ParseBBoxInputTestCase)
-    unittest.TextTestRunner(verbosity=2).run(suite)
-
-    suite = unittest.TestLoader().loadTestsFromTestCase(ParseComplexInputTestCase)
-    unittest.TextTestRunner(verbosity=2).run(suite)
-
-    suite = unittest.TestLoader().loadTestsFromTestCase(ParseReferenceTestCase)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    unittest.TextTestRunner(verbosity=2).run(load_tests())
 
 if __name__ == "__main__":
     main()
