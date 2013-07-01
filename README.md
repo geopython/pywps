@@ -12,6 +12,10 @@ owslib - https://github.com/geopython/OWSLib
 Run tests
 =========
 
+[![Build Status](https://travis-ci.org/jachym/pywps-4.png)](https://travis-ci.org/jachym/pywps-4)
+
+
+
 Install and run [tox](http://testrun.org/tox/latest/):
 
     $ pip install tox
