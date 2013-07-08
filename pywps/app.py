@@ -4,23 +4,8 @@ https://github.com/jachym/pywps-4/issues/2
 """
 
 from werkzeug.wrappers import Request, Response
-
-
-CAPABILITIES_ANSWER = '''\
-<?xml version="1.0" encoding="utf-8"?>
-<wps:Capabilities service="WPS" version="1.0.0"
-  xmlns:wps="http://www.opengis.net/wps/1.0.0"
-  xmlns:ows="http://www.opengis.net/ows/1.1">
-    <ows:ServiceIdentification>
-        <ows:Title>PyWPS Server</ows:Title>
-        <ows:Abstract>Development version of PyWPS</ows:Abstract>
-        <ows:ServiceType>WPS</ows:ServiceType>
-        <ows:ServiceTypeVersion>1.0.0</ows:ServiceTypeVersion>
-        <ows:Fees>None</ows:Fees>
-        <ows:AccessConstraints>none</ows:AccessConstraints>
-    </ows:ServiceIdentification>
-</wps:Capabilities>
-'''
+import lxml.etree
+from lxml.builder import ElementMaker
 
 
 NAMESPACES = {
@@ -28,13 +13,21 @@ NAMESPACES = {
   'ows': "http://www.opengis.net/ows/1.1",
 }
 
+WPS = ElementMaker(namespace=NAMESPACES['wps'], nsmap=NAMESPACES)
+OWS = ElementMaker(namespace=NAMESPACES['ows'], nsmap=NAMESPACES)
+
 
 class Process:
     """ WPS process """
 
     @Request.application
     def __call__(self, request):
-        return Response(CAPABILITIES_ANSWER)
+        doc = WPS.Capabilities(
+            OWS.ServiceIdentification(
+                OWS.Title('PyWPS Server')
+            )
+        )
+        return Response(lxml.etree.tostring(doc, pretty_print=True))
 
 
 def create_process():
