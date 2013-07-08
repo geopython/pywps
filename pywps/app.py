@@ -20,11 +20,23 @@ OWS = ElementMaker(namespace=NAMESPACES['ows'], nsmap=NAMESPACES)
 class Service:
     """ WPS service """
 
+    def __init__(self, processes=[]):
+        self.processes = list(processes)
+
     @Request.application
     def __call__(self, request):
+        process_elements = []
+        for process in self.processes:
+            tag = WPS.Process(
+                OWS.Identifier(process.__name__)
+            )
+            process_elements.append(tag)
+
         doc = WPS.Capabilities(
             OWS.ServiceIdentification(
                 OWS.Title('PyWPS Server')
-            )
+            ),
+            WPS.ProcessOfferings(*process_elements)
         )
+
         return Response(lxml.etree.tostring(doc, pretty_print=True))

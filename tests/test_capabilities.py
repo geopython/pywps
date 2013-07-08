@@ -30,6 +30,19 @@ class CapabilitiesTest(unittest.TestCase):
                                 '/ows:Title')
         assert title == 'PyWPS Server'
 
+    def test_returns_process_names(self):
+        def pr1(): pass
+        def pr2(): pass
+        service = Service(processes=[pr1, pr2])
+        client = Client(service, WpsTestResponse)
+        resp = client.get('?Request=GetCapabilities')
+        assert resp.status_code == 200
+        names = resp.xpath_text('/wps:Capabilities'
+                                '/wps:ProcessOfferings'
+                                '/wps:Process'
+                                '/ows:Identifier')
+        assert names == 'pr1 pr2'
+
 
 def load_tests():
     loader = unittest.TestLoader()
