@@ -2,7 +2,7 @@ import unittest
 from werkzeug.test import Client
 from werkzeug.wrappers import BaseResponse
 import lxml.etree
-from pywps.app import create_process, NAMESPACES
+from pywps.app import create_service, NAMESPACES
 
 
 class WpsTestResponse(BaseResponse):
@@ -21,8 +21,8 @@ class WpsTestResponse(BaseResponse):
 class CapabilitiesTest(unittest.TestCase):
 
     def test_returns_valid_response(self):
-        app = create_process()
-        client = Client(app, WpsTestResponse)
+        service = create_service()
+        client = Client(service, WpsTestResponse)
         resp = client.get('?Request=GetCapabilities')
         assert resp.status_code == 200
         title = resp.xpath_text('/wps:Capabilities'

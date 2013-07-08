@@ -17,8 +17,8 @@ WPS = ElementMaker(namespace=NAMESPACES['wps'], nsmap=NAMESPACES)
 OWS = ElementMaker(namespace=NAMESPACES['ows'], nsmap=NAMESPACES)
 
 
-class Process:
-    """ WPS process """
+class Service:
+    """ WPS service """
 
     @Request.application
     def __call__(self, request):
@@ -30,5 +30,5 @@ class Process:
         return Response(lxml.etree.tostring(doc, pretty_print=True))
 
 
-def create_process():
-    return Process()
+def create_service():
+    return Service()
