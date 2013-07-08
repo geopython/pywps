@@ -28,7 +28,3 @@ class Service:
             )
         )
         return Response(lxml.etree.tostring(doc, pretty_print=True))
-
-
-def create_service():
-    return Service()
