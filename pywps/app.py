@@ -17,6 +17,35 @@ WPS = ElementMaker(namespace=NAMESPACES['wps'], nsmap=NAMESPACES)
 OWS = ElementMaker(namespace=NAMESPACES['ows'], nsmap=NAMESPACES)
 
 
+class WPSRequest:
+
+    def __init__(self, http_request):
+        self.http_request = http_request
+
+
+class WPSResponse:
+
+    def __init__(self, outputs=None):
+        self.outputs = outputs or {}
+
+    @Request.application
+    def __call__(self, request):
+        output_elements = []
+        for key, value in self.outputs.items():
+            output_elements.append(WPS.Output(
+                OWS.Identifier(key),
+                OWS.Data(WPS.LiteralData(value))
+            ))
+
+        doc = WPS.ExecuteResponse(
+            WPS.Status(
+                WPS.ProcessSucceeded("great success")
+            ),
+            WPS.ProcessOutputs(*output_elements)
+        )
+        return Response(lxml.etree.tostring(doc, pretty_print=True))
+
+
 class Process:
     """ WPS process """
 
@@ -27,6 +56,10 @@ class Process:
     def capabilities_xml(self):
         return WPS.Process(OWS.Identifier(self.identifier))
 
+    @Request.application
+    def __call__(self, http_request):
+        return self.handler(WPSRequest(http_request))
+
 
 class Service:
     """ WPS service """
@@ -34,8 +67,7 @@ class Service:
     def __init__(self, processes=[]):
         self.processes = list(processes)
 
-    @Request.application
-    def __call__(self, request):
+    def get_capabilities(self):
         process_elements = [p.capabilities_xml() for p in self.processes]
 
         doc = WPS.Capabilities(
@@ -46,3 +78,19 @@ class Service:
         )
 
         return Response(lxml.etree.tostring(doc, pretty_print=True))
+
+    def execute(self, request):
+        identifier = request.args['identifier']
+        for process in self.processes:
+            if process.identifier == identifier:
+                return Response.from_app(process, request.environ)
+
+    @Request.application
+    def __call__(self, request):
+        request_type = request.args['Request']
+
+        if request_type == 'GetCapabilities':
+            return self.get_capabilities()
+
+        elif request_type == 'Execute':
+            return self.execute(request)
