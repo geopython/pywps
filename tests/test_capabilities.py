@@ -1,5 +1,5 @@
 import unittest
-from pywps.app import Service
+from pywps.app import Process, Service
 from tests.common import client_for
 
 
@@ -17,7 +17,7 @@ class CapabilitiesTest(unittest.TestCase):
     def test_returns_process_names(self):
         def pr1(): pass
         def pr2(): pass
-        client = client_for(Service(processes=[pr1, pr2]))
+        client = client_for(Service(processes=[Process(pr1), Process(pr2)]))
         resp = client.get('?Request=GetCapabilities')
         assert resp.status_code == 200
         names = resp.xpath_text('/wps:Capabilities'

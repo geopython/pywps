@@ -17,6 +17,17 @@ WPS = ElementMaker(namespace=NAMESPACES['wps'], nsmap=NAMESPACES)
 OWS = ElementMaker(namespace=NAMESPACES['ows'], nsmap=NAMESPACES)
 
 
+class Process:
+    """ WPS process """
+
+    def __init__(self, handler, identifier=None):
+        self.identifier = identifier or handler.__name__
+        self.handler = handler
+
+    def capabilities_xml(self):
+        return WPS.Process(OWS.Identifier(self.identifier))
+
+
 class Service:
     """ WPS service """
 
@@ -25,12 +36,7 @@ class Service:
 
     @Request.application
     def __call__(self, request):
-        process_elements = []
-        for process in self.processes:
-            tag = WPS.Process(
-                OWS.Identifier(process.__name__)
-            )
-            process_elements.append(tag)
+        process_elements = [p.capabilities_xml() for p in self.processes]
 
         doc = WPS.Capabilities(
             OWS.ServiceIdentification(
