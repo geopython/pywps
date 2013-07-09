@@ -4,7 +4,7 @@ https://github.com/jachym/pywps-4/issues/2
 """
 
 from werkzeug.wrappers import Request, Response
-from werkzeug.exceptions import BadRequest, MethodNotAllowed
+from werkzeug.exceptions import HTTPException, BadRequest, MethodNotAllowed
 from werkzeug.datastructures import MultiDict
 import lxml.etree
 from lxml.builder import ElementMaker
@@ -42,9 +42,43 @@ class WPSRequest(object):
 
     def __init__(self, http_request):
         self.http_request = http_request
-        if http_request.method == 'POST':
+
+        if http_request.method == 'GET':
+            self.operation = http_request.args['Request']
+
+            if self.operation == 'GetCapabilities':
+                pass
+
+            elif self.operation == 'DescribeProcess':
+                self.identifiers = http_request.args.getlist('identifier')
+
+            elif self.operation == 'Execute':
+                self.identifier = http_request.args['identifier']
+
+            else:
+                raise BadRequest("Unknown request type %r" % self.operation)
+
+        elif http_request.method == 'POST':
             doc = lxml.etree.fromstring(http_request.get_data())
-            self.inputs = get_input_from_xml(doc)
+
+            if doc.tag == WPS.GetCapabilities().tag:
+                self.operation = 'GetCapabilities'
+
+            elif doc.tag == WPS.DescribeProcess().tag:
+                self.operation = 'DescribeProcess'
+                self.identifiers = [identifier_el.text for identifier_el in
+                                    xpath_ns(doc, './ows:Identifier')]
+
+            elif doc.tag == WPS.Execute().tag:
+                self.operation = 'Execute'
+                self.identifier = xpath_ns(doc, './ows:Identifier')[0].text
+                self.inputs = get_input_from_xml(doc)
+
+            else:
+                raise BadRequest("Unknown request type %r" % doc.tag)
+
+        else:
+            raise MethodNotAllowed()
 
 
 class WPSResponse(object):
@@ -85,8 +119,8 @@ class Process(object):
             OWS.Identifier(self.identifier)
         )
 
-    def execute(self, http_request):
-        return self.handler(WPSRequest(http_request))
+    def execute(self, wps_request):
+        return self.handler(wps_request)
 
 
 class Service(object):
@@ -114,55 +148,36 @@ class Service(object):
             try:
                 process = self.processes[identifier]
             except KeyError:
-                return BadRequest("Unknown process %r" % identifier)
+                raise BadRequest("Unknown process %r" % identifier)
             else:
                 identifier_elements.append(process.describe_xml())
         doc = WPS.ProcessDescriptions(*identifier_elements)
         return xml_response(doc)
 
-
-    def execute(self, identifier, request):
+    def execute(self, identifier, wps_request):
         try:
             process = self.processes[identifier]
         except KeyError:
-            return BadRequest("Unknown process %r" % identifier)
-        return process.execute(request)
+            raise BadRequest("Unknown process %r" % identifier)
+        return process.execute(wps_request)
 
     @Request.application
-    def __call__(self, request):
-        if request.method == 'GET':
-            request_type = request.args['Request']
+    def __call__(self, http_request):
+        try:
+            wps_request = WPSRequest(http_request)
 
-            if request_type == 'GetCapabilities':
+            if wps_request.operation == 'GetCapabilities':
                 return self.get_capabilities()
 
-            elif request_type == 'DescribeProcess':
-                identifiers = request.args.getlist('identifier')
-                return self.describe(identifiers)
+            elif wps_request.operation == 'DescribeProcess':
+                return self.describe(wps_request.identifiers)
 
-            elif request_type == 'Execute':
-                identifier = request.args['identifier']
-                return self.execute(identifier, request)
+            elif wps_request.operation == 'Execute':
+                return self.execute(wps_request.identifier, wps_request)
 
             else:
-                return BadRequest("Unknown request type %r" % request_type)
+                raise RuntimeError("Unknown operation %r"
+                                   % wps_request.operation)
 
-        elif request.method == 'POST':
-            doc = lxml.etree.fromstring(request.get_data())
-            if doc.tag == WPS.GetCapabilities().tag:
-                return self.get_capabilities()
-
-            elif doc.tag == WPS.DescribeProcess().tag:
-                identifiers = [identifier_el.text for identifier_el in
-                               xpath_ns(doc, './ows:Identifier')]
-                return self.describe(identifiers)
-
-            elif doc.tag == WPS.Execute().tag:
-                identifier = xpath_ns(doc, './ows:Identifier')[0].text
-                return self.execute(identifier, request)
-
-            else:
-                return BadRequest("Unknown request type %r" % doc.tag)
-
-        else:
-            return MethodNotAllowed()
+        except HTTPException as e:
+            return e
