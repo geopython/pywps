@@ -25,8 +25,10 @@ class BadRequestTest(unittest.TestCase):
 
 class CapabilitiesTest(unittest.TestCase):
 
-    def test_returns_valid_response(self):
-        client = client_for(Service())
+    def test_get_request(self):
+        def pr1(): pass
+        def pr2(): pass
+        client = client_for(Service(processes=[Process(pr1), Process(pr2)]))
         resp = client.get('?Request=GetCapabilities')
         assert resp.status_code == 200
         assert resp.headers['Content-Type'] == 'text/xml'
@@ -34,14 +36,6 @@ class CapabilitiesTest(unittest.TestCase):
                                 '/ows:ServiceIdentification'
                                 '/ows:Title')
         assert title == 'PyWPS Server'
-
-    def test_returns_process_names(self):
-        def pr1(): pass
-        def pr2(): pass
-        client = client_for(Service(processes=[Process(pr1), Process(pr2)]))
-        resp = client.get('?Request=GetCapabilities')
-        assert resp.status_code == 200
-        assert resp.headers['Content-Type'] == 'text/xml'
         names = resp.xpath_text('/wps:Capabilities'
                                 '/wps:ProcessOfferings'
                                 '/wps:Process'
