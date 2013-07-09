@@ -79,18 +79,26 @@ class Service:
 
         return Response(lxml.etree.tostring(doc, pretty_print=True))
 
-    def execute(self, request):
-        identifier = request.args['identifier']
+    def execute(self, identifier, request):
         for process in self.processes:
             if process.identifier == identifier:
                 return Response.from_app(process, request.environ)
 
     @Request.application
     def __call__(self, request):
-        request_type = request.args['Request']
+        if request.method == 'GET':
+            request_type = request.args['Request']
 
-        if request_type == 'GetCapabilities':
-            return self.get_capabilities()
+            if request_type == 'GetCapabilities':
+                return self.get_capabilities()
 
-        elif request_type == 'Execute':
-            return self.execute(request)
+            elif request_type == 'Execute':
+                identifier = request.args['identifier']
+                return self.execute(identifier, request)
+
+        elif request.method == 'POST':
+            doc = lxml.etree.fromstring(request.get_data())
+            if doc.tag == WPS.Execute().tag:
+                identifier = doc.xpath('/wps:Execute/ows:Identifier',
+                                       namespaces=NAMESPACES)[0].text
+                return self.execute(identifier, request)
