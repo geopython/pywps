@@ -40,8 +40,7 @@ class ExecuteTest(unittest.TestCase):
     def test_post_with_no_inputs(self):
         client = client_for(Service(processes=[create_ultimate_question()]))
         request_doc = WPS.Execute(OWS.Identifier('ultimate_question'))
-        resp = client.post('', data=lxml.etree.tostring(
-            request_doc, pretty_print=True))
+        resp = client.post_xml(doc=request_doc)
         self.check_ultimate_question_response(resp)
 
 

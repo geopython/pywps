@@ -4,6 +4,15 @@ from werkzeug.wrappers import BaseResponse
 from pywps.app import NAMESPACES
 
 
+class WpsClient(Client):
+
+    def post_xml(self, *args, **kwargs):
+        doc = kwargs.pop('doc')
+        data = lxml.etree.tostring(doc, pretty_print=True)
+        kwargs['data'] = data
+        return self.post(*args, **kwargs)
+
+
 class WpsTestResponse(BaseResponse):
 
     def __init__(self, *args):
@@ -19,4 +28,4 @@ class WpsTestResponse(BaseResponse):
 
 
 def client_for(service):
-    return Client(service, WpsTestResponse)
+    return WpsClient(service, WpsTestResponse)
