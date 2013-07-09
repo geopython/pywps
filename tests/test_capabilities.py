@@ -1,5 +1,6 @@
 import unittest
-from pywps.app import Process, Service
+import lxml.etree
+from pywps.app import Process, Service, WPS
 from tests.common import client_for
 
 
@@ -13,6 +14,12 @@ class BadRequestTest(unittest.TestCase):
     def test_bad_request_type_with_get(self):
         client = client_for(Service())
         resp = client.get('?Request=foo')
+        assert resp.status_code == 400
+
+    def test_bad_request_type_with_post(self):
+        client = client_for(Service())
+        request_doc = WPS.Foo()
+        resp = client.post_xml('', doc=request_doc)
         assert resp.status_code == 400
 
 

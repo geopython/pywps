@@ -112,5 +112,8 @@ class Service:
                                        namespaces=NAMESPACES)[0].text
                 return self.execute(identifier, request)
 
+            else:
+                return BadRequest("Unknown request type %r" % doc.tag)
+
         else:
             return MethodNotAllowed()
