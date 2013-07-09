@@ -20,13 +20,16 @@ WPS = ElementMaker(namespace=NAMESPACES['wps'], nsmap=NAMESPACES)
 OWS = ElementMaker(namespace=NAMESPACES['ows'], nsmap=NAMESPACES)
 
 
+def xpath_ns(el, path):
+    return el.xpath(path, namespaces=NAMESPACES)
+
+
 def xml_response(doc):
     return Response(lxml.etree.tostring(doc, pretty_print=True),
                     content_type='text/xml')
 
 
 def get_input_from_xml(doc):
-    xpath_ns = lambda el, path: el.xpath(path, namespaces=NAMESPACES)
     the_input = MultiDict()
     for input_el in xpath_ns(doc, '/wps:Execute/wps:DataInputs/wps:Input'):
         [identifier_el] = xpath_ns(input_el, './ows:Identifier')

@@ -1,7 +1,7 @@
 import unittest
 import lxml.etree
 from pywps.app import (Service, Process, WPSResponse, WPS, OWS, NAMESPACES,
-                       get_input_from_xml)
+                       get_input_from_xml, xpath_ns)
 from pywps._compat import text_type
 from tests.common import client_for
 
@@ -21,7 +21,6 @@ def create_greeter():
 
 
 def get_output(doc):
-    xpath_ns = lambda el, path: el.xpath(path, namespaces=NAMESPACES)
     output = {}
     for output_el in xpath_ns(doc, '/wps:ExecuteResponse'
                                    '/wps:ProcessOutputs/wps:Output'):
