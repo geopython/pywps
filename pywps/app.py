@@ -4,6 +4,7 @@ https://github.com/jachym/pywps-4/issues/2
 """
 
 from werkzeug.wrappers import Request, Response
+from werkzeug.exceptions import MethodNotAllowed
 import lxml.etree
 from lxml.builder import ElementMaker
 
@@ -107,3 +108,6 @@ class Service:
                 identifier = doc.xpath('/wps:Execute/ows:Identifier',
                                        namespaces=NAMESPACES)[0].text
                 return self.execute(identifier, request)
+
+        else:
+            return MethodNotAllowed()

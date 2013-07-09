@@ -3,6 +3,14 @@ from pywps.app import Process, Service
 from tests.common import client_for
 
 
+class BadRequestTest(unittest.TestCase):
+
+    def test_bad_http_verb(self):
+        client = client_for(Service())
+        resp = client.put('')
+        assert resp.status_code == 405  # method not allowed
+
+
 class CapabilitiesTest(unittest.TestCase):
 
     def test_returns_valid_response(self):
@@ -32,6 +40,7 @@ class CapabilitiesTest(unittest.TestCase):
 def load_tests():
     loader = unittest.TestLoader()
     suite_list = [
+        loader.loadTestsFromTestCase(BadRequestTest),
         loader.loadTestsFromTestCase(CapabilitiesTest),
     ]
     return unittest.TestSuite(suite_list)
