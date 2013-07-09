@@ -38,7 +38,7 @@ def get_input_from_xml(doc):
     return the_input
 
 
-class WPSRequest:
+class WPSRequest(object):
 
     def __init__(self, http_request):
         self.http_request = http_request
@@ -47,7 +47,7 @@ class WPSRequest:
             self.inputs = get_input_from_xml(doc)
 
 
-class WPSResponse:
+class WPSResponse(object):
 
     def __init__(self, outputs=None):
         self.outputs = outputs or {}
@@ -70,7 +70,7 @@ class WPSResponse:
         return xml_response(doc)
 
 
-class Process:
+class Process(object):
     """ WPS process """
 
     def __init__(self, handler, identifier=None):
@@ -89,7 +89,7 @@ class Process:
         return self.handler(WPSRequest(http_request))
 
 
-class Service:
+class Service(object):
     """ WPS service """
 
     def __init__(self, processes=[]):
