@@ -62,8 +62,7 @@ class Process:
     def capabilities_xml(self):
         return WPS.Process(OWS.Identifier(self.identifier))
 
-    @Request.application
-    def __call__(self, http_request):
+    def execute(self, http_request):
         return self.handler(WPSRequest(http_request))
 
 
@@ -88,7 +87,7 @@ class Service:
     def execute(self, identifier, request):
         for process in self.processes:
             if process.identifier == identifier:
-                return Response.from_app(process, request.environ)
+                return process.execute(request)
 
         else:
             return BadRequest("Unknown process %r" % identifier)
