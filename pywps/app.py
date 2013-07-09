@@ -149,8 +149,7 @@ class Service:
                 return self.get_capabilities()
 
             elif doc.tag == WPS.Execute().tag:
-                identifier = doc.xpath('/wps:Execute/ows:Identifier',
-                                       namespaces=NAMESPACES)[0].text
+                identifier = xpath_ns(doc, './ows:Identifier')[0].text
                 return self.execute(identifier, request)
 
             else:
