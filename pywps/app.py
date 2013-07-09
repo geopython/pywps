@@ -108,12 +108,16 @@ class Service:
 
         return xml_response(doc)
 
-    def describe(self, identifier):
-        try:
-            process = self.processes[identifier]
-        except KeyError:
-            return BadRequest("Unknown process %r" % identifier)
-        doc = WPS.ProcessDescriptions(process.describe_xml())
+    def describe(self, identifiers):
+        identifier_elements = []
+        for identifier in identifiers:
+            try:
+                process = self.processes[identifier]
+            except KeyError:
+                return BadRequest("Unknown process %r" % identifier)
+            else:
+                identifier_elements.append(process.describe_xml())
+        doc = WPS.ProcessDescriptions(*identifier_elements)
         return xml_response(doc)
 
 
@@ -133,8 +137,8 @@ class Service:
                 return self.get_capabilities()
 
             elif request_type == 'DescribeProcess':
-                identifier = request.args['identifier']
-                return self.describe(identifier)
+                identifiers = request.args.getlist('identifier')
+                return self.describe(identifiers)
 
             elif request_type == 'Execute':
                 identifier = request.args['identifier']
@@ -149,9 +153,9 @@ class Service:
                 return self.get_capabilities()
 
             elif doc.tag == WPS.DescribeProcess().tag:
-                identifier = doc.xpath('./ows:Identifier',
-                                       namespaces=NAMESPACES)[0].text
-                return self.describe(identifier)
+                identifiers = [identifier_el.text for identifier_el in
+                               xpath_ns(doc, './ows:Identifier')]
+                return self.describe(identifiers)
 
             elif doc.tag == WPS.Execute().tag:
                 identifier = xpath_ns(doc, './ows:Identifier')[0].text

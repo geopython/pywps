@@ -13,21 +13,47 @@ def get_describe_result(resp):
         result.append((identifier_el.text,))
     return result
 
+
 class DescribeProcessTest(unittest.TestCase):
 
     def setUp(self):
         def hello(request): pass
-        hello_process = Process(hello)
-        self.client = client_for(Service(processes=[hello_process]))
+        def ping(request): pass
+        processes = [Process(hello), Process(ping)]
+        self.client = client_for(Service(processes=processes))
 
-    def test_get_request(self):
+    def test_get_request_zero_args(self):
+        resp = self.client.get('?Request=DescribeProcess')
+        assert [ident for (ident,) in get_describe_result(resp)] == []
+
+    def test_post_request_zero_args(self):
+        request_doc = WPS.DescribeProcess()
+        resp = self.client.post_xml(doc=request_doc)
+        assert [ident for (ident,) in get_describe_result(resp)] == []
+
+    def test_get_one_arg(self):
         resp = self.client.get('?Request=DescribeProcess&identifier=hello')
         assert [ident for (ident,) in get_describe_result(resp)] == ['hello']
 
-    def test_post_request(self):
+    def test_post_one_arg(self):
         request_doc = WPS.DescribeProcess(OWS.Identifier('hello'))
         resp = self.client.post_xml(doc=request_doc)
         assert [ident for (ident,) in get_describe_result(resp)] == ['hello']
+
+    def test_get_two_args(self):
+        resp = self.client.get('?Request=DescribeProcess'
+                               '&identifier=hello'
+                               '&identifier=ping')
+        result = get_describe_result(resp)
+        assert [ident for (ident,) in result] == ['hello', 'ping']
+
+    def test_post_two_args(self):
+        request_doc = WPS.DescribeProcess(
+            OWS.Identifier('hello'),
+            OWS.Identifier('ping'))
+        resp = self.client.post_xml(doc=request_doc)
+        result = get_describe_result(resp)
+        assert [ident for (ident,) in result] == ['hello', 'ping']
 
 
 def load_tests():
