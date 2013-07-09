@@ -14,7 +14,7 @@ def get_output(doc):
     output = {}
     for output_el in xpath_ns(doc, '/wps:ExecuteResponse/wps:ProcessOutputs'):
         [identifier_el] = xpath_ns(output_el, '//ows:Identifier')
-        [value_el] = xpath_ns(output_el, '//ows:Data/wps:LiteralData')
+        [value_el] = xpath_ns(output_el, '//wps:Data/wps:LiteralData')
         output[identifier_el.text] = value_el.text
     return output
 

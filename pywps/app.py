@@ -40,7 +40,7 @@ class WPSResponse:
         for key, value in self.outputs.items():
             output_elements.append(WPS.Output(
                 OWS.Identifier(key),
-                OWS.Data(WPS.LiteralData(value))
+                WPS.Data(WPS.LiteralData(value))
             ))
 
         doc = WPS.ExecuteResponse(
