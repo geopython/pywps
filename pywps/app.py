@@ -17,6 +17,11 @@ WPS = ElementMaker(namespace=NAMESPACES['wps'], nsmap=NAMESPACES)
 OWS = ElementMaker(namespace=NAMESPACES['ows'], nsmap=NAMESPACES)
 
 
+def xml_response(doc):
+    return Response(lxml.etree.tostring(doc, pretty_print=True),
+                    content_type='text/xml')
+
+
 class WPSRequest:
 
     def __init__(self, http_request):
@@ -43,7 +48,7 @@ class WPSResponse:
             ),
             WPS.ProcessOutputs(*output_elements)
         )
-        return Response(lxml.etree.tostring(doc, pretty_print=True))
+        return xml_response(doc)
 
 
 class Process:
@@ -77,7 +82,7 @@ class Service:
             WPS.ProcessOfferings(*process_elements)
         )
 
-        return Response(lxml.etree.tostring(doc, pretty_print=True))
+        return xml_response(doc)
 
     def execute(self, identifier, request):
         for process in self.processes:

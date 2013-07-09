@@ -13,6 +13,7 @@ class ExecuteTest(unittest.TestCase):
 
     def check_ultimate_question_response(self, resp):
         assert resp.status_code == 200
+        assert resp.headers['Content-Type'] == 'text/xml'
         success = resp.xpath_text('/wps:ExecuteResponse'
                                   '/wps:Status'
                                   '/wps:ProcessSucceeded')

@@ -8,7 +8,8 @@ class WpsTestResponse(BaseResponse):
 
     def __init__(self, *args):
         super(WpsTestResponse, self).__init__(*args)
-        self.xml = lxml.etree.fromstring(self.get_data())
+        if self.headers.get('Content-Type') == 'text/xml':
+            self.xml = lxml.etree.fromstring(self.get_data())
 
     def xpath(self, path):
         return self.xml.xpath(path, namespaces=NAMESPACES)

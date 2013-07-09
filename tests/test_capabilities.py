@@ -9,6 +9,7 @@ class CapabilitiesTest(unittest.TestCase):
         client = client_for(Service())
         resp = client.get('?Request=GetCapabilities')
         assert resp.status_code == 200
+        assert resp.headers['Content-Type'] == 'text/xml'
         title = resp.xpath_text('/wps:Capabilities'
                                 '/ows:ServiceIdentification'
                                 '/ows:Title')
@@ -20,6 +21,7 @@ class CapabilitiesTest(unittest.TestCase):
         client = client_for(Service(processes=[Process(pr1), Process(pr2)]))
         resp = client.get('?Request=GetCapabilities')
         assert resp.status_code == 200
+        assert resp.headers['Content-Type'] == 'text/xml'
         names = resp.xpath_text('/wps:Capabilities'
                                 '/wps:ProcessOfferings'
                                 '/wps:Process'
