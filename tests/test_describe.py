@@ -1,5 +1,5 @@
 import unittest
-from pywps.app import Process, Service, xpath_ns
+from pywps.app import Process, Service, xpath_ns, WPS, OWS
 from tests.common import client_for
 
 
@@ -18,6 +18,11 @@ class DescribeProcessTest(unittest.TestCase):
 
     def test_get_request(self):
         resp = self.client.get('?Request=DescribeProcess&identifier=hello')
+        self.check_describe_response(resp)
+
+    def test_post_request(self):
+        request_doc = WPS.DescribeProcess(OWS.Identifier('hello'))
+        resp = self.client.post_xml(doc=request_doc)
         self.check_describe_response(resp)
 
 

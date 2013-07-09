@@ -148,6 +148,11 @@ class Service:
             if doc.tag == WPS.GetCapabilities().tag:
                 return self.get_capabilities()
 
+            elif doc.tag == WPS.DescribeProcess().tag:
+                identifier = doc.xpath('./ows:Identifier',
+                                       namespaces=NAMESPACES)[0].text
+                return self.describe(identifier)
+
             elif doc.tag == WPS.Execute().tag:
                 identifier = xpath_ns(doc, './ows:Identifier')[0].text
                 return self.execute(identifier, request)
