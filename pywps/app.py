@@ -7,6 +7,7 @@ from werkzeug.wrappers import Request, Response
 from werkzeug.exceptions import BadRequest, MethodNotAllowed
 import lxml.etree
 from lxml.builder import ElementMaker
+from pywps._compat import text_type
 
 
 NAMESPACES = {
@@ -23,10 +24,23 @@ def xml_response(doc):
                     content_type='text/xml')
 
 
+def get_input_from_xml(doc):
+    xpath_ns = lambda el, path: el.xpath(path, namespaces=NAMESPACES)
+    the_input = {}
+    for input_el in xpath_ns(doc, '/wps:Execute/wps:DataInputs/wps:Input'):
+        [identifier_el] = xpath_ns(input_el, './ows:Identifier')
+        [value_el] = xpath_ns(input_el, './wps:Data/wps:LiteralData')
+        the_input[identifier_el.text] = text_type(value_el.text)
+    return the_input
+
+
 class WPSRequest:
 
     def __init__(self, http_request):
         self.http_request = http_request
+        if http_request.method == 'POST':
+            doc = lxml.etree.fromstring(http_request.get_data())
+            self.inputs = get_input_from_xml(doc)
 
 
 class WPSResponse:

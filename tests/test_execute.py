@@ -1,12 +1,22 @@
 import unittest
 import lxml.etree
 from pywps.app import Service, Process, WPSResponse, WPS, OWS, NAMESPACES
+from pywps._compat import text_type
 from tests.common import client_for
 
 
 def create_ultimate_question():
     return Process(identifier='ultimate_question',
                    handler=lambda request: WPSResponse({'outvalue': '42'}))
+
+
+def create_greeter():
+    def greeter(request):
+        name = request.inputs['name']
+        assert type(name) is text_type
+        return WPSResponse({'message': "Hello %s!" % name})
+
+    return Process(handler=greeter)
 
 
 def get_output(doc):
@@ -48,6 +58,21 @@ class ExecuteTest(unittest.TestCase):
         resp = client.post_xml(doc=request_doc)
         assert_response_success(resp)
         assert get_output(resp.xml) == {'outvalue': '42'}
+
+    def test_post_with_string_input(self):
+        client = client_for(Service(processes=[create_greeter()]))
+        request_doc = WPS.Execute(
+            OWS.Identifier('greeter'),
+            WPS.DataInputs(
+                WPS.Input(
+                    OWS.Identifier('name'),
+                    WPS.Data(WPS.LiteralData('foo'))
+                )
+            )
+        )
+        resp = client.post_xml(doc=request_doc)
+        assert_response_success(resp)
+        assert get_output(resp.xml) == {'message': "Hello foo!"}
 
 
 def load_tests():
