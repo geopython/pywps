@@ -4,7 +4,7 @@ https://github.com/jachym/pywps-4/issues/2
 """
 
 from werkzeug.wrappers import Request, Response
-from werkzeug.exceptions import MethodNotAllowed
+from werkzeug.exceptions import BadRequest, MethodNotAllowed
 import lxml.etree
 from lxml.builder import ElementMaker
 
@@ -101,6 +101,9 @@ class Service:
             elif request_type == 'Execute':
                 identifier = request.args['identifier']
                 return self.execute(identifier, request)
+
+            else:
+                return BadRequest("Unknown request type %r" % request_type)
 
         elif request.method == 'POST':
             doc = lxml.etree.fromstring(request.get_data())

@@ -10,6 +10,11 @@ class BadRequestTest(unittest.TestCase):
         resp = client.put('')
         assert resp.status_code == 405  # method not allowed
 
+    def test_bad_request_type_with_get(self):
+        client = client_for(Service())
+        resp = client.get('?Request=foo')
+        assert resp.status_code == 400
+
 
 class CapabilitiesTest(unittest.TestCase):
 
