@@ -88,10 +88,11 @@ class Service:
     """ WPS service """
 
     def __init__(self, processes=[]):
-        self.processes = list(processes)
+        self.processes = {p.identifier: p for p in processes}
 
     def get_capabilities(self):
-        process_elements = [p.capabilities_xml() for p in self.processes]
+        process_elements = [p.capabilities_xml()
+                            for p in self.processes.values()]
 
         doc = WPS.Capabilities(
             OWS.ServiceIdentification(
@@ -103,12 +104,11 @@ class Service:
         return xml_response(doc)
 
     def execute(self, identifier, request):
-        for process in self.processes:
-            if process.identifier == identifier:
-                return process.execute(request)
-
-        else:
+        try:
+            process = self.processes[identifier]
+        except KeyError:
             return BadRequest("Unknown process %r" % identifier)
+        return process.execute(request)
 
     @Request.application
     def __call__(self, request):
