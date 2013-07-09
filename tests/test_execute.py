@@ -89,7 +89,20 @@ class ExecuteXmlParserTest(unittest.TestCase):
                 WPS.Input(
                     OWS.Identifier('name'),
                     WPS.Data(WPS.LiteralData('foo')))))
-        assert get_input_from_xml(request_doc) == {'name': 'foo'}
+        assert get_input_from_xml(request_doc).to_dict() == {'name': 'foo'}
+
+    def test_two_strings(self):
+        request_doc = WPS.Execute(
+            OWS.Identifier('foo'),
+            WPS.DataInputs(
+                WPS.Input(
+                    OWS.Identifier('name'),
+                    WPS.Data(WPS.LiteralData('foo'))),
+                WPS.Input(
+                    OWS.Identifier('name'),
+                    WPS.Data(WPS.LiteralData('bar')))))
+        rv = get_input_from_xml(request_doc)
+        assert rv.getlist('name') == ['foo', 'bar']
 
 
 def load_tests():

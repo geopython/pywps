@@ -5,6 +5,7 @@ https://github.com/jachym/pywps-4/issues/2
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.exceptions import BadRequest, MethodNotAllowed
+from werkzeug.datastructures import MultiDict
 import lxml.etree
 from lxml.builder import ElementMaker
 from pywps._compat import text_type
@@ -26,11 +27,11 @@ def xml_response(doc):
 
 def get_input_from_xml(doc):
     xpath_ns = lambda el, path: el.xpath(path, namespaces=NAMESPACES)
-    the_input = {}
+    the_input = MultiDict()
     for input_el in xpath_ns(doc, '/wps:Execute/wps:DataInputs/wps:Input'):
         [identifier_el] = xpath_ns(input_el, './ows:Identifier')
         [value_el] = xpath_ns(input_el, './wps:Data/wps:LiteralData')
-        the_input[identifier_el.text] = text_type(value_el.text)
+        the_input.update({identifier_el.text: text_type(value_el.text)})
     return the_input
 
 
