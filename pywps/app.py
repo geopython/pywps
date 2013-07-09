@@ -80,6 +80,11 @@ class Process:
     def capabilities_xml(self):
         return WPS.Process(OWS.Identifier(self.identifier))
 
+    def describe_xml(self):
+        return WPS.ProcessDescription(
+            OWS.Identifier(self.identifier)
+        )
+
     def execute(self, http_request):
         return self.handler(WPSRequest(http_request))
 
@@ -103,6 +108,15 @@ class Service:
 
         return xml_response(doc)
 
+    def describe(self, identifier):
+        try:
+            process = self.processes[identifier]
+        except KeyError:
+            return BadRequest("Unknown process %r" % identifier)
+        doc = WPS.ProcessDescriptions(process.describe_xml())
+        return xml_response(doc)
+
+
     def execute(self, identifier, request):
         try:
             process = self.processes[identifier]
@@ -117,6 +131,10 @@ class Service:
 
             if request_type == 'GetCapabilities':
                 return self.get_capabilities()
+
+            elif request_type == 'DescribeProcess':
+                identifier = request.args['identifier']
+                return self.describe(identifier)
 
             elif request_type == 'Execute':
                 identifier = request.args['identifier']

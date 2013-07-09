@@ -4,6 +4,7 @@ import unittest
 import parse
 import extent
 from tests import test_capabilities
+from tests import test_describe
 from tests import test_execute
 
 def load_tests():
@@ -12,6 +13,7 @@ def load_tests():
         extent.load_tests(),
         test_capabilities.load_tests(),
         test_execute.load_tests(),
+        test_describe.load_tests(),
     ])
 
 if __name__ == "__main__":
