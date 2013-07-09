@@ -1,6 +1,7 @@
 import unittest
 import lxml.etree
-from pywps.app import Service, Process, WPSResponse, WPS, OWS, NAMESPACES
+from pywps.app import (Service, Process, WPSResponse, WPS, OWS, NAMESPACES,
+                       get_input_from_xml)
 from pywps._compat import text_type
 from tests.common import client_for
 
@@ -75,9 +76,26 @@ class ExecuteTest(unittest.TestCase):
         assert get_output(resp.xml) == {'message': "Hello foo!"}
 
 
+class ExecuteXmlParserTest(unittest.TestCase):
+
+    def test_empty(self):
+        request_doc = WPS.Execute(OWS.Identifier('foo'))
+        assert get_input_from_xml(request_doc) == {}
+
+    def test_one_string(self):
+        request_doc = WPS.Execute(
+            OWS.Identifier('foo'),
+            WPS.DataInputs(
+                WPS.Input(
+                    OWS.Identifier('name'),
+                    WPS.Data(WPS.LiteralData('foo')))))
+        assert get_input_from_xml(request_doc) == {'name': 'foo'}
+
+
 def load_tests():
     loader = unittest.TestLoader()
     suite_list = [
         loader.loadTestsFromTestCase(ExecuteTest),
+        loader.loadTestsFromTestCase(ExecuteXmlParserTest),
     ]
     return unittest.TestSuite(suite_list)
