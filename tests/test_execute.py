@@ -1,12 +1,22 @@
 import unittest
 import lxml.etree
-from pywps.app import Service, Process, WPSResponse, WPS, OWS
+from pywps.app import Service, Process, WPSResponse, WPS, OWS, NAMESPACES
 from tests.common import client_for
 
 
 def create_ultimate_question():
     return Process(identifier='ultimate_question',
                    handler=lambda request: WPSResponse({'outvalue': '42'}))
+
+
+def get_output(doc):
+    xpath_ns = lambda el, path: el.xpath(path, namespaces=NAMESPACES)
+    output = {}
+    for output_el in xpath_ns(doc, '/wps:ExecuteResponse/wps:ProcessOutputs'):
+        [identifier_el] = xpath_ns(output_el, '//ows:Identifier')
+        [value_el] = xpath_ns(output_el, '//ows:Data/wps:LiteralData')
+        output[identifier_el.text] = value_el.text
+    return output
 
 
 class ExecuteTest(unittest.TestCase):
@@ -19,18 +29,8 @@ class ExecuteTest(unittest.TestCase):
                                   '/wps:ProcessSucceeded')
         assert success == "great success"
 
-        out_id = resp.xpath_text('/wps:ExecuteResponse'
-                                 '/wps:ProcessOutputs'
-                                 '/wps:Output'
-                                 '/ows:Identifier')
-        assert out_id == 'outvalue'
-
-        out_value = resp.xpath_text('/wps:ExecuteResponse'
-                                    '/wps:ProcessOutputs'
-                                    '/wps:Output'
-                                    '/ows:Data'
-                                    '/wps:LiteralData')
-        assert out_value == '42'
+        output = get_output(resp.xml)
+        assert output == {'outvalue': '42'}
 
     def test_missing_process_error(self):
         client = client_for(Service(processes=[create_ultimate_question()]))
