@@ -32,6 +32,11 @@ class ExecuteTest(unittest.TestCase):
                                     '/wps:LiteralData')
         assert out_value == '42'
 
+    def test_missing_process_error(self):
+        client = client_for(Service(processes=[create_ultimate_question()]))
+        resp = client.get('?Request=Execute&identifier=foo')
+        assert resp.status_code == 400
+
     def test_get_with_no_inputs(self):
         client = client_for(Service(processes=[create_ultimate_question()]))
         resp = client.get('?Request=Execute&identifier=ultimate_question')

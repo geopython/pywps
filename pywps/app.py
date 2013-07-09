@@ -90,6 +90,9 @@ class Service:
             if process.identifier == identifier:
                 return Response.from_app(process, request.environ)
 
+        else:
+            return BadRequest("Unknown process %r" % identifier)
+
     @Request.application
     def __call__(self, request):
         if request.method == 'GET':
