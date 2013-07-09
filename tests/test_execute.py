@@ -3,18 +3,16 @@ from pywps.app import Service, Process, WPSResponse
 from tests.common import client_for
 
 
+def create_ultimate_question():
+    return Process(identifier='ultimate_question',
+                   handler=lambda request: WPSResponse({'outvalue': '42'}))
+
+
 class ExecuteTest(unittest.TestCase):
 
-    def test_returns_function_response(self):
-        def increment_handler(request):
-            return WPSResponse({'outvalue': '13'})
-        increment = Process(
-            identifier='increment',
-            handler=increment_handler)
-        client = client_for(Service(processes=[increment]))
-        resp = client.get('?Request=Execute'
-                           '&identifier=increment'
-                           '&DataInputs=invalue=13')
+    def test_get_with_no_inputs(self):
+        client = client_for(Service(processes=[create_ultimate_question()]))
+        resp = client.get('?Request=Execute&identifier=ultimate_question')
         assert resp.status_code == 200
         success = resp.xpath_text('/wps:ExecuteResponse'
                                   '/wps:Status'
@@ -32,7 +30,7 @@ class ExecuteTest(unittest.TestCase):
                                     '/wps:Output'
                                     '/ows:Data'
                                     '/wps:LiteralData')
-        assert out_value == '13'
+        assert out_value == '42'
 
 def load_tests():
     loader = unittest.TestLoader()
