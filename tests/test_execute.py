@@ -19,18 +19,16 @@ def get_output(doc):
     return output
 
 
+def assert_response_success(resp):
+    assert resp.status_code == 200
+    assert resp.headers['Content-Type'] == 'text/xml'
+    success = resp.xpath_text('/wps:ExecuteResponse'
+                              '/wps:Status'
+                              '/wps:ProcessSucceeded')
+    assert success == "great success"
+
+
 class ExecuteTest(unittest.TestCase):
-
-    def check_ultimate_question_response(self, resp):
-        assert resp.status_code == 200
-        assert resp.headers['Content-Type'] == 'text/xml'
-        success = resp.xpath_text('/wps:ExecuteResponse'
-                                  '/wps:Status'
-                                  '/wps:ProcessSucceeded')
-        assert success == "great success"
-
-        output = get_output(resp.xml)
-        assert output == {'outvalue': '42'}
 
     def test_missing_process_error(self):
         client = client_for(Service(processes=[create_ultimate_question()]))
@@ -40,13 +38,15 @@ class ExecuteTest(unittest.TestCase):
     def test_get_with_no_inputs(self):
         client = client_for(Service(processes=[create_ultimate_question()]))
         resp = client.get('?Request=Execute&identifier=ultimate_question')
-        self.check_ultimate_question_response(resp)
+        assert_response_success(resp)
+        assert get_output(resp.xml) == {'outvalue': '42'}
 
     def test_post_with_no_inputs(self):
         client = client_for(Service(processes=[create_ultimate_question()]))
         request_doc = WPS.Execute(OWS.Identifier('ultimate_question'))
         resp = client.post_xml(doc=request_doc)
-        self.check_ultimate_question_response(resp)
+        assert_response_success(resp)
+        assert get_output(resp.xml) == {'outvalue': '42'}
 
 
 def load_tests():
