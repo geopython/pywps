@@ -10,8 +10,7 @@ def get_describe_result(resp):
     assert resp.status_code == 200
     assert resp.headers['Content-Type'] == 'text/xml'
     result = []
-    for desc_el in resp.xpath('/wps:ProcessDescriptions'
-                              '/wps:ProcessDescription'):
+    for desc_el in resp.xpath('/wps:ProcessDescriptions/ProcessDescription'):
         [identifier_el] = xpath_ns(desc_el, './ows:Identifier')
         result.append(ProcessDescription(identifier_el.text))
     return result

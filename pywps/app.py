@@ -16,6 +16,7 @@ NAMESPACES = {
   'ows': "http://www.opengis.net/ows/1.1",
 }
 
+E = ElementMaker()
 WPS = ElementMaker(namespace=NAMESPACES['wps'], nsmap=NAMESPACES)
 OWS = ElementMaker(namespace=NAMESPACES['ows'], nsmap=NAMESPACES)
 
@@ -115,7 +116,7 @@ class Process(object):
         return WPS.Process(OWS.Identifier(self.identifier))
 
     def describe_xml(self):
-        return WPS.ProcessDescription(
+        return E.ProcessDescription(
             OWS.Identifier(self.identifier)
         )
 
