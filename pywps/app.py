@@ -124,7 +124,10 @@ class Service:
 
         elif request.method == 'POST':
             doc = lxml.etree.fromstring(request.get_data())
-            if doc.tag == WPS.Execute().tag:
+            if doc.tag == WPS.GetCapabilities().tag:
+                return self.get_capabilities()
+
+            elif doc.tag == WPS.Execute().tag:
                 identifier = doc.xpath('/wps:Execute/ows:Identifier',
                                        namespaces=NAMESPACES)[0].text
                 return self.execute(identifier, request)

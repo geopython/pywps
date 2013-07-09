@@ -25,11 +25,12 @@ class BadRequestTest(unittest.TestCase):
 
 class CapabilitiesTest(unittest.TestCase):
 
-    def test_get_request(self):
+    def setUp(self):
         def pr1(): pass
         def pr2(): pass
-        client = client_for(Service(processes=[Process(pr1), Process(pr2)]))
-        resp = client.get('?Request=GetCapabilities')
+        self.client = client_for(Service(processes=[Process(pr1), Process(pr2)]))
+
+    def check_capabilities_response(self, resp):
         assert resp.status_code == 200
         assert resp.headers['Content-Type'] == 'text/xml'
         title = resp.xpath_text('/wps:Capabilities'
@@ -41,6 +42,15 @@ class CapabilitiesTest(unittest.TestCase):
                                 '/wps:Process'
                                 '/ows:Identifier')
         assert names == 'pr1 pr2'
+
+    def test_get_request(self):
+        resp = self.client.get('?Request=GetCapabilities')
+        self.check_capabilities_response(resp)
+
+    def test_post_request(self):
+        request_doc = WPS.GetCapabilities()
+        resp = self.client.post_xml(doc=request_doc)
+        self.check_capabilities_response(resp)
 
 
 def load_tests():
