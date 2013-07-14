@@ -1,14 +1,14 @@
 import unittest
 from collections import namedtuple
 from pywps.app import (Process, Service, xpath_ns, WPS, OWS, LiteralInput,
-                       xmlschema_2)
+                       xmlschema_2, LITERAL_DATA_TYPES)
 from tests.common import client_for
 
 ProcessDescription = namedtuple('ProcessDescription', ['identifier', 'inputs'])
 
 
 def get_data_type(el):
-    for datatype in ['string', 'float', 'integer', 'boolean']:
+    for datatype in LITERAL_DATA_TYPES:
         if el.attrib['reference'] == xmlschema_2 + datatype:
             assert el.text == datatype
             return el.text
@@ -87,6 +87,15 @@ class DescribeProcessInputTest(unittest.TestCase):
         resp = client.get('?Request=DescribeProcess&identifier=hello')
         [result] = get_describe_result(resp)
         assert result.inputs == [('the_name', 'literal', 'string')]
+
+    def test_one_literal_integer_input(self):
+        def hello(request): pass
+        hello_process = Process(hello, inputs=[
+            LiteralInput('the_number', 'integer')])
+        client = client_for(Service(processes=[hello_process]))
+        resp = client.get('?Request=DescribeProcess&identifier=hello')
+        [result] = get_describe_result(resp)
+        assert result.inputs == [('the_number', 'literal', 'integer')]
 
 
 def load_tests():

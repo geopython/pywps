@@ -12,6 +12,8 @@ from pywps._compat import text_type
 
 
 xmlschema_2 = "http://www.w3.org/TR/xmlschema-2/#"
+LITERAL_DATA_TYPES = ['string', 'float', 'integer', 'boolean']
+
 NAMESPACES = {
   'wps': "http://www.opengis.net/wps/1.0.0",
   'ows': "http://www.opengis.net/ows/1.1",
@@ -108,9 +110,10 @@ class WPSResponse(object):
 
 class LiteralInput(object):
 
-    def __init__(self, identifier):
+    def __init__(self, identifier, data_type='string'):
         self.identifier = identifier
-        self.data_type = 'string'
+        assert data_type in LITERAL_DATA_TYPES
+        self.data_type = data_type
 
     def describe_xml(self):
         return E.Input(
