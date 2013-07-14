@@ -41,7 +41,7 @@ class CapabilitiesTest(unittest.TestCase):
                                 '/wps:ProcessOfferings'
                                 '/wps:Process'
                                 '/ows:Identifier')
-        assert names == 'pr1 pr2'
+        assert sorted(names.split()) == ['pr1', 'pr2']
 
     def test_get_request(self):
         resp = self.client.get('?Request=GetCapabilities')
