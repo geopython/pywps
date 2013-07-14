@@ -1,6 +1,6 @@
 import unittest
 from collections import namedtuple
-from pywps.app import (Process, Service, xpath_ns, WPS, OWS,
+from pywps.app import (Process, Service, xpath_ns, E, WPS, OWS,
                        LiteralInput, ComplexInput, Format,
                        xmlschema_2, LITERAL_DATA_TYPES)
 from tests.common import client_for
@@ -9,10 +9,8 @@ ProcessDescription = namedtuple('ProcessDescription', ['identifier', 'inputs'])
 
 
 def get_data_type(el):
-    for datatype in LITERAL_DATA_TYPES:
-        if el.attrib['reference'] == xmlschema_2 + datatype:
-            assert el.text == datatype
-            return el.text
+    if el.text in LITERAL_DATA_TYPES:
+        return el.text
     raise RuntimeError("Can't parse data type")
 
 
@@ -121,10 +119,24 @@ class DescribeProcessInputTest(unittest.TestCase):
             ('the_layer', 'complex', [{'mime_type': 'application/json'}])]
 
 
+class InputDescriptionTest(unittest.TestCase):
+
+    def test_literal_integer_input(self):
+        literal = LiteralInput('foo', 'integer')
+        doc = literal.describe_xml()
+        assert doc.tag == E.Input().tag
+        [identifier_el] = xpath_ns(doc, './ows:Identifier')
+        assert identifier_el.text == 'foo'
+        [type_el] = xpath_ns(doc, './LiteralData/ows:DataType')
+        assert type_el.text == 'integer'
+        assert type_el.attrib['reference'] == xmlschema_2 + 'integer'
+
+
 def load_tests():
     loader = unittest.TestLoader()
     suite_list = [
         loader.loadTestsFromTestCase(DescribeProcessTest),
         loader.loadTestsFromTestCase(DescribeProcessInputTest),
+        loader.loadTestsFromTestCase(InputDescriptionTest),
     ]
     return unittest.TestSuite(suite_list)
