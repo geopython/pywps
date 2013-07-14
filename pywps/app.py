@@ -105,19 +105,33 @@ class WPSResponse(object):
         return xml_response(doc)
 
 
+class LiteralInput(object):
+
+    def __init__(self, identifier):
+        self.identifier = identifier
+
+    def describe_xml(self):
+        return E.Input(
+            OWS.Identifier(self.identifier)
+        )
+
+
 class Process(object):
     """ WPS process """
 
-    def __init__(self, handler, identifier=None):
+    def __init__(self, handler, identifier=None, inputs=[]):
         self.identifier = identifier or handler.__name__
         self.handler = handler
+        self.inputs = inputs
 
     def capabilities_xml(self):
         return WPS.Process(OWS.Identifier(self.identifier))
 
     def describe_xml(self):
+        input_elements = [i.describe_xml() for i in self.inputs]
         return E.ProcessDescription(
-            OWS.Identifier(self.identifier)
+            OWS.Identifier(self.identifier),
+            E.DataInputs(*input_elements)
         )
 
     def execute(self, wps_request):

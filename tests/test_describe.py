@@ -1,9 +1,9 @@
 import unittest
 from collections import namedtuple
-from pywps.app import Process, Service, xpath_ns, WPS, OWS
+from pywps.app import Process, Service, xpath_ns, WPS, OWS, LiteralInput
 from tests.common import client_for
 
-ProcessDescription = namedtuple('ProcessDescription', ['identifier'])
+ProcessDescription = namedtuple('ProcessDescription', ['identifier', 'inputs'])
 
 
 def get_describe_result(resp):
@@ -12,7 +12,11 @@ def get_describe_result(resp):
     result = []
     for desc_el in resp.xpath('/wps:ProcessDescriptions/ProcessDescription'):
         [identifier_el] = xpath_ns(desc_el, './ows:Identifier')
-        result.append(ProcessDescription(identifier_el.text))
+        inputs = []
+        for input_el in xpath_ns(desc_el, './DataInputs/Input'):
+            [input_identifier_el] = xpath_ns(input_el, './ows:Identifier')
+            inputs.append((input_identifier_el.text,))
+        result.append(ProcessDescription(identifier_el.text, inputs))
     return result
 
 
@@ -58,9 +62,21 @@ class DescribeProcessTest(unittest.TestCase):
         assert [pr.identifier for pr in result] == ['hello', 'ping']
 
 
+class DescribeProcessInputTest(unittest.TestCase):
+
+    def test_one_literal_input(self):
+        def hello(request): pass
+        hello_process = Process(hello, inputs=[LiteralInput('the_name')])
+        client = client_for(Service(processes=[hello_process]))
+        resp = client.get('?Request=DescribeProcess&identifier=hello')
+        [result] = get_describe_result(resp)
+        assert result.inputs == [('the_name',)]
+
+
 def load_tests():
     loader = unittest.TestLoader()
     suite_list = [
         loader.loadTestsFromTestCase(DescribeProcessTest),
+        loader.loadTestsFromTestCase(DescribeProcessInputTest),
     ]
     return unittest.TestSuite(suite_list)
