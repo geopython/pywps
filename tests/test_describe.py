@@ -131,6 +131,16 @@ class InputDescriptionTest(unittest.TestCase):
         assert type_el.text == 'integer'
         assert type_el.attrib['reference'] == xmlschema_2 + 'integer'
 
+    def test_complex_input_default(self):
+        complex = ComplexInput('foo', [Format('bar/baz')])
+        doc = complex.describe_xml()
+        assert doc.tag == E.Input().tag
+        [identifier_el] = xpath_ns(doc, './ows:Identifier')
+        assert identifier_el.text == 'foo'
+        [default_format] = xpath_ns(doc, './ComplexData/Default/Format')
+        [mime_el] = xpath_ns(default_format, './ows:MimeType')
+        assert mime_el.text == 'bar/baz'
+
 
 def load_tests():
     loader = unittest.TestLoader()

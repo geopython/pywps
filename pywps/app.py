@@ -132,11 +132,13 @@ class ComplexInput(object):
         self.formats = formats
 
     def describe_xml(self):
-        format_elements = [f.describe_xml() for f in self.formats]
+        default_format_el = self.formats[0].describe_xml()
+        supported_format_elements = [f.describe_xml() for f in self.formats]
         return E.Input(
             OWS.Identifier(self.identifier),
             E.ComplexData(
-                E.Supported(*format_elements)
+                E.Default(default_format_el),
+                E.Supported(*supported_format_elements)
             )
         )
 
