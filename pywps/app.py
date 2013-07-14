@@ -125,6 +125,31 @@ class LiteralInput(object):
         )
 
 
+class ComplexInput(object):
+
+    def __init__(self, identifier, formats):
+        self.identifier = identifier
+        self.formats = formats
+
+    def describe_xml(self):
+        format_elements = [f.describe_xml() for f in self.formats]
+        return E.Input(
+            OWS.Identifier(self.identifier),
+            E.ComplexData(
+                E.Supported(*format_elements)
+            )
+        )
+
+
+class Format(object):
+
+    def __init__(self, mime_type):
+        self.mime_type = mime_type
+
+    def describe_xml(self):
+        return E.Format(OWS.MimeType(self.mime_type))
+
+
 class Process(object):
     """ WPS process """
 

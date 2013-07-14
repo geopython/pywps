@@ -1,6 +1,7 @@
 import unittest
 from collections import namedtuple
-from pywps.app import (Process, Service, xpath_ns, WPS, OWS, LiteralInput,
+from pywps.app import (Process, Service, xpath_ns, WPS, OWS,
+                       LiteralInput, ComplexInput, Format,
                        xmlschema_2, LITERAL_DATA_TYPES)
 from tests.common import client_for
 
@@ -24,12 +25,22 @@ def get_describe_result(resp):
         inputs = []
         for input_el in xpath_ns(desc_el, './DataInputs/Input'):
             [input_identifier_el] = xpath_ns(input_el, './ows:Identifier')
+            input_identifier = input_identifier_el.text
             literal_data_el_list = xpath_ns(input_el, './LiteralData')
+            complex_data_el_list = xpath_ns(input_el, './ComplexData')
             if literal_data_el_list:
                 [literal_data_el] = literal_data_el_list
                 [data_type_el] = xpath_ns(literal_data_el, './ows:DataType')
                 data_type = get_data_type(data_type_el)
-                inputs.append((input_identifier_el.text, 'literal', data_type))
+                inputs.append((input_identifier, 'literal', data_type))
+            elif complex_data_el_list:
+                [complex_data_el] = complex_data_el_list
+                formats = []
+                for format_el in xpath_ns(complex_data_el,
+                                          './Supported/Format'):
+                    [mimetype_el] = xpath_ns(format_el, './ows:MimeType')
+                    formats.append({'mime_type': mimetype_el.text})
+                inputs.append((input_identifier, 'complex', formats))
             else:
                 raise RuntimeError("Can't parse input description")
         result.append(ProcessDescription(identifier_el.text, inputs))
@@ -99,6 +110,15 @@ class DescribeProcessInputTest(unittest.TestCase):
             LiteralInput('the_number', 'integer')])
         result = self.describe_process(hello_process)
         assert result.inputs == [('the_number', 'literal', 'integer')]
+
+    def test_one_complex_input(self):
+        def feature_count(request): pass
+        result = self.describe_process(Process(feature_count, inputs=[
+            ComplexInput('the_layer', formats=[
+                Format(mime_type='application/json'),
+            ])]))
+        assert result.inputs == [
+            ('the_layer', 'complex', [{'mime_type': 'application/json'}])]
 
 
 def load_tests():
