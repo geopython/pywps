@@ -109,15 +109,6 @@ class DescribeProcessInputTest(unittest.TestCase):
         result = self.describe_process(hello_process)
         assert result.inputs == [('the_number', 'literal', 'integer')]
 
-    def test_one_complex_input(self):
-        def feature_count(request): pass
-        result = self.describe_process(Process(feature_count, inputs=[
-            ComplexInput('the_layer', formats=[
-                Format(mime_type='application/json'),
-            ])]))
-        assert result.inputs == [
-            ('the_layer', 'complex', [{'mime_type': 'application/json'}])]
-
 
 class InputDescriptionTest(unittest.TestCase):
 
@@ -131,15 +122,24 @@ class InputDescriptionTest(unittest.TestCase):
         assert type_el.text == 'integer'
         assert type_el.attrib['reference'] == xmlschema_2 + 'integer'
 
-    def test_complex_input_default(self):
+    def test_complex_input_identifier(self):
         complex = ComplexInput('foo', [Format('bar/baz')])
         doc = complex.describe_xml()
         assert doc.tag == E.Input().tag
         [identifier_el] = xpath_ns(doc, './ows:Identifier')
         assert identifier_el.text == 'foo'
+
+    def test_complex_input_default_and_supported(self):
+        complex = ComplexInput('foo', [Format('a/b'), Format('c/d')])
+        doc = complex.describe_xml()
         [default_format] = xpath_ns(doc, './ComplexData/Default/Format')
-        [mime_el] = xpath_ns(default_format, './ows:MimeType')
-        assert mime_el.text == 'bar/baz'
+        [default_mime_el] = xpath_ns(default_format, './ows:MimeType')
+        assert default_mime_el.text == 'a/b'
+        supported_mime_types = []
+        for supported_el in xpath_ns(doc, './ComplexData/Supported/Format'):
+            [mime_el] = xpath_ns(supported_el, './ows:MimeType')
+            supported_mime_types.append(mime_el.text)
+        assert supported_mime_types == ['a/b', 'c/d']
 
 
 def load_tests():
