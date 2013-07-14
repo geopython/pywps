@@ -1,9 +1,18 @@
 import unittest
 from collections import namedtuple
-from pywps.app import Process, Service, xpath_ns, WPS, OWS, LiteralInput
+from pywps.app import (Process, Service, xpath_ns, WPS, OWS, LiteralInput,
+                       xmlschema_2)
 from tests.common import client_for
 
 ProcessDescription = namedtuple('ProcessDescription', ['identifier', 'inputs'])
+
+
+def get_data_type(el):
+    for datatype in ['string', 'float', 'integer', 'boolean']:
+        if el.attrib['reference'] == xmlschema_2 + datatype:
+            assert el.text == datatype
+            return el.text
+    raise RuntimeError("Can't parse data type")
 
 
 def get_describe_result(resp):
@@ -15,7 +24,14 @@ def get_describe_result(resp):
         inputs = []
         for input_el in xpath_ns(desc_el, './DataInputs/Input'):
             [input_identifier_el] = xpath_ns(input_el, './ows:Identifier')
-            inputs.append((input_identifier_el.text,))
+            literal_data_el_list = xpath_ns(input_el, './LiteralData')
+            if literal_data_el_list:
+                [literal_data_el] = literal_data_el_list
+                [data_type_el] = xpath_ns(literal_data_el, './ows:DataType')
+                data_type = get_data_type(data_type_el)
+                inputs.append((input_identifier_el.text, 'literal', data_type))
+            else:
+                raise RuntimeError("Can't parse input description")
         result.append(ProcessDescription(identifier_el.text, inputs))
     return result
 
@@ -64,13 +80,13 @@ class DescribeProcessTest(unittest.TestCase):
 
 class DescribeProcessInputTest(unittest.TestCase):
 
-    def test_one_literal_input(self):
+    def test_one_literal_string_input(self):
         def hello(request): pass
         hello_process = Process(hello, inputs=[LiteralInput('the_name')])
         client = client_for(Service(processes=[hello_process]))
         resp = client.get('?Request=DescribeProcess&identifier=hello')
         [result] = get_describe_result(resp)
-        assert result.inputs == [('the_name',)]
+        assert result.inputs == [('the_name', 'literal', 'string')]
 
 
 def load_tests():

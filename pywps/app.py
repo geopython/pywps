@@ -11,6 +11,7 @@ from lxml.builder import ElementMaker
 from pywps._compat import text_type
 
 
+xmlschema_2 = "http://www.w3.org/TR/xmlschema-2/#"
 NAMESPACES = {
   'wps': "http://www.opengis.net/wps/1.0.0",
   'ows': "http://www.opengis.net/ows/1.1",
@@ -109,10 +110,15 @@ class LiteralInput(object):
 
     def __init__(self, identifier):
         self.identifier = identifier
+        self.data_type = 'string'
 
     def describe_xml(self):
         return E.Input(
-            OWS.Identifier(self.identifier)
+            OWS.Identifier(self.identifier),
+            E.LiteralData(
+                OWS.DataType(self.data_type,
+                             reference=xmlschema_2 + self.data_type)
+            )
         )
 
 
