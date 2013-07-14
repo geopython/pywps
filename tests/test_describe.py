@@ -1,6 +1,9 @@
 import unittest
+from collections import namedtuple
 from pywps.app import Process, Service, xpath_ns, WPS, OWS
 from tests.common import client_for
+
+ProcessDescription = namedtuple('ProcessDescription', ['identifier'])
 
 
 def get_describe_result(resp):
@@ -10,7 +13,7 @@ def get_describe_result(resp):
     for desc_el in resp.xpath('/wps:ProcessDescriptions'
                               '/wps:ProcessDescription'):
         [identifier_el] = xpath_ns(desc_el, './ows:Identifier')
-        result.append((identifier_el.text,))
+        result.append(ProcessDescription(identifier_el.text))
     return result
 
 
@@ -24,28 +27,28 @@ class DescribeProcessTest(unittest.TestCase):
 
     def test_get_request_zero_args(self):
         resp = self.client.get('?Request=DescribeProcess')
-        assert [ident for (ident,) in get_describe_result(resp)] == []
+        assert [pr.identifier for pr in get_describe_result(resp)] == []
 
     def test_post_request_zero_args(self):
         request_doc = WPS.DescribeProcess()
         resp = self.client.post_xml(doc=request_doc)
-        assert [ident for (ident,) in get_describe_result(resp)] == []
+        assert [pr.identifier for pr in get_describe_result(resp)] == []
 
     def test_get_one_arg(self):
         resp = self.client.get('?Request=DescribeProcess&identifier=hello')
-        assert [ident for (ident,) in get_describe_result(resp)] == ['hello']
+        assert [pr.identifier for pr in get_describe_result(resp)] == ['hello']
 
     def test_post_one_arg(self):
         request_doc = WPS.DescribeProcess(OWS.Identifier('hello'))
         resp = self.client.post_xml(doc=request_doc)
-        assert [ident for (ident,) in get_describe_result(resp)] == ['hello']
+        assert [pr.identifier for pr in get_describe_result(resp)] == ['hello']
 
     def test_get_two_args(self):
         resp = self.client.get('?Request=DescribeProcess'
                                '&identifier=hello'
                                '&identifier=ping')
         result = get_describe_result(resp)
-        assert [ident for (ident,) in result] == ['hello', 'ping']
+        assert [pr.identifier for pr in result] == ['hello', 'ping']
 
     def test_post_two_args(self):
         request_doc = WPS.DescribeProcess(
@@ -53,7 +56,7 @@ class DescribeProcessTest(unittest.TestCase):
             OWS.Identifier('ping'))
         resp = self.client.post_xml(doc=request_doc)
         result = get_describe_result(resp)
-        assert [ident for (ident,) in result] == ['hello', 'ping']
+        assert [pr.identifier for pr in result] == ['hello', 'ping']
 
 
 def load_tests():
