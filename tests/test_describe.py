@@ -80,21 +80,24 @@ class DescribeProcessTest(unittest.TestCase):
 
 class DescribeProcessInputTest(unittest.TestCase):
 
+    def describe_process(self, process):
+        client = client_for(Service(processes=[process]))
+        resp = client.get('?Request=DescribeProcess&identifier=%s'
+                          % process.identifier)
+        [result] = get_describe_result(resp)
+        return result
+
     def test_one_literal_string_input(self):
         def hello(request): pass
         hello_process = Process(hello, inputs=[LiteralInput('the_name')])
-        client = client_for(Service(processes=[hello_process]))
-        resp = client.get('?Request=DescribeProcess&identifier=hello')
-        [result] = get_describe_result(resp)
+        result = self.describe_process(hello_process)
         assert result.inputs == [('the_name', 'literal', 'string')]
 
     def test_one_literal_integer_input(self):
         def hello(request): pass
         hello_process = Process(hello, inputs=[
             LiteralInput('the_number', 'integer')])
-        client = client_for(Service(processes=[hello_process]))
-        resp = client.get('?Request=DescribeProcess&identifier=hello')
-        [result] = get_describe_result(resp)
+        result = self.describe_process(hello_process)
         assert result.inputs == [('the_number', 'literal', 'integer')]
 
 
