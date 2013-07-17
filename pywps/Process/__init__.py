@@ -628,7 +628,7 @@ class WPSProcess:
             if type(self.logFile) == type(""):
                 try:
                     f = open(self.logFile,"w")
-                    f.write(msg)
+                    f.write('DEBUG:' + msg + '\n')
                     f.close()
                 except:
                     print >>sys.stderr, "PyWPS WARNING: Could not write to logfile [%s]" % self.logFile
