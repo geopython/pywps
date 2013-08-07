@@ -57,6 +57,13 @@ def get_input_from_xml(doc):
     return the_input
 
 
+class FileReference(object):
+
+    def __init__(self, url, mime_type):
+        self.url = url
+        self.mime_type = mime_type
+
+
 class WPSRequest(object):
 
     def __init__(self, http_request):
@@ -109,9 +116,15 @@ class WPSResponse(object):
     def __call__(self, request):
         output_elements = []
         for key, value in self.outputs.items():
+            if isinstance(value, FileReference):
+                data_el = WPS.Reference(href=value.url,
+                                        mimeType=value.mime_type)
+            else:
+                data_el = WPS.LiteralData(value)
+
             output_elements.append(WPS.Output(
                 OWS.Identifier(key),
-                WPS.Data(WPS.LiteralData(value))
+                WPS.Data(data_el)
             ))
 
         doc = WPS.ExecuteResponse(
