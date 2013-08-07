@@ -8,7 +8,7 @@ from werkzeug.exceptions import HTTPException, BadRequest, MethodNotAllowed
 from werkzeug.datastructures import MultiDict
 import lxml.etree
 from lxml.builder import ElementMaker
-from pywps._compat import text_type
+from pywps._compat import text_type, StringIO
 
 
 xmlschema_2 = "http://www.w3.org/TR/xmlschema-2/#"
@@ -37,8 +37,20 @@ def get_input_from_xml(doc):
     the_input = MultiDict()
     for input_el in xpath_ns(doc, '/wps:Execute/wps:DataInputs/wps:Input'):
         [identifier_el] = xpath_ns(input_el, './ows:Identifier')
-        [value_el] = xpath_ns(input_el, './wps:Data/wps:LiteralData')
-        the_input.update({identifier_el.text: text_type(value_el.text)})
+
+        literal_data = xpath_ns(input_el, './wps:Data/wps:LiteralData')
+        if literal_data:
+            value_el = literal_data[0]
+            the_input.update({identifier_el.text: text_type(value_el.text)})
+            continue
+
+        complex_data = xpath_ns(input_el, './wps:Data/wps:ComplexData')
+        if complex_data:
+            value_el = complex_data[0][0]
+            tmp = StringIO(lxml.etree.tounicode(value_el))
+            the_input.update({identifier_el.text: tmp})
+            continue
+
     return the_input
 
 

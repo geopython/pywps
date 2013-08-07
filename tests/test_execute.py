@@ -1,6 +1,6 @@
 import unittest
 import lxml.etree
-from pywps.app import (Service, Process, WPSResponse, WPS, OWS, NAMESPACES,
+from pywps.app import (Service, Process, WPSResponse, E, WPS, OWS, NAMESPACES,
                        get_input_from_xml, xpath_ns)
 from pywps._compat import text_type
 from tests.common import client_for
@@ -102,6 +102,20 @@ class ExecuteXmlParserTest(unittest.TestCase):
                     WPS.Data(WPS.LiteralData('bar')))))
         rv = get_input_from_xml(request_doc)
         assert rv.getlist('name') == ['foo', 'bar']
+
+    def test_complex_input(self):
+        the_data = E.TheData("hello world")
+        request_doc = WPS.Execute(
+            OWS.Identifier('foo'),
+            WPS.DataInputs(
+                WPS.Input(
+                    OWS.Identifier('name'),
+                    WPS.Data(
+                        WPS.ComplexData(the_data)))))
+        rv = get_input_from_xml(request_doc)
+        rv_doc = lxml.etree.parse(rv['name']).getroot()
+        assert rv_doc.tag == 'TheData'
+        assert rv_doc.text == "hello world"
 
 
 def load_tests():
