@@ -10,7 +10,11 @@ def say_hello(request):
 
 
 def feature_count(request):
-    return WPSResponse({'count': '13'})
+    import lxml.etree
+    from pywps.app import xpath_ns
+    doc = lxml.etree.parse(request.inputs['layer'])
+    feature_elements = xpath_ns(doc, '//gml:featureMember')
+    return WPSResponse({'count': str(len(feature_elements))})
 
 
 def create_app():
