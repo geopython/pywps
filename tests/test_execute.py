@@ -111,8 +111,9 @@ class ExecuteXmlParserTest(unittest.TestCase):
                 WPS.Input(
                     OWS.Identifier('name'),
                     WPS.Data(
-                        WPS.ComplexData(the_data)))))
+                        WPS.ComplexData(the_data, mimeType='text/foobar')))))
         rv = get_input_from_xml(request_doc)
+        assert rv['name'].mime_type == 'text/foobar'
         rv_doc = lxml.etree.parse(rv['name']).getroot()
         assert rv_doc.tag == 'TheData'
         assert rv_doc.text == "hello world"

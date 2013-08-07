@@ -46,8 +46,10 @@ def get_input_from_xml(doc):
 
         complex_data = xpath_ns(input_el, './wps:Data/wps:ComplexData')
         if complex_data:
-            value_el = complex_data[0][0]
+            complex_data_el = complex_data[0]
+            value_el = complex_data_el[0]
             tmp = StringIO(lxml.etree.tounicode(value_el))
+            tmp.mime_type = complex_data_el.attrib.get('mimeType')
             the_input.update({identifier_el.text: tmp})
             continue
 
