@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 from contextlib import contextmanager
 import tempfile
 import subprocess
@@ -88,4 +89,6 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    run_simple('localhost', 8080, app, use_reloader=True)
+    port = int(os.environ.get('PORT', '5000'))
+    debug = os.environ.get('DEBUG') == 'on'
+    run_simple('0.0.0.0', port, app, use_reloader=debug)
