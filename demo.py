@@ -100,6 +100,9 @@ DESCRIPTION_HTML = """\
 <h1>PyWPS-4 demo app</h1>
 <p>This is a demo WPS server. It exposes a few processes: say_hello,
 feature_count, and centroids. Connect to <tt>{url}</tt>.</p>
+<p>Source code and issue tracking
+at <a href="https://github.com/jachym/pywps-4/"
+>github.com/jachym/pywps-4</a>.</p>
 """
 
 
