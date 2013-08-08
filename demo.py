@@ -97,6 +97,7 @@ def create_app():
 
 DESCRIPTION_HTML = """\
 <!doctype html>
+<title>PyWPS-4 demo app</title>
 <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap\
 /3.0.0-rc1/css/bootstrap.min.css">
 <div class="container">
