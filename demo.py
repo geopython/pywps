@@ -9,6 +9,7 @@ from collections import deque
 from uuid import uuid4
 from StringIO import StringIO
 from path import path
+import flask
 from werkzeug.serving import run_simple
 from werkzeug.wsgi import get_path_info, wrap_file
 from pywps.app import (Process, Service, WPSResponse, LiteralInput,
@@ -58,8 +59,7 @@ def centroids(request):
             'mime-type': 'application/json',
         }
         recent_data_files.append(data_file)
-        url = (request.http_request.base_url.rstrip('/') +
-               '/datafile/' + data_file['uuid'])
+        url = flask.url_for('datafile', uuid=data_file['uuid'], _external=True)
         reference = FileReference(url, data_file['mime-type'])
         return WPSResponse({'centroids_layer': reference})
 
@@ -73,18 +73,34 @@ def create_app():
                 inputs=[ComplexInput('layer', [Format('text/xml')])]),
     ])
 
-    def serve_data_files(environ, start_response):
-        cleaned_path = get_path_info(environ).strip('/')
-        print(cleaned_path)
-        if cleaned_path.startswith('datafile/'):
-            requested_uuid = cleaned_path.split('/', 1)[1]
-            for data_file in recent_data_files:
-                if data_file['uuid'] == requested_uuid:
-                    start_response('200 OK', [])
-                    return wrap_file(environ, StringIO(data_file['bytes']))
-        return service(environ, start_response)
+    app = flask.Flask(__name__)
 
-    return serve_data_files
+    @app.route('/')
+    def home():
+        url = flask.url_for('wps', _external=True)
+        return DESCRIPTION_HTML.format(url=url)
+
+    @app.route('/wps', methods=['GET', 'POST'])
+    def wps():
+        return service
+
+    @app.route('/datafile/<uuid>')
+    def datafile(uuid):
+        for data_file in recent_data_files:
+            if data_file['uuid'] == uuid:
+                return flask.Response(data_file['bytes'])
+        else:
+            flask.abort(404)
+
+    return app
+
+
+DESCRIPTION_HTML = """\
+<!doctype html>
+<h1>PyWPS-4 demo app</h1>
+<p>This is a demo WPS server. It exposes a few processes: say_hello,
+feature_count, and centroids. Connect to <tt>{url}</tt>.</p>
+"""
 
 
 if __name__ == '__main__':
