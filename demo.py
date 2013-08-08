@@ -101,11 +101,15 @@ DESCRIPTION_HTML = """\
 /3.0.0-rc1/css/bootstrap.min.css">
 <div class="container">
 <h1>PyWPS-4 demo app</h1>
-<p>This is a demo WPS server. It exposes a few processes: say_hello,
-feature_count, and centroids. Connect to <tt>{url}</tt>.</p>
+<p>This is a demo WPS server. It exposes a few processes:
+<ul><li><b>say_hello</b> - returns a literal string output based on the input.
+<li><b>feature_count</b> - counts number of features in the uploaded GML.
+<li><b>centroids</b> - returns GeoJSON with centroids of features in the
+uploaded GML.</ul>
+<p>Connect to <tt>{url}</tt>.
 <p>Source code and issue tracking
 at <a href="https://github.com/jachym/pywps-4/"
->github.com/jachym/pywps-4</a>.</p>
+>github.com/jachym/pywps-4</a>.
 </div>
 """
 
