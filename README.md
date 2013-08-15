@@ -9,6 +9,10 @@ Dependencies
 lxml - http://lxml.de
 owslib - https://github.com/geopython/OWSLib
 
+path.py - pip install path.py
+flask
+werkzeug
+
 Run tests
 =========
 
