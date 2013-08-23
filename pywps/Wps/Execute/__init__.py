@@ -1130,6 +1130,8 @@ class Execute(Request):
                 elif not self._samefile(output.value,outFile):
                     # TODO: dirty hack to avoid copy time
                     os.link(os.path.abspath(output.value), outFile)
+                    import stat
+                    os.chmod(outFile, stat.S_IROTH)
                     #COPY(os.path.abspath(output.value), outFile)
                 
                 #If ftp then the path to file is the outputpath otherwise it has to be the outputURL
