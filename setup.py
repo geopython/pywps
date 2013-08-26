@@ -84,6 +84,9 @@ dist =  setup(
                      'default.cfg'],
                     'pywps.Templates.1_0_0': ['inc/*.tmpl']
                 },
+        requires=[
+            'ordereddict',
+            ],
         scripts=['wps.py']
 )
 

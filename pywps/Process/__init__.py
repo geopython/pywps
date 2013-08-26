@@ -34,6 +34,8 @@ import types
 import sys,os
 import traceback
 
+from ordereddict import OrderedDict
+
 class Status:
     """Status object for each process
 
@@ -286,7 +288,7 @@ class WPSProcess:
         self.debug = False
 
         self.status = Status()
-        self.inputs = {}
+        self.inputs = OrderedDict()
         self.outputs = {}
 
         self.lang = Lang.Lang()
