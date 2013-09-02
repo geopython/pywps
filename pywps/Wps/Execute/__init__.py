@@ -1129,8 +1129,12 @@ class Execute(Request):
                     COPY(os.path.abspath(output.value), outFile)
                 elif not self._samefile(output.value,outFile):
                     # TODO: dirty hack to avoid copy time
-                    logging.debug("link output: from=%s, to=%s", os.path.abspath(output.value), outFile)
-                    os.link(os.path.abspath(output.value), outFile)
+                    try:
+                        logging.debug("link output: from=%s, to=%s", os.path.abspath(output.value), outFile)
+                        os.link(os.path.abspath(output.value), outFile)
+                    except:
+                        logging.warn("failed to link output")
+                        COPY(os.path.abspath(output.value), outFile)
                     import stat
                     os.chmod(outFile, stat.S_IROTH)
                     #COPY(os.path.abspath(output.value), outFile)
