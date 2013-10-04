@@ -32,14 +32,10 @@ PyWPS wsgi script
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import sys
-
-sys.path.append("/home/jachym/usr/src/pywps/trunk/")
-
 import pywps
 from pywps.Exceptions import *
 
-def dispatchWps(environ, start_response):
+def application(environ, start_response):
 
     status = '200 OK'
     response_headers = [('Content-type','text/xml')]
@@ -82,5 +78,5 @@ if __name__ == '__main__':
         )[0],"tests","processes")
 
     from wsgiref.simple_server import make_server
-    srv = make_server('localhost', 8081, dispatchWps)
+    srv = make_server('localhost', 8081, application)
     srv.serve_forever()
