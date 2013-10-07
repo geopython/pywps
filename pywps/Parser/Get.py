@@ -34,6 +34,7 @@ Get
 #      version 1.0.0
 #      ref.num.: OGC 05-007r7
 
+import urllib
 import types
 from string import split
 import pywps
@@ -67,12 +68,14 @@ class Get(Parser):
         value = None
         keys = []
         maxInputLength = int(pywps.config.getConfigValue("server","maxinputparamlength"))
-
+        unquotedQueryString = urllib.unquote(queryString)
+        serverEncoding = pywps.config.getConfigValue("wps", "encoding")
+        decodedQueryString = unquotedQueryString.decode(serverEncoding)
         # parse query string
         # arguments are separated by "&" character
         # everything is stored into unparsedInputs structure, for latter
         # validation
-        for feature in queryString.split("&"):
+        for feature in decodedQueryString.split("&"):
             feature = feature.strip()
             # omit empty KVPs, e.g. due to optional ampersand after the last
             # KVP in request string (OWS_1-1-0, p.75, sect. 11.2):
