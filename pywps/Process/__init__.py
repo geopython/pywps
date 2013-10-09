@@ -3,8 +3,8 @@ Process
 -------
 Package for creating (Py)WPS Process classes
 """
-# Author:	Jachym Cepicky
-#        	http://les-ejk.cz
+# Author:       Jachym Cepicky
+#               http://les-ejk.cz
 # Lince:
 #
 # Web Processing Service implementation
@@ -281,9 +281,9 @@ class WPSProcess:
                 statusSupported = False
         self.statusSupported = statusSupported
 
-	# status not supported on windows
-	if os.name == "nt":
-		self.statusSupported = False
+        # status not supported on windows
+        if os.name == "nt":
+                self.statusSupported = False
 
         self.debug = False
 
@@ -630,12 +630,12 @@ class WPSProcess:
             if type(self.logFile) == type(""):
                 try:
                     f = open(self.logFile,"w")
-                    f.write('DEBUG:' + msg + '\n')
+                    f.write("DEBUG: " + msg + "\n")
                     f.close()
                 except:
                     print >>sys.stderr, "PyWPS WARNING: Could not write to logfile [%s]" % self.logFile
             else:
-                self.logFile.write(msg)
+                self.logFile.write("DEBUG: " + msg + "\n")
         return
 
     def getInput(self,identifier):
