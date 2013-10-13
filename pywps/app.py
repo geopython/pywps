@@ -12,8 +12,8 @@ from pywps._compat import text_type
 
 
 NAMESPACES = {
-  'wps': "http://www.opengis.net/wps/1.0.0",
-  'ows': "http://www.opengis.net/ows/1.1",
+    'wps': "http://www.opengis.net/wps/1.0.0",
+    'ows': "http://www.opengis.net/ows/1.1",
 }
 
 WPS = ElementMaker(namespace=NAMESPACES['wps'], nsmap=NAMESPACES)
@@ -44,16 +44,17 @@ class WPSRequest(object):
         self.http_request = http_request
 
         if http_request.method == 'GET':
-            self.operation = http_request.args['Request']
+            self.operation = self._get_get_param('request').lower()
 
-            if self.operation == 'GetCapabilities':
+            if self.operation == 'getcapabilities':
                 pass
 
-            elif self.operation == 'DescribeProcess':
-                self.identifiers = http_request.args.getlist('identifier')
+            elif self.operation == 'describeprocess':
+                self.identifiers = self._get_get_param('identifier',
+                                                       aslist=True)
 
-            elif self.operation == 'Execute':
-                self.identifier = http_request.args['identifier']
+            elif self.operation == 'execute':
+                self.identifier = self._get_get_param('identifier')
 
             else:
                 raise BadRequest("Unknown request type %r" % self.operation)
@@ -62,15 +63,15 @@ class WPSRequest(object):
             doc = lxml.etree.fromstring(http_request.get_data())
 
             if doc.tag == WPS.GetCapabilities().tag:
-                self.operation = 'GetCapabilities'
+                self.operation = 'getcapabilities'
 
             elif doc.tag == WPS.DescribeProcess().tag:
-                self.operation = 'DescribeProcess'
+                self.operation = 'describeprocess'
                 self.identifiers = [identifier_el.text for identifier_el in
                                     xpath_ns(doc, './ows:Identifier')]
 
             elif doc.tag == WPS.Execute().tag:
-                self.operation = 'Execute'
+                self.operation = 'execute'
                 self.identifier = xpath_ns(doc, './ows:Identifier')[0].text
                 self.inputs = get_input_from_xml(doc)
 
@@ -79,6 +80,27 @@ class WPSRequest(object):
 
         else:
             raise MethodNotAllowed()
+
+    def _get_get_param(self, key, aslist=False):
+        """Returns key from the key:value pair, of the HTTP GET request, for
+        example 'service' or 'request'
+
+        :param key: key value you need to dig out of the HTTP GET request
+        :param value: default value
+        """
+        key = key.lower()
+        for k in self.http_request.args.keys():
+            if k.lower() == key:
+                if aslist is True:
+                    return self.http_request.args.getlist(k)
+                else:
+                    return self.http_request.args.get(k)
+
+        # raise error
+        if aslist:
+            return ()
+        else:
+            return self.http_request.args[key]
 
 
 class WPSResponse(object):
@@ -166,13 +188,13 @@ class Service(object):
         try:
             wps_request = WPSRequest(http_request)
 
-            if wps_request.operation == 'GetCapabilities':
+            if wps_request.operation == 'getcapabilities':
                 return self.get_capabilities()
 
-            elif wps_request.operation == 'DescribeProcess':
+            elif wps_request.operation == 'describeprocess':
                 return self.describe(wps_request.identifiers)
 
-            elif wps_request.operation == 'Execute':
+            elif wps_request.operation == 'execute':
                 return self.execute(wps_request.identifier, wps_request)
 
             else:
