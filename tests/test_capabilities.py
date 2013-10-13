@@ -47,14 +47,19 @@ class CapabilitiesTest(unittest.TestCase):
         resp = self.client.get('?Request=GetCapabilities')
         self.check_capabilities_response(resp)
 
+        # case insesitive check
+        resp = self.client.get('?request=getcapabilities')
+        self.check_capabilities_response(resp)
+
     def test_post_request(self):
         request_doc = WPS.GetCapabilities()
         resp = self.client.post_xml(doc=request_doc)
         self.check_capabilities_response(resp)
 
 
-def load_tests():
-    loader = unittest.TestLoader()
+def load_tests(loader=None, tests=None, pattern=None):
+    if not loader:
+        loader = unittest.TestLoader()
     suite_list = [
         loader.loadTestsFromTestCase(BadRequestTest),
         loader.loadTestsFromTestCase(CapabilitiesTest),

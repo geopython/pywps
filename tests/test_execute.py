@@ -104,8 +104,9 @@ class ExecuteXmlParserTest(unittest.TestCase):
         assert rv.getlist('name') == ['foo', 'bar']
 
 
-def load_tests():
-    loader = unittest.TestLoader()
+def load_tests(loader=None, tests=None, pattern=None):
+    if not loader:
+        loader = unittest.TestLoader()
     suite_list = [
         loader.loadTestsFromTestCase(ExecuteTest),
         loader.loadTestsFromTestCase(ExecuteXmlParserTest),
