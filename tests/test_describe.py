@@ -142,8 +142,9 @@ class InputDescriptionTest(unittest.TestCase):
         assert supported_mime_types == ['a/b', 'c/d']
 
 
-def load_tests():
-    loader = unittest.TestLoader()
+def load_tests(loader=None, tests=None, pattern=None):
+    if not loader:
+        loader = unittest.TestLoader()
     suite_list = [
         loader.loadTestsFromTestCase(DescribeProcessTest),
         loader.loadTestsFromTestCase(DescribeProcessInputTest),
