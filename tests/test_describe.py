@@ -56,8 +56,9 @@ class DescribeProcessTest(unittest.TestCase):
         assert [ident for (ident,) in result] == ['hello', 'ping']
 
 
-def load_tests():
-    loader = unittest.TestLoader()
+def load_tests(loader=None, tests=None, pattern=None):
+    if not loader:
+        loader = unittest.TestLoader()
     suite_list = [
         loader.loadTestsFromTestCase(DescribeProcessTest),
     ]
