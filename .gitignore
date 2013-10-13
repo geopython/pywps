@@ -4,6 +4,7 @@
 dist
 build
 .tox
+/docs/_build
 
 # vim, mac os
 *.sw*
