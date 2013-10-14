@@ -52,9 +52,17 @@ class DescribeProcessTest(unittest.TestCase):
         processes = [Process(hello), Process(ping)]
         self.client = client_for(Service(processes=processes))
 
+    def test_get_request_all_args(self):
+        resp = self.client.get('?Request=DescribeProcess&service=wps&identifier=all')
+        assert [desc.identifier for desc in get_describe_result(resp)] == ['ping','hello']
+
     def test_get_request_zero_args(self):
-        resp = self.client.get('?Request=DescribeProcess')
-        assert [pr.identifier for pr in get_describe_result(resp)] == []
+        resp = self.client.get('?Request=DescribeProcess&service=wps')
+        assert resp.status_code == 400 # bad request, identifier is missing
+
+    def test_get_request_nonexisting_process_args(self):
+        resp = self.client.get('?Request=DescribeProcess&service=wps&identifier=NONEXISTINGPROCESS')
+        assert resp.status_code == 400
 
     def test_post_request_zero_args(self):
         request_doc = WPS.DescribeProcess()
@@ -62,7 +70,7 @@ class DescribeProcessTest(unittest.TestCase):
         assert [pr.identifier for pr in get_describe_result(resp)] == []
 
     def test_get_one_arg(self):
-        resp = self.client.get('?Request=DescribeProcess&identifier=hello')
+        resp = self.client.get('?service=wps&Request=DescribeProcess&identifier=hello')
         assert [pr.identifier for pr in get_describe_result(resp)] == ['hello']
 
     def test_post_one_arg(self):
@@ -72,6 +80,7 @@ class DescribeProcessTest(unittest.TestCase):
 
     def test_get_two_args(self):
         resp = self.client.get('?Request=DescribeProcess'
+                               '&service=wps'
                                '&identifier=hello'
                                '&identifier=ping')
         result = get_describe_result(resp)
@@ -90,7 +99,7 @@ class DescribeProcessInputTest(unittest.TestCase):
 
     def describe_process(self, process):
         client = client_for(Service(processes=[process]))
-        resp = client.get('?Request=DescribeProcess&identifier=%s'
+        resp = client.get('?service=wps&Request=DescribeProcess&identifier=%s'
                           % process.identifier)
         [result] = get_describe_result(resp)
         return result

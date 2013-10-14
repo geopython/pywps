@@ -48,7 +48,7 @@ class ExecuteTest(unittest.TestCase):
 
     def test_get_with_no_inputs(self):
         client = client_for(Service(processes=[create_ultimate_question()]))
-        resp = client.get('?Request=Execute&identifier=ultimate_question')
+        resp = client.get('?service=wps&Request=Execute&identifier=ultimate_question')
         assert_response_success(resp)
         assert get_output(resp.xml) == {'outvalue': '42'}
 
