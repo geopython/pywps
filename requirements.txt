@@ -1,0 +1,8 @@
+Flask==0.10.1
+itsdangerous==0.23
+Jinja2==2.7.1
+lxml==3.2.3
+MarkupSafe==0.18
+path.py==4.3
+Shapely==1.2.18
+Werkzeug==0.9.3
