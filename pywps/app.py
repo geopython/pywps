@@ -58,6 +58,10 @@ def get_input_from_xml(doc):
 
 
 class FileReference(object):
+    """
+    :param url: URL where the file can be downloaded by the client.
+    :param mime_type: MIME type of the file.
+    """
 
     def __init__(self, url, mime_type):
         self.url = url
@@ -65,7 +69,6 @@ class FileReference(object):
 
 
 class WPSRequest(object):
-
     def __init__(self, http_request):
         self.http_request = http_request
 
@@ -130,6 +133,11 @@ class WPSRequest(object):
 
 
 class WPSResponse(object):
+    """
+    :param outputs: A dictionary of output values that will be returned
+                    to the client. The values can be strings or
+                    :class:`~FileReference` objects.
+    """
 
     def __init__(self, outputs=None):
         self.outputs = outputs or {}
@@ -159,6 +167,10 @@ class WPSResponse(object):
 
 
 class LiteralInput(object):
+    """
+    :param identifier: The name of this input.
+    :param data_type: Type of literal input (e.g. `string`, `float`...).
+    """
 
     def __init__(self, identifier, data_type='string'):
         self.identifier = identifier
@@ -176,6 +188,11 @@ class LiteralInput(object):
 
 
 class ComplexInput(object):
+    """
+    :param identifier: The name of this input.
+    :param formats: Allowed formats for this input. Should be a list of
+                    one or more :class:`~Format` objects.
+    """
 
     def __init__(self, identifier, formats):
         self.identifier = identifier
@@ -194,6 +211,9 @@ class ComplexInput(object):
 
 
 class Format(object):
+    """
+    :param mime_type: MIME type allowed for a complex input.
+    """
 
     def __init__(self, mime_type):
         self.mime_type = mime_type
@@ -203,7 +223,16 @@ class Format(object):
 
 
 class Process(object):
-    """ WPS process """
+    """
+    :param handler: A callable that gets invoked for each incoming
+                    request. It should accept a single
+                    :class:`~WPSRequest` argument and return a
+                    :class:`~WPSResponse` object.
+    :param identifier: Name of this process.
+    :param inputs: List of inputs accepted by this process. They
+                   should be :class:`~LiteralInput` and :class:`~ComplexInput`
+                   objects.
+    """
 
     def __init__(self, handler, identifier=None, inputs=[]):
         self.identifier = identifier or handler.__name__
@@ -227,6 +256,9 @@ class Process(object):
 class Service(object):
     """ The top-level object that represents a WPS service. It's a WSGI
     application.
+
+    :param processes: A list of :class:`~Process` objects that are
+                      provided by this service.
     """
 
     def __init__(self, processes=[]):
