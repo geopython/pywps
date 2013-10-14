@@ -91,7 +91,7 @@ class WPSRequest(object):
         key = key.lower()
         for k in self.http_request.args.keys():
             if k.lower() == key:
-                if aslist is True:
+                if aslist:
                     return self.http_request.args.getlist(k)
                 else:
                     return self.http_request.args.get(k)
