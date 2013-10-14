@@ -225,7 +225,9 @@ class Process(object):
 
 
 class Service(object):
-    """ WPS service """
+    """ The top-level object that represents a WPS service. It's a WSGI
+    application.
+    """
 
     def __init__(self, processes=[]):
         self.processes = {p.identifier: p for p in processes}
