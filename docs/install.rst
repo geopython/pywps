@@ -8,4 +8,7 @@ is from the source repository::
 
     $ pip install -e git+https://github.com/jachym/pywps-4.git@master#egg=pywps-dev
 
-This automatically installs the dependencies, `lxml` and `werkzeug`.
+This automatically installs the dependencies, lxml_ and werkzeug_.
+
+.. _lxml: http://lxml.de/
+.. _werkzeug: http://werkzeug.pocoo.org/
