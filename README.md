@@ -1,24 +1,22 @@
 pywps-4
 =======
 
-New version of PyWPS - written from scratch
+New version of PyWPS, written from scratch.
+
+* [Documentation](http://pywps.rtfd.org), hosted by ReadTheDocs.
+* Continuous integration with Travis: 
+  [![Build Status](https://travis-ci.org/jachym/pywps-4.png)](https://travis-ci.org/jachym/pywps-4)
+
 
 Dependencies
 ============
 
-lxml - http://lxml.de
-owslib - https://github.com/geopython/OWSLib
+* lxml (http://lxml.de)
+* werkzeug (http://werkzeug.pocoo.org)
 
-path.py - pip install path.py
-flask
-werkzeug
 
 Run tests
 =========
-
-[![Build Status](https://travis-ci.org/jachym/pywps-4.png)](https://travis-ci.org/jachym/pywps-4)
-
-
 
 Install and run [tox](http://testrun.org/tox/latest/):
 
