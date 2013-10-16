@@ -1,7 +1,7 @@
 import unittest
 import lxml.etree
-from pywps.app import (Service, Process, WPSResponse, E, WPS, OWS, NAMESPACES,
-                       get_input_from_xml, xpath_ns)
+from pywps import Service, Process, WPSResponse
+from pywps.app import E, WPS, OWS, NAMESPACES, get_input_from_xml, xpath_ns
 from pywps._compat import text_type
 from tests.common import client_for
 

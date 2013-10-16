@@ -12,8 +12,8 @@ from path import path
 import flask
 from werkzeug.serving import run_simple
 from werkzeug.wsgi import get_path_info, wrap_file
-from pywps.app import (Process, Service, WPSResponse, LiteralInput,
-                       ComplexInput, Format, FileReference)
+from pywps import (Process, Service, WPSResponse, LiteralInput,
+                   ComplexInput, Format, FileReference)
 
 
 recent_data_files = deque(maxlen=20)

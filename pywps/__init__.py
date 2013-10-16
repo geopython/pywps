@@ -20,6 +20,19 @@ class PyWPS:
 
     pass
 
+
+from pywps.app import (
+    Process,
+    Service,
+    WPSRequest,
+    WPSResponse,
+    LiteralInput,
+    ComplexInput,
+    Format,
+    FileReference,
+)
+
+
 if __name__ == "__main__":
     pass
 

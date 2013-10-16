@@ -1,8 +1,7 @@
 import unittest
 from collections import namedtuple
-from pywps.app import (Process, Service, xpath_ns, E, WPS, OWS,
-                       LiteralInput, ComplexInput, Format,
-                       xmlschema_2, LITERAL_DATA_TYPES)
+from pywps import Process, Service, LiteralInput, ComplexInput, Format
+from pywps.app import E, WPS, OWS, xpath_ns, xmlschema_2, LITERAL_DATA_TYPES
 from tests.common import client_for
 
 ProcessDescription = namedtuple('ProcessDescription', ['identifier', 'inputs'])
