@@ -6,6 +6,7 @@ New version of PyWPS, written from scratch.
 * [Documentation](http://pywps.rtfd.org), hosted by ReadTheDocs.
 * Continuous integration with Travis: 
   [![Build Status](https://travis-ci.org/jachym/pywps-4.png)](https://travis-ci.org/jachym/pywps-4)
+* [Demo application](http://pywps.grep.ro/)
 
 
 Dependencies
