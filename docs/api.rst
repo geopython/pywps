@@ -2,7 +2,7 @@
 API
 ===
 
-.. module:: pywps.app
+.. module:: pywps
 
 
 Defining processes

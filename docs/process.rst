@@ -1,4 +1,4 @@
-.. currentmodule:: pywps.app
+.. currentmodule:: pywps
 
 =========
 Processes
@@ -13,7 +13,7 @@ Writing a handler
 The handler is a function (or any callable object), that takes a request
 object as argument, and returns a response object. Like so::
 
-    from pywps.app import WPSResponse
+    from pywps import WPSResponse
 
     def handler(request):
         return WPSResponse({'msg': "Hello world!"})
@@ -59,7 +59,7 @@ it's accessible at a URL, but if you have such a URL, you can
 communicate it to the client, by wrapping it in a
 :class:`FileReference`::
 
-    from pywps.app import FileReference
+    from pywps import FileReference
 
     def handler(request):
         # ... do some computation and save the output
@@ -74,7 +74,7 @@ In order to let clients call our process, we need to build a PyWPS
 :class:`Service` and have it listen for requests. Firstly we build a
 :class:`Process` object that knows about our handler::
 
-    from pywps.app import Process
+    from pywps import Process
 
     process = Process(handler)
 
@@ -86,7 +86,7 @@ but we can override it::
 Then we build a :class:`Service` object that knows about any number of
 processes::
 
-    from pywps.app import Service
+    from pywps import Service
 
     service = Service([process])
 
@@ -113,7 +113,7 @@ Declaring inputs and outputs
 Clients need to know what our processes expect as input. We can declare
 the expected input when creating a :class:`Process` object::
 
-    from pywps.app import LiteralInput, ComplexInput
+    from pywps import LiteralInput, ComplexInput
 
     process = Process(handler, inputs=[
         LiteralInput('foo', 'string'),
