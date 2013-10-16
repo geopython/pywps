@@ -1,3 +1,4 @@
+git+https://github.com/jachym/pywps-4.git@master#egg=pywps-master
 Flask==0.10.1
 itsdangerous==0.23
 Jinja2==2.7.1

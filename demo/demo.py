@@ -78,7 +78,7 @@ def create_app():
     @app.route('/')
     def home():
         url = flask.url_for('wps', _external=True)
-        return DESCRIPTION_HTML.format(url=url)
+        return flask.render_template('home.html', url=url)
 
     @app.route('/wps', methods=['GET', 'POST'])
     def wps():
@@ -95,28 +95,19 @@ def create_app():
     return app
 
 
-DESCRIPTION_HTML = """\
-<!doctype html>
-<title>PyWPS-4 demo app</title>
-<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap\
-/3.0.0-rc1/css/bootstrap.min.css">
-<div class="container">
-<h1>PyWPS-4 demo app</h1>
-<p>This is a demo WPS server. It exposes a few processes:
-<ul><li><b>say_hello</b> - returns a literal string output based on the input.
-<li><b>feature_count</b> - counts number of features in the uploaded GML.
-<li><b>centroids</b> - returns GeoJSON with centroids of features in the
-uploaded GML.</ul>
-<p>Connect to <tt>{url}</tt>.
-<p>Source code and issue tracking
-at <a href="https://github.com/jachym/pywps-4/"
->github.com/jachym/pywps-4</a>.
-</div>
-"""
+def main():
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('listen', nargs='?', default='localhost:5000')
+    parser.add_argument('-d', '--debug', action='store_true')
+    args = parser.parse_args()
+
+    app = create_app()
+    app.debug = args.debug
+    host, port = args.listen.split(':')
+    run_simple(host, int(port), app, use_reloader=app.debug)
 
 
 if __name__ == '__main__':
-    app = create_app()
-    port = int(os.environ.get('PORT', '5000'))
-    debug = os.environ.get('DEBUG') == 'on'
-    run_simple('0.0.0.0', port, app, use_reloader=debug)
+    main()

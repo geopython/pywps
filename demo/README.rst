@@ -18,7 +18,4 @@ Running
 ~~~~~~~
 Simply run the python file::
 
-    $ python app.py
-
-By default the app listens on port ``5000``. This can be changed via the
-``$PORT`` environment variable.
+    $ python demo.py
