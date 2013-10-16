@@ -101,12 +101,19 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('listen', nargs='?', default='localhost:5000')
     parser.add_argument('-d', '--debug', action='store_true')
+    parser.add_argument('-w', '--waitress', action='store_true')
     args = parser.parse_args()
 
     app = create_app()
     app.debug = args.debug
     host, port = args.listen.split(':')
-    run_simple(host, int(port), app, use_reloader=app.debug)
+    port = int(port)
+
+    if args.waitress:
+        import waitress
+        waitress.serve(app, host=host, port=port)
+    else:
+        run_simple(host, port, app, use_reloader=app.debug)
 
 
 if __name__ == '__main__':
