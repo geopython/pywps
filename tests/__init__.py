@@ -6,6 +6,7 @@ import extent
 from tests import test_capabilities
 from tests import test_describe
 from tests import test_execute
+from tests import test_exceptions
 
 def load_tests():
     return unittest.TestSuite([

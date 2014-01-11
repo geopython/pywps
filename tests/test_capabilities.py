@@ -45,11 +45,11 @@ class CapabilitiesTest(unittest.TestCase):
         assert sorted(names.split()) == ['pr1', 'pr2']
 
     def test_get_request(self):
-        resp = self.client.get('?Request=GetCapabilities')
+        resp = self.client.get('?Request=GetCapabilities&service=WpS')
         self.check_capabilities_response(resp)
 
         # case insesitive check
-        resp = self.client.get('?request=getcapabilities')
+        resp = self.client.get('?request=getcapabilities&service=wps')
         self.check_capabilities_response(resp)
 
     def test_post_request(self):

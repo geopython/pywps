@@ -5,6 +5,7 @@ https://github.com/jachym/pywps-4/issues/2
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.exceptions import HTTPException, BadRequest, MethodNotAllowed
+from pywps.exceptions import InvalidParameterValue, MissingParameterValue, VersionNegotiationFailed, NoApplicableCode, OperationNotSupported
 from werkzeug.datastructures import MultiDict
 import lxml.etree
 from lxml.builder import ElementMaker
@@ -73,7 +74,25 @@ class WPSRequest(object):
         self.http_request = http_request
 
         if http_request.method == 'GET':
-            self.operation = self._get_get_param('request').lower()
+            # service shall be WPS
+            service = self._get_get_param('service',
+                                            aslist=False)
+            if service:
+                if str(service).lower() != 'wps':
+                    raise OperationNotSupported(
+                        'parameter SERVICE [%s] not supported' % service)
+            else:
+                raise MissingParameterValue('service','service')
+
+            # operation shall be one of GetCapabilities, DescribeProcess,
+            # Execute
+            self.operation = self._get_get_param('request',
+                                                 aslist=False)
+
+            if not self.operation:
+                raise MissingParameterValue('request')
+            else:
+                self.operation = self.operation.lower()
 
             if self.operation == 'getcapabilities':
                 pass
@@ -81,12 +100,14 @@ class WPSRequest(object):
             elif self.operation == 'describeprocess':
                 self.identifiers = self._get_get_param('identifier',
                                                        aslist=True)
+                if not self.identifiers:
+                    raise MissingParameterValue('identifier')
 
             elif self.operation == 'execute':
                 self.identifier = self._get_get_param('identifier')
 
             else:
-                raise BadRequest("Unknown request type %r" % self.operation)
+                raise InvalidParameterValue(self.operation)
 
         elif http_request.method == 'POST':
             doc = lxml.etree.fromstring(http_request.get_data())
@@ -105,7 +126,7 @@ class WPSRequest(object):
                 self.inputs = get_input_from_xml(doc)
 
             else:
-                raise BadRequest("Unknown request type %r" % doc.tag)
+                raise InvalidParameterValue(doc.tag)
 
         else:
             raise MethodNotAllowed()
@@ -113,6 +134,8 @@ class WPSRequest(object):
     def _get_get_param(self, key, aslist=False):
         """Returns key from the key:value pair, of the HTTP GET request, for
         example 'service' or 'request'
+
+        If no value,
 
         :param key: key value you need to dig out of the HTTP GET request
         :param value: default value
@@ -126,10 +149,7 @@ class WPSRequest(object):
                     return self.http_request.args.get(k)
 
         # raise error
-        if aslist:
-            return ()
-        else:
-            return self.http_request.args[key]
+        return None
 
 
 class WPSResponse(object):
@@ -279,13 +299,18 @@ class Service(object):
 
     def describe(self, identifiers):
         identifier_elements = []
-        for identifier in identifiers:
-            try:
-                process = self.processes[identifier]
-            except KeyError:
-                raise BadRequest("Unknown process %r" % identifier)
-            else:
-                identifier_elements.append(process.describe_xml())
+        # 'all' keyword means all processes
+        if 'all' in (ident.lower() for ident in identifiers):
+            for process in self.processes:
+                identifier_elements.append(self.processes[process].describe_xml())
+        else:
+            for identifier in identifiers:
+                try:
+                    process = self.processes[identifier]
+                except KeyError:
+                    raise InvalidParameterValue("Unknown process %r" % identifier, "identifier")
+                else:
+                    identifier_elements.append(process.describe_xml())
         doc = WPS.ProcessDescriptions(*identifier_elements)
         return xml_response(doc)
 
@@ -315,4 +340,7 @@ class Service(object):
                                    % wps_request.operation)
 
         except HTTPException as e:
+            # transform HTTPException to OWS NoApplicableCode exception
+            if not isinstance(e, NoApplicableCode):
+                e = NoApplicableCode(e.description, code=e.code)
             return e
