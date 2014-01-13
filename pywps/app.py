@@ -10,6 +10,7 @@ from werkzeug.datastructures import MultiDict
 import lxml.etree
 from lxml.builder import ElementMaker
 from pywps._compat import text_type, StringIO
+from pywps.formats import Formats
 
 
 xmlschema_2 = "http://www.w3.org/TR/xmlschema-2/#"
@@ -54,6 +55,8 @@ def get_input_from_xml(doc):
             tmp.mime_type = complex_data_el.attrib.get('mimeType')
             the_input.update({identifier_el.text: tmp})
             continue
+
+        # TODO bounding box data
 
     return the_input
 
@@ -230,13 +233,87 @@ class ComplexInput(object):
         )
 
 
+class LiteralOutput(object):
+    """
+    :param identifier: The name of this output.
+    :param data_type: Type of literal input (e.g. `string`, `float`...).
+    :param value: Resulting value
+            Should be :class:`~String` object.
+    """
+
+    def __init__(self, identifier, data_type='string'):
+        self.identifier = identifier
+        assert data_type in LITERAL_DATA_TYPES
+        self.data_type = data_type
+        self.value = None
+
+    def setvalue(self, value):
+        self.value = value
+
+    def describe_xml(self):
+        return E.Output(
+            OWS.Identifier(self.identifier),
+            E.LiteralData( OWS.DataType(self.data_type, reference=xmlschema_2 + self.data_type))
+        )
+
+    def execute_xml(self):
+        # TODO
+        return E.Output(
+            OWS.Identifier(self.identifier),
+            E.LiteralOutput(
+                OWS.DataType(self.data_type,
+                             reference=xmlschema_2 + self.data_type)
+            )
+        )
+
+
+class ComplexOutput(object):
+    """
+    :param identifier: The name of this output.
+    :param formats: Possible output formats for this output.
+            Should be list of :class:`~Format` object.
+    :param output_format: Required format for this output.
+            Should be :class:`~Format` object.
+    :param value: Resulting value
+            Should be :class:`~File` or :class:`~String` object.
+    """
+
+    def __init__(self, identifier, formats, output_format=None):
+        self.identifier = identifier
+        self.formats = formats
+        self.output_format = output_format
+        self.value = None
+
+    def describe_xml(self):
+        default_format_el = self.formats[0].describe_xml()
+        supported_format_elements = [f.describe_xml() for f in self.formats]
+        return E.Output(
+            OWS.Identifier(self.identifier),
+            E.ComplexOutput(
+                E.Default(default_format_el),
+                E.Supported(*supported_format_elements)
+            )
+        )
+
+
+class BoundingBoxOutput(object):
+    """bounding box output
+    """
+    # TODO
+    pass
+
 class Format(object):
     """
     :param mime_type: MIME type allowed for a complex input.
     """
+    mime_type = None
 
     def __init__(self, mime_type):
-        self.mime_type = mime_type
+
+        if isinstance(mime_type, Formats):
+            self.mime_type = mime_type.value
+        else:
+            self.mime_type = mime_type
 
     def describe_xml(self):
         return E.Format(OWS.MimeType(self.mime_type))
@@ -251,26 +328,35 @@ class Process(object):
     :param identifier: Name of this process.
     :param inputs: List of inputs accepted by this process. They
                    should be :class:`~LiteralInput` and :class:`~ComplexInput`
+                   and :class:`~BoundingBoxInput`
+                   objects.
+    :param outputs: List of outputs returned by this process. They
+                   should be :class:`~LiteralOutput` and :class:`~ComplexOutput`
+                   and :class:`~BoundingBoxOutput`
                    objects.
     """
 
-    def __init__(self, handler, identifier=None, inputs=[]):
+    def __init__(self, handler, identifier=None, inputs=[], outputs=[]):
         self.identifier = identifier or handler.__name__
         self.handler = handler
         self.inputs = inputs
+        self.outputs = outputs
 
     def capabilities_xml(self):
         return WPS.Process(OWS.Identifier(self.identifier))
 
     def describe_xml(self):
         input_elements = [i.describe_xml() for i in self.inputs]
+        output_elements = [i.describe_xml() for i in self.outputs]
         return E.ProcessDescription(
             OWS.Identifier(self.identifier),
-            E.DataInputs(*input_elements)
+            E.DataInputs(*input_elements),
+            E.DataOutputs(*output_elements)
         )
 
     def execute(self, wps_request):
-        return self.handler(wps_request)
+        wps_response = WPSResponse({o.identifier: o for o in self.outputs})
+        return self.handler(wps_request, wps_response)
 
 
 class Service(object):

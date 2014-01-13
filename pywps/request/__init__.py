@@ -2,6 +2,7 @@ import types
 import logging
 import io
 
+# Deprecated, remove, everything is parsed in app.py
 from pywps import namespaces
 
 # indicates, if xsd-based validation of the request should return
@@ -31,7 +32,7 @@ class Request:
         pass
 
     def set_from_xml(self,root):
-        """Set values of this request based on url ETree root 
+        """Set values of this request based on url ETree root
         """
         global namespaces
         self.request=root.tag.lower().replace("{%s}"%namespaces["wps"],"")
@@ -54,7 +55,7 @@ def get_request(data):
     if isinstance(data, str):
         kvs = parse_params(data)
         return __get_request_from_url(kvs)
-        
+
     # post request is supposed to be file object
     elif isinstance(data, io.IOBase):
         root =  parse_xml(data)
