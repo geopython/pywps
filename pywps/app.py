@@ -168,17 +168,19 @@ class WPSResponse(object):
     @Request.application
     def __call__(self, request):
         output_elements = []
-        for key, value in self.outputs.items():
-            if isinstance(value, FileReference):
-                data_el = WPS.Reference(href=value.url,
-                                        mimeType=value.mime_type)
-            else:
-                data_el = WPS.LiteralData(value)
+        for identifier in self.outputs:
+            output = self.outputs[identifier]
+            output_elements.append(output.execute_xml())
+        #    if isinstance(value, FileReference):
+        #        data_el = WPS.Reference(href=value.url,
+        #                                mimeType=value.mime_type)
+        #    else:
+        #        data_el = WPS.LiteralData(value)
 
-            output_elements.append(WPS.Output(
-                OWS.Identifier(key),
-                WPS.Data(data_el)
-            ))
+        #    output_elements.append(WPS.Output(
+        #        OWS.Identifier(key),
+        #        WPS.Data(data_el)
+        #    ))
 
         doc = WPS.ExecuteResponse(
             WPS.Status(
@@ -250,20 +252,23 @@ class LiteralOutput(object):
     def setvalue(self, value):
         self.value = value
 
+    def getvalue(self):
+        return self.value
+
     def describe_xml(self):
         return E.Output(
             OWS.Identifier(self.identifier),
-            E.LiteralData( OWS.DataType(self.data_type, reference=xmlschema_2 + self.data_type))
+            E.LiteralData(OWS.DataType(self.data_type, reference=xmlschema_2 + self.data_type))
         )
 
     def execute_xml(self):
-        # TODO
         return E.Output(
             OWS.Identifier(self.identifier),
-            E.LiteralOutput(
-                OWS.DataType(self.data_type,
-                             reference=xmlschema_2 + self.data_type)
-            )
+            E.Data(WPS.LiteralData(
+                self.getvalue(),
+                dataType=self.data_type,
+                reference=xmlschema_2 + self.data_type
+            ))
         )
 
 
@@ -274,15 +279,66 @@ class ComplexOutput(object):
             Should be list of :class:`~Format` object.
     :param output_format: Required format for this output.
             Should be :class:`~Format` object.
-    :param value: Resulting value
-            Should be :class:`~File` or :class:`~String` object.
+    :param encoding: The encoding of this input or requested for this output
+            (e.g., UTF-8).
     """
 
-    def __init__(self, identifier, formats, output_format=None):
+    def __init__(self, identifier, formats, output_format=None, encoding="UTF-8", schema=None):
         self.identifier = identifier
         self.formats = formats
-        self.output_format = output_format
         self.value = None
+        self.as_reference = False
+        self.set_outputformat(output_format)
+        self.set_encoding(encoding)
+        self.set_schema(schema)
+
+    def getvalue(self):
+        """Get value of this output
+        """
+
+        return str(self.value)
+
+    def get_outputformat(self):
+        """Get output format
+        :rtype: String
+        """
+
+        if self.output_format:
+            return self.output_format
+        else:
+            return ''
+
+    def set_outputformat(self, output_format):
+        """Set output format
+        """
+        self.output_format = output_format
+
+    def get_encoding(self ):
+        """Get output encoding
+        :rtype: String
+        """
+
+        if self.encoding:
+            return self.encoding
+        else:
+            return ''
+
+    def set_encoding(self, encoding):
+        """Set output encoding
+        """
+        self.encoding = encoding
+
+    def get_schema(self):
+        """Get output schema
+        :rtype: String
+        """
+
+        return ""
+
+    def set_schema(self, schema):
+        """Set output encoding
+        """
+        self.schema = schema
 
     def describe_xml(self):
         default_format_el = self.formats[0].describe_xml()
@@ -295,6 +351,36 @@ class ComplexOutput(object):
             )
         )
 
+    def execute_xml(self):
+        """Render Execute response XML node
+
+        :return: node
+        :rtype: ElementMaker
+        """
+
+        node = None
+        if self.as_reference == True:
+            node = self._execute_xml_reference()
+        else:
+            node = self._execute_xml_data()
+
+        return E.Output(
+            OWS.Identifier(self.identifier),
+            E.Data(node)
+        )
+
+    def _execute_xml_reference(self):
+        """Return Reference node
+        """
+        pass
+
+    def _execute_xml_data(self):
+        return WPS.ComplexData(
+                self.getvalue(),
+                mimeType=self.get_outputformat(),
+                encoding=self.get_encoding(),
+                schema=self.get_schema()
+        )
 
 class BoundingBoxOutput(object):
     """bounding box output
