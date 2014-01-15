@@ -180,6 +180,7 @@ class WPSResponse(object):
 
     def __init__(self, outputs=None):
         self.outputs = outputs or {}
+        self.message = None
 
     @Request.application
     def __call__(self, request):

@@ -17,7 +17,7 @@ sys.path.append(os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     os.path.pardir))
 import pywps
-from pywps import (Process, Service, WPSResponse, LiteralInput,
+from pywps import (Process, Service, WPSResponse, LiteralInput, LiteralOutput,
                    ComplexInput, Format, FileReference)
 from pywps.formats import Formats
 
@@ -35,6 +35,7 @@ def temp_dir():
 
 
 def say_hello(request, response):
+    response.outputs['response'].setvalue(request.inputs['name'])
     return response
 
 
@@ -43,7 +44,8 @@ def feature_count(request, response):
     from pywps.app import xpath_ns
     doc = lxml.etree.parse(request.inputs['layer'])
     feature_elements = xpath_ns(doc, '//gml:featureMember')
-    return WPSResponse({'count': str(len(feature_elements))})
+    response.outputs['count'] =  str(len(feature_elements))
+    return response
 
 
 def centroids(request, response):
@@ -72,9 +74,11 @@ def centroids(request, response):
 
 def create_app():
     service = Service(processes=[
-        Process(say_hello, inputs=[LiteralInput('name', 'string')]),
+        Process(say_hello, inputs=[LiteralInput('name', 'string')],
+                outputs=[LiteralOutput('response', 'string')]),
         Process(feature_count,
-                inputs=[ComplexInput('layer', [Format(Formats.GML)])]),
+                inputs=[ComplexInput('layer', [Format(Formats.GML)])],
+                outputs=[ComplexInput('layer', [Format(Formats.GML)])]),
         Process(centroids,
                 inputs=[ComplexInput('layer', [Format(Formats.GML)])]),
     ])
