@@ -36,6 +36,20 @@ def xml_response(doc):
                     content_type='text/xml')
 
 
+def get_input_from_kvp(datainputs):
+    """Get execute DataInputs from URL (key-value-pairs) encoding
+    """
+
+    inputs = {}
+
+    for inpt in datainputs.split(";"):
+        (identifier, val) = inpt.split("=")
+
+        # add input to Inputs
+        inputs[identifier] = val
+
+    return inputs
+
 def get_input_from_xml(doc):
     the_input = MultiDict()
     for input_el in xpath_ns(doc, '/wps:Execute/wps:DataInputs/wps:Input'):
@@ -108,6 +122,8 @@ class WPSRequest(object):
 
             elif self.operation == 'execute':
                 self.identifier = self._get_get_param('identifier')
+                self.inputs = get_input_from_kvp(
+                    self._get_get_param('datainputs'))
 
             else:
                 raise InvalidParameterValue(self.operation)
@@ -171,16 +187,6 @@ class WPSResponse(object):
         for identifier in self.outputs:
             output = self.outputs[identifier]
             output_elements.append(output.execute_xml())
-        #    if isinstance(value, FileReference):
-        #        data_el = WPS.Reference(href=value.url,
-        #                                mimeType=value.mime_type)
-        #    else:
-        #        data_el = WPS.LiteralData(value)
-
-        #    output_elements.append(WPS.Output(
-        #        OWS.Identifier(key),
-        #        WPS.Data(data_el)
-        #    ))
 
         doc = WPS.ExecuteResponse(
             WPS.Status(
