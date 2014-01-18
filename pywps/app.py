@@ -5,13 +5,13 @@ https://github.com/jachym/pywps-4/issues/2
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.exceptions import HTTPException, BadRequest, MethodNotAllowed
-from pywps.exceptions import InvalidParameterValue, MissingParameterValue, VersionNegotiationFailed, NoApplicableCode, OperationNotSupported
+from pywps.exceptions import InvalidParameterValue, \
+    MissingParameterValue, NoApplicableCode,\
+    OperationNotSupported
 from werkzeug.datastructures import MultiDict
 import lxml.etree
 from lxml.builder import ElementMaker
 from pywps._compat import text_type, StringIO
-from pywps.formats import Formats
-
 
 xmlschema_2 = "http://www.w3.org/TR/xmlschema-2/#"
 LITERAL_DATA_TYPES = ['string', 'float', 'integer', 'boolean']
@@ -42,11 +42,12 @@ def get_input_from_kvp(datainputs):
 
     inputs = {}
 
-    for inpt in datainputs.split(";"):
-        (identifier, val) = inpt.split("=")
+    if datainputs:
+        for inpt in datainputs.split(";"):
+            (identifier, val) = inpt.split("=")
 
-        # add input to Inputs
-        inputs[identifier] = val
+            # add input to Inputs
+            inputs[identifier] = val
 
     return inputs
 
@@ -263,15 +264,15 @@ class LiteralOutput(object):
         return self.value
 
     def describe_xml(self):
-        return E.Output(
+        return WPS.Output(
             OWS.Identifier(self.identifier),
-            E.LiteralData(OWS.DataType(self.data_type, reference=xmlschema_2 + self.data_type))
+            WPS.LiteralData(OWS.DataType(self.data_type, reference=xmlschema_2 + self.data_type))
         )
 
     def execute_xml(self):
-        return E.Output(
+        return WPS.Output(
             OWS.Identifier(self.identifier),
-            E.Data(WPS.LiteralData(
+            WPS.Data(WPS.LiteralData(
                 self.getvalue(),
                 dataType=self.data_type,
                 reference=xmlschema_2 + self.data_type
@@ -350,7 +351,7 @@ class ComplexOutput(object):
     def describe_xml(self):
         default_format_el = self.formats[0].describe_xml()
         supported_format_elements = [f.describe_xml() for f in self.formats]
-        return E.Output(
+        return WPS.Output(
             OWS.Identifier(self.identifier),
             E.ComplexOutput(
                 E.Default(default_format_el),
@@ -371,9 +372,9 @@ class ComplexOutput(object):
         else:
             node = self._execute_xml_data()
 
-        return E.Output(
+        return WPS.Output(
             OWS.Identifier(self.identifier),
-            E.Data(node)
+            WPS.Data(node)
         )
 
     def _execute_xml_reference(self):
@@ -395,6 +396,7 @@ class BoundingBoxOutput(object):
     # TODO
     pass
 
+
 class Format(object):
     """
     :param mime_type: MIME type allowed for a complex input.
@@ -403,10 +405,7 @@ class Format(object):
 
     def __init__(self, mime_type):
 
-        if isinstance(mime_type, Formats):
-            self.mime_type = mime_type.value
-        else:
-            self.mime_type = mime_type
+        self.mime_type = mime_type
 
     def describe_xml(self):
         return E.Format(OWS.MimeType(self.mime_type))
