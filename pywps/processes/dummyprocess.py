@@ -17,10 +17,12 @@ class Process(WPSProcess):
               grassLocation =False)
               
          self.Input1 = self.addLiteralInput(identifier = "input1",
-                                            title = "Input1 number", 
+                                            title = "Input1 number",
+                                            type=type(0), 
                                             default="100")
          self.Input2= self.addLiteralInput(identifier="input2", 
-                                           title="Input2 number", 
+                                           title="Input2 number",
+                                            type=type(0), 
                                           default="200")
          self.Output1=self.addLiteralOutput(identifier="output1", 
                                             title="Output1 add 1 result")
