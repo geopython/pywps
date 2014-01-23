@@ -198,59 +198,6 @@ class WPSResponse(object):
         )
         return xml_response(doc)
 
-class InputInterface(object):
-    """Input interface
-    """
-
-    def getvalue(self):
-        """Returns value as given by the client
-        """
-        pass
-
-    def getdata(self):
-        """Returns data (text string, raster data or vector data)
-        """
-        pass
-
-    def getfile(self):
-        """Returns data as file object
-        """
-        pass
-
-    def describe_xml(self):
-        """Returns Element, sutiable for DescribeProcess response
-        """
-        pass
-
-    def execute_xml(self):
-        """Returns Element, sutiable for Execute response (when lineage is true)
-        """
-        pass
-
-class OutputInterface(object):
-    """Output interface
-    """
-
-    def setvalue(self, value):
-        """Enables to set value for the client, regardless, PyWPS is going to set
-        """
-        pass
-
-    def setdata(self, data):
-        """Enables to set output value as data (text string, raster data or vector data)
-        """
-        pass
-
-    def setfile(self, file_like):
-        """Enables to set output value as file object
-        """
-        pass
-
-    def execute_xml(self):
-        """Returns Element, sutiable for Execute response
-        """
-        pass
-
 class LiteralInput(object):
     """
     :param identifier: The name of this input.

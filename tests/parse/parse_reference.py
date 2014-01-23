@@ -12,8 +12,6 @@ sys.path.append(pywpsPath)
 
 import unittest
 
-from pywps.request.execute.complex import ComplexInput
-
 class ParseReferenceTestCase(unittest.TestCase):
 
     def setUp(self):
@@ -50,7 +48,7 @@ class ParseReferenceTestCase(unittest.TestCase):
 
     def test_parse_reference_POST(self):
         """Parse complex input XML reference, post method"""
-        
+
         strin = StringIO("""<wps:Reference xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:wps="http://www.opengis.net/wps/1.0.0" xlink:href="http://foo/bar.tif" method="GET"/>""")
 
         req = objectify.parse(strin)
@@ -63,7 +61,7 @@ class ParseReferenceTestCase(unittest.TestCase):
 
     def test_parse_reference_POST_body(self):
         """Parse complex input XML reference, post method"""
-        
+
         strin = StringIO("""<wps:Reference xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:wps="http://www.opengis.net/wps/1.0.0" xlink:href="http://foo/bar.tif" method="GET">
                             <wps:Header key1="value1" key2="value2" key3="value3" />
                             <wps:Body><body /></wps:Body>
@@ -83,7 +81,7 @@ class ParseReferenceTestCase(unittest.TestCase):
 
     def test_parse_reference_POST_bodyref(self):
         """Parse complex input XML reference, post method, body reference"""
-        
+
         strin = StringIO("""<wps:Reference xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:wps="http://www.opengis.net/wps/1.0.0" xlink:href="http://foo/bar.tif" method="GET">
                             <wps:BodyReference xlink:href="http://foo/bar/reference" />
                         </wps:Reference>""")
