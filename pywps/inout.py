@@ -49,6 +49,7 @@ class IOHandler(object):
     ...
     ...     # testing stream object on input
     ...     ioh_stream = IOHandler(tempdir=tmp)
+    ...     assert ioh_stream.tempdir == tmp
     ...     ioh_stream.set_stream(FileIO(fileobj.name,'r'))
     ...     assert ioh_stream.source_type == SOURCE_TYPE.STREAM
     ...     file = ioh_stream.get_file()
