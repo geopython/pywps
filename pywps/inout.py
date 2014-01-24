@@ -5,73 +5,60 @@ class SOURCE_TYPE:
     FILE = 1
     STREAM = 2
 
+class STORE_TYPE:
+    PATH = 0
+
 class IOHandler(object):
     """Basic IO class. Provides functions, to accept input data in file,
     memory object and stream object and give them out in all three types
 
     >>> # setting up tempory directory for testing environment
-    >>> import tempfile, os
+    >>> import os
     >>> from io import RawIOBase
-    >>> from path import path
-    >>> from contextlib import contextmanager
     >>> from io import FileIO
     >>> import types
     >>>
-    >>> @contextmanager
-    ... def temp_dir():
-    ...     "Create temoprary directory"
-    ...     tmp = path(tempfile.mkdtemp())
-    ...     try:
-    ...         yield tmp
-    ...     finally:
-    ...         tmp.rmtree()
+    >>> ioh_file = IOHandler(tempdir=tmp)
+    >>> assert isinstance(ioh_file, IOHandler)
+    >>>
+    >>> # Create test file input
+    >>> fileobj = open(os.path.join(tmp, 'myfile.txt'), 'w')
+    >>> fileobj.write('ASDF ASFADSF ASF ASF ASDF ASFASF')
+    >>> fileobj.close()
+    >>>
+    >>> # testing file object on input
+    >>> ioh_file.set_file(fileobj.name)
+    >>> assert ioh_file.source_type == SOURCE_TYPE.FILE
+    >>> file = ioh_file.get_file()
+    >>> stream = ioh_file.get_stream()
+    >>>
+    >>> assert file == fileobj.name
+    >>> assert isinstance(stream, RawIOBase)
+    >>> # skipped assert isinstance(ioh_file.get_object(), POSH)
+    >>>
+    >>> # testing stream object on input
+    >>> ioh_stream = IOHandler(tempdir=tmp)
+    >>> assert ioh_stream.tempdir == tmp
+    >>> ioh_stream.set_stream(FileIO(fileobj.name,'r'))
+    >>> assert ioh_stream.source_type == SOURCE_TYPE.STREAM
+    >>> file = ioh_stream.get_file()
+    >>> stream = ioh_stream.get_stream()
+    >>>
+    >>> assert open(file).read() == ioh_file.get_stream().read()
+    >>> assert isinstance(stream, RawIOBase)
+    >>> # skipped assert isinstance(ioh_stream.get_object(), POSH)
+    >>>
+    >>> # testing in memory object object on input
+    >>> # skipped ioh_mo = IOHandler(tempdir=tmp)
+    >>> # skipped ioh_mo.set_memory_object(POSH)
+    >>> # skipped assert ioh_mo.source_type == SOURCE_TYPE.MEMORY
+    >>> # skipped file = ioh_mo.get_file()
+    >>> # skipped stream = ioh_mo.get_stream()
+    >>> # skipped posh = ioh_mo.get_memory_object()
     >>> #
-    >>> # Test starts here
-    >>> #
-    >>> with temp_dir() as tmp:
-    ...     ioh_file = IOHandler(tempdir=tmp)
-    ...     assert isinstance(ioh_file, IOHandler)
-    ...
-    ...     # Create test file input
-    ...     fileobj = open(os.path.join(tmp, 'myfile.txt'), 'w')
-    ...     fileobj.write('ASDF ASFADSF ASF ASF ASDF ASFASF')
-    ...     fileobj.close()
-    ...
-    ...     # testing file object on input
-    ...     ioh_file.set_file(fileobj.name)
-    ...     assert ioh_file.source_type == SOURCE_TYPE.FILE
-    ...     file = ioh_file.get_file()
-    ...     stream = ioh_file.get_stream()
-    ...
-    ...     assert file == fileobj.name
-    ...     assert isinstance(stream, RawIOBase)
-    ...     # skipped assert isinstance(ioh_file.get_object(), POSH)
-    ...
-    ...     # testing stream object on input
-    ...     ioh_stream = IOHandler(tempdir=tmp)
-    ...     assert ioh_stream.tempdir == tmp
-    ...     ioh_stream.set_stream(FileIO(fileobj.name,'r'))
-    ...     assert ioh_stream.source_type == SOURCE_TYPE.STREAM
-    ...     file = ioh_stream.get_file()
-    ...     stream = ioh_stream.get_stream()
-    ...
-    ...     assert isinstance(file, types.StringType)
-    ...     assert open(file).read() == ioh_file.get_stream().read()
-    ...     assert isinstance(stream, RawIOBase)
-    ...     # skipped assert isinstance(ioh_stream.get_object(), POSH)
-    ...
-    ...     # testing in memory object object on input
-    ...     # skipped ioh_mo = IOHandler(tempdir=tmp)
-    ...     # skipped ioh_mo.set_memory_object(POSH)
-    ...     # skipped assert ioh_mo.source_type == SOURCE_TYPE.MEMORY
-    ...     # skipped file = ioh_mo.get_file()
-    ...     # skipped stream = ioh_mo.get_stream()
-    ...     # skipped posh = ioh_mo.get_memory_object()
-    ...     #
-    ...     # skipped assert isinstance(file, types.StringType)
-    ...     # skipped assert open(file).read() == ioh_file.get_stream().read()
-    ...     # skipped assert isinstance(ioh_mo.get_stream(), RawIOBase)
-    ...     # skipped assert isinstance(ioh_mo.get_object(), POSH)
+    >>> # skipped assert open(file).read() == ioh_file.get_stream().read()
+    >>> # skipped assert isinstance(ioh_mo.get_stream(), RawIOBase)
+    >>> # skipped assert isinstance(ioh_mo.get_object(), POSH)
     """
 
     def __init__(self, tempdir=None):
@@ -80,17 +67,21 @@ class IOHandler(object):
         self.tempdir = tempdir
 
     def set_file(self, filename):
+        """Set source as file name"""
         self.source_type = SOURCE_TYPE.FILE
         self.source = filename
 
     def set_memory_object(self, memory_object):
+        """Set source as in memory object"""
         self.source_type = SOURCE_TYPE.MEMORY
 
     def set_stream(self, stream):
+        """Set source as stream object"""
         self.source_type = SOURCE_TYPE.STREAM
         self.source = stream
 
     def get_file(self):
+        """Get source as file name"""
         if self.source_type == SOURCE_TYPE.FILE:
             return self.source
         elif self.source_type == SOURCE_TYPE.STREAM:
@@ -103,9 +94,11 @@ class IOHandler(object):
 
 
     def get_memory_object(self):
+        """Get source as memory object"""
         raise Exception("setmemory_object not implemented, Soeren promissed to implement at WPS Workshop on 23rd of January 2014")
 
     def get_stream(self):
+        """Get source as stream object"""
         if self.source_type == SOURCE_TYPE.FILE:
             from io import FileIO
             return FileIO(self.source, mode='r', closefd=True)
@@ -116,6 +109,7 @@ class IOHandler(object):
     file = property(fget=get_file, fset=set_file)
     memory_object = property(fget=get_memory_object, fset=set_memory_object)
     stream = property(fget=get_stream, fset=set_stream)
+
 
 class ComplexInput(IOHandler):
     """Complex input abstract class
@@ -144,23 +138,44 @@ class ComplexInput(IOHandler):
 class ComplexOutput(IOHandler):
     """Complex output abstract class
 
+    >>> import ConfigParser
+    >>> config = ConfigParser.RawConfigParser()
+    >>> config.add_section('FileStorage')
+    >>> config.set('FileStorage', 'target', './')
+    >>> config.add_section('server')
+    >>> config.set('server', 'outputurl', 'http://foo/bar/filestorage')
+    >>>
     >>> co = ComplexOutput()
-    >>> co.set_storage(1)
-    >>> co.get_storage()
-    1
+    >>> tiff_file = open('file.tiff', 'w')
+    >>> tiff_file.write("AA")
+    >>> tiff_file.close()
+    >>> co.set_file('file.tiff')
+    >>> fs = FileStorage(config)
+    >>> co.storage = fs
+    >>>
+    >>> url = co.get_url() # get url, data are stored
+    >>>
+    >>> co.get_stream().read() # get data - nothing is stored
+    'AA'
     """
 
-    def set_storage(self, storage):
-        """Set output storage
-        """
-        self._storage = storage
+    def __init__(self):
+        IOHandler.__init__(self)
+        self._storage = None
 
-    def get_storage(self):
-        """Get output storage
-        """
+    @property
+    def storage(self):
         return self._storage
 
-    storage = property(fget=get_storage, fset=set_storage)
+    @storage.setter
+    def storage(self, storage):
+        self._storage = storage
+
+    def get_url(self):
+        """Return URL pointing to data
+        """
+        (outtype, storage, url) = self.storage.store(self)
+        return url
 
 class ValidatorAbstract(object):
     """Data validator abstract class
@@ -188,12 +203,12 @@ class StorageAbstract(object):
 
     @abstractmethod
     def store(self):
-        """Store the data
         """
-        pass
-
-    def store(self):
-        """Store the data
+        :param output: of type IOHandler
+        :returns: (type, store, url) where
+            type - is type of STORE_TYPE - number
+            store - string describing storage - file name, database connection
+            url - url, where the data can be downloaded
         """
         pass
 
@@ -201,28 +216,78 @@ class DummyStorage(StorageAbstract):
     """Dummy empty storage implementation, does nothing
 
     Default instance, for non-reference output request
+
+    >>> store = DummyStorage()
+    >>> assert store.store
     """
 
-    def __init__(self, config):
+    def __init__(self, config=None):
         """
         :param config: storage configuration object
         """
+        self.config = config
 
-    def store(self):
+    def store(self, ouput):
         pass
 
 class FileStorage(StorageAbstract):
     """File storage implementation, stores data to file system
+
+    >>> import ConfigParser
+    >>> config = ConfigParser.RawConfigParser()
+    >>> config.add_section('FileStorage')
+    >>> config.set('FileStorage', 'target', './')
+    >>> config.add_section('server')
+    >>> config.set('server', 'outputurl', 'http://foo/bar/filestorage')
+    >>>
+    >>> store = FileStorage(config = config)
+    >>>
+    >>> class FakeOutput(IOHandler):
+    ...     def get_file(self):
+    ...         tiff_file = open('file.tiff', 'w')
+    ...         tiff_file.close()
+    ...         return 'file.tiff'
+    >>> fake_out = FakeOutput()
+    >>> (type, path, url) = store.store(fake_out)
     """
 
     def __init__(self, config):
         """
         :param config: storage configuration object
         """
+        self.target = config.get('FileStorage', 'target')
+        self.outputurl = config.get('server', 'outputurl')
 
-    def store(self):
-        pass
+    def store(self, output):
+        import shutil, tempfile
+        from urlparse import urljoin
+        file_name = output.get_file()
+        (prefix, suffix) = os.path.splitext(file_name)
+        output_name = tempfile.mkstemp(suffix=suffix, prefix=prefix,
+                                       dir=self.target)[1]
+
+        shutil.copy2(output.get_file(), output_name)
+
+        just_file_name = os.path.basename(output_name)
+        url = urljoin(self.outputurl, just_file_name)
+
+        return (STORE_TYPE.PATH, output_name, url)
+
 
 if __name__ == "__main__":
     import doctest
-    doctest.testmod()
+
+    import tempfile, os
+    from contextlib import contextmanager
+    from path import path
+    @contextmanager
+    def temp_dir():
+        tmp = path(tempfile.mkdtemp())
+        try:
+            yield tmp
+        finally:
+            tmp.rmtree()
+
+    with temp_dir() as tmp:
+        os.chdir(tmp)
+        doctest.testmod()
