@@ -54,7 +54,9 @@ class DescribeProcessTest(unittest.TestCase):
 
     def test_get_request_all_args(self):
         resp = self.client.get('?Request=DescribeProcess&service=wps&identifier=all')
-        assert [desc.identifier for desc in get_describe_result(resp)] == ['ping','hello']
+        identifiers = [desc.identifier for desc in get_describe_result(resp)]
+        assert 'ping' in identifiers
+        assert 'hello' in identifiers
 
     def test_get_request_zero_args(self):
         resp = self.client.get('?Request=DescribeProcess&service=wps')

@@ -8,6 +8,16 @@ class SOURCE_TYPE:
 class STORE_TYPE:
     PATH = 0
 
+
+class FormatAbstract(object):
+    """Input/output format specification
+    """
+    def __init__(self, mimetype, schema=None, encoding=None, validator=None):
+        self.mimetype = mimetype
+        self.schema = schema
+        self.encoding = encoding
+        self.validator = validator
+
 class IOHandler(object):
     """Basic IO class. Provides functions, to accept input data in file,
     memory object and stream object and give them out in all three types
@@ -27,44 +37,46 @@ class IOHandler(object):
     >>> fileobj.close()
     >>>
     >>> # testing file object on input
-    >>> ioh_file.set_file(fileobj.name)
+    >>> ioh_file.file = fileobj.name
     >>> assert ioh_file.source_type == SOURCE_TYPE.FILE
-    >>> file = ioh_file.get_file()
-    >>> stream = ioh_file.get_stream()
+    >>> file = ioh_file.file
+    >>> stream = ioh_file.stream
     >>>
     >>> assert file == fileobj.name
     >>> assert isinstance(stream, RawIOBase)
-    >>> # skipped assert isinstance(ioh_file.get_object(), POSH)
+    >>> # skipped assert isinstance(ioh_file.memory_object, POSH)
     >>>
     >>> # testing stream object on input
     >>> ioh_stream = IOHandler(tempdir=tmp)
     >>> assert ioh_stream.tempdir == tmp
-    >>> ioh_stream.set_stream(FileIO(fileobj.name,'r'))
+    >>> ioh_stream.stream = FileIO(fileobj.name,'r')
     >>> assert ioh_stream.source_type == SOURCE_TYPE.STREAM
-    >>> file = ioh_stream.get_file()
-    >>> stream = ioh_stream.get_stream()
+    >>> file = ioh_stream.file
+    >>> stream = ioh_stream.stream
     >>>
-    >>> assert open(file).read() == ioh_file.get_stream().read()
+    >>> assert open(file).read() == ioh_file.stream.read()
     >>> assert isinstance(stream, RawIOBase)
-    >>> # skipped assert isinstance(ioh_stream.get_object(), POSH)
+    >>> # skipped assert isinstance(ioh_stream.memory_object, POSH)
     >>>
     >>> # testing in memory object object on input
     >>> # skipped ioh_mo = IOHandler(tempdir=tmp)
-    >>> # skipped ioh_mo.set_memory_object(POSH)
+    >>> # skipped ioh_mo.memory_object = POSH
     >>> # skipped assert ioh_mo.source_type == SOURCE_TYPE.MEMORY
-    >>> # skipped file = ioh_mo.get_file()
-    >>> # skipped stream = ioh_mo.get_stream()
-    >>> # skipped posh = ioh_mo.get_memory_object()
+    >>> # skipped file = ioh_mo.file
+    >>> # skipped stream = ioh_mo.stream
+    >>> # skipped posh = ioh_mo.memory_object
     >>> #
-    >>> # skipped assert open(file).read() == ioh_file.get_stream().read()
-    >>> # skipped assert isinstance(ioh_mo.get_stream(), RawIOBase)
-    >>> # skipped assert isinstance(ioh_mo.get_object(), POSH)
+    >>> # skipped assert open(file).read() == ioh_file.stream.read()
+    >>> # skipped assert isinstance(ioh_mo.stream, RawIOBase)
+    >>> # skipped assert isinstance(ioh_mo.memory_object, POSH)
     """
 
-    def __init__(self, tempdir=None):
+    def __init__(self, tempdir=None, data_format=None):
         self.source_type = None
         self.source = None
+        self._tempfile = None
         self.tempdir = tempdir
+        self.data_format = data_format
 
     def set_file(self, filename):
         """Set source as file name"""
@@ -85,12 +97,16 @@ class IOHandler(object):
         if self.source_type == SOURCE_TYPE.FILE:
             return self.source
         elif self.source_type == SOURCE_TYPE.STREAM:
-            import tempfile
-            (opening, stream_file_name) = tempfile.mkstemp(dir=self.tempdir)
-            stream_file = open(stream_file_name, 'w')
-            stream_file.write(self.source.read())
-            stream_file.close()
-            return str(stream_file_name)
+            if self._tempfile:
+                return self._tempfile
+            else:
+                import tempfile
+                (opening, stream_file_name) = tempfile.mkstemp(dir=self.tempdir)
+                stream_file = open(stream_file_name, 'w')
+                stream_file.write(self.source.read())
+                stream_file.close()
+                self._tempfile = str(stream_file_name)
+                return self._tempfile
 
 
     def get_memory_object(self):
@@ -115,29 +131,29 @@ class ComplexInput(IOHandler):
     """Complex input abstract class
 
     >>> ci = ComplexInput()
-    >>> ci.set_validator(1)
-    >>> ci.get_validator()
+    >>> ci.validator = 1
+    >>> ci.validator
     1
     """
 
+    def __init__(self, tempdir=None, data_format=None):
+        IOHandler.__init__(self, tempdir, data_format)
+        self._validator = None
+
     def set_validator(self, validator):
+        """Set validator attribute"""
         self._validator = validator
 
     def get_validator(self):
+        """Get validator attribute"""
         return self._validator
 
     validator = property(fget=get_validator, fset=set_validator)
 
-    def get_file(self):
-        filename = IOHandler.get_file(self)
-        if self.validator:
-            self.validator.validate_file(filename)
-        return filename
-
-
 class ComplexOutput(IOHandler):
     """Complex output abstract class
 
+    >>> # temporary configuration
     >>> import ConfigParser
     >>> config = ConfigParser.RawConfigParser()
     >>> config.add_section('FileStorage')
@@ -145,10 +161,12 @@ class ComplexOutput(IOHandler):
     >>> config.add_section('server')
     >>> config.set('server', 'outputurl', 'http://foo/bar/filestorage')
     >>>
-    >>> co = ComplexOutput()
+    >>> # create temporary file
     >>> tiff_file = open('file.tiff', 'w')
     >>> tiff_file.write("AA")
     >>> tiff_file.close()
+    >>>
+    >>> co = ComplexOutput()
     >>> co.set_file('file.tiff')
     >>> fs = FileStorage(config)
     >>> co.storage = fs
@@ -176,24 +194,6 @@ class ComplexOutput(IOHandler):
         """
         (outtype, storage, url) = self.storage.store(self)
         return url
-
-class ValidatorAbstract(object):
-    """Data validator abstract class
-    """
-
-    __metaclass__ = ABCMeta
-
-
-    def set_input(self):
-        """Perform input validation
-        """
-        pass
-
-    @abstractmethod
-    def validate(self):
-        """Perform input validation
-        """
-        pass
 
 class StorageAbstract(object):
     """Data storage abstract class

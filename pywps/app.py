@@ -12,6 +12,7 @@ from werkzeug.datastructures import MultiDict
 import lxml.etree
 from lxml.builder import ElementMaker
 from pywps._compat import text_type, StringIO
+from pywps import inout
 
 xmlschema_2 = "http://www.w3.org/TR/xmlschema-2/#"
 LITERAL_DATA_TYPES = ['string', 'float', 'integer', 'boolean']
@@ -279,7 +280,7 @@ class LiteralOutput(object):
         )
 
 
-class ComplexOutput(object):
+class ComplexOutput(inout.ComplexOutput):
     """
     :param identifier: The name of this output.
     :param formats: Possible output formats for this output.
@@ -290,20 +291,16 @@ class ComplexOutput(object):
             (e.g., UTF-8).
     """
 
-    def __init__(self, identifier, formats, output_format=None, encoding="UTF-8", schema=None):
+    def __init__(self, identifier, formats, output_format=None,
+                 encoding="UTF-8", schema=None):
+        inout.ComplexOutput.__init__(self)
+
         self.identifier = identifier
         self.formats = formats
-        self.value = None
         self.as_reference = False
         self.set_outputformat(output_format)
         self.set_encoding(encoding)
         self.set_schema(schema)
-
-    def getvalue(self):
-        """Get value of this output
-        """
-
-        return str(self.value)
 
     def get_outputformat(self):
         """Get output format
@@ -383,7 +380,7 @@ class ComplexOutput(object):
 
     def _execute_xml_data(self):
         return WPS.ComplexData(
-                self.getvalue(),
+                self.get_stream().read(),
                 mimeType=self.get_outputformat(),
                 encoding=self.get_encoding(),
                 schema=self.get_schema()
