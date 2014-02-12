@@ -48,6 +48,7 @@ def assert_response_success(resp):
 
 
 class ExecuteTest(unittest.TestCase):
+    """Test for Exeucte request KVP request"""
 
     def test_missing_process_error(self):
         client = client_for(Service(processes=[create_ultimate_question()]))
@@ -82,8 +83,9 @@ class ExecuteTest(unittest.TestCase):
         assert_response_success(resp)
         assert get_output(resp.xml) == {'message': "Hello foo!"}
 
-
 class ExecuteXmlParserTest(unittest.TestCase):
+    """Tests for Execute request XML Parser
+    """
 
     def test_empty(self):
         request_doc = WPS.Execute(OWS.Identifier('foo'))

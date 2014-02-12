@@ -8,21 +8,21 @@
 FORMATS = {
     """List of known mimetypes
     """
-    'GEOJSON': 'application/geojson',
-    'JSON': 'application/json',
-    'SHP': 'application/x-zipped-shp',
-    'GML': 'application/gml+xml',
-    'GEOTIFF': 'image/tiff; subtype=geotiff',
-    'WCS': 'application/xogc-wcs',
-    'WCS100': 'application/x-ogc-wcs; version=1.0.0',
-    'WCS110': 'application/x-ogc-wcs; version=1.1.0',
-    'WCS20': 'application/x-ogc-wcs; version=2.0',
-    'WFS': 'application/x-ogc-wfs',
-    'WFS100': 'application/x-ogc-wfs; version=1.0.0',
-    'WFS110': 'application/x-ogc-wfs; version=1.1.0',
-    'WFS20': 'application/x-ogc-wfs; version=2.0',
-    'WMS': 'application/x-ogc-wms',
-    'WMS130': 'application/x-ogc-wms; version=1.3.0',
-    'WMS110': 'application/x-ogc-wms; version=1.1.0',
-    'WMS100': 'application/x-ogc-wms; version=1.0.0'
+    'GEOJSON': ['application/geojson', '.geojson'],
+    'JSON': ['application/json', '.json'],
+    'SHP': ['application/x-zipped-shp', '.zip'],
+    'GML': ['application/gml+xml', '.gml'],
+    'GEOTIFF': ['image/tiff; subtype=geotiff', '.tiff'],
+    'WCS': ['application/xogc-wcs', '.xml'],
+    'WCS100': ['application/x-ogc-wcs; version=1.0.0', '.xml'],
+    'WCS110': ['application/x-ogc-wcs; version=1.1.0', '.xml'],
+    'WCS20': ['application/x-ogc-wcs; version=2.0', '.xml'],
+    'WFS': ['application/x-ogc-wfs', '.xml'],
+    'WFS100': ['application/x-ogc-wfs; version=1.0.0', '.xml'],
+    'WFS110': ['application/x-ogc-wfs; version=1.1.0', '.xml'],
+    'WFS20': ['application/x-ogc-wfs; version=2.0', '.xml'],
+    'WMS': ['application/x-ogc-wms', '.xml'],
+    'WMS130': ['application/x-ogc-wms; version=1.3.0', '.xml'],
+    'WMS110': ['application/x-ogc-wms; version=1.1.0', '.xml'],
+    'WMS100': ['application/x-ogc-wms; version=1.0.0','.xml']
 }

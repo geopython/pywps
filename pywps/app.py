@@ -297,52 +297,63 @@ class ComplexOutput(inout.ComplexOutput):
 
         self.identifier = identifier
         self.formats = formats
+
+        self._schema = None
+        self._output_format = None
+        self._encoding = None
+
         self.as_reference = False
         self.set_outputformat(output_format)
         self.set_encoding(encoding)
         self.set_schema(schema)
 
-    def get_outputformat(self):
+    @property
+    def output_format(self):
         """Get output format
         :rtype: String
         """
 
-        if self.output_format:
-            return self.output_format
+        if self._output_format:
+            return self._output_format
         else:
             return ''
 
-    def set_outputformat(self, output_format):
+    @output_format.setter
+    def output_format(self, output_format):
         """Set output format
         """
-        self.output_format = output_format
+        self._output_format = output_format
 
-    def get_encoding(self ):
+    @property
+    def encoding(self ):
         """Get output encoding
         :rtype: String
         """
 
-        if self.encoding:
-            return self.encoding
+        if self._encoding:
+            return self._encoding
         else:
             return ''
 
-    def set_encoding(self, encoding):
+    @encoding.setter
+    def encoding(self, encoding):
         """Set output encoding
         """
-        self.encoding = encoding
+        self._encoding = encoding
 
-    def get_schema(self):
+    @property
+    def schema(self):
         """Get output schema
         :rtype: String
         """
 
-        return ""
+        return self._schema
 
-    def set_schema(self, schema):
+    @schema.setter
+    def schema(self, schema):
         """Set output encoding
         """
-        self.schema = schema
+        self._schema = schema
 
     def describe_xml(self):
         default_format_el = self.formats[0].describe_xml()
@@ -381,9 +392,9 @@ class ComplexOutput(inout.ComplexOutput):
     def _execute_xml_data(self):
         return WPS.ComplexData(
                 self.get_stream().read(),
-                mimeType=self.get_outputformat(),
-                encoding=self.get_encoding(),
-                schema=self.get_schema()
+                mimeType=self.output_format,
+                encoding=self.encoding,
+                schema=self.schema
         )
 
 class BoundingBoxOutput(object):
