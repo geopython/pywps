@@ -4,10 +4,10 @@
 # based on Web Processing Service Best Practices Discussion Paper, OGC 12-029
 # http://opengeospatial.org/standards/wps
 
+"""List of known mimetypes
+"""
 
 FORMATS = {
-    """List of known mimetypes
-    """
     'GEOJSON': ['application/geojson', '.geojson'],
     'JSON': ['application/json', '.json'],
     'SHP': ['application/x-zipped-shp', '.zip'],

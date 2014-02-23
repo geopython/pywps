@@ -387,7 +387,7 @@ class ComplexOutput(inout.ComplexOutput):
     def _execute_xml_reference(self):
         """Return Reference node
         """
-        pass
+        (store_type, path, url) = self.storage.store(self)
 
     def _execute_xml_data(self):
         return WPS.ComplexData(
