@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
-from formats import FORMATS
+from pywps.formats import FORMATS
 import os
 
 class MODE(object):
@@ -90,7 +90,13 @@ def validategml(data_input, mode):
     if mode >= MODE.VERYSTRICT:
 
         from lxml import etree
-        from urllib2 import urlopen
+
+        from pywps._compat import PY2
+        if PY2:
+            from urllib2 import urlopen
+        else:
+            from urllib.request import urlopen
+
         schema_url = data_input.data_format.schema
         gmlschema_doc = etree.parse(urlopen(schema_url))
         gmlschema = etree.XMLSchema(gmlschema_doc)

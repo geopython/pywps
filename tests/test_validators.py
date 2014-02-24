@@ -69,3 +69,11 @@ class ValidateTest(unittest.TestCase):
         fake_input = get_input('point.xsd', 'point.xsd', FORMATS['GML'][0])
 
         self.assertFalse(validategml(fake_input, MODE.SIMPLE), 'SIMPLE validation invalid')
+
+def load_tests(loader=None, tests=None, pattern=None):
+    if not loader:
+        loader = unittest.TestLoader()
+    suite_list = [
+        loader.loadTestsFromTestCase(ValidateTest)
+    ]
+    return unittest.TestSuite(suite_list)
