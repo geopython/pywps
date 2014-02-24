@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
 from formats import FORMATS
+import os
 
 class MODE(object):
     NONE = 0
@@ -93,7 +94,7 @@ def validategml(data_input, mode):
         schema_url = data_input.data_format.schema
         gmlschema_doc = etree.parse(urlopen(schema_url))
         gmlschema = etree.XMLSchema(gmlschema_doc)
-        return gmlschema.validate(etree.parse(open(data_input.file)))
+        return gmlschema.validate(etree.parse(data_input.stream))
 
     return passed
 
@@ -117,7 +118,6 @@ def validategeojson(data_input, mode):
 
     if mode >= MODE.NONE:
         passed = True
-    import sys
 
     if mode >= MODE.SIMPLE:
 
@@ -143,15 +143,49 @@ def validategeojson(data_input, mode):
 
     if mode >= MODE.VERYSTRICT:
 
-        from lxml import etree
-        from urllib2 import urlopen
-        schema_url = data_input.data_format.schema
-        gmlschema_doc = etree.parse(urlopen(schema_url))
-        gmlschema = etree.XMLSchema(gmlschema_doc)
-        return gmlschema.validate(etree.parse(open(data_input.file)))
+        import jsonschema, json
+
+        # this code comes from
+        # https://github.com/om-henners/GeoJSON_Validation/blob/master/geojsonvalidation/geojson_validation.py
+
+        # TODO: more robust way, how to define schemas
+        _schema_home = os.path.join(
+            os.path.abspath(
+                os.path.dirname(__file__)
+            ), os.path.pardir,
+            "schemas",
+            "geojson"
+        )
+
+        geojson_base = json.load(
+            open(
+                os.path.join(
+                    _schema_home,
+                    "geojson.json"
+                )
+            )
+        )
+
+        cached_json = {
+            "http://json-schema.org/geojson/crs.json": json.load(open(os.path.join(_schema_home, "crs.json"))),
+            "http://json-schema.org/geojson/bbox.json": json.load(open(os.path.join(_schema_home, "bbox.json"))),
+            "http://json-schema.org/geojson/geometry.json": json.load(open(os.path.join(_schema_home, "geometry.json"))),
+        }
+
+        resolver = jsonschema.RefResolver(
+            "http://json-schema.org/geojson/geojson.json",
+            geojson_base,
+            store=cached_json
+        )
+
+        validator = jsonschema.Draft4Validator(geojson_base, resolver=resolver)
+        try:
+            validator.validate(json.loads(data_input.stream.read()))
+            passed = True
+        except jsonschema.ValidationError:
+            passed = False
 
     return passed
-
 
 
 if __name__ == "__main__":

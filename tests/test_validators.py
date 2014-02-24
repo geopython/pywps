@@ -20,6 +20,7 @@ def get_input(name, schema, mimetype):
             'data', schema)
 
     fake_input = FakeInput()
+    fake_input.stream = open(fake_input.file)
     fake_input.data_format = data_format()
     fake_input.data_format.schema = 'file://' + fake_input.data_format.file
     fake_input.data_format.mimetype = mimetype
@@ -58,11 +59,10 @@ class ValidateTest(unittest.TestCase):
         """
         geojson_input = get_input('json/point.geojson', 'json/schema/geojson.json',
                                   FORMATS['GEOJSON'][0])
-        print "TADY DELAM ###############################xx"
-        self.assertTrue(validategml(geojson_input, MODE.NONE), 'NONE validation')
-        self.assertTrue(validategml(geojson_input, MODE.SIMPLE), 'SIMPLE validation')
-        self.assertTrue(validategml(geojson_input, MODE.STRICT), 'STRICT validation')
-        #self.assertTrue(validategml(geojson_input, MODE.VERYSTRICT), 'VERYSTRICT validation')
+        self.assertTrue(validategeojson(geojson_input, MODE.NONE), 'NONE validation')
+        self.assertTrue(validategeojson(geojson_input, MODE.SIMPLE), 'SIMPLE validation')
+        self.assertTrue(validategeojson(geojson_input, MODE.STRICT), 'STRICT validation')
+        self.assertTrue(validategeojson(geojson_input, MODE.VERYSTRICT), 'VERYSTRICT validation')
 
     def test_fail_validator(self):
 
