@@ -1,23 +1,31 @@
 import unittest
 import lxml.etree
-from pywps import Service, Process, WPSResponse
+from pywps import Service, Process, WPSResponse, LiteralOutput, LiteralInput
 from pywps.app import E, WPS, OWS, NAMESPACES, get_input_from_xml, xpath_ns
 from pywps._compat import text_type
 from tests.common import client_for
 
 
 def create_ultimate_question():
+    def handler(request, response):
+        response.outputs['outvalue'].setvalue('42')
+        return response
+
     return Process(identifier='ultimate_question',
-                   handler=lambda request: WPSResponse({'outvalue': '42'}))
+                   outputs=[LiteralOutput('outvalue', data_type='string')],
+                   handler=handler)
 
 
 def create_greeter():
-    def greeter(request):
+    def greeter(request, response):
         name = request.inputs['name']
         assert type(name) is text_type
-        return WPSResponse({'message': "Hello %s!" % name})
+        response.outputs['message'].setvalue("Hello %s!" % name)
+        return response
 
-    return Process(handler=greeter)
+    return Process(handler=greeter,
+                   inputs=[LiteralInput('name', data_type='string')],
+                   outputs=[LiteralOutput('message', data_type='string')])
 
 
 def get_output(doc):
@@ -40,6 +48,7 @@ def assert_response_success(resp):
 
 
 class ExecuteTest(unittest.TestCase):
+    """Test for Exeucte request KVP request"""
 
     def test_missing_process_error(self):
         client = client_for(Service(processes=[create_ultimate_question()]))
@@ -74,8 +83,9 @@ class ExecuteTest(unittest.TestCase):
         assert_response_success(resp)
         assert get_output(resp.xml) == {'message': "Hello foo!"}
 
-
 class ExecuteXmlParserTest(unittest.TestCase):
+    """Tests for Execute request XML Parser
+    """
 
     def test_empty(self):
         request_doc = WPS.Execute(OWS.Identifier('foo'))

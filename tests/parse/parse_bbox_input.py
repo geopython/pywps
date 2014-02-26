@@ -12,8 +12,6 @@ sys.path.append(pywpsPath)
 
 import unittest
 
-from pywps.request.execute.bbox import BoundingBoxInput
-
 class ParseBBoxInputTestCase(unittest.TestCase):
 
     def setUp(self):

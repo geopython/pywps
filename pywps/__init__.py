@@ -27,7 +27,9 @@ from pywps.app import (
     WPSRequest,
     WPSResponse,
     LiteralInput,
+    LiteralOutput,
     ComplexInput,
+    ComplexOutput,
     Format,
     FileReference,
 )
