@@ -3,6 +3,14 @@ from pywps.formats import FORMATS
 import os
 
 class MODE(object):
+    """Validation modes
+
+    NONE: always true
+    SIMPLE: mimeType check
+    STRICT: can be opened using standard library (e.g. GDAL)
+    VERYSTRICT: Schema passes
+    """
+
     NONE = 0
     SIMPLE = 1
     STRICT = 2
@@ -149,40 +157,27 @@ def validategeojson(data_input, mode):
 
     if mode >= MODE.VERYSTRICT:
 
-        import jsonschema, json
+        import jsonschema
+        import json
 
         # this code comes from
         # https://github.com/om-henners/GeoJSON_Validation/blob/master/geojsonvalidation/geojson_validation.py
-
-        # TODO: more robust way, how to define schemas
-        _schema_home = os.path.join(
-            os.path.abspath(
-                os.path.dirname(__file__)
-            ), os.path.pardir,
-            "schemas",
-            "geojson"
-        )
-
-        geojson_base = json.load(
-            open(
-                os.path.join(
-                    _schema_home,
-                    "geojson.json"
-                )
-            )
-        )
+        schema_home = os.path.join(_get_schemas_home(), "geojson")
+        base_schema = os.path.join(schema_home, "geojson.json")
+        geojson_base = json.load(open(base_schema))
 
         cached_json = {
-            "http://json-schema.org/geojson/crs.json": json.load(open(os.path.join(_schema_home, "crs.json"))),
-            "http://json-schema.org/geojson/bbox.json": json.load(open(os.path.join(_schema_home, "bbox.json"))),
-            "http://json-schema.org/geojson/geometry.json": json.load(open(os.path.join(_schema_home, "geometry.json"))),
+            "http://json-schema.org/geojson/crs.json":
+            json.load(open(os.path.join(schema_home, "crs.json"))),
+            "http://json-schema.org/geojson/bbox.json":
+            json.load(open(os.path.join(schema_home, "bbox.json"))),
+            "http://json-schema.org/geojson/geometry.json":
+            json.load(open(os.path.join(schema_home, "geometry.json")))
         }
 
         resolver = jsonschema.RefResolver(
             "http://json-schema.org/geojson/geojson.json",
-            geojson_base,
-            store=cached_json
-        )
+            geojson_base, store=cached_json)
 
         validator = jsonschema.Draft4Validator(geojson_base, resolver=resolver)
         try:
@@ -192,6 +187,16 @@ def validategeojson(data_input, mode):
             passed = False
 
     return passed
+
+
+def _get_schemas_home():
+    """Get path to schemas directory
+    """
+    return os.path.join(
+        os.path.abspath(
+            os.path.dirname(__file__)
+        ),
+        "schemas")
 
 
 if __name__ == "__main__":

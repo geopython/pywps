@@ -8,6 +8,12 @@ New version of PyWPS, written from scratch.
   [![Build Status](https://travis-ci.org/jachym/pywps-4.png)](https://travis-ci.org/jachym/pywps-4)
 * [Demo application](http://pywps.grep.ro/)
 
+License
+=======
+
+Short version: [MIT](https://en.wikipedia.org/wiki/MIT_License)
+Long version: see [LICENSE.txt](LICENSE.txt) file
+
 
 Dependencies
 ============
