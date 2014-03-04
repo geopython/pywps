@@ -4,6 +4,7 @@ class SOURCE_TYPE:
     MEMORY = 0
     FILE = 1
     STREAM = 2
+    DATA = 3
 
 class STORE_TYPE:
     PATH = 0
@@ -92,22 +93,34 @@ class IOHandler(object):
         self.source_type = SOURCE_TYPE.STREAM
         self.source = stream
 
+    def set_data(self, data):
+        """Set source as simple datatype e.g. string, number"""
+        self.source_type = SOURCE_TYPE.DATA
+        self.source = data
+
     def get_file(self):
         """Get source as file name"""
         if self.source_type == SOURCE_TYPE.FILE:
             return self.source
-        elif self.source_type == SOURCE_TYPE.STREAM:
+
+        elif self.source_type == SOURCE_TYPE.STREAM or\
+             self.source_type == SOURCE_TYPE.DATA:
+
             if self._tempfile:
                 return self._tempfile
             else:
                 import tempfile
                 (opening, stream_file_name) = tempfile.mkstemp(dir=self.tempdir)
                 stream_file = open(stream_file_name, 'w')
-                stream_file.write(self.source.read())
+
+                if self.source_type == SOURCE_TYPE.STREAM:
+                    stream_file.write(self.source.read())
+                else:
+                    stream_file.write(self.source)
+
                 stream_file.close()
                 self._tempfile = str(stream_file_name)
                 return self._tempfile
-
 
     def get_memory_object(self):
         """Get source as memory object"""
@@ -120,11 +133,24 @@ class IOHandler(object):
             return FileIO(self.source, mode='r', closefd=True)
         elif self.source_type == SOURCE_TYPE.STREAM:
             return self.source
+        elif self.source_type == SOURCE_TYPE.DATA:
+            from io import StringIO
+            return StringIO(unicode(self.source))
+
+    def get_data(self):
+        """Get source as simple data object"""
+        if self.source_type == SOURCE_TYPE.FILE:
+            return open(self.source, mode='r').read()
+        elif self.source_type == SOURCE_TYPE.STREAM:
+            return self.source.read()
+        elif self.source_type == SOURCE_TYPE.DATA:
+            return self.source
 
     # Properties
     file = property(fget=get_file, fset=set_file)
     memory_object = property(fget=get_memory_object, fset=set_memory_object)
     stream = property(fget=get_stream, fset=set_stream)
+    data = property(fget=get_data, fset=set_data)
 
 
 class ComplexInput(IOHandler):
