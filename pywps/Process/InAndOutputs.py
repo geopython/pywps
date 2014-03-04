@@ -3,20 +3,20 @@ Inputs and outputs of OGC WPS Processes
 """
 # Author:    Jachym Cepicky
 #            http://les-ejk.cz
-# Lince: 
-# 
+# Lince:
+#
 # Web Processing Service implementation
 # Copyright (C) 2006 Jachym Cepicky
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -36,10 +36,10 @@ class Input:
 
     :param identifier: input identifier
     :param title: input title
-    :param abstract: input description. 
-    :param metadata: List of metadata references. 
-    :param minOccurs: minimum number of occurrences. 
-    :param maxOccurs: maximum number of occurrences. 
+    :param abstract: input description.
+    :param metadata: List of metadata references.
+    :param minOccurs: minimum number of occurrences.
+    :param maxOccurs: maximum number of occurrences.
     :param type: one of "LiteralValue", "ComplexValue" or "BoundingBoxValue"
 
     .. attribute :: identifier
@@ -50,15 +50,15 @@ class Input:
 
         input title
 
-    .. attribute :: abstract 
+    .. attribute :: abstract
 
         input abstract
 
-    .. attribute :: metadata 
+    .. attribute :: metadata
 
         input metadata reference
 
-    .. attribute :: minOccurs 
+    .. attribute :: minOccurs
 
         minimum occurense
 
@@ -75,9 +75,9 @@ class Input:
         actual value of this input
 
     .. attribute :: ms
-        
+
         :mod:`magic` cookie
-        
+
     """
 
     identifier = None
@@ -105,10 +105,10 @@ class Input:
         self.value = None
 
         return
-    
+
     def setValue(self,input):
         """Control in some way the input value from the client
-        
+
         :param input: input value, parsed in :mod:`pywps.Parser.Execute`
         """
 
@@ -140,14 +140,14 @@ class Input:
         return self.value
 
 class LiteralInput(Input):
-    """Literal input type of input. 
+    """Literal input type of input.
 
     :param identifier: input identifier
     :param title: input title
     :param abstract: input description. Default: None
     :param uoms: List of string value units
-    :param minOccurs: minimum number of occurrences. 
-    :param maxOccurs: maximum number of occurrences. 
+    :param minOccurs: minimum number of occurrences.
+    :param maxOccurs: maximum number of occurrences.
     :param allowedValues:  List of strings or lists of allowed values,
                 which can be used with this input. You can set interval
                 using list with two items, like::
@@ -181,7 +181,7 @@ class LiteralInput(Input):
     .. attribute:: values
 
         allowed values
-    
+
     .. attribute:: default
 
         default value
@@ -191,7 +191,7 @@ class LiteralInput(Input):
         .. note:: this attribute is not used
 
     .. attribute:: uom
-        
+
         units
     """
 
@@ -209,7 +209,7 @@ class LiteralInput(Input):
         """Class constructor"""
         Input.__init__(self,identifier,title,abstract=abstract,
                 metadata=metadata,minOccurs=minOccurs,maxOccurs=maxOccurs,type="LiteralValue")
-        
+
         self.dataType = dataType
         self.uoms = uoms
         self.restrictedCharacters = ['\\',"#",";", "&","!"]
@@ -219,12 +219,12 @@ class LiteralInput(Input):
             self.values = values
         self.default = default
         self.spacing = spacing
-        self.uom = None 
+        self.uom = None
         return
 
     def setValue(self, input):
         """Set input value to this input
-        
+
         :param input: input parsed by parsers
         :return: None or Error message
         """
@@ -255,14 +255,14 @@ class LiteralInput(Input):
 
         :param value: value to be controled
         """
-        
+
          # ugly characters, only if string
         if  type(value)!= types.BooleanType:
             for char in self.restrictedCharacters:
                 if value.find(char) > -1:
                     raise Exceptions.InvalidParameterValue(value)
-        
-        # type 
+
+        # type
         try:
             if self.dataType == types.FloatType:
                 value = float(value)
@@ -279,7 +279,7 @@ class LiteralInput(Input):
         # value list
         if "*" in self.values:
             return value
-        
+
         for allowed in self.values:
             if type(allowed) == types.ListType:
                 if allowed[0] <= value <= allowed[-1]:
@@ -288,11 +288,11 @@ class LiteralInput(Input):
                             return value
                     else:
                         return value
-                    
+
             else:
                 if str(value) == str(allowed):
                     return value
-            
+
         raise Exceptions.InvalidParameterValue(value)
 
 class ComplexInput(Input):
@@ -300,10 +300,10 @@ class ComplexInput(Input):
 
     :param identifier: input identifier
     :param title: input title
-    :param abstract: input description. 
-    :param metadata: List of metadata references. 
-    :param minOccurs: minimum number of occurencies. 
-    :param maxOccurs: maximum number of occurencies. 
+    :param abstract: input description.
+    :param metadata: List of metadata references.
+    :param minOccurs: minimum number of occurencies.
+    :param maxOccurs: maximum number of occurencies.
     :param formats: List of objects according to table 23 (page 25). E.g.
 
         ::
@@ -318,18 +318,18 @@ class ComplexInput(Input):
             ]
 
     :param maxmegabites: Maximum input file size. Can not be bigger, as
-            `maxfilesize` defined in global configuration file. 
-    
-    .. attribute:: maxFileSize 
-    
+            `maxfilesize` defined in global configuration file.
+
+    .. attribute:: maxFileSize
+
         maximal allowed file size
-        
+
     .. attribute:: formats
-    
+
         list of supported formats
-        
+
     .. attribute:: format
-    
+
         the final format
 
     .. attribute:: value
@@ -385,20 +385,20 @@ class ComplexInput(Input):
             input["asReference"] = True
 
         # download data
-        
-        if input.has_key("asReference") and input["asReference"] == True:  
+
+        if input.has_key("asReference") and input["asReference"] == True:
             self.downloadData(input["value"])
         else:
             self.storeData(input["value"])
         return
-    
+
     def setMimeType(self,input):
-        """Sets the MimeType from input before going to setValue() this allows 
+        """Sets the MimeType from input before going to setValue() this allows
         for some self.format to be filled febore base64 decoding. URL inputs don't have an input[], since they are just URLs.
         There mimeType was implemented to URL references, basically it sets a self.format based on the input provided by the user e.g:http://localhost/wps.cgi?request=Execute&service=wps&version=1.0.0&identifier=geotiff2png&datainputs=[input=@xlink:href=http://rsg.pml.ac.uk/wps/testdata/elev_srtm_30m.tif@method=POST@mimeType=text%2Fxml]
         this example shall raise an exception"""
-        
-        #NOTE: setting mimeType in URL and direct input should be the same, this if structure is here 
+
+        #NOTE: setting mimeType in URL and direct input should be the same, this if structure is here
         #for historical reasons and allows to differencite between the 2 types or requests if in the future
         # changes need to be done e.g setting mimetypes from HTTP stream etc
         keys=["mimetype","schema","encoding"]
@@ -416,16 +416,16 @@ class ComplexInput(Input):
                 else:
                     logging.debug("input define by user didnt contain %s" % key)
                     self.format[key]=None
-        
-        return  
+
+        return
 
     def storeData(self,data):
         """Store data from given file. Not bigger, then
         :attr:`maxFileSize`
-        
+
         :param data: the data, which should be stored
         :type data: string
-        """  
+        """
         import tempfile
         from os import curdir, rename
 
@@ -434,16 +434,16 @@ class ComplexInput(Input):
         try:
             fout=open(outputName,'wb')
         except IOError, what:
-            self.onProblem("NoApplicableCode","Could not open file for writing") 
+            self.onProblem("NoApplicableCode","Could not open file for writing")
         # NOTE: the filesize should be already checked in pywps/Post.py,
         # while getting the input XML file
         fout.write(data.encode("utf-8","utf-8"))
         fout.close()
-        
+
         self.checkMimeTypeIn(fout.name)
-        
+
         #self.format already set
-        if  (self.format["mimetype"].lower().split("/")[0] != "text" and self.format["mimetype"].lower() != "application/xml"): 
+        if  (self.format["mimetype"].lower().split("/")[0] != "text" and self.format["mimetype"].lower() != "application/xml"):
                # convert it to binary using base64
                #Python problem: The file object has to be closed after base64.decode, so that ALL content is flushed, otherwise the binary files are corrupted
                #This happens if the base64 has some 'trash' before and after the string. Better to use close() to be certain
@@ -456,17 +456,17 @@ class ComplexInput(Input):
                    f2.close()
                except:
                    self.onProblem("NoApplicableCode", "Could not convert text input to binary using base64 encoding.")
-               finally:  
+               finally:
                     os.remove(fout.name+".base64")
         #Checking what is actu
         try:
             mimeTypeMagic=self.ms.file(fileName).split(';')[0]
             if self.format["mimetype"]!=mimeTypeMagic:
-                logging.debug("ComplexDataInput defines mimeType %s (default set) but libMagic detects %s" % (str(self.format["mimetype"]),mimeTypeMagic))            
+                logging.debug("ComplexDataInput defines mimeType %s (default set) but libMagic detects %s" % (str(self.format["mimetype"]),mimeTypeMagic))
         except:
             pass
-        
-        
+
+
         resp = self._setValueWithOccurence(self.value, outputName)
         if resp:
             return resp
@@ -474,7 +474,7 @@ class ComplexInput(Input):
 
     def getValue(self, asFile=False):
         """Get this value
-        
+
         :param asFile: return the value not as file name (default), but as  file object
         :return: :attr:`value`
         :rtype: string or file
@@ -519,25 +519,25 @@ class ComplexInput(Input):
                     "Remote server says: [%s] not found" % (url))
 
             # everything is here, break
-            if not chunk: 
+            if not chunk:
                 break
             fout.write (chunk)
 
             # TOO BIG! STOP THIS
-            if (self.maxFileSize!=0 and (size > self.maxFileSize)): 
+            if (self.maxFileSize!=0 and (size > self.maxFileSize)):
                 self.onProblem("FileSizeExceeded","Maximum file size is "+
                         str(self.maxFileSize/1024/1024)+" MB for input "+
                         url)
         fout.close()
-        
+
         self.checkMimeTypeIn(fout.name)
         resp = self._setValueWithOccurence(self.value, outputName)
         if resp:
             return resp
         return
-    
+
     def onProblem(self,what, why):
-        """Empty method, called, when there was any problem with the input. 
+        """Empty method, called, when there was any problem with the input.
         This method is replaced in Execute.consolidateInputs, basically input.onProblem = self.onInputProblem
         therefore Exception raise is implemented in Execute.onInputProblem()
         :param what: Message with error description
@@ -546,20 +546,20 @@ class ComplexInput(Input):
         pass
 
     def checkMimeTypeIn(self,fileName):
-        
+
         """Check, if the given mimetype is in self.formats
-        checkMimeType is done after process.format is set by parsing user's content. 
+        checkMimeType is done after process.format is set by parsing user's content.
         1) if process.format[mimetype] has content it will be check in formats
         2) if process.format[mimetype]-->None assume process.format as first in list
             a) no exceptions should be risen
-        3) If formats dict is empty then there is nothing that can be done, and self.format=None    
+        3) If formats dict is empty then there is nothing that can be done, and self.format=None
         4) As request by wps-grass-process, in case of missing information even schema is passed. This is necessary
         for vector processes and to differenciate between text/xml from GML and KML
         :param fileName:
         :param mimeType:
         """
-         #Note: magic output something like: 'image/tiff; charset=binary' we only need the typeContent 
-        if (self.format["mimetype"] is None) or (self.format["mimetype"]==""): 
+         #Note: magic output something like: 'image/tiff; charset=binary' we only need the typeContent
+        if (self.format["mimetype"] is None) or (self.format["mimetype"]==""):
             #No mimeType let's set it from default
             logging.debug("Missing ComplexDataInput mimeType in: %s, adopting default mimeType (first in formats list)" % self.identifier)
             self.format["mimetype"]=self.formats[0]["mimeType"]
@@ -575,11 +575,11 @@ class ComplexInput(Input):
             #--> new funcion aget base64 change
             #mimeTypeMagic=self.ms.file(fileName).split(';')[0]
             #if self.format["mimetype"]!=mimeTypeMagic:
-            #    logging.debug("ComplexDataInput defines mimeType %s (default set) but libMagic detects %s" % (str(self.format["mimetype"]),mimeTypeMagic))            
+            #    logging.debug("ComplexDataInput defines mimeType %s (default set) but libMagic detects %s" % (str(self.format["mimetype"]),mimeTypeMagic))
         else:
-            #Checking is mimeType is in the acceptable formats        
+            #Checking is mimeType is in the acceptable formats
             if self.format["mimetype"] not in [dic["mimeType"] for dic in self.formats]:
-                #ATTENTION: False positive if dictionary is not set in process/empty 
+                #ATTENTION: False positive if dictionary is not set in process/empty
                 if (len(self.formats)==1) and (type(self.formats[0]["mimeType"])==types.NoneType):
                     logging.debug("Input %s without mimetype list, cant check if ComplexDataInput mimtype is correct or not" % self.identifier)
                 else:
@@ -589,14 +589,14 @@ class ComplexInput(Input):
 
     def onMaxFileSizeExceeded(self, what):
         """Empty method, called, when there was any problem with the input.
-        
+
         :param what: Error code
         """
         pass
 
     def onNotFound(self,what):
         """Empty method, called, when there was any problem with the input.
-        
+
         :param what: Error code
         """
         pass
@@ -604,7 +604,7 @@ class ComplexInput(Input):
     def _isURL(self,text):
         """Check wheather given text is url or not
         """
-        
+
         try:
             (urltype, opaquestring) = urllib.splittype(text)
 
@@ -621,26 +621,26 @@ class BoundingBoxInput(Input):
 
     :param identifier: input identifier
     :param title: input title
-    :param abstract: input description. 
-    :param metadata: List of metadata references. 
-    :param minOccurs: minimum number of occurrences. 
-    :param maxOccurs: maximum number of occurrences. 
+    :param abstract: input description.
+    :param metadata: List of metadata references.
+    :param minOccurs: minimum number of occurrences.
+    :param maxOccurs: maximum number of occurrences.
     :param crss: List of strings supported coordinate systems.
 
     .. attribute:: crss
-        
+
         Supported coordinate systems
 
     .. attribute:: dimensions
-        
+
         Bbox dimensions
 
     .. attribute:: crs
-        
+
         Used coordinate system
 
     .. attribute:: coords
-        
+
         List of list of coordinates in form::
 
             (
@@ -654,7 +654,7 @@ class BoundingBoxInput(Input):
         So, most common case::
 
             ((minx,miny),(maxx, maxy))
-        
+
     """
 
     crss = None
@@ -668,7 +668,7 @@ class BoundingBoxInput(Input):
         """Class constructor"""
         Input.__init__(self,identifier,title,abstract=abstract,
                 metadata=metadata,minOccurs=minOccurs,maxOccurs=maxOccurs,type="BoundingBoxValue")
-        
+
         self.crss = crss
         self.dimensions = dimensions
         self.crs = self.crss[0]
@@ -679,7 +679,7 @@ class BoundingBoxInput(Input):
         """Set value of this input
 
         :param input: bounding box parsed input in format::
-            
+
                 {identifier:"id",dimensions:2, value:(minx,miny,maxx,maxy),
                 crs:"epsg4326"}
 
@@ -706,20 +706,21 @@ class BoundingBoxInput(Input):
 
 
         # convert possible string value to array
-        if type(input["value"]) == type(""):
+        if type(input["value"]) == type("") or\
+           type(input['value']) == type(u""):
             input["value"] = input["value"].split(",")
 
         # set dimensions
         if input.has_key("crs"):
             value.crs = input["crs"]
-            
+
         # set dimensions
         if input.has_key("dimensions"):
             value.dimensions = int(input["dimensions"])
         else:
             # from the KVP
             coordsLen = len(input["value"])
-                
+
             # last one is crs, take it
             if len(input["value"])%2 == 1:
                 coordsLen = coordsLen-1
@@ -744,11 +745,11 @@ class BoundingBoxInput(Input):
 
     def getValue(self):
         """Get this value
-        
+
         :returns: bounding box in format::
-            
+
                 (minx, miny, maxx, maxy)
-                
+
         """
         return self.value
 
@@ -757,8 +758,8 @@ class Output:
 
     :param identifier: input identifier
     :param title: input title
-    :param abstract: input description. 
-    :param metadata: List of metadata references. 
+    :param abstract: input description.
+    :param metadata: List of metadata references.
     :param type: one of "LiteralValue", "ComplexValue"  or "BoundingBoxValue"
     :param asReference:  whether this output will be given back as
             reference or as file
@@ -777,16 +778,16 @@ class Output:
         "ComplexValue", "LiteralValue", "BoundingBoxValue"
 
     .. attribute:: asReference
-    
+
         this output should be formated as reference (URL) or give the file
-        content back 
+        content back
 
     .. attribute:: value
 
         output value
-        
+
     .. attribute:: ms
-    
+
         mime cookie
 
     """
@@ -831,12 +832,12 @@ class LiteralOutput(Output):
     """
 
     def __init__(self,identifier,title,abstract=None,
-                metadata=[], uoms=(), dataType = types.StringType, 
+                metadata=[], uoms=(), dataType = types.StringType,
                 default=None,asReference=False):
         """Class Constructor"""
         Output.__init__(self,identifier,title,abstract=abstract,
                 metadata=metadata,type="LiteralValue",asReference=asReference)
-        
+
         self.uoms = uoms
         if len(self.uoms) > 0:
             self.uom = self.uoms[0]
@@ -848,7 +849,7 @@ class LiteralOutput(Output):
 
 class ComplexOutput(Output):
     """Complex value output
-    
+
     :param identifier: output identifier
     :param title: output title
     :param metadata: List of metadata references
@@ -876,7 +877,7 @@ class ComplexOutput(Output):
     .. attribute :: formats
 
         list of supported formats.::
-            
+
             [
                 {
                     'mimeType':'text/xml',
@@ -906,14 +907,14 @@ class ComplexOutput(Output):
 
         (used by mapserver, see useMapscript below)
         if not set, will be determined automatically
-        
+
     .. attribute :: height
 
         (used by mapserver, see useMapscript below)
         if not set, will be determined automatically
 
     .. attribute :: useMapscript
-    
+
         If set to true and asReference is set to true (by request), PyWPS
         will gerenate UMN MapServer mapfile and point the reference URL to
         it, so that raster layer will be accessible as OGC WCS and vector
@@ -923,9 +924,9 @@ class ComplexOutput(Output):
         Attributes projection, bbox, width and height will be used. If not
         set, they will be determined using gdal/ogr libraries. If something
         does not work, try to adjust them manualy.
-        
+
         Unlike ComplexInput, the check for mimeType is done in Execute during
-        output consolidation.        
+        output consolidation.
     """
     formats = None
     format = {"mimetype":None,"encoding":None,"schema":None}
@@ -942,7 +943,7 @@ class ComplexOutput(Output):
         """Class constructor"""
         Output.__init__(self,identifier,title,abstract=abstract,
                 metadata=metadata,type="ComplexValue", asReference=asReference)
-        
+
         if type(formats) == types.StringType:
             formats = [{"mimeType":formats,"encoding":None,"schema":None}]
         elif type(formats) == types.DictType:
@@ -953,10 +954,10 @@ class ComplexOutput(Output):
                 format["encoding"] = None
             if not "schema" in format.keys():
                 format["schema"] = None
-        
+
         self.formats = formats
         self.format={}
-    
+
         self.projection = projection
         self.bbox = bbox
         self.useMapscript = useMapscript
@@ -974,20 +975,20 @@ class ComplexOutput(Output):
         :param value: value to be returned (file name or file itself)
         :type value: string or file
         """
-        
+
         #Note: cStringIO and StringIO are totally messed up, StringIO is type instance, cString is type cStringIO.StringO
         #Better to also use __class__.__name__ to be certain what is is
-        # StringIO => StringIO but cStringIO => StringO  
+        # StringIO => StringIO but cStringIO => StringO
         if type(value) == types.StringType or type(value)==types.UnicodeType:
             self.value = value
         elif type(value) == types.FileType:
             self.value = value.name
-        elif value.__class__.__name__=='StringIO' or value.__class__.__name__=='StringO': 
+        elif value.__class__.__name__=='StringIO' or value.__class__.__name__=='StringO':
             import tempfile
             from os import curdir
             stringIOName = tempfile.mkstemp(prefix="pywpsOutput",dir=curdir) #(5, '/tmp/pywps-instanceS2j6ve/pywpsOutputZxSM6V')
             stringIOName=stringIOName[1]
-            
+
             stringIOFile=open(stringIOName,"w")
             stringIOFile.write(value.getvalue())
             stringIOFile.close()
@@ -996,8 +997,8 @@ class ComplexOutput(Output):
         else:
             raise Exception("Output type '%s' of '%s' output not known, not FileName, File or (c)StringIO object" %\
                     (type(value),self.identifier))
-    
-    
+
+
     def checkMimeTypeIn(self):
             #Checking the mimeType
             #-1)Easier to set the schema and utf if present then deal with mimetype
@@ -1014,45 +1015,45 @@ class ComplexOutput(Output):
                 self.format["encoding"]=self.formats[0]["encoding"]
                 logging.debug("Adding encoding: %s" % self.format["encoding"])
         except:
-            logging.debug("Adding schema and/or encoding failed, ")     
-            
+            logging.debug("Adding schema and/or encoding failed, ")
+
         if (self.format["mimetype"] is None) or (self.format["mimetype"]==""):
-                logging.debug("Missing ComplexDataOutput mimeType in %s, adopting default mimeType %s (first in formats list)" % (self.identifier,self.formats[0]["mimeType"])) 
-                self.format["mimetype"]=self.formats[0]["mimeType"]             
+                logging.debug("Missing ComplexDataOutput mimeType in %s, adopting default mimeType %s (first in formats list)" % (self.identifier,self.formats[0]["mimeType"]))
+                self.format["mimetype"]=self.formats[0]["mimeType"]
                 #wps-grass-bridge
         else:
-            #Checking is mimeType is in the acceptable formats    
+            #Checking is mimeType is in the acceptable formats
             if self.format["mimetype"] not in [dic["mimeType"] for dic in self.formats]:
-                #ATTENTION: False positive if dictionary is not set in process/empty formats list 
+                #ATTENTION: False positive if dictionary is not set in process/empty formats list
                 if (len(self.formats)==1) and (type(self.formats[0]["mimeType"])==types.NoneType):
                     logging.debug("Process without mimetype list, cant check if ComplexDataOutput mimtype is correct or not")
                 else:
                     logging.debug("ComplexDataOutputXML defines mimeType %s  which is not in process %s formats list" % (str(self.format["mimetype"]),str(self.identifier)))
                     self.onProblem("InvalidParameterValue",self.identifier)
-    
-    
-    def onProblem(self,what, why):    
-        """Empty method, called, when there was any problem with the input. 
+
+
+    def onProblem(self,what, why):
+        """Empty method, called, when there was any problem with the input.
         This method is replaced in Execute.consolidateInputs, basically output.onProblem = self.onOutputProblem
         therefore Exception raise is implemented in Execute.onInputProblem()
         :param what: Message with error description
         :param why: Error code
        """
-        pass        
+        pass
 
 class BoundingBoxOutput(Output):
-    """Bounding box ouput 
-        
+    """Bounding box ouput
+
     :param identifier: input identifier
     :param title: input title
-    :param abstract: input description. 
+    :param abstract: input description.
     :param crss: List of strings of supported coordinate systems.
     :param dimensions: number of dimensions
     :param asReference:  whether this output will be given back as
             reference or as file
-        
+
     .. attribute:: crss
-        
+
         list of supporte coordinate systems
 
     .. attribute:: crs
@@ -1085,7 +1086,7 @@ class BoundingBoxOutput(Output):
         """Set value to bbox output
 
         :param value: boundngbox::
-        
+
             (minx,miny,maxx,maxy)
 
         """
