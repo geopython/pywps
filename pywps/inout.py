@@ -140,7 +140,10 @@ class IOHandler(object):
     def get_data(self):
         """Get source as simple data object"""
         if self.source_type == SOURCE_TYPE.FILE:
-            return open(self.source, mode='r').read()
+            file_handler = open(self.source, mode='r')
+            content = file_handler.read()
+            file_handler.close()
+            return content
         elif self.source_type == SOURCE_TYPE.STREAM:
             return self.source.read()
         elif self.source_type == SOURCE_TYPE.DATA:

@@ -19,6 +19,7 @@ class IOHandlerTest(unittest.TestCase):
         tmp_dir = path(tempfile.mkdtemp())
         data_format = get_data_format()
         self.iohandler = IOHandler(tempdir=tmp_dir, data_format = data_format)
+        self._value = 'lalala'
 
 
     def tearDown(self):
@@ -29,81 +30,68 @@ class IOHandlerTest(unittest.TestCase):
         self.assertTrue(os.path.isdir(self.iohandler.tempdir))
         self.assertTrue(self.iohandler.data_format)
 
-    def test_data(self):
-        """Test data input IOHandler"""
-        source = 'lalala'
-        self.iohandler.data = source
-        self.assertEqual(SOURCE_TYPE.DATA, self.iohandler.source_type,
-                          'Source type properly set')
-        self.assertEqual(source, self.iohandler.data, 'Data obtained')
-        file_handler = open(self.iohandler.file)
-        self.assertEqual(source, file_handler.read(), 'File obtained')
-        file_handler.close()
-        self.assertEqual(source, self.iohandler.stream.read(),
-                          'Stream obtained')
-        self.skipTest('Memory object not implemented')
-        self.assertEqual(source, self.iohandler.memory_object,
-                          'Memory object obtained')
+    def _test_outout(self, source_type):
+        """Test all outputs"""
 
-    def test_stream(self):
-        """Test stream input IOHandler"""
-        value = 'lalala'
-        source = StringIO(text_type(value))
-        self.iohandler.stream = source
-        self.assertEqual(SOURCE_TYPE.STREAM, self.iohandler.source_type,
+        self.assertEqual(source_type, self.iohandler.source_type,
                           'Source type properly set')
-        self.assertEqual(value, self.iohandler.data, 'Data obtained')
 
-        source = StringIO(text_type(value))
-        self.iohandler.stream = source
+        self.assertEqual(self._value, self.iohandler.data, 'Data obtained')
+
+        if self.iohandler.source_type == SOURCE_TYPE.STREAM:
+            source = StringIO(text_type(self._value))
+            self.iohandler.stream = source
 
         file_handler = open(self.iohandler.file)
-        self.assertEqual(value, file_handler.read(), 'File obtained')
+        self.assertEqual(self._value, file_handler.read(), 'File obtained')
         file_handler.close()
 
-        source = StringIO(text_type(value))
-        self.iohandler.stream = source
+        if self.iohandler.source_type == SOURCE_TYPE.STREAM:
+            source = StringIO(text_type(self._value))
+            self.iohandler.stream = source
 
-        self.assertEqual(value, self.iohandler.stream.read(),
-                          'Stream obtained')
+        stream_val = self.iohandler.stream.read()
+        if type(stream_val) == type(b''):
+            self.assertEqual(str.encode(self._value), stream_val,
+                            'Stream obtained')
+        else:
+            self.assertEqual(self._value, stream_val,
+                            'Stream obtained')
+        self.iohandler.stream.close()
 
-        source = StringIO(text_type(value))
-        self.iohandler.stream = source
+        if self.iohandler.source_type == SOURCE_TYPE.STREAM:
+            source = StringIO(text_type(self._value))
+            self.iohandler.stream = source
 
         self.skipTest('Memory object not implemented')
         self.assertEqual(data, self.iohandler.memory_object,
                           'Memory object obtained')
 
+
+    def test_data(self):
+        """Test data input IOHandler"""
+        self.iohandler.data = self._value
+        self._test_outout(SOURCE_TYPE.DATA)
+
+    def test_stream(self):
+        """Test stream input IOHandler"""
+        source = StringIO(text_type(self._value))
+        self.iohandler.stream = source
+        self._test_outout(SOURCE_TYPE.STREAM)
+
     def test_file(self):
         """Test file input IOHandler"""
-        pass
-        # TODO
-        #value = 'lalala'
-        #source = StringIO(text_type(value))
-        #self.iohandler.stream = source
-        #self.assertEqual(SOURCE_TYPE.STREAM, self.iohandler.source_type,
-        #                  'Source type properly set')
-        #self.assertEqual(value, self.iohandler.data, 'Data obtained')
+        (fd, tmp_file) = tempfile.mkstemp()
+        source = tmp_file
+        file_handler = open(tmp_file, 'w')
+        file_handler.write(self._value)
+        file_handler.close()
+        self.iohandler.file = source
+        self._test_outout(SOURCE_TYPE.FILE)
 
-        #source = StringIO(text_type(value))
-        #self.iohandler.stream = source
-
-        #self.assertEqual(value, open(self.iohandler.file).read(),
-        #                  'File obtained')
-
-        #source = StringIO(text_type(value))
-        #self.iohandler.stream = source
-
-        #self.assertEqual(value, self.iohandler.stream.read(),
-        #                  'Stream obtained')
-
-        #source = StringIO(text_type(value))
-        #self.iohandler.stream = source
-
-        #self.skipTest('Memory object not implemented')
-        #self.assertEqual(data, self.iohandler.memory_object,
-        #                  'Memory object obtained')
-
+    def test_memory(self):
+        """Test data input IOHandler"""
+        self.skipTest('Memory object not implemented')
 
 
 def load_tests(loader=None, tests=None, pattern=None):
