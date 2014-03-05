@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
+from pywps._compat import text_type, StringIO
 
 class SOURCE_TYPE:
     MEMORY = 0
@@ -134,8 +135,7 @@ class IOHandler(object):
         elif self.source_type == SOURCE_TYPE.STREAM:
             return self.source
         elif self.source_type == SOURCE_TYPE.DATA:
-            from io import StringIO
-            return StringIO(unicode(self.source))
+            return StringIO(text_type(self.source))
 
     def get_data(self):
         """Get source as simple data object"""

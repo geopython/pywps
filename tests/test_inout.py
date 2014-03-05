@@ -5,7 +5,7 @@ from pywps.inout import *
 import os
 import tempfile
 from path import path
-import io
+from pywps._compat import text_type, StringIO
 
 def get_data_format():
     class DataFormat(FormatAbstract):
@@ -33,43 +33,45 @@ class IOHandlerTest(unittest.TestCase):
         """Test data input IOHandler"""
         source = 'lalala'
         self.iohandler.data = source
-        self.assertEquals(SOURCE_TYPE.DATA, self.iohandler.source_type,
+        self.assertEqual(SOURCE_TYPE.DATA, self.iohandler.source_type,
                           'Source type properly set')
-        self.assertEquals(source, self.iohandler.data, 'Data obtained')
-        self.assertEquals(source, open(self.iohandler.file).read(),
-                          'File obtained')
-        self.assertEquals(source, self.iohandler.stream.read(),
+        self.assertEqual(source, self.iohandler.data, 'Data obtained')
+        file_handler = open(self.iohandler.file)
+        self.assertEqual(source, file_handler.read(), 'File obtained')
+        file_handler.close()
+        self.assertEqual(source, self.iohandler.stream.read(),
                           'Stream obtained')
         self.skipTest('Memory object not implemented')
-        self.assertEquals(source, self.iohandler.memory_object,
+        self.assertEqual(source, self.iohandler.memory_object,
                           'Memory object obtained')
 
     def test_stream(self):
         """Test stream input IOHandler"""
         value = 'lalala'
-        source = io.StringIO(unicode(value))
+        source = StringIO(text_type(value))
         self.iohandler.stream = source
-        self.assertEquals(SOURCE_TYPE.STREAM, self.iohandler.source_type,
+        self.assertEqual(SOURCE_TYPE.STREAM, self.iohandler.source_type,
                           'Source type properly set')
-        self.assertEquals(value, self.iohandler.data, 'Data obtained')
+        self.assertEqual(value, self.iohandler.data, 'Data obtained')
 
-        source = io.StringIO(unicode(value))
+        source = StringIO(text_type(value))
         self.iohandler.stream = source
 
-        self.assertEquals(value, open(self.iohandler.file).read(),
-                          'File obtained')
+        file_handler = open(self.iohandler.file)
+        self.assertEqual(value, file_handler.read(), 'File obtained')
+        file_handler.close()
 
-        source = io.StringIO(unicode(value))
+        source = StringIO(text_type(value))
         self.iohandler.stream = source
 
-        self.assertEquals(value, self.iohandler.stream.read(),
+        self.assertEqual(value, self.iohandler.stream.read(),
                           'Stream obtained')
 
-        source = io.StringIO(unicode(value))
+        source = StringIO(text_type(value))
         self.iohandler.stream = source
 
         self.skipTest('Memory object not implemented')
-        self.assertEquals(data, self.iohandler.memory_object,
+        self.assertEqual(data, self.iohandler.memory_object,
                           'Memory object obtained')
 
     def test_file(self):
@@ -77,29 +79,29 @@ class IOHandlerTest(unittest.TestCase):
         pass
         # TODO
         #value = 'lalala'
-        #source = io.StringIO(unicode(value))
+        #source = StringIO(text_type(value))
         #self.iohandler.stream = source
-        #self.assertEquals(SOURCE_TYPE.STREAM, self.iohandler.source_type,
+        #self.assertEqual(SOURCE_TYPE.STREAM, self.iohandler.source_type,
         #                  'Source type properly set')
-        #self.assertEquals(value, self.iohandler.data, 'Data obtained')
+        #self.assertEqual(value, self.iohandler.data, 'Data obtained')
 
-        #source = io.StringIO(unicode(value))
+        #source = StringIO(text_type(value))
         #self.iohandler.stream = source
 
-        #self.assertEquals(value, open(self.iohandler.file).read(),
+        #self.assertEqual(value, open(self.iohandler.file).read(),
         #                  'File obtained')
 
-        #source = io.StringIO(unicode(value))
+        #source = StringIO(text_type(value))
         #self.iohandler.stream = source
 
-        #self.assertEquals(value, self.iohandler.stream.read(),
+        #self.assertEqual(value, self.iohandler.stream.read(),
         #                  'Stream obtained')
 
-        #source = io.StringIO(unicode(value))
+        #source = StringIO(text_type(value))
         #self.iohandler.stream = source
 
         #self.skipTest('Memory object not implemented')
-        #self.assertEquals(data, self.iohandler.memory_object,
+        #self.assertEqual(data, self.iohandler.memory_object,
         #                  'Memory object obtained')
 
 
