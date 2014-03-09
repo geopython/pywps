@@ -1,4 +1,6 @@
+from abc import ABCMeta, abstractmethod, abstractproperty
 from pywps._compat import text_type, StringIO
+import tempfile
 
 class SOURCE_TYPE:
     MEMORY = 0
@@ -7,9 +9,7 @@ class SOURCE_TYPE:
     DATA = 3
 
 
-
-class FormatAbstract(object):
-    # TODO use ABCMeta
+class FormatBase(object):
     """Input/output format specification
     """
     def __init__(self, mimetype, schema=None, encoding=None, validator=None):
@@ -18,18 +18,28 @@ class FormatAbstract(object):
         self.encoding = encoding
         self.validator = validator
 
+
 class DataTypeAbstract(object):
-    # TODO use ABCMeta
     """LiteralObject data_type abstract class
     """
+
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
     def convert(self, value):
         return value
 
+
 class DataValidatorAbstract(object):
-    # TODO use ABCMeta
     """LiteralObject validator
     """
+
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
     def is_valid(self, value):
+        """Make sure, given value is ok according to LiteralInput definition
+        """
         return True
 
 
@@ -86,12 +96,11 @@ class IOHandler(object):
     >>> # skipped assert isinstance(ioh_mo.memory_object, POSH)
     """
 
-    def __init__(self, tempdir=None, data_format=None):
+    def __init__(self, tempdir=None):
         self.source_type = None
         self.source = None
         self._tempfile = None
         self.tempdir = tempdir
-        self.data_format = data_format
 
     def set_file(self, filename):
         """Set source as file name"""
@@ -123,7 +132,6 @@ class IOHandler(object):
             if self._tempfile:
                 return self._tempfile
             else:
-                import tempfile
                 (opening, stream_file_name) = tempfile.mkstemp(dir=self.tempdir)
                 stream_file = open(stream_file_name, 'w')
 
@@ -170,7 +178,9 @@ class IOHandler(object):
 
 
 # TODO cover with tests
-class SimpleHandler(object):
+# TODO since storage is needed, consider to rewrite SimpleHandler with
+# IOHandler
+class SimpleHandler(IOHandler):
     """Data handler for Literal In- and Outputs
 
     >>> class Int_type(object):
@@ -191,20 +201,16 @@ class SimpleHandler(object):
     >>> inpt.validator.is_valid(inpt.value)
     False
     """
-    def __init__(self, data_type = None):
+
+    def __init__(self, tempdir=None, data_type=None):
+        IOHandler.__init__(self, tempdir)
         self._data_type = data_type
         self._validator = None
-        self._value = None
 
-    @property
-    def value(self):
-        return self._value
-
-    @value.setter
-    def value(self, value):
+    def set_data(self, data):
         if self._data_type:
-            value = self._data_type.convert(value)
-        self._value = value
+            data = self._data_type.convert(data)
+        IOHandler.set_data(self, data)
 
     @property
     def validator(self):
@@ -218,18 +224,19 @@ class SimpleHandler(object):
 class BasicLiteralInput(SimpleHandler):
     """LiteralInput input abstract class
     """
-    pass
+
+    def __init__(self, tempdir=None):
+        SimpleHandler.__init__(self, tempdir=None)
+
 
 class BasicLiteralOutput(SimpleHandler):
     """Basic LiteralOutput class
     """
 
-    def __init__(self):
-        IOHandler.__init__(self)
+    def __init__(self, tempdir=None):
+        SimpleHandler.__init__(self, tempdir=None)
         self._storage = None
 
-    # TODO is storage needed?
-    # TODO if so, it needs to be prepared for SimpleHandler class
     @property
     def storage(self):
         return self._storage
@@ -238,21 +245,15 @@ class BasicLiteralOutput(SimpleHandler):
     def storage(self, storage):
         self._storage = storage
 
-class BasicBBoxInput(SimpleHandler):
-    """Basic Bounding box input abstract class
-    """
-    pass
 
 class BasicBBoxOutput(SimpleHandler):
     """Basic BoundingBox output class
     """
 
-    def __init__(self):
-        IOHandler.__init__(self)
+    def __init__(self, tempdir=None):
+        SimpleHandler.__init__(self, tempdir=None)
         self._storage = None
 
-    # TODO is storage needed?
-    # TODO if so, it needs to be prepared for SimpleHandler class
     @property
     def storage(self):
         return self._storage
@@ -261,10 +262,13 @@ class BasicBBoxOutput(SimpleHandler):
     def storage(self, storage):
         self._storage = storage
 
+
 class BasicBBoxInput(SimpleHandler):
     """Basic Bounding box input abstract class
     """
-    pass
+
+    def __init__(self, tempdir=None):
+        SimpleHandler.__init__(self, tempdir=None)
 
 
 class ComplexInput(IOHandler):
@@ -277,18 +281,10 @@ class ComplexInput(IOHandler):
     """
 
     def __init__(self, tempdir=None, data_format=None):
-        IOHandler.__init__(self, tempdir, data_format)
-        self._validator = None
+        IOHandler.__init__(self, tempdir)
 
-    def set_validator(self, validator):
-        """Set validator attribute"""
-        self._validator = validator
+        self.data_format = data_format
 
-    def get_validator(self):
-        """Get validator attribute"""
-        return self._validator
-
-    validator = property(fget=get_validator, fset=set_validator)
 
 class ComplexOutput(IOHandler):
     """Complex output abstract class
@@ -318,8 +314,10 @@ class ComplexOutput(IOHandler):
     'AA'
     """
 
-    def __init__(self):
-        IOHandler.__init__(self)
+    def __init__(self, tempdir=None, data_format=None):
+        IOHandler.__init__(self, tempdir)
+
+        self.data_format = data_format
         self._storage = None
 
     @property
@@ -337,11 +335,9 @@ class ComplexOutput(IOHandler):
         return url
 
 
-
 if __name__ == "__main__":
     import doctest
-
-    import tempfile, os
+    import os
     from contextlib import contextmanager
     from path import path
     @contextmanager
