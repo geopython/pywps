@@ -20,6 +20,19 @@ class FormatAbstract(object):
         self.encoding = encoding
         self.validator = validator
 
+class DataTypeAbstract(object):
+    """LiteralObject data_type abstract class
+    """
+    def convert(self, value):
+        return value
+
+class DataValidatorAbstract(object):
+    """LiteralObject validator
+    """
+    def is_valid(self, value):
+        return True
+
+
 class IOHandler(object):
     """Basic IO class. Provides functions, to accept input data in file,
     memory object and stream object and give them out in all three types
@@ -156,6 +169,104 @@ class IOHandler(object):
     data = property(fget=get_data, fset=set_data)
 
 
+# TODO cover with tests
+class SimpleHandler(object):
+    """Data handler for Literal In- and Outputs
+
+    >>> class Int_type(object):
+    ...     @staticmethod
+    ...     def convert(value): return int(value)
+    >>>
+    >>> class MyValidator(object):
+    ...     @staticmethod
+    ...     def is_valid(value): return 0 < value < 3
+    >>>
+    >>> inpt = SimpleHandler(data_type = Int_type)
+    >>> inpt.validator = MyValidator
+    >>>
+    >>> inpt.value = 1
+    >>> inpt.validator.is_valid(inpt.value)
+    True
+    >>> inpt.value = 5
+    >>> inpt.validator.is_valid(inpt.value)
+    False
+    """
+    def __init__(self, data_type = None):
+        self._data_type = data_type
+        self._validator = None
+        self._value = None
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        if self._data_type:
+            value = self._data_type.convert(value)
+        self._value = value
+
+    @property
+    def validator(self):
+        return self._validator
+
+    @validator.setter
+    def validator(self, validator):
+        self._validator = validator
+
+
+class BasicLiteralInput(SimpleHandler):
+    """LiteralInput input abstract class
+    """
+    pass
+
+class BasicLiteralOutput(SimpleHandler):
+    """Basic LiteralOutput class
+    """
+
+    def __init__(self):
+        IOHandler.__init__(self)
+        self._storage = None
+
+    # TODO is storage needed?
+    # TODO if so, it needs to be prepared for SimpleHandler class
+    @property
+    def storage(self):
+        return self._storage
+
+    @storage.setter
+    def storage(self, storage):
+        self._storage = storage
+
+class BasicBBoxInput(SimpleHandler):
+    """Basic Bounding box input abstract class
+    """
+    pass
+
+class BasicBBoxOutput(SimpleHandler):
+    """Basic BoundingBox output class
+    """
+
+    def __init__(self):
+        IOHandler.__init__(self)
+        self._storage = None
+
+    # TODO is storage needed?
+    # TODO if so, it needs to be prepared for SimpleHandler class
+    @property
+    def storage(self):
+        return self._storage
+
+    @storage.setter
+    def storage(self, storage):
+        self._storage = storage
+
+class BasicBBoxInput(SimpleHandler):
+    """Basic Bounding box input abstract class
+    """
+    pass
+
+
 class ComplexInput(IOHandler):
     """Complex input abstract class
 
@@ -224,6 +335,8 @@ class ComplexOutput(IOHandler):
         (outtype, storage, url) = self.storage.store(self)
         return url
 
+# TODO: move this to separate file
+# TODO: cover with tests
 class StorageAbstract(object):
     """Data storage abstract class
     """
@@ -286,6 +399,7 @@ class FileStorage(StorageAbstract):
         """
         self.target = config.get('FileStorage', 'target')
         self.outputurl = config.get('server', 'outputurl')
+
 
     def store(self, output):
         import shutil, tempfile

@@ -1,3 +1,6 @@
+"""Validator classes are used for ComplexInputs, to validate the content
+"""
+
 from abc import ABCMeta, abstractmethod, abstractproperty
 from pywps.formats import FORMATS
 import os
@@ -43,12 +46,9 @@ class BasicValidator(ValidatorAbstract):
 
     def validate(self, data_input, level=MODE.VERYSTRICT):
         """Perform input validation
+
         """
-        if level > MODE.NONE:
-            data_input.data_format.validator.validate(data_input)
-        else:
-            return True
-        pass
+        return True
 
 def validategml(data_input, mode):
     """GML validation example
