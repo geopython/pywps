@@ -1,4 +1,3 @@
-from abc import ABCMeta, abstractmethod, abstractproperty
 from pywps._compat import text_type, StringIO
 
 class SOURCE_TYPE:
@@ -7,11 +6,10 @@ class SOURCE_TYPE:
     STREAM = 2
     DATA = 3
 
-class STORE_TYPE:
-    PATH = 0
 
 
 class FormatAbstract(object):
+    # TODO use ABCMeta
     """Input/output format specification
     """
     def __init__(self, mimetype, schema=None, encoding=None, validator=None):
@@ -21,12 +19,14 @@ class FormatAbstract(object):
         self.validator = validator
 
 class DataTypeAbstract(object):
+    # TODO use ABCMeta
     """LiteralObject data_type abstract class
     """
     def convert(self, value):
         return value
 
 class DataValidatorAbstract(object):
+    # TODO use ABCMeta
     """LiteralObject validator
     """
     def is_valid(self, value):
@@ -295,6 +295,7 @@ class ComplexOutput(IOHandler):
 
     >>> # temporary configuration
     >>> import ConfigParser
+    >>> from pywps.storage import *
     >>> config = ConfigParser.RawConfigParser()
     >>> config.add_section('FileStorage')
     >>> config.set('FileStorage', 'target', './')
@@ -335,86 +336,6 @@ class ComplexOutput(IOHandler):
         (outtype, storage, url) = self.storage.store(self)
         return url
 
-# TODO: move this to separate file
-# TODO: cover with tests
-class StorageAbstract(object):
-    """Data storage abstract class
-    """
-
-    __metaclass__ = ABCMeta
-
-    @abstractmethod
-    def store(self):
-        """
-        :param output: of type IOHandler
-        :returns: (type, store, url) where
-            type - is type of STORE_TYPE - number
-            store - string describing storage - file name, database connection
-            url - url, where the data can be downloaded
-        """
-        pass
-
-class DummyStorage(StorageAbstract):
-    """Dummy empty storage implementation, does nothing
-
-    Default instance, for non-reference output request
-
-    >>> store = DummyStorage()
-    >>> assert store.store
-    """
-
-    def __init__(self, config=None):
-        """
-        :param config: storage configuration object
-        """
-        self.config = config
-
-    def store(self, ouput):
-        pass
-
-class FileStorage(StorageAbstract):
-    """File storage implementation, stores data to file system
-
-    >>> import ConfigParser
-    >>> config = ConfigParser.RawConfigParser()
-    >>> config.add_section('FileStorage')
-    >>> config.set('FileStorage', 'target', './')
-    >>> config.add_section('server')
-    >>> config.set('server', 'outputurl', 'http://foo/bar/filestorage')
-    >>>
-    >>> store = FileStorage(config = config)
-    >>>
-    >>> class FakeOutput(IOHandler):
-    ...     def get_file(self):
-    ...         tiff_file = open('file.tiff', 'w')
-    ...         tiff_file.close()
-    ...         return 'file.tiff'
-    >>> fake_out = FakeOutput()
-    >>> (type, path, url) = store.store(fake_out)
-    """
-
-    def __init__(self, config):
-        """
-        :param config: storage configuration object
-        """
-        self.target = config.get('FileStorage', 'target')
-        self.outputurl = config.get('server', 'outputurl')
-
-
-    def store(self, output):
-        import shutil, tempfile
-        from urlparse import urljoin
-        file_name = output.get_file()
-        (prefix, suffix) = os.path.splitext(file_name)
-        output_name = tempfile.mkstemp(suffix=suffix, prefix=prefix,
-                                       dir=self.target)[1]
-
-        shutil.copy2(output.get_file(), output_name)
-
-        just_file_name = os.path.basename(output_name)
-        url = urljoin(self.outputurl, just_file_name)
-
-        return (STORE_TYPE.PATH, output_name, url)
 
 
 if __name__ == "__main__":
