@@ -37,7 +37,7 @@ class DataValidatorAbstract(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def is_valid(self, value):
+    def validate(self, value):
         """Make sure, given value is ok according to LiteralInput definition
         """
         return True
@@ -177,9 +177,6 @@ class IOHandler(object):
     data = property(fget=get_data, fset=set_data)
 
 
-# TODO cover with tests
-# TODO since storage is needed, consider to rewrite SimpleHandler with
-# IOHandler
 class SimpleHandler(IOHandler):
     """Data handler for Literal In- and Outputs
 
@@ -189,27 +186,29 @@ class SimpleHandler(IOHandler):
     >>>
     >>> class MyValidator(object):
     ...     @staticmethod
-    ...     def is_valid(value): return 0 < value < 3
+    ...     def validate(inpt): return 0 < inpt.data < 3
     >>>
     >>> inpt = SimpleHandler(data_type = Int_type)
     >>> inpt.validator = MyValidator
     >>>
-    >>> inpt.value = 1
-    >>> inpt.validator.is_valid(inpt.value)
+    >>> inpt.data = 1
+    >>> inpt.validator.validate(inpt)
     True
-    >>> inpt.value = 5
-    >>> inpt.validator.is_valid(inpt.value)
+    >>> inpt.data = 5
+    >>> inpt.validator.validate(inpt)
     False
     """
 
     def __init__(self, tempdir=None, data_type=None):
         IOHandler.__init__(self, tempdir)
-        self._data_type = data_type
+        self.data_type = data_type
         self._validator = None
 
     def set_data(self, data):
-        if self._data_type:
-            data = self._data_type.convert(data)
+        """Set data value. input data are converted into target format
+        """
+        if self.data_type:
+            data = self.data_type.convert(data)
         IOHandler.set_data(self, data)
 
     @property
@@ -246,6 +245,14 @@ class BasicLiteralOutput(SimpleHandler):
         self._storage = storage
 
 
+class BasicBBoxInput(SimpleHandler):
+    """Basic Bounding box input abstract class
+    """
+
+    def __init__(self, tempdir=None):
+        SimpleHandler.__init__(self, tempdir=None)
+
+
 class BasicBBoxOutput(SimpleHandler):
     """Basic BoundingBox output class
     """
@@ -261,14 +268,6 @@ class BasicBBoxOutput(SimpleHandler):
     @storage.setter
     def storage(self, storage):
         self._storage = storage
-
-
-class BasicBBoxInput(SimpleHandler):
-    """Basic Bounding box input abstract class
-    """
-
-    def __init__(self, tempdir=None):
-        SimpleHandler.__init__(self, tempdir=None)
 
 
 class ComplexInput(IOHandler):
