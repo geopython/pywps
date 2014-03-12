@@ -30,19 +30,6 @@ class DataTypeAbstract(object):
         return value
 
 
-class DataValidatorAbstract(object):
-    """LiteralObject validator
-    """
-
-    __metaclass__ = ABCMeta
-
-    @abstractmethod
-    def validate(self, value):
-        """Make sure, given value is ok according to LiteralInput definition
-        """
-        return True
-
-
 class IOHandler(object):
     """Basic IO class. Provides functions, to accept input data in file,
     memory object and stream object and give them out in all three types
@@ -224,8 +211,18 @@ class BasicLiteralInput(SimpleHandler):
     """LiteralInput input abstract class
     """
 
-    def __init__(self, tempdir=None):
+    def __init__(self, tempdir=None, allowed_values=None,
+                 value_reference=value_reference):
         SimpleHandler.__init__(self, tempdir=None)
+
+        self.allowed_values = allowed_values
+        self.value_reference = value_reference
+
+        if self.allowed_values == None and\
+           self.value_reference == None:
+            self.any_value = True
+        else:
+            self.any_value = False
 
 
 class BasicLiteralOutput(SimpleHandler):

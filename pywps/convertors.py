@@ -1,4 +1,5 @@
-# THIS FILE IS NOT USED, DELETE IT
+from abc import ABCMeta, abstractmethod, abstractproperty
+# TODO cover with tests
 """Convertors are used for LiteralInputs, to make sure, input data are OK
 """
 
@@ -22,7 +23,7 @@ class ConvertorAbstract(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def convert(self, input, level=MODE.VERYSTRICT):
+    def convert(self, inpt, level=MODE.STRICT):
         """Perform input conversion
         """
         pass
@@ -32,10 +33,34 @@ class BasicConvertor(ConvertorAbstract):
 
     """
 
-    def convert(self, lit_input, level=MODE.VERYSTRICT):
+    def convert(self, lit_input, level=MODE.STRICT):
         """Perform input validation
         """
         return lit_input
+
+
+def convert_boolean(bool_input, mode):
+    """Return boolean value from input bool_input"""
+
+    data = bool_input.data
+
+    if mode >= MODE.NONE:
+        pass
+
+    elif mode >= MODE.BASIC:
+        if str(data).lower() in ['false', 'f']:
+            data = False
+        else:
+            try:
+                data = int(data)
+                if data == 0:
+                    data = False
+                else:
+                    data = True
+            except:
+                data = True
+
+    return data
 
 def convert_integer(lit_input, mode):
     """Return integer value from input lit_input"""

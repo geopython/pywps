@@ -196,6 +196,7 @@ def _get_schemas_home():
         os.path.abspath(
             os.path.dirname(__file__)
         ),
+        os.path.pardir,
         "schemas")
 
 
