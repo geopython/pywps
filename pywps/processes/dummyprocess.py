@@ -1,9 +1,10 @@
 """
 DummyProcess to check the WPS structure
 
-Author: Jorge de Jesus (jorge.de-jesus@jrc.it) as suggested by Kor de Jong
+Author: Jorge de Jesus (jorge.jesus@gmail.com) as suggested by Kor de Jong
 """
-from pywps.Process import WPSProcess                                
+from pywps.Process import WPSProcess
+import types                                  
 class Process(WPSProcess):
      def __init__(self):
           # init process
@@ -17,16 +18,18 @@ class Process(WPSProcess):
               grassLocation =False)
               
          self.Input1 = self.addLiteralInput(identifier = "input1",
-                                            title = "Input1 number", 
+                                            title = "Input1 number",
+                                            type=types.IntType, 
                                             default="100")
          self.Input2= self.addLiteralInput(identifier="input2", 
-                                           title="Input2 number", 
+                                           title="Input2 number",
+                                           type=types.IntType, 
                                           default="200")
          self.Output1=self.addLiteralOutput(identifier="output1", 
                                             title="Output1 add 1 result")
          self.Output2=self.addLiteralOutput(identifier="output2",title="Output2 subtract 1 result" )                                   
      def execute(self):
          
-        self.Output1.setValue(self.Input1.getValue()+1)
-        self.Output2.setValue(self.Input1.getValue()-1)
+        self.Output1.setValue(int(self.Input1.getValue())+1)
+        self.Output2.setValue(int(self.Input1.getValue())-1)
         return
