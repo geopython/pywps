@@ -7,6 +7,13 @@ import tempfile
 from path import path
 import os
 
+try:
+    import osgeo
+except ImportError:
+    WITH_GDAL = False
+else:
+    WITH_GDAL = True
+
 def get_input(name, schema, mimetype):
 
     class FakeInput(object):
@@ -51,8 +58,9 @@ class ValidateTest(unittest.TestCase):
         gml_input = get_input('point.gml', 'point.xsd', FORMATS['GML'][0])
         self.assertTrue(validategml(gml_input, MODE.NONE), 'NONE validation')
         self.assertTrue(validategml(gml_input, MODE.SIMPLE), 'SIMPLE validation')
-        self.assertTrue(validategml(gml_input, MODE.STRICT), 'STRICT validation')
-        self.assertTrue(validategml(gml_input, MODE.VERYSTRICT), 'VERYSTRICT validation')
+        if WITH_GDAL:
+            self.assertTrue(validategml(gml_input, MODE.STRICT), 'STRICT validation')
+            self.assertTrue(validategml(gml_input, MODE.VERYSTRICT), 'VERYSTRICT validation')
 
     def test_geojson_validator(self):
         """Test GeoJSON validator
@@ -61,8 +69,9 @@ class ValidateTest(unittest.TestCase):
                                   FORMATS['GEOJSON'][0])
         self.assertTrue(validategeojson(geojson_input, MODE.NONE), 'NONE validation')
         self.assertTrue(validategeojson(geojson_input, MODE.SIMPLE), 'SIMPLE validation')
-        self.assertTrue(validategeojson(geojson_input, MODE.STRICT), 'STRICT validation')
-        self.assertTrue(validategeojson(geojson_input, MODE.VERYSTRICT), 'VERYSTRICT validation')
+        if WITH_GDAL:
+            self.assertTrue(validategeojson(geojson_input, MODE.STRICT), 'STRICT validation')
+            self.assertTrue(validategeojson(geojson_input, MODE.VERYSTRICT), 'VERYSTRICT validation')
 
     def test_fail_validator(self):
 
