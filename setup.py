@@ -65,9 +65,9 @@ doclines = __doc__.split("\n")
 
 dist =  setup(
         name = name,
-        version = 'soap-branch',
+        version = '3.x-master',
         maintainer="Jachym Cepicky",
-        maintainer_email = 'jachym@les-ejk.cz',
+        maintainer_email = 'jachym.cepicky@gmail.com',
         author = 'Jachym Cepicky',
         author_email = 'jachym@les-ejk.cz',
         url = 'http://pywps.wald.intevation.org',
