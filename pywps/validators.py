@@ -76,7 +76,7 @@ def validategml(data_input, mode):
     if mode >= MODE.SIMPLE:
 
         import mimetypes
-        from formats import FORMATS
+        from pywps.formats import FORMATS
         mimetypes.init()
         for pywps_format in FORMATS:
             (mtype, ext) = FORMATS[pywps_format]
@@ -136,7 +136,7 @@ def validategeojson(data_input, mode):
     if mode >= MODE.SIMPLE:
 
         import mimetypes
-        from formats import FORMATS
+        from pywps.formats import FORMATS
         mimetypes.init()
         for pywps_format in FORMATS:
             (mtype, ext) = FORMATS[pywps_format]
