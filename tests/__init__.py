@@ -8,7 +8,9 @@ from tests import test_describe
 from tests import test_execute
 from tests import test_exceptions
 from tests import test_inout
-from tests import test_validators
+from tests import validator
+from validator import test_complexvalidators
+from validator import test_literalvalidators
 
 def load_tests():
     return unittest.TestSuite([
@@ -18,7 +20,8 @@ def load_tests():
         test_execute.load_tests(),
         test_describe.load_tests(),
         test_inout.load_tests(),
-        test_validators.load_tests()
+        test_complexvalidators.load_tests(),
+        test_literalvalidators.load_tests()
     ])
 
 if __name__ == "__main__":

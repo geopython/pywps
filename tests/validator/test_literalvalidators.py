@@ -1,30 +1,19 @@
-"""Unit tests for validator
+"""Unit tests for literal validator
 """
 import unittest
-from pywps.validators import *
-from pywps.formats import FORMATS
-import tempfile
-from path import path
-import os
-
-try:
-    import osgeo
-except ImportError:
-    WITH_GDAL = False
-else:
-    WITH_GDAL = True
+from pywps.validator.literalvalidator import *
 
 def get_input(name, schema, mimetype):
 
     class FakeInput(object):
         file = os.path.join(
             os.path.abspath(os.path.dirname(__file__)),
-            'data', name)
+            '..', 'data', name)
 
     class data_format(object):
         file = os.path.join(
             os.path.abspath(os.path.dirname(__file__)),
-            'data', schema)
+            '..', 'data', schema)
 
     fake_input = FakeInput()
     fake_input.stream = open(fake_input.file)
@@ -36,7 +25,7 @@ def get_input(name, schema, mimetype):
 
 
 class ValidateTest(unittest.TestCase):
-    """Validator test cases"""
+    """Literal validator test cases"""
 
     def setUp(self):
         pass
@@ -58,9 +47,8 @@ class ValidateTest(unittest.TestCase):
         gml_input = get_input('point.gml', 'point.xsd', FORMATS['GML'][0])
         self.assertTrue(validategml(gml_input, MODE.NONE), 'NONE validation')
         self.assertTrue(validategml(gml_input, MODE.SIMPLE), 'SIMPLE validation')
-        if WITH_GDAL:
-            self.assertTrue(validategml(gml_input, MODE.STRICT), 'STRICT validation')
-            self.assertTrue(validategml(gml_input, MODE.VERYSTRICT), 'VERYSTRICT validation')
+        self.assertTrue(validategml(gml_input, MODE.STRICT), 'STRICT validation')
+        self.assertTrue(validategml(gml_input, MODE.VERYSTRICT), 'VERYSTRICT validation')
 
     def test_geojson_validator(self):
         """Test GeoJSON validator
@@ -69,9 +57,8 @@ class ValidateTest(unittest.TestCase):
                                   FORMATS['GEOJSON'][0])
         self.assertTrue(validategeojson(geojson_input, MODE.NONE), 'NONE validation')
         self.assertTrue(validategeojson(geojson_input, MODE.SIMPLE), 'SIMPLE validation')
-        if WITH_GDAL:
-            self.assertTrue(validategeojson(geojson_input, MODE.STRICT), 'STRICT validation')
-            self.assertTrue(validategeojson(geojson_input, MODE.VERYSTRICT), 'VERYSTRICT validation')
+        self.assertTrue(validategeojson(geojson_input, MODE.STRICT), 'STRICT validation')
+        self.assertTrue(validategeojson(geojson_input, MODE.VERYSTRICT), 'VERYSTRICT validation')
 
     def test_fail_validator(self):
 

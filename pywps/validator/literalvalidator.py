@@ -13,25 +13,11 @@ class RangeClosureType:
 
 class AllowedValueAbstract:
 
-    __metaclass__ = ABCMeta
-
-# FIXME TODO define abstract property on this class
-    @abstractproperty
     allowed_type = None
-
-    @abstractproperty
     values = None
-
-    @abstractproperty
     minval = None
-
-    @abstractproperty
     maxval = None
-
-    @abstractproperty
     spacing = None
-
-    @abstractproperty
     range_closure = None
 
 
