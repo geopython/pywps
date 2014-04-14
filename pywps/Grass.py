@@ -104,7 +104,7 @@ class Grass:
             self.locationDir = os.path.join(config.getConfigValue("grass","gisdbase"), location)
             self.mapsetDir = tempfile.mkdtemp(prefix="pywps",dir=self.locationDir)
             self.mapsetName = os.path.split(self.mapsetDir)[1]
-            self.locationName = location
+            self.locationName = os.path.split(location)[-1]
 
             self.executeRequest.dirsToBeRemoved.append(os.path.abspath(self.mapsetDir))
 
@@ -140,7 +140,7 @@ class Grass:
         gisrc.write("OVERWRITE: 1\n")
         gisrc.write("GRASS_GUI: text\n")
         gisrc.close()
-        
+
         logging.info("GRASS MAPSET set to %s" % self.mapsetName)
         logging.info("GRASS LOCATION_NAME set to %s" % self.locationName)
         logging.info("GRASS GISDBASE set to %s" % self.gisdbase)

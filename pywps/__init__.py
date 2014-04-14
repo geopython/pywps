@@ -20,7 +20,7 @@ example how to use this module::
 
 .. moduleauthor:: Jachym Cepicky <jachym bnhelp cz>
 
-.. data:: METHOD_GET 
+.. data:: METHOD_GET
 
     String for HTTP GET method identification
 
@@ -30,15 +30,15 @@ example how to use this module::
 
 .. data:: OWS_NAMESPACE
 
-    Namespace of OGC OWS 1.1. standard 
+    Namespace of OGC OWS 1.1. standard
 
 .. data:: WPS_NAMESPACE
 
-    Namespace of OGC OWS 1.0.0 standard 
+    Namespace of OGC OWS 1.0.0 standard
 
 .. data:: XLINK_NAMESPACE
 
-    Namespace of OGC OWS 1.0.0 standard 
+    Namespace of OGC OWS 1.0.0 standard
 
 .. data:: PYWPS_INSTALL_DIR
 
@@ -118,11 +118,11 @@ class Pywps:
     :param configFiles: List of configuration files. Ignore, if you want to use standard files location
     :type configFiles: list
 
-    .. attribute:: method 
+    .. attribute:: method
 
         METHOD_GET or METHOD_POST
 
-    .. attribute:: parser 
+    .. attribute:: parser
 
         WPS request parser
 
@@ -148,16 +148,16 @@ class Pywps:
 
     .. attribute:: logFile
 
-        File objects, where some logs are written to. 
+        File objects, where some logs are written to.
 
         .. note:: Use ::
-            
+
                 import logging
-                logging.debug("hallo world") 
+                logging.debug("hallo world")
 
             for any debugging information, you want to get
 
-            
+
 
     """
 
@@ -208,7 +208,7 @@ class Pywps:
             self.parser = Get(self)
         else:
             from pywps.Parser.Post import Post
-            self.parser = Post(self)      
+            self.parser = Post(self)
 
         self.inputs = self.parser.parse(queryStringObject)
         return self.inputs
@@ -231,7 +231,7 @@ class Pywps:
                 self.request = GetCapabilities(self,processes=processes)
             elif inputs["request"]  == "describeprocess":
                 from pywps.Wps.DescribeProcess import DescribeProcess
-                self.request = DescribeProcess(self,processes=processes)              
+                self.request = DescribeProcess(self, processes=processes)
             elif inputs["request"]  == "execute":
                 from pywps.Wps.Execute import Execute
                 self.request = Execute(self,processes=processes)
