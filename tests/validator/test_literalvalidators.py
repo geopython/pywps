@@ -3,23 +3,16 @@
 import unittest
 from pywps.validator.literalvalidator import *
 
-def get_input(name, schema, mimetype):
+def get_input(allowed_values, data = 1):
 
     class FakeInput(object):
-        file = os.path.join(
-            os.path.abspath(os.path.dirname(__file__)),
-            '..', 'data', name)
+        data = 1
+        data_type = 'data'
 
-    class data_format(object):
-        file = os.path.join(
-            os.path.abspath(os.path.dirname(__file__)),
-            '..', 'data', schema)
 
     fake_input = FakeInput()
-    fake_input.stream = open(fake_input.file)
-    fake_input.data_format = data_format()
-    fake_input.data_format.schema = 'file://' + fake_input.data_format.file
-    fake_input.data_format.mimetype = mimetype
+    fake_input.data = data
+    fake_input.allowed_values = allowed_values
 
     return fake_input
 
@@ -30,13 +23,95 @@ class ValidateTest(unittest.TestCase):
     def setUp(self):
         pass
 
-
     def tearDown(self):
         pass
 
     def test_basic_validator(self):
         """Test basic validator"""
-        pass
+        inpt = get_input(allowed_values = None)
+        validator = BasicValidator()
+        self.assertTrue(validator.validate(inpt, MODE.NONE), 'NONE validation')
+        self.assertFalse(validator.validate(inpt), 'Strict validation')
+
+    def test_anyvalue_validator(self):
+        """Test anyvalue validator"""
+        inpt = get_input(allowed_values = None)
+        validator = BasicValidator()
+        self.assertTrue(validate_anyvalue(inpt, MODE.NONE))
+
+    def test_allowedvalues_values_validator(self):
+        """Test allowed values - values"""
+        allowed_value = AllowedValue()
+        allowed_value.allowed_type = AllowedValueType.VALUE
+        allowed_value.value = 1
+
+        inpt = get_input(allowed_values = [allowed_value])
+        self.assertTrue(validate_allowed_values(inpt, MODE.SIMPLE), 'Allowed value 1 allowed')
+
+        inpt.data = 2
+        self.assertFalse(validate_allowed_values(inpt, MODE.SIMPLE), 'Allowed value 2 NOT allowed')
+
+    def test_allowedvalues_ranges_validator(self):
+        """Test allowed values - ranges"""
+
+        allowed_value = AllowedValue()
+        allowed_value.allowed_type = AllowedValueType.RANGE
+        allowed_value.minval = 1
+        allowed_value.maxval = 11
+        allowed_value.spacing = 2
+        allowed_value.range_closure = RangeClosureType.OPEN
+
+        inpt = get_input(allowed_values = [allowed_value])
+
+        inpt.data = 1
+        self.assertTrue(validate_allowed_values(inpt, MODE.SIMPLE), 'Range OPEN closure')
+
+        inpt.data = 12
+        self.assertFalse(validate_allowed_values(inpt, MODE.SIMPLE), 'Value too big')
+
+        inpt.data = 5
+        self.assertTrue(validate_allowed_values(inpt, MODE.SIMPLE), 'Spacing not fit')
+
+        inpt.data = 4
+        self.assertFalse(validate_allowed_values(inpt, MODE.SIMPLE), 'Spacing fits')
+
+        inpt.data = 11
+        allowed_value.range_closure = RangeClosureType.OPEN
+        self.assertTrue(validate_allowed_values(inpt, MODE.SIMPLE), 'Open Range')
+
+        allowed_value.range_closure = RangeClosureType.OPENCLOSED
+        self.assertFalse(validate_allowed_values(inpt, MODE.SIMPLE), 'OPENCLOSED Range')
+
+        inpt.data = 1
+        allowed_value.range_closure = RangeClosureType.CLOSEDOPEN
+        self.assertFalse(validate_allowed_values(inpt, MODE.SIMPLE), 'CLOSEDOPEN Range')
+
+    def test_combined_validator(self):
+        """Test allowed values - ranges and values combination"""
+
+        allowed_value1 = AllowedValue()
+        allowed_value1.allowed_type = AllowedValueType.RANGE
+        allowed_value1.minval = 1
+        allowed_value1.maxval = 11
+        allowed_value1.spacing = 2
+        allowed_value1.range_closure = RangeClosureType.OPEN
+
+        allowed_value2 = AllowedValue()
+        allowed_value2.allowed_type = AllowedValueType.VALUE
+        allowed_value2.value = 15
+
+        inpt = get_input(allowed_values = [allowed_value1, allowed_value2])
+
+        inpt.data = 1
+        self.assertTrue(validate_allowed_values(inpt, MODE.SIMPLE), 'Range OPEN closure')
+
+        inpt.data = 15
+        self.assertTrue(validate_allowed_values(inpt, MODE.SIMPLE), 'AllowedValue')
+
+        inpt.data = 13
+        self.assertFalse(validate_allowed_values(inpt, MODE.SIMPLE), 'Out of range')
+
+
 
 def load_tests(loader=None, tests=None, pattern=None):
     if not loader:

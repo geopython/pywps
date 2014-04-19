@@ -211,18 +211,11 @@ class BasicLiteralInput(SimpleHandler):
     """LiteralInput input abstract class
     """
 
-    def __init__(self, tempdir=None, allowed_values=None,
-                 value_reference=None):
+    def __init__(self, tempdir=None, allowed_values=None):
         SimpleHandler.__init__(self, tempdir=None)
 
         self.allowed_values = allowed_values
-        self.value_reference = value_reference
-
-        if self.allowed_values is None and\
-           self.value_reference is None:
-            self.any_value = True
-        else:
-            self.any_value = False
+        self.any_value = self.allowed_values is None
 
 
 class BasicLiteralOutput(SimpleHandler):
