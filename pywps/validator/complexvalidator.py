@@ -5,6 +5,7 @@ from pywps.validator import ValidatorAbstract
 from pywps.validator import MODE
 from pywps.formats import FORMATS
 import os
+import mimetypes
 
 
 class BasicValidator(ValidatorAbstract):
@@ -52,12 +53,7 @@ def validategml(data_input, mode):
 
     if mode >= MODE.SIMPLE:
 
-        import mimetypes
-        from pywps.formats import FORMATS
-        mimetypes.init()
-        for pywps_format in FORMATS:
-            (mtype, ext) = FORMATS[pywps_format]
-            mimetypes.add_type(mtype, ext, False)
+        _get_mimetypes()
 
         name = data_input.file
         (mtype, encoding) = mimetypes.guess_type(name, strict=False)
@@ -112,12 +108,7 @@ def validategeojson(data_input, mode):
 
     if mode >= MODE.SIMPLE:
 
-        import mimetypes
-        from pywps.formats import FORMATS
-        mimetypes.init()
-        for pywps_format in FORMATS:
-            (mtype, ext) = FORMATS[pywps_format]
-            mimetypes.add_type(mtype, ext, False)
+        _get_mimetypes()
 
         name = data_input.file
         (mtype, encoding) = mimetypes.guess_type(name, strict=False)
@@ -165,6 +156,44 @@ def validategeojson(data_input, mode):
 
     return passed
 
+def validateshapefile(data_input, mode):
+    """ESRI Shapefile validation example
+
+    """
+    passed = False
+
+    if mode >= MODE.NONE:
+        passed = True
+
+    if mode >= MODE.SIMPLE:
+
+        _get_mimetypes()
+        name = data_input.file
+        (mtype, encoding) = mimetypes.guess_type(name, strict=False)
+        passed = (mtype == data_input.data_format.mimetype == FORMATS['SHP'][0])
+
+    if mode >= MODE.STRICT:
+
+        from osgeo import ogr
+
+        import zipfile
+        z = zipfile.ZipFile(data_input.stream)
+        shape_name = None
+        for name in z.namelist():
+            z.extract(name, data_input.tempdir)
+            if os.path.splitext(name)[1].lower() == '.shp':
+                shape_name = name
+        data_input.stream.close()
+
+        if shape_name:
+            data_source = ogr.Open(os.path.join(data_input.tempdir, shape_name))
+
+        if data_source:
+            passed = (data_source.GetDriver().GetName() == "ESRI Shapefile")
+        else:
+            passed = False
+
+    return passed
 
 def _get_schemas_home():
     """Get path to schemas directory
@@ -175,6 +204,16 @@ def _get_schemas_home():
         ),
         os.path.pardir,
         "schemas")
+
+def _get_mimetypes():
+    from pywps.formats import FORMATS
+    mimetypes.init()
+    for pywps_format in FORMATS:
+        (mtype, ext) = FORMATS[pywps_format]
+
+        # NOTE: strict is set to True: mimetype will be added to system
+        # mimetypes, zip -> application/zipped-shapefile
+        mimetypes.add_type(mtype, ext, True)
 
 
 if __name__ == "__main__":

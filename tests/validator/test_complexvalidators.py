@@ -1,6 +1,7 @@
 """Unit tests for complex validator
 """
 import unittest
+import sys
 from pywps.validator.complexvalidator import *
 from pywps.formats import FORMATS
 import tempfile
@@ -17,6 +18,7 @@ else:
 def get_input(name, schema, mimetype):
 
     class FakeInput(object):
+        tempdir = tempfile.mkdtemp()
         file = os.path.join(
             os.path.abspath(os.path.dirname(__file__)),
             '..', 'data', name)
@@ -24,12 +26,13 @@ def get_input(name, schema, mimetype):
     class data_format(object):
         file = os.path.join(
             os.path.abspath(os.path.dirname(__file__)),
-            '..', 'data', schema)
+            '..', 'data', str(schema))
 
     fake_input = FakeInput()
     fake_input.stream = open(fake_input.file)
     fake_input.data_format = data_format()
-    fake_input.data_format.schema = 'file://' + fake_input.data_format.file
+    if schema:
+        fake_input.data_format.schema = 'file://' + fake_input.data_format.file
     fake_input.data_format.mimetype = mimetype
 
     return fake_input
@@ -72,6 +75,15 @@ class ValidateTest(unittest.TestCase):
         if WITH_GDAL:
             self.assertTrue(validategeojson(geojson_input, MODE.STRICT), 'STRICT validation')
             self.assertTrue(validategeojson(geojson_input, MODE.VERYSTRICT), 'VERYSTRICT validation')
+
+    def test_shapefile_validator(self):
+        """Test ESRI Shapefile validator
+        """
+        shapefile_input = get_input('shp/point.shp.zip', None, FORMATS['SHP'][0])
+        self.assertTrue(validateshapefile(shapefile_input, MODE.NONE), 'NONE validation')
+        self.assertTrue(validateshapefile(shapefile_input, MODE.SIMPLE), 'SIMPLE validation')
+        if WITH_GDAL:
+            self.assertTrue(validateshapefile(shapefile_input, MODE.STRICT), 'STRICT validation')
 
     def test_fail_validator(self):
 
