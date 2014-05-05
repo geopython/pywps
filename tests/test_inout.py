@@ -153,7 +153,7 @@ class BasicLiteralInputTest(unittest.TestCase):
 
     def setUp(self):
 
-        self.literal_input = BasicLiteralInput()
+        self.literal_input = BasicLiteralInput(identifier="literalinput")
 
     def test_contruct(self):
         self.assertIsInstance(self.literal_input, BasicLiteralInput)
@@ -164,7 +164,7 @@ class BasicLiteralOutputTest(unittest.TestCase):
 
     def setUp(self):
 
-        self.literal_output = BasicLiteralOutput()
+        self.literal_output = BasicLiteralOutput("literaloutput")
 
     def test_contruct(self):
         self.assertIsInstance(self.literal_output, BasicLiteralOutput)

@@ -2,6 +2,8 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 from pywps._compat import text_type, StringIO
 import tempfile
 
+LITERAL_DATA_TYPES = ['string', 'float', 'integer', 'boolean']
+
 class SOURCE_TYPE:
     MEMORY = 0
     FILE = 1
@@ -207,22 +209,46 @@ class SimpleHandler(IOHandler):
         self._validator = validator
 
 
-class BasicLiteralInput(SimpleHandler):
+class BasicIO:
+    """Basic Input or Ouput class
+    """
+    def __init__(self, identifier, title=None, abstract=None):
+        self.identifier = identifier
+        self.title = title
+        self.abstract = abstract
+
+class BasicLiteral:
+    """Basic literal class
+    """
+
+    def __init__(self, data_type=None):
+        if not data_type:
+            data_type = LITERAL_DATA_TYPES[2]
+        assert data_type in LITERAL_DATA_TYPES
+        self.data_type = data_type
+
+class BasicLiteralInput(BasicIO, BasicLiteral, SimpleHandler):
     """LiteralInput input abstract class
     """
 
-    def __init__(self, tempdir=None, allowed_values=None):
-        SimpleHandler.__init__(self, tempdir=None)
+    def __init__(self, identifier, title=None, abstract=None,
+                 data_type=None, tempdir=None, allowed_values=None):
+        BasicIO.__init__(self, identifier, title, abstract)
+        BasicLiteral.__init__(self, data_type)
+        SimpleHandler.__init__(self, tempdir)
 
         self.allowed_values = allowed_values
         self.any_value = self.allowed_values is None
 
 
-class BasicLiteralOutput(SimpleHandler):
+class BasicLiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
     """Basic LiteralOutput class
     """
 
-    def __init__(self, tempdir=None):
+    def __init__(self, identifier, title=None, abstract=None,
+                 data_type=None, tempdir=None):
+        BasicIO.__init__(self, identifier, title, abstract)
+        BasicLiteral.__init__(self, data_type)
         SimpleHandler.__init__(self, tempdir=None)
         self._storage = None
 
