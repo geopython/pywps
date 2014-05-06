@@ -218,7 +218,7 @@ class BasicIO:
         self.abstract = abstract
 
 class BasicLiteral:
-    """Basic literal class
+    """Basic literal input/output class
     """
 
     def __init__(self, data_type=None):
@@ -227,7 +227,24 @@ class BasicLiteral:
         assert data_type in LITERAL_DATA_TYPES
         self.data_type = data_type
 
-class BasicLiteralInput(BasicIO, BasicLiteral, SimpleHandler):
+class BasicComplex(object):
+    """Basic complex input/output class
+    """
+
+    def __init__(self, data_format=None):
+        self.data_format = data_format
+
+class BasicBoundingBox(object):
+    """Basic BoundingBox input/output class
+    """
+
+    def __init__(self, crs=None, dimensions=2):
+        self.crs = crs
+        self.dimensions = dimensions
+        self.ll = []
+        self.ur = []
+
+class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
     """LiteralInput input abstract class
     """
 
@@ -241,7 +258,7 @@ class BasicLiteralInput(BasicIO, BasicLiteral, SimpleHandler):
         self.any_value = self.allowed_values is None
 
 
-class BasicLiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
+class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
     """Basic LiteralOutput class
     """
 
@@ -261,19 +278,23 @@ class BasicLiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
         self._storage = storage
 
 
-class BasicBBoxInput(SimpleHandler):
+class BBoxInput(BasicIO, BasicBoundingBox, SimpleHandler):
     """Basic Bounding box input abstract class
     """
 
-    def __init__(self, tempdir=None):
+    def __init__(self, identifier, title=None, abstract=None, crs=None, dimensions=None, tempdir=None):
+        BasicIO.__init__(self, identifier, title, abstract)
+        BasicBoundingBox.__init__(self, crs, dimensions)
         SimpleHandler.__init__(self, tempdir=None)
 
 
-class BasicBBoxOutput(SimpleHandler):
+class BBoxOutput(BasicIO, BasicBoundingBox, SimpleHandler):
     """Basic BoundingBox output class
     """
 
-    def __init__(self, tempdir=None):
+    def __init__(self, identifier, title=None, abstract=None, crs=None, dimensions=None, tempdir=None):
+        BasicIO.__init__(self, identifier, title, abstract)
+        BasicBoundingBox.__init__(self, crs, dimensions)
         SimpleHandler.__init__(self, tempdir=None)
         self._storage = None
 
@@ -286,7 +307,7 @@ class BasicBBoxOutput(SimpleHandler):
         self._storage = storage
 
 
-class ComplexInput(IOHandler):
+class ComplexInput(BasicIO, BasicComplex, IOHandler):
     """Complex input abstract class
 
     >>> ci = ComplexInput()
@@ -295,10 +316,12 @@ class ComplexInput(IOHandler):
     1
     """
 
-    def __init__(self, tempdir=None, data_format=None):
+    def __init__(self, identifier, title=None, abstract=None,
+                 tempdir=None, data_format=None):
+        BasicIO.__init__(self, identifier, title, abstract)
+        BasicComplex.__init__(self, data_format)
         IOHandler.__init__(self, tempdir)
 
-        self.data_format = data_format
 
 
 class ComplexOutput(IOHandler):
@@ -329,10 +352,12 @@ class ComplexOutput(IOHandler):
     'AA'
     """
 
-    def __init__(self, tempdir=None, data_format=None):
+    def __init__(self, identifier, title=None, abstract=None,
+                 tempdir=None, data_format=None):
+        BasicIO.__init__(self, identifier, title, abstract)
+        BasicComplex.__init__(self, data_format)
         IOHandler.__init__(self, tempdir)
 
-        self.data_format = data_format
         self._storage = None
 
     @property
