@@ -7,7 +7,7 @@ import subprocess
 import json
 from collections import deque
 from uuid import uuid4
-from StringIO import StringIO
+from pywps._compat import StringIO
 from path import path
 import flask
 from werkzeug.serving import run_simple
@@ -19,7 +19,7 @@ sys.path.append(os.path.join(
 import pywps
 from pywps import (Process, Service, WPSResponse, LiteralInput, LiteralOutput,
                    ComplexInput, Format, FileReference)
-from pywps.formats import Formats
+from pywps.formats import FORMATS
 
 
 recent_data_files = deque(maxlen=20)
@@ -77,11 +77,12 @@ def create_app():
         Process(say_hello, inputs=[LiteralInput('name', 'string')],
                 outputs=[LiteralOutput('response', 'string')]),
         Process(feature_count,
-                inputs=[ComplexInput('layer', [Format(Formats.GML)])],
-                outputs=[ComplexInput('layer', [Format(Formats.GML)])]),
+                inputs=[ComplexInput('layer', FORMATS['SHP'])],
+                outputs=[ComplexInput('layer', FORMATS['GML'])]),
         Process(centroids,
-                inputs=[ComplexInput('layer', [Format(Formats.GML)])]),
+                inputs=[ComplexInput('layer', FORMATS['GML'])]),
     ])
+    
 
     app = flask.Flask(__name__)
 
@@ -115,7 +116,7 @@ def main():
     args = parser.parse_args()
 
     app = create_app()
-    app.debug = args.debug
+    app.debug = True #args.debug
     host, port = args.listen.split(':')
     port = int(port)
 
