@@ -8,7 +8,7 @@
 """
 
 FORMATS = {
-    'GEOJSON': ['application/geojson', '.geojson'],
+    'GEOJSON': ['application/vnd.geo+json', '.geojson'],
     'JSON': ['application/json', '.json'],
     'SHP': ['application/x-zipped-shp', '.zip'],
     'GML': ['application/gml+xml', '.gml'],
