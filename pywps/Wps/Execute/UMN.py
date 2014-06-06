@@ -183,7 +183,7 @@ class UMN:
 
             myLayerObj.data = layer.GetName()
 
-            if geometry.GetGeometryName().lower() == "point":
+            if geometry.GetGeometryName().lower() in ["point","multipoint"]:
                 myLayerObj.type = MS_LAYER_POINT
                 myStyleObj.color.setRGB(0,0,0)
             else:
@@ -191,9 +191,9 @@ class UMN:
                 myStyleObj.color= colorObj(238,153,0)
                 myStyleObj.size=5
                 myStyleObj.width=5
-                if geometry.GetGeometryName().lower() in ["line","linestring"]:
+                if geometry.GetGeometryName().lower() in ["linestring","multilinestring"]:
                     myLayerObj.type = MS_LAYER_LINE
-                elif geometry.GetGeometryName().lower() == "polygon":
+                elif geometry.GetGeometryName().lower() in ["polygon", "multipolygon"]:
                     myLayerObj.type = MS_LAYER_POLYGON
                 else:
                     myLayerObj.type = MS_LAYER_POINT
