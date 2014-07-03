@@ -1,4 +1,4 @@
-	"""
+"""
 .. data:: TEMPDIRPREFIX
 
     prefix of temporary pywps directory
