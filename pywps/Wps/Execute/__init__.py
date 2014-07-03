@@ -1,4 +1,4 @@
-"""
+	"""
 .. data:: TEMPDIRPREFIX
 
     prefix of temporary pywps directory
@@ -1136,7 +1136,7 @@ class Execute(Request):
                         logging.warn("failed to link output")
                         COPY(os.path.abspath(output.value), outFile)
                     import stat
-                    os.chmod(outFile, stat.S_IROTH)
+                    os.chmod(outFile, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
                     #COPY(os.path.abspath(output.value), outFile)
                 
                 #If ftp then the path to file is the outputpath otherwise it has to be the outputURL
