@@ -753,7 +753,7 @@ class Execute(Request):
         if self.storeRequired and (self.status == self.accepted or
                                    #self.status == self.succeeded or
                                    self.status == self.failed or
-                                   self.spawned):
+                                   (self.spawned and self.status != self.succeeded)):
             pywps.response.response(self.response,
                                     self.outputFile,
                                     self.wps.parser.soapVersion,
