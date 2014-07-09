@@ -366,10 +366,11 @@ class Execute(Request):
             # spawn this process
             logging.info("Spawning process to the background")
             self.outputFile.name
-            subprocess.Popen([sys.executable,__file__,
+            FNULL = open(os.devnull,"w")
+            subprocess.Popen([sys.executable, __file__,
                 os.path.join(tmpPath, self.__pickleFileName+"-"+str(self.wps.UUID)),self.outputFile.name],
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE)
+                stdout=FNULL,#subprocess.PIPE, 
+                stderr=FNULL)#subprocess.PIPE)
             logging.info("This is parent process, end.")
 
             # close the outputs ..
@@ -753,7 +754,7 @@ class Execute(Request):
         if self.storeRequired and (self.status == self.accepted or
                                    #self.status == self.succeeded or
                                    self.status == self.failed or
-                                   self.spawned):
+                                   (self.spawned and self.status != self.succeeded)):
             pywps.response.response(self.response,
                                     self.outputFile,
                                     self.wps.parser.soapVersion,
