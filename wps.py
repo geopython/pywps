@@ -29,10 +29,8 @@ Public License as published by the Free Software Foundation version 2 of the
 License.
 
 Enjoy and happy GISing!
-
-$Id: wps.py 871 2009-11-23 14:25:09Z jachym $
 """
-__version__ = "3.0-svn"
+__version__ = "3.2.2"
 
 
 # Author:    Jachym Cepicky
@@ -69,7 +67,7 @@ if not method:  # set standard method
 inputQuery = None
 if method == pywps.METHOD_GET:
     try:
-        inputQuery = os.environ["QUERY_STRING"]     
+        inputQuery = os.environ["QUERY_STRING"]
     except KeyError:
         # if QUERY_STRING isn't found in env-dictionary, try to read
         # query from command line:
@@ -94,7 +92,7 @@ try:
             # print only to standard out
                 pywps.response.response(wps.response,
                     sys.stdout,wps.parser.soapVersion,wps.parser.isSoap,wps.parser.isSoapExecute, wps.request.contentType)
-                
+
 except WPSException,e:
     traceback.print_exc(file=pywps.logFile)
     pywps.response.response(e, sys.stdout, wps.parser.soapVersion,

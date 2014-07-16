@@ -2,11 +2,13 @@ SOURCE
 ======
 1 - Make new branch/tag
 
-svn copy svn+ssh://$DEVELOPER@svn.wald.intevation.org/pywps/trunk version_name
+git clone https://github.com/geopython/PyWPS.git
+git checkout $VERSION-branch
+git tag $VERSION
+git push
 
 Fix versions in the source
 ==========================
-cd version_name
 edit setup.py <- fix version
 edit wps.py <- fix version
 
