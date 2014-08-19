@@ -608,7 +608,7 @@ class ComplexInput(Input):
         try:
             (urltype, opaquestring) = urllib.splittype(text)
 
-            if urltype in ["http","https","ftp"]:
+            if urltype in ["http","https","ftp","file"]:
                 return True
             else:
                 return False
