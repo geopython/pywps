@@ -387,7 +387,7 @@ class ComplexInput(Input):
         # download data
 
         if input.has_key("asReference") and input["asReference"] == True:
-            self.downloadData(input["value"])
+            self.downloadData2(input["value"])
         else:
             self.storeData(input["value"])
         return
@@ -484,6 +484,32 @@ class ComplexInput(Input):
             return open(self.value,"r")
         else:
             return self.value
+
+    def downloadData2(self, url):
+        """Download data from given file url.
+
+        :param url: File URL where the data are lying
+        """
+        from urlparse import urlparse
+        url_parsed = urlparse(url)
+        # if not file use old downloadData
+        if url_parsed.scheme != 'file':
+            return self.downloadData(url)
+    
+        # try to make symbolic link to file otherwise download it
+        from os import curdir, symlink
+        outputName = tempfile.mktemp(prefix="pywpsInput",dir=curdir)
+        try:
+            symlink(url_parsed.path, outputName)
+        except Exception, what:
+            logging.exception('could not create symbolic link for file %s.', url_parsed.path)
+            return self.downloadData(url)
+
+        self.checkMimeTypeIn(outputName)
+        resp = self._setValueWithOccurence(self.value, outputName)
+        if resp:
+            return resp
+        return
 
     def downloadData(self, url):
         """Download data from given url. Do not download more, then
