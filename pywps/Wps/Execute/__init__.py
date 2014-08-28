@@ -356,21 +356,15 @@ class Execute(Request):
                     self.process.identifier)
 
             logging.debug("Store and Status are both set to True, let's be async")
-            # save the WPS object the the file
-            tmpPath=config.getConfigValue("server","tempPath")
-            self.pickleFile = open(os.path.join(tmpPath, self.__pickleFileName+"-"+str(self.wps.UUID)),"w")
-            logging.debug("PickleFile:%s" % self.pickleFile.name)
-            pickle.dump(wps,self.pickleFile)
-            self.pickleFile.close()
+            picklePath = self._store_state(wps, config.config)
+            logging.debug("PickleFile: %s" % picklePath)
 
             # spawn this process
             logging.info("Spawning process to the background")
             self.outputFile.name
-            FNULL = open(os.devnull,"w")
-            subprocess.Popen([sys.executable, __file__,
-                os.path.join(tmpPath, self.__pickleFileName+"-"+str(self.wps.UUID)),self.outputFile.name],
-                stdout=FNULL,#subprocess.PIPE, 
-                stderr=FNULL)#subprocess.PIPE)
+            new_env = self._prepare_env()
+            subprocess.Popen([sys.executable, __file__, picklePath, self.outputFile.name],
+                             stdout=None, stderr=None, env=new_env)
             logging.info("This is parent process, end.")
 
             # close the outputs ..
@@ -1380,6 +1374,51 @@ class Execute(Request):
             #check 
             self.contentType = output.format["mimetype"]
             self.response = open(outFile,"rb")
+
+    def _prepare_env(self):
+        '''
+        Prepare the environment variables to send to the spawned process when
+        using async.
+
+        The async process needs the following information:
+
+        * is the server running under mod_wsgi? If so, the spawned process
+          must redirect stdout to stderr in order to be able to catch the
+          process' output in apache's error log file.
+
+        :return: A dictionary with the environment that should be set in the
+                 spawned async process.
+        '''
+
+        new_env = os.environ.copy()
+        try:
+            import mod_wsgi
+            logging.debug('Running under mod_wsgi')
+            new_env['MOD_WSGI'] = 'MOD_WSGI'
+        except:
+            logging.debug('Nah, no mod_wsgi here. Move along')
+        return new_env
+
+    def _store_state(self, wps_instance, config_instance):
+        '''
+        Store the current state of the wps and confing to a pickle file.
+
+        This is used in the async processing. The stored state is unpickled by
+        the spawned process when execution is due.
+
+        :returns: The full path to the pickled file
+        '''
+
+        tempPath = config.getConfigValue("server","tempPath")
+        pickleName = '-'.join((self.__pickleFileName, str(self.wps.UUID)))
+        picklePath = os.path.join(tempPath, pickleName)
+        with open(picklePath, 'wb') as fh:
+            pickle.dump(wps_instance, fh)
+            pickle.dump(config_instance, fh)
+        return picklePath
+
+
+
         
 """
 Initialize Execute method with existing WPS instance
@@ -1387,15 +1426,30 @@ Initialize Execute method with existing WPS instance
 This basicaly is used for asynchronous WPS executions
 """
 if __name__ == "__main__":
+    if os.environ.get('MOD_WSGI') is not None:
+        # the main process is running under mod_wsgi.
+        # Redirect stdout to stderr, as per instructions in
+        # https://code.google.com/p/modwsgi/wiki/ApplicationIssues
+        sys.stdout = sys.stderr
     # load the pickeled file from the disc
-    if len(sys.argv) and os.path.exists(sys.argv[1]):
-        wps = pickle.load(open(sys.argv[1]))
+    picklePath = sys.argv[1] if len(sys.argv) else ''
+    if os.path.isfile(picklePath):
+        with open(picklePath) as fh:
+            wps = pickle.load(fh)
+            config.config = pickle.load(fh)
+        if config.config.has_option('server', 'virtualenvpath'):
+            # we are running under a virtualenv. Activate it as per
+            # instructions in
+            # https://code.google.com/p/modwsgi/wiki/VirtualEnvironments
+            venv = config.getConfigValue('server', 'virtualenvpath')
+            activate_script = os.path.join(venv, 'bin', 'activate_this.py')
+            if os.path.isfile(activate_script):
+                execfile(activate_script, dict(__file__=activate_script))
         wps.setLogFile()
-            
         logging.info("Spawn process started, continuting to execute the process")
         # fix some inputs
         wps.inputs["responseform"]["responsedocument"]["status"] = False
-            
+
         # create Execute instance, that's all
         if isinstance(wps,pywps.Pywps):
             try:
