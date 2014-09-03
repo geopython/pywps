@@ -35,7 +35,8 @@ import sys,os
 #        os.path.dirname( os.path.abspath(__file__)) ,"..","..","..")
 #    )
 
-sys.path[0]= os.path.join(os.path.dirname( os.path.abspath(__file__)) ,"..","..","..")
+sys.path.insert(1, os.path.join(os.path.dirname( os.path.abspath(__file__)),
+                "..","..",".."))
 import pywps
 import pywps.Ftp
 from pywps import config
