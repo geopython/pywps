@@ -78,6 +78,7 @@ dist =  setup(
         platforms=["any"],
         classifiers= classifiers,
         long_description = "\n".join(doclines[1:]),
+        install_requires=['Flask==0.7.2', 'MarkupSafe' , 'Flask-SQLAlchemy==0.16'],
 
         packages = [
             'pywps',
