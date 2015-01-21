@@ -26,6 +26,7 @@ from re import escape
 from pywps.Soap import SOAP
 import pywps.Soap
 import sys
+from xml.sax.saxutils import escape as xml_text_escape
 
 called = 0
 
@@ -98,7 +99,7 @@ class NoApplicableCode(WPSException):
             self.ExceptionText = self.document.createElement("ExceptionText")
             self.ExceptionText.appendChild(self.document.createTextNode(repr(value)))
             self.Exception.appendChild(self.ExceptionText)
-            self.value = escape(value)
+            self.value = xml_text_escape(value)
 
 class VersionNegotiationFailed(WPSException):
     """VersionNegotiationFailed WPS Exception"""
