@@ -294,7 +294,7 @@ class ComplexOutput(inout.ComplexOutput):
 
     def __init__(self, identifier, formats, output_format=None,
                  encoding="UTF-8", schema=None):
-        inout.ComplexOutput.__init__(self)
+        inout.ComplexOutput.__init__(self, identifier)
 
         self.identifier = identifier
         self.formats = formats
