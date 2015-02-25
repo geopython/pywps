@@ -324,7 +324,7 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
 
 
 
-class ComplexOutput(IOHandler):
+class ComplexOutput(BasicIO, BasicComplex, IOHandler):
     """Complex output abstract class
 
     >>> # temporary configuration
