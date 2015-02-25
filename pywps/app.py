@@ -304,9 +304,9 @@ class ComplexOutput(inout.ComplexOutput):
         self._encoding = None
 
         self.as_reference = False
-        self.set_outputformat(output_format)
-        self.set_encoding(encoding)
-        self.set_schema(schema)
+        self.output_format = output_format
+        self.encoding = encoding
+        self.schema = schema
 
     @property
     def output_format(self):
