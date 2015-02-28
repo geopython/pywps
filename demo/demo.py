@@ -18,8 +18,7 @@ sys.path.append(os.path.join(
     os.path.pardir))
 import pywps
 from pywps import (Process, Service, WPSResponse, LiteralInput, LiteralOutput,
-                   ComplexInput, Format, FileReference)
-from pywps.formats import FORMATS
+                   ComplexInput, ComplexOutput, Format, FileReference)
 
 
 recent_data_files = deque(maxlen=20)
@@ -77,10 +76,10 @@ def create_app():
         Process(say_hello, inputs=[LiteralInput('name', 'string')],
                 outputs=[LiteralOutput('response', 'string')]),
         Process(feature_count,
-                inputs=[ComplexInput('layer', FORMATS['SHP'])],
-                outputs=[ComplexInput('layer', FORMATS['GML'])]),
+                inputs=[ComplexInput('layer', [Format('SHP')])],
+                outputs=[ComplexOutput('layer', [Format('GML')])]),
         Process(centroids,
-                inputs=[ComplexInput('layer', FORMATS['GML'])]),
+                inputs=[ComplexInput('layer', [Format('GML')])]),
     ])
     
 

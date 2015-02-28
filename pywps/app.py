@@ -13,6 +13,7 @@ import lxml.etree
 from lxml.builder import ElementMaker
 from pywps._compat import text_type, StringIO
 from pywps import inout
+from pywps.formats import FORMATS
 
 xmlschema_2 = "http://www.w3.org/TR/xmlschema-2/#"
 LITERAL_DATA_TYPES = ['string', 'float', 'integer', 'boolean']
@@ -293,7 +294,7 @@ class ComplexOutput(inout.ComplexOutput):
 
     def __init__(self, identifier, formats, output_format=None,
                  encoding="UTF-8", schema=None):
-        inout.ComplexOutput.__init__(self)
+        inout.ComplexOutput.__init__(self, identifier)
 
         self.identifier = identifier
         self.formats = formats
@@ -303,9 +304,9 @@ class ComplexOutput(inout.ComplexOutput):
         self._encoding = None
 
         self.as_reference = False
-        self.set_outputformat(output_format)
-        self.set_encoding(encoding)
-        self.set_schema(schema)
+        self.output_format = output_format
+        self.encoding = encoding
+        self.schema = schema
 
     @property
     def output_format(self):
@@ -412,7 +413,10 @@ class Format(object):
 
     def __init__(self, mime_type):
 
-        self.mime_type = mime_type
+        if mime_type in FORMATS:
+            self.mime_type = FORMATS[mime_type][0]
+        else:
+            self.mime_type = mime_type
 
     def describe_xml(self):
         return E.Format(OWS.MimeType(self.mime_type))
