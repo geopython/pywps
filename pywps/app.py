@@ -14,6 +14,7 @@ from lxml.builder import ElementMaker
 from pywps._compat import text_type, StringIO
 from pywps import inout
 from pywps.formats import FORMATS
+from pywps.inout import FormatBase
 
 xmlschema_2 = "http://www.w3.org/TR/xmlschema-2/#"
 LITERAL_DATA_TYPES = ['string', 'float', 'integer', 'boolean']
@@ -352,7 +353,7 @@ class ComplexOutput(inout.ComplexOutput):
 
     @schema.setter
     def schema(self, schema):
-        """Set output encoding
+        """Set output schema
         """
         self._schema = schema
 
@@ -405,18 +406,15 @@ class BoundingBoxOutput(object):
     pass
 
 
-class Format(object):
+class Format(FormatBase):
     """
     :param mime_type: MIME type allowed for a complex input.
-    """
-    mime_type = None
+    :param encoding: The encoding of this input or requested for this output
+            (e.g., UTF-8).
+    """    
 
-    def __init__(self, mime_type):
-
-        if mime_type in FORMATS:
-            self.mime_type = FORMATS[mime_type][0]
-        else:
-            self.mime_type = mime_type
+    def __init__(self, mime_type, encoding='UTF-8', schema=None):
+        FormatBase.__init__(self, mime_type, schema, encoding)
 
     def describe_xml(self):
         return E.Format(OWS.MimeType(self.mime_type))
