@@ -89,6 +89,16 @@ class FileReference(object):
         self.url = url
         self.mime_type = mime_type
 
+    def execute_xml(self):
+        #TODO: Empty attributes should not be displayed
+        f = Format(self.mime_type)
+        return WPS.Output(
+            WPS.Reference(href=self.url, 
+                          mimeType=f.mime_type, 
+                          encoding=f.encoding, 
+                          schema=f.schema
+            )
+        )
 
 class WPSRequest(object):
     def __init__(self, http_request):
