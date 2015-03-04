@@ -487,6 +487,8 @@ class Execute(Request):
         self.process.status.onStatusChanged = self.onStatusChanged
         self.process.debug = config.getConfigValue("server","debug")
         self.process.logFile = pywps.logFile
+        # tell execute() that we are async
+        self.process.spawned = self.spawned
 
     def consolidateInputs(self):
         """ Donwload and control input data, defined by the client """
@@ -1432,6 +1434,7 @@ if __name__ == "__main__":
         # Redirect stdout to stderr, as per instructions in
         # https://code.google.com/p/modwsgi/wiki/ApplicationIssues
         sys.stdout = sys.stderr
+
     # load the pickeled file from the disc
     picklePath = sys.argv[1] if len(sys.argv) else ''
     if os.path.isfile(picklePath):
