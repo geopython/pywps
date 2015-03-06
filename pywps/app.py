@@ -514,10 +514,17 @@ class Service(object):
         return xml_response(doc)
 
     def execute(self, identifier, wps_request):
+        # check if process is valid
         try:
             process = self.processes[identifier]
         except KeyError:
             raise BadRequest("Unknown process %r" % identifier)
+        
+        # check if all mandatory inputs are passed
+        for inpt in process.inputs:
+            if inpt.identifier not in wps_request.inputs:
+                raise MissingParameterValue('', inpt.identifier)
+            
         return process.execute(wps_request)
 
     @Request.application
