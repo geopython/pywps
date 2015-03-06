@@ -467,9 +467,27 @@ class Process(object):
             E.DataOutputs(*output_elements)
         )
 
-    def execute(self, wps_request):
+    def execute(self, wps_request):    
         wps_response = WPSResponse({o.identifier: o for o in self.outputs})
-        return self.handler(wps_request, wps_response)
+        wps_response = self.handler(wps_request, wps_response) 
+        
+        #TODO: very weird code, look into it
+        output_elements = []
+        for o in wps_response.outputs:
+            output_elements.append(wps_response.outputs[o].execute_xml())
+        #output_elements = [o.execute_xml() for o in wps_response.outputs]
+        
+        doc = []
+        doc.append(
+            WPS.Process(
+                OWS.Identifier(self.identifier)
+            )
+        )
+        doc.append(
+            E.ProcessOutputs(*output_elements)
+        )
+        
+        return doc
 
 
 class Service(object):
@@ -531,7 +549,7 @@ class Service(object):
         except Exception as e:
             raise NoApplicableCode(e)
             
-        return doc
+        return xml_response(doc)
 
     @Request.application
     def __call__(self, http_request):
