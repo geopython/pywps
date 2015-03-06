@@ -39,21 +39,6 @@ def xml_response(doc):
                     content_type='text/xml')
 
 
-def get_input_from_kvp(datainputs):
-    """Get execute DataInputs from URL (key-value-pairs) encoding
-    """
-
-    inputs = {}
-
-    if datainputs:
-        for inpt in datainputs.split(";"):
-            (identifier, val) = inpt.split("=")
-
-            # add input to Inputs
-            inputs[identifier] = val
-
-    return inputs
-
 def get_input_from_xml(doc):
     the_input = MultiDict()
     for input_el in xpath_ns(doc, '/wps:Execute/wps:DataInputs/wps:Input'):
@@ -134,7 +119,7 @@ class WPSRequest(object):
 
             elif self.operation == 'execute':
                 self.identifier = self._get_get_param('identifier')
-                self.inputs = get_input_from_kvp(
+                self.inputs = self._get_input_from_kvp(
                     self._get_get_param('datainputs'))
 
             else:
@@ -185,6 +170,22 @@ class WPSRequest(object):
             raise MissingParameterValue('', key)
         
         return value
+    
+    def _get_input_from_kvp(self, datainputs):
+        """Get execute DataInputs from URL (key-value-pairs) encoding
+        :param datainputs: key:value pair list of the datainputs parameter
+        """
+        
+        inputs = {}
+        
+        for inpt in datainputs.split(";"):
+            try:
+                (identifier, val) = inpt.split("=")
+                inputs[identifier] = val
+            except:
+                inputs[inpt] = ''
+
+        return inputs
 
 
 class WPSResponse(object):
