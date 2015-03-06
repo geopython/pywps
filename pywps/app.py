@@ -131,8 +131,6 @@ class WPSRequest(object):
             elif self.operation == 'describeprocess':
                 self.identifiers = self._get_get_param('identifier',
                                                        aslist=True)
-                if not self.identifiers:
-                    raise MissingParameterValue('identifier')
 
             elif self.operation == 'execute':
                 self.identifier = self._get_get_param('identifier')
@@ -165,24 +163,28 @@ class WPSRequest(object):
             raise MethodNotAllowed()
 
     def _get_get_param(self, key, aslist=False):
-        """Returns key from the key:value pair, of the HTTP GET request, for
+        """Returns value from the key:value pair, of the HTTP GET request, for
         example 'service' or 'request'
 
-        If no value,
+        If no value, raise MissingParameterValue error
 
         :param key: key value you need to dig out of the HTTP GET request
         :param value: default value
         """
+        
         key = key.lower()
+        value = None
         for k in self.http_request.args.keys():
             if k.lower() == key:
+                value = self.http_request.args.get(k)
                 if aslist:
-                    return self.http_request.args.getlist(k)
-                else:
-                    return self.http_request.args.get(k)
-
-        # raise error
-        return None
+                    value = value.split(",")
+                    
+        if not value:
+            # raise error if value is empty
+            raise MissingParameterValue('', key)
+        
+        return value
 
 
 class WPSResponse(object):
