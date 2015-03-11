@@ -151,8 +151,6 @@ class WPSRequest(object):
         """Returns value from the key:value pair, of the HTTP GET request, for
         example 'service' or 'request'
 
-        If no value, raise MissingParameterValue error
-
         :param key: key value you need to dig out of the HTTP GET request
         :param value: default value
         """
@@ -164,10 +162,6 @@ class WPSRequest(object):
                 value = self.http_request.args.get(k)
                 if aslist:
                     value = value.split(",")
-                    
-        if not value:
-            # raise error if value is empty
-            raise MissingParameterValue('', key)
         
         return value
     
@@ -177,6 +171,9 @@ class WPSRequest(object):
         """
         
         inputs = {}
+        
+        if not datainputs:
+            return inputs
         
         for inpt in datainputs.split(";"):
             try:
@@ -512,6 +509,9 @@ class Service(object):
         return xml_response(doc)
 
     def describe(self, identifiers):
+        if not identifiers:
+            raise MissingParameterValue('', 'identifier')
+        
         identifier_elements = []
         # 'all' keyword means all processes
         if 'all' in (ident.lower() for ident in identifiers):
