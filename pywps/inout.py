@@ -328,7 +328,7 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
                  data_type=None, tempdir=None, allowed_values=None):
         BasicIO.__init__(self, identifier, title, abstract)
         BasicLiteral.__init__(self, data_type)
-        SimpleHandler.__init__(self, tempdir)
+        SimpleHandler.__init__(self, tempdir, data_type)
 
         self.allowed_values = allowed_values
         self.any_value = self.allowed_values is None
@@ -342,7 +342,7 @@ class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
                  data_type=None, tempdir=None):
         BasicIO.__init__(self, identifier, title, abstract)
         BasicLiteral.__init__(self, data_type)
-        SimpleHandler.__init__(self, tempdir=None)
+        SimpleHandler.__init__(self, tempdir=None, data_type=data_type)
         self._storage = None
 
     @property

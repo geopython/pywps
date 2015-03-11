@@ -106,7 +106,7 @@ class WPSRequest(object):
                                                  aslist=False)
 
             if not self.operation:
-                raise MissingParameterValue('request')
+                raise MissingParameterValue('Missing request value', 'request')
             else:
                 self.operation = self.operation.lower()
 
@@ -123,7 +123,7 @@ class WPSRequest(object):
                     self._get_get_param('datainputs'))
 
             else:
-                raise InvalidParameterValue(self.operation)
+                raise InvalidParameterValue('Unknown request %r' % self.operation, 'request')
 
         elif http_request.method == 'POST':
             doc = lxml.etree.fromstring(http_request.get_data())
@@ -214,16 +214,14 @@ class WPSResponse(object):
         )
         return xml_response(doc)
 
-class LiteralInput(object):
+class LiteralInput(inout.LiteralInput):
     """
     :param identifier: The name of this input.
     :param data_type: Type of literal input (e.g. `string`, `float`...).
     """
 
     def __init__(self, identifier, data_type='string'):
-        self.identifier = identifier
-        assert data_type in LITERAL_DATA_TYPES
-        self.data_type = data_type
+        inout.LiteralInput.__init__(self, identifier=identifier, data_type=data_type)
 
     def describe_xml(self):
         return E.Input(
@@ -235,7 +233,7 @@ class LiteralInput(object):
         )
 
 
-class ComplexInput(object):
+class ComplexInput(inout.ComplexInput):
     """
     :param identifier: The name of this input.
     :param formats: Allowed formats for this input. Should be a list of
@@ -243,7 +241,7 @@ class ComplexInput(object):
     """
 
     def __init__(self, identifier, formats):
-        self.identifier = identifier
+        inout.ComplexInput.__init__(self, identifier)
         self.formats = formats
 
     def describe_xml(self):
@@ -258,7 +256,7 @@ class ComplexInput(object):
         )
 
 
-class LiteralOutput(object):
+class LiteralOutput(inout.LiteralOutput):
     """
     :param identifier: The name of this output.
     :param data_type: Type of literal input (e.g. `string`, `float`...).
@@ -267,9 +265,7 @@ class LiteralOutput(object):
     """
 
     def __init__(self, identifier, data_type='string'):
-        self.identifier = identifier
-        assert data_type in LITERAL_DATA_TYPES
-        self.data_type = data_type
+        inout.LiteralOutput.__init__(self, identifier, data_type=data_type)
         self.value = None
 
     def setvalue(self, value):
