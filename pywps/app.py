@@ -472,14 +472,11 @@ class Process(object):
         #output_elements = [o.execute_xml() for o in wps_response.outputs]
         
         doc = []
-        doc.append(
-            WPS.Process(
-                OWS.Identifier(self.identifier)
-            )
-        )
-        doc.append(
-            E.ProcessOutputs(*output_elements)
-        )
+        doc.extend((
+            WPS.Process(OWS.Identifier(self.identifier)),
+            WPS.Status(WPS.ProcessSucceeded("great success")),
+            WPS.ProcessOutputs(*output_elements)
+        ))
         
         return doc
 

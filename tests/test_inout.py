@@ -10,7 +10,7 @@ from pywps._compat import text_type, StringIO
 def get_data_format():
     class DataFormat(FormatBase):
         pass
-    return DataFormat(mimetype= 'text/plain')
+    return DataFormat(mime_type= 'text/plain')
 
 class IOHandlerTest(unittest.TestCase):
     """IOHandler test cases"""
