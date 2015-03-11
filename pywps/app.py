@@ -172,8 +172,8 @@ class WPSRequest(object):
         
         inputs = {}
         
-        if not datainputs:
-            return inputs
+        if datainputs is None:
+            return None
         
         for inpt in datainputs.split(";"):
             try:
@@ -534,6 +534,11 @@ class Service(object):
             process = self.processes[identifier]
         except KeyError:
             raise BadRequest("Unknown process %r" % identifier)
+        
+        # check if datainputs is required and has been passed
+        if process.inputs:
+            if wps_request.inputs is None:
+                raise MissingParameterValue('', 'datainputs')
         
         # check if all mandatory inputs are passed
         for inpt in process.inputs:
