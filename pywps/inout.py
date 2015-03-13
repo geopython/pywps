@@ -14,11 +14,87 @@ class SOURCE_TYPE:
 class FormatBase(object):
     """Input/output format specification
     """
-    def __init__(self, mimetype, schema=None, encoding=None, validator=None):
-        self.mimetype = mimetype
-        self.schema = schema
+    def __init__(self, mime_type, schema=None, encoding=None, validator=None):
+        
+        self._mime_type = None
+        self._encoding = None
+        self._schema = None
+        self._validator = None
+        
+        self.mime_type = mime_type
         self.encoding = encoding
+        self.schema = schema
         self.validator = validator
+
+        
+    @property
+    def mime_type(self):
+        """Get format mime type
+        :rtype: String
+        """
+        
+        from formats import FORMATS
+        if self._mime_type in FORMATS:
+            return FORMATS[self._mime_type][0]
+        else:
+            return self._mime_type
+    
+    @mime_type.setter
+    def mime_type(self, mime_type):
+        """Set format mime type
+        """
+        
+        self._mime_type = mime_type
+            
+    @property
+    def encoding(self):
+        """Get format encoding
+        :rtype: String
+        """
+        
+        if self._encoding:
+            return self._encoding
+        else:
+            return ''
+    
+    @encoding.setter
+    def encoding(self, encoding):
+        """Set format encoding
+        """
+        
+        self._encoding = encoding
+        
+    @property
+    def schema(self):
+        """Get format schema
+        :rtype: String
+        """
+        if self._schema:
+            return self._schema
+        else:
+            return ''
+
+    @schema.setter
+    def schema(self, schema):
+        """Set format schema
+        """
+        self._schema = schema
+        
+    @property
+    def validator(self):
+        """Get format validator
+        :rtype: String
+        """
+        if self._validator:
+            return self._validator
+        else:
+            return ''
+
+    @validator.setter
+    def validator(self, validator):
+        """Set format validator
+        """
+        self._validator = validator
 
 
 class DataTypeAbstract(object):
@@ -252,7 +328,7 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
                  data_type=None, tempdir=None, allowed_values=None):
         BasicIO.__init__(self, identifier, title, abstract)
         BasicLiteral.__init__(self, data_type)
-        SimpleHandler.__init__(self, tempdir)
+        SimpleHandler.__init__(self, tempdir, data_type)
 
         self.allowed_values = allowed_values
         self.any_value = self.allowed_values is None
@@ -266,7 +342,7 @@ class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
                  data_type=None, tempdir=None):
         BasicIO.__init__(self, identifier, title, abstract)
         BasicLiteral.__init__(self, data_type)
-        SimpleHandler.__init__(self, tempdir=None)
+        SimpleHandler.__init__(self, tempdir=None, data_type=data_type)
         self._storage = None
 
     @property
@@ -324,7 +400,7 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
 
 
 
-class ComplexOutput(IOHandler):
+class ComplexOutput(BasicIO, BasicComplex, IOHandler):
     """Complex output abstract class
 
     >>> # temporary configuration

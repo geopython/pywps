@@ -18,8 +18,7 @@ sys.path.append(os.path.join(
     os.path.pardir))
 import pywps
 from pywps import (Process, Service, WPSResponse, LiteralInput, LiteralOutput,
-                   ComplexInput, Format, FileReference)
-from pywps.formats import FORMATS
+                   ComplexInput, ComplexOutput, Format, FileReference)
 
 
 recent_data_files = deque(maxlen=20)
@@ -50,9 +49,11 @@ def feature_count(request, response):
 
 def centroids(request, response):
     from shapely.geometry import shape, mapping
+    import urllib2
     with temp_dir() as tmp:
         input_gml = tmp / 'input.gml'
-        input_gml.write_bytes(request.inputs['layer'].read().encode('utf-8'))
+        data_input = urllib2.urlopen(request.inputs['layer'])
+        input_gml.write_bytes(data_input.read())
         input_geojson = tmp / 'input.geojson'
         subprocess.check_call(['ogr2ogr', '-f', 'geojson',
                                input_geojson, input_gml])
@@ -77,10 +78,10 @@ def create_app():
         Process(say_hello, inputs=[LiteralInput('name', 'string')],
                 outputs=[LiteralOutput('response', 'string')]),
         Process(feature_count,
-                inputs=[ComplexInput('layer', FORMATS['SHP'])],
-                outputs=[ComplexInput('layer', FORMATS['GML'])]),
+                inputs=[ComplexInput('layer', [Format('SHP')])],
+                outputs=[ComplexOutput('layer', [Format('GML')])]),
         Process(centroids,
-                inputs=[ComplexInput('layer', FORMATS['GML'])]),
+                inputs=[ComplexInput('layer', [Format('GML')])]),
     ])
     
 
