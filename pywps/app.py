@@ -22,7 +22,8 @@ LITERAL_DATA_TYPES = ['string', 'float', 'integer', 'boolean']
 NAMESPACES = {
     'wps': "http://www.opengis.net/wps/1.0.0",
     'ows': "http://www.opengis.net/ows/1.1",
-    'gml': "http://www.opengis.net/gml",
+    #'gml': "http://www.opengis.net/gml",
+    'xsi': "http://www.w3.org/2001/XMLSchema-instance"
 }
 
 E = ElementMaker()
@@ -443,9 +444,11 @@ class Process(object):
                    objects.
     """
 
-    def __init__(self, handler, identifier=None, inputs=[], outputs=[]):
+    def __init__(self, handler, identifier=None, title='', abstract='', inputs=[], outputs=[]):
         self.identifier = identifier or handler.__name__
         self.handler = handler
+        self.title = title
+        self.abstract = abstract
         self.inputs = inputs
         self.outputs = outputs
 
@@ -455,10 +458,16 @@ class Process(object):
     def describe_xml(self):
         input_elements = [i.describe_xml() for i in self.inputs]
         output_elements = [i.describe_xml() for i in self.outputs]
+        # TODO: retrieve information and put it here
         return E.ProcessDescription(
+            {'{http://www.opengis.net/wps/1.0.0}processVersion': "None"},
             OWS.Identifier(self.identifier),
+            OWS.Title(self.title),
+            OWS.Abstract(self.abstract),
             E.DataInputs(*input_elements),
-            E.DataOutputs(*output_elements)
+            E.DataOutputs(*output_elements),
+            storeSupported="true",
+            statusSupported="true"
         )
 
     def execute(self, wps_request):    
@@ -522,7 +531,13 @@ class Service(object):
                     raise InvalidParameterValue("Unknown process %r" % identifier, "identifier")
                 else:
                     identifier_elements.append(process.describe_xml())
-        doc = WPS.ProcessDescriptions(*identifier_elements)
+        doc = WPS.ProcessDescriptions(
+            {'{http://www.w3.org/XML/1998/namespace}lang': 'en-CA'},
+            {'{http://www.w3.org/2001/XMLSchema-instance}schemaLocation': 'http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd'},
+            *identifier_elements,
+            service="WPS",
+            version="1.0.0"
+        )
         return xml_response(doc)
 
     def execute(self, identifier, wps_request):
