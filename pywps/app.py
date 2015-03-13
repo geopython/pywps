@@ -15,14 +15,18 @@ from pywps._compat import text_type, StringIO
 from pywps import inout
 from pywps.formats import FORMATS
 from pywps.inout import FormatBase
+from lxml.etree import SubElement
+from lxml import etree
 
 xmlschema_2 = "http://www.w3.org/TR/xmlschema-2/#"
 LITERAL_DATA_TYPES = ['string', 'float', 'integer', 'boolean']
 
 NAMESPACES = {
+    'xlink': "http://www.w3.org/1999/xlink",
     'wps': "http://www.opengis.net/wps/1.0.0",
     'ows': "http://www.opengis.net/ows/1.1",
-    'gml': "http://www.opengis.net/gml",
+    #'gml': "http://www.opengis.net/gml",
+    'xsi': "http://www.w3.org/2001/XMLSchema-instance"
 }
 
 E = ElementMaker()
@@ -281,10 +285,11 @@ class LiteralOutput(inout.LiteralOutput):
         return WPS.Output(
             OWS.Identifier(self.identifier),
             WPS.Data(WPS.LiteralData(
-                self.getvalue(),
-                dataType=self.data_type,
-                reference=xmlschema_2 + self.data_type
-            ))
+                    self.getvalue(),
+                    dataType=self.data_type,
+                    reference=xmlschema_2 + self.data_type
+                )
+            )
         )
 
 
@@ -423,7 +428,9 @@ class Format(FormatBase):
         FormatBase.__init__(self, mime_type, schema, encoding)
 
     def describe_xml(self):
-        return E.Format(OWS.MimeType(self.mime_type))
+        return E.Format(
+            OWS.MimeType(self.mime_type) # Zero or one (optional)
+        )
 
 
 class Process(object):
@@ -450,7 +457,16 @@ class Process(object):
         self.outputs = outputs
 
     def capabilities_xml(self):
-        return WPS.Process(OWS.Identifier(self.identifier))
+        return WPS.Process(
+            # TODO: replace None with the actual provided version
+            {'{http://www.opengis.net/wps/1.0.0}processVersion': "None"}, # Zero or one (optional)
+            OWS.Identifier(self.identifier),
+            OWS.Title('None'),
+            OWS.Abstract('None') # Zero or one (optional)
+            # OWS.Metadata Zero or one (optional)
+            # OWS.Profile Zero or one (optional)
+            # OWS.WSDL Zero or one (optional)
+        )
 
     def describe_xml(self):
         input_elements = [i.describe_xml() for i in self.inputs]
@@ -465,7 +481,7 @@ class Process(object):
         wps_response = WPSResponse({o.identifier: o for o in self.outputs})
         wps_response = self.handler(wps_request, wps_response) 
         
-        #TODO: very weird code, look into it
+        # TODO: very weird code, look into it
         output_elements = []
         for o in wps_response.outputs:
             output_elements.append(wps_response.outputs[o].execute_xml())
@@ -496,12 +512,94 @@ class Service(object):
         process_elements = [p.capabilities_xml()
                             for p in self.processes.values()]
 
+        # TODO: retrieve information and put it here
         doc = WPS.Capabilities(
+            {'{http://www.w3.org/XML/1998/namespace}lang': 'en-CA'},
+            {'{http://www.w3.org/2001/XMLSchema-instance}schemaLocation': 'http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsGetCapabilities_response.xsd'},
             OWS.ServiceIdentification(
-                OWS.Title('PyWPS Server')
+                OWS.Title('PyWPS 4 Server'), # one or more
+                OWS.Abstract('See http://www.opengeospatial.org/standards/wps and https://github.com/jachym/pywps-4'), # Zero or one (optional)
+                OWS.Keywords( # Zero or one (optional)
+                    OWS.Keyword('GRASS'),
+                    OWS.Keyword('GIS'),
+                    OWS.Keyword('WPS')
+                ),
+                OWS.ServiceType('WPS'),
+                OWS.ServiceTypeVersion('1.0.0'), # one or more
+                OWS.Fees('None'), # Zero or one (optional)
+                OWS.AccessConstraints('none') # Zero or one (optional)
+                # OWS.Profile Zero or one (optional)
             ),
-            WPS.ProcessOfferings(*process_elements)
-        )
+            OWS.ServiceProvider(
+                OWS.ProviderName('Your Company Name'),
+                OWS.ProviderSite({'{http://www.w3.org/1999/xlink}href': "http://foo.bar"}), # Zero or one (optional)
+                OWS.ServiceContact( # Zero or one (optional)
+                    OWS.IndividualName('Your Name'),
+                    OWS.PositionName('Your Position'),
+                    OWS.ContactInfo(
+                        OWS.Address(
+                            OWS.DeliveryPoint('Street'),
+                            OWS.City('City'),
+                            OWS.PostalCode('000 00'),
+                            OWS.Country('eu'),
+                            OWS.ElectronicMailAddress('login@server.org')
+                        ),
+                        OWS.OnlineResource({'{http://www.w3.org/1999/xlink}href': "http://foo.bar"}),
+                        OWS.HoursOfService('0:00-24:00'),
+                        OWS.ContactInstructions('none')
+                    ),
+                    OWS.Role('Your role')
+                )
+            ),
+            OWS.OperationsMetadata(
+                OWS.Operation( # one or more
+                    OWS.DCP( # one or more
+                        OWS.HTTP(
+                            OWS.Get({'{http://www.w3.org/1999/xlink}href': "http://localhost:5000/wps?"}),
+                            OWS.Post({'{http://www.w3.org/1999/xlink}href': "http://localhost:5000/wps"}),
+                        )
+                    ),
+                    name="GetCapabilities"
+                    # paramenter Zero or one (optional)
+                    # constraint Zero or one (optional)
+                    # metadata Zero or one (optional)
+                ),
+                OWS.Operation(
+                    OWS.DCP(
+                        OWS.HTTP(
+                            OWS.Get({'{http://www.w3.org/1999/xlink}href': "http://localhost:5000/wps?"}),
+                            OWS.Post({'{http://www.w3.org/1999/xlink}href': "http://localhost:5000/wps"}),
+                        )
+                    ),
+                    name="DescribeProcess"
+                ),
+                OWS.Operation(
+                    OWS.DCP(
+                        OWS.HTTP(
+                            OWS.Get({'{http://www.w3.org/1999/xlink}href': "http://localhost:5000/wps?"}),
+                            OWS.Post({'{http://www.w3.org/1999/xlink}href': "http://localhost:5000/wps"}),
+                        )
+                    ),
+                    name="Execute"
+                )
+                # OWS.Parameter Zero or one (optional)
+                # OWS.Constraint Zero or one (optional)
+                # OWS.ExtendedCapabilities Zero or one (optional)
+            ),
+            WPS.ProcessOfferings(*process_elements),
+            WPS.Languages(
+                WPS.Default(
+                    OWS.Language('en-CA')
+                ),
+                WPS.Supported(
+                    OWS.Language('en-CA')
+                )
+            ),
+            WPS.WSDL({'{http://www.w3.org/1999/xlink}href': "http://localhost:5000/wps?WSDL"}), # Zero or one (optional)
+            service="WPS",
+            version="1.0.0",
+            updateSequence="1" # Zero or one (optional)
+        )    
 
         return xml_response(doc)
 
