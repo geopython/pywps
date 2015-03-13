@@ -5,13 +5,15 @@ Created on 10 Mar 2015
 '''
 import unittest
 import lxml.etree
-from pywps import Service, Process, ComplexInput, ComplexOutput
+import sys
+from pywps import Service, Process, ComplexInput, ComplexOutput, Exceptions
 from pywps.app import WPS, OWS
 from tests.common import client_for
 from osgeo import ogr
 
-# A layer from the MUSIC project - must be replace by something simpler
+# Layers from the MUSIC project - must be replaced by something simpler
 wfsResource = "http://maps.iguess.list.lu/cgi-bin/mapserv?map=/srv/mapserv/MapFiles/LB_localOWS_test.map&SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TYPENAME=LB_building_footprints&MAXFEATURES=10"
+wcsResource = "http://mapservices-gent.tudor.lu/gent_ows?&SERVICE=WCS&FORMAT=image/img&BBOX=103757,192665,104721,193770&RESX=1.0&RESY=1.0&RESPONSE_CRS=EPSG:31370&CRS=EPSG:31370&VERSION=1.0.0&REQUEST=GetCoverage&COVERAGE=GE_dsm"
 
 # This method already exists in test_execute - think of refactoring
 def assert_response_success(resp):
@@ -52,12 +54,47 @@ def create_feature():
         outFeature.SetGeometryDirectly(inGeometry)
         outLayer.CreateFeature(outFeature)
         outFeature.Destroy()
-    
+
+        response.outputs['output'] = out
         return response
 
     return Process(handler=feature,
                    inputs=[ComplexInput('input', mimeType='text/xml')],
                    outputs=[ComplexOutput('output', mimeType='text/xml')])
+    
+    
+def create_sum_one():
+    
+    def sum_one(request, response):
+        input = request.inputs['input']
+        # What do we need to assert a Complex input?
+        #assert type(input) is text_type
+        
+        sys.path.append("/usr/lib/grass64/etc/python/")
+        import grass.script as grass
+
+        # Import the raster and set the region
+        if grass.run_command("r.in.gdal", flags="o", out="input", input=input) != 0:
+            raise Exceptions.NoApplicableCode("Could not import cost map. Please check the WCS service.")
+        
+        if grass.run_command("g.region", flags="ap", rast="input") != 0:
+            raise Exceptions.NoApplicableCode("Could not set GRASS region.")
+        
+        # Add 1
+        if grass.mapcalc("$output = $input + $value", output="output", input="input", value=1.0) != 0:
+            raise Exceptions.NoApplicableCode("Could not set GRASS region.")
+        
+        # Export the result
+        out = "./output.tif"
+        if grass.run_command("r.out.gdal", input="output", type="Float32", output=out) != 0:
+            raise Exceptions.NoApplicableCode("Could not export result from GRASS.")
+
+        response.outputs['output'] = out
+        return response
+
+    return Process(handler=sum_one,
+                   inputs=[ComplexInput('input', mimeType='image/tiff')],
+                   outputs=[ComplexOutput('output', mimeType='image/tiff')])
     
     
 class ExecuteTest(unittest.TestCase):
@@ -70,6 +107,20 @@ class ExecuteTest(unittest.TestCase):
                 WPS.Input(
                     OWS.Identifier('input'),
                     WPS.Data(WPS.ComplexData(wfsResource)))))
+        resp = client.post_xml(doc=request_doc)
+        assert_response_success(resp)
+        # Other things to assert:
+        # . the inclusion of output
+        # . the type of output
+        
+    def test_wcs(self):
+        client = client_for(Service(processes=[create_sum_one()]))
+        request_doc = WPS.Execute(
+            OWS.Identifier('sum_one'),
+            WPS.DataInputs(
+                WPS.Input(
+                    OWS.Identifier('input'),
+                    WPS.Data(WPS.ComplexData(wcsResource)))))
         resp = client.post_xml(doc=request_doc)
         assert_response_success(resp)
         # Other things to assert:
