@@ -22,8 +22,9 @@ LITERAL_DATA_TYPES = ['string', 'float', 'integer', 'boolean']
 NAMESPACES = {
     'wps': "http://www.opengis.net/wps/1.0.0",
     'ows': "http://www.opengis.net/ows/1.1",
-    #'gml': "http://www.opengis.net/gml",
-    'xsi': "http://www.w3.org/2001/XMLSchema-instance"
+    'gml': "http://www.opengis.net/gml",
+    'xsi': "http://www.w3.org/2001/XMLSchema-instance",
+    'xlink': "http://www.w3.org/1999/xlink"
 }
 
 E = ElementMaker()
@@ -79,12 +80,45 @@ class FileReference(object):
         #TODO: Empty attributes should not be displayed
         f = Format(self.mime_type)
         return WPS.Output(
-            WPS.Reference(href=self.url, 
-                          mimeType=f.mime_type, 
-                          encoding=f.encoding, 
+            WPS.Reference(href=self.url,
+                          mimeType=f.mime_type,
+                          encoding=f.encoding,
                           schema=f.schema
             )
         )
+
+
+class Format(FormatBase):
+    """
+    :param mime_type: MIME type allowed for a complex input.
+    :param encoding: The encoding of this input or requested for this output
+            (e.g., UTF-8).
+    """
+
+    def __init__(self, mime_type, encoding='UTF-8', schema=None):
+        FormatBase.__init__(self, mime_type, schema, encoding)
+
+    def describe_xml(self):
+        return E.Format(
+            OWS.MimeType(self.mime_type),
+            OWS.Encoding(self.encoding),
+            OWS.Schema(self.schema)
+        )
+
+
+class UOM(object):
+    """
+    :param uom: unit of measure
+    """
+
+    def __init__(self, uom=''):
+        self.uom = uom
+
+    def describe_xml(self):
+        return E.UOM(
+            self.uom
+        )
+
 
 class WPSRequest(object):
     def __init__(self, http_request):
@@ -155,7 +189,7 @@ class WPSRequest(object):
         :param key: key value you need to dig out of the HTTP GET request
         :param value: default value
         """
-        
+
         key = key.lower()
         value = None
         for k in self.http_request.args.keys():
@@ -163,19 +197,19 @@ class WPSRequest(object):
                 value = self.http_request.args.get(k)
                 if aslist:
                     value = value.split(",")
-        
+
         return value
-    
+
     def _get_input_from_kvp(self, datainputs):
         """Get execute DataInputs from URL (key-value-pairs) encoding
         :param datainputs: key:value pair list of the datainputs parameter
         """
-        
+
         inputs = {}
-        
+
         if datainputs is None:
             return None
-        
+
         for inpt in datainputs.split(";"):
             try:
                 (identifier, val) = inpt.split("=")
@@ -218,16 +252,37 @@ class LiteralInput(inout.LiteralInput):
     :param data_type: Type of literal input (e.g. `string`, `float`...).
     """
 
-    def __init__(self, identifier, data_type='string'):
+    def __init__(self, identifier, title, data_type='string', abstract='', metadata=[''], uom=[UOM()], default='',
+                 min_occurs='1',
+                 max_occurs='1'):
         inout.LiteralInput.__init__(self, identifier=identifier, data_type=data_type)
+        self.title = title
+        self.abstract = abstract
+        self.metadata = metadata
+        self.uom = uom
+        self.default = default
+        self.min_occurs = min_occurs
+        self.max_occurs = max_occurs
 
     def describe_xml(self):
+        metadata_elements = [m for m in self.metadata]
+        default_uom_element = self.uom[0].describe_xml()
+        supported_uom_elements = [u.describe_xml() for u in self.uom]
         return E.Input(
             OWS.Identifier(self.identifier),
+            OWS.Title(self.title),
+            OWS.Abstract(self.abstract),
+            OWS.Metadata(*metadata_elements),
             E.LiteralData(
-                OWS.DataType(self.data_type,
-                             reference=xmlschema_2 + self.data_type)
-            )
+                OWS.DataType(self.data_type, reference=xmlschema_2 + self.data_type),
+                E.UOMs(
+                    E.Default(default_uom_element),
+                    E.Supported(*supported_uom_elements)
+                ),
+                E.Defaultvalue(self.default)
+            ),
+            minOccurs=self.min_occurs,
+            maxOccurs=self.max_occurs
         )
 
 
@@ -238,19 +293,40 @@ class ComplexInput(inout.ComplexInput):
                     one or more :class:`~Format` objects.
     """
 
-    def __init__(self, identifier, formats):
+    def __init__(self, identifier, title, formats, abstract='', metadata=[''], default='', min_occurs='1',
+                 max_occurs='1', max_megabytes=None):
         inout.ComplexInput.__init__(self, identifier)
         self.formats = formats
+        self.title = title
+        self.formats = formats
+        self.abstract = abstract
+        self.metadata = metadata
+        self.default = default
+        self.min_occurs = min_occurs
+        self.max_occurs = max_occurs
+
+        if max_megabytes:
+            self.max_fileSize = max_megabytes * 1024 * 1024
+        else:
+            # TODO: set default max size from config
+            self.max_megabytes = '0'
 
     def describe_xml(self):
+        metadata_elements = [m for m in self.metadata]
         default_format_el = self.formats[0].describe_xml()
         supported_format_elements = [f.describe_xml() for f in self.formats]
         return E.Input(
             OWS.Identifier(self.identifier),
+            OWS.Title(self.title),
+            OWS.Abstract(self.abstract),
+            OWS.Metadata(*metadata_elements),
             E.ComplexData(
                 E.Default(default_format_el),
-                E.Supported(*supported_format_elements)
-            )
+                E.Supported(*supported_format_elements),
+                maximumMegabytes=self.max_megabytes
+            ),
+            minOccurs=self.max_occurs,
+            maxOccurs=self.min_occurs
         )
 
 
@@ -262,20 +338,47 @@ class LiteralOutput(inout.LiteralOutput):
             Should be :class:`~String` object.
     """
 
-    def __init__(self, identifier, data_type='string'):
+    def __init__(self, identifier, title, data_type='string', abstract='', metadata=[''], uom=[UOM()], default=''):
         inout.LiteralOutput.__init__(self, identifier, data_type=data_type)
-        self.value = None
+        self.title = title
+        self.abstract = abstract
+        self.metadata = metadata
+        self.uom = uom
+        self.default = default
+        self._value = None
 
-    def setvalue(self, value):
-        self.value = value
+    @property
+    def value(self):
+        """Get resulting value
+        :rtype: String
+        """
 
-    def getvalue(self):
-        return self.value
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        """Set resulting value
+        """
+
+        self._value = value
 
     def describe_xml(self):
-        return WPS.Output(
+        metadata_elements = [m for m in self.metadata]
+        default_uom_element = self.uom[0].describe_xml()
+        supported_uom_elements = [u.describe_xml() for u in self.uom]
+        return E.Output(
             OWS.Identifier(self.identifier),
-            WPS.LiteralData(OWS.DataType(self.data_type, reference=xmlschema_2 + self.data_type))
+            OWS.Title(self.title),
+            OWS.Abstract(self.abstract),
+            OWS.Metadata(*metadata_elements),
+            E.LiteralData(
+                OWS.DataType(self.data_type, reference=xmlschema_2 + self.data_type),
+                E.UOMs(
+                    E.Default(default_uom_element),
+                    E.Supported(*supported_uom_elements)
+                ),
+                E.Defaultvalue(self.default)
+            )
         )
 
     def execute_xml(self):
@@ -300,12 +403,15 @@ class ComplexOutput(inout.ComplexOutput):
             (e.g., UTF-8).
     """
 
-    def __init__(self, identifier, formats, output_format=None,
-                 encoding="UTF-8", schema=None):
+    def __init__(self, identifier, title, formats, output_format=None, encoding="UTF-8",
+                 schema=None, abstract='', metadata=[''], default='', max_megabytes=None):
         inout.ComplexOutput.__init__(self, identifier)
-
-        self.identifier = identifier
         self.formats = formats
+        self.title = title
+        self.formats = formats
+        self.abstract = abstract
+        self.metadata = metadata
+        self.default = default
 
         self._schema = None
         self._output_format = None
@@ -315,6 +421,12 @@ class ComplexOutput(inout.ComplexOutput):
         self.output_format = output_format
         self.encoding = encoding
         self.schema = schema
+
+        if max_megabytes:
+            self.max_fileSize = max_megabytes * 1024 * 1024
+        else:
+            # TODO: set default max size from config
+            self.max_megabytes = '0'
 
     @property
     def output_format(self):
@@ -334,7 +446,7 @@ class ComplexOutput(inout.ComplexOutput):
         self._output_format = output_format
 
     @property
-    def encoding(self ):
+    def encoding(self):
         """Get output encoding
         :rtype: String
         """
@@ -367,11 +479,15 @@ class ComplexOutput(inout.ComplexOutput):
     def describe_xml(self):
         default_format_el = self.formats[0].describe_xml()
         supported_format_elements = [f.describe_xml() for f in self.formats]
-        return WPS.Output(
+        return E.Output(
             OWS.Identifier(self.identifier),
+            OWS.Title(self.title),
+            OWS.Abstract(self.abstract),
+            OWS.Metadata(*self.metadata),
             E.ComplexOutput(
                 E.Default(default_format_el),
-                E.Supported(*supported_format_elements)
+                E.Supported(*supported_format_elements),
+                maximumMegabytes=self.max_megabytes
             )
         )
 
@@ -400,31 +516,18 @@ class ComplexOutput(inout.ComplexOutput):
 
     def _execute_xml_data(self):
         return WPS.ComplexData(
-                self.get_stream().read(),
-                mimeType=self.output_format,
-                encoding=self.encoding,
-                schema=self.schema
+            self.get_stream().read(),
+            mimeType=self.output_format,
+            encoding=self.encoding,
+            schema=self.schema
         )
+
 
 class BoundingBoxOutput(object):
     """bounding box output
     """
     # TODO
     pass
-
-
-class Format(FormatBase):
-    """
-    :param mime_type: MIME type allowed for a complex input.
-    :param encoding: The encoding of this input or requested for this output
-            (e.g., UTF-8).
-    """    
-
-    def __init__(self, mime_type, encoding='UTF-8', schema=None):
-        FormatBase.__init__(self, mime_type, schema, encoding)
-
-    def describe_xml(self):
-        return E.Format(OWS.MimeType(self.mime_type))
 
 
 class Process(object):
@@ -444,13 +547,27 @@ class Process(object):
                    objects.
     """
 
-    def __init__(self, handler, identifier=None, title='', abstract='', inputs=[], outputs=[]):
+    def __init__(self, handler, identifier=None, title='', abstract='', profile=[], wsdl='', metadata=[], inputs=[],
+                 outputs=[], store_supported=False, status_supported=False):
         self.identifier = identifier or handler.__name__
         self.handler = handler
         self.title = title
         self.abstract = abstract
+        self.metadata = metadata
+        self.profile = profile
+        self.wsdl = wsdl
         self.inputs = inputs
         self.outputs = outputs
+
+        if store_supported:
+            self.store_supported = 'true'
+        else:
+            self.store_supported = 'false'
+
+        if status_supported:
+            self.status_supported = 'true'
+        else:
+            self.status_supported = 'false'
 
     def capabilities_xml(self):
         return WPS.Process(OWS.Identifier(self.identifier))
@@ -458,35 +575,51 @@ class Process(object):
     def describe_xml(self):
         input_elements = [i.describe_xml() for i in self.inputs]
         output_elements = [i.describe_xml() for i in self.outputs]
-        # TODO: retrieve information and put it here
-        return E.ProcessDescription(
+
+        doc = E.ProcessDescription(
             {'{http://www.opengis.net/wps/1.0.0}processVersion': "None"},
             OWS.Identifier(self.identifier),
-            OWS.Title(self.title),
-            OWS.Abstract(self.abstract),
-            E.DataInputs(*input_elements),
-            E.DataOutputs(*output_elements),
-            storeSupported="true",
-            statusSupported="true"
+            OWS.Title(self.title)
         )
 
-    def execute(self, wps_request):    
+        # TODO: include if storage of outputs or execute response document is supported
+        doc.attrib['storeSupported'] = self.store_supported
+
+        # TODO: include if updating of status data is supported
+        doc.attrib['statusSupported'] = self.status_supported
+
+        if self.abstract:
+            doc.append(OWS.Abstract(self.abstract))
+
+        for m in self.metadata:
+            doc.append(OWS.Metadata({'{http://www.w3.org/1999/xlink}title': m}))
+
+        for p in self.profile:
+            doc.append(WPS.Profile(p))
+
+        if self.wsdl:
+            doc.append(WPS.WSDL({'{http://www.w3.org/1999/xlink}href': self.wsdl}))
+
+        if input_elements:
+            doc.append(E.DataInputs(*input_elements))
+
+        doc.append(E.ProcessOutputs(*output_elements))
+
+        return doc
+
+    def execute(self, wps_request):
         wps_response = WPSResponse({o.identifier: o for o in self.outputs})
-        wps_response = self.handler(wps_request, wps_response) 
-        
-        #TODO: very weird code, look into it
-        output_elements = []
-        for o in wps_response.outputs:
-            output_elements.append(wps_response.outputs[o].execute_xml())
-        #output_elements = [o.execute_xml() for o in wps_response.outputs]
-        
+        wps_response = self.handler(wps_request, wps_response)
+
+        output_elements = [wps_response.outputs[o].execute_xml() for o in wps_response.outputs]
+
         doc = []
         doc.extend((
             WPS.Process(OWS.Identifier(self.identifier)),
             WPS.Status(WPS.ProcessSucceeded("great success")),
             WPS.ProcessOutputs(*output_elements)
         ))
-        
+
         return doc
 
 
@@ -517,7 +650,7 @@ class Service(object):
     def describe(self, identifiers):
         if not identifiers:
             raise MissingParameterValue('', 'identifier')
-        
+
         identifier_elements = []
         # 'all' keyword means all processes
         if 'all' in (ident.lower() for ident in identifiers):
@@ -531,13 +664,14 @@ class Service(object):
                     raise InvalidParameterValue("Unknown process %r" % identifier, "identifier")
                 else:
                     identifier_elements.append(process.describe_xml())
+
         doc = WPS.ProcessDescriptions(
-            {'{http://www.w3.org/XML/1998/namespace}lang': 'en-CA'},
-            {'{http://www.w3.org/2001/XMLSchema-instance}schemaLocation': 'http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd'},
-            *identifier_elements,
-            service="WPS",
-            version="1.0.0"
+            *identifier_elements
         )
+        doc.attrib['{http://www.w3.org/2001/XMLSchema-instance}schemaLocation'] = 'http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd'
+        doc.attrib['service'] = 'WPS'
+        doc.attrib['version'] = '1.0.0'
+        doc.attrib['{http://www.w3.org/XML/1998/namespace}lang'] = 'en-CA'
         return xml_response(doc)
 
     def execute(self, identifier, wps_request):
@@ -546,23 +680,23 @@ class Service(object):
             process = self.processes[identifier]
         except KeyError:
             raise BadRequest("Unknown process %r" % identifier)
-        
+
         # check if datainputs is required and has been passed
         if process.inputs:
             if wps_request.inputs is None:
                 raise MissingParameterValue('', 'datainputs')
-        
+
         # check if all mandatory inputs are passed
         for inpt in process.inputs:
             if inpt.identifier not in wps_request.inputs:
                 raise MissingParameterValue('', inpt.identifier)
-            
+
         # catch error generated by process code
         try:
             doc = WPS.ExecuteResponse(*process.execute(wps_request))
         except Exception as e:
             raise NoApplicableCode(e)
-            
+
         return xml_response(doc)
 
     @Request.application
