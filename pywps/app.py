@@ -6,7 +6,7 @@ https://github.com/jachym/pywps-4/issues/2
 from werkzeug.wrappers import Request, Response
 from werkzeug.exceptions import HTTPException, BadRequest, MethodNotAllowed
 from pywps.exceptions import InvalidParameterValue, \
-    MissingParameterValue, NoApplicableCode,\
+    MissingParameterValue, NoApplicableCode, \
     OperationNotSupported
 from werkzeug.datastructures import MultiDict
 import lxml.etree
@@ -77,7 +77,7 @@ class FileReference(object):
         self.mime_type = mime_type
 
     def execute_xml(self):
-        #TODO: Empty attributes should not be displayed
+        # TODO: Empty attributes should not be displayed
         f = Format(self.mime_type)
         return WPS.Output(
             WPS.Reference(href=self.url,
@@ -99,11 +99,17 @@ class Format(FormatBase):
         FormatBase.__init__(self, mime_type, schema, encoding)
 
     def describe_xml(self):
-        return E.Format(
-            OWS.MimeType(self.mime_type),
-            OWS.Encoding(self.encoding),
-            OWS.Schema(self.schema)
+        doc = E.Format(
+            E.MimeType(self.mime_type)
         )
+
+        if self.encoding:
+            doc.append(E.Encoding(self.encoding))
+
+        if self.schema:
+            doc.append(E.Schema(self.schema))
+
+        return doc
 
 
 class UOM(object):
@@ -115,7 +121,7 @@ class UOM(object):
         self.uom = uom
 
     def describe_xml(self):
-        return E.UOM(
+        return OWS.UOM(
             self.uom
         )
 
@@ -126,14 +132,13 @@ class WPSRequest(object):
 
         if http_request.method == 'GET':
             # service shall be WPS
-            service = self._get_get_param('service',
-                                            aslist=False)
+            service = self._get_get_param('service', aslist=False)
             if service:
                 if str(service).lower() != 'wps':
                     raise OperationNotSupported(
                         'parameter SERVICE [%s] not supported' % service)
             else:
-                raise MissingParameterValue('service','service')
+                raise MissingParameterValue('service', 'service')
 
             # operation shall be one of GetCapabilities, DescribeProcess,
             # Execute
@@ -246,15 +251,15 @@ class WPSResponse(object):
         )
         return xml_response(doc)
 
+
 class LiteralInput(inout.LiteralInput):
     """
     :param identifier: The name of this input.
     :param data_type: Type of literal input (e.g. `string`, `float`...).
     """
 
-    def __init__(self, identifier, title, data_type='string', abstract='', metadata=[''], uom=[UOM()], default='',
-                 min_occurs='1',
-                 max_occurs='1'):
+    def __init__(self, identifier, title, data_type=None, abstract='', metadata=[], uom=[], default='',
+                 min_occurs='1', max_occurs='1'):
         inout.LiteralInput.__init__(self, identifier=identifier, data_type=data_type)
         self.title = title
         self.abstract = abstract
@@ -265,25 +270,45 @@ class LiteralInput(inout.LiteralInput):
         self.max_occurs = max_occurs
 
     def describe_xml(self):
-        metadata_elements = [m for m in self.metadata]
-        default_uom_element = self.uom[0].describe_xml()
-        supported_uom_elements = [u.describe_xml() for u in self.uom]
-        return E.Input(
+        doc = E.Input(
             OWS.Identifier(self.identifier),
-            OWS.Title(self.title),
-            OWS.Abstract(self.abstract),
-            OWS.Metadata(*metadata_elements),
-            E.LiteralData(
-                OWS.DataType(self.data_type, reference=xmlschema_2 + self.data_type),
+            OWS.Title(self.title)
+        )
+
+        doc.attrib['minOccurs'] = self.min_occurs
+        doc.attrib['maxOccurs'] = self.max_occurs
+
+        if self.abstract:
+            doc.append(OWS.Abstract(self.abstract))
+
+        if self.metadata:
+            doc.append(OWS.Metadata(*self.metadata))
+
+        literal_data_doc = E.LiteralData()
+
+        if self.data_type:
+            literal_data_doc.append(OWS.DataType(self.data_type, reference=xmlschema_2 + self.data_type))
+
+        if self.uom:
+            default_uom_element = self.uom[0].describe_xml()
+            supported_uom_elements = [u.describe_xml() for u in self.uom]
+
+            literal_data_doc.append(
                 E.UOMs(
                     E.Default(default_uom_element),
                     E.Supported(*supported_uom_elements)
-                ),
-                E.Defaultvalue(self.default)
-            ),
-            minOccurs=self.min_occurs,
-            maxOccurs=self.max_occurs
-        )
+                )
+            )
+
+        doc.append(literal_data_doc)
+
+        # TODO: refer to table 29 and 30
+        doc.append(OWS.AnyValue())
+
+        if self.default:
+            doc.append(E.DefaultValue(self.default))
+
+        return doc
 
 
 class ComplexInput(inout.ComplexInput):
@@ -293,7 +318,7 @@ class ComplexInput(inout.ComplexInput):
                     one or more :class:`~Format` objects.
     """
 
-    def __init__(self, identifier, title, formats, abstract='', metadata=[''], default='', min_occurs='1',
+    def __init__(self, identifier, title, formats, abstract='', metadata=[], min_occurs='1',
                  max_occurs='1', max_megabytes=None):
         inout.ComplexInput.__init__(self, identifier)
         self.formats = formats
@@ -301,33 +326,43 @@ class ComplexInput(inout.ComplexInput):
         self.formats = formats
         self.abstract = abstract
         self.metadata = metadata
-        self.default = default
         self.min_occurs = min_occurs
         self.max_occurs = max_occurs
+        self.max_megabytes = max_megabytes
 
+        # TODO: if not set then set to default max size
         if max_megabytes:
             self.max_fileSize = max_megabytes * 1024 * 1024
-        else:
-            # TODO: set default max size from config
-            self.max_megabytes = '0'
 
     def describe_xml(self):
-        metadata_elements = [m for m in self.metadata]
         default_format_el = self.formats[0].describe_xml()
         supported_format_elements = [f.describe_xml() for f in self.formats]
-        return E.Input(
+
+        doc = E.Input(
             OWS.Identifier(self.identifier),
-            OWS.Title(self.title),
-            OWS.Abstract(self.abstract),
-            OWS.Metadata(*metadata_elements),
+            OWS.Title(self.title)
+        )
+
+        doc.attrib['minOccurs'] = self.min_occurs
+        doc.attrib['maxOccurs'] = self.max_occurs
+
+        if self.abstract:
+            doc.append(OWS.Abstract(self.abstract))
+
+        if self.metadata:
+            doc.append(OWS.Metadata(*self.metadata))
+
+        doc.append(
             E.ComplexData(
                 E.Default(default_format_el),
-                E.Supported(*supported_format_elements),
-                maximumMegabytes=self.max_megabytes
-            ),
-            minOccurs=self.max_occurs,
-            maxOccurs=self.min_occurs
+                E.Supported(*supported_format_elements)
+            )
         )
+
+        if self.max_megabytes:
+            doc.attrib['maximumMegabytes'] = self.max_megabytes
+
+        return doc
 
 
 class LiteralOutput(inout.LiteralOutput):
@@ -338,13 +373,12 @@ class LiteralOutput(inout.LiteralOutput):
             Should be :class:`~String` object.
     """
 
-    def __init__(self, identifier, title, data_type='string', abstract='', metadata=[''], uom=[UOM()], default=''):
+    def __init__(self, identifier, title, data_type=None, abstract='', metadata=[], uom=[]):
         inout.LiteralOutput.__init__(self, identifier, data_type=data_type)
         self.title = title
         self.abstract = abstract
         self.metadata = metadata
         self.uom = uom
-        self.default = default
         self._value = None
 
     @property
@@ -363,23 +397,34 @@ class LiteralOutput(inout.LiteralOutput):
         self._value = value
 
     def describe_xml(self):
-        metadata_elements = [m for m in self.metadata]
-        default_uom_element = self.uom[0].describe_xml()
-        supported_uom_elements = [u.describe_xml() for u in self.uom]
-        return E.Output(
+        doc = E.Output(
             OWS.Identifier(self.identifier),
-            OWS.Title(self.title),
-            OWS.Abstract(self.abstract),
-            OWS.Metadata(*metadata_elements),
-            E.LiteralData(
-                OWS.DataType(self.data_type, reference=xmlschema_2 + self.data_type),
+            OWS.Title(self.title)
+        )
+
+        if self.abstract:
+            doc.append(OWS.Abstract(self.abstract))
+
+        for m in self.metadata:
+            doc.append(OWS.Metadata(m))
+
+        literal_data_doc = E.LiteralData()
+
+        if self.data_type:
+            literal_data_doc.append(OWS.DataType(self.data_type, reference=xmlschema_2 + self.data_type))
+
+        if self.uom:
+            default_uom_element = self.uom[0].describe_xml()
+            supported_uom_elements = [u.describe_xml() for u in self.uom]
+
+            literal_data_doc.append(
                 E.UOMs(
                     E.Default(default_uom_element),
                     E.Supported(*supported_uom_elements)
-                ),
-                E.Defaultvalue(self.default)
+                )
             )
-        )
+
+        return doc
 
     def execute_xml(self):
         return WPS.Output(
@@ -404,14 +449,14 @@ class ComplexOutput(inout.ComplexOutput):
     """
 
     def __init__(self, identifier, title, formats, output_format=None, encoding="UTF-8",
-                 schema=None, abstract='', metadata=[''], default='', max_megabytes=None):
+                 schema=None, abstract='', metadata=[], max_megabytes=None):
         inout.ComplexOutput.__init__(self, identifier)
         self.formats = formats
         self.title = title
         self.formats = formats
         self.abstract = abstract
         self.metadata = metadata
-        self.default = default
+        self.max_megabytes = max_megabytes
 
         self._schema = None
         self._output_format = None
@@ -422,11 +467,9 @@ class ComplexOutput(inout.ComplexOutput):
         self.encoding = encoding
         self.schema = schema
 
+        # TODO: if not set then set to default max size
         if max_megabytes:
             self.max_fileSize = max_megabytes * 1024 * 1024
-        else:
-            # TODO: set default max size from config
-            self.max_megabytes = '0'
 
     @property
     def output_format(self):
@@ -479,17 +522,29 @@ class ComplexOutput(inout.ComplexOutput):
     def describe_xml(self):
         default_format_el = self.formats[0].describe_xml()
         supported_format_elements = [f.describe_xml() for f in self.formats]
-        return E.Output(
+
+        doc = E.Output(
             OWS.Identifier(self.identifier),
-            OWS.Title(self.title),
-            OWS.Abstract(self.abstract),
-            OWS.Metadata(*self.metadata),
+            OWS.Title(self.title)
+        )
+
+        if self.abstract:
+            doc.append(OWS.Abstract(self.abstract))
+
+        for m in self.metadata:
+            doc.append(OWS.Metadata(*self.metadata))
+
+        doc.append(
             E.ComplexOutput(
                 E.Default(default_format_el),
-                E.Supported(*supported_format_elements),
-                maximumMegabytes=self.max_megabytes
+                E.Supported(*supported_format_elements)
             )
         )
+
+        if self.max_megabytes:
+            doc.attrib['maximumMegabytes'] = self.max_megabytes
+
+        return doc
 
     def execute_xml(self):
         """Render Execute response XML node
@@ -655,7 +710,10 @@ class Service(object):
         # 'all' keyword means all processes
         if 'all' in (ident.lower() for ident in identifiers):
             for process in self.processes:
-                identifier_elements.append(self.processes[process].describe_xml())
+                try:
+                    identifier_elements.append(self.processes[process].describe_xml())
+                except Exception as e:
+                    raise NoApplicableCode(e)
         else:
             for identifier in identifiers:
                 try:
@@ -663,7 +721,11 @@ class Service(object):
                 except KeyError:
                     raise InvalidParameterValue("Unknown process %r" % identifier, "identifier")
                 else:
-                    identifier_elements.append(process.describe_xml())
+                    try:
+                        identifier_elements.append(process.describe_xml())
+                    except Exception as e:
+                        raise NoApplicableCode(e)
+
 
         doc = WPS.ProcessDescriptions(
             *identifier_elements
