@@ -94,7 +94,7 @@ def create_sum_one():
         return response
 
     return Process(handler=sum_one,
-                   inputs=[ComplexInput('input', [Format('image/tiff')])],
+                   inputs=[ComplexInput('input', [Format('image/img')])],
                    outputs=[ComplexOutput('output', [Format('image/tiff')])])
     
     
@@ -107,7 +107,10 @@ class ExecuteTests(unittest.TestCase):
             WPS.DataInputs(
                 WPS.Input(
                     OWS.Identifier('input'),
-                    WPS.Data(WPS.ComplexData(wfsResource)))))
+                    WPS.Data(WPS.ComplexData(wfsResource, mimeType='text/xml')))),
+            WPS.ProcessOutputs(
+                WPS.Output(
+                    OWS.Identifier('output'))))
         resp = client.post_xml(doc=request_doc)
         assert_response_success(resp)
         # Other things to assert:
@@ -121,7 +124,10 @@ class ExecuteTests(unittest.TestCase):
             WPS.DataInputs(
                 WPS.Input(
                     OWS.Identifier('input'),
-                    WPS.Data(WPS.ComplexData(wcsResource)))))
+                    WPS.Data(WPS.ComplexData(wcsResource, mimeType='image/img')))),
+            WPS.ProcessOutputs(
+                WPS.Output(
+                    OWS.Identifier('output'))))
         resp = client.post_xml(doc=request_doc)
         assert_response_success(resp)
         # Other things to assert:
