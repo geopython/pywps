@@ -107,7 +107,7 @@ class ExecuteTests(unittest.TestCase):
             WPS.DataInputs(
                 WPS.Input(
                     OWS.Identifier('input'),
-                    WPS.Data(WPS.ComplexData(wfsResource, mimeType='text/xml')))),
+                    WPS.Reference(href=wfsResource, mimeType='text/xml'))),
             WPS.ProcessOutputs(
                 WPS.Output(
                     OWS.Identifier('output'))))
@@ -124,7 +124,7 @@ class ExecuteTests(unittest.TestCase):
             WPS.DataInputs(
                 WPS.Input(
                     OWS.Identifier('input'),
-                    WPS.Data(WPS.ComplexData(wcsResource, mimeType='image/img')))),
+                    WPS.Reference(href=wcsResource, mimeType='image/img'))),
             WPS.ProcessOutputs(
                 WPS.Output(
                     OWS.Identifier('output'))))
