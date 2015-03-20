@@ -450,23 +450,37 @@ class Process(object):
                    objects.
     """
 
-    def __init__(self, handler, identifier=None, inputs=[], outputs=[]):
+    def __init__(self, handler, identifier=None, title='', abstract='', metadata=[], profile=None, wsdl='',
+                 version=None, inputs=[], outputs=[]):
         self.identifier = identifier or handler.__name__
+        self.title = title
+        self.abstract = abstract
+        self.metadata = metadata
+        self.profile = profile
+        self.wsdl = wsdl
+        self.version = version
         self.handler = handler
         self.inputs = inputs
         self.outputs = outputs
 
     def capabilities_xml(self):
-        return WPS.Process(
-            # TODO: replace None with the actual provided version
-            {'{http://www.opengis.net/wps/1.0.0}processVersion': "None"}, # Zero or one (optional)
+        doc = WPS.Process(
             OWS.Identifier(self.identifier),
-            OWS.Title('None'),
-            OWS.Abstract('None') # Zero or one (optional)
-            # OWS.Metadata Zero or one (optional)
-            # OWS.Profile Zero or one (optional)
-            # OWS.WSDL Zero or one (optional)
+            OWS.Title(self.title)
         )
+        if self.abstract:
+            doc.append(OWS.Abstract(self.abstract))
+        # TODO: See Table 32 Metadata in OGC 06-121r3
+        for m in self.metadata:
+            doc.append(OWS.Metadata(m))
+        if self.profile:
+            doc.append(OWS.Profile(self.profile))
+        if self.wsdl:
+            doc.append(OWS.WSDL(self.wsdl))
+        if self.version:
+            doc.append({'{http://www.opengis.net/wps/1.0.0}processVersion': self.version})
+
+        return doc
 
     def describe_xml(self):
         input_elements = [i.describe_xml() for i in self.inputs]
@@ -477,23 +491,23 @@ class Process(object):
             E.DataOutputs(*output_elements)
         )
 
-    def execute(self, wps_request):    
+    def execute(self, wps_request):
         wps_response = WPSResponse({o.identifier: o for o in self.outputs})
-        wps_response = self.handler(wps_request, wps_response) 
-        
+        wps_response = self.handler(wps_request, wps_response)
+
         # TODO: very weird code, look into it
         output_elements = []
         for o in wps_response.outputs:
             output_elements.append(wps_response.outputs[o].execute_xml())
-        #output_elements = [o.execute_xml() for o in wps_response.outputs]
-        
+        # output_elements = [o.execute_xml() for o in wps_response.outputs]
+
         doc = []
         doc.extend((
             WPS.Process(OWS.Identifier(self.identifier)),
             WPS.Status(WPS.ProcessSucceeded("great success")),
             WPS.ProcessOutputs(*output_elements)
         ))
-        
+
         return doc
 
 
@@ -512,94 +526,161 @@ class Service(object):
         process_elements = [p.capabilities_xml()
                             for p in self.processes.values()]
 
-        # TODO: retrieve information and put it here
-        doc = WPS.Capabilities(
-            {'{http://www.w3.org/XML/1998/namespace}lang': 'en-CA'},
-            {'{http://www.w3.org/2001/XMLSchema-instance}schemaLocation': 'http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsGetCapabilities_response.xsd'},
-            OWS.ServiceIdentification(
-                OWS.Title('PyWPS 4 Server'), # one or more
-                OWS.Abstract('See http://www.opengeospatial.org/standards/wps and https://github.com/jachym/pywps-4'), # Zero or one (optional)
-                OWS.Keywords( # Zero or one (optional)
-                    OWS.Keyword('GRASS'),
-                    OWS.Keyword('GIS'),
-                    OWS.Keyword('WPS')
-                ),
-                OWS.ServiceType('WPS'),
-                OWS.ServiceTypeVersion('1.0.0'), # one or more
-                OWS.Fees('None'), # Zero or one (optional)
-                OWS.AccessConstraints('none') # Zero or one (optional)
-                # OWS.Profile Zero or one (optional)
-            ),
-            OWS.ServiceProvider(
-                OWS.ProviderName('Your Company Name'),
-                OWS.ProviderSite({'{http://www.w3.org/1999/xlink}href': "http://foo.bar"}), # Zero or one (optional)
-                OWS.ServiceContact( # Zero or one (optional)
-                    OWS.IndividualName('Your Name'),
-                    OWS.PositionName('Your Position'),
-                    OWS.ContactInfo(
-                        OWS.Address(
-                            OWS.DeliveryPoint('Street'),
-                            OWS.City('City'),
-                            OWS.PostalCode('000 00'),
-                            OWS.Country('eu'),
-                            OWS.ElectronicMailAddress('login@server.org')
-                        ),
-                        OWS.OnlineResource({'{http://www.w3.org/1999/xlink}href': "http://foo.bar"}),
-                        OWS.HoursOfService('0:00-24:00'),
-                        OWS.ContactInstructions('none')
-                    ),
-                    OWS.Role('Your role')
+        import config
+
+        doc = WPS.Capabilities()
+
+        doc.attrib['service'] = 'WPS'
+        doc.attrib['version'] = '1.0.0'
+        doc.attrib['{http://www.w3.org/XML/1998/namespace}lang'] = 'en-CA'
+        doc.attrib['{http://www.w3.org/2001/XMLSchema-instance}schemaLocation'] = 'http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd'
+        # TODO: check Table 7 in OGC 05-007r7
+        doc.attrib['updateSequence'] = '1'
+
+        # Service Identification
+        service_ident_doc = OWS.ServiceIdentification(
+            OWS.Title(config.get_config_value('wps', 'title'))
+        )
+
+        if config.get_config_value('wps', 'abstract'):
+            service_ident_doc.append(OWS.Abstract(config.get_config_value('wps', 'abstract')))
+
+        if config.get_config_value('wps', 'keywords'):
+            keywords_doc = OWS.Keywords()
+            for k in config.get_config_value('wps', 'keywords').split(','):
+                if k:
+                    keywords_doc.append(OWS.Keyword(k))
+            service_ident_doc.append(keywords_doc)
+
+        service_ident_doc.append(OWS.ServiceType('WPS'))
+
+        for v in config.get_config_value('wps', 'version').split(','):
+            service_ident_doc.append(OWS.ServiceTypeVersion(v))
+
+        service_ident_doc.append(OWS.Fees(config.get_config_value('wps', 'fees')))
+
+        for con in config.get_config_value('wps', 'constraints').split(','):
+            service_ident_doc.append(OWS.AccessConstraints(con))
+
+        if config.get_config_value('wps', 'profile'):
+            service_ident_doc.append(OWS.Profile(config.get_config_value('wps', 'profile')))
+
+        doc.append(service_ident_doc)
+
+        # Service Provider
+        service_prov_doc = OWS.ServiceProvider(OWS.ProviderName(config.get_config_value('provider', 'providerName')))
+
+        if config.get_config_value('provider', 'providerSite'):
+            service_prov_doc.append(OWS.ProviderSite(
+                {'{http://www.w3.org/1999/xlink}href': config.get_config_value('provider', 'providerSite')})
+            )
+
+        # Service Contact
+        service_contact_doc = OWS.ServiceContact()
+
+        # Add Contact information only if a name is set
+        if config.get_config_value('provider', 'individualName'):
+            service_contact_doc.append(OWS.IndividualName(config.get_config_value('provider', 'individualName')))
+            if config.get_config_value('provider', 'positionName'):
+                service_contact_doc.append(OWS.PositionName(config.get_config_value('provider', 'positionName')))
+            if config.get_config_value('provider', 'role'):
+                service_contact_doc.append(OWS.Role(config.get_config_value('provider', 'role')))
+
+            contact_info_doc = OWS.ContactInfo()
+
+            phone_doc = OWS.Phone()
+            if config.get_config_value('provider', 'phoneVoice'):
+                phone_doc.append(OWS.Voice(config.get_config_value('provider', 'phoneVoice')))
+            if config.get_config_value('provider', 'phoneFacsimile'):
+                phone_doc.append(OWS.Facsimile(config.get_config_value('provider', 'phoneFacsimile')))
+            # Add Phone if not empty
+            if len(phone_doc):
+                contact_info_doc.append(phone_doc)
+
+            address_doc = OWS.Address()
+            if config.get_config_value('provider', 'deliveryPoint'):
+                address_doc.append(OWS.DeliveryPoint(config.get_config_value('provider', 'deliveryPoint')))
+            if config.get_config_value('provider', 'city'):
+                address_doc.append(OWS.City(config.get_config_value('provider', 'city')))
+            if config.get_config_value('provider', 'postalCode'):
+                address_doc.append(OWS.PostalCode(config.get_config_value('provider', 'postalCode')))
+            if config.get_config_value('provider', 'country'):
+                address_doc.append(OWS.Country(config.get_config_value('provider', 'country')))
+            if config.get_config_value('provider', 'electronicalMailAddress'):
+                address_doc.append(
+                    OWS.ElectronicMailAddress(config.get_config_value('provider', 'electronicalMailAddress'))
                 )
-            ),
-            OWS.OperationsMetadata(
-                OWS.Operation( # one or more
-                    OWS.DCP( # one or more
-                        OWS.HTTP(
-                            OWS.Get({'{http://www.w3.org/1999/xlink}href': "http://localhost:5000/wps?"}),
-                            OWS.Post({'{http://www.w3.org/1999/xlink}href': "http://localhost:5000/wps"}),
-                        )
-                    ),
-                    name="GetCapabilities"
-                    # paramenter Zero or one (optional)
-                    # constraint Zero or one (optional)
-                    # metadata Zero or one (optional)
-                ),
-                OWS.Operation(
-                    OWS.DCP(
-                        OWS.HTTP(
-                            OWS.Get({'{http://www.w3.org/1999/xlink}href': "http://localhost:5000/wps?"}),
-                            OWS.Post({'{http://www.w3.org/1999/xlink}href': "http://localhost:5000/wps"}),
-                        )
-                    ),
-                    name="DescribeProcess"
-                ),
-                OWS.Operation(
-                    OWS.DCP(
-                        OWS.HTTP(
-                            OWS.Get({'{http://www.w3.org/1999/xlink}href': "http://localhost:5000/wps?"}),
-                            OWS.Post({'{http://www.w3.org/1999/xlink}href': "http://localhost:5000/wps"}),
-                        )
-                    ),
-                    name="Execute"
+            # Add Address if not empty
+            if len(address_doc):
+                contact_info_doc.append(address_doc)
+
+            if config.get_config_value('provider', 'onlineResource'):
+                contact_info_doc.append(OWS.OnlineResource(
+                    {'{http://www.w3.org/1999/xlink}href': config.get_config_value('provider', 'onlineResource')})
                 )
-                # OWS.Parameter Zero or one (optional)
-                # OWS.Constraint Zero or one (optional)
-                # OWS.ExtendedCapabilities Zero or one (optional)
-            ),
-            WPS.ProcessOfferings(*process_elements),
-            WPS.Languages(
-                WPS.Default(
-                    OWS.Language('en-CA')
+            if config.get_config_value('provider', 'hoursOfService'):
+                contact_info_doc.append(OWS.HoursOfService(config.get_config_value('provider', 'hoursOfService')))
+            if config.get_config_value('provider', 'contactInstructions'):
+                contact_info_doc.append(OWS.ContactInstructions(config.get_config_value('provider', 'contactInstructions')))
+
+            # Add Contact information if not empty
+            if len(contact_info_doc):
+                service_contact_doc.append(contact_info_doc)
+
+        # Add Service Contact only if ProviderName and PositionName are set
+        if len(service_contact_doc):
+            service_prov_doc.append(service_contact_doc)
+
+        doc.append(service_prov_doc)
+
+        # Operations Metadata
+        operations_metadata_doc = OWS.OperationsMetadata(
+            OWS.Operation(
+                OWS.DCP(
+                    OWS.HTTP(
+                        OWS.Get({'{http://www.w3.org/1999/xlink}href': config.get_config_value('wps', 'serveraddress').join("?")}),
+                        OWS.Post({'{http://www.w3.org/1999/xlink}href': config.get_config_value('wps', 'serveraddress')}),
+                    )
                 ),
-                WPS.Supported(
-                    OWS.Language('en-CA')
-                )
+                name="GetCapabilities"
             ),
-            WPS.WSDL({'{http://www.w3.org/1999/xlink}href': "http://localhost:5000/wps?WSDL"}), # Zero or one (optional)
-            service="WPS",
-            version="1.0.0",
-            updateSequence="1" # Zero or one (optional)
-        )    
+            OWS.Operation(
+                OWS.DCP(
+                    OWS.HTTP(
+                        OWS.Get({'{http://www.w3.org/1999/xlink}href': config.get_config_value('wps', 'serveraddress').join("?")}),
+                        OWS.Post({'{http://www.w3.org/1999/xlink}href': config.get_config_value('wps', 'serveraddress')}),
+                    )
+                ),
+                name="DescribeProcess"
+            ),
+            OWS.Operation(
+                OWS.DCP(
+                    OWS.HTTP(
+                        OWS.Get({'{http://www.w3.org/1999/xlink}href': config.get_config_value('wps', 'serveraddress').join("?")}),
+                        OWS.Post({'{http://www.w3.org/1999/xlink}href': config.get_config_value('wps', 'serveraddress')}),
+                    )
+                ),
+                name="Execute"
+            )
+        )
+        doc.append(operations_metadata_doc)
+
+        doc.append(WPS.ProcessOfferings(*process_elements))
+
+        languages = config.get_config_value('wps', 'lang').split(',')
+        languages_doc = WPS.Languages(
+            WPS.Default(
+                OWS.Language(languages[0])
+            )
+        )
+        lang_supported_doc = WPS.Supported()
+        for l in languages:
+            lang_supported_doc.append(OWS.Language(l))
+        languages_doc.append(lang_supported_doc)
+
+        doc.append(languages_doc)
+
+        doc.append(WPS.WSDL({'{http://www.w3.org/1999/xlink}href': config.get_config_value('wps', 'serveraddress').join("?WSDL")}))
 
         return xml_response(doc)
 
@@ -639,7 +720,7 @@ class Service(object):
         for inpt in process.inputs:
             if inpt.identifier not in wps_request.inputs:
                 raise MissingParameterValue('', inpt.identifier)
-            
+
         # catch error generated by process code
         try:
             doc = WPS.ExecuteResponse(*process.execute(wps_request))
