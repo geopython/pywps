@@ -95,6 +95,7 @@ def load_configuration():
         home_path = os.getenv("HOME")
         if home_path:
             cfg_files = (os.path.join(pywps.__path__[0], "pywps.cfg"),
+                         os.path.join(pywps.__path__[0], os.path.pardir, "pywps.cfg"),
                          "/etc/pywps.cfg",
                          os.path.join(os.getenv("HOME"), ".pywps.cfg"))
         else:
