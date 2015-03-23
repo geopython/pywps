@@ -1,4 +1,6 @@
+import sys
 import os
+import pywps
 import ConfigParser
 import tempfile
 
@@ -83,10 +85,21 @@ def load_configuration():
     config.set('server', 'logFile', '')
     config.set('server', 'logLevel', 'INFO')
 
-    # Read configuration file
-    pywps_cfg = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)),
-        os.path.pardir,
-        "pywps.cfg")
-    files = [pywps_cfg]
-    config.read(files)
+    # try to estimate the default location
+    # Windows or Unix
+    if sys.platform == 'win32':
+        PYWPS_INSTALL_DIR = os.path.abspath(os.path.join(os.getcwd(), os.path.dirname(sys.argv[0])))
+        cfg_files = (os.path.join(PYWPS_INSTALL_DIR, "pywps", "pywps.cfg"),
+                     os.path.join(PYWPS_INSTALL_DIR, "pywps.cfg"))
+    else:
+        home_path = os.getenv("HOME")
+        if home_path:
+            cfg_files = (os.path.join(pywps.__path__[0], "pywps.cfg"),
+                         "/etc/pywps.cfg",
+                         os.path.join(os.getenv("HOME"), ".pywps.cfg"))
+        else:
+            cfg_files = (os.path.join(pywps.__path__[0], "pywps.cfg"),
+                         os.path.join(pywps.__path__[0], os.path.pardir, "pywps.cfg"),
+                         "/etc/pywps.cfg")
+
+    config.read(cfg_files)
