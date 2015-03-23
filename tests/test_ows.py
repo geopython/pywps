@@ -6,7 +6,8 @@ Created on 10 Mar 2015
 import unittest
 import lxml.etree
 import sys
-from pywps import Service, Process, ComplexInput, ComplexOutput, Exceptions
+from pywps import Service, Process, ComplexInput, ComplexOutput, Format 
+from pywps.exceptions import NoApplicableCode
 from pywps.app import WPS, OWS
 from tests.common import client_for
 from osgeo import ogr
@@ -59,8 +60,8 @@ def create_feature():
         return response
 
     return Process(handler=feature,
-                   inputs=[ComplexInput('input', mimeType='text/xml')],
-                   outputs=[ComplexOutput('output', mimeType='text/xml')])
+                   inputs=[ComplexInput('input', [Format('text/xml')])],
+                   outputs=[ComplexOutput('output', [Format('text/xml')])])
     
     
 def create_sum_one():
@@ -75,29 +76,29 @@ def create_sum_one():
 
         # Import the raster and set the region
         if grass.run_command("r.in.gdal", flags="o", out="input", input=input) != 0:
-            raise Exceptions.NoApplicableCode("Could not import cost map. Please check the WCS service.")
+            raise NoApplicableCode("Could not import cost map. Please check the WCS service.")
         
         if grass.run_command("g.region", flags="ap", rast="input") != 0:
-            raise Exceptions.NoApplicableCode("Could not set GRASS region.")
+            raise NoApplicableCode("Could not set GRASS region.")
         
         # Add 1
         if grass.mapcalc("$output = $input + $value", output="output", input="input", value=1.0) != 0:
-            raise Exceptions.NoApplicableCode("Could not set GRASS region.")
+            raise NoApplicableCode("Could not set GRASS region.")
         
         # Export the result
         out = "./output.tif"
         if grass.run_command("r.out.gdal", input="output", type="Float32", output=out) != 0:
-            raise Exceptions.NoApplicableCode("Could not export result from GRASS.")
+            raise NoApplicableCode("Could not export result from GRASS.")
 
         response.outputs['output'] = out
         return response
 
     return Process(handler=sum_one,
-                   inputs=[ComplexInput('input', mimeType='image/tiff')],
-                   outputs=[ComplexOutput('output', mimeType='image/tiff')])
+                   inputs=[ComplexInput('input', [Format('image/img')])],
+                   outputs=[ComplexOutput('output', [Format('image/tiff')])])
     
     
-class ExecuteTest(unittest.TestCase):
+class ExecuteTests(unittest.TestCase):
 
     def test_wfs(self):
         client = client_for(Service(processes=[create_feature()]))
@@ -106,7 +107,10 @@ class ExecuteTest(unittest.TestCase):
             WPS.DataInputs(
                 WPS.Input(
                     OWS.Identifier('input'),
-                    WPS.Data(WPS.ComplexData(wfsResource)))))
+                    WPS.Reference(href=wfsResource, mimeType='text/xml'))),
+            WPS.ProcessOutputs(
+                WPS.Output(
+                    OWS.Identifier('output'))))
         resp = client.post_xml(doc=request_doc)
         assert_response_success(resp)
         # Other things to assert:
@@ -120,10 +124,21 @@ class ExecuteTest(unittest.TestCase):
             WPS.DataInputs(
                 WPS.Input(
                     OWS.Identifier('input'),
-                    WPS.Data(WPS.ComplexData(wcsResource)))))
+                    WPS.Reference(href=wcsResource, mimeType='image/img'))),
+            WPS.ProcessOutputs(
+                WPS.Output(
+                    OWS.Identifier('output'))))
         resp = client.post_xml(doc=request_doc)
         assert_response_success(resp)
         # Other things to assert:
         # . the inclusion of output
         # . the type of output
-        
+   
+   
+def load_tests(loader=None, tests=None, pattern=None):
+    if not loader:
+        loader = unittest.TestLoader()
+    suite_list = [
+        loader.loadTestsFromTestCase(ExecuteTests),
+    ]
+    return unittest.TestSuite(suite_list)     
