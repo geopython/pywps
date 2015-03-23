@@ -69,7 +69,7 @@ class DescribeProcessTest(unittest.TestCase):
     def test_post_request_zero_args(self):
         request_doc = WPS.DescribeProcess()
         resp = self.client.post_xml(doc=request_doc)
-        assert [pr.identifier for pr in get_describe_result(resp)] == []
+        assert resp.status_code == 400
 
     def test_get_one_arg(self):
         resp = self.client.get('?service=wps&Request=DescribeProcess&identifier=hello')
@@ -83,8 +83,7 @@ class DescribeProcessTest(unittest.TestCase):
     def test_get_two_args(self):
         resp = self.client.get('?Request=DescribeProcess'
                                '&service=wps'
-                               '&identifier=hello'
-                               '&identifier=ping')
+                               '&identifier=hello,ping')
         result = get_describe_result(resp)
         assert [pr.identifier for pr in result] == ['hello', 'ping']
 

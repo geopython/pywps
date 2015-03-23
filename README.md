@@ -20,6 +20,7 @@ Dependencies
 
 * lxml (http://lxml.de)
 * werkzeug (http://werkzeug.pocoo.org)
+* libxml2-dev, libxslt1-dev 
 
 
 Run tests

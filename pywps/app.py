@@ -14,6 +14,7 @@ from lxml.builder import ElementMaker
 from pywps._compat import text_type, StringIO
 from pywps import inout
 from pywps.formats import FORMATS
+from pywps.inout import FormatBase
 
 xmlschema_2 = "http://www.w3.org/TR/xmlschema-2/#"
 LITERAL_DATA_TYPES = ['string', 'float', 'integer', 'boolean']
@@ -37,21 +38,6 @@ def xml_response(doc):
     return Response(lxml.etree.tostring(doc, pretty_print=True),
                     content_type='text/xml')
 
-
-def get_input_from_kvp(datainputs):
-    """Get execute DataInputs from URL (key-value-pairs) encoding
-    """
-
-    inputs = {}
-
-    if datainputs:
-        for inpt in datainputs.split(";"):
-            (identifier, val) = inpt.split("=")
-
-            # add input to Inputs
-            inputs[identifier] = val
-
-    return inputs
 
 def get_input_from_xml(doc):
     the_input = MultiDict()
@@ -88,6 +74,16 @@ class FileReference(object):
         self.url = url
         self.mime_type = mime_type
 
+    def execute_xml(self):
+        #TODO: Empty attributes should not be displayed
+        f = Format(self.mime_type)
+        return WPS.Output(
+            WPS.Reference(href=self.url, 
+                          mimeType=f.mime_type, 
+                          encoding=f.encoding, 
+                          schema=f.schema
+            )
+        )
 
 class WPSRequest(object):
     def __init__(self, http_request):
@@ -110,7 +106,7 @@ class WPSRequest(object):
                                                  aslist=False)
 
             if not self.operation:
-                raise MissingParameterValue('request')
+                raise MissingParameterValue('Missing request value', 'request')
             else:
                 self.operation = self.operation.lower()
 
@@ -120,16 +116,14 @@ class WPSRequest(object):
             elif self.operation == 'describeprocess':
                 self.identifiers = self._get_get_param('identifier',
                                                        aslist=True)
-                if not self.identifiers:
-                    raise MissingParameterValue('identifier')
 
             elif self.operation == 'execute':
                 self.identifier = self._get_get_param('identifier')
-                self.inputs = get_input_from_kvp(
+                self.inputs = self._get_input_from_kvp(
                     self._get_get_param('datainputs'))
 
             else:
-                raise InvalidParameterValue(self.operation)
+                raise InvalidParameterValue('Unknown request %r' % self.operation, 'request')
 
         elif http_request.method == 'POST':
             doc = lxml.etree.fromstring(http_request.get_data())
@@ -154,24 +148,41 @@ class WPSRequest(object):
             raise MethodNotAllowed()
 
     def _get_get_param(self, key, aslist=False):
-        """Returns key from the key:value pair, of the HTTP GET request, for
+        """Returns value from the key:value pair, of the HTTP GET request, for
         example 'service' or 'request'
-
-        If no value,
 
         :param key: key value you need to dig out of the HTTP GET request
         :param value: default value
         """
+        
         key = key.lower()
+        value = None
         for k in self.http_request.args.keys():
             if k.lower() == key:
+                value = self.http_request.args.get(k)
                 if aslist:
-                    return self.http_request.args.getlist(k)
-                else:
-                    return self.http_request.args.get(k)
+                    value = value.split(",")
+        
+        return value
+    
+    def _get_input_from_kvp(self, datainputs):
+        """Get execute DataInputs from URL (key-value-pairs) encoding
+        :param datainputs: key:value pair list of the datainputs parameter
+        """
+        
+        inputs = {}
+        
+        if datainputs is None:
+            return None
+        
+        for inpt in datainputs.split(";"):
+            try:
+                (identifier, val) = inpt.split("=")
+                inputs[identifier] = val
+            except:
+                inputs[inpt] = ''
 
-        # raise error
-        return None
+        return inputs
 
 
 class WPSResponse(object):
@@ -200,16 +211,14 @@ class WPSResponse(object):
         )
         return xml_response(doc)
 
-class LiteralInput(object):
+class LiteralInput(inout.LiteralInput):
     """
     :param identifier: The name of this input.
     :param data_type: Type of literal input (e.g. `string`, `float`...).
     """
 
     def __init__(self, identifier, data_type='string'):
-        self.identifier = identifier
-        assert data_type in LITERAL_DATA_TYPES
-        self.data_type = data_type
+        inout.LiteralInput.__init__(self, identifier=identifier, data_type=data_type)
 
     def describe_xml(self):
         return E.Input(
@@ -221,7 +230,7 @@ class LiteralInput(object):
         )
 
 
-class ComplexInput(object):
+class ComplexInput(inout.ComplexInput):
     """
     :param identifier: The name of this input.
     :param formats: Allowed formats for this input. Should be a list of
@@ -229,7 +238,7 @@ class ComplexInput(object):
     """
 
     def __init__(self, identifier, formats):
-        self.identifier = identifier
+        inout.ComplexInput.__init__(self, identifier)
         self.formats = formats
 
     def describe_xml(self):
@@ -244,7 +253,7 @@ class ComplexInput(object):
         )
 
 
-class LiteralOutput(object):
+class LiteralOutput(inout.LiteralOutput):
     """
     :param identifier: The name of this output.
     :param data_type: Type of literal input (e.g. `string`, `float`...).
@@ -253,9 +262,7 @@ class LiteralOutput(object):
     """
 
     def __init__(self, identifier, data_type='string'):
-        self.identifier = identifier
-        assert data_type in LITERAL_DATA_TYPES
-        self.data_type = data_type
+        inout.LiteralOutput.__init__(self, identifier, data_type=data_type)
         self.value = None
 
     def setvalue(self, value):
@@ -352,7 +359,7 @@ class ComplexOutput(inout.ComplexOutput):
 
     @schema.setter
     def schema(self, schema):
-        """Set output encoding
+        """Set output schema
         """
         self._schema = schema
 
@@ -405,18 +412,15 @@ class BoundingBoxOutput(object):
     pass
 
 
-class Format(object):
+class Format(FormatBase):
     """
     :param mime_type: MIME type allowed for a complex input.
-    """
-    mime_type = None
+    :param encoding: The encoding of this input or requested for this output
+            (e.g., UTF-8).
+    """    
 
-    def __init__(self, mime_type):
-
-        if mime_type in FORMATS:
-            self.mime_type = FORMATS[mime_type][0]
-        else:
-            self.mime_type = mime_type
+    def __init__(self, mime_type, encoding='UTF-8', schema=None):
+        FormatBase.__init__(self, mime_type, schema, encoding)
 
     def describe_xml(self):
         return E.Format(OWS.MimeType(self.mime_type))
@@ -457,9 +461,24 @@ class Process(object):
             E.DataOutputs(*output_elements)
         )
 
-    def execute(self, wps_request):
+    def execute(self, wps_request):    
         wps_response = WPSResponse({o.identifier: o for o in self.outputs})
-        return self.handler(wps_request, wps_response)
+        wps_response = self.handler(wps_request, wps_response) 
+        
+        #TODO: very weird code, look into it
+        output_elements = []
+        for o in wps_response.outputs:
+            output_elements.append(wps_response.outputs[o].execute_xml())
+        #output_elements = [o.execute_xml() for o in wps_response.outputs]
+        
+        doc = []
+        doc.extend((
+            WPS.Process(OWS.Identifier(self.identifier)),
+            WPS.Status(WPS.ProcessSucceeded("great success")),
+            WPS.ProcessOutputs(*output_elements)
+        ))
+        
+        return doc
 
 
 class Service(object):
@@ -487,6 +506,9 @@ class Service(object):
         return xml_response(doc)
 
     def describe(self, identifiers):
+        if not identifiers:
+            raise MissingParameterValue('', 'identifier')
+        
         identifier_elements = []
         # 'all' keyword means all processes
         if 'all' in (ident.lower() for ident in identifiers):
@@ -504,11 +526,29 @@ class Service(object):
         return xml_response(doc)
 
     def execute(self, identifier, wps_request):
+        # check if process is valid
         try:
             process = self.processes[identifier]
         except KeyError:
             raise BadRequest("Unknown process %r" % identifier)
-        return process.execute(wps_request)
+        
+        # check if datainputs is required and has been passed
+        if process.inputs:
+            if wps_request.inputs is None:
+                raise MissingParameterValue('', 'datainputs')
+        
+        # check if all mandatory inputs are passed
+        for inpt in process.inputs:
+            if inpt.identifier not in wps_request.inputs:
+                raise MissingParameterValue('', inpt.identifier)
+            
+        # catch error generated by process code
+        try:
+            doc = WPS.ExecuteResponse(*process.execute(wps_request))
+        except Exception as e:
+            raise NoApplicableCode(e)
+            
+        return xml_response(doc)
 
     @Request.application
     def __call__(self, http_request):

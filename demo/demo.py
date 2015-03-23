@@ -49,9 +49,11 @@ def feature_count(request, response):
 
 def centroids(request, response):
     from shapely.geometry import shape, mapping
+    import urllib2
     with temp_dir() as tmp:
         input_gml = tmp / 'input.gml'
-        input_gml.write_bytes(request.inputs['layer'].read().encode('utf-8'))
+        data_input = urllib2.urlopen(request.inputs['layer'])
+        input_gml.write_bytes(data_input.read())
         input_geojson = tmp / 'input.geojson'
         subprocess.check_call(['ogr2ogr', '-f', 'geojson',
                                input_geojson, input_gml])
