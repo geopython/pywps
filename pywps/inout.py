@@ -273,8 +273,23 @@ class SimpleHandler(IOHandler):
         """Set data value. input data are converted into target format
         """
         if self.data_type:
-            data = self.data_type.convert(data)
-        IOHandler.set_data(self, data)
+            # TODO: check datatypeabstract class somethings missing here
+            # check if it is a valid data_type
+            if self.data_type.lower() in LITERAL_DATA_TYPES:
+                if self.data_type.lower() == 'string':
+                    data = str(data)
+                elif self.data_type.lower() == 'integer':
+                    data = int(data)
+                elif self.data_type.lower() == 'float':
+                    data = float(data)
+                elif self.data_type.lower() == 'boolean':
+                    if self.data.lower() == 'true':
+                        data = True
+                    else:
+                        data = False
+                #data = self.data_type.convert(data)
+
+                IOHandler.set_data(self, data)
 
     @property
     def validator(self):
