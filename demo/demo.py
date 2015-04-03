@@ -17,8 +17,10 @@ sys.path.append(os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     os.path.pardir))
 import pywps
+from pywps.formats import FORMATS
 from pywps import (Process, Service, WPSResponse, LiteralInput, LiteralOutput,
                    ComplexInput, ComplexOutput, Format, FileReference)
+                   ComplexInput, ComplexOutput, Format)
 
 
 recent_data_files = deque(maxlen=20)
@@ -34,7 +36,7 @@ def temp_dir():
 
 
 def say_hello(request, response):
-    response.outputs['response'].setvalue(request.inputs['name'])
+    response.outputs['response'].value = request.inputs['name'].value
     return response
 
 
@@ -49,11 +51,9 @@ def feature_count(request, response):
 
 def centroids(request, response):
     from shapely.geometry import shape, mapping
-    import urllib2
     with temp_dir() as tmp:
         input_gml = tmp / 'input.gml'
-        data_input = urllib2.urlopen(request.inputs['layer'])
-        input_gml.write_bytes(data_input.read())
+        input_gml.write_bytes(request.inputs['layer'].stream.read())
         input_geojson = tmp / 'input.geojson'
         subprocess.check_call(['ogr2ogr', '-f', 'geojson',
                                input_geojson, input_gml])
@@ -62,26 +62,21 @@ def centroids(request, response):
             geom = shape(feature['geometry'])
             feature['geometry'] = mapping(geom.centroid)
         out_bytes = json.dumps(data, indent=2)
-        data_file = {
-            'uuid': str(uuid4()),
-            'bytes': out_bytes,
-            'mime-type': 'application/json',
-        }
-        recent_data_files.append(data_file)
-        url = flask.url_for('datafile', uuid=data_file['uuid'], _external=True)
-        reference = FileReference(url, data_file['mime-type'])
-        return WPSResponse({'centroids_layer': reference})
+        response.outputs['out'].output_format = Format(FORMATS['JSON'])
+        response.outputs['out'].out_bytes = out_bytes
+        return response
 
 
 def create_app():
     service = Service(processes=[
-        Process(say_hello, inputs=[LiteralInput('name', 'string')],
-                outputs=[LiteralOutput('response', 'string')]),
+        Process(say_hello, version='1.3.3.7', inputs=[LiteralInput('name', 'blatitle', data_type='string')],
+                outputs=[LiteralOutput('response', 'Response', data_type='string')]),
         Process(feature_count,
-                inputs=[ComplexInput('layer', [Format('SHP')])],
-                outputs=[ComplexOutput('layer', [Format('GML')])]),
+                inputs=[ComplexInput('layer', 'Layer', [Format('SHP')])],
+                outputs=[ComplexOutput('layer', 'Layer', [Format('GML')])]),
         Process(centroids,
-                inputs=[ComplexInput('layer', [Format('GML')])]),
+                inputs=[ComplexInput('layer', 'Layer', [Format('GML')])],
+                outputs=[ComplexOutput('out', 'Referenced Output', [Format('JSON')])])
     ])
     
 
@@ -96,11 +91,18 @@ def create_app():
     def wps():
         return service
 
-    @app.route('/datafile/<uuid>')
+    @app.route(pywps.config.get_config_value('server', 'outputUrl')+'<uuid>')
     def datafile(uuid):
-        for data_file in recent_data_files:
-            if data_file['uuid'] == uuid:
-                return flask.Response(data_file['bytes'])
+        service.processes
+        import pywps.config
+        file_path = pywps.config.get_config_value('server', 'outputPath')
+        for data_file in os.listdir(file_path):
+            if data_file == uuid:
+                file_ext = os.path.splitext(data_file)[1]
+                file_obj = open(os.path.join(file_path, data_file))
+                file_bytes = file_obj.read()
+                file_obj.close()
+                return flask.Response(file_bytes, mimetype=None)
         else:
             flask.abort(404)
 

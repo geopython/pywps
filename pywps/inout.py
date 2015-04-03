@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
 from pywps._compat import text_type, StringIO
+from pywps.formats import FORMATS
 import tempfile
 
 LITERAL_DATA_TYPES = ['string', 'float', 'integer', 'boolean']
@@ -33,7 +34,6 @@ class FormatBase(object):
         :rtype: String
         """
 
-        from pywps.formats import FORMATS
         if self._mime_type in FORMATS:
             return FORMATS[self._mime_type][0]
         else:
@@ -45,6 +45,9 @@ class FormatBase(object):
         """
 
         self._mime_type = mime_type
+
+    def get_extension(self):
+        return self._mime_type[1]
 
     @property
     def encoding(self):
