@@ -7,7 +7,7 @@ from werkzeug.wrappers import Request, Response
 from werkzeug.exceptions import HTTPException, BadRequest, MethodNotAllowed
 from pywps.exceptions import InvalidParameterValue, \
     MissingParameterValue, NoApplicableCode, \
-    OperationNotSupported
+    OperationNotSupported, VersionNegotiationFailed
 from werkzeug.datastructures import MultiDict
 import lxml.etree
 from lxml.builder import ElementMaker
@@ -157,6 +157,12 @@ class WPSRequest(object):
                 pass
 
             elif self.operation == 'describeprocess':
+                self.version = self._get_get_param('version')
+                if not self.version:
+                    raise MissingParameterValue('Missing version', 'version')
+                if self.version != '1.0.0':
+                    raise VersionNegotiationFailed('The requested version "%s" is not supported by this server' % self.version, 'version')
+
                 self.identifiers = self._get_get_param('identifier',
                                                        aslist=True)
 
