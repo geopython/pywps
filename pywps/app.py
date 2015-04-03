@@ -2,6 +2,11 @@
 Simple implementation of PyWPS based on
 https://github.com/jachym/pywps-4/issues/2
 """
+import os
+import config
+from storage import FileStorage
+from uuid import uuid4
+import flask
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.exceptions import HTTPException, BadRequest, MethodNotAllowed
@@ -17,6 +22,7 @@ from pywps.formats import FORMATS
 from pywps.inout import FormatBase
 from lxml.etree import SubElement
 from lxml import etree
+import urllib2
 
 xmlschema_2 = "http://www.w3.org/TR/xmlschema-2/#"
 LITERAL_DATA_TYPES = ['string', 'float', 'integer', 'boolean']
@@ -81,13 +87,13 @@ class FileReference(object):
     def execute_xml(self):
         #TODO: Empty attributes should not be displayed
         f = Format(self.mime_type)
-        return WPS.Output(
-            WPS.Reference(href=self.url, 
-                          mimeType=f.mime_type, 
-                          encoding=f.encoding, 
-                          schema=f.schema
-            )
+        doc = WPS.Reference(
+            href=self.url,
+            mimeType=f.mime_type,
+            encoding=f.encoding,
+            schema=f.schema
         )
+        return doc
 
 
 
@@ -167,9 +173,19 @@ class WPSRequest(object):
                                                        aslist=True)
 
             elif self.operation == 'execute':
+                self.version = self._get_get_param('version')
+                if not self.version:
+                    raise MissingParameterValue('Missing version', 'version')
+                if self.version != '1.0.0':
+                    raise VersionNegotiationFailed('The requested version "%s" is not supported by this server' % self.version, 'version')
+
                 self.identifier = self._get_get_param('identifier')
+                self.store_execute = self._get_get_param('storeExecuteResponse', 'false')
+                self.lineage = self._get_get_param('lineage', 'false')
+                self.outputs = self._get_input_from_kvp(
+                    self._get_get_param('ResponseDocument'))
                 self.inputs = self._get_input_from_kvp(
-                    self._get_get_param('datainputs'))
+                    self._get_get_param('DataInputs'))
 
             else:
                 raise InvalidParameterValue('Unknown request %r' % self.operation, 'request')
@@ -196,16 +212,17 @@ class WPSRequest(object):
         else:
             raise MethodNotAllowed()
 
-    def _get_get_param(self, key, aslist=False):
+    def _get_get_param(self, key, default=None, aslist=False):
         """Returns value from the key:value pair, of the HTTP GET request, for
         example 'service' or 'request'
 
         :param key: key value you need to dig out of the HTTP GET request
-        :param value: default value
         """
+
         
         key = key.lower()
-        value = None
+        value = default
+        # http_request.args.keys will make + sign disappear in GET url if not urlencoded
         for k in self.http_request.args.keys():
             if k.lower() == key:
                 value = self.http_request.args.get(k)
@@ -226,8 +243,21 @@ class WPSRequest(object):
         
         for inpt in datainputs.split(";"):
             try:
-                (identifier, val) = inpt.split("=")
-                inputs[identifier] = val
+                input = {}
+                parameter = inpt.split('@')
+
+                # First parameter is InputId and its value
+                (identifier, val) = parameter[0].split("=")
+                input[identifier] = val
+
+                # Get the attributes of the InputId
+                for attr in parameter[1:]:
+                    (attribute, attr_val) = attr.split('=')
+                    input[attribute] = attr_val
+
+                # Add the input with all its attributes and values to the inputs dictionary
+
+                inputs[identifier] = input
             except:
                 inputs[inpt] = ''
 
@@ -247,19 +277,8 @@ class WPSResponse(object):
 
     @Request.application
     def __call__(self, request):
-        output_elements = []
-        for identifier in self.outputs:
-            output = self.outputs[identifier]
-            output_elements.append(output.execute_xml())
-
-        doc = WPS.ExecuteResponse(
-            WPS.Status(
-                WPS.ProcessSucceeded("great success")
-            ),
-            WPS.ProcessOutputs(*output_elements)
-        )
-        return xml_response(doc)
-
+        doc = WPS.ExecuteResponse('WPSRESPONSE')
+        return doc
 
 class LiteralInput(inout.LiteralInput):
     """
@@ -268,15 +287,30 @@ class LiteralInput(inout.LiteralInput):
     """
 
     def __init__(self, identifier, title, data_type=None, abstract='', metadata=[], uom=[], default='',
-                 min_occurs='1', max_occurs='1'):
-        inout.LiteralInput.__init__(self, identifier=identifier, data_type=data_type)
-        self.title = title
-        self.abstract = abstract
+                 min_occurs='1', max_occurs='1', as_reference=False):
+        inout.LiteralInput.__init__(self, identifier=identifier, title=title, abstract=abstract, data_type=data_type)
         self.metadata = metadata
         self.uom = uom
         self.default = default
         self.min_occurs = min_occurs
         self.max_occurs = max_occurs
+        self.as_reference = as_reference
+        self._value = None
+
+    @property
+    def value(self):
+        """Get resulting value
+        :rtype: Stringvalue
+        """
+
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        """Set resulting value
+        """
+
+        self._value = value
 
     def describe_xml(self):
         doc = E.Input(
@@ -319,25 +353,71 @@ class LiteralInput(inout.LiteralInput):
 
         return doc
 
+        def execute_xml(self):
+        """Render Execute response XML node
+
+        :return: node
+        :rtype: ElementMaker
+        """
+        # TODO: check if literals can even be referenced, if this makes any sense
+        node = None
+        if self.asReference:
+            node = self._execute_xml_reference()
+        else:
+            node = self._execute_xml_data()
+
+        doc = WPS.Input(
+            OWS.Identifier(self.identifier),
+            OWS.Title(self.title)
+        )
+        if self.abstract:
+            doc.append(OWS.Abstract(self.abstract))
+        doc.append(node)
+
+        return doc
+
+    def _execute_xml_reference(self):
+        """Return Reference node
+        """
+        doc = WPS.Reference()
+        doc.attrib['{http://www.w3.org/1999/xlink}href'] = self.stream
+        if self.method.upper() == 'POST' or self.method.upper() == 'GET':
+            doc.attrib['method'] = self.method.upper()
+        return doc
+
+    def _execute_xml_data(self):
+        """Return Data node
+        """
+        doc = WPS.Data()
+        literal_doc = WPS.LiteralData(self._value)
+
+        if self.data_type:
+            literal_doc.attrib['dataType'] = self.data_type
+        if self.uom:
+            literal_doc.attrib['uom'] = self.uom
+        doc.append(literal_doc)
+        return doc
+
 
 class ComplexInput(inout.ComplexInput):
     """
     :param identifier: The name of this input.
-    :param formats: Allowed formats for this input. Should be a list of
+    :param allowed_formats: Allowed formats for this input. Should be a list of
                     one or more :class:`~Format` objects.
+    :param data_format: Format of the passed input. Should be :class:`~Format` object
     """
 
-    def __init__(self, identifier, title, formats, abstract='', metadata=[], min_occurs='1',
-                 max_occurs='1', max_megabytes=None):
-        inout.ComplexInput.__init__(self, identifier)
-        self.formats = formats
-        self.title = title
-        self.formats = formats
+    def __init__(self, identifier, title, allowed_formats, data_format=None, abstract='', metadata=[], min_occurs='1',
+                 max_occurs='1', max_megabytes=None, as_reference=False):
+        inout.ComplexInput.__init__(self, identifier, title, abstract, data_format=data_format)
+        self.allowed_formats = allowed_formats
         self.abstract = abstract
         self.metadata = metadata
         self.min_occurs = min_occurs
         self.max_occurs = max_occurs
         self.max_megabytes = max_megabytes
+        self.as_reference = as_reference
+        self.method = ''
 
         # TODO: if not set then set to default max size
         if max_megabytes:
@@ -346,7 +426,7 @@ class ComplexInput(inout.ComplexInput):
     def describe_xml(self):
         default_format_el = self.formats[0].describe_xml()
         supported_format_elements = [f.describe_xml() for f in self.formats]
-
+        
         doc = E.Input(
             OWS.Identifier(self.identifier),
             OWS.Title(self.title)
@@ -372,7 +452,61 @@ class ComplexInput(inout.ComplexInput):
             doc.attrib['maximumMegabytes'] = self.max_megabytes
 
         return doc
+    
+    def execute_xml(self):
+        """Render Execute response XML node
 
+
+        :return: node
+        :rtype: ElementMaker
+        """
+        node = None
+        if self.as_reference:
+            node = self._execute_xml_reference()
+        else:
+            node = self._execute_xml_data()
+
+        doc = WPS.Input(
+            OWS.Identifier(self.identifier),
+            OWS.Title(self.title)
+        )
+        if self.abstract:
+            doc.append(OWS.Abstract(self.abstract))
+        doc.append(node)
+
+        return doc
+
+    def _execute_xml_reference(self):
+        """Return Reference node
+        """
+        doc = WPS.Reference()
+        doc.attrib['{http://www.w3.org/1999/xlink}href'] = self.stream.url
+        if self.data_format:
+            if self.data_format.mime_type:
+                doc.attrib['mimeType'] = self.data_format.mime_type
+            if self.data_format.encoding:
+                doc.attrib['encoding'] = self.data_format.encoding
+            if self.data_format.schema:
+                doc.attrib['schema'] = self.data_format.schema
+        if self.method.upper() == 'POST' or self.method.upper() == 'GET':
+            doc.attrib['method'] = self.method.upper()
+        return doc
+
+    def _execute_xml_data(self):
+        """Return Data node
+        """
+        doc = WPS.Data()
+        complex_doc = WPS.ComplexData(self.data)
+
+        if self.data_format:
+            if self.data_format.mime_type:
+                complex_doc.attrib['mimeType'] = self.data_format.mime_type
+            if self.data_format.encoding:
+                complex_doc.attrib['encoding'] = self.data_format.encoding
+            if self.data_format.schema:
+                complex_doc.attrib['schema'] = self.data_format.schema
+        doc.append(complex_doc)
+        return doc
 
 class LiteralOutput(inout.LiteralOutput):
     """
@@ -436,15 +570,34 @@ class LiteralOutput(inout.LiteralOutput):
         return doc
 
     def execute_xml(self):
-        return WPS.Output(
+        doc = WPS.Output(
             OWS.Identifier(self.identifier),
-            WPS.Data(WPS.LiteralData(
-                self.getvalue(),
-                dataType=self.data_type,
-                reference=xmlschema_2 + self.data_type
-            )
-            )
+            OWS.Title(self.title)
         )
+
+        if self.abstract:
+            doc.append(OWS.Abstract(self.abstract))
+
+        data_doc = WPS.Data()
+
+        literal_data_doc = WPS.LiteralData(self.value)
+        literal_data_doc.attrib['dataType'] = self.data_type
+        literal_data_doc.attrib['reference'] = xmlschema_2 + self.data_type
+        if self.uom:
+            default_uom_element = self.uom[0].describe_xml()
+            supported_uom_elements = [u.describe_xml() for u in self.uom]
+
+            literal_data_doc.append(
+                E.UOMs(
+                    E.Default(default_uom_element),
+                    E.Supported(*supported_uom_elements)
+                )
+            )
+        data_doc.append(literal_data_doc)
+
+        doc.append(data_doc)
+
+        return doc
 
 
 class ComplexOutput(inout.ComplexOutput):
@@ -461,7 +614,6 @@ class ComplexOutput(inout.ComplexOutput):
     def __init__(self, identifier, title, formats, output_format=None, encoding="UTF-8",
                  schema=None, abstract='', metadata=[], max_megabytes=None):
         inout.ComplexOutput.__init__(self, identifier)
-        self.formats = formats
         self.title = title
         self.formats = formats
         self.abstract = abstract
@@ -476,10 +628,28 @@ class ComplexOutput(inout.ComplexOutput):
         self.output_format = output_format
         self.encoding = encoding
         self.schema = schema
+        # TODO: maybe change variable name
+        self._out_bytes = None
+        self.storage = FileStorage(config)
 
         # TODO: if not set then set to default max size
         if max_megabytes:
             self.max_fileSize = max_megabytes * 1024 * 1024
+
+    @property
+    def out_bytes(self):
+        """Get resulting bytes
+        """
+
+        return self._out_bytes
+
+    @out_bytes.setter
+    def out_bytes(self, out_bytes):
+        """Set resulting bytes
+        """
+
+        self._out_bytes = out_bytes
+        self.data = out_bytes
 
     @property
     def output_format(self):
@@ -564,34 +734,60 @@ class ComplexOutput(inout.ComplexOutput):
         """
 
         node = None
-        if self.as_reference == True:
+        if self.as_reference:
             node = self._execute_xml_reference()
         else:
             node = self._execute_xml_data()
 
-        return WPS.Output(
+        doc = WPS.Output(
             OWS.Identifier(self.identifier),
-            WPS.Data(node)
+            OWS.Title(self.title)
         )
+        if self.abstract:
+            doc.append(OWS.Abstract(self.abstract))
+        doc.append(node)
+
+        return doc
 
     def _execute_xml_reference(self):
         """Return Reference node
         """
-        (store_type, path, url) = self.storage.store(self)
+        doc = WPS.Reference()
+
+        # get_url will create the file and return the url for it
+        doc.attrib['{http://www.w3.org/1999/xlink}href'] = self.get_url()
+
+        if self.data_format:
+            if self.data_format.mime_type:
+                doc.attrib['mimeType'] = self.data_format.mime_type
+            if self.data_format.encoding:
+                doc.attrib['encoding'] = self.data_format.encoding
+            if self.data_format.schema:
+                doc.attrib['schema'] = self.data_format.schema
+        return doc
 
     def _execute_xml_data(self):
-        return WPS.ComplexData(
-            self.get_stream().read(),
-            mimeType=self.output_format,
-            encoding=self.encoding,
-            schema=self.schema
-        )
+        """Return Data node
+        """
+        doc = WPS.Data()
+
+        complex_doc = WPS.ComplexData(self.data)
+
+        if self.data_format:
+            if self.data_format.mime_type:
+                complex_doc.attrib['mimeType'] = self.data_format.mime_type
+            if self.data_format.encoding:
+                complex_doc.attrib['encoding'] = self.data_format.encoding
+            if self.data_format.schema:
+                complex_doc.attrib['schema'] = self.data_format.schema
+        doc.append(complex_doc)
+        return doc
 
 
 class BoundingBoxOutput(object):
     """bounding box output
     """
-    # TODO
+    # TODO: BoundingBoxOutput
     pass
 
 
@@ -624,6 +820,7 @@ class Process(object):
         self.version = version
         self.inputs = inputs
         self.outputs = outputs
+        self.status_location = ''
 
         if store_supported:
             self.store_supported = 'true'
@@ -664,6 +861,7 @@ class Process(object):
             OWS.Title(self.title)
         )
 
+    def execute(self, wps_request):
         # TODO: include if storage of outputs or execute response document is supported
         doc.attrib['storeSupported'] = self.store_supported
 
@@ -692,20 +890,69 @@ class Process(object):
     def execute(self, wps_request):
         wps_response = WPSResponse({o.identifier: o for o in self.outputs})
         wps_response = self.handler(wps_request, wps_response) 
-        
-        # TODO: very weird code, look into it
-        output_elements = []
-        for o in wps_response.outputs:
-            output_elements.append(wps_response.outputs[o].execute_xml())
-        #output_elements = [o.execute_xml() for o in wps_response.outputs]
-        
-        doc = []
-        doc.extend((
-            WPS.Process(OWS.Identifier(self.identifier)),
-            WPS.Status(WPS.ProcessSucceeded("great success")),
-            WPS.ProcessOutputs(*output_elements)
-        ))
-        
+
+        doc = WPS.ExecuteResponse()
+
+        # Process XML
+        process_doc = WPS.Process(
+            OWS.Identifier(self.identifier),
+            OWS.Title(self.title)
+        )
+        if self.abstract:
+            doc.append(OWS.Abstract(self.abstract))
+        # TODO: See Table 32 Metadata in OGC 06-121r3
+        for m in self.metadata:
+            doc.append(OWS.Metadata(m))
+        if self.profile:
+            doc.append(OWS.Profile(self.profile))
+        if self.wsdl:
+            doc.append(OWS.WSDL(self.wsdl))
+        #if self.version:
+        process_doc.attrib['{http://www.opengis.net/wps/1.0.0}processVersion'] = self.version
+        doc.append(process_doc)
+
+        # Status XML
+        status_doc = WPS.Status(WPS.ProcessSucceeded("great success"))
+        doc.append(status_doc)
+
+        # DataInputs XML if lineage=true
+        if wps_request.lineage.lower() == 'true':
+            data_inputs = [wps_request.inputs[i].execute_xml() for i in wps_request.inputs]
+            datainputs_doc = WPS.DataInputs(*data_inputs)
+            doc.append(datainputs_doc)
+
+        # DataOutput definition XML if lineage=true
+        if wps_request.lineage.lower() == 'true':
+            output_definitions = [i.describe_xml() for i in self.outputs]
+            dataoutputs_doc = WPS.OutputDefinitions(*output_definitions)
+            doc.append(dataoutputs_doc)
+
+        # Process outputs XML
+        output_elements = [wps_response.outputs[o].execute_xml() for o in wps_response.outputs]
+        process_output_doc = WPS.ProcessOutputs(*output_elements)
+        doc.append(process_output_doc)
+
+        doc.attrib['{http://www.w3.org/2001/XMLSchema-instance}schemaLocation'] = 'http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd'
+        doc.attrib['service'] = 'WPS'
+        doc.attrib['version'] = '1.0.0'
+        doc.attrib['{http://www.w3.org/XML/1998/namespace}lang'] = 'en-CA'
+        doc.attrib['serviceInstance'] = config.get_config_value('wps', 'serveraddress') + '/wps?service=wps&request=getcapabilities'
+
+        # store the execute response document if true
+        if wps_request.store_execute.lower() == 'true':
+            file_path = config.get_config_value('server', 'outputPath')
+            file_url = config.get_config_value('wps', 'serveraddress') + config.get_config_value('server', 'outputUrl')
+            status_uuid = str(uuid4())
+            status_file_path = os.path.join(file_path, status_uuid)+'.xml'
+            status_file_url = os.path.join(file_url, status_uuid)+'.xml'
+
+            doc.attrib['statusLocation'] = status_file_url
+
+            file_obj = open(status_file_path, 'w')
+            # TODO: take the correct encoding
+            file_obj.write(etree.tostring(doc, pretty_print=True))
+            file_obj.close()
+
         return doc
 
 
@@ -927,12 +1174,64 @@ class Service(object):
         if process.inputs:
             if wps_request.inputs is None:
                 raise MissingParameterValue('', 'datainputs')
-        
-        # check if all mandatory inputs are passed
+
+        # check if all mandatory inputs have been passed
+        request_inputs = {}
         for inpt in process.inputs:
             if inpt.identifier not in wps_request.inputs:
                 raise MissingParameterValue('', inpt.identifier)
-            
+
+            # set process inputs to the passed values from GET/POST
+            for wps_identifier in wps_request.inputs:
+                if inpt.identifier == wps_identifier:
+                    wps_attrs = wps_request.inputs[wps_identifier]
+
+                    # set the input to the type defined in the process
+                    if isinstance(inpt, ComplexInput):
+                        data_input = ComplexInput(inpt.identifier, '', None)
+                    else:
+                        data_input = LiteralInput(inpt.identifier, '')
+
+                    if isinstance(data_input, ComplexInput):
+                        f = Format()
+                        f.mime_type = wps_attrs.get('mimetype')
+                        f.encoding = wps_attrs.get('encoding')
+                        f.schema = wps_attrs.get('schema')
+                        data_input.data_format = f
+                        data_input.method = wps_attrs.get('method', 'GET')
+
+                        # get the referenced input otherwise get the value of the field
+                        is_reference = wps_attrs.get('href', None)
+                        if is_reference:
+                            data_input.stream = urllib2.urlopen(wps_attrs.get('href'))
+                            data_input.as_reference = True
+                        else:
+                            data_input.data = wps_attrs[wps_identifier]
+
+                    elif isinstance(data_input, LiteralInput):
+                        data_input.uom = wps_attrs.get('uom')
+                        data_input.data_type = wps_attrs.get('datatype')
+
+                        # get the value of the field
+                        data_input.value = wps_attrs[wps_identifier]
+
+                    # add Literal/Complex input to the dict
+                    request_inputs[wps_identifier] = data_input
+
+            # Replace the dicts with the dict of Literal/Complex inputs
+            wps_request.inputs = request_inputs
+
+        # set all the specified outputs as reference if asReference=true
+        for outpt in process.outputs:
+            if wps_request.outputs is not None:
+                for wps_identifier in wps_request.outputs:
+                    if outpt.identifier == wps_identifier:
+                        wps_attrs = wps_request.outputs[wps_identifier]
+
+                        is_reference = wps_attrs.get('asReference', None)
+                        if is_reference.lower() == 'true':
+                            outpt.as_reference = True
+
         # catch error generated by process code
         try:
             doc = WPS.ExecuteResponse(*process.execute(wps_request))

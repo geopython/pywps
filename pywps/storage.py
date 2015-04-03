@@ -39,6 +39,7 @@ class DummyStorage(StorageAbstract):
     def store(self, ouput):
         pass
 
+
 class FileStorage(StorageAbstract):
     """File storage implementation, stores data to file system
 
@@ -68,19 +69,21 @@ class FileStorage(StorageAbstract):
         """
         :param config: storage configuration object
         """
-        self.target = config.get('FileStorage', 'target')
-        self.outputurl = config.get('server', 'outputurl')
-
+        self.target = config.get_config_value('server', 'outputPath')
+        self.outputurl = config.get_config_value('wps', 'serveraddress') + config.get_config_value('server', 'outputUrl')
 
     def store(self, output):
         import shutil, tempfile
         from urlparse import urljoin
         file_name = output.file
         (prefix, suffix) = os.path.splitext(file_name)
-        output_name = tempfile.mkstemp(suffix=suffix, prefix=prefix,
+        if not suffix:
+            suffix = output.output_format.get_extension()
+        (file_dir, file_name) = os.path.split(prefix)
+        output_name = tempfile.mkstemp(suffix=suffix, prefix=file_name,
                                        dir=self.target)[1]
 
-        shutil.copy2(output.file, output_name)
+        shutil.copy2(output.file, os.path.join(self.target, output_name))
 
         just_file_name = os.path.basename(output_name)
         url = urljoin(self.outputurl, just_file_name)
