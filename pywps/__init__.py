@@ -30,8 +30,7 @@ from pywps.app import (
     LiteralOutput,
     ComplexInput,
     ComplexOutput,
-    Format,
-    FileReference,
+    Format
 )
 
 

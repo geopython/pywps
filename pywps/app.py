@@ -15,6 +15,7 @@ from pywps._compat import text_type, StringIO
 from pywps import inout
 from pywps.formats import FORMATS
 from pywps.inout import FormatBase
+from owslib.ows import BoundingBox
 
 xmlschema_2 = "http://www.w3.org/TR/xmlschema-2/#"
 LITERAL_DATA_TYPES = ['string', 'float', 'integer', 'boolean']
@@ -59,7 +60,12 @@ def get_input_from_xml(doc):
             the_input.update({identifier_el.text: tmp})
             continue
 
-        # TODO bounding box data
+        bbox_data = xpath_ns(input_el, './wps:Data/wps:BoundingBoxData')
+        if bbox_data:
+            bbox_data_el = bbox_data[0]
+            bbox = BoundingBox(bbox_data_el)
+            the_input.update({ identifier_el.text: bbox })
+            continue
 
     return the_input
 
