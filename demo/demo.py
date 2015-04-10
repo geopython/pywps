@@ -36,7 +36,7 @@ def temp_dir():
 
 
 def say_hello(request, response):
-    response.outputs['response'].value = request.inputs['name'].value
+    response.outputs['response'].setvalue(request.inputs['name'].getvalue())
     return response
 
 
