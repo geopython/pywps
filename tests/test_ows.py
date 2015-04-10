@@ -110,7 +110,9 @@ class ExecuteTests(unittest.TestCase):
                     WPS.Reference(href=wfsResource, mimeType='text/xml'))),
             WPS.ProcessOutputs(
                 WPS.Output(
-                    OWS.Identifier('output'))))
+                    OWS.Identifier('output'))),
+            version='1.0.0'
+        )
         resp = client.post_xml(doc=request_doc)
         assert_response_success(resp)
         # Other things to assert:

@@ -426,9 +426,8 @@ class ComplexInput(inout.ComplexInput):
 
     def __init__(self, identifier, title='', allowed_formats=None, data_format=None, abstract='', metadata=[], min_occurs='1',
                  max_occurs='1', max_megabytes=None, as_reference=False):
-        inout.ComplexInput.__init__(self, identifier, title, abstract, data_format=data_format)
+        inout.ComplexInput.__init__(self, identifier=identifier, title=title, abstract=abstract, data_format=data_format)
         self.allowed_formats = allowed_formats
-        self.abstract = abstract
         self.metadata = metadata
         self.min_occurs = min_occurs
         self.max_occurs = max_occurs
@@ -534,8 +533,7 @@ class LiteralOutput(inout.LiteralOutput):
     """
 
     def __init__(self, identifier, title='', data_type='string', abstract='', metadata=[], uom=[]):
-        inout.LiteralOutput.__init__(self, identifier, data_type=data_type)
-        self.title = title
+        inout.LiteralOutput.__init__(self, identifier, title=title, data_type=data_type)
         self.abstract = abstract
         self.metadata = metadata
         self.uom = uom
@@ -621,10 +619,8 @@ class ComplexOutput(inout.ComplexOutput):
 
     def __init__(self, identifier, title='', formats=None, output_format=None, encoding="UTF-8",
                  schema=None, abstract='', metadata=[], max_megabytes=None):
-        inout.ComplexOutput.__init__(self, identifier)
-        self.title = title
+        inout.ComplexOutput.__init__(self, identifier, title=title, abstract=abstract)
         self.formats = formats
-        self.abstract = abstract
         self.metadata = metadata
         self.max_megabytes = max_megabytes
 
