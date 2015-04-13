@@ -19,9 +19,7 @@ sys.path.append(os.path.join(
 import pywps
 from pywps.formats import FORMATS
 from pywps import (Process, Service, WPSResponse, LiteralInput, LiteralOutput,
-                   ComplexInput, ComplexOutput, Format, FileReference)
                    ComplexInput, ComplexOutput, Format)
-
 
 recent_data_files = deque(maxlen=20)
 
@@ -52,8 +50,7 @@ def feature_count(request, response):
 def centroids(request, response):
     from shapely.geometry import shape, mapping
     with temp_dir() as tmp:
-        input_gml = tmp / 'input.gml'
-        input_gml.write_bytes(request.inputs['layer'].stream.read())
+        input_gml = request.inputs['layer'].file
         input_geojson = tmp / 'input.geojson'
         subprocess.check_call(['ogr2ogr', '-f', 'geojson',
                                input_geojson, input_gml])
@@ -63,7 +60,7 @@ def centroids(request, response):
             feature['geometry'] = mapping(geom.centroid)
         out_bytes = json.dumps(data, indent=2)
         response.outputs['out'].output_format = Format(FORMATS['JSON'])
-        response.outputs['out'].out_bytes = out_bytes
+        response.outputs['out'].data = out_bytes
         return response
 
 

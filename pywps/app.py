@@ -3,6 +3,7 @@ Simple implementation of PyWPS based on
 https://github.com/jachym/pywps-4/issues/2
 """
 import os
+import tempfile
 import config
 from storage import FileStorage
 from uuid import uuid4
@@ -82,7 +83,9 @@ def get_input_from_xml(doc):
             reference_data_el = reference_data[0]
             inpt = {}
             inpt[identifier_el.text] = reference_data_el.text
-            inpt['href'] = reference_data_el.attrib.get('{http://www.w3.org/1999/xlink}href', '')
+            inpt['href'] = reference_data_el.attrib.get('href', '')
+            if not inpt['href']:
+                inpt['href'] = reference_data_el.attrib.get('{http://www.w3.org/1999/xlink}href', '')
             inpt['mimeType'] = reference_data_el.attrib.get('mimeType', '')
             the_input[identifier_el.text] = inpt
             continue
@@ -433,6 +436,7 @@ class ComplexInput(inout.ComplexInput):
         self.max_occurs = max_occurs
         self.max_megabytes = max_megabytes
         self.as_reference = as_reference
+        self.url = ''
         self.method = ''
 
         # TODO: if not set then set to default max size
@@ -496,7 +500,7 @@ class ComplexInput(inout.ComplexInput):
         """Return Reference node
         """
         doc = WPS.Reference()
-        doc.attrib['{http://www.w3.org/1999/xlink}href'] = self.stream.url
+        doc.attrib['{http://www.w3.org/1999/xlink}href'] = self.url
         if self.data_format:
             if self.data_format.mime_type:
                 doc.attrib['mimeType'] = self.data_format.mime_type
@@ -537,7 +541,7 @@ class LiteralOutput(inout.LiteralOutput):
         self.abstract = abstract
         self.metadata = metadata
         self.uom = uom
-        self._value = None
+        self.value = None
 
     def setvalue(self, value):
         self.value = value
@@ -632,27 +636,11 @@ class ComplexOutput(inout.ComplexOutput):
         self.output_format = output_format
         self.encoding = encoding
         self.schema = schema
-        self._out_bytes = None
         self.storage = FileStorage(config)
 
         # TODO: if not set then set to default max size
         if max_megabytes:
             self.max_fileSize = max_megabytes * 1024 * 1024
-
-    @property
-    def out_bytes(self):
-        """Get resulting bytes
-        """
-
-        return self._out_bytes
-
-    @out_bytes.setter
-    def out_bytes(self, out_bytes):
-        """Set resulting bytes
-        """
-
-        self._out_bytes = out_bytes
-        self.data = out_bytes
 
     @property
     def output_format(self):
@@ -1208,7 +1196,12 @@ class Service(object):
                         # get the referenced input otherwise get the value of the field
                         is_reference = wps_attrs.get('href', None)
                         if is_reference:
-                            data_input.stream = urllib2.urlopen(wps_attrs.get('href'))
+                            tmp_file = tempfile.mkstemp(dir=config.get_config_value('server', 'tempPath'))[1]
+                            f = open(tmp_file, 'w')
+                            f.write(urllib2.urlopen(wps_attrs.get('href')).read())
+                            f.close()
+                            data_input.file = tmp_file
+                            data_input.url = wps_attrs.get('href')
                             data_input.as_reference = True
                         else:
                             data_input.data = wps_request.inputs[wps_identifier]['data']

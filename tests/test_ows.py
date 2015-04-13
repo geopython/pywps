@@ -29,7 +29,7 @@ def assert_response_success(resp):
 def create_feature():
     
     def feature(request, response):
-        input = request.inputs['input']
+        input = request.inputs['input'].file
         # What do we need to assert a Complex input?
         #assert type(input) is text_type
         
@@ -56,7 +56,7 @@ def create_feature():
         outLayer.CreateFeature(outFeature)
         outFeature.Destroy()
 
-        response.outputs['output'] = out
+        response.outputs['output'].data = out
         return response
 
     return Process(handler=feature,
@@ -107,7 +107,9 @@ class ExecuteTests(unittest.TestCase):
             WPS.DataInputs(
                 WPS.Input(
                     OWS.Identifier('input'),
-                    WPS.Reference(href=wfsResource, mimeType='text/xml'))),
+                    WPS.Reference(
+                        {'{http://www.w3.org/1999/xlink}href': wfsResource},
+                        mimeType='text/xml'))),
             WPS.ProcessOutputs(
                 WPS.Output(
                     OWS.Identifier('output'))),
