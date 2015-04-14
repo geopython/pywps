@@ -72,13 +72,14 @@ GRASS-Python interface example
 ..............................
 ::
 
-    from grass.script import core as grass
     from pywps.Process import WPSProcess
 
     process =  WPSProcess(identifier="grassprocess",
                         title="GRASS Process")
 
     def execute():
+        from grass.script import core as grass 
+
         ret = grass.run_command("d.his", h_map = "drap_map", 
                                          i_map = "relief_map",
                                          brighten = 0)

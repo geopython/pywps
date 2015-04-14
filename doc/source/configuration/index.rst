@@ -358,3 +358,54 @@ Configuration file example
     gisbase=/usr/lib/grass/
     ldLibraryPath=/usr/lib/grass/lib
     gisdbase=/home/foo/datagrass
+
+
+
+Notes for Windows users
+=======================
+Windows users do have to adjust their paths to what is standard on this
+platform. E.g. instead of using ":" as delemiter ";" is supposed to be used.
+Also usage of slash "/" and backslash "\\" can be tricky.
+
+Generally speaking, it's good to start by installing GRASS (if needed) and all
+the required geospatial packages using `OSGeo4W tool <http://trac.osgeo.org/osgeo4w/>`_.
+
+Having GRASS and PyWPS is possible and was successfuly tested. You have to
+adjust especially PATH variable. Example of relevant configuration parts
+follows: ::
+
+    [server]
+    maxoperations=30
+    maxinputparamlength=1024
+    maxfilesize=10mb
+    tempPath=c:\\\\tmp
+    processesPath=
+    outputUrl=http://localhost/tmp/wpsoutputs
+    outputPath=c:\OSGeo4W\apache\htdocs\tmp\wpsoutputs\
+    debug=true # deprecated since 3.2, use logLevel instead
+    logFile=
+    logLevel=INFO
+
+    [grass]
+    path=c:\\\\osgeo4w/apps/grass/grass-7.0.0/lib;c:\\\\osgeo4w/apps/grass/grass-7.0.0/bin;c:\\\\c/Users/jachym/AppData/Roaming/GRASS7/addons/bin;c:\\\\usr/bin;c:\\\\osgeo4w/bin;c:\\\\c/Windows/system32;c:\\\\c/Windows;c:\\\\c/Windows/WBem;c:\\\\usr/bin;c:\\\\osgeo4w/apps/Python27/Scripts
+    addonPath=
+    version=7.0.0
+    gui=text
+    gisbase=c:\\\\OSGeo4W\\\\apps\\\\grass\\\\grass-7.0.0
+    ldLibraryPath=c:\OSGeo4W\apps\grass\grass-7.0.0\lib
+    gisdbase=c:\Users\jachym\src\vugtk\grassdata\
+    home=c:\Users\jachym
+
+FOr the configuration of Apache web server, you can directly use `wps.py` binary
+from the root of PyWPS source code and use it. Example of relevant httpd.conf
+file follows (it can of course be used on Unix as well)::
+
+    
+    # wps.py was copied from pywps-source/wps.py
+    Alias /wps C:\OSGeo4W/bin/wps.py
+    <Location /wps
+            SetHandler cgi-script
+            Options ExecCGI
+            SetEnv PYWPS_CFG C:\path/to/your/configuration/pywps.cfg
+            SetEnv PYWPS_PROCESSES C:\path/to/your/processes
+    </Location>

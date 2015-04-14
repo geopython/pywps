@@ -49,7 +49,8 @@ class Grass:
                 "version":"GRASS_VERSION",
                 "gui":"GRASS_GUI",
                 "gisbase": "GISBASE",
-                "ldLibraryPath": "LD_LIBRARY_PATH"
+                "ldLibraryPath": "LD_LIBRARY_PATH",
+                "home": "HOME"
         }
 
         # put env
@@ -64,7 +65,7 @@ class Grass:
                 pass
 
         # GIS_LOCK
-        self.setEnv('GIS_LOCK',str(os.getpid()))
+        self.setEnv('GIS_LOCK', str(os.getpid()))
         logging.info("GRASS GIS_LOCK set to %s" % str(os.getpid()))
 
     def mkMapset(self,location=None):
@@ -174,12 +175,10 @@ class Grass:
         wind.close()
         return
 
-    def setEnv(self,key,value):
+    def setEnv(self, key, value):
         """Set GRASS environmental variables """
-        origValue = os.getenv(key)
-        #REMOVED: It doesnt seem necessary
-        #if origValue:
-        #    value  += ":"+origValue
-        os.putenv(key,value)
+        os.putenv(key, value)
         os.environ[key] = value
-        return
+
+        if key == 'GISBASE':
+            sys.path.append(os.path.join(value, 'etc', 'python'))
