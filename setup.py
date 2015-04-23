@@ -108,5 +108,8 @@ dist =  setup(
                      'processes/*.py-dist','processes/README',
                      'default.cfg']
                 },
+        requires=[
+            'ordereddict',
+            ],
         scripts=['wps.py']
 )
