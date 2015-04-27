@@ -13,7 +13,7 @@ from werkzeug.wrappers import Request, Response
 from werkzeug.exceptions import HTTPException, BadRequest, MethodNotAllowed
 from pywps.exceptions import InvalidParameterValue, \
     MissingParameterValue, NoApplicableCode, \
-    OperationNotSupported, VersionNegotiationFailed
+    OperationNotSupported, VersionNegotiationFailed, FileSizeExceeded, StorageNotSupported
 from werkzeug.datastructures import MultiDict
 import lxml.etree
 from lxml.builder import ElementMaker
@@ -59,6 +59,7 @@ def get_input_from_xml(doc):
         if literal_data:
             value_el = literal_data[0]
             inpt = {}
+            inpt['identifier'] = identifier_el.text
             inpt['data'] = text_type(value_el.text)
             inpt['uom'] = value_el.attrib.get('uom', '')
             inpt['datatype'] = value_el.attrib.get('datatype', '')
@@ -70,6 +71,7 @@ def get_input_from_xml(doc):
             complex_data_el = complex_data[0]
             value_el = complex_data_el[0]
             inpt = {}
+            inpt['identifier'] = identifier_el.text
             inpt['data'] = value_el
             inpt['mime_type'] = complex_data_el.attrib.get('mimeType', '')
             inpt['encoding'] = complex_data_el.attrib.get('encoding', '')
@@ -82,6 +84,7 @@ def get_input_from_xml(doc):
         if reference_data:
             reference_data_el = reference_data[0]
             inpt = {}
+            inpt['identifier'] = identifier_el.text
             inpt[identifier_el.text] = reference_data_el.text
             inpt['href'] = reference_data_el.attrib.get('href', '')
             if not inpt['href']:
@@ -134,16 +137,131 @@ class UOM(object):
         return OWS.UOM(
             self.uom
         )
-def get_resp_doc_from_xml(doc):
+def get_output_from_xml(doc):
     the_output = {}
-    for output_el in xpath_ns(doc, '/wps:Execute/wps:ResponseForm/wps:ResponseDocument/wps:Output'):
-        [identifier_el] = xpath_ns(output_el, './ows:Identifier')
-        outpt = {}
-        outpt[identifier_el.text] = ''
-        outpt['asReference'] = output_el.attrib.get('asReference', 'false')
-        the_output[identifier_el.text] = outpt
+
+    if xpath_ns(doc, '/wps:Execute/wps:ResponseForm/wps:ResponseDocument'):
+        for output_el in xpath_ns(doc, '/wps:Execute/wps:ResponseForm/wps:ResponseDocument/wps:Output'):
+            [identifier_el] = xpath_ns(output_el, './ows:Identifier')
+            outpt = {}
+            outpt[identifier_el.text] = ''
+            outpt['asReference'] = output_el.attrib.get('asReference', 'false')
+            the_output[identifier_el.text] = outpt
+
+    elif xpath_ns(doc, '/wps:Execute/wps:ResponseForm/wps:RawDataOutput'):
+        for output_el in xpath_ns(doc, '/wps:Execute/wps:ResponseForm/wps:RawDataOutput'):
+            [identifier_el] = xpath_ns(output_el, './ows:Identifier')
+            outpt = {}
+            outpt[identifier_el.text] = ''
+            outpt['mimetype'] = output_el.attrib.get('mimeType', '')
+            outpt['encoding'] = output_el.attrib.get('encoding', '')
+            outpt['schema'] = output_el.attrib.get('schema', '')
+            outpt['uom'] = output_el.attrib.get('uom', '')
+            the_output[identifier_el.text] = outpt
 
     return the_output
+
+
+def get_data_from_kvp(data):
+    """Get execute DataInputs and ResponseDocument from URL (key-value-pairs) encoding
+    :param data: key:value pair list of the datainputs and responseDocument parameter
+    """
+
+    the_data = {}
+
+    if data is None:
+        return None
+
+    for d in data.split(";"):
+        try:
+            io = {}
+            fields = d.split('@')
+
+            # First field is identifier and its value
+            (identifier, val) = fields[0].split("=")
+            io['identifier'] = identifier
+            io['data'] = val
+
+            # Get the attributes of the data
+            for attr in fields[1:]:
+                (attribute, attr_val) = attr.split('=')
+                io[attribute] = attr_val
+
+            # Add the input/output with all its attributes and values to the dictionary
+            the_data[identifier] = io
+        except:
+            the_data[d] = ''
+
+    return the_data
+
+
+def parse_complex_inputs(inputs):
+
+    data_input = ComplexInput(inputs.get('identifier'), '', None)
+    data_input.data_format = Format(
+        inputs.get('mime_type'),
+        inputs.get('encoding'),
+        inputs.get('schema')
+    )
+    data_input.method = inputs.get('method', 'GET')
+
+    # get the referenced input otherwise get the value of the field
+    href = inputs.get('href', None)
+    if href:
+
+        # save the reference input in tempPath
+
+        tmp_file = tempfile.mkstemp(dir=config.get_config_value('server', 'tempPath'))[1]
+        reference_file = urllib2.urlopen(href)
+        reference_file_data = reference_file.read()
+        data_size = reference_file.headers.get('Content-Length', 0)
+
+        # if the response did not return a 'Content-Length' header then calculate the size
+        if data_size == 0:
+            tmp_sio = StringIO()
+            tmp_sio.write(reference_file_data)
+            data_size = tmp_sio.len
+            tmp_sio.close()
+
+        # check if input file size was not exceeded
+        if data_size > int(data_input.max_megabytes):
+            raise FileSizeExceeded('File size for input exceeded.'
+                                   ' Maximum allowed: %i bytes' % data_input.max_megabytes,
+                                   inputs.get('identifier'))
+
+        f = open(tmp_file, 'w')
+        f.write(reference_file_data)
+        f.close()
+
+        data_input.file = tmp_file
+        data_input.url = href
+        data_input.as_reference = True
+    else:
+        data = inputs.get('data')
+        if len(data.encode('utf-8')) > int(data_input.max_megabytes):
+            raise FileSizeExceeded('File size for input exceeded.'
+                                   ' Maximum allowed: %i bytes' % data_input.max_megabytes,
+                                   inputs.get('identifier'))
+        data_input.data = data
+    return data_input
+
+
+def parse_literal_inputs(inputs):
+    """ Takes the http_request and parses the input to objects
+    :return:
+    """
+
+    # set the input to the type defined in the process
+    data_input = LiteralInput(inputs.get('identifier'), '')
+    data_input.uom = inputs.get('uom')
+    data_type = inputs.get('datatype')
+    if data_type:
+        data_input.data_type = data_type
+
+    # get the value of the field
+    data_input.data = inputs.get('data')
+
+    return data_input
 
 
 class WPSRequest(object):
@@ -193,10 +311,21 @@ class WPSRequest(object):
                 self.identifier = self._get_get_param('identifier')
                 self.store_execute = self._get_get_param('storeExecuteResponse', 'false')
                 self.lineage = self._get_get_param('lineage', 'false')
-                self.outputs = self._get_data_from_kvp(
-                    self._get_get_param('ResponseDocument'))
-                self.inputs = self._get_data_from_kvp(
-                    self._get_get_param('DataInputs'))
+                self.inputs = get_data_from_kvp(self._get_get_param('DataInputs'))
+                self.outputs = {}
+
+                # take responseDocument preferably
+                resp_outputs = get_data_from_kvp(self._get_get_param('ResponseDocument'))
+                raw_outputs = get_data_from_kvp(self._get_get_param('RawDataOutput'))
+                self.raw = False
+                if resp_outputs:
+                    self.outputs = resp_outputs
+                elif raw_outputs:
+                    self.outputs = raw_outputs
+                    self.raw = True
+                    # executeResponse XML will not be stored and no updating of status
+                    self.store_execute = 'false'
+                    self.status = 'false'
 
             else:
                 raise InvalidParameterValue('Unknown request %r' % self.operation, 'request')
@@ -228,14 +357,20 @@ class WPSRequest(object):
                 self.operation = 'execute'
                 self.identifier = xpath_ns(doc, './ows:Identifier')[0].text
                 self.inputs = get_input_from_xml(doc)
-                self.outputs = get_resp_doc_from_xml(doc)
+                self.outputs = get_output_from_xml(doc)
+                self.raw = False
+                if xpath_ns(doc, '/wps:Execute/wps:ResponseForm/wps:RawDataOutput'):
+                    self.raw = True
+                    # executeResponse XML will not be stored
+                    self.store_execute = 'false'
+
+                # check if response document tag has been set then retrieve
                 response_document = xpath_ns(doc, './wps:ResponseForm/wps:ResponseDocument')
                 if len(response_document) > 0:
                     self.lineage = response_document[0].attrib.get('lineage', 'false')
                     self.store_execute = response_document[0].attrib.get('storeExecute', 'false')
-                else:
-                    self.lineage = 'false'
-                    self.store_execute = 'false'
+                    self.status = response_document[0].attrib.get('status', 'false')
+
             else:
                 raise InvalidParameterValue(doc.tag)
 
@@ -260,37 +395,6 @@ class WPSRequest(object):
                     value = value.split(",")
         
         return value
-
-    def _get_data_from_kvp(self, data):
-        """Get execute DataInputs and ResponseDocument from URL (key-value-pairs) encoding
-        :param data: key:value pair list of the datainputs and responseDocument parameter
-        """
-
-        the_data = {}
-
-        if data is None:
-            return None
-        
-        for d in data.split(";"):
-            try:
-                io = {}
-                fields = d.split('@')
-
-                # First field is identifier and its value
-                (identifier, val) = fields[0].split("=")
-                io['value'] = val
-
-                # Get the attributes of the data
-                for attr in fields[1:]:
-                    (attribute, attr_val) = attr.split('=')
-                    io[attribute] = attr_val
-
-                # Add the input/output with all its attributes and values to the dictionary
-                the_data[identifier] = io
-            except:
-                the_data[d] = ''
-
-        return the_data
 
 
 class WPSResponse(object):
@@ -1169,78 +1273,55 @@ class Service(object):
                 raise MissingParameterValue('', 'datainputs')
 
         # check if all mandatory inputs have been passed
-        request_inputs = {}
+        data_inputs = {}
         for inpt in process.inputs:
             if inpt.identifier not in wps_request.inputs:
                 raise MissingParameterValue('', inpt.identifier)
 
-            # set process inputs to the passed values from GET/POST
-            for wps_identifier in wps_request.inputs:
-                if inpt.identifier == wps_identifier:
-                    wps_attrs = wps_request.inputs[wps_identifier]
-
-                    # set the input to the type defined in the process
-                    if isinstance(inpt, ComplexInput):
-                        data_input = ComplexInput(inpt.identifier, '', None)
-                    else:
-                        data_input = LiteralInput(inpt.identifier, '')
-
-                    if isinstance(data_input, ComplexInput):
-                        f = Format()
-                        f.mime_type = wps_attrs.get('mime_type')
-                        f.encoding = wps_attrs.get('encoding')
-                        f.schema = wps_attrs.get('schema')
-                        data_input.data_format = f
-                        data_input.method = wps_attrs.get('method', 'GET')
-
-                        # get the referenced input otherwise get the value of the field
-                        is_reference = wps_attrs.get('href', None)
-                        if is_reference:
-                            tmp_file = tempfile.mkstemp(dir=config.get_config_value('server', 'tempPath'))[1]
-                            f = open(tmp_file, 'w')
-                            f.write(urllib2.urlopen(wps_attrs.get('href')).read())
-                            f.close()
-                            data_input.file = tmp_file
-                            data_input.url = wps_attrs.get('href')
-                            data_input.as_reference = True
-                        else:
-                            data_input.data = wps_request.inputs[wps_identifier]['data']
-
-                    elif isinstance(data_input, LiteralInput):
-                        data_input.uom = wps_attrs.get('uom')
-                        data_type = wps_attrs.get('datatype')
-                        if data_type:
-                            data_input.data_type = data_type
-
-                        # get the value of the field
-                        data_input.setvalue(wps_request.inputs[wps_identifier]['data'])
-
-                    # add Literal/Complex input to the dict
-                    request_inputs[wps_identifier] = data_input
-
             # Replace the dicts with the dict of Literal/Complex inputs
-            wps_request.inputs = request_inputs
+            # set the input to the type defined in the process
+            if isinstance(inpt, ComplexInput):
+                data_inputs[inpt.identifier] = parse_complex_inputs(wps_request.inputs[inpt.identifier])
+            elif isinstance(inpt, LiteralInput):
+                data_inputs[inpt.identifier] = parse_literal_inputs(wps_request.inputs[inpt.identifier])
+        wps_request.inputs = data_inputs
 
-        # set all the specified outputs as reference if asReference=true
-        for outpt in process.outputs:
-            if wps_request.outputs is not None:
-                for wps_identifier in wps_request.outputs:
-                    if outpt.identifier == wps_identifier:
-                        wps_attrs = wps_request.outputs[wps_identifier]
+        # set as_reference to True for all the outputs specified as reference
+        # if the output is not required to be raw
+        if not wps_request.raw:
+            for wps_outpt in wps_request.outputs:
 
-                        is_reference = wps_attrs.get('asReference', None)
-                        if is_reference.lower() == 'true':
-                            outpt.as_reference = True
-                        else:
-                            outpt.as_reference = False
+                is_reference = wps_request.outputs[wps_outpt].get('asReference', 'false')
+                if is_reference.lower() == 'true':
+                    # check if store is supported
+                    if process.store_supported == 'false':
+                        raise StorageNotSupported('The storage of data is not supported for this process.')
+
+                    is_reference = True
+                else:
+                    is_reference = False
+
+                for outpt in process.outputs:
+                    if outpt.identifier == wps_outpt:
+                        outpt.as_reference = is_reference
 
         # catch error generated by process code
         try:
-            doc = WPS.ExecuteResponse(*process.execute(wps_request))
+            wps_response = process.execute(wps_request)
         except Exception as e:
             raise NoApplicableCode(e)
-            
-        return xml_response(doc)
+
+        # get the specified output as raw
+        if wps_request.raw:
+            for outpt in wps_request.outputs:
+                for proc_outpt in process.outputs:
+                    if outpt == proc_outpt.identifier:
+                        return Response(proc_outpt.data)
+
+            # if the specified identifier was not found raise error
+            raise InvalidParameterValue('')
+
+        return wps_response
 
     @Request.application
     def __call__(self, http_request):
