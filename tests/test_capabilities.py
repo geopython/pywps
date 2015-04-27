@@ -37,7 +37,7 @@ class CapabilitiesTest(unittest.TestCase):
         title = resp.xpath_text('/wps:Capabilities'
                                 '/ows:ServiceIdentification'
                                 '/ows:Title')
-        assert title == 'PyWPS Server'
+        assert title != ''
         names = resp.xpath_text('/wps:Capabilities'
                                 '/wps:ProcessOfferings'
                                 '/wps:Process'

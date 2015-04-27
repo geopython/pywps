@@ -15,7 +15,7 @@ except ImportError:
 else:
     WITH_GDAL = True
 
-def get_input(name, schema, mimetype):
+def get_input(name, schema, mime_type):
 
     class FakeInput(object):
         tempdir = tempfile.mkdtemp()
@@ -33,7 +33,7 @@ def get_input(name, schema, mimetype):
     fake_input.data_format = data_format()
     if schema:
         fake_input.data_format.schema = 'file://' + fake_input.data_format.file
-    fake_input.data_format.mimetype = mimetype
+    fake_input.data_format.mime_type = mime_type
 
     return fake_input
 
@@ -86,9 +86,7 @@ class ValidateTest(unittest.TestCase):
             self.assertTrue(validateshapefile(shapefile_input, MODE.STRICT), 'STRICT validation')
 
     def test_fail_validator(self):
-
-        fake_input = get_input('point.xsd', 'point.xsd', FORMATS['GML'][0])
-
+        fake_input = get_input('point.xsd', 'point.xsd', FORMATS['SHP'][0])
         self.assertFalse(validategml(fake_input, MODE.SIMPLE), 'SIMPLE validation invalid')
 
 def load_tests(loader=None, tests=None, pattern=None):

@@ -1,7 +1,7 @@
 import unittest
 from collections import namedtuple
-from pywps import Process, Service, LiteralInput, ComplexInput, Format
-from pywps.app import E, WPS, OWS, xpath_ns, xmlschema_2, LITERAL_DATA_TYPES
+from pywps import Process, Service, LiteralInput, ComplexInput
+from pywps.app import E, WPS, OWS, xpath_ns, xmlschema_2, LITERAL_DATA_TYPES, Format
 from tests.common import client_for
 
 ProcessDescription = namedtuple('ProcessDescription', ['identifier', 'inputs'])
@@ -53,17 +53,17 @@ class DescribeProcessTest(unittest.TestCase):
         self.client = client_for(Service(processes=processes))
 
     def test_get_request_all_args(self):
-        resp = self.client.get('?Request=DescribeProcess&service=wps&identifier=all')
+        resp = self.client.get('?Request=DescribeProcess&service=wps&version=1.0.0&identifier=all')
         identifiers = [desc.identifier for desc in get_describe_result(resp)]
         assert 'ping' in identifiers
         assert 'hello' in identifiers
 
     def test_get_request_zero_args(self):
-        resp = self.client.get('?Request=DescribeProcess&service=wps')
+        resp = self.client.get('?Request=DescribeProcess&version=1.0.0&service=wps')
         assert resp.status_code == 400 # bad request, identifier is missing
 
     def test_get_request_nonexisting_process_args(self):
-        resp = self.client.get('?Request=DescribeProcess&service=wps&identifier=NONEXISTINGPROCESS')
+        resp = self.client.get('?Request=DescribeProcess&version=1.0.0&service=wps&identifier=NONEXISTINGPROCESS')
         assert resp.status_code == 400
 
     def test_post_request_zero_args(self):
@@ -72,17 +72,21 @@ class DescribeProcessTest(unittest.TestCase):
         assert resp.status_code == 400
 
     def test_get_one_arg(self):
-        resp = self.client.get('?service=wps&Request=DescribeProcess&identifier=hello')
+        resp = self.client.get('?service=wps&version=1.0.0&Request=DescribeProcess&identifier=hello')
         assert [pr.identifier for pr in get_describe_result(resp)] == ['hello']
 
     def test_post_one_arg(self):
-        request_doc = WPS.DescribeProcess(OWS.Identifier('hello'))
+        request_doc = WPS.DescribeProcess(
+            OWS.Identifier('hello'),
+            version='1.0.0'
+        )
         resp = self.client.post_xml(doc=request_doc)
         assert [pr.identifier for pr in get_describe_result(resp)] == ['hello']
 
     def test_get_two_args(self):
         resp = self.client.get('?Request=DescribeProcess'
                                '&service=wps'
+                               '&version=1.0.0'
                                '&identifier=hello,ping')
         result = get_describe_result(resp)
         assert [pr.identifier for pr in result] == ['hello', 'ping']
@@ -90,7 +94,9 @@ class DescribeProcessTest(unittest.TestCase):
     def test_post_two_args(self):
         request_doc = WPS.DescribeProcess(
             OWS.Identifier('hello'),
-            OWS.Identifier('ping'))
+            OWS.Identifier('ping'),
+            version='1.0.0'
+        )
         resp = self.client.post_xml(doc=request_doc)
         result = get_describe_result(resp)
         assert [pr.identifier for pr in result] == ['hello', 'ping']
@@ -100,7 +106,7 @@ class DescribeProcessInputTest(unittest.TestCase):
 
     def describe_process(self, process):
         client = client_for(Service(processes=[process]))
-        resp = client.get('?service=wps&Request=DescribeProcess&identifier=%s'
+        resp = client.get('?service=wps&version=1.0.0&Request=DescribeProcess&identifier=%s'
                           % process.identifier)
         [result] = get_describe_result(resp)
         return result
@@ -114,7 +120,7 @@ class DescribeProcessInputTest(unittest.TestCase):
     def test_one_literal_integer_input(self):
         def hello(request): pass
         hello_process = Process(hello, inputs=[
-            LiteralInput('the_number', 'integer')])
+            LiteralInput('the_number', data_type='integer')])
         result = self.describe_process(hello_process)
         assert result.inputs == [('the_number', 'literal', 'integer')]
 
@@ -122,7 +128,7 @@ class DescribeProcessInputTest(unittest.TestCase):
 class InputDescriptionTest(unittest.TestCase):
 
     def test_literal_integer_input(self):
-        literal = LiteralInput('foo', 'integer')
+        literal = LiteralInput('foo', data_type='integer')
         doc = literal.describe_xml()
         assert doc.tag == E.Input().tag
         [identifier_el] = xpath_ns(doc, './ows:Identifier')
@@ -132,21 +138,21 @@ class InputDescriptionTest(unittest.TestCase):
         assert type_el.attrib['reference'] == xmlschema_2 + 'integer'
 
     def test_complex_input_identifier(self):
-        complex = ComplexInput('foo', [Format('bar/baz')])
+        complex = ComplexInput('foo', allowed_formats=[Format('bar/baz')])
         doc = complex.describe_xml()
         assert doc.tag == E.Input().tag
         [identifier_el] = xpath_ns(doc, './ows:Identifier')
         assert identifier_el.text == 'foo'
 
     def test_complex_input_default_and_supported(self):
-        complex = ComplexInput('foo', [Format('a/b'), Format('c/d')])
+        complex = ComplexInput('foo', allowed_formats=[Format('a/b'), Format('c/d')])
         doc = complex.describe_xml()
         [default_format] = xpath_ns(doc, './ComplexData/Default/Format')
-        [default_mime_el] = xpath_ns(default_format, './ows:MimeType')
+        [default_mime_el] = xpath_ns(default_format, './MimeType')
         assert default_mime_el.text == 'a/b'
         supported_mime_types = []
         for supported_el in xpath_ns(doc, './ComplexData/Supported/Format'):
-            [mime_el] = xpath_ns(supported_el, './ows:MimeType')
+            [mime_el] = xpath_ns(supported_el, './MimeType')
             supported_mime_types.append(mime_el.text)
         assert supported_mime_types == ['a/b', 'c/d']
 

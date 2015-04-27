@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
 from pywps._compat import text_type, StringIO
+from pywps.formats import FORMATS
 import tempfile
 
 LITERAL_DATA_TYPES = ['string', 'float', 'integer', 'boolean']
@@ -33,7 +34,6 @@ class FormatBase(object):
         :rtype: String
         """
 
-        from pywps.formats import FORMATS
         if self._mime_type in FORMATS:
             return FORMATS[self._mime_type][0]
         else:
@@ -45,6 +45,9 @@ class FormatBase(object):
         """
 
         self._mime_type = mime_type
+
+    def get_extension(self):
+        return self._mime_type[1]
 
     @property
     def encoding(self):
@@ -269,12 +272,30 @@ class SimpleHandler(IOHandler):
         self.data_type = data_type
         self._validator = None
 
+    def get_data(self):
+        return IOHandler.get_data(self)
+
     def set_data(self, data):
         """Set data value. input data are converted into target format
         """
         if self.data_type:
-            data = self.data_type.convert(data)
-        IOHandler.set_data(self, data)
+            # TODO: check datatypeabstract class somethings missing here
+            # check if it is a valid data_type
+            if self.data_type.lower() in LITERAL_DATA_TYPES:
+                if self.data_type.lower() == 'string':
+                    data = text_type(data)
+                elif self.data_type.lower() == 'integer':
+                    data = int(data)
+                elif self.data_type.lower() == 'float':
+                    data = float(data)
+                elif self.data_type.lower() == 'boolean':
+                    if data.lower() == 'true':
+                        data = True
+                    else:
+                        data = False
+                #data = self.data_type.convert(data)
+
+                IOHandler.set_data(self, data)
 
     @property
     def validator(self):
@@ -283,6 +304,8 @@ class SimpleHandler(IOHandler):
     @validator.setter
     def validator(self, validator):
         self._validator = validator
+
+    data = property(fget=get_data, fset=set_data)
 
 
 class BasicIO:
