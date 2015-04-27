@@ -272,6 +272,9 @@ class SimpleHandler(IOHandler):
         self.data_type = data_type
         self._validator = None
 
+    def get_data(self):
+        return IOHandler.get_data(self)
+
     def set_data(self, data):
         """Set data value. input data are converted into target format
         """
@@ -280,13 +283,13 @@ class SimpleHandler(IOHandler):
             # check if it is a valid data_type
             if self.data_type.lower() in LITERAL_DATA_TYPES:
                 if self.data_type.lower() == 'string':
-                    data = str(data)
+                    data = text_type(data)
                 elif self.data_type.lower() == 'integer':
                     data = int(data)
                 elif self.data_type.lower() == 'float':
                     data = float(data)
                 elif self.data_type.lower() == 'boolean':
-                    if self.data.lower() == 'true':
+                    if data.lower() == 'true':
                         data = True
                     else:
                         data = False
@@ -301,6 +304,8 @@ class SimpleHandler(IOHandler):
     @validator.setter
     def validator(self, validator):
         self._validator = validator
+
+    data = property(fget=get_data, fset=set_data)
 
 
 class BasicIO:

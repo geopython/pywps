@@ -56,7 +56,7 @@ def create_feature():
         outLayer.CreateFeature(outFeature)
         outFeature.Destroy()
 
-        response.outputs['output'].data = out
+        response.outputs['output'].file = out
         return response
 
     return Process(handler=feature,

@@ -9,7 +9,7 @@ from tests.common import client_for
 
 def create_ultimate_question():
     def handler(request, response):
-        response.outputs['outvalue'].setvalue('42')
+        response.outputs['outvalue'].data = '42'
         return response
 
     return Process(identifier='ultimate_question',
@@ -19,9 +19,9 @@ def create_ultimate_question():
 
 def create_greeter():
     def greeter(request, response):
-        name = request.inputs['name'].getvalue()
+        name = request.inputs['name'].data
         assert type(name) is text_type
-        response.outputs['message'].setvalue("Hello %s!" % name)
+        response.outputs['message'].data = "Hello %s!" % name
         return response
 
     return Process(handler=greeter,
@@ -42,10 +42,8 @@ def get_output(doc):
 def assert_response_success(resp):
     assert resp.status_code == 200
     assert resp.headers['Content-Type'] == 'text/xml'
-    success = resp.xpath_text('/wps:ExecuteResponse'
-                              '/wps:Status'
-                              '/wps:ProcessSucceeded')
-    assert success == "great success"
+    success = resp.xpath('/wps:ExecuteResponse/wps:Status/wps:ProcessSucceeded')
+    assert len(success) == 1
 
 
 class ExecuteTest(unittest.TestCase):

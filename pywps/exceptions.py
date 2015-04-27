@@ -63,15 +63,20 @@ class NoApplicableCode(HTTPException):
         })
 
 
-
 class InvalidParameterValue(NoApplicableCode):
     """Invalid parameter value exception implementation
     """
-    code = 501
+    code = 400
 
 
 class MissingParameterValue(NoApplicableCode):
     """Missing parameter value exception implementation
+    """
+    code = 400
+
+
+class FileSizeExceeded(NoApplicableCode):
+    """File size exceeded exception implementation
     """
     code = 400
 
@@ -81,8 +86,15 @@ class VersionNegotiationFailed(NoApplicableCode):
     """
     pass
 
+
 class OperationNotSupported(NoApplicableCode):
     """Operation not supported exception implementation
     """
     code = 501
+
+
+class StorageNotSupported(NoApplicableCode):
+    """Storage not supported exception implementation
+    """
+    code = 400
 
