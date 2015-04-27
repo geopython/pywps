@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
 import os,sys
+import multiprocessing
+import multiprocessing.queues
 from contextlib import contextmanager
 import tempfile
 import subprocess
 import json
 from collections import deque
-from uuid import uuid4
 from pywps._compat import StringIO
 from path import path
 import flask
@@ -18,11 +19,8 @@ sys.path.append(os.path.join(
     os.path.pardir))
 import pywps
 from pywps.formats import FORMATS
-from pywps import (Process, Service, WPSResponse, LiteralInput, LiteralOutput,
+from pywps import (Process, Service, LiteralInput, LiteralOutput,
                    ComplexInput, ComplexOutput, Format)
-
-recent_data_files = deque(maxlen=20)
-
 
 @contextmanager
 def temp_dir():
@@ -33,8 +31,39 @@ def temp_dir():
         tmp.rmtree()
 
 
+def sleep(request, response):
+    import time
+
+    sleep_delay = request.inputs['delay'].data
+    if sleep_delay:
+        sleep_delay = float(sleep_delay)
+    else:
+        sleep_delay = 10
+
+    time.sleep(sleep_delay)
+    response.update_status('PyWPS Process started. Waiting...', 20)
+    time.sleep(sleep_delay)
+    response.update_status('PyWPS Process started. Waiting...', 40)
+    time.sleep(sleep_delay)
+    response.update_status('PyWPS Process started. Waiting...', 60)
+    time.sleep(sleep_delay)
+    response.update_status('PyWPS Process started. Waiting...', 80)
+    time.sleep(sleep_delay)
+    print int(request)
+    response.outputs['sleep_output'].data = 'done sleeping'
+
+    # This one needs to be after all calculation has been done otherwise the response as the end will not be complete
+    response.update_status('PyWPS Process finished', 100)
+    return response
+
+
+def ultimate_question(request, response):
+    response.outputs['outvalue'].data = '42'
+    return response
+
+
 def say_hello(request, response):
-    response.outputs['response'].setvalue(request.inputs['name'].getvalue())
+    response.outputs['response'].data = 'Hello ' + request.inputs['name'].data
     return response
 
 
@@ -43,7 +72,7 @@ def feature_count(request, response):
     from pywps.app import xpath_ns
     doc = lxml.etree.parse(request.inputs['layer'])
     feature_elements = xpath_ns(doc, '//gml:featureMember')
-    response.outputs['count'] =  str(len(feature_elements))
+    response.outputs['count'] = str(len(feature_elements))
     return response
 
 
@@ -66,16 +95,30 @@ def centroids(request, response):
 
 def create_app():
     service = Service(processes=[
-        Process(say_hello, version='1.3.3.7', inputs=[LiteralInput('name', 'blatitle', data_type='string')],
-                outputs=[LiteralOutput('response', 'Response', data_type='string')]),
+        Process(say_hello, version='1.3.3.7', inputs=[LiteralInput('name', data_type='string')],
+                outputs=[LiteralOutput('response', data_type='string')],
+                store_supported=True,
+                status_supported=True),
         Process(feature_count,
                 inputs=[ComplexInput('layer', 'Layer', [Format('SHP')])],
                 outputs=[ComplexOutput('layer', 'Layer', [Format('GML')])]),
         Process(centroids,
                 inputs=[ComplexInput('layer', 'Layer', [Format('GML')])],
-                outputs=[ComplexOutput('out', 'Referenced Output', [Format('JSON')])])
+                outputs=[ComplexOutput('out', 'Referenced Output', [Format('JSON')])],
+                store_supported=True,
+                status_supported=True),
+        Process(ultimate_question,
+                outputs=[LiteralOutput('outvalue', 'Output Value', data_type='string')]),
+        Process(test_feature,
+                inputs=[ComplexInput('input', 'Input', [Format('text/xml')])],
+                outputs=[ComplexOutput('output', 'Output', [Format('text/xml')])]),
+        Process(sleep,
+                inputs=[LiteralInput('delay', 'Delay between every update', data_type='float')],
+                outputs=[LiteralOutput('sleep_output', 'Sleep Output', data_type='string')],
+                store_supported=True,
+                status_supported=True
+                )
     ])
-    
 
     app = flask.Flask(__name__)
 
@@ -90,7 +133,6 @@ def create_app():
 
     @app.route(pywps.config.get_config_value('server', 'outputUrl')+'<uuid>')
     def datafile(uuid):
-        service.processes
         import pywps.config
         file_path = pywps.config.get_config_value('server', 'outputPath')
         for data_file in os.listdir(file_path):
