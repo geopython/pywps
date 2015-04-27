@@ -4,6 +4,7 @@ https://github.com/jachym/pywps-4/issues/2
 """
 import os
 import tempfile
+import time
 import config
 from storage import FileStorage
 from uuid import uuid4
@@ -356,6 +357,9 @@ class WPSRequest(object):
 
                 self.operation = 'execute'
                 self.identifier = xpath_ns(doc, './ows:Identifier')[0].text
+                self.lineage = 'false'
+                self.store_execute = 'false'
+                self.status = 'false'
                 self.inputs = get_input_from_xml(doc)
                 self.outputs = get_output_from_xml(doc)
                 self.raw = False
@@ -393,25 +397,161 @@ class WPSRequest(object):
                 value = self.http_request.args.get(k)
                 if aslist:
                     value = value.split(",")
-        
+
         return value
 
 
 class WPSResponse(object):
-    """
-    :param outputs: A dictionary of output values that will be returned
-                    to the client. The values can be strings or
-                    :class:`~FileReference` objects.
-    """
 
-    def __init__(self, outputs=None):
-        self.outputs = outputs or {}
+    NO_STATUS = 0
+    STORE_STATUS = 1
+    STORE_AND_UPDATE_STATUS = 2
+
+    def __init__(self, process, wps_request):
+        self.process = process
+        self.wps_request = wps_request
+        self.outputs = {o.identifier: o for o in process.outputs}
         self.message = None
+        self.status = self.NO_STATUS
+        self.status_percentage = 0
+        self.doc = None
+
+    def update_status(self, message, status_percentage=None):
+        self.message = message
+        if status_percentage:
+            self.status_percentage = status_percentage
+
+            # rebuild the doc and update the status xml file
+            self.doc = self._construct_doc()
+
+        # check if storing of the status is requested
+        if self.status >= self.STORE_STATUS:
+            self.write_response_doc(self.doc)
+
+    def write_response_doc(self, doc):
+        file_obj = open(self.process.status_location, 'w')
+        file_obj.write(etree.tostring(doc, pretty_print=True))
+        file_obj.close()
+
+    def _process_accepted(self):
+        return WPS.Status(
+            WPS.ProcessAccepted(self.message),
+            creationTime=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime())
+        )
+
+    def _process_started(self):
+        return WPS.Status(
+            WPS.ProcessStarted(
+                self.message,
+                percentCompleted=str(self.status_percentage)
+            ),
+            creationTime=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime())
+        )
+
+    def _process_paused(self):
+        return WPS.Status(
+            WPS.ProcessPaused(
+                self.message,
+                percentCompleted=str(self.status_percentage)
+            ),
+            creationTime=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime())
+        )
+
+    def _process_succeeded(self):
+        return WPS.Status(
+            WPS.ProcessSucceeded(self.message),
+            creationTime=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime())
+        )
+
+    def _process_failed(self):
+        return WPS.Status(
+            WPS.ProcessFailed(
+                WPS.ExceptionReport(
+                    OWS.Exception(
+                        OWS.Exception(self.message),
+                        exceptionCode='NoApplicableCode',
+                        locater='None'
+                    )
+                )
+            ),
+            creationTime=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime())
+        )
+
+    def _construct_doc(self):
+        doc = WPS.ExecuteResponse()
+        doc.attrib['{http://www.w3.org/2001/XMLSchema-instance}schemaLocation'] = 'http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd'
+        doc.attrib['service'] = 'WPS'
+        doc.attrib['version'] = '1.0.0'
+        doc.attrib['{http://www.w3.org/XML/1998/namespace}lang'] = 'en-CA'
+        doc.attrib['serviceInstance'] = config.get_config_value('wps', 'serveraddress') + '/wps?service=wps&request=getcapabilities'
+
+        if self.status >= self.STORE_STATUS:
+            if self.process.status_location:
+                doc.attrib['statusLocation'] = self.process.status_url
+
+        # Process XML
+        process_doc = WPS.Process(
+            OWS.Identifier(self.process.identifier),
+            OWS.Title(self.process.title)
+        )
+        if self.process.abstract:
+            doc.append(OWS.Abstract(self.process.abstract))
+        # TODO: See Table 32 Metadata in OGC 06-121r3
+        for m in self.process.metadata:
+            doc.append(OWS.Metadata(m))
+        if self.process.profile:
+            doc.append(OWS.Profile(self.process.profile))
+        if self.process.wsdl:
+            doc.append(OWS.WSDL(self.process.wsdl))
+        process_doc.attrib['{http://www.opengis.net/wps/1.0.0}processVersion'] = self.process.version
+
+        doc.append(process_doc)
+
+        # Status XML
+        # return the correct response depending on the progress of the process
+        if self.status >= self.STORE_AND_UPDATE_STATUS:
+            if self.status_percentage == 0:
+                self.message = 'PyWPS Process %s accepted' % self.process.identifier
+                status_doc = self._process_accepted()
+                doc.append(status_doc)
+                return doc
+            elif self.status_percentage < 100:
+                status_doc = self._process_started()
+                doc.append(status_doc)
+                return doc
+
+        # check if process failed and display fail message
+        if self.status_percentage == -1:
+            status_doc = self._process_failed()
+            doc.append(status_doc)
+            return doc
+
+        # TODO: add paused status
+
+        self.message = 'PyWPS Process %s successfully calculated' % self.process.identifier
+        status_doc = self._process_succeeded()
+        doc.append(status_doc)
+
+        # DataInputs and DataOutputs definition XML if lineage=true
+        if self.wps_request.lineage == 'true':
+            data_inputs = [self.wps_request.inputs[i].execute_xml() for i in self.wps_request.inputs]
+            doc.append(WPS.DataInputs(*data_inputs))
+
+            output_definitions = [self.outputs[o].describe_xml() for o in self.outputs]
+            doc.append(WPS.OutputDefinitions(*output_definitions))
+
+        # Process outputs XML
+        output_elements = [self.outputs[o].execute_xml() for o in self.outputs]
+        doc.append(WPS.ProcessOutputs(*output_elements))
+
+        if self.wps_request.store_execute == 'true':
+            self.write_response_doc(doc)
+
+        return doc
 
     @Request.application
     def __call__(self, request):
-        doc = WPS.ExecuteResponse('WPSRESPONSE')
-        return doc
+        return xml_response(self._construct_doc())
 
 
 class LiteralInput(inout.LiteralInput):
@@ -429,13 +569,6 @@ class LiteralInput(inout.LiteralInput):
         self.min_occurs = min_occurs
         self.max_occurs = max_occurs
         self.as_reference = as_reference
-        self._value = None
-
-    def setvalue(self, value):
-        self._value = value
-
-    def getvalue(self):
-        return self._value
 
     def describe_xml(self):
         doc = E.Input(
@@ -513,7 +646,7 @@ class LiteralInput(inout.LiteralInput):
         """Return Data node
         """
         doc = WPS.Data()
-        literal_doc = WPS.LiteralData(self._value)
+        literal_doc = WPS.LiteralData(self.data)
 
         if self.data_type:
             literal_doc.attrib['dataType'] = self.data_type
@@ -532,20 +665,42 @@ class ComplexInput(inout.ComplexInput):
     """
 
     def __init__(self, identifier, title='', allowed_formats=None, data_format=None, abstract='', metadata=[], min_occurs='1',
-                 max_occurs='1', max_megabytes=None, as_reference=False):
+                 max_occurs='1', as_reference=False):
         inout.ComplexInput.__init__(self, identifier=identifier, title=title, abstract=abstract, data_format=data_format)
         self.allowed_formats = allowed_formats
         self.metadata = metadata
         self.min_occurs = min_occurs
         self.max_occurs = max_occurs
-        self.max_megabytes = max_megabytes
         self.as_reference = as_reference
         self.url = ''
         self.method = ''
+        self.max_megabytes = int(0)
+        self.calculate_max_input_size()
 
-        # TODO: if not set then set to default max size
-        if max_megabytes:
-            self.max_fileSize = max_megabytes * 1024 * 1024
+    def calculate_max_input_size(self):
+        """Calculates maximal size for input file based on configuration
+        and units
+
+        :return: maximum file size bytes
+        """
+        maxSize = config.get_config_value('server', 'maxfilesize')
+        maxSize = maxSize.lower()
+
+        import re
+
+        units = re.compile("[gmkb].*")
+        size = float(re.sub(units, '', maxSize))
+
+        if maxSize.find("g") > -1:
+            size *= 1024*1024*1024
+        elif maxSize.find("m") > -1:
+            size *= 1024*1024
+        elif maxSize.find("k") > -1:
+            size *= 1024
+        else:
+            size *= 1
+
+        self.max_megabytes = size
 
     def describe_xml(self):
         default_format_el = self.allowed_formats[0].describe_xml()
@@ -573,7 +728,7 @@ class ComplexInput(inout.ComplexInput):
         )
 
         if self.max_megabytes:
-            doc.attrib['maximumMegabytes'] = self.max_megabytes
+            doc.attrib['maximumMegabytes'] = str(self.max_megabytes)
 
         return doc
     
@@ -632,6 +787,7 @@ class ComplexInput(inout.ComplexInput):
         doc.append(complex_doc)
         return doc
 
+
 class LiteralOutput(inout.LiteralOutput):
     """
     :param identifier: The name of this output.
@@ -645,13 +801,7 @@ class LiteralOutput(inout.LiteralOutput):
         self.abstract = abstract
         self.metadata = metadata
         self.uom = uom
-        self.value = None
-
-    def setvalue(self, value):
-        self.value = value
-
-    def getvalue(self):
-        return self.value
+        self.data = ''
 
     def describe_xml(self):
         doc = E.Output(
@@ -694,7 +844,7 @@ class LiteralOutput(inout.LiteralOutput):
 
         data_doc = WPS.Data()
 
-        literal_data_doc = WPS.LiteralData(self.value)
+        literal_data_doc = WPS.LiteralData(self.data)
         literal_data_doc.attrib['dataType'] = self.data_type
         literal_data_doc.attrib['reference'] = xmlschema_2 + self.data_type
         if self.uom:
@@ -726,11 +876,10 @@ class ComplexOutput(inout.ComplexOutput):
     """
 
     def __init__(self, identifier, title='', formats=None, output_format=None, encoding="UTF-8",
-                 schema=None, abstract='', metadata=[], max_megabytes=None):
+                 schema=None, abstract='', metadata=[]):
         inout.ComplexOutput.__init__(self, identifier, title=title, abstract=abstract)
         self.formats = formats
         self.metadata = metadata
-        self.max_megabytes = max_megabytes
 
         self._schema = None
         self._output_format = None
@@ -741,10 +890,6 @@ class ComplexOutput(inout.ComplexOutput):
         self.encoding = encoding
         self.schema = schema
         self.storage = FileStorage(config)
-
-        # TODO: if not set then set to default max size
-        if max_megabytes:
-            self.max_fileSize = max_megabytes * 1024 * 1024
 
     @property
     def output_format(self):
@@ -815,9 +960,6 @@ class ComplexOutput(inout.ComplexOutput):
                 E.Supported(*supported_format_elements)
             )
         )
-
-        if self.max_megabytes:
-            doc.attrib['maximumMegabytes'] = self.max_megabytes
 
         return doc
 
@@ -904,7 +1046,7 @@ class Process(object):
     """
 
     def __init__(self, handler, identifier=None, title='', abstract='', profile=[], wsdl='', metadata=[], inputs=[],
-                 outputs=[], version='None', lineage=False, store_supported=False, status_supported=False):
+                 outputs=[], version='None', store_supported=False, status_supported=False):
         self.identifier = identifier or handler.__name__
         self.handler = handler
         self.title = title
@@ -915,12 +1057,9 @@ class Process(object):
         self.version = version
         self.inputs = inputs
         self.outputs = outputs
+        self.uuid = None
         self.status_location = ''
-
-        if lineage:
-            self.lineage = 'true'
-        else:
-            self.lineage = 'false'
+        self.status_url = ''
 
         if store_supported:
             self.store_supported = 'true'
@@ -961,11 +1100,11 @@ class Process(object):
         )
         doc.attrib['{http://www.opengis.net/wps/1.0.0}processVersion'] = self.version
 
-        # TODO: include if storage of outputs or execute response document is supported
-        doc.attrib['storeSupported'] = self.store_supported
+        if self.store_supported == 'true':
+            doc.attrib['storeSupported'] = self.store_supported
 
-        # TODO: include if updating of status data is supported
-        doc.attrib['statusSupported'] = self.status_supported
+        if self.status_supported == 'true':
+            doc.attrib['statusSupported'] = self.status_supported
 
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
@@ -987,70 +1126,46 @@ class Process(object):
         return doc
 
     def execute(self, wps_request):
-        wps_response = WPSResponse({o.identifier: o for o in self.outputs})
-        wps_response = self.handler(wps_request, wps_response) 
+        import multiprocessing
+        self.uuid = str(uuid4())
+        async = False
+        wps_response = WPSResponse(self, wps_request)
 
-        doc = WPS.ExecuteResponse()
+        # check if status storage and updating are supported by this process
+        if wps_request.store_execute == 'true':
+            if self.store_supported != 'true':
+                raise StorageNotSupported('Process does not support the storing of the execute response')
 
-        # Process XML
-        process_doc = WPS.Process(
-            OWS.Identifier(self.identifier),
-            OWS.Title(self.title)
-        )
-        if self.abstract:
-            doc.append(OWS.Abstract(self.abstract))
-        # TODO: See Table 32 Metadata in OGC 06-121r3
-        for m in self.metadata:
-            doc.append(OWS.Metadata(m))
-        if self.profile:
-            doc.append(OWS.Profile(self.profile))
-        if self.wsdl:
-            doc.append(OWS.WSDL(self.wsdl))
-        process_doc.attrib['{http://www.opengis.net/wps/1.0.0}processVersion'] = self.version
-        doc.append(process_doc)
-
-        # Status XML
-        status_doc = WPS.Status(WPS.ProcessSucceeded("great success"))
-        doc.append(status_doc)
-
-        # DataInputs XML if lineage=true
-        if wps_request.lineage.lower() == 'true':
-            data_inputs = [wps_request.inputs[i].execute_xml() for i in wps_request.inputs]
-            datainputs_doc = WPS.DataInputs(*data_inputs)
-            doc.append(datainputs_doc)
-
-        # DataOutput definition XML if lineage=true
-        if wps_request.lineage.lower() == 'true':
-            output_definitions = [i.describe_xml() for i in self.outputs]
-            dataoutputs_doc = WPS.OutputDefinitions(*output_definitions)
-            doc.append(dataoutputs_doc)
-
-        # Process outputs XML
-        output_elements = [wps_response.outputs[o].execute_xml() for o in wps_response.outputs]
-        process_output_doc = WPS.ProcessOutputs(*output_elements)
-        doc.append(process_output_doc)
-
-        doc.attrib['{http://www.w3.org/2001/XMLSchema-instance}schemaLocation'] = 'http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd'
-        doc.attrib['service'] = 'WPS'
-        doc.attrib['version'] = '1.0.0'
-        doc.attrib['{http://www.w3.org/XML/1998/namespace}lang'] = 'en-CA'
-        doc.attrib['serviceInstance'] = config.get_config_value('wps', 'serveraddress') + '/wps?service=wps&request=getcapabilities'
-
-        # store the execute response document if true
-        if wps_request.store_execute.lower() == 'true':
             file_path = config.get_config_value('server', 'outputPath')
             file_url = config.get_config_value('wps', 'serveraddress') + config.get_config_value('server', 'outputUrl')
-            status_uuid = str(uuid4())
-            status_file_path = os.path.join(file_path, status_uuid)+'.xml'
-            status_file_url = os.path.join(file_url, status_uuid)+'.xml'
+            self.status_location = os.path.join(file_path, self.uuid)+'.xml'
+            self.status_url = os.path.join(file_url, self.uuid)+'.xml'
 
-            doc.attrib['statusLocation'] = status_file_url
+            if wps_request.status == 'true':
+                if self.status_supported != 'true':
+                    raise OperationNotSupported('Process does not support the updating of status')
 
-            file_obj = open(status_file_path, 'w')
-            file_obj.write(etree.tostring(doc, pretty_print=True))
-            file_obj.close()
+                wps_response.status = WPSResponse.STORE_AND_UPDATE_STATUS
+                async = True
+            else:
+                wps_response.status = WPSResponse.STORE_STATUS
 
-        return doc
+        # check if updating of status is not required then no need to spawn a process
+        if async:
+            # TODO: problem, how to tell if process finished correctly or failed?
+            process = multiprocessing.Process(target=self.handler, args=(wps_request, wps_response))
+            process.start()
+        else:
+            try:
+                wps_response = self.handler(wps_request, wps_response)
+
+                # update the process to 100% if everything went correctly
+                wps_response.update_status(wps_response.message, 100)
+            except Exception as e:
+                wps_response.update_status(str(e), -1)
+
+        # TODO: process succeeded or failed
+        return wps_response
 
 
 class Service(object):
