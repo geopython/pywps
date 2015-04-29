@@ -22,6 +22,7 @@ from pywps._compat import text_type, StringIO
 from pywps import inout
 from pywps.formats import FORMATS
 from pywps.inout import FormatBase
+from owslib.ows import BoundingBox
 from lxml.etree import SubElement
 from lxml import etree
 
@@ -38,7 +39,7 @@ NAMESPACES = {
     'xlink': "http://www.w3.org/1999/xlink",
     'wps': "http://www.opengis.net/wps/1.0.0",
     'ows': "http://www.opengis.net/ows/1.1",
-    #'gml': "http://www.opengis.net/gml",
+    'gml': "http://www.opengis.net/gml",
     'xsi': "http://www.w3.org/2001/XMLSchema-instance"
 }
 
@@ -99,7 +100,12 @@ def get_input_from_xml(doc):
             the_input[identifier_el.text] = inpt
             continue
 
-        # TODO bounding box data
+        bbox_data = xpath_ns(input_el, './wps:Data/wps:BoundingBoxData')
+        if bbox_data:
+            bbox_data_el = bbox_data[0]
+            bbox = BoundingBox(bbox_data_el)
+            the_input.update({ identifier_el.text: bbox })
+            continue
 
     return the_input
 

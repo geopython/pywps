@@ -5,6 +5,7 @@ from pywps import Service, Process, WPSResponse, LiteralOutput, LiteralInput
 from pywps.app import E, WPS, OWS, NAMESPACES, get_input_from_xml, xpath_ns
 from pywps._compat import text_type
 from tests.common import client_for
+from owslib.ows import BoundingBox
 
 
 def create_ultimate_question():
@@ -134,6 +135,22 @@ class ExecuteXmlParserTest(unittest.TestCase):
         assert rv_doc.tag == 'TheData'
         assert rv_doc.text == "hello world"
 
+    def test_bbox_input(self):
+        request_doc = WPS.Execute(
+            OWS.Identifier('request'),
+            WPS.DataInputs(
+                WPS.Input(
+                    OWS.Identifier('bbox'),
+                    WPS.Data(
+                        WPS.BoundingBoxData(
+                            OWS.LowerCorner('40 50'),
+                            OWS.UpperCorner('60 70'))))))
+        rv = get_input_from_xml(request_doc)
+        assert isinstance(rv['bbox'], BoundingBox)
+        assert rv['bbox'].minx == '40'
+        assert rv['bbox'].miny == '50'
+        assert rv['bbox'].maxx == '60'
+        assert rv['bbox'].maxy == '70'
 
 def load_tests(loader=None, tests=None, pattern=None):
     if not loader:
