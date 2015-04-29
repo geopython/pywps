@@ -322,7 +322,7 @@ class WPSRequest(object):
 
                 self.identifier = self._get_get_param('identifier')
                 self.store_execute = self._get_get_param('storeExecuteResponse', 'false')
-                self.status = 'false'
+                self.status = self._get_get_param('status', 'false')
                 self.lineage = self._get_get_param('lineage', 'false')
                 self.inputs = get_data_from_kvp(self._get_get_param('DataInputs'))
                 self.outputs = {}
