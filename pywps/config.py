@@ -1,10 +1,15 @@
 import sys
 import os
 import pywps
-import ConfigParser
 import tempfile
 
 config = None
+
+from pywps._compat import PY2
+if PY2:
+    import ConfigParser
+else:
+    import configparser
 
 
 def get_config_value(section, option):
@@ -42,7 +47,10 @@ def load_configuration():
     """
     global config
 
-    config = ConfigParser.SafeConfigParser()
+    if PY2:
+        config = ConfigParser.SafeConfigParser()
+    else:
+        config = configparser.SafeConfigParser()
 
     # Set default values
     config.add_section('wps')

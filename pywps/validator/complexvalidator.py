@@ -180,13 +180,12 @@ def validateshapefile(data_input, mode):
         from osgeo import ogr
 
         import zipfile
-        z = zipfile.ZipFile(data_input.stream)
+        z = zipfile.ZipFile(data_input.file)
         shape_name = None
         for name in z.namelist():
             z.extract(name, data_input.tempdir)
             if os.path.splitext(name)[1].lower() == '.shp':
                 shape_name = name
-        data_input.stream.close()
 
         if shape_name:
             data_source = ogr.Open(os.path.join(data_input.tempdir, shape_name))

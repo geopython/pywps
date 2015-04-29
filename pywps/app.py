@@ -5,8 +5,8 @@ https://github.com/jachym/pywps-4/issues/2
 import os
 import tempfile
 import time
-import config
-from storage import FileStorage
+from pywps import config
+from pywps.storage import FileStorage
 from uuid import uuid4
 import flask
 
@@ -24,7 +24,12 @@ from pywps.formats import FORMATS
 from pywps.inout import FormatBase
 from lxml.etree import SubElement
 from lxml import etree
-import urllib2
+
+from pywps._compat import PY2
+if PY2:
+    import urllib2
+else:
+    import urllib
 
 xmlschema_2 = "http://www.w3.org/TR/xmlschema-2/#"
 LITERAL_DATA_TYPES = ['string', 'float', 'integer', 'boolean']
@@ -1182,8 +1187,6 @@ class Service(object):
     def get_capabilities(self):
         process_elements = [p.capabilities_xml()
                             for p in self.processes.values()]
-
-        import config
 
         doc = WPS.Capabilities()
 

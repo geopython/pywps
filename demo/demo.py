@@ -1,18 +1,13 @@
 #!/usr/bin/env python
 
 import os,sys
-import multiprocessing
-import multiprocessing.queues
 from contextlib import contextmanager
 import tempfile
 import subprocess
 import json
-from collections import deque
-from pywps._compat import StringIO
 from path import path
 import flask
 from werkzeug.serving import run_simple
-from werkzeug.wsgi import get_path_info, wrap_file
 
 sys.path.append(os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
@@ -109,9 +104,6 @@ def create_app():
                 status_supported=True),
         Process(ultimate_question,
                 outputs=[LiteralOutput('outvalue', 'Output Value', data_type='string')]),
-        Process(test_feature,
-                inputs=[ComplexInput('input', 'Input', [Format('text/xml')])],
-                outputs=[ComplexOutput('output', 'Output', [Format('text/xml')])]),
         Process(sleep,
                 inputs=[LiteralInput('delay', 'Delay between every update', data_type='float')],
                 outputs=[LiteralOutput('sleep_output', 'Sleep Output', data_type='string')],
@@ -133,7 +125,6 @@ def create_app():
 
     @app.route(pywps.config.get_config_value('server', 'outputUrl')+'<uuid>')
     def datafile(uuid):
-        import pywps.config
         file_path = pywps.config.get_config_value('server', 'outputPath')
         for data_file in os.listdir(file_path):
             if data_file == uuid:

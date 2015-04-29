@@ -36,7 +36,7 @@ def create_feature():
         # open the input file
         try:
             inSource = ogr.Open(input)
-        except Exception,e:
+        except Exception as e:
             return "Could not open given vector file: %s" % e
         inLayer = inSource.GetLayer()
 
