@@ -384,7 +384,7 @@ class WPSRequest(object):
                 response_document = xpath_ns(doc, './wps:ResponseForm/wps:ResponseDocument')
                 if len(response_document) > 0:
                     self.lineage = response_document[0].attrib.get('lineage', 'false')
-                    self.store_execute = response_document[0].attrib.get('storeExecute', 'false')
+                    self.store_execute = response_document[0].attrib.get('storeExecuteResponse', 'false')
                     self.status = response_document[0].attrib.get('status', 'false')
 
             else:
