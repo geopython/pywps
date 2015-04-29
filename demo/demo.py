@@ -44,7 +44,6 @@ def sleep(request, response):
     time.sleep(sleep_delay)
     response.update_status('PyWPS Process started. Waiting...', 80)
     time.sleep(sleep_delay)
-    print int(request)
     response.outputs['sleep_output'].data = 'done sleeping'
 
     # This one needs to be after all calculation has been done otherwise the response as the end will not be complete
