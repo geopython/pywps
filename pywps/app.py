@@ -236,7 +236,7 @@ def parse_complex_inputs(inputs):
             tmp_sio.close()
 
         # check if input file size was not exceeded
-        if data_size > int(data_input.max_megabytes):
+        if int(data_size) > int(data_input.max_megabytes):
             raise FileSizeExceeded('File size for input exceeded.'
                                    ' Maximum allowed: %i bytes' % data_input.max_megabytes,
                                    inputs.get('identifier'))
@@ -322,6 +322,7 @@ class WPSRequest(object):
 
                 self.identifier = self._get_get_param('identifier')
                 self.store_execute = self._get_get_param('storeExecuteResponse', 'false')
+                self.status = 'false'
                 self.lineage = self._get_get_param('lineage', 'false')
                 self.inputs = get_data_from_kvp(self._get_get_param('DataInputs'))
                 self.outputs = {}

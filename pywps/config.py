@@ -88,7 +88,7 @@ def load_configuration():
     config.set('server', 'maxfilesize', '3mb')
     config.set('server', 'tempPath', tempfile.gettempdir())
     config.set('server', 'processesPath', '')
-    config.set('server', 'outputUrl', '')
+    config.set('server', 'outputUrl', '/')
     config.set('server', 'outputPath', '')
     config.set('server', 'logFile', '')
     config.set('server', 'logLevel', 'INFO')
