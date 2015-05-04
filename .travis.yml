@@ -6,6 +6,6 @@ python:
 install:
   - "pip install . --use-mirrors"
   - "pip install owslib --use-mirrors"
-  - "pip install GDAL==1.10.0 --global-option=build_ext --global-option="-I/usr/include/gdal""
+  - "pip install GDAL==1.10.0 --global-option=build_ext --global-option=\"-I/usr/include/gdal\"  --use-mirrors"
 
 script: "python tests/__init__.py"
