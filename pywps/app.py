@@ -243,6 +243,8 @@ def parse_complex_inputs(inputs):
                                    ' Maximum allowed: %i bytes' % data_input.max_megabytes,
                                    inputs.get('identifier'))
 
+
+        # TODO: check if file/directory is still present, maybe deleted in mean time
         f = open(tmp_file, 'w')
         f.write(reference_file_data)
         f.close()
@@ -443,9 +445,11 @@ class WPSResponse(object):
             self.write_response_doc(self.doc)
 
     def write_response_doc(self, doc):
-        file_obj = open(self.process.status_location, 'w')
-        file_obj.write(etree.tostring(doc, pretty_print=True))
-        file_obj.close()
+        # TODO: check if file/directory is still present, maybe deleted in mean time
+        with open(self.process.status_location, 'w') as f:
+            f.write(etree.tostring(doc, pretty_print=True))
+            f.flush()
+            os.fsync(f.fileno())
 
     def _process_accepted(self):
         return WPS.Status(
@@ -528,8 +532,9 @@ class WPSResponse(object):
                 self.message = 'PyWPS Process %s accepted' % self.process.identifier
                 status_doc = self._process_accepted()
                 doc.append(status_doc)
+                self.write_response_doc(doc)
                 return doc
-            elif self.status_percentage < 100:
+            elif 0 < self.status_percentage < 100:
                 status_doc = self._process_started()
                 doc.append(status_doc)
                 return doc
@@ -542,7 +547,6 @@ class WPSResponse(object):
 
         # TODO: add paused status
 
-        self.message = 'PyWPS Process %s successfully calculated' % self.process.identifier
         status_doc = self._process_succeeded()
         doc.append(status_doc)
 
@@ -557,9 +561,6 @@ class WPSResponse(object):
         # Process outputs XML
         output_elements = [self.outputs[o].execute_xml() for o in self.outputs]
         doc.append(WPS.ProcessOutputs(*output_elements))
-
-        if self.wps_request.store_execute == 'true':
-            self.write_response_doc(doc)
 
         return doc
 
@@ -1166,19 +1167,22 @@ class Process(object):
 
         # check if updating of status is not required then no need to spawn a process
         if async:
-            # TODO: problem, how to tell if process finished correctly or failed?
-            process = multiprocessing.Process(target=self.handler, args=(wps_request, wps_response))
+            process = multiprocessing.Process(target=self._run_process, args=(wps_request, wps_response))
             process.start()
         else:
-            try:
-                wps_response = self.handler(wps_request, wps_response)
+            wps_response = self._run_process(wps_request, wps_response)
 
-                # update the process to 100% if everything went correctly
-                wps_response.update_status(wps_response.message, 100)
-            except Exception as e:
-                wps_response.update_status(str(e), -1)
+        return wps_response
 
-        # TODO: process succeeded or failed
+    def _run_process(self, wps_request, wps_response):
+        try:
+            wps_response = self.handler(wps_request, wps_response)
+            # update the process status to 100% if everything went correctly
+            wps_response.update_status('PyWPS Process finished', 100)
+        except Exception as e:
+            # update the process status to display process failed
+            wps_response.update_status(str(e), -1)
+
         return wps_response
 
 

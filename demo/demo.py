@@ -46,8 +46,6 @@ def sleep(request, response):
     time.sleep(sleep_delay)
     response.outputs['sleep_output'].data = 'done sleeping'
 
-    # This one needs to be after all calculation has been done otherwise the response as the end will not be complete
-    response.update_status('PyWPS Process finished', 100)
     return response
 
 
@@ -88,6 +86,26 @@ def centroids(request, response):
 
 
 def create_app():
+
+    from pywps.config import config
+
+    output_url = pywps.config.get_config_value('server', 'outputUrl')
+    output_path = pywps.config.get_config_value('server', 'outputPath')
+    temp_path = pywps.config.get_config_value('server', 'tempPath')
+
+    # check if in the configuration file specified directories can be created/written to
+    try:
+        if not os.path.exists(temp_path):
+            os.makedirs(temp_path)
+
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+    except OSError as e:
+        from pywps.exceptions import NoApplicableCode
+
+        print e
+        exit(1)
+
     service = Service(processes=[
         Process(say_hello, version='1.3.3.7', inputs=[LiteralInput('name', data_type='string')],
                 outputs=[LiteralOutput('response', data_type='string')],
@@ -122,13 +140,12 @@ def create_app():
     def wps():
         return service
 
-    @app.route(pywps.config.get_config_value('server', 'outputUrl')+'<uuid>')
+    @app.route(output_url+'<uuid>')
     def datafile(uuid):
-        file_path = pywps.config.get_config_value('server', 'outputPath')
-        for data_file in os.listdir(file_path):
+        for data_file in os.listdir(output_path):
             if data_file == uuid:
                 file_ext = os.path.splitext(data_file)[1]
-                file_obj = open(os.path.join(file_path, data_file))
+                file_obj = open(os.path.join(output_path, data_file))
                 file_bytes = file_obj.read()
                 file_obj.close()
                 return flask.Response(file_bytes, mimetype=None)
