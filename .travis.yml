@@ -6,8 +6,7 @@ python:
 install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq gdal-bin libgdal-dev libgdal1h libgdal1-dev libgeos-dev
-  - "pip install . --use-mirrors"
-  - "pip install owslib --use-mirrors"
+  - "pip install ."
   - "pip install GDAL==1.10.0 --global-option=build_ext --global-option=\"-I/usr/include/gdal\""
 
 script: "python tests/__init__.py"
