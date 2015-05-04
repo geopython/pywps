@@ -5,7 +5,10 @@ from pywps import Service, Process, WPSResponse, LiteralOutput, LiteralInput
 from pywps.app import E, WPS, OWS, NAMESPACES, get_input_from_xml, xpath_ns
 from pywps._compat import text_type
 from tests.common import client_for
-from owslib.ows import BoundingBox
+
+from pywps._compat import PY2
+if PY2:
+    from owslib.ows import BoundingBox
 
 
 def create_ultimate_question():
@@ -136,6 +139,8 @@ class ExecuteXmlParserTest(unittest.TestCase):
         assert rv_doc.text == "hello world"
 
     def test_bbox_input(self):
+        if not PY2:
+            self.skipTest('OWSlib not python 3 compatible')
         request_doc = WPS.Execute(
             OWS.Identifier('request'),
             WPS.DataInputs(
