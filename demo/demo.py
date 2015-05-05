@@ -86,13 +86,11 @@ def centroids(request, response):
 
 
 def create_app():
-
-    from pywps.config import config
-
-    output_url = pywps.config.get_config_value('server', 'outputUrl')
-    output_path = pywps.config.get_config_value('server', 'outputPath')
-    temp_path = pywps.config.get_config_value('server', 'tempPath')
-
+    from pywps.config import PyWPSConfig
+    pywps.app.config = PyWPSConfig(os.path.join(os.path.dirname(os.path.abspath(__file__)), "pywps.cfg"))
+    output_url = pywps.app.config.get_config_value('server', 'outputUrl')
+    output_path = pywps.app.config.get_config_value('server', 'outputPath')
+    temp_path = pywps.app.config.get_config_value('server', 'tempPath')
     # check if in the configuration file specified directories can be created/written to
     try:
         if not os.path.exists(temp_path):

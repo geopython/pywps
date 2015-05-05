@@ -32,6 +32,8 @@ if PY2:
 else:
     import urllib
 
+global config
+
 xmlschema_2 = "http://www.w3.org/TR/xmlschema-2/#"
 LITERAL_DATA_TYPES = ['string', 'float', 'integer', 'boolean']
 
