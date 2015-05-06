@@ -48,55 +48,55 @@ class PyWPSConfig(object):
         """
 
         if PY2:
-            config = ConfigParser.SafeConfigParser()
+            configuration = ConfigParser.SafeConfigParser()
         else:
-            config = configparser.SafeConfigParser()
+            configuration = configparser.SafeConfigParser()
 
         # Set default values
-        config.add_section('wps')
-        config.set('wps', 'encoding', 'utf-8')
-        config.set('wps', 'title', 'PyWPS Server')
-        config.set('wps', 'version', '1.0.0')
-        config.set('wps', 'abstract', '')
-        config.set('wps', 'fees', 'NONE')
-        config.set('wps', 'constraint', 'NONE')
-        config.set('wps', 'serveraddress', 'http://')
-        config.set('wps', 'keywords', '')
-        config.set('wps', 'lang', 'en-CA')
+        configuration.add_section('wps')
+        configuration.set('wps', 'encoding', 'utf-8')
+        configuration.set('wps', 'title', 'PyWPS Server')
+        configuration.set('wps', 'version', '1.0.0')
+        configuration.set('wps', 'abstract', '')
+        configuration.set('wps', 'fees', 'NONE')
+        configuration.set('wps', 'constraint', 'NONE')
+        configuration.set('wps', 'serveraddress', 'http://')
+        configuration.set('wps', 'keywords', '')
+        configuration.set('wps', 'lang', 'en-CA')
 
-        config.add_section('provider')
-        config.set('provider', 'providerName', 'Your Company Name')
-        config.set('provider', 'individualName', 'Your Name')
-        config.set('provider', 'positionName', 'Your Position')
-        config.set('provider', 'role', 'Your Role')
-        config.set('provider', 'deliveryPoint', 'Street')
-        config.set('provider', 'city', 'City')
-        config.set('provider', 'postalCode', '000 00')
-        config.set('provider', 'country', 'LU')
-        config.set('provider', 'electronicalMailAddress', 'login@server.org')
-        config.set('provider', 'providerSite', 'http://foo.bar')
-        config.set('provider', 'phoneVoice', 'False')
-        config.set('provider', 'phoneFacsimile', 'False')
-        config.set('provider', 'administrativeArea', 'False')
-        config.set('provider', 'onlineResource', 'http://foo.bar')
-        config.set('provider', 'hoursOfService', '00:00-24:00')
-        config.set('provider', 'contactInstructions', 'NONE')
+        configuration.add_section('provider')
+        configuration.set('provider', 'providerName', 'Your Company Name')
+        configuration.set('provider', 'individualName', 'Your Name')
+        configuration.set('provider', 'positionName', 'Your Position')
+        configuration.set('provider', 'role', 'Your Role')
+        configuration.set('provider', 'deliveryPoint', 'Street')
+        configuration.set('provider', 'city', 'City')
+        configuration.set('provider', 'postalCode', '000 00')
+        configuration.set('provider', 'country', 'LU')
+        configuration.set('provider', 'electronicalMailAddress', 'login@server.org')
+        configuration.set('provider', 'providerSite', 'http://foo.bar')
+        configuration.set('provider', 'phoneVoice', 'False')
+        configuration.set('provider', 'phoneFacsimile', 'False')
+        configuration.set('provider', 'administrativeArea', 'False')
+        configuration.set('provider', 'onlineResource', 'http://foo.bar')
+        configuration.set('provider', 'hoursOfService', '00:00-24:00')
+        configuration.set('provider', 'contactInstructions', 'NONE')
 
-        config.add_section('server')
-        config.set('server', 'maxoperations', '30')
-        config.set('server', 'maxinputparamlength', '1024')
-        config.set('server', 'maxfilesize', '3mb')
-        config.set('server', 'tempPath', tempfile.gettempdir())
-        config.set('server', 'processesPath', '')
-        config.set('server', 'outputUrl', '/')
-        config.set('server', 'outputPath', '/')
-        config.set('server', 'logFile', '')
-        config.set('server', 'logLevel', 'INFO')
+        configuration.add_section('server')
+        configuration.set('server', 'maxoperations', '30')
+        configuration.set('server', 'maxinputparamlength', '1024')
+        configuration.set('server', 'maxfilesize', '3mb')
+        configuration.set('server', 'tempPath', tempfile.gettempdir())
+        configuration.set('server', 'processesPath', '')
+        configuration.set('server', 'outputUrl', '/')
+        configuration.set('server', 'outputPath', '/')
+        configuration.set('server', 'logFile', '')
+        configuration.set('server', 'logLevel', 'INFO')
 
         # try to estimate the default location if no user defined file has been set
         # Windows or Unix
         if os.path.exists(self.config_path):
-            config.read(self.config_path)
+            configuration.read(self.config_path)
         else:
             if sys.platform == 'win32':
                 PYWPS_INSTALL_DIR = os.path.abspath(os.path.join(os.getcwd(), os.path.dirname(sys.argv[0])))
@@ -113,8 +113,8 @@ class PyWPSConfig(object):
                     cfg_files = (os.path.join(pywps.__path__[0], "pywps.cfg"),
                                  os.path.join(pywps.__path__[0], os.path.pardir, "pywps.cfg"),
                                  "/etc/pywps.cfg")
-            config.read(cfg_files)
-        self.config = config
+            configuration.read(cfg_files)
+        self.config = configuration
 
 
-config = PyWPSConfig()
+#config = PyWPSConfig()

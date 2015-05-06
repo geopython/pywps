@@ -5,7 +5,7 @@ https://github.com/jachym/pywps-4/issues/2
 import os
 import tempfile
 import time
-from pywps.config import config
+from pywps.config import PyWPSConfig
 from pywps.storage import FileStorage
 from uuid import uuid4
 
@@ -27,6 +27,9 @@ if PY2:
     from owslib.ows import BoundingBox
 else:
     import urllib
+
+config = PyWPSConfig(os.path.join(os.path.dirname(os.path.abspath(__file__)), "pywps.cfg"))
+
 
 xmlschema_2 = "http://www.w3.org/TR/xmlschema-2/#"
 LITERAL_DATA_TYPES = ['string', 'float', 'integer', 'boolean']
