@@ -5,24 +5,20 @@ https://github.com/jachym/pywps-4/issues/2
 import os
 import tempfile
 import time
-from pywps import config
+from pywps.config import config
 from pywps.storage import FileStorage
 from uuid import uuid4
-import flask
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.exceptions import HTTPException, BadRequest, MethodNotAllowed
 from pywps.exceptions import InvalidParameterValue, \
     MissingParameterValue, NoApplicableCode, \
     OperationNotSupported, VersionNegotiationFailed, FileSizeExceeded, StorageNotSupported
-from werkzeug.datastructures import MultiDict
 import lxml.etree
 from lxml.builder import ElementMaker
 from pywps._compat import text_type, StringIO
 from pywps import inout
-from pywps.formats import FORMATS
 from pywps.inout import FormatBase
-from lxml.etree import SubElement
 from lxml import etree
 
 from pywps._compat import PY2
@@ -31,8 +27,6 @@ if PY2:
     from owslib.ows import BoundingBox
 else:
     import urllib
-
-global config
 
 xmlschema_2 = "http://www.w3.org/TR/xmlschema-2/#"
 LITERAL_DATA_TYPES = ['string', 'float', 'integer', 'boolean']

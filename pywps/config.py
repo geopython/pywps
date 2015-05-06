@@ -10,9 +10,9 @@ else:
     import configparser
 
 
-class PyWPSConfig:
+class PyWPSConfig(object):
 
-    def __init__(self, config_path=None):
+    def __init__(self, config_path=''):
         self.config = None
         self.config_path = config_path
         self.load_configuration()
@@ -115,3 +115,6 @@ class PyWPSConfig:
                                  "/etc/pywps.cfg")
             config.read(cfg_files)
         self.config = config
+
+
+config = PyWPSConfig()
