@@ -5,7 +5,6 @@ https://github.com/jachym/pywps-4/issues/2
 import os
 import tempfile
 import time
-from pywps.config import PyWPSConfig
 from pywps.storage import FileStorage
 from uuid import uuid4
 
@@ -19,6 +18,7 @@ from lxml.builder import ElementMaker
 from pywps._compat import text_type, StringIO
 from pywps import inout
 from pywps.inout import FormatBase
+from pywps import config
 from lxml import etree
 
 from pywps._compat import PY2
@@ -27,9 +27,6 @@ if PY2:
     from owslib.ows import BoundingBox
 else:
     import urllib
-
-config = PyWPSConfig(os.path.join(os.path.dirname(os.path.abspath(__file__)), "pywps.cfg"))
-
 
 xmlschema_2 = "http://www.w3.org/TR/xmlschema-2/#"
 LITERAL_DATA_TYPES = ['string', 'float', 'integer', 'boolean']
@@ -105,7 +102,7 @@ def get_input_from_xml(doc):
             if bbox_data:
                 bbox_data_el = bbox_data[0]
                 bbox = BoundingBox(bbox_data_el)
-                the_input.update({ identifier_el.text: bbox })
+                the_input.update({identifier_el.text: bbox})
                 continue
 
     return the_input
@@ -500,7 +497,11 @@ class WPSResponse(object):
         doc.attrib['service'] = 'WPS'
         doc.attrib['version'] = '1.0.0'
         doc.attrib['{http://www.w3.org/XML/1998/namespace}lang'] = 'en-CA'
-        doc.attrib['serviceInstance'] = config.get_config_value('wps', 'serveraddress') + '/wps?service=wps&request=getcapabilities'
+        doc.attrib['serviceInstance'] = '%s:%s%s' % (
+            config.get_config_value('wps', 'serveraddress'),
+            config.get_config_value('wps', 'serverport'),
+            '/wps?service=wps&request=getcapabilities'
+        )
 
         if self.status >= self.STORE_STATUS:
             if self.process.status_location:
@@ -1151,9 +1152,14 @@ class Process(object):
                 raise StorageNotSupported('Process does not support the storing of the execute response')
 
             file_path = config.get_config_value('server', 'outputPath')
-            file_url = config.get_config_value('wps', 'serveraddress') + config.get_config_value('server', 'outputUrl')
-            self.status_location = os.path.join(file_path, self.uuid)+'.xml'
-            self.status_url = os.path.join(file_url, self.uuid)+'.xml'
+            file_url = '%s:%s%s' % (
+                config.get_config_value('wps', 'serveraddress'),
+                config.get_config_value('wps', 'serverport'),
+                config.get_config_value('server', 'outputUrl')
+            )
+
+            self.status_location = os.path.join(file_path, self.uuid) + '.xml'
+            self.status_url = os.path.join(file_url, self.uuid) + '.xml'
 
             if wps_request.status == 'true':
                 if self.status_supported != 'true':
@@ -1310,8 +1316,16 @@ class Service(object):
             OWS.Operation(
                 OWS.DCP(
                     OWS.HTTP(
-                        OWS.Get({'{http://www.w3.org/1999/xlink}href': config.get_config_value('wps', 'serveraddress')+'/wps?'}),
-                        OWS.Post({'{http://www.w3.org/1999/xlink}href': config.get_config_value('wps', 'serveraddress')+'/wps'}),
+                        OWS.Get({'{http://www.w3.org/1999/xlink}href': '%s:%s%s' % (
+                            config.get_config_value('wps', 'serveraddress'),
+                            config.get_config_value('wps', 'serverport'),
+                            '/wps?'
+                        )}),
+                        OWS.Post({'{http://www.w3.org/1999/xlink}href': '%s:%s%s' % (
+                            config.get_config_value('wps', 'serveraddress'),
+                            config.get_config_value('wps', 'serverport'),
+                            '/wps'
+                        )})
                     )
                 ),
                 name="GetCapabilities"
@@ -1319,8 +1333,16 @@ class Service(object):
             OWS.Operation(
                 OWS.DCP(
                     OWS.HTTP(
-                        OWS.Get({'{http://www.w3.org/1999/xlink}href': config.get_config_value('wps', 'serveraddress')+'/wps?'}),
-                        OWS.Post({'{http://www.w3.org/1999/xlink}href': config.get_config_value('wps', 'serveraddress')+'/wps'}),
+                        OWS.Get({'{http://www.w3.org/1999/xlink}href': '%s:%s%s' % (
+                            config.get_config_value('wps', 'serveraddress'),
+                            config.get_config_value('wps', 'serverport'),
+                            '/wps?'
+                        )}),
+                        OWS.Post({'{http://www.w3.org/1999/xlink}href': '%s:%s%s' % (
+                            config.get_config_value('wps', 'serveraddress'),
+                            config.get_config_value('wps', 'serverport'),
+                            '/wps'
+                        )})
                     )
                 ),
                 name="DescribeProcess"
@@ -1328,8 +1350,16 @@ class Service(object):
             OWS.Operation(
                 OWS.DCP(
                     OWS.HTTP(
-                        OWS.Get({'{http://www.w3.org/1999/xlink}href': config.get_config_value('wps', 'serveraddress')+'/wps?'}),
-                        OWS.Post({'{http://www.w3.org/1999/xlink}href': config.get_config_value('wps', 'serveraddress')+'/wps'}),
+                        OWS.Get({'{http://www.w3.org/1999/xlink}href': '%s:%s%s' % (
+                            config.get_config_value('wps', 'serveraddress'),
+                            config.get_config_value('wps', 'serverport'),
+                            '/wps?'
+                        )}),
+                        OWS.Post({'{http://www.w3.org/1999/xlink}href': '%s:%s%s' % (
+                            config.get_config_value('wps', 'serveraddress'),
+                            config.get_config_value('wps', 'serverport'),
+                            '/wps'
+                        )})
                     )
                 ),
                 name="Execute"
@@ -1352,7 +1382,11 @@ class Service(object):
 
         doc.append(languages_doc)
 
-        doc.append(WPS.WSDL({'{http://www.w3.org/1999/xlink}href': config.get_config_value('wps', 'serveraddress')+'/wps?WSDL'}))
+        doc.append(WPS.WSDL({'{http://www.w3.org/1999/xlink}href':  '%s:%s%s' % (
+            config.get_config_value('wps', 'serveraddress'),
+            config.get_config_value('wps', 'serverport'),
+            '/wps?WSDL')
+        }))
 
         return xml_response(doc)
 

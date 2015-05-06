@@ -13,6 +13,7 @@ sys.path.append(os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     os.path.pardir))
 import pywps
+from pywps import config
 from pywps.formats import FORMATS
 from pywps import (Process, Service, LiteralInput, LiteralOutput,
                    ComplexInput, ComplexOutput, Format)
@@ -85,14 +86,14 @@ def centroids(request, response):
         return response
 
 
-def create_app():
-    from pywps.config import PyWPSConfig
-    config = PyWPSConfig(os.path.join(os.path.dirname(os.path.abspath(__file__)), "pywps.cfg"))
+def create_app(config_file):
+
+    config.load_configuration(config_file)
+
     output_url = config.get_config_value('server', 'outputUrl')
     output_path = config.get_config_value('server', 'outputPath')
     temp_path = config.get_config_value('server', 'tempPath')
 
-    config.config = config
     # check if in the configuration file specified directories can be created/written to
     try:
         if not os.path.exists(temp_path):
@@ -164,7 +165,8 @@ def main():
     parser.add_argument('-w', '--waitress', action='store_true')
     args = parser.parse_args()
 
-    app = create_app()
+    config_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pywps.cfg")
+    app = create_app(config_file)
     app.debug = True #args.debug
     host, port = args.listen.split(':')
     port = int(port)
