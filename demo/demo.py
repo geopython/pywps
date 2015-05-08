@@ -27,34 +27,6 @@ def temp_dir():
         tmp.rmtree()
 
 
-def sleep(request, response):
-    import time
-
-    sleep_delay = request.inputs['delay'].data
-    if sleep_delay:
-        sleep_delay = float(sleep_delay)
-    else:
-        sleep_delay = 10
-
-    time.sleep(sleep_delay)
-    response.update_status('PyWPS Process started. Waiting...', 20)
-    time.sleep(sleep_delay)
-    response.update_status('PyWPS Process started. Waiting...', 40)
-    time.sleep(sleep_delay)
-    response.update_status('PyWPS Process started. Waiting...', 60)
-    time.sleep(sleep_delay)
-    response.update_status('PyWPS Process started. Waiting...', 80)
-    time.sleep(sleep_delay)
-    response.outputs['sleep_output'].data = 'done sleeping'
-
-    return response
-
-
-def ultimate_question(request, response):
-    response.outputs['outvalue'].data = '42'
-    return response
-
-
 def say_hello(request, response):
     response.outputs['response'].data = 'Hello ' + request.inputs['name'].data
     return response
@@ -86,7 +58,8 @@ def centroids(request, response):
         return response
 
 
-def create_app(config_file):
+def create_app(config_file=None):
+    from processes import UltimateQuestion, Sleep
 
     config.load_configuration(config_file)
 
@@ -104,7 +77,7 @@ def create_app(config_file):
     except OSError as e:
         from pywps.exceptions import NoApplicableCode
 
-        print e
+        print(e)
         exit(1)
 
     service = Service(processes=[
@@ -120,14 +93,8 @@ def create_app(config_file):
                 outputs=[ComplexOutput('out', 'Referenced Output', [Format('JSON')])],
                 store_supported=True,
                 status_supported=True),
-        Process(ultimate_question,
-                outputs=[LiteralOutput('outvalue', 'Output Value', data_type='string')]),
-        Process(sleep,
-                inputs=[LiteralInput('delay', 'Delay between every update', data_type='float')],
-                outputs=[LiteralOutput('sleep_output', 'Sleep Output', data_type='string')],
-                store_supported=True,
-                status_supported=True
-                )
+        UltimateQuestion(),
+        Sleep()
     ])
 
     app = flask.Flask(__name__)
@@ -157,25 +124,30 @@ def create_app(config_file):
 
 
 def main():
-    import argparse
+    #import argparse
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('listen', nargs='?', default='localhost:5000')
-    parser.add_argument('-d', '--debug', action='store_true')
-    parser.add_argument('-w', '--waitress', action='store_true')
-    args = parser.parse_args()
+    #parser = argparse.ArgumentParser()
+    #parser.add_argument('listen', nargs='?', default='localhost:5000')
+    #parser.add_argument('-d', '--debug', action='store_true')
+    #parser.add_argument('-w', '--waitress', action='store_true')
+    #args = parser.parse_args()
 
     config_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pywps.cfg")
-    app = create_app(config_file)
-    app.debug = True #args.debug
-    host, port = args.listen.split(':')
-    port = int(port)
 
-    if args.waitress:
-        import waitress
-        waitress.serve(app, host=host, port=port)
-    else:
-        run_simple(host, port, app, use_reloader=app.debug)
+    import server
+
+    s = server.Server(config_file)
+    s.run()
+
+
+
+    # TODO: need to spawn a different process for different server
+
+    #if args.waitress:
+    #    import waitress
+    #    waitress.serve(app, host=host, port=port)
+    #else:
+    #    run_simple(host, port, app)
 
 
 if __name__ == '__main__':

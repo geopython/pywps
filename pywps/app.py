@@ -22,11 +22,8 @@ from pywps import config
 from lxml import etree
 
 from pywps._compat import PY2
-if PY2:
-    import urllib2
-    from owslib.ows import BoundingBox
-else:
-    import urllib
+
+
 
 xmlschema_2 = "http://www.w3.org/TR/xmlschema-2/#"
 LITERAL_DATA_TYPES = ['string', 'float', 'integer', 'boolean']
@@ -98,6 +95,8 @@ def get_input_from_xml(doc):
 
         # OWSlib is not python 3 compatible yet
         if PY2:
+            from owslib.ows import BoundingBox
+
             bbox_data = xpath_ns(input_el, './wps:Data/wps:BoundingBoxData')
             if bbox_data:
                 bbox_data_el = bbox_data[0]
@@ -221,10 +220,18 @@ def parse_complex_inputs(inputs):
 
         # save the reference input in tempPath
 
-        tmp_file = tempfile.mkstemp(dir=config.get_config_value('server', 'tempPath'))[1]
-        reference_file = urllib2.urlopen(href)
-        reference_file_data = reference_file.read()
-        data_size = reference_file.headers.get('Content-Length', 0)
+        try:
+            if PY2:
+                import urllib2
+                reference_file = urllib2.urlopen(href)
+            else:
+                from urllib.request import urlopen
+                reference_file = urlopen(href)
+
+            reference_file_data = reference_file.read().decode('utf-8')
+            data_size = reference_file.headers.get('Content-Length', 0)
+        except Exception as e:
+            raise NoApplicableCode(e)
 
         # if the response did not return a 'Content-Length' header then calculate the size
         if data_size == 0:
@@ -241,9 +248,12 @@ def parse_complex_inputs(inputs):
 
 
         # TODO: check if file/directory is still present, maybe deleted in mean time
-        f = open(tmp_file, 'w')
-        f.write(reference_file_data)
-        f.close()
+        try:
+            f = open(tmp_file, 'w')
+            f.write(reference_file_data)
+            f.close()
+        except Exception as e:
+            raise NoApplicableCode(e)
 
         data_input.file = tmp_file
         data_input.url = href

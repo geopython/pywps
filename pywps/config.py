@@ -92,7 +92,7 @@ def load_configuration(cfgfiles=None):
     config.set('server', 'tempPath', tempfile.gettempdir())
     config.set('server', 'processesPath', '')
     config.set('server', 'outputUrl', '/')
-    config.set('server', 'outputPath', '/')
+    config.set('server', 'outputPath', tempfile.gettempdir())
     config.set('server', 'logFile', '')
     config.set('server', 'logLevel', 'INFO')
 
