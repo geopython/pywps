@@ -18,8 +18,6 @@ class PyWPSServerAbstract(object):
     __metaclass__ = ABCMeta
 
     route_base = '/'
-    host = 'localhost'
-    port = 5000
 
     @abstractmethod
     def run(self):

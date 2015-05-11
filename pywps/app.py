@@ -217,8 +217,14 @@ def parse_complex_inputs(inputs):
     # get the referenced input otherwise get the value of the field
     href = inputs.get('href', None)
     if href:
+        tmp_dir = config.get_config_value('server', 'tempPath')
+
+        # check if in the configuration file specified temp directory exists
+        if not os.path.exists(tmp_dir):
+            raise NoApplicableCode('Error: %s does not exist' % tmp_dir)
 
         # save the reference input in tempPath
+        tmp_file = tempfile.mkstemp(dir=tmp_dir)[1]
 
         try:
             if PY2:
@@ -291,6 +297,12 @@ class WPSRequest(object):
         self.http_request = http_request
 
         if http_request.method == 'GET':
+            # WSDL request
+            wsdl = self._get_get_param('WSDL')
+            if wsdl is not None:
+                # TODO: fix #57 then remove the exception
+                raise NoApplicableCode('WSDL not implemented')
+
             # service shall be WPS
             service = self._get_get_param('service', aslist=False)
             if service:
@@ -433,7 +445,7 @@ class WPSResponse(object):
         self.process = process
         self.wps_request = wps_request
         self.outputs = {o.identifier: o for o in process.outputs}
-        self.message = None
+        self.message = ''
         self.status = self.NO_STATUS
         self.status_percentage = 0
         self.doc = None
@@ -452,10 +464,13 @@ class WPSResponse(object):
 
     def write_response_doc(self, doc):
         # TODO: check if file/directory is still present, maybe deleted in mean time
-        with open(self.process.status_location, 'w') as f:
-            f.write(etree.tostring(doc, pretty_print=True))
-            f.flush()
-            os.fsync(f.fileno())
+        try:
+            with open(self.process.status_location, 'w', encoding='utf-8') as f:
+                f.write(etree.tostring(doc, pretty_print=True, encoding='utf-8').decode('utf-8'))
+                f.flush()
+                os.fsync(f.fileno())
+        except IOError as e:
+            raise NoApplicableCode('Writing Response Document failed with : %s' % e)
 
     def _process_accepted(self):
         return WPS.Status(
@@ -1171,6 +1186,10 @@ class Process(object):
             self.status_location = os.path.join(file_path, self.uuid) + '.xml'
             self.status_url = os.path.join(file_url, self.uuid) + '.xml'
 
+            # check if in the configuration file specified directory exists
+            if not os.path.exists(file_path):
+                raise NoApplicableCode('Error: %s does not exist' % file_path)
+
             if wps_request.status == 'true':
                 if self.status_supported != 'true':
                     raise OperationNotSupported('Process does not support the updating of status')
@@ -1196,7 +1215,7 @@ class Process(object):
             wps_response.update_status('PyWPS Process finished', 100)
         except Exception as e:
             # update the process status to display process failed
-            wps_response.update_status(str(e), -1)
+            wps_response.update_status('Process error: %s' % e, -1)
 
         return wps_response
 
