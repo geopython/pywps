@@ -1,1 +1,2 @@
 recursive-include pywps/schemas *
+recursive-include demo *
