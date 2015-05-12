@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
 import os
 from pywps._compat import PY2
+from pywps.exceptions import NotEnoughStorage
 
 
 class STORE_TYPE:
@@ -79,8 +80,21 @@ class FileStorage(StorageAbstract):
         )
 
     def store(self, output):
-        import shutil, tempfile
+        import shutil, tempfile, math
+
         file_name = output.file
+
+        file_block_size = os.stat(file_name).st_blksize
+        avail_size = get_free_space(self.target)
+        file_size = os.stat(file_name).st_size
+
+        # calculate space used according to block size
+        actual_file_size = math.ceil(file_size / float(file_block_size)) * file_block_size
+
+        print(actual_file_size)
+        if avail_size < actual_file_size:
+            raise NotEnoughStorage('Not enough space in %s to store %s' % (self.target, file_name))
+
         (prefix, suffix) = os.path.splitext(file_name)
         if not suffix:
             suffix = output.output_format.get_extension()
@@ -101,3 +115,18 @@ class FileStorage(StorageAbstract):
 
 
         return (STORE_TYPE.PATH, output_name, url)
+
+
+def get_free_space(folder):
+    """ Return folder/drive free space (in bytes)
+    """
+    import platform
+
+    if platform.system() == 'Windows':
+        import ctypes
+
+        free_bytes = ctypes.c_ulonglong(0)
+        ctypes.windll.kernel32.GetDiskFreeSpaceExW(ctypes.c_wchar_p(folder), None, None, ctypes.pointer(free_bytes))
+        return free_bytes.value
+    else:
+        return os.statvfs(folder).f_bfree

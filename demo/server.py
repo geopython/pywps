@@ -14,10 +14,10 @@ def centroids(request, response):
     from shapely.geometry import shape, mapping
     with temp_dir() as tmp:
         input_gml = request.inputs['layer'].file
-        input_geojson = tmp / 'input.geojson'
+        input_geojson = os.path.join(tmp, 'input.geojson')
         subprocess.check_call(['ogr2ogr', '-f', 'geojson',
                                input_geojson, input_gml])
-        data = json.loads(input_geojson.text(encoding='utf-8'))
+        data = json.loads(input_geojson.read_file('r'))
         for feature in data['features']:
             geom = shape(feature['geometry'])
             feature['geometry'] = mapping(geom.centroid)
@@ -42,7 +42,7 @@ def say_hello(request, response):
 
 
 class Server(PyWPSServerAbstract):
-    def __init__(self, host='localhost', port='5000', debug=False, config_file=None):
+    def __init__(self, host='localhost', port='5000', debug=False, processes=[], config_file=None):
         self.app = flask.Flask(__name__)
         self.host = host
         self.port = port
@@ -57,6 +57,7 @@ class Server(PyWPSServerAbstract):
         self.temp_path = config.get_config_value('server', 'tempPath')
         self.host = config.get_config_value('wps', 'serveraddress').split('://')[1]
         self.port = int(config.get_config_value('wps', 'serverport'))
+
         self.processes = [
             Process(say_hello,
                     version='1.3.3.7',
@@ -75,6 +76,11 @@ class Server(PyWPSServerAbstract):
             UltimateQuestion(),
             Sleep()
         ]
+
+        # if any processes have been passed then prioritize these
+        if processes:
+            self.processes = processes
+
         self.service = Service(processes=self.processes)
 
     def run(self):

@@ -1,12 +1,12 @@
 from abc import abstractmethod, ABCMeta
 from contextlib import contextmanager
 import tempfile
-import flask
-from path import path
+from unipath import Path
+
 
 @contextmanager
 def temp_dir():
-    tmp = path(tempfile.mkdtemp())
+    tmp = Path(tempfile.mkdtemp())
     try:
         yield tmp
     finally:

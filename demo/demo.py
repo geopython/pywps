@@ -22,7 +22,7 @@ def main():
     host, port = args.listen.split(':')
     port = int(port)
 
-    s = Server(host, port, debug, config_file)
+    s = Server(host=host, port=port, debug=debug, config_file=config_file)
 
     # TODO: need to spawn a different process for different server
     if args.waitress:
