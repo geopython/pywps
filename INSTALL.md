@@ -1,35 +1,29 @@
 PyWPS 4 Installation
 ====================
 
-Dependencies on Debian based systems
-------------------------------------
+Dependencies
+------------
 
-	$ sudo apt-get install git python-lxml python-gdal python-werkzeug python-flask python-jsonschema python-unipath python-owslib
+To use PyWPS 4 the third party libraries GIT and GDAL need to be installed in the system.
 
-Dependencies on other systems
------------------------------
+In Debian based systems this can be installed with
 
-	1. Install Git
-	
-	2. Install GDAL
-	
-	3. Install Python libraries
+    $ sudo apt-get install git python-gdal
 
 Install PyWPS 4
 ----------------
 
-Manual installation
+Using Pip 
+
+	$ sudo pip install -e git+https://github.com/jachym/pywps-4.git@master#egg=pywps
+
+or manual installation
 
     $ git clone https://github.com/jachym/pywps-4.git
     
     $ cd pywps-4/
     
     $ sudo python setup.py install
-    
-or using Pip 
-
-	$ sudo pip install -e git+https://github.com/jachym/pywps-4.git@master#egg=pywps
-
 
 Install demo service
 --------------------
