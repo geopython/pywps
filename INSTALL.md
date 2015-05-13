@@ -15,18 +15,27 @@ Dependencies on other systems
 	
 	3. Install Python libraries
 
-		$ sudo pip install 
-
 Install PyWPS 4
 ----------------
 
-	$ sudo pip install -e git+https://github.com/jachym/pywps-4.git@master#egg=pywps-dev
+Manual installation
+
+    $ git clone https://github.com/jachym/pywps-4.git
+    
+    $ cd pywps-4/
+    
+    $ sudo python setup.py install
+    
+or using Pip 
+
+	$ sudo pip install -e git+https://github.com/jachym/pywps-4.git@master#egg=pywps
 
 
 Install demo service
 --------------------
 
-	git clone git@github.com:ldesousa/pywps-4-demo.git pywps-4-demo
+	$ git clone git@github.com:ldesousa/pywps-4-demo.git pywps-4-demo
+	
 
 Run demo
 --------
