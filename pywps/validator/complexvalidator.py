@@ -57,7 +57,7 @@ def validategml(data_input, mode):
 
         name = data_input.file
         (mtype, encoding) = mimetypes.guess_type(name, strict=False)
-        passed = (mtype == data_input.data_format.mimetype == FORMATS['GML'][0])
+        passed = data_input.data_format.mime_type in {mtype, FORMATS['GML'][0]}
 
     if mode >= MODE.STRICT:
 
@@ -78,10 +78,13 @@ def validategml(data_input, mode):
         else:
             from urllib.request import urlopen
 
-        schema_url = data_input.data_format.schema
-        gmlschema_doc = etree.parse(urlopen(schema_url))
-        gmlschema = etree.XMLSchema(gmlschema_doc)
-        return gmlschema.validate(etree.parse(data_input.stream))
+        try:
+            schema_url = data_input.data_format.schema
+            gmlschema_doc = etree.parse(urlopen(schema_url))
+            gmlschema = etree.XMLSchema(gmlschema_doc)
+            passed = gmlschema.validate(etree.parse(data_input.stream))
+        except:
+            passed = False
 
     return passed
 
@@ -112,7 +115,7 @@ def validategeojson(data_input, mode):
 
         name = data_input.file
         (mtype, encoding) = mimetypes.guess_type(name, strict=False)
-        passed = (mtype == data_input.data_format.mimetype == FORMATS['GEOJSON'][0])
+        passed = data_input.data_format.mime_type in {mtype, FORMATS['GEOJSON'][0]}
 
     if mode >= MODE.STRICT:
 
@@ -170,20 +173,19 @@ def validateshapefile(data_input, mode):
         _get_mimetypes()
         name = data_input.file
         (mtype, encoding) = mimetypes.guess_type(name, strict=False)
-        passed = (mtype == data_input.data_format.mimetype == FORMATS['SHP'][0])
+        passed = data_input.data_format.mime_type in {mtype, FORMATS['SHP'][0]}
 
     if mode >= MODE.STRICT:
 
         from osgeo import ogr
 
         import zipfile
-        z = zipfile.ZipFile(data_input.stream)
+        z = zipfile.ZipFile(data_input.file)
         shape_name = None
         for name in z.namelist():
             z.extract(name, data_input.tempdir)
             if os.path.splitext(name)[1].lower() == '.shp':
                 shape_name = name
-        data_input.stream.close()
 
         if shape_name:
             data_source = ogr.Open(os.path.join(data_input.tempdir, shape_name))

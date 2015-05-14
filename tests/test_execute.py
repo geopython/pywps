@@ -1,27 +1,31 @@
+from io import StringIO
 import unittest
 import lxml.etree
 from pywps import Service, Process, WPSResponse, LiteralOutput, LiteralInput
 from pywps.app import E, WPS, OWS, NAMESPACES, get_input_from_xml, xpath_ns
 from pywps._compat import text_type
 from tests.common import client_for
-from owslib.ows import BoundingBox
+
+from pywps._compat import PY2
+if PY2:
+    from owslib.ows import BoundingBox
 
 
 def create_ultimate_question():
     def handler(request, response):
-        response.outputs['outvalue'].setvalue('42')
+        response.outputs['outvalue'].data = '42'
         return response
 
     return Process(identifier='ultimate_question',
-                   outputs=[LiteralOutput('outvalue', data_type='string')],
+                   outputs=[LiteralOutput('outvalue', 'Output Value', data_type='string')],
                    handler=handler)
 
 
 def create_greeter():
     def greeter(request, response):
-        name = request.inputs['name']
+        name = request.inputs['name'].data
         assert type(name) is text_type
-        response.outputs['message'].setvalue("Hello %s!" % name)
+        response.outputs['message'].data = "Hello %s!" % name
         return response
 
     return Process(handler=greeter,
@@ -42,10 +46,8 @@ def get_output(doc):
 def assert_response_success(resp):
     assert resp.status_code == 200
     assert resp.headers['Content-Type'] == 'text/xml'
-    success = resp.xpath_text('/wps:ExecuteResponse'
-                              '/wps:Status'
-                              '/wps:ProcessSucceeded')
-    assert success == "great success"
+    success = resp.xpath('/wps:ExecuteResponse/wps:Status/wps:ProcessSucceeded')
+    assert len(success) == 1
 
 
 class ExecuteTest(unittest.TestCase):
@@ -58,13 +60,16 @@ class ExecuteTest(unittest.TestCase):
 
     def test_get_with_no_inputs(self):
         client = client_for(Service(processes=[create_ultimate_question()]))
-        resp = client.get('?service=wps&Request=Execute&identifier=ultimate_question')
+        resp = client.get('?service=wps&version=1.0.0&Request=Execute&identifier=ultimate_question')
         assert_response_success(resp)
         assert get_output(resp.xml) == {'outvalue': '42'}
 
     def test_post_with_no_inputs(self):
         client = client_for(Service(processes=[create_ultimate_question()]))
-        request_doc = WPS.Execute(OWS.Identifier('ultimate_question'))
+        request_doc = WPS.Execute(
+            OWS.Identifier('ultimate_question'),
+            version='1.0.0'
+        )
         resp = client.post_xml(doc=request_doc)
         assert_response_success(resp)
         assert get_output(resp.xml) == {'outvalue': '42'}
@@ -78,7 +83,8 @@ class ExecuteTest(unittest.TestCase):
                     OWS.Identifier('name'),
                     WPS.Data(WPS.LiteralData('foo'))
                 )
-            )
+            ),
+            version='1.0.0'
         )
         resp = client.post_xml(doc=request_doc)
         assert_response_success(resp)
@@ -99,20 +105,23 @@ class ExecuteXmlParserTest(unittest.TestCase):
                 WPS.Input(
                     OWS.Identifier('name'),
                     WPS.Data(WPS.LiteralData('foo')))))
-        assert get_input_from_xml(request_doc).to_dict() == {'name': 'foo'}
+        rv = get_input_from_xml(request_doc)
+        assert 'name' in rv
+        assert rv['name']['data'] == 'foo'
 
     def test_two_strings(self):
         request_doc = WPS.Execute(
             OWS.Identifier('foo'),
             WPS.DataInputs(
                 WPS.Input(
-                    OWS.Identifier('name'),
+                    OWS.Identifier('name1'),
                     WPS.Data(WPS.LiteralData('foo'))),
                 WPS.Input(
-                    OWS.Identifier('name'),
+                    OWS.Identifier('name2'),
                     WPS.Data(WPS.LiteralData('bar')))))
         rv = get_input_from_xml(request_doc)
-        assert rv.getlist('name') == ['foo', 'bar']
+        assert rv['name1']['data'] == 'foo'
+        assert rv['name2']['data'] == 'bar'
 
     def test_complex_input(self):
         the_data = E.TheData("hello world")
@@ -124,12 +133,14 @@ class ExecuteXmlParserTest(unittest.TestCase):
                     WPS.Data(
                         WPS.ComplexData(the_data, mimeType='text/foobar')))))
         rv = get_input_from_xml(request_doc)
-        assert rv['name'].mime_type == 'text/foobar'
-        rv_doc = lxml.etree.parse(rv['name']).getroot()
+        assert rv['name']['mime_type'] == 'text/foobar'
+        rv_doc = lxml.etree.parse(StringIO(lxml.etree.tounicode(rv['name']['data']))).getroot()
         assert rv_doc.tag == 'TheData'
         assert rv_doc.text == "hello world"
 
     def test_bbox_input(self):
+        if not PY2:
+            self.skipTest('OWSlib not python 3 compatible')
         request_doc = WPS.Execute(
             OWS.Identifier('request'),
             WPS.DataInputs(
