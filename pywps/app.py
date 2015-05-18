@@ -200,7 +200,7 @@ def get_data_from_kvp(data):
             # Add the input/output with all its attributes and values to the dictionary
             the_data[identifier] = io
         except:
-            the_data[d] = ''
+            the_data[d] = {'identifier': d, 'data': ''}
 
     return the_data
 
