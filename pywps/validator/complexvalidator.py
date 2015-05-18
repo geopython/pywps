@@ -5,7 +5,7 @@ from pywps.validator import ValidatorAbstract
 from pywps.validator import MODE
 from pywps.formats import FORMATS
 import mimetypes
-
+import os
 
 class BasicValidator(ValidatorAbstract):
     """Data validator implements ValidatorAbstract class
