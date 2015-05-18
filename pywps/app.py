@@ -5,6 +5,7 @@ https://github.com/jachym/pywps-4/issues/2
 import os
 import tempfile
 import time
+import sys
 from pywps.storage import FileStorage
 from uuid import uuid4
 
@@ -219,9 +220,12 @@ def parse_complex_inputs(inputs):
     if href:
         tmp_dir = config.get_config_value('server', 'tempPath')
 
-        # check if in the configuration file specified temp directory exists
-        if not os.path.exists(tmp_dir):
-            raise NoApplicableCode('Error: %s does not exist' % tmp_dir)
+        # check if in the configuration file specified temp directory exists otherwise create it
+        try:
+            if not os.path.exists(tmp_dir):
+                os.makedirs(tmp_dir)
+        except Exception as e:
+            raise NoApplicableCode('File error: Could not create %s. %s' % (tmp_dir, e))
 
         # save the reference input in tempPath
         tmp_file = tempfile.mkstemp(dir=tmp_dir)[1]
@@ -253,12 +257,15 @@ def parse_complex_inputs(inputs):
                                    ' Maximum allowed: %i megabytes' % data_input.max_megabytes,
                                    inputs.get('identifier'))
 
-
-        # TODO: check if file/directory is still present, maybe deleted in mean time
         try:
-            f = open(tmp_file, 'w')
-            f.write(reference_file_data)
-            f.close()
+            if PY2:
+                mode = 'w'
+            else:
+                mode = 'wb'
+
+            with open(tmp_file, mode) as f:
+                f.write(reference_file_data)
+                f.close()
         except Exception as e:
             raise NoApplicableCode(e)
 
@@ -267,9 +274,11 @@ def parse_complex_inputs(inputs):
         data_input.as_reference = True
     else:
         data = inputs.get('data')
-        if len(data.encode('utf-8')) > int(data_input.max_megabytes):
+        # check if input file size was not exceeded
+        byte_size = data_input.max_megabytes * 1024 * 1024
+        if len(data.encode('utf-8')) > int(byte_size):
             raise FileSizeExceeded('File size for input exceeded.'
-                                   ' Maximum allowed: %i bytes' % data_input.max_megabytes,
+                                   ' Maximum allowed: %i megabytes' % data_input.max_megabytes,
                                    inputs.get('identifier'))
         data_input.data = data
     return data_input
@@ -423,7 +432,6 @@ class WPSRequest(object):
         :param key: key value you need to dig out of the HTTP GET request
         """
 
-        
         key = key.lower()
         value = default
         # http_request.args.keys will make + sign disappear in GET url if not urlencoded
@@ -841,7 +849,6 @@ class LiteralOutput(inout.LiteralOutput):
         self.abstract = abstract
         self.metadata = metadata
         self.uom = uom
-        self.data = ''
 
     def describe_xml(self):
         doc = E.Output(
@@ -884,7 +891,7 @@ class LiteralOutput(inout.LiteralOutput):
 
         data_doc = WPS.Data()
 
-        literal_data_doc = WPS.LiteralData(self.data)
+        literal_data_doc = WPS.LiteralData(text_type(self.data))
         literal_data_doc.attrib['dataType'] = self.data_type
         literal_data_doc.attrib['reference'] = xmlschema_2 + self.data_type
         if self.uom:
@@ -1049,7 +1056,10 @@ class ComplexOutput(inout.ComplexOutput):
         """
         doc = WPS.Data()
 
-        complex_doc = WPS.ComplexData(self.data)
+        if self.data is None:
+            complex_doc = WPS.ComplexData()
+        else:
+            complex_doc = WPS.ComplexData(self.data)
 
         if self.data_format:
             if self.data_format.mime_type:
@@ -1187,9 +1197,12 @@ class Process(object):
             self.status_location = os.path.join(file_path, self.uuid) + '.xml'
             self.status_url = os.path.join(file_url, self.uuid) + '.xml'
 
-            # check if in the configuration file specified directory exists
-            if not os.path.exists(file_path):
-                raise NoApplicableCode('Error: %s does not exist' % file_path)
+            # check if in the configuration file specified directory exists otherwise create it
+            try:
+                if not os.path.exists(file_path):
+                    os.makedirs(file_path)
+            except Exception as e:
+                raise NoApplicableCode('File error: Could not create %s. %s' % (file_path, e))
 
             if wps_request.status == 'true':
                 if self.status_supported != 'true':
@@ -1212,11 +1225,32 @@ class Process(object):
     def _run_process(self, wps_request, wps_response):
         try:
             wps_response = self.handler(wps_request, wps_response)
-            # update the process status to 100% if everything went correctly
-            wps_response.update_status('PyWPS Process finished', 100)
+
+            # if status not yet set to 100% then do it after execution was successful
+            if wps_response.status_percentage != 100:
+                # update the process status to 100% if everything went correctly
+                wps_response.update_status('PyWPS Process finished', 100)
         except Exception as e:
+            # retrieve the file and line number where the exception occurred
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            found = False
+            while not found:
+                # search for the _handler method
+                m_name = exc_tb.tb_frame.f_code.co_name
+                if m_name == '_handler':
+                    found = True
+                else:
+                    if exc_tb.tb_next is not None:
+                        exc_tb = exc_tb.tb_next
+                    else:
+                        # if not found then take the first
+                        exc_tb = sys.exc_info()[2]
+                        break
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            method_name = exc_tb.tb_frame.f_code.co_name
+
             # update the process status to display process failed
-            wps_response.update_status('Process error: %s' % e, -1)
+            wps_response.update_status('Process error: %s.%s Line %i %s' % (fname, method_name, exc_tb.tb_lineno, e), -1)
 
         return wps_response
 
@@ -1443,7 +1477,6 @@ class Service(object):
                         identifier_elements.append(process.describe_xml())
                     except Exception as e:
                         raise NoApplicableCode(e)
-
 
         doc = WPS.ProcessDescriptions(
             *identifier_elements
