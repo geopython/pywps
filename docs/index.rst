@@ -8,6 +8,7 @@ Contents:
 
    install
    process
+   exceptions
    api
 
 

@@ -4,49 +4,77 @@
 Processes
 =========
 
-PyWPS works with processes and services. A process is a handler function
+PyWPS-4 works with processes and services. A process is a class with a handler function
 and some input specification. A service is a collection of processes.
 
 
-Writing a handler
-~~~~~~~~~~~~~~~~~
-The handler is a function (or any callable object), that takes a request
+Writing a process class
+~~~~~~~~~~~~~~~~~~~~~~~
+
+    from pywps import Process, LiteralInput, LiteralOutput
+
+    class HelloWorld(Process):
+        def __init__(self):
+            inputs = [LiteralInput('name', 'Name of a person', data_type='string')]
+            outputs = [LiteralOutput('output', 'HelloWorld Output', data_type='string')]
+
+            super(HelloWorld, self).__init__(
+                self._handler,
+                identifier='hello_world',
+                version='0.1',
+                title='My very first process!',
+                abstract='This process takes the name of a person and displays Hello World with it.',
+                inputs=inputs,
+                outputs=outputs
+            )
+
+The handler is a function (or any callable object), that takes a request and a response
 object as argument, and returns a response object. Like so::
 
-    from pywps import WPSResponse
+    @staticmethod
+    def _handler(request, response):
+        response.outputs['output'].data = 'Hello world!'
+        return response
 
-    def handler(request):
-        return WPSResponse({'msg': "Hello world!"})
+request is an instance of :class:`WPSRequest`.
+response is an instance of :class:`WPSResponse`.
 
-The :class:`WPSResponse` class accepts a dictionary of output names and
+These classes accept :class:`LiteralInput`
 values. The values can be strings (that become literal outputs) or
 :class:`FileReference` objects (that become complex outputs).
 
 
 Reading input
 ~~~~~~~~~~~~~
-Handlers receive a single argument, a :class:`WPSRequest` object. Input
+Handlers receive an input argument, a :class:`WPSRequest` object. Input
 values are found in the `inputs` dictionary::
 
-    def handler(request):
-        name = request.inputs['name']
-        return WPSResponse({'message': "Hello %s!" % name})
+    @staticmethod
+    def _handler(request, response):
+        name = request.inputs['name'].data
+        response.outputs['output'].data = 'Hello world %s!' % name
+        return response
 
-Actually, `inputs` is not a plain Python dictionary, but a
-`MultiDict`_ object, that can store multiple values for a single key.
+`inputs` is a plain Python dictionary.
+Input can be set and read in different ways including as a file, as data
+like string or numbers or as a stream::
 
-.. _MultiDict: http://werkzeug.pocoo.org/docs/datastructures/#werkzeug.datastructures.MultiDict
+    request.inputs['file_input'].file
+    request.inputs['data_input'].data
+    request.inputs['stream_input'].stream
 
 For `LiteralInput`, the value is a string. For `ComplexInput`, the value
 is an open file object, with a `mime_type` attribute::
 
-    def handler(request):
-        layer_file = request.inputs['layer']
+    @staticmethod
+    def handler(request, response):
+        layer_file = request.inputs['layer'].file
         mime_type = layer_file.mime_type
         bytes = layer_file.read()
         msg = ("You gave me a file of type %s and size %d"
                % (mime_type, len(bytes)))
-        return WPSResponse({'message': msg})
+        response.outputs['output'].data = msg
+        return response
 
 
 Returning large data
@@ -54,58 +82,87 @@ Returning large data
 WPS allows for a clever method of returning a large data file: instead
 of embedding the data in the response, we can save it separately, and
 return a URL where the data can be downloaded. In the current
-implementation, it's up to you to figure out how to save the data so
-it's accessible at a URL, but if you have such a URL, you can
-communicate it to the client, by wrapping it in a
-:class:`FileReference`::
+implementation, PyWPS-4 core will save the file in a folder specified
+in the configuration passed by the server application or in a default location
+and return the URL embedded in the XML response.
 
-    from pywps import FileReference
+This behaviour can be requested either by using GET::
 
-    def handler(request):
-        # ... do some computation and save the output
-        # as GeoJSON at the address `url` ...
-        ref = FileReference(url, 'application/json')
-        return WPSResponse({'layer': ref})
+    ...ResponseDocument=output=@asReference=true...
+
+Or a POST request::
+
+    ...
+    <wps:ResponseForm>
+        <wps:ResponseDocument>
+            <wps:Output asReference="true">
+                <ows:Identifier>output</ows:Identifier>
+                <ows:Title>Some Output</ows:Title>
+            </wps:Output>
+        </wps:ResponseDocument>
+    </wps:ResponseForm>
+    ...
+
+**output** is the identifier of the output you wish to have it stored
+and accessible from a URL. Only *one output can be requested as reference.
 
 
 Publishing a process
 ~~~~~~~~~~~~~~~~~~~~
 In order to let clients call our process, we need to build a PyWPS
 :class:`Service` and have it listen for requests. Firstly we build a
-:class:`Process` object that knows about our handler::
+:class:`Process` object which will be located in our demo application
+in ``demo/processes/``. This process will know about our handler.
 
-    from pywps import Process
+By default the process has its **Identifier** set to the function's name,
+but we can override it. In the process constructor::
 
-    process = Process(handler)
+    class HelloWorld(Process):
+        def __init__(self):
+            ...
+            super(HelloWorld, self).__init__(
+                self._handler,
+                identifier='magic_process',
+                ...
+            )
 
-By default the process has its `Identifier` set to the function's name,
-but we can override it::
-
-    process = Process(handler, identifier='magic_process')
+When making a request we need to specify nw **magic_process** as identifier instead.
 
 Then we build a :class:`Service` object that knows about any number of
 processes::
 
     from pywps import Service
+    from processes.helloworld import HelloWorld
 
-    service = Service([process])
+    ...
+    processes = [ HelloWorld() ]
+
+    service = Service(processes=processes)
+    ...
 
 The service is a `WSGI application`_ that accepts incoming `Execute`
 requests and calls the appropriate process to handle them. It also
 answers `GetCapabilities` and `DescribeProcess` requests based on the
-process names and their inputs and outputs.
+process identifier and their inputs and outputs.
 
 .. _WSGI application: http://werkzeug.pocoo.org/docs/terms/#wsgi
 
-For testing purposes we can easily publish our service using the
-development server in Werkzeug. Replace ``localhost`` with ``0.0.0.0``
-if you want the server to be visible from another computer. Also, since
-we specify ``use_reloader=True``, the server will restart itself if any
-of the Python source files are changed::
+For testing purposes we can easily publish our service using the :class:`Server`
+using the development server in Flask. Replace ``localhost`` with ``0.0.0.0``
+if you want the server to be visible from another computer.
+In the demo application we have the demo.py which creates a server
+of :class:`Server` inheriting from :class:`PyWPSAbstract`.
+We can pass a host, a port, a config file and the processes.
+**host** and **port** will be **prioritized** if passed to the constructor then
+it takes the config file and if no file is passed the server will use default values.
+Use `run` method start the server::
 
-    from werkzeug.serving import run_simple
 
-    run_simple('localhost', 5000, service, use_reloader=True)
+    ...
+    s = Server(host='0.0.0.0', processes=processes, config_file=config_file)
+
+    s.run()
+    ...
 
 
 Declaring inputs and outputs
@@ -113,12 +170,26 @@ Declaring inputs and outputs
 Clients need to know what our processes expect as input. We can declare
 the expected input when creating a :class:`Process` object::
 
-    from pywps import LiteralInput, ComplexInput
 
-    process = Process(handler, inputs=[
-        LiteralInput('foo', 'string'),
-        ComplexInput('bar', [Format('text/xml')]),
-    ])
+    from pywps import Process, LiteralInput, LiteralOutput
+
+    class FooProcess(Process):
+        def __init__(self):
+            inputs = [
+                LiteralInput('foo', data_type='string'),
+                ComplexInput('bar', [Format('text/xml')])
+            ]
+            outputs = [
+                LiteralOutput('foo_output', data_type='string'),
+                ComplexOutput('bar_output', [Format('JSON')])
+            ]
+
+            super(FooProcess, self).__init__(
+                ...
+                inputs=inputs,
+                outputs=outputs
+            )
+            ...
 
 :class:`LiteralInput`
     A simple value embedded in the request. The first argument is a
@@ -131,7 +202,17 @@ the expected input when creating a :class:`Process` object::
     ``text/xml`` for GML files or ``application/json`` for GeoJSON
     files.
 
+:class:`LiteralOutput`
+    A simple value embedded in the response. The first argument is a
+    name. The second argument is the type, one of `string`, `float`,
+    `integer` or `boolean`.
+
+:class:`ComplexOutput`
+    Same as :class:`ComplexInput`. The first argument is a
+    name. The second argument is a list of one or more formats, e.g.
+    ``text/xml`` for GML files or ``application/json`` for GeoJSON
+    files.
+
 Currently, incoming requests are not checked against the declared
 inputs, the declaration only serves to inform clients about the service,
-if they send a `DescribeProcess` request. There is no way to declare
-outputs yet, but QGIS doesn't seem to mind.
+if they send a `DescribeProcess` request.
