@@ -220,13 +220,6 @@ def parse_complex_inputs(inputs):
     if href:
         tmp_dir = config.get_config_value('server', 'tempPath')
 
-        # check if in the configuration file specified temp directory exists otherwise create it
-        try:
-            if not os.path.exists(tmp_dir):
-                os.makedirs(tmp_dir)
-        except Exception as e:
-            raise NoApplicableCode('File error: Could not create %s. %s' % (tmp_dir, e))
-
         # save the reference input in tempPath
         tmp_file = tempfile.mkstemp(dir=tmp_dir)[1]
 
@@ -724,7 +717,6 @@ class ComplexInput(inout.ComplexInput):
         self.url = ''
         self.method = ''
         self.max_megabytes = int(0)
-        self.calculate_max_input_size()
 
     def calculate_max_input_size(self):
         """Calculates maximal size for input file based on configuration
@@ -775,6 +767,7 @@ class ComplexInput(inout.ComplexInput):
             )
         )
 
+        self.calculate_max_input_size()
         if self.max_megabytes:
             doc.attrib['maximumMegabytes'] = str(self.max_megabytes)
 
@@ -1196,13 +1189,6 @@ class Process(object):
 
             self.status_location = os.path.join(file_path, self.uuid) + '.xml'
             self.status_url = os.path.join(file_url, self.uuid) + '.xml'
-
-            # check if in the configuration file specified directory exists otherwise create it
-            try:
-                if not os.path.exists(file_path):
-                    os.makedirs(file_path)
-            except Exception as e:
-                raise NoApplicableCode('File error: Could not create %s. %s' % (file_path, e))
 
             if wps_request.status == 'true':
                 if self.status_supported != 'true':

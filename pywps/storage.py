@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
 import os
 from pywps._compat import PY2
-from pywps.exceptions import NotEnoughStorage
+from pywps.exceptions import NotEnoughStorage, NoApplicableCode
 
 
 class STORE_TYPE:
@@ -91,7 +91,6 @@ class FileStorage(StorageAbstract):
         # calculate space used according to block size
         actual_file_size = math.ceil(file_size / float(file_block_size)) * file_block_size
 
-        print(actual_file_size)
         if avail_size < actual_file_size:
             raise NotEnoughStorage('Not enough space in %s to store %s' % (self.target, file_name))
 
@@ -112,7 +111,6 @@ class FileStorage(StorageAbstract):
         else:
             from urllib.parse import urljoin
             url = urljoin(self.output_url, just_file_name)
-
 
         return (STORE_TYPE.PATH, output_name, url)
 
