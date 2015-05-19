@@ -10,7 +10,7 @@ config = {
     'download_url': 'https://github.com/jachym/pywps-4',
     'author_email': 'jachym.cepicky@gmail.com',
     'version': '4.0',
-    'install_requires': ['lxml', 'werkzeug', 'flask', 'path.py', 'owslib', 'jsonschema'],
+    'install_requires': ['lxml', 'werkzeug', 'flask', 'unipath', 'owslib', 'jsonschema'],
     'packages': ['pywps'],
     'scripts': [],
     'name': 'pywps'
