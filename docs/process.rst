@@ -10,6 +10,8 @@ and some input specification. A service is a collection of processes.
 
 Writing a process class
 ~~~~~~~~~~~~~~~~~~~~~~~
+Processes are objects of a class inheriting from :class:`Process`.
+Here is a very basic example of a process::
 
     from pywps import Process, LiteralInput, LiteralOutput
 
