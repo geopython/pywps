@@ -1,4 +1,4 @@
-Welcome to PyWPS's documentation!
+Welcome to the PyWPS documentation!
 =================================
 
 Contents:
