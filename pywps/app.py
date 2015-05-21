@@ -244,6 +244,7 @@ def parse_complex_inputs(inputs):
             tmp_sio.close()
 
         # check if input file size was not exceeded
+        data_input.calculate_max_input_size()
         byte_size = data_input.max_megabytes * 1024 * 1024
         if int(data_size) > int(byte_size):
             raise FileSizeExceeded('File size for input exceeded.'
