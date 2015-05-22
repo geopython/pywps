@@ -16,9 +16,10 @@ def create_ultimate_question():
         response.outputs['outvalue'].data = '42'
         return response
 
-    return Process(identifier='ultimate_question',
-                   outputs=[LiteralOutput('outvalue', 'Output Value', data_type='string')],
-                   handler=handler)
+    return Process(handler=handler,
+                   identifier='ultimate_question',
+                   title='Ultimate Question',
+                   outputs=[LiteralOutput('outvalue', 'Output Value', data_type='string')])
 
 
 def create_greeter():
@@ -29,8 +30,10 @@ def create_greeter():
         return response
 
     return Process(handler=greeter,
-                   inputs=[LiteralInput('name', data_type='string')],
-                   outputs=[LiteralOutput('message', data_type='string')])
+                   identifier='greeter',
+                   title='Greeter',
+                   inputs=[LiteralInput('name', 'Input name', data_type='string')],
+                   outputs=[LiteralOutput('message', 'Output message', data_type='string')])
 
 
 def get_output(doc):

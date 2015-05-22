@@ -227,11 +227,12 @@ def parse_complex_inputs(inputs):
             if PY2:
                 import urllib2
                 reference_file = urllib2.urlopen(href)
+                reference_file_data = reference_file.read()
             else:
                 from urllib.request import urlopen
                 reference_file = urlopen(href)
+                reference_file_data = reference_file.read().decode('utf-8')
 
-            reference_file_data = reference_file.read()
             data_size = reference_file.headers.get('Content-Length', 0)
         except Exception as e:
             raise NoApplicableCode('File reference error: %s' % e)
@@ -239,8 +240,10 @@ def parse_complex_inputs(inputs):
         # if the response did not return a 'Content-Length' header then calculate the size
         if data_size == 0:
             tmp_sio = StringIO()
-            tmp_sio.write(reference_file_data)
-            data_size = tmp_sio.len
+            if PY2:
+                data_size = tmp_sio.len
+            else:
+                data_size = tmp_sio.write(reference_file_data)
             tmp_sio.close()
 
         # check if input file size was not exceeded
@@ -252,12 +255,7 @@ def parse_complex_inputs(inputs):
                                    inputs.get('identifier'))
 
         try:
-            if PY2:
-                mode = 'w'
-            else:
-                mode = 'wb'
-
-            with open(tmp_file, mode) as f:
+            with open(tmp_file, 'w') as f:
                 f.write(reference_file_data)
                 f.close()
         except Exception as e:
@@ -603,7 +601,7 @@ class LiteralInput(inout.LiteralInput):
     :param data_type: Type of literal input (e.g. `string`, `float`...).
     """
 
-    def __init__(self, identifier, title='', data_type='string', abstract='', metadata=[], uom=[], default='',
+    def __init__(self, identifier, title, data_type='string', abstract='', metadata=[], uom=[], default='',
                  min_occurs='1', max_occurs='1', as_reference=False):
         inout.LiteralInput.__init__(self, identifier=identifier, title=title, abstract=abstract, data_type=data_type)
         self.metadata = metadata
@@ -707,7 +705,7 @@ class ComplexInput(inout.ComplexInput):
     :param data_format: Format of the passed input. Should be :class:`~Format` object
     """
 
-    def __init__(self, identifier, title='', allowed_formats=None, data_format=None, abstract='', metadata=[], min_occurs='1',
+    def __init__(self, identifier, title, allowed_formats=None, data_format=None, abstract='', metadata=[], min_occurs='1',
                  max_occurs='1', as_reference=False):
         inout.ComplexInput.__init__(self, identifier=identifier, title=title, abstract=abstract, data_format=data_format)
         self.allowed_formats = allowed_formats
@@ -838,7 +836,7 @@ class LiteralOutput(inout.LiteralOutput):
             Should be :class:`~String` object.
     """
 
-    def __init__(self, identifier, title='', data_type='string', abstract='', metadata=[], uom=[]):
+    def __init__(self, identifier, title, data_type='string', abstract='', metadata=[], uom=[]):
         inout.LiteralOutput.__init__(self, identifier, title=title, data_type=data_type)
         self.abstract = abstract
         self.metadata = metadata
@@ -916,7 +914,7 @@ class ComplexOutput(inout.ComplexOutput):
             (e.g., UTF-8).
     """
 
-    def __init__(self, identifier, title='', formats=None, output_format=None, encoding="UTF-8",
+    def __init__(self, identifier, title, formats=None, output_format=None, encoding="UTF-8",
                  schema=None, abstract='', metadata=[]):
         inout.ComplexOutput.__init__(self, identifier, title=title, abstract=abstract)
         self.formats = formats
@@ -1090,9 +1088,9 @@ class Process(object):
                    objects.
     """
 
-    def __init__(self, handler, identifier=None, title='', abstract='', profile=[], wsdl='', metadata=[], inputs=[],
+    def __init__(self, handler, identifier, title, abstract='', profile=[], wsdl='', metadata=[], inputs=[],
                  outputs=[], version='None', store_supported=False, status_supported=False):
-        self.identifier = identifier or handler.__name__
+        self.identifier = identifier
         self.handler = handler
         self.title = title
         self.abstract = abstract

@@ -29,7 +29,7 @@ class CapabilitiesTest(unittest.TestCase):
     def setUp(self):
         def pr1(): pass
         def pr2(): pass
-        self.client = client_for(Service(processes=[Process(pr1), Process(pr2)]))
+        self.client = client_for(Service(processes=[Process(pr1, 'pr1', 'Process 1'), Process(pr2, 'pr2', 'Process 2')]))
 
     def check_capabilities_response(self, resp):
         assert resp.status_code == 200

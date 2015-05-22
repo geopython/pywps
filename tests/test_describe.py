@@ -49,7 +49,7 @@ class DescribeProcessTest(unittest.TestCase):
     def setUp(self):
         def hello(request): pass
         def ping(request): pass
-        processes = [Process(hello), Process(ping)]
+        processes = [Process(hello, 'hello', 'Process Hello'), Process(ping, 'ping', 'Process Ping')]
         self.client = client_for(Service(processes=processes))
 
     def test_get_request_all_args(self):
@@ -113,14 +113,14 @@ class DescribeProcessInputTest(unittest.TestCase):
 
     def test_one_literal_string_input(self):
         def hello(request): pass
-        hello_process = Process(hello, inputs=[LiteralInput('the_name')])
+        hello_process = Process(hello, 'hello', 'Process Hello', inputs=[LiteralInput('the_name', 'Input name')])
         result = self.describe_process(hello_process)
         assert result.inputs == [('the_name', 'literal', 'string')]
 
     def test_one_literal_integer_input(self):
         def hello(request): pass
-        hello_process = Process(hello, inputs=[
-            LiteralInput('the_number', data_type='integer')])
+        hello_process = Process(hello, 'hello', 'Process Hello', inputs=[
+            LiteralInput('the_number', 'Input number', data_type='integer')])
         result = self.describe_process(hello_process)
         assert result.inputs == [('the_number', 'literal', 'integer')]
 
@@ -128,7 +128,7 @@ class DescribeProcessInputTest(unittest.TestCase):
 class InputDescriptionTest(unittest.TestCase):
 
     def test_literal_integer_input(self):
-        literal = LiteralInput('foo', data_type='integer')
+        literal = LiteralInput('foo', 'Literal foo', data_type='integer')
         doc = literal.describe_xml()
         assert doc.tag == E.Input().tag
         [identifier_el] = xpath_ns(doc, './ows:Identifier')
@@ -138,14 +138,14 @@ class InputDescriptionTest(unittest.TestCase):
         assert type_el.attrib['reference'] == xmlschema_2 + 'integer'
 
     def test_complex_input_identifier(self):
-        complex = ComplexInput('foo', allowed_formats=[Format('bar/baz')])
+        complex = ComplexInput('foo', 'Complex foo', allowed_formats=[Format('bar/baz')])
         doc = complex.describe_xml()
         assert doc.tag == E.Input().tag
         [identifier_el] = xpath_ns(doc, './ows:Identifier')
         assert identifier_el.text == 'foo'
 
     def test_complex_input_default_and_supported(self):
-        complex = ComplexInput('foo', allowed_formats=[Format('a/b'), Format('c/d')])
+        complex = ComplexInput('foo', 'Complex foo', allowed_formats=[Format('a/b'), Format('c/d')])
         doc = complex.describe_xml()
         [default_format] = xpath_ns(doc, './ComplexData/Default/Format')
         [default_mime_el] = xpath_ns(default_format, './MimeType')
