@@ -7,13 +7,10 @@ python:
 git:
     submodules: false
 
-# Use system wide packages, needed for gdal
-virtualenv:
-  system_site_packages: true
-
 install:
   - sudo apt-get update -qq
-  - sudo apt-get install python-gdal python3-gdal
+  - sudo apt-get install -qq gdal-bin libgdal-dev libgdal1h libgdal1-dev libgeos-dev
   - "pip install ."
+  - "pip install GDAL==1.10.0 --global-option=build_ext --global-option=\"-I/usr/include/gdal\""
 
 script: "python tests/__init__.py"
