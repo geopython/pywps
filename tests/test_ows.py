@@ -3,12 +3,15 @@ Created on 10 Mar 2015
 
 @author: desousa
 '''
+import os
+import tempfile
 import unittest
 import lxml.etree
 import sys
-from pywps import Service, Process, ComplexInput, ComplexOutput, Format 
+from pywps import Service, Process, ComplexInput, ComplexOutput, Format, FORMATS
 from pywps.exceptions import NoApplicableCode
 from pywps.app import WPS, OWS
+from pywps.wpsserver import temp_dir
 from tests.common import client_for
 from osgeo import ogr
 
@@ -20,10 +23,10 @@ wcsResource = "http://mapservices-gent.tudor.lu/gent_ows?&SERVICE=WCS&FORMAT=ima
 def assert_response_success(resp):
     assert resp.status_code == 200
     assert resp.headers['Content-Type'] == 'text/xml'
-    success = resp.xpath_text('/wps:ExecuteResponse'
+    success = resp.xpath('/wps:ExecuteResponse'
                               '/wps:Status'
                               '/wps:ProcessSucceeded')
-    assert success == "great success"
+    assert len(success) == 1
 
 
 def create_feature():
@@ -32,7 +35,7 @@ def create_feature():
         input = request.inputs['input'].file
         # What do we need to assert a Complex input?
         #assert type(input) is text_type
-        
+
         # open the input file
         try:
             inSource = ogr.Open(input)
@@ -41,27 +44,35 @@ def create_feature():
         inLayer = inSource.GetLayer()
 
         # create output file
-        out = "output.gml"
+        out = 'point'
+        outPath = os.path.join(tempfile.gettempdir(), out)
+
         driver = ogr.GetDriverByName('GML')
-        outSource = driver.CreateDataSource(out, ["XSISCHEMAURI=http://schemas.opengis.net/gml/2.1.2/feature.xsd"])
-        outLayer = outSource.CreateLayer(out,None,ogr.wkbUnknown)
-        
+        outSource = driver.CreateDataSource(outPath, ["XSISCHEMAURI=http://schemas.opengis.net/gml/2.1.2/feature.xsd"])
+        outLayer = outSource.CreateLayer(out, None, ogr.wkbUnknown)
+
         # get the first feature
         inFeature = inLayer.GetNextFeature()
         inGeometry = inFeature.GetGeometryRef()
 
+        # make the buffer
+        buff = inGeometry.Buffer(float(100000))
+
         # create output feature to the file
         outFeature = ogr.Feature(feature_def=outLayer.GetLayerDefn())
-        outFeature.SetGeometryDirectly(inGeometry)
+        outFeature.SetGeometryDirectly(buff)
         outLayer.CreateFeature(outFeature)
         outFeature.Destroy()
 
-        response.outputs['output'].file = out
+        response.outputs['output'].output_format = Format(FORMATS['GML'])
+        response.outputs['output'].file = outPath
         return response
 
     return Process(handler=feature,
-                   inputs=[ComplexInput('input', [Format('text/xml')])],
-                   outputs=[ComplexOutput('output', [Format('text/xml')])])
+                   identifier='feature',
+                   title='Process Feature',
+                   inputs=[ComplexInput('input', 'Input', [Format('GML')])],
+                   outputs=[ComplexOutput('output', 'Output', [Format('GML')])])
     
     
 def create_sum_one():
@@ -70,7 +81,7 @@ def create_sum_one():
         input = request.inputs['input']
         # What do we need to assert a Complex input?
         #assert type(input) is text_type
-        
+
         sys.path.append("/usr/lib/grass64/etc/python/")
         import grass.script as grass
 
@@ -94,6 +105,8 @@ def create_sum_one():
         return response
 
     return Process(handler=sum_one,
+                   identifier='sum_one',
+                   title='Process Sum One',
                    inputs=[ComplexInput('input', [Format('image/img')])],
                    outputs=[ComplexOutput('output', [Format('image/tiff')])])
     
@@ -122,6 +135,11 @@ class ExecuteTests(unittest.TestCase):
         # . the type of output
         
     def test_wcs(self):
+        try:
+            sys.path.append("/usr/lib/grass64/etc/python/")
+            import grass.script as grass
+        except:
+            self.skipTest('GRASS lib not found')
         client = client_for(Service(processes=[create_sum_one()]))
         request_doc = WPS.Execute(
             OWS.Identifier('sum_one'),
@@ -131,7 +149,8 @@ class ExecuteTests(unittest.TestCase):
                     WPS.Reference(href=wcsResource, mimeType='image/img'))),
             WPS.ProcessOutputs(
                 WPS.Output(
-                    OWS.Identifier('output'))))
+                    OWS.Identifier('output'))),
+            version='1.0.0')
         resp = client.post_xml(doc=request_doc)
         assert_response_success(resp)
         # Other things to assert:

@@ -22,7 +22,7 @@ def load_tests():
         test_execute.load_tests(),
         test_describe.load_tests(),
         test_inout.load_tests(),
-        #test_ows.load_tests(),
+        test_ows.load_tests(),
         test_literaltypes.load_tests(),
         test_complexvalidators.load_tests(),
         test_literalvalidators.load_tests()

@@ -1,4 +1,4 @@
-Welcome to PyWPS's documentation!
+Welcome to the PyWPS documentation!
 =================================
 
 Contents:
@@ -8,6 +8,7 @@ Contents:
 
    install
    process
+   exceptions
    api
 
 

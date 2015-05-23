@@ -5,7 +5,7 @@ https://github.com/jachym/pywps-4/issues/2
 import os
 import tempfile
 import time
-from pywps.config import config
+import sys
 from pywps.storage import FileStorage
 from uuid import uuid4
 
@@ -19,14 +19,12 @@ from lxml.builder import ElementMaker
 from pywps._compat import text_type, StringIO
 from pywps import inout
 from pywps.inout import FormatBase
+from pywps import config
 from lxml import etree
 
 from pywps._compat import PY2
-if PY2:
-    import urllib2
-    from owslib.ows import BoundingBox
-else:
-    import urllib
+
+
 
 xmlschema_2 = "http://www.w3.org/TR/xmlschema-2/#"
 LITERAL_DATA_TYPES = ['string', 'float', 'integer', 'boolean']
@@ -98,11 +96,13 @@ def get_input_from_xml(doc):
 
         # OWSlib is not python 3 compatible yet
         if PY2:
+            from owslib.ows import BoundingBox
+
             bbox_data = xpath_ns(input_el, './wps:Data/wps:BoundingBoxData')
             if bbox_data:
                 bbox_data_el = bbox_data[0]
                 bbox = BoundingBox(bbox_data_el)
-                the_input.update({ identifier_el.text: bbox })
+                the_input.update({identifier_el.text: bbox})
                 continue
 
     return the_input
@@ -200,7 +200,7 @@ def get_data_from_kvp(data):
             # Add the input/output with all its attributes and values to the dictionary
             the_data[identifier] = io
         except:
-            the_data[d] = ''
+            the_data[d] = {'identifier': d, 'data': ''}
 
     return the_data
 
@@ -218,41 +218,59 @@ def parse_complex_inputs(inputs):
     # get the referenced input otherwise get the value of the field
     href = inputs.get('href', None)
     if href:
+        tmp_dir = config.get_config_value('server', 'tempPath')
 
         # save the reference input in tempPath
+        tmp_file = tempfile.mkstemp(dir=tmp_dir)[1]
 
-        tmp_file = tempfile.mkstemp(dir=config.get_config_value('server', 'tempPath'))[1]
-        reference_file = urllib2.urlopen(href)
-        reference_file_data = reference_file.read()
-        data_size = reference_file.headers.get('Content-Length', 0)
+        try:
+            if PY2:
+                import urllib2
+                reference_file = urllib2.urlopen(href)
+                reference_file_data = reference_file.read()
+            else:
+                from urllib.request import urlopen
+                reference_file = urlopen(href)
+                reference_file_data = reference_file.read().decode('utf-8')
+
+            data_size = reference_file.headers.get('Content-Length', 0)
+        except Exception as e:
+            raise NoApplicableCode('File reference error: %s' % e)
 
         # if the response did not return a 'Content-Length' header then calculate the size
         if data_size == 0:
             tmp_sio = StringIO()
-            tmp_sio.write(reference_file_data)
-            data_size = tmp_sio.len
+            if PY2:
+                data_size = tmp_sio.len
+            else:
+                data_size = tmp_sio.write(reference_file_data)
             tmp_sio.close()
 
         # check if input file size was not exceeded
-        if int(data_size) > int(data_input.max_megabytes):
+        data_input.calculate_max_input_size()
+        byte_size = data_input.max_megabytes * 1024 * 1024
+        if int(data_size) > int(byte_size):
             raise FileSizeExceeded('File size for input exceeded.'
-                                   ' Maximum allowed: %i bytes' % data_input.max_megabytes,
+                                   ' Maximum allowed: %i megabytes' % data_input.max_megabytes,
                                    inputs.get('identifier'))
 
-
-        # TODO: check if file/directory is still present, maybe deleted in mean time
-        f = open(tmp_file, 'w')
-        f.write(reference_file_data)
-        f.close()
+        try:
+            with open(tmp_file, 'w') as f:
+                f.write(reference_file_data)
+                f.close()
+        except Exception as e:
+            raise NoApplicableCode(e)
 
         data_input.file = tmp_file
         data_input.url = href
         data_input.as_reference = True
     else:
         data = inputs.get('data')
-        if len(data.encode('utf-8')) > int(data_input.max_megabytes):
+        # check if input file size was not exceeded
+        byte_size = data_input.max_megabytes * 1024 * 1024
+        if len(data.encode('utf-8')) > int(byte_size):
             raise FileSizeExceeded('File size for input exceeded.'
-                                   ' Maximum allowed: %i bytes' % data_input.max_megabytes,
+                                   ' Maximum allowed: %i megabytes' % data_input.max_megabytes,
                                    inputs.get('identifier'))
         data_input.data = data
     return data_input
@@ -281,6 +299,12 @@ class WPSRequest(object):
         self.http_request = http_request
 
         if http_request.method == 'GET':
+            # WSDL request
+            wsdl = self._get_get_param('WSDL')
+            if wsdl is not None:
+                # TODO: fix #57 then remove the exception
+                raise NoApplicableCode('WSDL not implemented')
+
             # service shall be WPS
             service = self._get_get_param('service', aslist=False)
             if service:
@@ -400,7 +424,6 @@ class WPSRequest(object):
         :param key: key value you need to dig out of the HTTP GET request
         """
 
-        
         key = key.lower()
         value = default
         # http_request.args.keys will make + sign disappear in GET url if not urlencoded
@@ -423,7 +446,7 @@ class WPSResponse(object):
         self.process = process
         self.wps_request = wps_request
         self.outputs = {o.identifier: o for o in process.outputs}
-        self.message = None
+        self.message = ''
         self.status = self.NO_STATUS
         self.status_percentage = 0
         self.doc = None
@@ -442,10 +465,13 @@ class WPSResponse(object):
 
     def write_response_doc(self, doc):
         # TODO: check if file/directory is still present, maybe deleted in mean time
-        with open(self.process.status_location, 'w') as f:
-            f.write(etree.tostring(doc, pretty_print=True))
-            f.flush()
-            os.fsync(f.fileno())
+        try:
+            with open(self.process.status_location, 'w') as f:
+                f.write(etree.tostring(doc, pretty_print=True, encoding='utf-8').decode('utf-8'))
+                f.flush()
+                os.fsync(f.fileno())
+        except IOError as e:
+            raise NoApplicableCode('Writing Response Document failed with : %s' % e)
 
     def _process_accepted(self):
         return WPS.Status(
@@ -497,7 +523,11 @@ class WPSResponse(object):
         doc.attrib['service'] = 'WPS'
         doc.attrib['version'] = '1.0.0'
         doc.attrib['{http://www.w3.org/XML/1998/namespace}lang'] = 'en-CA'
-        doc.attrib['serviceInstance'] = config.get_config_value('wps', 'serveraddress') + '/wps?service=wps&request=getcapabilities'
+        doc.attrib['serviceInstance'] = '%s:%s%s' % (
+            config.get_config_value('wps', 'serveraddress'),
+            config.get_config_value('wps', 'serverport'),
+            '/wps?service=wps&request=getcapabilities'
+        )
 
         if self.status >= self.STORE_STATUS:
             if self.process.status_location:
@@ -571,7 +601,7 @@ class LiteralInput(inout.LiteralInput):
     :param data_type: Type of literal input (e.g. `string`, `float`...).
     """
 
-    def __init__(self, identifier, title='', data_type='string', abstract='', metadata=[], uom=[], default='',
+    def __init__(self, identifier, title, data_type='string', abstract='', metadata=[], uom=[], default='',
                  min_occurs='1', max_occurs='1', as_reference=False):
         inout.LiteralInput.__init__(self, identifier=identifier, title=title, abstract=abstract, data_type=data_type)
         self.metadata = metadata
@@ -675,7 +705,7 @@ class ComplexInput(inout.ComplexInput):
     :param data_format: Format of the passed input. Should be :class:`~Format` object
     """
 
-    def __init__(self, identifier, title='', allowed_formats=None, data_format=None, abstract='', metadata=[], min_occurs='1',
+    def __init__(self, identifier, title, allowed_formats=None, data_format=None, abstract='', metadata=[], min_occurs='1',
                  max_occurs='1', as_reference=False):
         inout.ComplexInput.__init__(self, identifier=identifier, title=title, abstract=abstract, data_format=data_format)
         self.allowed_formats = allowed_formats
@@ -686,7 +716,6 @@ class ComplexInput(inout.ComplexInput):
         self.url = ''
         self.method = ''
         self.max_megabytes = int(0)
-        self.calculate_max_input_size()
 
     def calculate_max_input_size(self):
         """Calculates maximal size for input file based on configuration
@@ -703,14 +732,13 @@ class ComplexInput(inout.ComplexInput):
         size = float(re.sub(units, '', maxSize))
 
         if maxSize.find("g") > -1:
-            size *= 1024*1024*1024
-        elif maxSize.find("m") > -1:
-            size *= 1024*1024
-        elif maxSize.find("k") > -1:
             size *= 1024
+        elif maxSize.find("m") > -1:
+            size *= 1
+        elif maxSize.find("k") > -1:
+            size /= 1024
         else:
             size *= 1
-
         self.max_megabytes = size
 
     def describe_xml(self):
@@ -738,6 +766,7 @@ class ComplexInput(inout.ComplexInput):
             )
         )
 
+        self.calculate_max_input_size()
         if self.max_megabytes:
             doc.attrib['maximumMegabytes'] = str(self.max_megabytes)
 
@@ -807,12 +836,11 @@ class LiteralOutput(inout.LiteralOutput):
             Should be :class:`~String` object.
     """
 
-    def __init__(self, identifier, title='', data_type='string', abstract='', metadata=[], uom=[]):
+    def __init__(self, identifier, title, data_type='string', abstract='', metadata=[], uom=[]):
         inout.LiteralOutput.__init__(self, identifier, title=title, data_type=data_type)
         self.abstract = abstract
         self.metadata = metadata
         self.uom = uom
-        self.data = ''
 
     def describe_xml(self):
         doc = E.Output(
@@ -855,7 +883,7 @@ class LiteralOutput(inout.LiteralOutput):
 
         data_doc = WPS.Data()
 
-        literal_data_doc = WPS.LiteralData(self.data)
+        literal_data_doc = WPS.LiteralData(text_type(self.data))
         literal_data_doc.attrib['dataType'] = self.data_type
         literal_data_doc.attrib['reference'] = xmlschema_2 + self.data_type
         if self.uom:
@@ -886,7 +914,7 @@ class ComplexOutput(inout.ComplexOutput):
             (e.g., UTF-8).
     """
 
-    def __init__(self, identifier, title='', formats=None, output_format=None, encoding="UTF-8",
+    def __init__(self, identifier, title, formats=None, output_format=None, encoding="UTF-8",
                  schema=None, abstract='', metadata=[]):
         inout.ComplexOutput.__init__(self, identifier, title=title, abstract=abstract)
         self.formats = formats
@@ -900,7 +928,7 @@ class ComplexOutput(inout.ComplexOutput):
         self.output_format = output_format
         self.encoding = encoding
         self.schema = schema
-        self.storage = FileStorage(config)
+        self.storage = None
 
     @property
     def output_format(self):
@@ -1003,6 +1031,7 @@ class ComplexOutput(inout.ComplexOutput):
         doc = WPS.Reference()
 
         # get_url will create the file and return the url for it
+        self.storage = FileStorage(config)
         doc.attrib['{http://www.w3.org/1999/xlink}href'] = self.get_url()
 
         if self.data_format:
@@ -1019,7 +1048,10 @@ class ComplexOutput(inout.ComplexOutput):
         """
         doc = WPS.Data()
 
-        complex_doc = WPS.ComplexData(self.data)
+        if self.data is None:
+            complex_doc = WPS.ComplexData()
+        else:
+            complex_doc = WPS.ComplexData(self.data)
 
         if self.data_format:
             if self.data_format.mime_type:
@@ -1056,9 +1088,9 @@ class Process(object):
                    objects.
     """
 
-    def __init__(self, handler, identifier=None, title='', abstract='', profile=[], wsdl='', metadata=[], inputs=[],
+    def __init__(self, handler, identifier, title, abstract='', profile=[], wsdl='', metadata=[], inputs=[],
                  outputs=[], version='None', store_supported=False, status_supported=False):
-        self.identifier = identifier or handler.__name__
+        self.identifier = identifier
         self.handler = handler
         self.title = title
         self.abstract = abstract
@@ -1148,9 +1180,14 @@ class Process(object):
                 raise StorageNotSupported('Process does not support the storing of the execute response')
 
             file_path = config.get_config_value('server', 'outputPath')
-            file_url = config.get_config_value('wps', 'serveraddress') + config.get_config_value('server', 'outputUrl')
-            self.status_location = os.path.join(file_path, self.uuid)+'.xml'
-            self.status_url = os.path.join(file_url, self.uuid)+'.xml'
+            file_url = '%s:%s%s' % (
+                config.get_config_value('wps', 'serveraddress'),
+                config.get_config_value('wps', 'serverport'),
+                config.get_config_value('server', 'outputUrl')
+            )
+
+            self.status_location = os.path.join(file_path, self.uuid) + '.xml'
+            self.status_url = os.path.join(file_url, self.uuid) + '.xml'
 
             if wps_request.status == 'true':
                 if self.status_supported != 'true':
@@ -1173,11 +1210,32 @@ class Process(object):
     def _run_process(self, wps_request, wps_response):
         try:
             wps_response = self.handler(wps_request, wps_response)
-            # update the process status to 100% if everything went correctly
-            wps_response.update_status('PyWPS Process finished', 100)
+
+            # if status not yet set to 100% then do it after execution was successful
+            if wps_response.status_percentage != 100:
+                # update the process status to 100% if everything went correctly
+                wps_response.update_status('PyWPS Process finished', 100)
         except Exception as e:
+            # retrieve the file and line number where the exception occurred
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            found = False
+            while not found:
+                # search for the _handler method
+                m_name = exc_tb.tb_frame.f_code.co_name
+                if m_name == '_handler':
+                    found = True
+                else:
+                    if exc_tb.tb_next is not None:
+                        exc_tb = exc_tb.tb_next
+                    else:
+                        # if not found then take the first
+                        exc_tb = sys.exc_info()[2]
+                        break
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            method_name = exc_tb.tb_frame.f_code.co_name
+
             # update the process status to display process failed
-            wps_response.update_status(str(e), -1)
+            wps_response.update_status('Process error: %s.%s Line %i %s' % (fname, method_name, exc_tb.tb_lineno, e), -1)
 
         return wps_response
 
@@ -1307,8 +1365,16 @@ class Service(object):
             OWS.Operation(
                 OWS.DCP(
                     OWS.HTTP(
-                        OWS.Get({'{http://www.w3.org/1999/xlink}href': config.get_config_value('wps', 'serveraddress')+'/wps?'}),
-                        OWS.Post({'{http://www.w3.org/1999/xlink}href': config.get_config_value('wps', 'serveraddress')+'/wps'}),
+                        OWS.Get({'{http://www.w3.org/1999/xlink}href': '%s:%s%s' % (
+                            config.get_config_value('wps', 'serveraddress'),
+                            config.get_config_value('wps', 'serverport'),
+                            '/wps?'
+                        )}),
+                        OWS.Post({'{http://www.w3.org/1999/xlink}href': '%s:%s%s' % (
+                            config.get_config_value('wps', 'serveraddress'),
+                            config.get_config_value('wps', 'serverport'),
+                            '/wps'
+                        )})
                     )
                 ),
                 name="GetCapabilities"
@@ -1316,8 +1382,16 @@ class Service(object):
             OWS.Operation(
                 OWS.DCP(
                     OWS.HTTP(
-                        OWS.Get({'{http://www.w3.org/1999/xlink}href': config.get_config_value('wps', 'serveraddress')+'/wps?'}),
-                        OWS.Post({'{http://www.w3.org/1999/xlink}href': config.get_config_value('wps', 'serveraddress')+'/wps'}),
+                        OWS.Get({'{http://www.w3.org/1999/xlink}href': '%s:%s%s' % (
+                            config.get_config_value('wps', 'serveraddress'),
+                            config.get_config_value('wps', 'serverport'),
+                            '/wps?'
+                        )}),
+                        OWS.Post({'{http://www.w3.org/1999/xlink}href': '%s:%s%s' % (
+                            config.get_config_value('wps', 'serveraddress'),
+                            config.get_config_value('wps', 'serverport'),
+                            '/wps'
+                        )})
                     )
                 ),
                 name="DescribeProcess"
@@ -1325,8 +1399,16 @@ class Service(object):
             OWS.Operation(
                 OWS.DCP(
                     OWS.HTTP(
-                        OWS.Get({'{http://www.w3.org/1999/xlink}href': config.get_config_value('wps', 'serveraddress')+'/wps?'}),
-                        OWS.Post({'{http://www.w3.org/1999/xlink}href': config.get_config_value('wps', 'serveraddress')+'/wps'}),
+                        OWS.Get({'{http://www.w3.org/1999/xlink}href': '%s:%s%s' % (
+                            config.get_config_value('wps', 'serveraddress'),
+                            config.get_config_value('wps', 'serverport'),
+                            '/wps?'
+                        )}),
+                        OWS.Post({'{http://www.w3.org/1999/xlink}href': '%s:%s%s' % (
+                            config.get_config_value('wps', 'serveraddress'),
+                            config.get_config_value('wps', 'serverport'),
+                            '/wps'
+                        )})
                     )
                 ),
                 name="Execute"
@@ -1349,7 +1431,11 @@ class Service(object):
 
         doc.append(languages_doc)
 
-        doc.append(WPS.WSDL({'{http://www.w3.org/1999/xlink}href': config.get_config_value('wps', 'serveraddress')+'/wps?WSDL'}))
+        doc.append(WPS.WSDL({'{http://www.w3.org/1999/xlink}href':  '%s:%s%s' % (
+            config.get_config_value('wps', 'serveraddress'),
+            config.get_config_value('wps', 'serverport'),
+            '/wps?WSDL')
+        }))
 
         return xml_response(doc)
 
@@ -1376,7 +1462,6 @@ class Service(object):
                         identifier_elements.append(process.describe_xml())
                     except Exception as e:
                         raise NoApplicableCode(e)
-
 
         doc = WPS.ProcessDescriptions(
             *identifier_elements
@@ -1433,10 +1518,10 @@ class Service(object):
                         outpt.as_reference = is_reference
 
         # catch error generated by process code
-        #try:
-        wps_response = process.execute(wps_request)
-        #except Exception as e:
-        #    raise NoApplicableCode(e)
+        try:
+            wps_response = process.execute(wps_request)
+        except Exception as e:
+            raise NoApplicableCode('Service error: %s' % e)
 
         # get the specified output as raw
         if wps_request.raw:

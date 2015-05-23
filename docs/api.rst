@@ -12,9 +12,15 @@ Defining processes
 
 .. autoclass:: Service
 
+.. autoclass:: PyWPSServerAbstract
+
 .. autoclass:: LiteralInput
 
 .. autoclass:: ComplexInput
+
+.. autoclass:: LiteralOutput
+
+.. autoclass:: ComplexOutput
 
 .. autoclass:: Format
 
@@ -45,4 +51,3 @@ Request and response objects
 
 .. autoclass:: WPSResponse
 
-.. autoclass:: FileReference

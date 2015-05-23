@@ -20,7 +20,10 @@ Dependencies
 
 * lxml (http://lxml.de)
 * werkzeug (http://werkzeug.pocoo.org)
-* libxml2-dev, libxslt1-dev 
+* libxml2-dev, libxslt1-dev
+* GDAL (http://www.gdal.org/)
+* owslib (http://geopython.github.io/OWSLib/)
+* jsonschema (http://json-schema.org/)
 
 
 Run tests
@@ -38,6 +41,21 @@ Or run the tests by hand, with either python 2 or 3:
 Run web application
 ===================
 
+Demo application
+----------------
+Clone PyWPS-4 recursively with the demo application:
+
+    $ git clone --recursive git://github.com/jachym/pywps-4.git
+    $ sudo python setup.py install
+    $ cd demo/
+    $ python demo.py
+    
+Or clone only demo app after having installed PyWPS-4:
+
+    $ git clone git://github.com/ldesousa/pywps-4-demo.git
+    $ cd demo/
+    $ python demo.py
+ 
 Apache configuration
 --------------------
 1. Enable WSGI extension

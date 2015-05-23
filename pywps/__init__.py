@@ -9,9 +9,11 @@ import os,sys
 PYWPS_INSTALL_DIR = os.path.dirname(os.path.abspath(__file__))
 
 namespaces = {
-    "ows":"http://www.opengis.net/ows/1.1",
-    "wps": "http://www.opengis.net/wps/1.0.0",
-    "xlink":"http://www.w3.org/1999/xlink"
+    'xlink': "http://www.w3.org/1999/xlink",
+    'wps': "http://www.opengis.net/wps/1.0.0",
+    'ows': "http://www.opengis.net/ows/1.1",
+    'gml': "http://www.opengis.net/gml",
+    'xsi': "http://www.w3.org/2001/XMLSchema-instance"
 }
 
 class PyWPS:
@@ -32,6 +34,8 @@ from pywps.app import (
     ComplexOutput,
     Format
 )
+
+from pywps.formats import FORMATS
 
 
 if __name__ == "__main__":

@@ -4,7 +4,6 @@ import unittest
 from pywps.inout import *
 import os
 import tempfile
-from path import path
 from pywps._compat import text_type, StringIO
 
 def get_data_format():
@@ -16,7 +15,7 @@ class IOHandlerTest(unittest.TestCase):
     """IOHandler test cases"""
 
     def setUp(self):
-        tmp_dir = path(tempfile.mkdtemp())
+        tmp_dir = tempfile.mkdtemp()
         self.iohandler = IOHandler(tempdir=tmp_dir)
         self._value = 'lalala'
 
@@ -95,7 +94,7 @@ class ComplexInputTest(unittest.TestCase):
     """ComplexInput test cases"""
 
     def setUp(self):
-        tmp_dir = path(tempfile.mkdtemp())
+        tmp_dir = tempfile.mkdtemp()
         data_format = get_data_format()
         self.complex_in = ComplexInput(identifier="complexinput", tempdir=tmp_dir,
                                        data_format=data_format)
@@ -111,7 +110,7 @@ class ComplexOutputTest(unittest.TestCase):
     """ComplexOutput test cases"""
 
     def setUp(self):
-        tmp_dir = path(tempfile.mkdtemp())
+        tmp_dir = tempfile.mkdtemp()
         data_format = get_data_format()
         self.complex_out = ComplexOutput(identifier="complexinput", tempdir=tmp_dir,
                                          data_format=data_format)

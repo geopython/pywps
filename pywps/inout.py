@@ -477,15 +477,7 @@ class ComplexOutput(BasicIO, BasicComplex, IOHandler):
 if __name__ == "__main__":
     import doctest
     import os
-    from contextlib import contextmanager
-    from path import path
-    @contextmanager
-    def temp_dir():
-        tmp = path(tempfile.mkdtemp())
-        try:
-            yield tmp
-        finally:
-            tmp.rmtree()
+    from pywps.wpsserver import temp_dir
 
     with temp_dir() as tmp:
         os.chdir(tmp)

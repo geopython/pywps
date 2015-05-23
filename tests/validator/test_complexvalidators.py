@@ -5,7 +5,6 @@ import sys
 from pywps.validator.complexvalidator import *
 from pywps.formats import FORMATS
 import tempfile
-from path import path
 import os
 
 try:
