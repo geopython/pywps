@@ -2,9 +2,8 @@
 """
 import unittest
 from pywps.inout import *
+from pywps import Format
 import os
-import tempfile
-from pywps._compat import text_type, StringIO
 
 def get_data_format():
     class DataFormat(Format):
