@@ -31,61 +31,6 @@ def xml_response(doc):
                     content_type='text/xml')
 
 
-def get_input_from_xml(doc):
-    the_input = {}
-    for input_el in xpath_ns(doc, '/wps:Execute/wps:DataInputs/wps:Input'):
-        [identifier_el] = xpath_ns(input_el, './ows:Identifier')
-
-        literal_data = xpath_ns(input_el, './wps:Data/wps:LiteralData')
-        if literal_data:
-            value_el = literal_data[0]
-            inpt = {}
-            inpt['identifier'] = identifier_el.text
-            inpt['data'] = text_type(value_el.text)
-            inpt['uom'] = value_el.attrib.get('uom', '')
-            inpt['datatype'] = value_el.attrib.get('datatype', '')
-            the_input[identifier_el.text] = inpt
-            continue
-
-        complex_data = xpath_ns(input_el, './wps:Data/wps:ComplexData')
-        if complex_data:
-            complex_data_el = complex_data[0]
-            value_el = complex_data_el[0]
-            inpt = {}
-            inpt['identifier'] = identifier_el.text
-            inpt['data'] = value_el
-            inpt['mime_type'] = complex_data_el.attrib.get('mimeType', '')
-            inpt['encoding'] = complex_data_el.attrib.get('encoding', '')
-            inpt['schema'] = complex_data_el.attrib.get('schema', '')
-            inpt['method'] = complex_data_el.attrib.get('method', 'GET')
-            the_input[identifier_el.text] = inpt
-            continue
-
-        reference_data = xpath_ns(input_el, './wps:Reference')
-        if reference_data:
-            reference_data_el = reference_data[0]
-            inpt = {}
-            inpt['identifier'] = identifier_el.text
-            inpt[identifier_el.text] = reference_data_el.text
-            inpt['href'] = reference_data_el.attrib.get('href', '')
-            if not inpt['href']:
-                inpt['href'] = reference_data_el.attrib.get('{http://www.w3.org/1999/xlink}href', '')
-            inpt['mimeType'] = reference_data_el.attrib.get('mimeType', '')
-            the_input[identifier_el.text] = inpt
-            continue
-
-        # OWSlib is not python 3 compatible yet
-        if PY2:
-            from owslib.ows import BoundingBox
-
-            bbox_data = xpath_ns(input_el, './wps:Data/wps:BoundingBoxData')
-            if bbox_data:
-                bbox_data_el = bbox_data[0]
-                bbox = BoundingBox(bbox_data_el)
-                the_input.update({identifier_el.text: bbox})
-                continue
-
-    return the_input
 
 def get_output_from_xml(doc):
     the_output = {}
@@ -350,7 +295,7 @@ class WPSRequest(object):
                 self.lineage = 'false'
                 self.store_execute = 'false'
                 self.status = 'false'
-                self.inputs = get_input_from_xml(doc)
+                self.inputs = self.get_input_from_xml(doc)
                 self.outputs = get_output_from_xml(doc)
                 self.raw = False
                 if xpath_ns(doc, '/wps:Execute/wps:ResponseForm/wps:RawDataOutput'):
@@ -388,6 +333,64 @@ class WPSRequest(object):
                     value = value.split(",")
 
         return value
+    
+    @staticmethod
+    def get_input_from_xml(doc):
+        the_input = {}
+        for input_el in xpath_ns(doc, '/wps:Execute/wps:DataInputs/wps:Input'):
+            [identifier_el] = xpath_ns(input_el, './ows:Identifier')
+    
+            literal_data = xpath_ns(input_el, './wps:Data/wps:LiteralData')
+            if literal_data:
+                value_el = literal_data[0]
+                inpt = {}
+                inpt['identifier'] = identifier_el.text
+                inpt['data'] = text_type(value_el.text)
+                inpt['uom'] = value_el.attrib.get('uom', '')
+                inpt['datatype'] = value_el.attrib.get('datatype', '')
+                the_input[identifier_el.text] = inpt
+                continue
+    
+            complex_data = xpath_ns(input_el, './wps:Data/wps:ComplexData')
+            if complex_data:
+                complex_data_el = complex_data[0]
+                value_el = complex_data_el[0]
+                inpt = {}
+                inpt['identifier'] = identifier_el.text
+                inpt['data'] = value_el
+                inpt['mime_type'] = complex_data_el.attrib.get('mimeType', '')
+                inpt['encoding'] = complex_data_el.attrib.get('encoding', '')
+                inpt['schema'] = complex_data_el.attrib.get('schema', '')
+                inpt['method'] = complex_data_el.attrib.get('method', 'GET')
+                the_input[identifier_el.text] = inpt
+                continue
+    
+            reference_data = xpath_ns(input_el, './wps:Reference')
+            if reference_data:
+                reference_data_el = reference_data[0]
+                inpt = {}
+                inpt['identifier'] = identifier_el.text
+                inpt[identifier_el.text] = reference_data_el.text
+                inpt['href'] = reference_data_el.attrib.get('href', '')
+                if not inpt['href']:
+                    inpt['href'] = reference_data_el.attrib.get('{http://www.w3.org/1999/xlink}href', '')
+                inpt['mimeType'] = reference_data_el.attrib.get('mimeType', '')
+                the_input[identifier_el.text] = inpt
+                continue
+    
+            # OWSlib is not python 3 compatible yet
+            if PY2:
+                from owslib.ows import BoundingBox
+    
+                bbox_data = xpath_ns(input_el, './wps:Data/wps:BoundingBoxData')
+                if bbox_data:
+                    bbox_data_el = bbox_data[0]
+                    bbox = BoundingBox(bbox_data_el)
+                    the_input.update({identifier_el.text: bbox})
+                    continue
+    
+        return the_input
+
 
 
 class WPSResponse(object):

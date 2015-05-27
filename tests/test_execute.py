@@ -1,9 +1,9 @@
 from io import StringIO
 import unittest
 import lxml.etree
-from pywps import Service, Process, WPSResponse, LiteralOutput, LiteralInput
-from pywps import E, WPS, OWS, NAMESPACES
-from pywps.app import get_input_from_xml, xpath_ns
+from pywps import Service, Process, WPSRequest, LiteralOutput, LiteralInput
+from pywps import E, WPS, OWS
+from pywps.app import xpath_ns
 from pywps._compat import text_type
 from tests.common import client_for
 
@@ -100,7 +100,7 @@ class ExecuteXmlParserTest(unittest.TestCase):
 
     def test_empty(self):
         request_doc = WPS.Execute(OWS.Identifier('foo'))
-        assert get_input_from_xml(request_doc) == {}
+        assert WPSRequest.get_input_from_xml(request_doc) == {}
 
     def test_one_string(self):
         request_doc = WPS.Execute(
@@ -109,7 +109,7 @@ class ExecuteXmlParserTest(unittest.TestCase):
                 WPS.Input(
                     OWS.Identifier('name'),
                     WPS.Data(WPS.LiteralData('foo')))))
-        rv = get_input_from_xml(request_doc)
+        rv = WPSRequest.get_input_from_xml(request_doc)
         assert 'name' in rv
         assert rv['name']['data'] == 'foo'
 
@@ -123,7 +123,7 @@ class ExecuteXmlParserTest(unittest.TestCase):
                 WPS.Input(
                     OWS.Identifier('name2'),
                     WPS.Data(WPS.LiteralData('bar')))))
-        rv = get_input_from_xml(request_doc)
+        rv = WPSRequest.get_input_from_xml(request_doc)
         assert rv['name1']['data'] == 'foo'
         assert rv['name2']['data'] == 'bar'
 
@@ -136,7 +136,7 @@ class ExecuteXmlParserTest(unittest.TestCase):
                     OWS.Identifier('name'),
                     WPS.Data(
                         WPS.ComplexData(the_data, mimeType='text/foobar')))))
-        rv = get_input_from_xml(request_doc)
+        rv = WPSRequest.get_input_from_xml(request_doc)
         assert rv['name']['mime_type'] == 'text/foobar'
         rv_doc = lxml.etree.parse(StringIO(lxml.etree.tounicode(rv['name']['data']))).getroot()
         assert rv_doc.tag == 'TheData'
@@ -154,7 +154,7 @@ class ExecuteXmlParserTest(unittest.TestCase):
                         WPS.BoundingBoxData(
                             OWS.LowerCorner('40 50'),
                             OWS.UpperCorner('60 70'))))))
-        rv = get_input_from_xml(request_doc)
+        rv = WPSRequest.get_input_from_xml(request_doc)
         assert isinstance(rv['bbox'], BoundingBox)
         assert rv['bbox'].minx == '40'
         assert rv['bbox'].miny == '50'
