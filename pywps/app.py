@@ -34,126 +34,12 @@ def xml_response(doc):
 
 
 
-def get_data_from_kvp(data):
-    """Get execute DataInputs and ResponseDocument from URL (key-value-pairs) encoding
-    :param data: key:value pair list of the datainputs and responseDocument parameter
-    """
-
-    the_data = {}
-
-    if data is None:
-        return None
-
-    for d in data.split(";"):
-        try:
-            io = {}
-            fields = d.split('@')
-
-            # First field is identifier and its value
-            (identifier, val) = fields[0].split("=")
-            io['identifier'] = identifier
-            io['data'] = val
-
-            # Get the attributes of the data
-            for attr in fields[1:]:
-                (attribute, attr_val) = attr.split('=')
-                io[attribute] = attr_val
-
-            # Add the input/output with all its attributes and values to the dictionary
-            the_data[identifier] = io
-        except:
-            the_data[d] = {'identifier': d, 'data': ''}
-
-    return the_data
 
 
-def parse_complex_inputs(inputs):
-
-    data_input = ComplexInput(inputs.get('identifier'), '', None)
-    data_input.data_format = Format(
-        inputs.get('mime_type'),
-        inputs.get('encoding'),
-        inputs.get('schema')
-    )
-    data_input.method = inputs.get('method', 'GET')
-
-    # get the referenced input otherwise get the value of the field
-    href = inputs.get('href', None)
-    if href:
-        tmp_dir = config.get_config_value('server', 'tempPath')
-
-        # save the reference input in tempPath
-        tmp_file = tempfile.mkstemp(dir=tmp_dir)[1]
-
-        try:
-            if PY2:
-                import urllib2
-                reference_file = urllib2.urlopen(href)
-                reference_file_data = reference_file.read()
-            else:
-                from urllib.request import urlopen
-                reference_file = urlopen(href)
-                reference_file_data = reference_file.read().decode('utf-8')
-
-            data_size = reference_file.headers.get('Content-Length', 0)
-        except Exception as e:
-            raise NoApplicableCode('File reference error: %s' % e)
-
-        # if the response did not return a 'Content-Length' header then calculate the size
-        if data_size == 0:
-            tmp_sio = StringIO()
-            if PY2:
-                data_size = tmp_sio.len
-            else:
-                data_size = tmp_sio.write(reference_file_data)
-            tmp_sio.close()
-
-        # check if input file size was not exceeded
-        data_input.calculate_max_input_size()
-        byte_size = data_input.max_megabytes * 1024 * 1024
-        if int(data_size) > int(byte_size):
-            raise FileSizeExceeded('File size for input exceeded.'
-                                   ' Maximum allowed: %i megabytes' % data_input.max_megabytes,
-                                   inputs.get('identifier'))
-
-        try:
-            with open(tmp_file, 'w') as f:
-                f.write(reference_file_data)
-                f.close()
-        except Exception as e:
-            raise NoApplicableCode(e)
-
-        data_input.file = tmp_file
-        data_input.url = href
-        data_input.as_reference = True
-    else:
-        data = inputs.get('data')
-        # check if input file size was not exceeded
-        byte_size = data_input.max_megabytes * 1024 * 1024
-        if len(data.encode('utf-8')) > int(byte_size):
-            raise FileSizeExceeded('File size for input exceeded.'
-                                   ' Maximum allowed: %i megabytes' % data_input.max_megabytes,
-                                   inputs.get('identifier'))
-        data_input.data = data
-    return data_input
 
 
-def parse_literal_inputs(inputs):
-    """ Takes the http_request and parses the input to objects
-    :return:
-    """
 
-    # set the input to the type defined in the process
-    data_input = LiteralInput(inputs.get('identifier'), '')
-    data_input.uom = inputs.get('uom')
-    data_type = inputs.get('datatype')
-    if data_type:
-        data_input.data_type = data_type
 
-    # get the value of the field
-    data_input.data = inputs.get('data')
-
-    return data_input
 
 
 class UOM(object):
@@ -224,12 +110,12 @@ class WPSRequest(object):
                 self.store_execute = self._get_get_param('storeExecuteResponse', 'false')
                 self.status = self._get_get_param('status', 'false')
                 self.lineage = self._get_get_param('lineage', 'false')
-                self.inputs = get_data_from_kvp(self._get_get_param('DataInputs'))
+                self.inputs = self.get_data_from_kvp(self._get_get_param('DataInputs'))
                 self.outputs = {}
 
                 # take responseDocument preferably
-                resp_outputs = get_data_from_kvp(self._get_get_param('ResponseDocument'))
-                raw_outputs = get_data_from_kvp(self._get_get_param('RawDataOutput'))
+                resp_outputs = self.get_data_from_kvp(self._get_get_param('ResponseDocument'))
+                raw_outputs = self.get_data_from_kvp(self._get_get_param('RawDataOutput'))
                 self.raw = False
                 if resp_outputs:
                     self.outputs = resp_outputs
@@ -392,6 +278,40 @@ class WPSRequest(object):
                 the_output[identifier_el.text] = outpt
     
         return the_output
+    
+    @staticmethod
+    def get_data_from_kvp(data):
+        """Get execute DataInputs and ResponseDocument from URL (key-value-pairs) encoding
+        :param data: key:value pair list of the datainputs and responseDocument parameter
+        """
+    
+        the_data = {}
+    
+        if data is None:
+            return None
+    
+        for d in data.split(";"):
+            try:
+                io = {}
+                fields = d.split('@')
+    
+                # First field is identifier and its value
+                (identifier, val) = fields[0].split("=")
+                io['identifier'] = identifier
+                io['data'] = val
+    
+                # Get the attributes of the data
+                for attr in fields[1:]:
+                    (attribute, attr_val) = attr.split('=')
+                    io[attribute] = attr_val
+    
+                # Add the input/output with all its attributes and values to the dictionary
+                the_data[identifier] = io
+            except:
+                the_data[d] = {'identifier': d, 'data': ''}
+    
+        return the_data
+
 
 
 
@@ -982,9 +902,9 @@ class Service(object):
             # Replace the dicts with the dict of Literal/Complex inputs
             # set the input to the type defined in the process
             if isinstance(inpt, ComplexInput):
-                data_inputs[inpt.identifier] = parse_complex_inputs(wps_request.inputs[inpt.identifier])
+                data_inputs[inpt.identifier] = self.parse_complex_inputs(wps_request.inputs[inpt.identifier])
             elif isinstance(inpt, LiteralInput):
-                data_inputs[inpt.identifier] = parse_literal_inputs(wps_request.inputs[inpt.identifier])
+                data_inputs[inpt.identifier] = self.parse_literal_inputs(wps_request.inputs[inpt.identifier])
         wps_request.inputs = data_inputs
 
         # set as_reference to True for all the outputs specified as reference
@@ -1023,6 +943,96 @@ class Service(object):
             raise InvalidParameterValue('')
 
         return wps_response
+    
+    
+    def parse_complex_inputs(self, inputs):
+
+        data_input = ComplexInput(inputs.get('identifier'), '', None)
+        data_input.data_format = Format(
+            inputs.get('mime_type'),
+            inputs.get('encoding'),
+            inputs.get('schema')
+        )
+        data_input.method = inputs.get('method', 'GET')
+    
+        # get the referenced input otherwise get the value of the field
+        href = inputs.get('href', None)
+        if href:
+            tmp_dir = config.get_config_value('server', 'tempPath')
+    
+            # save the reference input in tempPath
+            tmp_file = tempfile.mkstemp(dir=tmp_dir)[1]
+    
+            try:
+                if PY2:
+                    import urllib2
+                    reference_file = urllib2.urlopen(href)
+                    reference_file_data = reference_file.read()
+                else:
+                    from urllib.request import urlopen
+                    reference_file = urlopen(href)
+                    reference_file_data = reference_file.read().decode('utf-8')
+    
+                data_size = reference_file.headers.get('Content-Length', 0)
+            except Exception as e:
+                raise NoApplicableCode('File reference error: %s' % e)
+    
+            # if the response did not return a 'Content-Length' header then calculate the size
+            if data_size == 0:
+                tmp_sio = StringIO()
+                if PY2:
+                    data_size = tmp_sio.len
+                else:
+                    data_size = tmp_sio.write(reference_file_data)
+                tmp_sio.close()
+    
+            # check if input file size was not exceeded
+            data_input.calculate_max_input_size()
+            byte_size = data_input.max_megabytes * 1024 * 1024
+            if int(data_size) > int(byte_size):
+                raise FileSizeExceeded('File size for input exceeded.'
+                                       ' Maximum allowed: %i megabytes' % data_input.max_megabytes,
+                                       inputs.get('identifier'))
+    
+            try:
+                with open(tmp_file, 'w') as f:
+                    f.write(reference_file_data)
+                    f.close()
+            except Exception as e:
+                raise NoApplicableCode(e)
+    
+            data_input.file = tmp_file
+            data_input.url = href
+            data_input.as_reference = True
+        else:
+            data = inputs.get('data')
+            # check if input file size was not exceeded
+            byte_size = data_input.max_megabytes * 1024 * 1024
+            if len(data.encode('utf-8')) > int(byte_size):
+                raise FileSizeExceeded('File size for input exceeded.'
+                                       ' Maximum allowed: %i megabytes' % data_input.max_megabytes,
+                                       inputs.get('identifier'))
+            data_input.data = data
+        return data_input
+    
+    
+    def parse_literal_inputs(self,inputs):
+        """ Takes the http_request and parses the input to objects
+        :return:
+        """
+
+        # set the input to the type defined in the process
+        data_input = LiteralInput(inputs.get('identifier'), '')
+        data_input.uom = inputs.get('uom')
+        data_type = inputs.get('datatype')
+        if data_type:
+            data_input.data_type = data_type
+    
+        # get the value of the field
+        data_input.data = inputs.get('data')
+    
+        return data_input
+
 
     @Request.application
     def __call__(self, http_request):
