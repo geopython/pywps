@@ -31,11 +31,10 @@ from pywps.app import (
     LiteralInput,
     LiteralOutput,
     ComplexInput,
-    ComplexOutput,
-    Format
+    ComplexOutput
 )
 
-from pywps.formats import FORMATS
+from pywps.formats import FORMATS, Format
 
 
 if __name__ == "__main__":

@@ -6,21 +6,23 @@ import os
 import tempfile
 import time
 import sys
-from pywps.storage import FileStorage
 from uuid import uuid4
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.exceptions import HTTPException, BadRequest, MethodNotAllowed
+import lxml.etree
+from lxml.builder import ElementMaker
+from lxml import etree
+
 from pywps.exceptions import InvalidParameterValue, \
     MissingParameterValue, NoApplicableCode, \
     OperationNotSupported, VersionNegotiationFailed, FileSizeExceeded, StorageNotSupported
-import lxml.etree
-from lxml.builder import ElementMaker
+from pywps.storage import FileStorage
 from pywps._compat import text_type, StringIO
 from pywps import inout
-from pywps.inout import FormatBase
 from pywps import config
-from lxml import etree
+from pywps.formats import Format
+
 
 from pywps._compat import PY2
 
@@ -107,32 +109,6 @@ def get_input_from_xml(doc):
 
     return the_input
 
-
-
-
-
-class Format(FormatBase):
-    """
-    :param mime_type: MIME type allowed for a complex input.
-    :param encoding: The encoding of this input or requested for this output
-            (e.g., UTF-8).
-    """
-
-    def __init__(self, mime_type, encoding='UTF-8', schema=None):
-        FormatBase.__init__(self, mime_type, schema, encoding)
-
-    def describe_xml(self):
-        doc = E.Format(
-            E.MimeType(self.mime_type)
-        )
-
-        if self.encoding:
-            doc.append(E.Encoding(self.encoding))
-
-        if self.schema:
-            doc.append(E.Schema(self.schema))
-
-        return doc
 
 
 class UOM(object):
