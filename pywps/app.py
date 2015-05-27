@@ -11,7 +11,6 @@ from uuid import uuid4
 from werkzeug.wrappers import Request, Response
 from werkzeug.exceptions import HTTPException, BadRequest, MethodNotAllowed
 import lxml.etree
-from lxml.builder import ElementMaker
 from lxml import etree
 
 from pywps.exceptions import InvalidParameterValue, \
@@ -26,22 +25,7 @@ from pywps.formats import Format
 
 from pywps._compat import PY2
 
-
-
 xmlschema_2 = "http://www.w3.org/TR/xmlschema-2/#"
-LITERAL_DATA_TYPES = ['string', 'float', 'integer', 'boolean']
-
-NAMESPACES = {
-    'xlink': "http://www.w3.org/1999/xlink",
-    'wps': "http://www.opengis.net/wps/1.0.0",
-    'ows': "http://www.opengis.net/ows/1.1",
-    'gml': "http://www.opengis.net/gml",
-    'xsi': "http://www.w3.org/2001/XMLSchema-instance"
-}
-
-E = ElementMaker()
-WPS = ElementMaker(namespace=NAMESPACES['wps'], nsmap=NAMESPACES)
-OWS = ElementMaker(namespace=NAMESPACES['ows'], nsmap=NAMESPACES)
 
 
 def xpath_ns(el, path):
@@ -109,20 +93,6 @@ def get_input_from_xml(doc):
 
     return the_input
 
-
-
-class UOM(object):
-    """
-    :param uom: unit of measure
-    """
-
-    def __init__(self, uom=''):
-        self.uom = uom
-
-    def describe_xml(self):
-        return OWS.UOM(
-            self.uom
-        )
 def get_output_from_xml(doc):
     the_output = {}
 
@@ -268,6 +238,20 @@ def parse_literal_inputs(inputs):
     data_input.data = inputs.get('data')
 
     return data_input
+
+
+class UOM(object):
+    """
+    :param uom: unit of measure
+    """
+
+    def __init__(self, uom=''):
+        self.uom = uom
+
+    def describe_xml(self):
+        return OWS.UOM(
+            self.uom
+        )
 
 
 class WPSRequest(object):
