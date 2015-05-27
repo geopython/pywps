@@ -32,29 +32,6 @@ def xml_response(doc):
 
 
 
-def get_output_from_xml(doc):
-    the_output = {}
-
-    if xpath_ns(doc, '/wps:Execute/wps:ResponseForm/wps:ResponseDocument'):
-        for output_el in xpath_ns(doc, '/wps:Execute/wps:ResponseForm/wps:ResponseDocument/wps:Output'):
-            [identifier_el] = xpath_ns(output_el, './ows:Identifier')
-            outpt = {}
-            outpt[identifier_el.text] = ''
-            outpt['asReference'] = output_el.attrib.get('asReference', 'false')
-            the_output[identifier_el.text] = outpt
-
-    elif xpath_ns(doc, '/wps:Execute/wps:ResponseForm/wps:RawDataOutput'):
-        for output_el in xpath_ns(doc, '/wps:Execute/wps:ResponseForm/wps:RawDataOutput'):
-            [identifier_el] = xpath_ns(output_el, './ows:Identifier')
-            outpt = {}
-            outpt[identifier_el.text] = ''
-            outpt['mimetype'] = output_el.attrib.get('mimeType', '')
-            outpt['encoding'] = output_el.attrib.get('encoding', '')
-            outpt['schema'] = output_el.attrib.get('schema', '')
-            outpt['uom'] = output_el.attrib.get('uom', '')
-            the_output[identifier_el.text] = outpt
-
-    return the_output
 
 
 def get_data_from_kvp(data):
@@ -296,7 +273,7 @@ class WPSRequest(object):
                 self.store_execute = 'false'
                 self.status = 'false'
                 self.inputs = self.get_input_from_xml(doc)
-                self.outputs = get_output_from_xml(doc)
+                self.outputs = self.get_output_from_xml(doc)
                 self.raw = False
                 if xpath_ns(doc, '/wps:Execute/wps:ResponseForm/wps:RawDataOutput'):
                     self.raw = True
@@ -390,6 +367,31 @@ class WPSRequest(object):
                     continue
     
         return the_input
+
+    @staticmethod
+    def get_output_from_xml(doc):
+        the_output = {}
+    
+        if xpath_ns(doc, '/wps:Execute/wps:ResponseForm/wps:ResponseDocument'):
+            for output_el in xpath_ns(doc, '/wps:Execute/wps:ResponseForm/wps:ResponseDocument/wps:Output'):
+                [identifier_el] = xpath_ns(output_el, './ows:Identifier')
+                outpt = {}
+                outpt[identifier_el.text] = ''
+                outpt['asReference'] = output_el.attrib.get('asReference', 'false')
+                the_output[identifier_el.text] = outpt
+    
+        elif xpath_ns(doc, '/wps:Execute/wps:ResponseForm/wps:RawDataOutput'):
+            for output_el in xpath_ns(doc, '/wps:Execute/wps:ResponseForm/wps:RawDataOutput'):
+                [identifier_el] = xpath_ns(output_el, './ows:Identifier')
+                outpt = {}
+                outpt[identifier_el.text] = ''
+                outpt['mimetype'] = output_el.attrib.get('mimeType', '')
+                outpt['encoding'] = output_el.attrib.get('encoding', '')
+                outpt['schema'] = output_el.attrib.get('schema', '')
+                outpt['uom'] = output_el.attrib.get('uom', '')
+                the_output[identifier_el.text] = outpt
+    
+        return the_output
 
 
 
