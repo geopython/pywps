@@ -3,9 +3,9 @@ import unittest
 import lxml.etree
 from pywps import Service, Process, WPSRequest, LiteralOutput, LiteralInput
 from pywps import E, WPS, OWS
-from pywps.app import xpath_ns
+from pywps.app.basic import xpath_ns
 from pywps._compat import text_type
-from tests.common import client_for
+from tests.common import client_for, assert_response_success
 
 from pywps._compat import PY2
 if PY2:
@@ -45,13 +45,6 @@ def get_output(doc):
         [value_el] = xpath_ns(output_el, './wps:Data/wps:LiteralData')
         output[identifier_el.text] = value_el.text
     return output
-
-
-def assert_response_success(resp):
-    assert resp.status_code == 200
-    assert resp.headers['Content-Type'] == 'text/xml'
-    success = resp.xpath('/wps:ExecuteResponse/wps:Status/wps:ProcessSucceeded')
-    assert len(success) == 1
 
 
 class ExecuteTest(unittest.TestCase):

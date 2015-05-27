@@ -3,6 +3,8 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 """Literaltypes are used for LiteralInputs, to make sure, input data are OK
 """
 
+LITERAL_DATA_TYPES = ['string', 'float', 'integer', 'boolean']
+
 def convert_boolean(inpt):
     """Return boolean value from input boolean input
 

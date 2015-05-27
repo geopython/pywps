@@ -3,7 +3,7 @@
 
 from pywps.validator import ValidatorAbstract
 from pywps.validator import MODE
-from pywps.formats import FORMATS
+from pywps.inout.formats import FORMATS
 import mimetypes
 import os
 
@@ -207,7 +207,6 @@ def _get_schemas_home():
         "schemas")
 
 def _get_mimetypes():
-    from pywps.formats import FORMATS
     mimetypes.init()
     for pywps_format in FORMATS:
         (mtype, ext) = FORMATS[pywps_format]

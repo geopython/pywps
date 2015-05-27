@@ -8,8 +8,6 @@ pywpsPath = os.path.abspath(os.path.join(os.path.split(os.path.abspath(__file__)
 sys.path.insert(0,pywpsPath)
 sys.path.append(pywpsPath)
 
-from pywps import request
-
 #from parse.parse_getcapabilities import *
 #from parse.parse_describeprocess import *
 from parse.parse_input import *

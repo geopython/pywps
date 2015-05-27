@@ -1,8 +1,8 @@
 from abc import ABCMeta, abstractmethod
 from pywps._compat import text_type, StringIO
 import tempfile
+from pywps.inout.literaltypes import LITERAL_DATA_TYPES
 
-LITERAL_DATA_TYPES = ['string', 'float', 'integer', 'boolean']
 
 class SOURCE_TYPE:
     MEMORY = 0

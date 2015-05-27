@@ -4,7 +4,7 @@ working with list of processes, executing them and redirecting OGC WPS
 responses back to client.
 """
 
-import os,sys
+import os
 from lxml.builder import ElementMaker
 
 PYWPS_INSTALL_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -30,19 +30,8 @@ class PyWPS:
     pass
 
 
-from pywps.app import (
-    Process,
-    Service,
-    WPSRequest,
-    WPSResponse,
-    LiteralInput,
-    LiteralOutput,
-    ComplexInput,
-    ComplexOutput
-)
-
-from pywps.formats import FORMATS, Format
-
+from pywps.inout import *
+from pywps.app import *
 
 if __name__ == "__main__":
     pass

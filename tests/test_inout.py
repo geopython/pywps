@@ -1,9 +1,13 @@
 """Unit tests for IOs
 """
-import unittest
-from pywps.inout import *
-from pywps import Format
 import os
+import tempfile
+import unittest
+from pywps import Format
+from pywps.inout.basic import IOHandler, SOURCE_TYPE, DataTypeAbstract, SimpleHandler, BBoxInput, BBoxOutput, \
+    ComplexInput, ComplexOutput, LiteralInput, LiteralOutput
+from pywps._compat import StringIO, text_type
+
 
 def get_data_format():
     class DataFormat(Format):

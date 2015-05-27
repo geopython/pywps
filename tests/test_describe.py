@@ -2,8 +2,8 @@ import unittest
 from collections import namedtuple
 from pywps import Process, Service, LiteralInput, ComplexInput
 from pywps import E, WPS, OWS, XMLSCHEMA_2, Format
-from pywps.inout import LITERAL_DATA_TYPES
-from pywps.app import xpath_ns
+from pywps.inout.literaltypes import LITERAL_DATA_TYPES
+from pywps.app.basic import xpath_ns
 
 from tests.common import client_for
 
