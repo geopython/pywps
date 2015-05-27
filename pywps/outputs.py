@@ -1,6 +1,7 @@
 from pywps import inout
 from pywps import config
 from pywps._compat import text_type
+from pywps import E, WPS, OWS, XMLSCHEMA_2
 
 class LiteralOutput(inout.LiteralOutput):
     """

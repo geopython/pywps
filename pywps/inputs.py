@@ -1,5 +1,5 @@
 from pywps import inout
-from pywps import config, E, OWS, XMLSCHEMA_2
+from pywps import config, E, OWS, WPS, XMLSCHEMA_2
 
 class ComplexInput(inout.ComplexInput):
     """

@@ -17,7 +17,7 @@ from pywps.exceptions import InvalidParameterValue, \
     MissingParameterValue, NoApplicableCode, \
     OperationNotSupported, VersionNegotiationFailed, FileSizeExceeded, StorageNotSupported
 from pywps._compat import text_type, StringIO, PY2
-from pywps import config, WPS, OWS, NAMESPACES
+from pywps import config, E, WPS, OWS, NAMESPACES
 from pywps.formats import Format
 from pywps.inputs import LiteralInput, ComplexInput
 from pywps.outputs import LiteralOutput, ComplexOutput

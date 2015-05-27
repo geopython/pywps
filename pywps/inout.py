@@ -1,7 +1,5 @@
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
 from pywps._compat import text_type, StringIO
-from pywps.formats import FORMATS
-from pywps.formats import Format
 import tempfile
 
 LITERAL_DATA_TYPES = ['string', 'float', 'integer', 'boolean']
