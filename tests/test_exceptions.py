@@ -1,5 +1,6 @@
 import unittest
-from pywps.app import Process, Service, xpath_ns, WPS, OWS
+from pywps import Process, Service, WPS, OWS
+from pywps.app import xpath_ns
 from tests.common import client_for
 import lxml.etree
 

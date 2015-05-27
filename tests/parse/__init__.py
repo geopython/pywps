@@ -10,8 +10,8 @@ sys.path.append(pywpsPath)
 
 from pywps import request
 
-from parse.parse_getcapabilities import *
-from parse.parse_describeprocess import *
+#from parse.parse_getcapabilities import *
+#from parse.parse_describeprocess import *
 from parse.parse_input import *
 from parse.parse_literal_input import *
 from parse.parse_bbox_input import *
@@ -21,35 +21,35 @@ from parse.parse_reference import *
 class RequestParse(unittest.TestCase):
     """Test input parsing"""
 
-    def test_capabilities_request(self):
-        self.skipTest("Parser changed")
+#     def test_capabilities_request(self):
+#         self.skipTest("Parser changed")
+# 
+#         root = objectify.Element("{http://www.opengis.net/wps/1.0.0}GetCapabilities")
+#         url = "requesT=GetCApabilities"
+# 
+# 
+#         # test xml
+#         r = request.get_request(io.BytesIO(etree.tostring(root)))
+#         self.assertTrue(isinstance(r,getcapabilities.GetCapabilities))
+# 
+#         # test url
+#         r = request.get_request(url)
+#         self.assertTrue(isinstance(r,getcapabilities.GetCapabilities))
 
-        root = objectify.Element("{http://www.opengis.net/wps/1.0.0}GetCapabilities")
-        url = "requesT=GetCApabilities"
-
-
-        # test xml
-        r = request.get_request(io.BytesIO(etree.tostring(root)))
-        self.assertTrue(isinstance(r,getcapabilities.GetCapabilities))
-
-        # test url
-        r = request.get_request(url)
-        self.assertTrue(isinstance(r,getcapabilities.GetCapabilities))
-
-    def test_describeprocess_request(self):
-        self.skipTest("Parser changed")
-        root = objectify.Element("{http://www.opengis.net/wps/1.0.0}DescribeProcess",version="1.0.0")
-        url = "requesT=DescribePROCESS&identifier=all"
-
-        from pywps.request import describeprocess
-
-        # test xml
-        r = request.get_request(io.BytesIO(etree.tostring(root)))
-        self.assertTrue(isinstance(r,describeprocess.DescribeProcess))
-
-        # test url
-        r = request.get_request(url)
-        self.assertTrue(isinstance(r,describeprocess.DescribeProcess))
+#     def test_describeprocess_request(self):
+#         self.skipTest("Parser changed")
+#         root = objectify.Element("{http://www.opengis.net/wps/1.0.0}DescribeProcess",version="1.0.0")
+#         url = "requesT=DescribePROCESS&identifier=all"
+# 
+#         from pywps.request import describeprocess
+# 
+#          test xml
+#         r = request.get_request(io.BytesIO(etree.tostring(root)))
+#         self.assertTrue(isinstance(r,describeprocess.DescribeProcess))
+# 
+#          test url
+#         r = request.get_request(url)
+#         self.assertTrue(isinstance(r,describeprocess.DescribeProcess))
 
     def test_execute_request(self):
         self.skipTest("Parser changed")
@@ -68,9 +68,9 @@ def load_tests():
     loader = unittest.TestLoader()
     suite_list = [
         loader.loadTestsFromTestCase(RequestParse),
-        loader.loadTestsFromTestCase(RequestParseGetCapabilitiesTestCase),
-        loader.loadTestsFromTestCase(RequestParseDescribeProcessTestCase),
-        loader.loadTestsFromTestCase(RequestParseDescribeProcessTestCase),
+        #loader.loadTestsFromTestCase(RequestParseGetCapabilitiesTestCase),
+        #loader.loadTestsFromTestCase(RequestParseDescribeProcessTestCase),
+        #loader.loadTestsFromTestCase(RequestParseDescribeProcessTestCase),
         loader.loadTestsFromTestCase(RequestInputTestCase),
         loader.loadTestsFromTestCase(ParseLiteralInputTestCase),
         loader.loadTestsFromTestCase(ParseBBoxInputTestCase),

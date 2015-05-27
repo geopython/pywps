@@ -1,7 +1,7 @@
 import lxml.etree
 from werkzeug.test import Client
 from werkzeug.wrappers import BaseResponse
-from pywps.app import NAMESPACES
+from pywps import NAMESPACES
 
 
 class WpsClient(Client):

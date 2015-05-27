@@ -10,7 +10,7 @@ import lxml.etree
 import sys
 from pywps import Service, Process, ComplexInput, ComplexOutput, Format, FORMATS
 from pywps.exceptions import NoApplicableCode
-from pywps.app import WPS, OWS
+from pywps import WPS, OWS
 from pywps.wpsserver import temp_dir
 from tests.common import client_for
 from osgeo import ogr

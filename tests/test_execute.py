@@ -2,7 +2,8 @@ from io import StringIO
 import unittest
 import lxml.etree
 from pywps import Service, Process, WPSResponse, LiteralOutput, LiteralInput
-from pywps.app import E, WPS, OWS, NAMESPACES, get_input_from_xml, xpath_ns
+from pywps import E, WPS, OWS, NAMESPACES
+from pywps.app import get_input_from_xml, xpath_ns
 from pywps._compat import text_type
 from tests.common import client_for
 
