@@ -21,6 +21,8 @@ E = ElementMaker()
 WPS = ElementMaker(namespace=NAMESPACES['wps'], nsmap=NAMESPACES)
 OWS = ElementMaker(namespace=NAMESPACES['ows'], nsmap=NAMESPACES)
 
+XMLSCHEMA_2 = "http://www.w3.org/TR/xmlschema-2/#"
+
 class PyWPS:
     """OGC Web Processsing Service  implementation
     """
