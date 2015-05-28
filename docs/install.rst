@@ -4,9 +4,10 @@ PyWPS-4 Installation
 
 Note that PyWPS-4 is still under development, there is no stable release yet.
 
-When using PyWPS-4 on Windows systems be careful as multiprocessing is not supported.
-This is used when making requests storing the response document and updating the status displaying to the user
-the progression of a process.
+When using PyWPS-4 on Windows systems be mindful that multiprocessing is not supported.
+This library is used to process asynchronous execution, i.e., when making requests 
+storing the response document and updating a status document displaying
+the progress of execution.
 
 
 Dependencies
@@ -43,7 +44,7 @@ Then install using pip::
 PyWPS-4
 ~~~~~~~
 
-The easiest to install PyWPS-4 is using the Python Package Index (PIP). 
+The easiest way to install PyWPS-4 is using the Python Package Index (PIP). 
 It fetches the source code from the repository and installs it automatically in the system.
 This might require superuser permissions (e.g. *sudo* in Debian based systems)::
 
@@ -83,6 +84,6 @@ It can be cloned directly into the user area:
 	$ git clone https://github.com/jachym/pywps-4-demo.git
 	
 It may be run right away through the *demo.py* script. 
-First time users should start by studying the demo service structure and then code their own processes.
+First time users should start by studying the demo project structure and then code their own processes.
 
 Full more details please consult the `process`_ section.
