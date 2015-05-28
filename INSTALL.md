@@ -9,7 +9,11 @@ To use PyWPS 4 the third party libraries GIT and GDAL need to be installed in th
 In Debian based systems this can be installed with
 
     $ sudo apt-get install git python-gdal
+    
+In Windows systems this can be installed by
 
+    Installing a GIT client (e.g. GitHub for Windows)
+    
 Install PyWPS 4
 ----------------
 

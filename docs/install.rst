@@ -4,6 +4,10 @@ PyWPS-4 Installation
 
 Note that PyWPS-4 is still under development, there is no stable release yet.
 
+When using PyWPS-4 on Windows systems be careful as multiprocessing is not supported.
+This is used when making requests storing the response document and updating the status displaying to the user
+the progression of a process.
+
 
 Dependencies
 ~~~~~~~~~~~~
@@ -15,6 +19,26 @@ In Debian based systems these packages can be installed with a tool like *apt*::
 
     $ sudo apt-get install git python-gdal
 
+In Windows systems these can be installed by
+
+    Downloading the corresponding wheel for Shapely_
+
+    Downloading the corresponding wheel for GDAL_
+
+    Installing a GIT client (e.g. GitHubForWindows_)
+
+Then install using pip::
+
+    $ pip install Wheel
+
+    $ pip install Shapely?x.x.x?cpxx?none?win_xxx.whl
+
+    $ pip install GDAL?x.x.x?cpxx?none?win_xxx.whl
+
+
+.. _GitHubForWindows: https://windows.github.com/
+.. _Shapely: http://www.lfd.uci.edu/~gohlke/pythonlibs/#shapely
+.. _GDAL: http://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal
 
 PyWPS-4
 ~~~~~~~
