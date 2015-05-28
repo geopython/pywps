@@ -34,7 +34,7 @@ import types
 import sys,os
 import traceback
 
-from ordereddict import OrderedDict
+from collections import OrderedDict
 
 class Status:
     """Status object for each process
