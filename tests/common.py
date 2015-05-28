@@ -1,7 +1,7 @@
 import lxml.etree
 from werkzeug.test import Client
 from werkzeug.wrappers import BaseResponse
-from pywps.app import NAMESPACES
+from pywps import NAMESPACES
 
 
 class WpsClient(Client):
@@ -29,3 +29,29 @@ class WpsTestResponse(BaseResponse):
 
 def client_for(service):
     return WpsClient(service, WpsTestResponse)
+
+
+def assert_response_accepted(resp):
+    assert resp.status_code == 200
+    assert resp.headers['Content-Type'] == 'text/xml'
+    success = resp.xpath_text('/wps:ExecuteResponse'
+                              '/wps:Status'
+                              '/wps:ProcessAccepted')
+    assert success != None
+    # To Do: assert status URL is present
+
+def assert_process_started(resp):
+    assert resp.status_code == 200
+    assert resp.headers['Content-Type'] == 'text/xml'
+    success = resp.xpath_text('/wps:ExecuteResponse'
+                              '/wps:Status'
+                              'ProcessStarted')
+    # Is it still like this in PyWPS-4 ?
+    assert success.split[0] == "processstarted"
+
+
+def assert_response_success(resp):
+    assert resp.status_code == 200
+    assert resp.headers['Content-Type'] == 'text/xml'
+    success = resp.xpath('/wps:ExecuteResponse/wps:Status/wps:ProcessSucceeded')
+    assert len(success) == 1

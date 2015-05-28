@@ -1,13 +1,16 @@
 """Unit tests for IOs
 """
-import unittest
-from pywps.inout import *
 import os
 import tempfile
-from pywps._compat import text_type, StringIO
+import unittest
+from pywps import Format
+from pywps.inout.basic import IOHandler, SOURCE_TYPE, DataTypeAbstract, SimpleHandler, BBoxInput, BBoxOutput, \
+    ComplexInput, ComplexOutput, LiteralInput, LiteralOutput
+from pywps._compat import StringIO, text_type
+
 
 def get_data_format():
-    class DataFormat(FormatBase):
+    class DataFormat(Format):
         pass
     return DataFormat(mime_type= 'text/plain')
 
@@ -103,7 +106,7 @@ class ComplexInputTest(unittest.TestCase):
         self.assertIsInstance(self.complex_in, ComplexInput)
 
     def test_data_format(self):
-        self.assertIsInstance(self.complex_in.data_format, FormatBase)
+        self.assertIsInstance(self.complex_in.data_format, Format)
 
 
 class ComplexOutputTest(unittest.TestCase):
@@ -119,7 +122,7 @@ class ComplexOutputTest(unittest.TestCase):
         self.assertIsInstance(self.complex_out, ComplexOutput)
 
     def test_data_format(self):
-        self.assertIsInstance(self.complex_out.data_format, FormatBase)
+        self.assertIsInstance(self.complex_out.data_format, Format)
 
     def test_storage(self):
         class Storage(object):

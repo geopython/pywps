@@ -10,23 +10,14 @@ import lxml.etree
 import sys
 from pywps import Service, Process, ComplexInput, ComplexOutput, Format, FORMATS
 from pywps.exceptions import NoApplicableCode
-from pywps.app import WPS, OWS
+from pywps import WPS, OWS
 from pywps.wpsserver import temp_dir
-from tests.common import client_for
+from tests.common import client_for, assert_response_success
 from osgeo import ogr
 
 # Layers from the MUSIC project - must be replaced by something simpler
 wfsResource = "http://maps.iguess.list.lu/cgi-bin/mapserv?map=/srv/mapserv/MapFiles/LB_localOWS_test.map&SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TYPENAME=LB_building_footprints&MAXFEATURES=10"
 wcsResource = "http://mapservices-gent.tudor.lu/gent_ows?&SERVICE=WCS&FORMAT=image/img&BBOX=103757,192665,104721,193770&RESX=1.0&RESY=1.0&RESPONSE_CRS=EPSG:31370&CRS=EPSG:31370&VERSION=1.0.0&REQUEST=GetCoverage&COVERAGE=GE_dsm"
-
-# This method already exists in test_execute - think of refactoring
-def assert_response_success(resp):
-    assert resp.status_code == 200
-    assert resp.headers['Content-Type'] == 'text/xml'
-    success = resp.xpath('/wps:ExecuteResponse'
-                              '/wps:Status'
-                              '/wps:ProcessSucceeded')
-    assert len(success) == 1
 
 
 def create_feature():

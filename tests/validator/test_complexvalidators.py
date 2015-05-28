@@ -3,7 +3,7 @@
 import unittest
 import sys
 from pywps.validator.complexvalidator import *
-from pywps.formats import FORMATS
+from pywps.inout.formats import FORMATS
 import tempfile
 import os
 
