@@ -1,12 +1,12 @@
 """
 Reads the PyWPS configuration file
 """
-# Author:    Calin Ciocui
+# Author:    Calin Ciociu
 #            
 # License:
 #
 # Web Processing Service implementation
-# Copyright (C) 2014 PyWPS Development Team, represented by Jachym Cepicky
+# Copyright (C) 2015 PyWPS Development Team, represented by Jachym Cepicky
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to
@@ -25,6 +25,7 @@ Reads the PyWPS configuration file
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
+
 import sys
 import os
 import tempfile
