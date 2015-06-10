@@ -43,21 +43,11 @@ class WPSRequest(object):
             elif self.operation == 'describeprocess':
                 self.version = self._get_get_param('version')
                 self._check_version()
-#                 if not self.version:
-#                     raise MissingParameterValue('Missing version', 'version')
-#                 if self.version != '1.0.0':
-#                     raise VersionNegotiationFailed('The requested version "%s" is not supported by this server' % self.version, 'version')
-
                 self.identifiers = self._get_get_param('identifier', aslist=True)
 
             elif self.operation == 'execute':
                 self.version = self._get_get_param('version')
                 self._check_version()
-#                 if not self.version:
-#                     raise MissingParameterValue('Missing version', 'version')
-#                 if self.version != '1.0.0':
-#                     raise VersionNegotiationFailed('The requested version "%s" is not supported by this server' % self.version, 'version')
-
                 self.identifier = self._get_get_param('identifier')
                 self.store_execute = self._get_get_param('storeExecuteResponse', 'false')
                 self.status = self._get_get_param('status', 'false')
