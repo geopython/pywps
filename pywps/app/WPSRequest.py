@@ -42,20 +42,21 @@ class WPSRequest(object):
 
             elif self.operation == 'describeprocess':
                 self.version = self._get_get_param('version')
-                if not self.version:
-                    raise MissingParameterValue('Missing version', 'version')
-                if self.version != '1.0.0':
-                    raise VersionNegotiationFailed('The requested version "%s" is not supported by this server' % self.version, 'version')
+                self._check_version()
+#                 if not self.version:
+#                     raise MissingParameterValue('Missing version', 'version')
+#                 if self.version != '1.0.0':
+#                     raise VersionNegotiationFailed('The requested version "%s" is not supported by this server' % self.version, 'version')
 
-                self.identifiers = self._get_get_param('identifier',
-                                                       aslist=True)
+                self.identifiers = self._get_get_param('identifier', aslist=True)
 
             elif self.operation == 'execute':
                 self.version = self._get_get_param('version')
-                if not self.version:
-                    raise MissingParameterValue('Missing version', 'version')
-                if self.version != '1.0.0':
-                    raise VersionNegotiationFailed('The requested version "%s" is not supported by this server' % self.version, 'version')
+                self._check_version()
+#                 if not self.version:
+#                     raise MissingParameterValue('Missing version', 'version')
+#                 if self.version != '1.0.0':
+#                     raise VersionNegotiationFailed('The requested version "%s" is not supported by this server' % self.version, 'version')
 
                 self.identifier = self._get_get_param('identifier')
                 self.store_execute = self._get_get_param('storeExecuteResponse', 'false')
@@ -81,17 +82,18 @@ class WPSRequest(object):
                 raise InvalidParameterValue('Unknown request %r' % self.operation, 'request')
 
         elif http_request.method == 'POST':
-            doc = lxml.etree.fromstring(http_request.get_data())
+            
+            try:
+                doc = lxml.etree.fromstring(http_request.get_data())
+            except Exception as e:
+                raise NoApplicableCode(e.message)
 
             if doc.tag == WPS.GetCapabilities().tag:
                 self.operation = 'getcapabilities'
 
             elif doc.tag == WPS.DescribeProcess().tag:
                 self.version = doc.attrib.get('version')
-                if not self.version:
-                    raise MissingParameterValue('Missing version', 'version')
-                if self.version != '1.0.0':
-                    raise VersionNegotiationFailed('The requested version "%s" is not supported by this server' % self.version, 'version')
+                self._check_version()
 
                 self.operation = 'describeprocess'
                 self.identifiers = [identifier_el.text for identifier_el in
@@ -99,10 +101,7 @@ class WPSRequest(object):
 
             elif doc.tag == WPS.Execute().tag:
                 self.version = doc.attrib.get('version')
-                if not self.version:
-                    raise MissingParameterValue('Missing version', 'version')
-                if self.version != '1.0.0':
-                    raise VersionNegotiationFailed('The requested version "%s" is not supported by this server' % self.version, 'version')
+                self._check_version()
 
                 self.operation = 'execute'
                 self.identifier = xpath_ns(doc, './ows:Identifier')[0].text
@@ -129,6 +128,14 @@ class WPSRequest(object):
 
         else:
             raise MethodNotAllowed()
+        
+    
+    def _check_version(self):    
+        if not self.version:
+            raise MissingParameterValue('Missing version', 'version')
+        if self.version != '1.0.0':
+            raise VersionNegotiationFailed('The requested version "%s" is not supported by this server' % self.version, 'version')
+    
 
     def _get_get_param(self, key, default=None, aslist=False):
         """Returns value from the key:value pair, of the HTTP GET request, for
