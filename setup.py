@@ -11,7 +11,7 @@ config = {
     'author_email': 'jachym.cepicky@gmail.com',
     'version': '4.0',
     'install_requires': ['lxml', 'werkzeug', 'unipath', 'owslib', 'jsonschema'],
-    'packages': ['pywps'],
+    'packages': ['pywps', 'pywps/app', 'pywps/inout', 'pywps/resources', 'pywps/validator'],
     'scripts': [],
     'name': 'pywps'
 }
