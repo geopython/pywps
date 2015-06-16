@@ -18,7 +18,7 @@ PyWPS-4 runs on Python 2.7, 3.3 or newer.
 Prior to installing PyWPS-4, Git and the Python bindings for GDAL must be installed in the system. 
 In Debian based systems these packages can be installed with a tool like *apt*::
 
-    $ sudo apt-get install git python-gdal
+    $ sudo apt-get install git python-dev python-flask python-gdal python-pip libxml2-dev libxslt-dev lib32z1-dev
 
 In Windows systems these can be installed by
 
