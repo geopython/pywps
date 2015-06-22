@@ -4,6 +4,11 @@ PyWPS-4 Installation
 
 Note that PyWPS-4 is still under development, there is no stable release yet.
 
+When using PyWPS-4 on Windows systems be mindful that multiprocessing is not supported.
+This library is used to process asynchronous execution, i.e., when making requests 
+storing the response document and updating a status document displaying
+the progress of execution.
+
 
 Dependencies
 ~~~~~~~~~~~~
@@ -13,13 +18,33 @@ PyWPS-4 runs on Python 2.7, 3.3 or newer.
 Prior to installing PyWPS-4, Git and the Python bindings for GDAL must be installed in the system. 
 In Debian based systems these packages can be installed with a tool like *apt*::
 
-    $ sudo apt-get install git python-gdal
+    $ sudo apt-get install git python-dev python-flask python-gdal python-pip libxml2-dev libxslt-dev lib32z1-dev
 
+In Windows systems these can be installed by
+
+    Downloading the corresponding wheel for Shapely_
+
+    Downloading the corresponding wheel for GDAL_
+
+    Installing a GIT client (e.g. GitHubForWindows_)
+
+Then install using pip::
+
+    $ pip install Wheel
+
+    $ pip install Shapely?x.x.x?cpxx?none?win_xxx.whl
+
+    $ pip install GDAL?x.x.x?cpxx?none?win_xxx.whl
+
+
+.. _GitHubForWindows: https://windows.github.com/
+.. _Shapely: http://www.lfd.uci.edu/~gohlke/pythonlibs/#shapely
+.. _GDAL: http://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal
 
 PyWPS-4
 ~~~~~~~
 
-The easiest to install PyWPS-4 is using the Python Package Index (PIP). 
+The easiest way to install PyWPS-4 is using the Python Package Index (PIP). 
 It fetches the source code from the repository and installs it automatically in the system.
 This might require superuser permissions (e.g. *sudo* in Debian based systems)::
 
@@ -59,6 +84,6 @@ It can be cloned directly into the user area:
 	$ git clone https://github.com/jachym/pywps-4-demo.git
 	
 It may be run right away through the *demo.py* script. 
-First time users should start by studying the demo service structure and then code their own processes.
+First time users should start by studying the demo project structure and then code their own processes.
 
 Full more details please consult the `process`_ section.

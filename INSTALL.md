@@ -6,18 +6,20 @@ Dependencies
 
 To use PyWPS 4 the third party libraries GIT and GDAL need to be installed in the system.
 
-In Debian based systems this can be installed with
+In Debian based systems these can be installed with:
 
     $ sudo apt-get install git python-gdal
-
+    
+In Windows systems a GIT client should be installed (e.g. GitHub for Windows).
+    
 Install PyWPS 4
 ----------------
 
-Using Pip 
+Using Pip: 
 
 	$ sudo pip install -e git+https://github.com/jachym/pywps-4.git@master#egg=pywps
 
-or manual installation
+Or in alternative install it manually:
 
     $ git clone https://github.com/jachym/pywps-4.git
     

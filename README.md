@@ -59,6 +59,7 @@ Or clone only demo app after having installed PyWPS-4:
 Apache configuration
 --------------------
 1. Enable WSGI extension
+
 2. Add configuration:
 
     WSGIDaemonProcess pywps user=user group=group processes=2 threads=5
@@ -71,26 +72,37 @@ Apache configuration
         Allow from all
     </Directory>
 
-3. Create wsgi file
+3. Create wsgi file:
+
+
     
     #!/usr/bin/env python3
 
     import sys
     sys.path.append('/path/to/src/pywps-4/')
-
+    
     import pywps
     from pywps.app import Service, WPS, Process
-
+    
     def pr1():
         """This is the execute method of the process
         """
         pass
-
-
+    
+    
     application = Service(processes=[Process(pr1)])
+
 
 4. Run via web browser
 
     http://localhost/pywps/?service=wps&request=getcapabilities
 
 5. Run in command line: TBD
+
+
+Issues
+======
+
+On Windows PyWPS-4 does not support multiprocessing which is used when making
+requests storing the response document and updating the status to displaying to the user
+the progression of a process.
