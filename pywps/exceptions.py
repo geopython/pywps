@@ -108,7 +108,7 @@ class FileSizeExceeded(NoApplicableCode):
 class VersionNegotiationFailed(NoApplicableCode):
     """Version negotiation exception implementation
     """
-    pass
+    code = 400
 
 
 class OperationNotSupported(NoApplicableCode):

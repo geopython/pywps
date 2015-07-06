@@ -1,7 +1,7 @@
 import unittest
 import lxml.etree
 from pywps import Process, Service
-from pywps import WPS
+from pywps import WPS, OWS
 from tests.common import client_for
 
 
@@ -15,6 +15,11 @@ class BadRequestTest(unittest.TestCase):
     def test_bad_request_type_with_get(self):
         client = client_for(Service())
         resp = client.get('?Request=foo')
+        assert resp.status_code == 400
+
+    def test_bad_service_type_with_get(self):
+        client = client_for(Service())
+        resp = client.get('?service=foo')
         assert resp.status_code == 400
 
     def test_bad_request_type_with_post(self):
@@ -56,6 +61,25 @@ class CapabilitiesTest(unittest.TestCase):
         request_doc = WPS.GetCapabilities()
         resp = self.client.post_xml(doc=request_doc)
         self.check_capabilities_response(resp)
+
+    def test_get_bad_version(self):
+        resp = self.client.get('?request=getcapabilities&service=wps&acceptversions=2001-123')
+        exception = resp.xpath('/ows:ExceptionReport'
+                                '/ows:Exception')
+        assert resp.status_code == 400
+        assert exception[0].attrib['exceptionCode'] == 'VersionNegotiationFailed'
+
+    def test_post_bad_version(self):
+        acceptedVersions_doc = OWS.AcceptVersions(
+                OWS.Version('2001-123'))
+        request_doc = WPS.GetCapabilities(acceptedVersions_doc)
+        resp = self.client.post_xml(doc=request_doc)
+        exception = resp.xpath('/ows:ExceptionReport'
+                                '/ows:Exception')
+
+        assert resp.status_code == 400
+        assert exception[0].attrib['exceptionCode'] == 'VersionNegotiationFailed'
+
 
 
 def load_tests(loader=None, tests=None, pattern=None):
