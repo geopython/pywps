@@ -33,7 +33,7 @@ class WPSRequest(object):
         service = _get_get_param(self.http_request, 'service', aslist=False)
         if service:
             if str(service).lower() != 'wps':
-                raise OperationNotSupported(
+                raise InvalidParameterValue(
                     'parameter SERVICE [%s] not supported' % service)
         else:
             raise MissingParameterValue('service', 'service')

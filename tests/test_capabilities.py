@@ -20,7 +20,12 @@ class BadRequestTest(unittest.TestCase):
     def test_bad_service_type_with_get(self):
         client = client_for(Service())
         resp = client.get('?service=foo')
+
+        exception = resp.xpath('/ows:ExceptionReport'
+                                '/ows:Exception')
+
         assert resp.status_code == 400
+        assert exception[0].attrib['exceptionCode'] == 'InvalidParameterValue'
 
     def test_bad_request_type_with_post(self):
         client = client_for(Service())
