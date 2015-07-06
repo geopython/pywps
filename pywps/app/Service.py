@@ -81,8 +81,6 @@ class Service(object):
             service_contact_doc.append(OWS.IndividualName(config.get_config_value('provider', 'individualName')))
             if config.get_config_value('provider', 'positionName'):
                 service_contact_doc.append(OWS.PositionName(config.get_config_value('provider', 'positionName')))
-            if config.get_config_value('provider', 'role'):
-                service_contact_doc.append(OWS.Role(config.get_config_value('provider', 'role')))
 
             contact_info_doc = OWS.ContactInfo()
 
@@ -124,6 +122,9 @@ class Service(object):
             # Add Contact information if not empty
             if len(contact_info_doc):
                 service_contact_doc.append(contact_info_doc)
+
+            if config.get_config_value('provider', 'role'):
+                service_contact_doc.append(OWS.Role(config.get_config_value('provider', 'role')))
 
         # Add Service Contact only if ProviderName and PositionName are set
         if len(service_contact_doc):

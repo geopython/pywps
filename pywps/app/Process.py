@@ -58,14 +58,16 @@ class Process(object):
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
         # TODO: See Table 32 Metadata in OGC 06-121r3
-        for m in self.metadata:
-            doc.append(OWS.Metadata(m))
+        #for m in self.metadata:
+        #    doc.append(OWS.Metadata(m))
         if self.profile:
             doc.append(OWS.Profile(self.profile))
         if self.wsdl:
             doc.append(OWS.WSDL(self.wsdl))
         if self.version != 'None':
             doc.attrib['{http://www.opengis.net/wps/1.0.0}processVersion'] = self.version
+        else:
+            doc.attrib['{http://www.opengis.net/wps/1.0.0}processVersion'] = 'undefined'
 
         return doc
 
