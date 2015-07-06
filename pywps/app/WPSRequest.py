@@ -51,7 +51,10 @@ class WPSRequest(object):
         try:
             doc = lxml.etree.fromstring(self.http_request.get_data())
         except Exception as e:
-            raise NoApplicableCode(e.message)
+            if PY2:
+                raise NoApplicableCode(e.message)
+            else:
+                raise NoApplicableCode(e.msg)
 
         operation = doc.tag
         request_parser = self._post_request_parser(operation)
