@@ -1,7 +1,7 @@
 from io import StringIO
 import unittest
 import lxml.etree
-from pywps import Service, Process, LiteralOutput, LiteralInput
+from pywps import Service, Process, LiteralOutput, LiteralInput, BoundingBoxOutput, BoundingBoxInput
 from pywps import get_input_from_xml, get_input_from_xml
 from pywps import E, WPS, OWS
 from pywps.app.basic import xpath_ns
@@ -36,6 +36,21 @@ def create_greeter():
                    title='Greeter',
                    inputs=[LiteralInput('name', 'Input name', data_type='string')],
                    outputs=[LiteralOutput('message', 'Output message', data_type='string')])
+
+def create_bbox_process():
+    def bbox_process(request, response):
+        coords = request.inputs['mybbox'].data
+        assert type(coords) == type([])
+        assert len(coords) == 4
+        assert coords[0] == '15'
+        response.outputs['outbbox'].data = coords
+        return response
+
+    return Process(handler=bbox_process,
+                   identifier='my_bbox_process',
+                   title='Bbox process',
+                   inputs=[BoundingBoxInput('mybbox', 'Input name', ["EPSG:4326"])],
+                   outputs=[BoundingBoxOutput('outbbox', 'Output message', ["EPSG:4326"])])
 
 
 def get_output(doc):
@@ -87,6 +102,31 @@ class ExecuteTest(unittest.TestCase):
         resp = client.post_xml(doc=request_doc)
         assert_response_success(resp)
         assert get_output(resp.xml) == {'message': "Hello foo!"}
+
+    def test_bbox(self):
+        if not PY2:
+            self.skipTest('OWSlib not python 3 compatible')
+        client = client_for(Service(processes=[create_bbox_process()]))
+        request_doc = WPS.Execute(
+            OWS.Identifier('my_bbox_process'),
+            WPS.DataInputs(
+                WPS.Input(
+                    OWS.Identifier('mybbox'),
+                    WPS.Data(WPS.BoundingBoxData(
+                        OWS.LowerCorner('15 50'),
+                        OWS.UpperCorner('16 51'),
+                        ))
+                )
+            ),
+            version='1.0.0'
+        )
+        resp = client.post_xml(doc=request_doc)
+        assert_response_success(resp)
+
+        [output] = xpath_ns(resp.xml, '/wps:ExecuteResponse'
+                                   '/wps:ProcessOutputs/wps:Output')
+        assert 'outbbox' == xpath_ns(output, './ows:Identifier')[0].text
+        assert '15 50' == xpath_ns(output, './ows:BoundingBox/ows:LowerCorner')[0].text
 
 class ExecuteXmlParserTest(unittest.TestCase):
     """Tests for Execute request XML Parser

@@ -233,3 +233,143 @@ class LiteralInput(basic.LiteralInput):
             literal_doc.attrib['uom'] = self.uom
         doc.append(literal_doc)
         return doc
+
+
+class BoundingBoxInput(basic.BBoxInput):
+    """
+    :param identifier: The name of this input.
+    :param data_type: Type of literal input (e.g. `string`, `float`...).
+    """
+
+    def __init__(self, identifier, title, crss, abstract='',
+                 dimensions=2, metadata=[], min_occurs='1',
+                 max_occurs='1', as_reference=False):
+        basic.BBoxInput.__init__(self, identifier, title=title,
+                                 abstract=abstract, crss=crss,
+                                 dimensions=dimensions)
+
+        self.metadata = metadata
+        self.min_occurs = min_occurs
+        self.max_occurs = max_occurs
+        self.as_reference = as_reference
+
+    def describe_xml(self):
+        doc = WPS.Input(
+            OWS.Identifier(self.identifier),
+            OWS.Title(self.title)
+        )
+
+        doc.attrib['minOccurs'] = self.min_occurs
+        doc.attrib['maxOccurs'] = self.max_occurs
+
+        if self.abstract:
+            doc.append(OWS.Abstract(self.abstract))
+
+        if self.metadata:
+            doc.append(OWS.Metadata(*self.metadata))
+
+        bbox_data_doc = E.BoundingBoxData()
+        doc.append(bbox_data_doc)
+
+        default_doc = E.Default()
+        default_doc.append(E.CRS(self.crss[0]))
+
+        supported_doc = E.Supported()
+        for c in self.crss:
+            supported_doc.append(E.CRS(c))
+
+        bbox_data_doc.append(default_doc)
+        bbox_data_doc.append(supported_doc)
+
+        return doc
+
+    def execute_xml(self):
+        doc = WPS.Input(
+            OWS.Identifier(self.identifier),
+            OWS.Title(self.title)
+        )
+
+        if self.abstract:
+            doc.append(OWS.Abstract(self.abstract))
+
+        bbox_data_doc = OWS.BoundingBox()
+
+        bbox_data_doc.attrib['crs'] = self.crs
+        bbox_data_doc.attrib['dimensions'] = str(self.dimensions)
+
+        bbox_data_doc.append(OWS.LowerCorner('{0[0]} {0[1]}'.format(self.data)))
+        bbox_data_doc.append(OWS.UpperCorner('{0[2]} {0[3]}'.format(self.data)))
+
+        doc.append(bbox_data_doc)
+
+        return doc
+
+
+class BoundingBoxOutput(basic.BBoxInput):
+    """
+    :param identifier: The name of this input.
+    :param data_type: Type of literal input (e.g. `string`, `float`...).
+    """
+
+    def __init__(self, identifier, title, crss, abstract='',
+                 dimensions=2, metadata=[], min_occurs='1',
+                 max_occurs='1', as_reference=False):
+        basic.BBoxInput.__init__(self, identifier, title=title,
+                                 abstract=abstract, crss=crss,
+                                 dimensions=dimensions)
+
+        self.metadata = metadata
+        self.min_occurs = min_occurs
+        self.max_occurs = max_occurs
+        self.as_reference = as_reference
+
+    def describe_xml(self):
+        doc = WPS.Output(
+            OWS.Identifier(self.identifier),
+            OWS.Title(self.title)
+        )
+
+        doc.attrib['minOccurs'] = self.min_occurs
+        doc.attrib['maxOccurs'] = self.max_occurs
+
+        if self.abstract:
+            doc.append(OWS.Abstract(self.abstract))
+
+        if self.metadata:
+            doc.append(OWS.Metadata(*self.metadata))
+
+        bbox_data_doc = E.BoundingBoxData()
+        doc.append(bbox_data_doc)
+
+        default_doc = E.Default()
+        default_doc.append(E.CRS(self.crss[0]))
+
+        supported_doc = E.Supported()
+        for c in self.crss:
+            supported_doc.append(E.CRS(c))
+
+        bbox_data_doc.append(default_doc)
+        bbox_data_doc.append(supported_doc)
+
+        return doc
+
+    def execute_xml(self):
+        doc = WPS.Output(
+            OWS.Identifier(self.identifier),
+            OWS.Title(self.title)
+        )
+
+        if self.abstract:
+            doc.append(OWS.Abstract(self.abstract))
+
+        bbox_data_doc = OWS.BoundingBox()
+
+        bbox_data_doc.attrib['crs'] = self.crs
+        bbox_data_doc.attrib['dimensions'] = str(self.dimensions)
+
+        bbox_data_doc.append(OWS.LowerCorner('{0[0]} {0[1]}'.format(self.data)))
+        bbox_data_doc.append(OWS.UpperCorner('{0[2]} {0[3]}'.format(self.data)))
+
+        doc.append(bbox_data_doc)
+
+        return doc

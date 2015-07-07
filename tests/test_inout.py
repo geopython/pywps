@@ -4,9 +4,13 @@ import os
 import tempfile
 import unittest
 from pywps import Format
+from pywps import NAMESPACES
 from pywps.inout.basic import IOHandler, SOURCE_TYPE, DataTypeAbstract, SimpleHandler, BBoxInput, BBoxOutput, \
     ComplexInput, ComplexOutput, LiteralInput, LiteralOutput
+from pywps.inout import BoundingBoxInput as BoundingBoxInputXML
 from pywps._compat import StringIO, text_type
+
+from lxml import etree
 
 
 def get_data_format():
@@ -179,7 +183,7 @@ class LiteralOutputTest(unittest.TestCase):
         self.assertEqual(self.literal_output.store, storage)
 
 class BoxInputTest(unittest.TestCase):
-    """LiteralInput test cases"""
+    """BBoxInput test cases"""
 
     def setUp(self):
 
@@ -190,7 +194,7 @@ class BoxInputTest(unittest.TestCase):
 
 
 class BoxOutputTest(unittest.TestCase):
-    """LiteralOutput test cases"""
+    """BoundingBoxOutput test cases"""
 
     def setUp(self):
 

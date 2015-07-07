@@ -1,6 +1,6 @@
 import unittest
 from collections import namedtuple
-from pywps import Process, Service, LiteralInput, ComplexInput
+from pywps import Process, Service, LiteralInput, ComplexInput, BoundingBoxInput, BoundingBoxOutput
 from pywps import E, WPS, OWS, XMLSCHEMA_2, Format
 from pywps.inout.literaltypes import LITERAL_DATA_TYPES
 from pywps.app.basic import xpath_ns
@@ -158,6 +158,28 @@ class InputDescriptionTest(unittest.TestCase):
             [mime_el] = xpath_ns(supported_el, './MimeType')
             supported_mime_types.append(mime_el.text)
         assert supported_mime_types == ['a/b', 'c/d']
+
+    def test_bbox_input(self):
+        bbox = BoundingBoxInput('bbox', 'BBox foo',
+                crss=["EPSG:4326", "EPSG:3035"])
+        doc = bbox.describe_xml()
+        [inpt] = xpath_ns(doc, '/wps:Input')
+        [default_crs] = xpath_ns(doc, './BoundingBoxData/Default/CRS')
+        supported = xpath_ns(doc, './BoundingBoxData/Supported/CRS')
+        assert inpt.attrib['minOccurs'] == '1'
+        assert default_crs.text == 'EPSG:4326'
+        assert len(supported) == 2
+
+    def test_bbox_input(self):
+        bbox = BoundingBoxOutput('bbox', 'BBox foo',
+                crss=["EPSG:4326"])
+        doc = bbox.describe_xml()
+        [inpt] = xpath_ns(doc, '/wps:Output')
+        [default_crs] = xpath_ns(doc, './BoundingBoxData/Default/CRS')
+        supported = xpath_ns(doc, './BoundingBoxData/Supported/CRS')
+        assert inpt.attrib['minOccurs'] == '1'
+        assert default_crs.text == 'EPSG:4326'
+        assert len(supported) == 1
 
 
 def load_tests(loader=None, tests=None, pattern=None):

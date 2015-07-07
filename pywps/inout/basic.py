@@ -247,8 +247,9 @@ class BasicBoundingBox(object):
     """Basic BoundingBox input/output class
     """
 
-    def __init__(self, crs=None, dimensions=2):
-        self.crs = crs
+    def __init__(self, crss=None, dimensions=2):
+        self.crss = crss or ['epsg:4326']
+        self.crs = self.crss[0]
         self.dimensions = dimensions
         self.ll = []
         self.ur = []
@@ -287,23 +288,22 @@ class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
         self._storage = storage
 
 
-class BBoxInput(BasicIO, BasicBoundingBox, SimpleHandler):
+class BBoxInput(BasicIO, BasicBoundingBox, IOHandler):
     """Basic Bounding box input abstract class
     """
 
-    def __init__(self, identifier, title=None, abstract=None, crs=None, dimensions=None, tempdir=None):
+    def __init__(self, identifier, title=None, abstract=None, crss=None, dimensions=None, tempdir=None):
         BasicIO.__init__(self, identifier, title, abstract)
-        BasicBoundingBox.__init__(self, crs, dimensions)
-        SimpleHandler.__init__(self, tempdir=None)
-
+        BasicBoundingBox.__init__(self, crss, dimensions)
+        IOHandler.__init__(self, tempdir=None)
 
 class BBoxOutput(BasicIO, BasicBoundingBox, SimpleHandler):
     """Basic BoundingBox output class
     """
 
-    def __init__(self, identifier, title=None, abstract=None, crs=None, dimensions=None, tempdir=None):
+    def __init__(self, identifier, title=None, abstract=None, crss=None, dimensions=None, tempdir=None):
         BasicIO.__init__(self, identifier, title, abstract)
-        BasicBoundingBox.__init__(self, crs, dimensions)
+        BasicBoundingBox.__init__(self, crss, dimensions)
         SimpleHandler.__init__(self, tempdir=None)
         self._storage = None
 

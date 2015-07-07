@@ -8,7 +8,7 @@ from pywps.app.WPSRequest import WPSRequest
 import pywps.configuration as config
 from pywps.exceptions import MissingParameterValue, NoApplicableCode, InvalidParameterValue, FileSizeExceeded, \
     StorageNotSupported
-from pywps.inout.inputs import ComplexInput, LiteralInput
+from pywps.inout.inputs import ComplexInput, LiteralInput, BoundingBoxInput
 
 
 class Service(object):
@@ -268,8 +268,11 @@ class Service(object):
                 data_inputs[inpt.identifier] = self.parse_complex_inputs(wps_request.inputs[inpt.identifier])
             elif isinstance(inpt, LiteralInput):
                 data_inputs[inpt.identifier] = self.parse_literal_inputs(wps_request.inputs[inpt.identifier])
+            elif isinstance(inpt, BoundingBoxInput):
+                data_inputs[inpt.identifier] = self.parse_bbox_inputs(inpt,
+                                                                      wps_request.inputs[inpt.identifier])
         wps_request.inputs = data_inputs
-
+        
         # set as_reference to True for all the outputs specified as reference
         # if the output is not required to be raw
         if not wps_request.raw:
@@ -385,7 +388,7 @@ class Service(object):
         return data_input
     
     
-    def parse_literal_inputs(self,inputs):
+    def parse_literal_inputs(self, inputs):
         """ Takes the http_request and parses the input to objects
         :return:
         """
@@ -401,6 +404,16 @@ class Service(object):
         data_input.data = inputs.get('data')
     
         return data_input
+
+
+    def parse_bbox_inputs(self, inpt, inputs):
+        """ Takes the http_request and parses the input to objects
+        :return:
+        """
+
+        inpt.data = [inputs.minx, inputs.miny, inputs.maxx, inputs.maxy]
+
+        return inpt
 
 
     @Request.application
