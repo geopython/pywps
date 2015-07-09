@@ -1,4 +1,4 @@
-from pywps import configuration, E, OWS, WPS, XMLSCHEMA_2
+from pywps import configuration, E, OWS, WPS, XMLSCHEMA_2, NAMESPACES
 from pywps.inout import basic
 
 
@@ -167,7 +167,9 @@ class LiteralInput(basic.LiteralInput):
         literal_data_doc = E.LiteralData()
 
         if self.data_type:
-            literal_data_doc.append(OWS.DataType(self.data_type, reference=XMLSCHEMA_2 + self.data_type))
+            data_type = OWS.DataType(self.data_type)
+            data_type.attrib['{%s}reference' % NAMESPACES['ows']] = XMLSCHEMA_2 + self.data_type
+            literal_data_doc.append(data_type)
 
         if self.uom:
             default_uom_element = self.uom[0].describe_xml()

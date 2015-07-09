@@ -1,7 +1,7 @@
 import unittest
 from collections import namedtuple
 from pywps import Process, Service, LiteralInput, ComplexInput, BoundingBoxInput, BoundingBoxOutput
-from pywps import E, WPS, OWS, XMLSCHEMA_2, Format
+from pywps import E, WPS, OWS, XMLSCHEMA_2, Format, NAMESPACES
 from pywps.inout.literaltypes import LITERAL_DATA_TYPES
 from pywps.app.basic import xpath_ns
 
@@ -138,7 +138,7 @@ class InputDescriptionTest(unittest.TestCase):
         assert identifier_el.text == 'foo'
         [type_el] = xpath_ns(doc, './LiteralData/ows:DataType')
         assert type_el.text == 'integer'
-        assert type_el.attrib['reference'] == XMLSCHEMA_2 + 'integer'
+        assert type_el.attrib['{%s}reference' % NAMESPACES['ows']] == XMLSCHEMA_2 + 'integer'
 
     def test_complex_input_identifier(self):
         complex = ComplexInput('foo', 'Complex foo', allowed_formats=[Format('bar/baz')])
