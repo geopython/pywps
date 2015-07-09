@@ -185,7 +185,7 @@ class LiteralInput(basic.LiteralInput):
         doc.append(literal_data_doc)
 
         # TODO: refer to table 29 and 30
-        doc.append(OWS.AnyValue())
+        literal_data_doc.append(OWS.AnyValue())
 
         if self.default:
             doc.append(E.DefaultValue(self.default))

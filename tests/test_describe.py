@@ -139,6 +139,8 @@ class InputDescriptionTest(unittest.TestCase):
         [type_el] = xpath_ns(doc, './LiteralData/ows:DataType')
         assert type_el.text == 'integer'
         assert type_el.attrib['{%s}reference' % NAMESPACES['ows']] == XMLSCHEMA_2 + 'integer'
+        anyvalue = xpath_ns(doc, './LiteralData/ows:AnyValue')
+        assert len(anyvalue) == 1
 
     def test_complex_input_identifier(self):
         complex = ComplexInput('foo', 'Complex foo', allowed_formats=[Format('bar/baz')])
