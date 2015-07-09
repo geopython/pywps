@@ -4,7 +4,6 @@ from pywps import Process, Service
 from pywps import WPS, OWS
 from tests.common import client_for
 
-
 class BadRequestTest(unittest.TestCase):
 
     def test_bad_http_verb(self):

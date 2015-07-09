@@ -75,6 +75,7 @@ class ExecuteTest(unittest.TestCase):
         client = client_for(Service(processes=[create_ultimate_question()]))
         resp = client.get('?service=wps&version=1.0.0&Request=Execute&identifier=ultimate_question')
         assert_response_success(resp)
+        
         assert get_output(resp.xml) == {'outvalue': '42'}
 
     def test_post_with_no_inputs(self):
@@ -124,7 +125,7 @@ class ExecuteTest(unittest.TestCase):
         assert_response_success(resp)
 
         [output] = xpath_ns(resp.xml, '/wps:ExecuteResponse'
-                                   '/wps:ProcessOutputs/wps:Output')
+                                   '/wps:ProcessOutputs/Output')
         assert 'outbbox' == xpath_ns(output, './ows:Identifier')[0].text
         assert '15 50' == xpath_ns(output, './ows:BoundingBox/ows:LowerCorner')[0].text
 

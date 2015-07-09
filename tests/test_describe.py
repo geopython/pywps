@@ -1,9 +1,11 @@
 import unittest
 from collections import namedtuple
-from pywps import Process, Service, LiteralInput, ComplexInput, BoundingBoxInput, BoundingBoxOutput
-from pywps import E, WPS, OWS, XMLSCHEMA_2, Format, NAMESPACES
+from pywps import Process, Service, LiteralInput, ComplexInput, BoundingBoxInput
+from pywps import LiteralOutput, ComplexOutput, BoundingBoxOutput
+from pywps import E, WPS, OWS, OGCTYPE, Format, NAMESPACES, OGCUNIT
 from pywps.inout.literaltypes import LITERAL_DATA_TYPES
 from pywps.app.basic import xpath_ns
+from pywps.inout.formats import Format
 
 from tests.common import client_for
 
@@ -122,23 +124,26 @@ class DescribeProcessInputTest(unittest.TestCase):
 
     def test_one_literal_integer_input(self):
         def hello(request): pass
-        hello_process = Process(hello, 'hello', 'Process Hello', inputs=[
-            LiteralInput('the_number', 'Input number', data_type='integer')])
+        hello_process = Process(hello, 'hello',
+                                'Process Hello',
+                                inputs=[LiteralInput('the_number',
+                                                     'Input number',
+                                                     data_type='positiveInteger')])
         result = self.describe_process(hello_process)
-        assert result.inputs == [('the_number', 'literal', 'integer')]
+        assert result.inputs == [('the_number', 'literal', 'positiveInteger')]
 
 
 class InputDescriptionTest(unittest.TestCase):
 
     def test_literal_integer_input(self):
-        literal = LiteralInput('foo', 'Literal foo', data_type='integer')
+        literal = LiteralInput('foo', 'Literal foo', data_type='positiveInteger', uoms=['metre'])
         doc = literal.describe_xml()
         assert doc.tag == E.Input().tag
         [identifier_el] = xpath_ns(doc, './ows:Identifier')
         assert identifier_el.text == 'foo'
         [type_el] = xpath_ns(doc, './LiteralData/ows:DataType')
-        assert type_el.text == 'integer'
-        assert type_el.attrib['{%s}reference' % NAMESPACES['ows']] == XMLSCHEMA_2 + 'integer'
+        assert type_el.text == 'positiveInteger'
+        assert type_el.attrib['{%s}reference' % NAMESPACES['ows']] == OGCTYPE['positiveInteger']
         anyvalue = xpath_ns(doc, './LiteralData/ows:AnyValue')
         assert len(anyvalue) == 1
 
@@ -163,22 +168,53 @@ class InputDescriptionTest(unittest.TestCase):
 
     def test_bbox_input(self):
         bbox = BoundingBoxInput('bbox', 'BBox foo',
-                crss=["EPSG:4326", "EPSG:3035"])
+                                crss=["EPSG:4326", "EPSG:3035"])
         doc = bbox.describe_xml()
-        [inpt] = xpath_ns(doc, '/wps:Input')
+        [inpt] = xpath_ns(doc, '/Input')
         [default_crs] = xpath_ns(doc, './BoundingBoxData/Default/CRS')
         supported = xpath_ns(doc, './BoundingBoxData/Supported/CRS')
         assert inpt.attrib['minOccurs'] == '1'
         assert default_crs.text == 'EPSG:4326'
         assert len(supported) == 2
 
-    def test_bbox_input(self):
+class OutputDescriptionTest(unittest.TestCase):
+
+    def test_literal_output(self):
+        literal = LiteralOutput('literal', 'Literal foo', uoms=['metre'])
+        doc = literal.describe_xml()
+        [output] = xpath_ns(doc, '/Output')
+        [identifier] = xpath_ns(doc, '/Output/ows:Identifier')
+        [data_type] = xpath_ns(doc, '/Output/LiteralData/ows:DataType')
+        [uoms] = xpath_ns(doc, '/Output/LiteralData/UOMs')
+        [default_uom] = xpath_ns(uoms, './Default/ows:UOM')
+        supported_uoms = xpath_ns(uoms, './Supported/ows:UOM')
+        
+        assert output is not None
+        assert identifier.text == 'literal'
+        assert data_type.attrib['{%s}reference' % NAMESPACES['ows']] == OGCTYPE['string']
+        assert uoms is not None
+        assert default_uom.text == 'metre'
+        assert default_uom.attrib['{%s}reference' % NAMESPACES['ows']] == OGCUNIT['metre']
+        assert len(supported_uoms) == 1
+
+    def test_complex_output(self):
+        complexo = ComplexOutput('complex', 'Complex foo', Format('GML'))
+        doc = complexo.describe_xml()
+        [outpt] = xpath_ns(doc, '/Output')
+        [default] = xpath_ns(doc, '/Output/ComplexOutput/Default/Format/MimeType')
+        supported = xpath_ns(doc,
+                             '/Output/ComplexOutput/Supported/Format/MimeType')
+
+        assert default.text == 'application/gml+xml'
+        assert len(supported) == 1
+
+    def test_bbox_output(self):
         bbox = BoundingBoxOutput('bbox', 'BBox foo',
                 crss=["EPSG:4326"])
         doc = bbox.describe_xml()
-        [inpt] = xpath_ns(doc, '/wps:Output')
-        [default_crs] = xpath_ns(doc, './BoundingBoxData/Default/CRS')
-        supported = xpath_ns(doc, './BoundingBoxData/Supported/CRS')
+        [inpt] = xpath_ns(doc, '/Output')
+        [default_crs] = xpath_ns(doc, './BoundingBoxOutput/Default/CRS')
+        supported = xpath_ns(doc, './BoundingBoxOutput/Supported/CRS')
         assert inpt.attrib['minOccurs'] == '1'
         assert default_crs.text == 'EPSG:4326'
         assert len(supported) == 1

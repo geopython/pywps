@@ -3,6 +3,9 @@ from werkzeug.test import Client
 from werkzeug.wrappers import BaseResponse
 from pywps import NAMESPACES
 
+import logging
+
+logging.disable(logging.CRITICAL)
 
 class WpsClient(Client):
 

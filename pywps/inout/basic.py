@@ -2,6 +2,7 @@ from abc import ABCMeta, abstractmethod
 from pywps._compat import text_type, StringIO
 import tempfile
 from pywps.inout.literaltypes import LITERAL_DATA_TYPES
+from pywps import OWS, OGCUNIT, NAMESPACES
 
 
 class SOURCE_TYPE:
@@ -230,11 +231,35 @@ class BasicLiteral:
     """Basic literal input/output class
     """
 
-    def __init__(self, data_type=None):
+    def __init__(self, data_type=None, uoms=None):
         if not data_type:
             data_type = LITERAL_DATA_TYPES[2]
         assert data_type in LITERAL_DATA_TYPES
         self.data_type = data_type
+        self.uoms = None
+        self._uom = None
+
+        if self.uoms:
+            self.uom = self.uoms[0]
+
+        if uoms:
+            if type(uoms) is not type([]):
+                uoms = [uoms]
+
+            self.uoms = []
+            for uom in uoms:
+                if not isinstance(uom, UOM):
+                    uom = UOM(uom)
+                self.uoms.append(uom)
+
+    @property
+    def uom(self):
+        return self._uom
+
+    @uom.setter
+    def uom(self, uom):
+        self._uom = uom
+
 
 class BasicComplex(object):
     """Basic complex input/output class
@@ -259,9 +284,9 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
     """
 
     def __init__(self, identifier, title=None, abstract=None,
-                 data_type=None, tempdir=None, allowed_values=None):
+                 data_type=None, tempdir=None, allowed_values=None, uoms=None):
         BasicIO.__init__(self, identifier, title, abstract)
-        BasicLiteral.__init__(self, data_type)
+        BasicLiteral.__init__(self, data_type, uoms)
         SimpleHandler.__init__(self, tempdir, data_type)
 
         self.allowed_values = allowed_values
@@ -273,10 +298,11 @@ class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
     """
 
     def __init__(self, identifier, title=None, abstract=None,
-                 data_type=None, tempdir=None):
+                 data_type=None, tempdir=None, uoms=None):
         BasicIO.__init__(self, identifier, title, abstract)
-        BasicLiteral.__init__(self, data_type)
+        BasicLiteral.__init__(self, data_type, uoms)
         SimpleHandler.__init__(self, tempdir=None, data_type=data_type)
+
         self._storage = None
 
     @property
@@ -286,7 +312,6 @@ class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
     @storage.setter
     def storage(self, storage):
         self._storage = storage
-
 
 class BBoxInput(BasicIO, BasicBoundingBox, IOHandler):
     """Basic Bounding box input abstract class
@@ -382,6 +407,24 @@ class ComplexOutput(BasicIO, BasicComplex, IOHandler):
         """
         (outtype, storage, url) = self.storage.store(self)
         return url
+
+
+class UOM(object):
+    """
+    :param uom: unit of measure
+    """
+
+    def __init__(self, uom=''):
+        self.uom = uom
+
+    def describe_xml(self):
+        elem = OWS.UOM(
+            self.uom
+        )
+
+        elem.attrib['{%s}reference' % NAMESPACES['ows']] = OGCUNIT[self.uom]
+
+        return elem
 
 
 if __name__ == "__main__":

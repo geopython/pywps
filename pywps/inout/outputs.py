@@ -1,8 +1,9 @@
 from pywps import configuration
 from pywps._compat import text_type
-from pywps import E, WPS, OWS, XMLSCHEMA_2
+from pywps import E, WPS, OWS, OGCTYPE, NAMESPACES
 from pywps.inout import basic
 from pywps.inout.storage import FileStorage
+from pywps.inout.formats import Format
 
 
 class LiteralOutput(basic.LiteralOutput):
@@ -13,11 +14,11 @@ class LiteralOutput(basic.LiteralOutput):
             Should be :class:`~String` object.
     """
 
-    def __init__(self, identifier, title, data_type='string', abstract='', metadata=[], uom=[]):
-        basic.LiteralOutput.__init__(self, identifier, title=title, data_type=data_type)
+    def __init__(self, identifier, title, data_type='string', abstract='',
+            metadata=[], uoms=[]):
+        basic.LiteralOutput.__init__(self, identifier, title=title, data_type=data_type, uoms=uoms)
         self.abstract = abstract
         self.metadata = metadata
-        self.uom = uom
 
     def describe_xml(self):
         doc = E.Output(
@@ -31,14 +32,16 @@ class LiteralOutput(basic.LiteralOutput):
         for m in self.metadata:
             doc.append(OWS.Metadata(m))
 
-        literal_data_doc = E.LiteralData()
+        literal_data_doc = E.LiteralOutput()
 
         if self.data_type:
-            literal_data_doc.append(OWS.DataType(self.data_type, reference=XMLSCHEMA_2 + self.data_type))
+            data_type = OWS.DataType(self.data_type)
+            data_type.attrib['{%s}reference' % NAMESPACES['ows']] = OGCTYPE[self.data_type]
+            literal_data_doc.append(data_type)
 
-        if self.uom:
-            default_uom_element = self.uom[0].describe_xml()
-            supported_uom_elements = [u.describe_xml() for u in self.uom]
+        if self.uoms:
+            default_uom_element = self.uom.describe_xml()
+            supported_uom_elements = [u.describe_xml() for u in self.uoms]
 
             literal_data_doc.append(
                 E.UOMs(
@@ -46,6 +49,8 @@ class LiteralOutput(basic.LiteralOutput):
                     E.Supported(*supported_uom_elements)
                 )
             )
+
+        doc.append(literal_data_doc)
 
         return doc
 
@@ -62,10 +67,10 @@ class LiteralOutput(basic.LiteralOutput):
 
         literal_data_doc = WPS.LiteralData(text_type(self.data))
         literal_data_doc.attrib['dataType'] = self.data_type
-        literal_data_doc.attrib['reference'] = XMLSCHEMA_2 + self.data_type
+        literal_data_doc.attrib['reference'] = OGCTYPE[self.data_type]
         if self.uom:
-            default_uom_element = self.uom[0].describe_xml()
-            supported_uom_elements = [u.describe_xml() for u in self.uom]
+            default_uom_element = self.uom.describe_xml()
+            supported_uom_elements = [u.describe_xml() for u in self.uoms]
 
             literal_data_doc.append(
                 E.UOMs(
@@ -91,21 +96,25 @@ class ComplexOutput(basic.ComplexOutput):
             (e.g., UTF-8).
     """
 
-    def __init__(self, identifier, title, formats=None, output_format=None, encoding="UTF-8",
-                 schema=None, abstract='', metadata=[]):
+    def __init__(self, identifier, title,  output_format,
+                 abstract='', supported_formats=None, metadata=[]):
+
         basic.ComplexOutput.__init__(self, identifier, title=title, abstract=abstract)
-        self.formats = formats
         self.metadata = metadata
 
-        self._schema = None
         self._output_format = None
-        self._encoding = None
 
         self.as_reference = False
-        self.output_format = output_format
-        self.encoding = encoding
-        self.schema = schema
+        if type(output_format) == type([]):
+            self.output_format = output_format[0]
+            supported_formats = output_format
+        else:
+            self.output_format = output_format
         self.storage = None
+        if not supported_formats:
+            supported_formats = []
+        self.supported_formats = [self.output_format]
+        self.supported_formats.extend(supported_formats)
 
     @property
     def output_format(self):
@@ -124,40 +133,12 @@ class ComplexOutput(basic.ComplexOutput):
         """
         self._output_format = output_format
 
-    @property
-    def encoding(self):
-        """Get output encoding
-        :rtype: String
-        """
-
-        if self._encoding:
-            return self._encoding
-        else:
-            return ''
-
-    @encoding.setter
-    def encoding(self, encoding):
-        """Set output encoding
-        """
-        self._encoding = encoding
-
-    @property
-    def schema(self):
-        """Get output schema
-        :rtype: String
-        """
-
-        return self._schema
-
-    @schema.setter
-    def schema(self, schema):
-        """Set output schema
-        """
-        self._schema = schema
 
     def describe_xml(self):
-        default_format_el = self.formats[0].describe_xml()
-        supported_format_elements = [f.describe_xml() for f in self.formats]
+        """Generate DescribeProcess element
+        """
+        default_format_el = self.output_format.describe_xml()
+        supported_format_elements = [f.describe_xml() for f in self.supported_formats]
 
         doc = E.Output(
             OWS.Identifier(self.identifier),
@@ -241,8 +222,67 @@ class ComplexOutput(basic.ComplexOutput):
         return doc
 
 
-class BoundingBoxOutput(object):
-    """bounding box output
+class BoundingBoxOutput(basic.BBoxInput):
     """
-    # TODO: BoundingBoxOutput
-    pass
+    :param identifier: The name of this input.
+    """
+
+    def __init__(self, identifier, title, crss, abstract='',
+                 dimensions=2, metadata=[], min_occurs='1',
+                 max_occurs='1', as_reference=False):
+        basic.BBoxInput.__init__(self, identifier, title=title,
+                                 abstract=abstract, crss=crss,
+                                 dimensions=dimensions)
+
+        self.metadata = metadata
+        self.min_occurs = min_occurs
+        self.max_occurs = max_occurs
+        self.as_reference = as_reference
+
+    def describe_xml(self):
+        doc = E.Output(
+            OWS.Identifier(self.identifier),
+            OWS.Title(self.title)
+        )
+
+        if self.abstract:
+            doc.append(OWS.Abstract(self.abstract))
+
+        if self.metadata:
+            doc.append(OWS.Metadata(*self.metadata))
+
+        bbox_data_doc = E.BoundingBoxOutput()
+        doc.append(bbox_data_doc)
+
+        default_doc = E.Default()
+        default_doc.append(E.CRS(self.crss[0]))
+
+        supported_doc = E.Supported()
+        for c in self.crss:
+            supported_doc.append(E.CRS(c))
+
+        bbox_data_doc.append(default_doc)
+        bbox_data_doc.append(supported_doc)
+
+        return doc
+
+    def execute_xml(self):
+        doc = E.Output(
+            OWS.Identifier(self.identifier),
+            OWS.Title(self.title)
+        )
+
+        if self.abstract:
+            doc.append(OWS.Abstract(self.abstract))
+
+        bbox_data_doc = OWS.BoundingBox()
+
+        bbox_data_doc.attrib['crs'] = self.crs
+        bbox_data_doc.attrib['dimensions'] = str(self.dimensions)
+
+        bbox_data_doc.append(OWS.LowerCorner('{0[0]} {0[1]}'.format(self.data)))
+        bbox_data_doc.append(OWS.UpperCorner('{0[2]} {0[3]}'.format(self.data)))
+
+        doc.append(bbox_data_doc)
+
+        return doc

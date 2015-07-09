@@ -35,6 +35,8 @@ from werkzeug._compat import text_type
 from werkzeug.utils import escape
 from werkzeug.http import HTTP_STATUS_CODES
 
+import logging
+
 
 class NoApplicableCode(HTTPException):
     """No applicable code exception implementation
@@ -51,6 +53,7 @@ class NoApplicableCode(HTTPException):
         self.code = code
         self.description = description
         self.locator = locator
+        logging.exception(description)
 
         HTTPException.__init__(self)
 
