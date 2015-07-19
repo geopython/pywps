@@ -66,18 +66,9 @@ class LiteralOutput(basic.LiteralOutput):
         data_doc = WPS.Data()
 
         literal_data_doc = WPS.LiteralData(text_type(self.data))
-        literal_data_doc.attrib['dataType'] = self.data_type
-        literal_data_doc.attrib['reference'] = OGCTYPE[self.data_type]
+        literal_data_doc.attrib['dataType'] = OGCTYPE[self.data_type]
         if self.uom:
-            default_uom_element = self.uom.describe_xml()
-            supported_uom_elements = [u.describe_xml() for u in self.uoms]
-
-            literal_data_doc.append(
-                E.UOMs(
-                    E.Default(default_uom_element),
-                    E.Supported(*supported_uom_elements)
-                )
-            )
+            literal_data_doc.attrib['uom'] = self.uom.execute_attribute()
         data_doc.append(literal_data_doc)
 
         doc.append(data_doc)

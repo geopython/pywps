@@ -426,6 +426,9 @@ class UOM(object):
 
         return elem
 
+    def execute_attribute(self):
+        return OGCUNIT[self.uom]
+
 
 if __name__ == "__main__":
     import doctest
