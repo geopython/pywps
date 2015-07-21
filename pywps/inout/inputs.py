@@ -20,7 +20,7 @@ class ComplexInput(basic.ComplexInput):
         self.as_reference = as_reference
         self.url = ''
         self.method = ''
-        self.max_megabytes = int(0)
+        self.max_size = int(0)
 
     def calculate_max_input_size(self):
         """Calculates maximal size for input file based on configuration
@@ -28,23 +28,8 @@ class ComplexInput(basic.ComplexInput):
 
         :return: maximum file size bytes
         """
-        maxSize = configuration.get_config_value('server', 'maxfilesize')
-        maxSize = maxSize.lower()
-
-        import re
-
-        units = re.compile("[gmkb].*")
-        size = float(re.sub(units, '', maxSize))
-
-        if maxSize.find("g") > -1:
-            size *= 1024
-        elif maxSize.find("m") > -1:
-            size *= 1
-        elif maxSize.find("k") > -1:
-            size /= 1024
-        else:
-            size *= 1
-        self.max_megabytes = size
+        maxSize = configuration.get_config_value('server', 'maxsingleinputsize')
+        self.max_size = configuration.get_size_mb(maxSize)
 
     def describe_xml(self):
         default_format_el = self.allowed_formats[0].describe_xml()
@@ -70,10 +55,6 @@ class ComplexInput(basic.ComplexInput):
                 E.Supported(*supported_format_elements)
             )
         )
-
-        self.calculate_max_input_size()
-        #if self.max_megabytes:
-        #    doc.attrib['maximumMegabytes'] = str(self.max_megabytes)
 
         return doc
     

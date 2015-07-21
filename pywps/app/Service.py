@@ -323,6 +323,7 @@ class Service(object):
     
         # get the referenced input otherwise get the value of the field
         href = inputs.get('href', None)
+
         if href:
             tmp_dir = config.get_config_value('server', 'tempPath')
     
@@ -360,11 +361,11 @@ class Service(object):
     
             # check if input file size was not exceeded
             data_input.calculate_max_input_size()
-            byte_size = data_input.max_megabytes * 1024 * 1024
+            byte_size = data_input.max_size * 1024 * 1024
             if int(data_size) > int(byte_size):
                 raise FileSizeExceeded('File size for input exceeded.'
-                                       ' Maximum allowed: %i megabytes' % data_input.max_megabytes,
-                                       inputs.get('identifier'))
+                                       ' Maximum allowed: %i megabytes' %
+                                       data_input.max_size, inputs.get('identifier'))
     
             try:
                 with open(tmp_file, 'w') as f:
@@ -378,12 +379,6 @@ class Service(object):
             data_input.as_reference = True
         else:
             data = inputs.get('data')
-            # check if input file size was not exceeded
-            byte_size = data_input.max_megabytes * 1024 * 1024
-            if len(data.encode('utf-8')) > int(byte_size):
-                raise FileSizeExceeded('File size for input exceeded.'
-                                       ' Maximum allowed: %i megabytes' % data_input.max_megabytes,
-                                       inputs.get('identifier'))
             data_input.data = data
         return data_input
     

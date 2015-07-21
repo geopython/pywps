@@ -93,7 +93,7 @@ def load_configuration(cfgfiles=None):
     config.set('wps', 'serveraddress', 'http://localhost')
     config.set('wps', 'serverport', '5000')
     config.set('wps', 'keywords', '')
-    config.set('wps', 'lang', 'en-CA')
+    config.set('wps', 'lang', 'en-EN')
 
     config.add_section('provider')
     config.set('provider', 'providerName', 'Your Company Name')
@@ -115,8 +115,8 @@ def load_configuration(cfgfiles=None):
 
     config.add_section('server')
     config.set('server', 'maxoperations', '30')
-    config.set('server', 'maxinputparamlength', '1024')
-    config.set('server', 'maxfilesize', '3mb')
+    config.set('server', 'maxsingleinputsize', '1mb')
+    config.set('server', 'maxrequestsize', '3mb')
     config.set('server', 'tempPath', tempfile.gettempdir())
     config.set('server', 'processesPath', '')
     config.set('server', 'outputUrl', '/')
@@ -176,3 +176,25 @@ def _get_default_config_files_location():
                             "pywps.cfg"), "/etc/pywps.cfg")
 
     return cfgfiles
+
+def get_size_mb(mbsize):
+    """Get real size of given obeject
+
+    """
+
+    size = mbsize.lower()
+
+    import re
+
+    units = re.compile("[gmkb].*")
+    newsize = float(re.sub(units, '', size))
+
+    if size.find("g") > -1:
+        newsize *= 1024
+    elif size.find("m") > -1:
+        newsize *= 1
+    elif size.find("k") > -1:
+        newsize /= 1024
+    else:
+        newsize *= 1
+    return newsize

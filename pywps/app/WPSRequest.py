@@ -1,25 +1,34 @@
 import lxml
+import lxml.etree
 from werkzeug.exceptions import MethodNotAllowed
 from pywps import WPS
 from pywps._compat import text_type, PY2
 from pywps.app.basic import xpath_ns
 from pywps.exceptions import NoApplicableCode, OperationNotSupported, MissingParameterValue, VersionNegotiationFailed, \
-    InvalidParameterValue
+    InvalidParameterValue, FileSizeExceeded
+from pywps import configuration
+from pywps._compat import PY2
 
 
 class WPSRequest(object):
     def __init__(self, http_request):
         self.http_request = http_request
 
-        if http_request.method == 'GET':
-            self._get_request()
-        elif http_request.method == 'POST':
-            self._post_request()
+        request_parser = self._get_request_parser_method(http_request.method)
+        request_parser()
+
+
+    def _get_request_parser_method(self, method):
+
+        if method == 'GET':
+            return self._get_request
+        elif method == 'POST':
+            return self._post_request
         else:
             raise MethodNotAllowed()
-        
 
-    def _get_request(self ):
+
+    def _get_request(self):
         """HTTP GET request parser
         """
 
@@ -48,8 +57,15 @@ class WPSRequest(object):
         """HTTP GET request parser
         """
             
+        # check if input file size was not exceeded
+        maxsize = configuration.get_config_value('server', 'maxrequestsize')
+        maxsize = configuration.get_size_mb(maxsize) * 1024 * 1024
+        if self.http_request.content_length > maxsize:
+            raise FileSizeExceeded('File size for input exceeded.'
+                                   ' Maximum request size allowed: %i megabytes' % maxsize / 1024 / 1024)
+
         try:
-            doc = lxml.etree.fromstring(self.http_request.get_data())
+                doc = lxml.etree.fromstring(self.http_request.get_data())
         except Exception as e:
             if PY2:
                 raise NoApplicableCode(e.message)
@@ -240,7 +256,7 @@ def get_input_from_xml(doc):
             value_el = complex_data_el[0]
             inpt = {}
             inpt['identifier'] = identifier_el.text
-            inpt['data'] = value_el
+            inpt['data'] = _get_dataelement_value(value_el)
             inpt['mime_type'] = complex_data_el.attrib.get('mimeType', '')
             inpt['encoding'] = complex_data_el.attrib.get('encoding', '')
             inpt['schema'] = complex_data_el.attrib.get('schema', '')
@@ -254,9 +270,7 @@ def get_input_from_xml(doc):
             inpt = {}
             inpt['identifier'] = identifier_el.text
             inpt[identifier_el.text] = reference_data_el.text
-            inpt['href'] = reference_data_el.attrib.get('href', '')
-            if not inpt['href']:
-                inpt['href'] = reference_data_el.attrib.get('{http://www.w3.org/1999/xlink}href', '')
+            inpt['href'] = reference_data_el.attrib.get('{http://www.w3.org/1999/xlink}href', '')
             inpt['mimeType'] = reference_data_el.attrib.get('mimeType', '')
             the_input[identifier_el.text] = inpt
             continue
@@ -321,7 +335,10 @@ def get_data_from_kvp(data):
             # Get the attributes of the data
             for attr in fields[1:]:
                 (attribute, attr_val) = attr.split('=')
-                io[attribute] = attr_val
+                if attribute == 'xlink:href':
+                    io['href'] = attr_val
+                else:
+                    io[attribute] = attr_val
 
             # Add the input/output with all its attributes and values to the dictionary
             the_data[identifier] = io
@@ -358,3 +375,16 @@ def _get_get_param(http_request, key, default=None, aslist=False):
                 value = value.split(",")
 
     return value
+
+def _get_dataelement_value(value_el):
+    """Return real value of XML Element (e.g. convert Element.FeatureCollection
+    to String
+    """
+
+    if isinstance(value_el, lxml.etree._Element):
+        if PY2:
+            return lxml.etree.tostring(value_el, encoding=unicode)
+        else:
+            return lxml.etree.tostring(value_el, encoding=str)
+    else:
+        return value_el

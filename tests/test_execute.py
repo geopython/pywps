@@ -1,4 +1,3 @@
-from io import StringIO
 import unittest
 import lxml.etree
 from pywps import Service, Process, LiteralOutput, LiteralInput, BoundingBoxOutput, BoundingBoxInput
@@ -9,6 +8,7 @@ from pywps._compat import text_type
 from tests.common import client_for, assert_response_success
 
 from pywps._compat import PY2
+from pywps._compat import StringIO
 if PY2:
     from owslib.ows import BoundingBox
 
@@ -173,7 +173,7 @@ class ExecuteXmlParserTest(unittest.TestCase):
                         WPS.ComplexData(the_data, mimeType='text/foobar')))))
         rv = get_input_from_xml(request_doc)
         assert rv['name']['mime_type'] == 'text/foobar'
-        rv_doc = lxml.etree.parse(StringIO(lxml.etree.tounicode(rv['name']['data']))).getroot()
+        rv_doc = lxml.etree.parse(StringIO(rv['name']['data'])).getroot()
         assert rv_doc.tag == 'TheData'
         assert rv_doc.text == "hello world"
 
