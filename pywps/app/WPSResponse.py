@@ -111,14 +111,14 @@ class WPSResponse(object):
             OWS.Title(self.process.title)
         )
         if self.process.abstract:
-            doc.append(OWS.Abstract(self.process.abstract))
+            process_doc.append(OWS.Abstract(self.process.abstract))
         # TODO: See Table 32 Metadata in OGC 06-121r3
-        for m in self.process.metadata:
-            doc.append(OWS.Metadata(m))
+        #for m in self.process.metadata:
+        #    process_doc.append(OWS.Metadata(m))
         if self.process.profile:
-            doc.append(OWS.Profile(self.process.profile))
+            process_doc.append(OWS.Profile(self.process.profile))
         if self.process.wsdl:
-            doc.append(OWS.WSDL(self.process.wsdl))
+            process_doc.append(OWS.WSDL(self.process.wsdl))
         process_doc.attrib['{http://www.opengis.net/wps/1.0.0}processVersion'] = self.process.version
 
         doc.append(process_doc)

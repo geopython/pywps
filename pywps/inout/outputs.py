@@ -4,6 +4,7 @@ from pywps import E, WPS, OWS, OGCTYPE, NAMESPACES
 from pywps.inout import basic
 from pywps.inout.storage import FileStorage
 from pywps.inout.formats import Format
+import lxml.etree as etree
 
 
 class LiteralOutput(basic.LiteralOutput):
@@ -170,6 +171,8 @@ class ComplexOutput(basic.ComplexOutput):
         :rtype: ElementMaker
         """
 
+        self.identifier
+
         node = None
         if self.as_reference:
             node = self._execute_xml_reference()
@@ -209,10 +212,15 @@ class ComplexOutput(basic.ComplexOutput):
         """
         doc = WPS.Data()
 
+
         if self.data is None:
             complex_doc = WPS.ComplexData()
         else:
-            complex_doc = WPS.ComplexData(self.data)
+            # TODO more robust output data handeling - can be raster, string,
+            # whetever and lxml does not have to read it
+            data_doc = etree.parse(self.file)
+            complex_doc = WPS.ComplexData()
+            complex_doc.append(data_doc.getroot())
 
         if self.data_format:
             if self.data_format.mime_type:
