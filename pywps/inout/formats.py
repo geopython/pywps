@@ -51,7 +51,7 @@ class Format(object):
         :rtype: String
         """
 
-        if self._mime_type in FORMATS:
+        if self._mime_type in FORMATS.keys():
             return FORMATS[self._mime_type][0]
         else:
             return self._mime_type

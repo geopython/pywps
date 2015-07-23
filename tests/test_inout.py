@@ -23,7 +23,7 @@ class IOHandlerTest(unittest.TestCase):
 
     def setUp(self):
         tmp_dir = tempfile.mkdtemp()
-        self.iohandler = IOHandler(tempdir=tmp_dir)
+        self.iohandler = IOHandler(workdir=tmp_dir)
         self._value = 'lalala'
 
     def tearDown(self):
@@ -31,7 +31,7 @@ class IOHandlerTest(unittest.TestCase):
 
     def test_basic_IOHandler(self):
         """Test basic IOHandler"""
-        self.assertTrue(os.path.isdir(self.iohandler.tempdir))
+        self.assertTrue(os.path.isdir(self.iohandler.workdir))
 
     def _test_outout(self, source_type):
         """Test all outputs"""
@@ -92,6 +92,17 @@ class IOHandlerTest(unittest.TestCase):
         self.iohandler.file = source
         self._test_outout(SOURCE_TYPE.FILE)
 
+    def test_workdir(self):
+        """Test workdir"""
+        workdir = tempfile.mkdtemp()
+        self.iohandler.workdir = workdir
+        self.assertTrue(os.path.isdir(self.iohandler.workdir))
+
+        # make another
+        workdir = tempfile.mkdtemp()
+        self.iohandler.workdir = workdir
+        self.assertTrue(os.path.isdir(self.iohandler.workdir))
+
     def test_memory(self):
         """Test data input IOHandler"""
         self.skipTest('Memory object not implemented')
@@ -103,7 +114,7 @@ class ComplexInputTest(unittest.TestCase):
     def setUp(self):
         tmp_dir = tempfile.mkdtemp()
         data_format = get_data_format()
-        self.complex_in = ComplexInput(identifier="complexinput", tempdir=tmp_dir,
+        self.complex_in = ComplexInput(identifier="complexinput", workdir=tmp_dir,
                                        data_format=data_format)
 
     def test_contruct(self):
@@ -119,7 +130,7 @@ class ComplexOutputTest(unittest.TestCase):
     def setUp(self):
         tmp_dir = tempfile.mkdtemp()
         data_format = get_data_format()
-        self.complex_out = ComplexOutput(identifier="complexinput", tempdir=tmp_dir,
+        self.complex_out = ComplexOutput(identifier="complexinput", workdir=tmp_dir,
                                          data_format=data_format)
 
     def test_contruct(self):

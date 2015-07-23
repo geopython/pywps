@@ -1,7 +1,7 @@
 import unittest
 import lxml.etree
 from pywps import Service, Process, LiteralOutput, LiteralInput, BoundingBoxOutput, BoundingBoxInput
-from pywps import get_input_from_xml, get_input_from_xml
+from pywps import get_inputs_from_xml, get_output_from_xml
 from pywps import E, WPS, OWS
 from pywps.app.basic import xpath_ns
 from pywps._compat import text_type
@@ -26,7 +26,7 @@ def create_ultimate_question():
 
 def create_greeter():
     def greeter(request, response):
-        name = request.inputs['name'].data
+        name = request.inputs['name'][0].data
         assert type(name) is text_type
         response.outputs['message'].data = "Hello %s!" % name
         return response
@@ -39,7 +39,7 @@ def create_greeter():
 
 def create_bbox_process():
     def bbox_process(request, response):
-        coords = request.inputs['mybbox'].data
+        coords = request.inputs['mybbox'][0].data
         assert type(coords) == type([])
         assert len(coords) == 4
         assert coords[0] == '15'
@@ -135,7 +135,7 @@ class ExecuteXmlParserTest(unittest.TestCase):
 
     def test_empty(self):
         request_doc = WPS.Execute(OWS.Identifier('foo'))
-        assert get_input_from_xml(request_doc) == {}
+        assert get_inputs_from_xml(request_doc) == {}
 
     def test_one_string(self):
         request_doc = WPS.Execute(
@@ -143,10 +143,16 @@ class ExecuteXmlParserTest(unittest.TestCase):
             WPS.DataInputs(
                 WPS.Input(
                     OWS.Identifier('name'),
-                    WPS.Data(WPS.LiteralData('foo')))))
-        rv = get_input_from_xml(request_doc)
+                    WPS.Data(WPS.LiteralData('foo'))),
+                WPS.Input(
+                    OWS.Identifier('name'),
+                    WPS.Data(WPS.LiteralData('bar')))
+                ))
+        rv = get_inputs_from_xml(request_doc)
         assert 'name' in rv
-        assert rv['name']['data'] == 'foo'
+        assert len(rv['name']) == 2
+        assert rv['name'][0]['data'] == 'foo'
+        assert rv['name'][1]['data'] == 'bar'
 
     def test_two_strings(self):
         request_doc = WPS.Execute(
@@ -158,9 +164,9 @@ class ExecuteXmlParserTest(unittest.TestCase):
                 WPS.Input(
                     OWS.Identifier('name2'),
                     WPS.Data(WPS.LiteralData('bar')))))
-        rv = get_input_from_xml(request_doc)
-        assert rv['name1']['data'] == 'foo'
-        assert rv['name2']['data'] == 'bar'
+        rv = get_inputs_from_xml(request_doc)
+        assert rv['name1'][0]['data'] == 'foo'
+        assert rv['name2'][0]['data'] == 'bar'
 
     def test_complex_input(self):
         the_data = E.TheData("hello world")
@@ -171,9 +177,9 @@ class ExecuteXmlParserTest(unittest.TestCase):
                     OWS.Identifier('name'),
                     WPS.Data(
                         WPS.ComplexData(the_data, mimeType='text/foobar')))))
-        rv = get_input_from_xml(request_doc)
-        assert rv['name']['mime_type'] == 'text/foobar'
-        rv_doc = lxml.etree.parse(StringIO(rv['name']['data'])).getroot()
+        rv = get_inputs_from_xml(request_doc)
+        assert rv['name'][0]['mime_type'] == 'text/foobar'
+        rv_doc = lxml.etree.parse(StringIO(rv['name'][0]['data'])).getroot()
         assert rv_doc.tag == 'TheData'
         assert rv_doc.text == "hello world"
 
@@ -189,12 +195,13 @@ class ExecuteXmlParserTest(unittest.TestCase):
                         WPS.BoundingBoxData(
                             OWS.LowerCorner('40 50'),
                             OWS.UpperCorner('60 70'))))))
-        rv = get_input_from_xml(request_doc)
-        assert isinstance(rv['bbox'], BoundingBox)
-        assert rv['bbox'].minx == '40'
-        assert rv['bbox'].miny == '50'
-        assert rv['bbox'].maxx == '60'
-        assert rv['bbox'].maxy == '70'
+        rv = get_inputs_from_xml(request_doc)
+        bbox = rv['bbox'][0]
+        assert isinstance(bbox, BoundingBox)
+        assert bbox.minx == '40'
+        assert bbox.miny == '50'
+        assert bbox.maxx == '60'
+        assert bbox.maxy == '70'
 
 def load_tests(loader=None, tests=None, pattern=None):
     if not loader:

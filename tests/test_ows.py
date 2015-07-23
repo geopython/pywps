@@ -23,7 +23,7 @@ wcsResource = "http://mapservices-gent.tudor.lu/gent_ows?&SERVICE=WCS&FORMAT=ima
 def create_feature():
     
     def feature(request, response):
-        input = request.inputs['input'].file
+        input = request.inputs['input'][0].file
         # What do we need to assert a Complex input?
         #assert type(input) is text_type
 
@@ -120,6 +120,8 @@ class ExecuteTests(unittest.TestCase):
             version='1.0.0'
         )
         resp = client.post_xml(doc=request_doc)
+        from lxml import etree
+
         assert_response_success(resp)
         # Other things to assert:
         # . the inclusion of output

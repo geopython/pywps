@@ -10,6 +10,9 @@ from pywps.exceptions import MissingParameterValue, NoApplicableCode, InvalidPar
     StorageNotSupported
 from pywps.inout.inputs import ComplexInput, LiteralInput, BoundingBoxInput
 
+from collections import deque
+import shutil
+
 
 class Service(object):
     """ The top-level object that represents a WPS service. It's a WSGI
@@ -245,12 +248,34 @@ class Service(object):
         return xml_response(doc)
 
     def execute(self, identifier, wps_request):
-        # check if process is valid
+        """Parse and perform Execute WPS request call
+
+        :param identifier: process identifier string
+        :param wps_request: pywps.WPSRequest structure with parsed inputs, still in memory
+        """
+
         try:
             process = self.processes[identifier]
+
+            workdir = config.get_config_value('server', 'workdir')
+            tempdir = tempfile.mkdtemp(prefix='pypws_process_', dir=workdir)
+            process.set_workdir(tempdir)
         except KeyError:
             raise BadRequest("Unknown process %r" % identifier)
-        
+
+        try:
+            response = None
+            response = self._parse_and_execute(process, wps_request)
+            shutil.rmtree(process.workdir)
+            return response
+        except Exception as e:
+            shutil.rmtree(process.workdir)
+            raise e
+
+    def _parse_and_execute(self, process, wps_request):
+        """Parse and execute request
+        """
+
         # check if datainputs is required and has been passed
         if process.inputs:
             if wps_request.inputs is None:
@@ -260,17 +285,23 @@ class Service(object):
         data_inputs = {}
         for inpt in process.inputs:
             if inpt.identifier not in wps_request.inputs:
-                raise MissingParameterValue('', inpt.identifier)
+                if inpt.min_occurs < 1:
+                    raise MissingParameterValue('', inpt.identifier)
+                else:
+                    data_inputs[inpt.identifier] = inpt.clone()
 
             # Replace the dicts with the dict of Literal/Complex inputs
             # set the input to the type defined in the process
             if isinstance(inpt, ComplexInput):
-                data_inputs[inpt.identifier] = self.parse_complex_inputs(wps_request.inputs[inpt.identifier])
+                data_inputs[inpt.identifier] = self.create_complex_inputs(inpt,
+                    wps_request.inputs[inpt.identifier])
             elif isinstance(inpt, LiteralInput):
-                data_inputs[inpt.identifier] = self.parse_literal_inputs(wps_request.inputs[inpt.identifier])
+                data_inputs[inpt.identifier] = self.create_literal_inputs(inpt,
+                    wps_request.inputs[inpt.identifier])
             elif isinstance(inpt, BoundingBoxInput):
-                data_inputs[inpt.identifier] = self.parse_bbox_inputs(inpt,
-                                                                      wps_request.inputs[inpt.identifier])
+                data_inputs[inpt.identifier] = self.create_bbox_inputs(inpt,
+                    wps_request.inputs[inpt.identifier])
+
         wps_request.inputs = data_inputs
         
         # set as_reference to True for all the outputs specified as reference
@@ -309,64 +340,37 @@ class Service(object):
             raise InvalidParameterValue('')
 
         return wps_response
-    
-    
-    def parse_complex_inputs(self, inputs):
 
-        data_input = ComplexInput(inputs.get('identifier'), '', None)
-        data_input.data_format = Format(
-            inputs.get('mime_type'),
-            inputs.get('encoding'),
-            inputs.get('schema')
-        )
-        data_input.method = inputs.get('method', 'GET')
-    
-        # get the referenced input otherwise get the value of the field
-        href = inputs.get('href', None)
+    def _get_complex_input_handler(self, href):
+        """Return function for parsing and storing complexdata
+        :param href: href object yes or not
+        """
 
-        if href:
-            tmp_dir = config.get_config_value('server', 'tempPath')
+        def href_handler(complexinput, datain):
+            """<wps:Reference /> handler"""
+            tmp_dir = config.get_config_value('server', 'workdir')
     
-            # save the reference input in tempPath
-            tmp_file = tempfile.mkstemp(dir=tmp_dir)[1]
+            # save the reference input in workdir
+            tmp_file = tempfile.mkstemp(dir=complexinput.workdir)[1]
     
             try:
-                if PY2:
-                    import urllib2
-                    reference_file = urllib2.urlopen(href)
-                    reference_file_data = reference_file.read()
-                else:
-                    from urllib.request import urlopen
-                    reference_file = urlopen(href)
-                    reference_file_data = reference_file.read().decode('utf-8')
-    
+                (reference_file, reference_file_data) = _openurl(href)
                 data_size = reference_file.headers.get('Content-Length', 0)
             except Exception as e:
                 raise NoApplicableCode('File reference error: %s' % e)
-    
+
             # if the response did not return a 'Content-Length' header then calculate the size
             if data_size == 0:
+                data_size = _get_datasize(reference_file_data)
 
-                if PY2:
-                    from StringIO import StringIO
-
-                    tmp_sio = StringIO()
-                    data_size = tmp_sio.len
-                else:
-                    from io import StringIO
-
-                    tmp_sio = StringIO()
-                    data_size = tmp_sio.write(reference_file_data)
-                tmp_sio.close()
-    
             # check if input file size was not exceeded
-            data_input.calculate_max_input_size()
-            byte_size = data_input.max_size * 1024 * 1024
+            complexinput.calculate_max_input_size()
+            byte_size = complexinput.max_size * 1024 * 1024
             if int(data_size) > int(byte_size):
                 raise FileSizeExceeded('File size for input exceeded.'
-                                       ' Maximum allowed: %i megabytes' %
-                                       data_input.max_size, inputs.get('identifier'))
-    
+                                       ' Maximum allowed: %i megabytes' %\
+                       complexinput.max_size, complexinput.get('identifier'))
+
             try:
                 with open(tmp_file, 'w') as f:
                     f.write(reference_file_data)
@@ -374,41 +378,95 @@ class Service(object):
             except Exception as e:
                 raise NoApplicableCode(e)
     
-            data_input.file = tmp_file
-            data_input.url = href
-            data_input.as_reference = True
+            complexinput.file = tmp_file
+            complexinput.url = href
+            complexinput.as_reference = True
+
+        def data_handler(complexinput, datain):
+            """<wps:Data> ... </wps:Data> handler"""
+
+            complexinput.data = datain.get('data')
+
+
+        if href:
+            return href_handler
         else:
-            data = inputs.get('data')
-            data_input.data = data
-        return data_input
-    
-    
-    def parse_literal_inputs(self, inputs):
-        """ Takes the http_request and parses the input to objects
-        :return:
+            return data_handler
+
+
+    def create_complex_inputs(self, source, inputs):
+        """Create new ComplexInput as clone of original ComplexInput
+        because of inputs can be more then one, take it just as Prototype
+        :return collections.deque:
         """
 
-        # set the input to the type defined in the process
-        data_input = LiteralInput(inputs.get('identifier'), '')
-        data_input.uom = inputs.get('uom')
-        data_type = inputs.get('datatype')
-        if data_type:
-            data_input.data_type = data_type
-    
-        # get the value of the field
-        data_input.data = inputs.get('data')
-    
-        return data_input
+        outinputs = deque(maxlen=source.max_occurs)
+
+        for inpt in inputs:
+            data_input = source.clone()
+            data_input.data_format = Format(
+                inpt.get('mime_type'),
+                inpt.get('encoding'),
+                inpt.get('schema')
+            )
+            data_input.method = inpt.get('method', 'GET')
+
+            # get the referenced input otherwise get the value of the field
+            href = inpt.get('href', None)
+
+            complex_data_handler = self._get_complex_input_handler(href)
+            complex_data_handler(data_input, inpt)
+
+            outinputs.append(data_input)
+
+        if len(outinputs) < source.min_occurs:
+            raise MissingParameterValue(locator = source.identifier)
+        return outinputs
 
 
-    def parse_bbox_inputs(self, inpt, inputs):
+    def create_literal_inputs(self, source, inputs):
         """ Takes the http_request and parses the input to objects
-        :return:
+        :return collections.deque:
         """
 
-        inpt.data = [inputs.minx, inputs.miny, inputs.maxx, inputs.maxy]
+        outinputs = deque(maxlen=source.max_occurs)
 
-        return inpt
+        for inpt in inputs:
+            newinpt = source.clone()
+            # set the input to the type defined in the process
+            newinpt.uom = inpt.get('uom')
+            data_type = inpt.get('datatype')
+            if data_type:
+                newinpt.data_type = data_type
+        
+            # get the value of the field
+            newinpt.data = inpt.get('data')
+
+            outinputs.append(newinpt)
+
+        if len(outinputs) < source.min_occurs:
+            raise MissingParameterValue(locator = source.identifier)
+    
+        return outinputs
+
+
+    def create_bbox_inputs(self, source, inputs):
+        """ Takes the http_request and parses the input to objects
+        :return collections.deque:
+        """
+
+        outinputs = deque(maxlen=source.max_occurs)
+
+        for datainput in inputs:
+            newinpt = source.clone()
+            newinpt.data = [datainput.minx, datainput.miny,
+                            datainput.maxx, datainput.maxy]
+            outinputs.append(newinpt)
+
+        if len(outinputs) < source.min_occurs:
+            raise MissingParameterValue(locator = source.identifier)
+
+        return outinputs
 
 
     @Request.application
@@ -434,3 +492,37 @@ class Service(object):
             if not isinstance(e, NoApplicableCode):
                 e = NoApplicableCode(e.description, code=e.code)
             return e
+
+
+def _openurl(href):
+    """use urllib to open given href
+    """
+    if PY2:
+        import urllib2
+        reference_file = urllib2.urlopen(href)
+        reference_file_data = reference_file.read()
+    else:
+        from urllib.request import urlopen
+        reference_file = urlopen(href)
+        reference_file_data = reference_file.read().decode('utf-8')
+
+    return (reference_file, reference_file_data)
+
+def _get_datasize(reference_file_data):
+
+    tmp_sio = None
+    data_size = 0
+
+    if PY2:
+        from StringIO import StringIO
+
+        tmp_sio = StringIO(reference_file_data)
+        data_size = tmp_sio.len
+    else:
+        from io import StringIO
+
+        tmp_sio = StringIO()
+        data_size = tmp_sio.write(reference_file_data)
+    tmp_sio.close()
+
+    return data_size

@@ -117,7 +117,7 @@ def load_configuration(cfgfiles=None):
     config.set('server', 'maxoperations', '30')
     config.set('server', 'maxsingleinputsize', '1mb')
     config.set('server', 'maxrequestsize', '3mb')
-    config.set('server', 'tempPath', tempfile.gettempdir())
+    config.set('server', 'workdir', tempfile.gettempdir())
     config.set('server', 'processesPath', '')
     config.set('server', 'outputUrl', '/')
     config.set('server', 'outputPath', tempfile.gettempdir())

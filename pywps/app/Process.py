@@ -39,6 +39,7 @@ class Process(object):
         self.uuid = None
         self.status_location = ''
         self.status_url = ''
+        self.workdir = None
 
         if store_supported:
             self.store_supported = 'true'
@@ -176,3 +177,16 @@ class Process(object):
             wps_response.update_status('Process error: %s.%s Line %i %s' % (fname, method_name, exc_tb.tb_lineno, e), -1)
 
         return wps_response
+
+    def set_workdir(self, workdir):
+        """Set working dir for all inputs and outputs
+
+        this is the directory, where all the data are being stored to
+        """
+
+        self.workdir = workdir
+        for inpt in self.inputs:
+            inpt.workdir = workdir
+
+        for outpt in self.outputs:
+            outpt.workdir = workdir

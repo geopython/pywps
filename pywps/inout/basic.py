@@ -1,8 +1,9 @@
 from abc import ABCMeta, abstractmethod
 from pywps._compat import text_type, StringIO
-import tempfile
+import tempfile, os
 from pywps.inout.literaltypes import LITERAL_DATA_TYPES
 from pywps import OWS, OGCUNIT, NAMESPACES
+from pywps import configuration
 
 
 class SOURCE_TYPE:
@@ -26,13 +27,13 @@ class IOHandler(object):
     """Basic IO class. Provides functions, to accept input data in file,
     memory object and stream object and give them out in all three types
 
-    >>> # setting up tempory directory for testing environment
+    >>> # setting up 
     >>> import os
     >>> from io import RawIOBase
     >>> from io import FileIO
     >>> import types
     >>>
-    >>> ioh_file = IOHandler(tempdir=tmp)
+    >>> ioh_file = IOHandler(workdir=tmp)
     >>> assert isinstance(ioh_file, IOHandler)
     >>>
     >>> # Create test file input
@@ -51,8 +52,8 @@ class IOHandler(object):
     >>> # skipped assert isinstance(ioh_file.memory_object, POSH)
     >>>
     >>> # testing stream object on input
-    >>> ioh_stream = IOHandler(tempdir=tmp)
-    >>> assert ioh_stream.tempdir == tmp
+    >>> ioh_stream = IOHandler(workdir=tmp)
+    >>> assert ioh_stream.workdir == tmp
     >>> ioh_stream.stream = FileIO(fileobj.name,'r')
     >>> assert ioh_stream.source_type == SOURCE_TYPE.STREAM
     >>> file = ioh_stream.file
@@ -63,7 +64,7 @@ class IOHandler(object):
     >>> # skipped assert isinstance(ioh_stream.memory_object, POSH)
     >>>
     >>> # testing in memory object object on input
-    >>> # skipped ioh_mo = IOHandler(tempdir=tmp)
+    >>> # skipped ioh_mo = IOHandler(workdir=tmp)
     >>> # skipped ioh_mo.memory_object = POSH
     >>> # skipped assert ioh_mo.source_type == SOURCE_TYPE.MEMORY
     >>> # skipped file = ioh_mo.file
@@ -75,16 +76,25 @@ class IOHandler(object):
     >>> # skipped assert isinstance(ioh_mo.memory_object, POSH)
     """
 
-    def __init__(self, tempdir=None):
+    def __init__(self, workdir=None):
         self.source_type = None
         self.source = None
         self._tempfile = None
-        self.tempdir = tempdir
+        self.workdir = workdir
 
     def set_file(self, filename):
         """Set source as file name"""
         self.source_type = SOURCE_TYPE.FILE
         self.source = filename
+
+    def set_workdir(self, workdirpath):
+        """Set working temporary directory for files to be stored in"""
+
+        if workdirpath is not None and not os.path.exists(workdirpath):
+            os.makedirs(workdirpath)
+
+        self._workdir = workdirpath
+
 
     def set_memory_object(self, memory_object):
         """Set source as in memory object"""
@@ -111,7 +121,7 @@ class IOHandler(object):
             if self._tempfile:
                 return self._tempfile
             else:
-                (opening, stream_file_name) = tempfile.mkstemp(dir=self.tempdir)
+                (opening, stream_file_name) = tempfile.mkstemp(dir=self.workdir)
                 stream_file = open(stream_file_name, 'w')
 
                 if self.source_type == SOURCE_TYPE.STREAM:
@@ -122,6 +132,11 @@ class IOHandler(object):
                 stream_file.close()
                 self._tempfile = str(stream_file_name)
                 return self._tempfile
+
+    def get_workdir(self):
+        """Return working directory name
+        """
+        return self._workdir
 
     def get_memory_object(self):
         """Get source as memory object"""
@@ -154,6 +169,7 @@ class IOHandler(object):
     memory_object = property(fget=get_memory_object, fset=set_memory_object)
     stream = property(fget=get_stream, fset=set_stream)
     data = property(fget=get_data, fset=set_data)
+    workdir = property(fget=get_workdir, fset=set_workdir)
 
 
 class SimpleHandler(IOHandler):
@@ -178,8 +194,8 @@ class SimpleHandler(IOHandler):
     False
     """
 
-    def __init__(self, tempdir=None, data_type=None):
-        IOHandler.__init__(self, tempdir)
+    def __init__(self, workdir=None, data_type=None):
+        IOHandler.__init__(self, workdir)
         self.data_type = data_type
         self._validator = None
 
@@ -284,10 +300,10 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
     """
 
     def __init__(self, identifier, title=None, abstract=None,
-                 data_type=None, tempdir=None, allowed_values=None, uoms=None):
+                 data_type=None, workdir=None, allowed_values=None, uoms=None):
         BasicIO.__init__(self, identifier, title, abstract)
         BasicLiteral.__init__(self, data_type, uoms)
-        SimpleHandler.__init__(self, tempdir, data_type)
+        SimpleHandler.__init__(self, workdir, data_type)
 
         self.allowed_values = allowed_values
         self.any_value = self.allowed_values is None
@@ -298,10 +314,10 @@ class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
     """
 
     def __init__(self, identifier, title=None, abstract=None,
-                 data_type=None, tempdir=None, uoms=None):
+                 data_type=None, workdir=None, uoms=None):
         BasicIO.__init__(self, identifier, title, abstract)
         BasicLiteral.__init__(self, data_type, uoms)
-        SimpleHandler.__init__(self, tempdir=None, data_type=data_type)
+        SimpleHandler.__init__(self, workdir=None, data_type=data_type)
 
         self._storage = None
 
@@ -317,19 +333,21 @@ class BBoxInput(BasicIO, BasicBoundingBox, IOHandler):
     """Basic Bounding box input abstract class
     """
 
-    def __init__(self, identifier, title=None, abstract=None, crss=None, dimensions=None, tempdir=None):
+    def __init__(self, identifier, title=None, abstract=None, crss=None,
+            dimensions=None, workdir=None):
         BasicIO.__init__(self, identifier, title, abstract)
         BasicBoundingBox.__init__(self, crss, dimensions)
-        IOHandler.__init__(self, tempdir=None)
+        IOHandler.__init__(self, workdir=None)
 
 class BBoxOutput(BasicIO, BasicBoundingBox, SimpleHandler):
     """Basic BoundingBox output class
     """
 
-    def __init__(self, identifier, title=None, abstract=None, crss=None, dimensions=None, tempdir=None):
+    def __init__(self, identifier, title=None, abstract=None, crss=None,
+            dimensions=None, workdir=None):
         BasicIO.__init__(self, identifier, title, abstract)
         BasicBoundingBox.__init__(self, crss, dimensions)
-        SimpleHandler.__init__(self, tempdir=None)
+        SimpleHandler.__init__(self, workdir=None)
         self._storage = None
 
     @property
@@ -351,10 +369,10 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
     """
 
     def __init__(self, identifier, title=None, abstract=None,
-                 tempdir=None, data_format=None):
+                 workdir=None, data_format=None):
         BasicIO.__init__(self, identifier, title, abstract)
         BasicComplex.__init__(self, data_format)
-        IOHandler.__init__(self, tempdir)
+        IOHandler.__init__(self, workdir)
 
 
 
@@ -387,10 +405,10 @@ class ComplexOutput(BasicIO, BasicComplex, IOHandler):
     """
 
     def __init__(self, identifier, title=None, abstract=None,
-                 tempdir=None, data_format=None):
+                 workdir=None, data_format=None):
         BasicIO.__init__(self, identifier, title, abstract)
         BasicComplex.__init__(self, data_format)
-        IOHandler.__init__(self, tempdir)
+        IOHandler.__init__(self, workdir)
 
         self._storage = None
 

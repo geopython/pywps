@@ -56,7 +56,6 @@ class WPSRequest(object):
     def _post_request(self):
         """HTTP GET request parser
         """
-            
         # check if input file size was not exceeded
         maxsize = configuration.get_config_value('server', 'maxrequestsize')
         maxsize = configuration.get_size_mb(maxsize) * 1024 * 1024
@@ -106,7 +105,7 @@ class WPSRequest(object):
             wpsrequest.store_execute = _get_get_param(http_request, 'storeExecuteResponse', 'false')
             wpsrequest.status = _get_get_param(http_request, 'status', 'false')
             wpsrequest.lineage = _get_get_param(http_request, 'lineage', 'false')
-            wpsrequest.inputs = get_data_from_kvp(_get_get_param(http_request, 'DataInputs'))
+            wpsrequest.inputs = get_data_from_kvp(_get_get_param(http_request, 'DataInputs'), 'DataInputs')
             wpsrequest.outputs = {}
 
             # take responseDocument preferably
@@ -175,7 +174,7 @@ class WPSRequest(object):
             wpsrequest.lineage = 'false'
             wpsrequest.store_execute = 'false'
             wpsrequest.status = 'false'
-            wpsrequest.inputs = get_input_from_xml(doc)
+            wpsrequest.inputs = get_inputs_from_xml(doc)
             wpsrequest.outputs = get_output_from_xml(doc)
             wpsrequest.raw = False
             if xpath_ns(doc, '/wps:Execute/wps:ResponseForm/wps:RawDataOutput'):
@@ -234,10 +233,14 @@ class WPSRequest(object):
         else:
             self.version = version
 
-def get_input_from_xml(doc):
-    the_input = {}
+def get_inputs_from_xml(doc):
+    the_inputs = {}
     for input_el in xpath_ns(doc, '/wps:Execute/wps:DataInputs/wps:Input'):
         [identifier_el] = xpath_ns(input_el, './ows:Identifier')
+        identifier = identifier_el.text
+
+        if identifier not in the_inputs:
+            the_inputs[identifier] = []
 
         literal_data = xpath_ns(input_el, './wps:Data/wps:LiteralData')
         if literal_data:
@@ -247,7 +250,7 @@ def get_input_from_xml(doc):
             inpt['data'] = text_type(value_el.text)
             inpt['uom'] = value_el.attrib.get('uom', '')
             inpt['datatype'] = value_el.attrib.get('datatype', '')
-            the_input[identifier_el.text] = inpt
+            the_inputs[identifier].append(inpt)
             continue
 
         complex_data = xpath_ns(input_el, './wps:Data/wps:ComplexData')
@@ -261,7 +264,7 @@ def get_input_from_xml(doc):
             inpt['encoding'] = complex_data_el.attrib.get('encoding', '')
             inpt['schema'] = complex_data_el.attrib.get('schema', '')
             inpt['method'] = complex_data_el.attrib.get('method', 'GET')
-            the_input[identifier_el.text] = inpt
+            the_inputs[identifier].append(inpt)
             continue
 
         reference_data = xpath_ns(input_el, './wps:Reference')
@@ -272,21 +275,20 @@ def get_input_from_xml(doc):
             inpt[identifier_el.text] = reference_data_el.text
             inpt['href'] = reference_data_el.attrib.get('{http://www.w3.org/1999/xlink}href', '')
             inpt['mimeType'] = reference_data_el.attrib.get('mimeType', '')
-            the_input[identifier_el.text] = inpt
+            the_inputs[identifier].append(inpt)
             continue
 
         # OWSlib is not python 3 compatible yet
         if PY2:
             from owslib.ows import BoundingBox
+            bbox_datas = xpath_ns(input_el, './wps:Data/wps:BoundingBoxData')
+            if bbox_datas:
+                for bbox_data in bbox_datas:
+                    bbox_data_el = bbox_data
+                    bbox = BoundingBox(bbox_data_el)
+                    the_inputs[identifier].append(bbox)
 
-            bbox_data = xpath_ns(input_el, './wps:Data/wps:BoundingBoxData')
-            if bbox_data:
-                bbox_data_el = bbox_data[0]
-                bbox = BoundingBox(bbox_data_el)
-                the_input.update({identifier_el.text: bbox})
-                continue
-
-    return the_input
+    return the_inputs
 
 def get_output_from_xml(doc):
     the_output = {}
@@ -312,9 +314,10 @@ def get_output_from_xml(doc):
 
     return the_output
 
-def get_data_from_kvp(data):
+def get_data_from_kvp(data, part=None):
     """Get execute DataInputs and ResponseDocument from URL (key-value-pairs) encoding
     :param data: key:value pair list of the datainputs and responseDocument parameter
+    :param part: DataInputs or similar part of input url
     """
 
     the_data = {}
@@ -341,8 +344,13 @@ def get_data_from_kvp(data):
                     io[attribute] = attr_val
 
             # Add the input/output with all its attributes and values to the dictionary
-            the_data[identifier] = io
-        except:
+            if part == 'DataInputs':
+                if identifier not in the_data:
+                    the_data[identifier] = []
+                the_data[identifier].append(io)
+            else:
+                the_data[identifier] = io
+        except Exception as e:
             the_data[d] = {'identifier': d, 'data': ''}
 
     return the_data

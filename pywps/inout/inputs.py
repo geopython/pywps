@@ -1,5 +1,6 @@
 from pywps import configuration, E, OWS, WPS, OGCTYPE, NAMESPACES
 from pywps.inout import basic
+from copy import deepcopy
 
 
 class ComplexInput(basic.ComplexInput):
@@ -10,13 +11,15 @@ class ComplexInput(basic.ComplexInput):
     :param data_format: Format of the passed input. Should be :class:`~Format` object
     """
 
-    def __init__(self, identifier, title, allowed_formats=None, data_format=None, abstract='', metadata=[], min_occurs='1',
-                 max_occurs='1', as_reference=False):
-        basic.ComplexInput.__init__(self, identifier=identifier, title=title, abstract=abstract, data_format=data_format)
+    def __init__(self, identifier, title, allowed_formats=None,
+                 data_format=None, abstract='', metadata=[], min_occurs=1,
+                 max_occurs=1, as_reference=False):
+        basic.ComplexInput.__init__(self, identifier=identifier, title=title, abstract=abstract,
+                                    data_format=data_format)
         self.allowed_formats = allowed_formats
         self.metadata = metadata
-        self.min_occurs = min_occurs
-        self.max_occurs = max_occurs
+        self.min_occurs = int(min_occurs)
+        self.max_occurs = int(max_occurs)
         self.as_reference = as_reference
         self.url = ''
         self.method = ''
@@ -40,8 +43,8 @@ class ComplexInput(basic.ComplexInput):
             OWS.Title(self.title)
         )
 
-        doc.attrib['minOccurs'] = self.min_occurs
-        doc.attrib['maxOccurs'] = self.max_occurs
+        doc.attrib['minOccurs'] = str(self.min_occurs)
+        doc.attrib['maxOccurs'] = str(self.max_occurs)
 
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
@@ -112,6 +115,12 @@ class ComplexInput(basic.ComplexInput):
                 complex_doc.attrib['schema'] = self.data_format.schema
         doc.append(complex_doc)
         return doc
+    
+    
+    def clone(self):
+        """Create copy of yourself
+        """
+        return deepcopy(self)
 
 
 class LiteralInput(basic.LiteralInput):
@@ -122,13 +131,13 @@ class LiteralInput(basic.LiteralInput):
 
     def __init__(self, identifier, title, data_type='string', abstract='',
                  metadata=[], uoms=[], default='',
-                 min_occurs='1', max_occurs='1', as_reference=False):
+                 min_occurs=1, max_occurs=1, as_reference=False):
         basic.LiteralInput.__init__(self, identifier=identifier, title=title,
                                     abstract=abstract, data_type=data_type, uoms=uoms)
         self.metadata = metadata
         self.default = default
-        self.min_occurs = min_occurs
-        self.max_occurs = max_occurs
+        self.min_occurs = int(min_occurs)
+        self.max_occurs = int(max_occurs)
         self.as_reference = as_reference
 
     def describe_xml(self):
@@ -137,8 +146,8 @@ class LiteralInput(basic.LiteralInput):
             OWS.Title(self.title)
         )
 
-        doc.attrib['minOccurs'] = self.min_occurs
-        doc.attrib['maxOccurs'] = self.max_occurs
+        doc.attrib['minOccurs'] = str(self.min_occurs)
+        doc.attrib['maxOccurs'] = str(self.max_occurs)
 
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
@@ -219,6 +228,12 @@ class LiteralInput(basic.LiteralInput):
         return doc
 
 
+    def clone(self):
+        """Create copy of yourself
+        """
+        return deepcopy(self)
+
+
 class BoundingBoxInput(basic.BBoxInput):
     """
     :param identifier: The name of this input.
@@ -226,15 +241,15 @@ class BoundingBoxInput(basic.BBoxInput):
     """
 
     def __init__(self, identifier, title, crss, abstract='',
-                 dimensions=2, metadata=[], min_occurs='1',
-                 max_occurs='1', as_reference=False):
+                 dimensions=2, metadata=[], min_occurs=1,
+                 max_occurs=1, as_reference=False):
         basic.BBoxInput.__init__(self, identifier, title=title,
                                  abstract=abstract, crss=crss,
                                  dimensions=dimensions)
 
         self.metadata = metadata
-        self.min_occurs = min_occurs
-        self.max_occurs = max_occurs
+        self.min_occurs = int(min_occurs)
+        self.max_occurs = int(max_occurs)
         self.as_reference = as_reference
 
     def describe_xml(self):
@@ -243,8 +258,8 @@ class BoundingBoxInput(basic.BBoxInput):
             OWS.Title(self.title)
         )
 
-        doc.attrib['minOccurs'] = self.min_occurs
-        doc.attrib['maxOccurs'] = self.max_occurs
+        doc.attrib['minOccurs'] = str(self.min_occurs)
+        doc.attrib['maxOccurs'] = str(self.max_occurs)
 
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
@@ -287,3 +302,8 @@ class BoundingBoxInput(basic.BBoxInput):
         doc.append(bbox_data_doc)
 
         return doc
+
+    def clone(self):
+        """Create copy of yourself
+        """
+        return deepcopy(self)

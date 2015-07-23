@@ -150,7 +150,7 @@ class WPSResponse(object):
 
         # DataInputs and DataOutputs definition XML if lineage=true
         if self.wps_request.lineage == 'true':
-            data_inputs = [self.wps_request.inputs[i].execute_xml() for i in self.wps_request.inputs]
+            data_inputs = [self.wps_request.inputs[i][0].execute_xml() for i in self.wps_request.inputs]
             doc.append(WPS.DataInputs(*data_inputs))
 
             output_definitions = [self.outputs[o].execute_xml_lineage() for o in self.outputs]
