@@ -1,6 +1,7 @@
 import lxml
 import lxml.etree
 from werkzeug.exceptions import MethodNotAllowed
+import base64
 from pywps import WPS
 from pywps._compat import text_type, PY2
 from pywps.app.basic import xpath_ns
@@ -256,11 +257,14 @@ def get_inputs_from_xml(doc):
         complex_data = xpath_ns(input_el, './wps:Data/wps:ComplexData')
         if complex_data:
             complex_data_el = complex_data[0]
-            value_el = complex_data_el[0]
             inpt = {}
             inpt['identifier'] = identifier_el.text
-            inpt['data'] = _get_dataelement_value(value_el)
-            inpt['mime_type'] = complex_data_el.attrib.get('mimeType', '')
+            if len(complex_data_el.getchildren()) > 0:
+                value_el = complex_data_el[0]
+                inpt['data'] = _get_dataelement_value(value_el)
+            else:
+                inpt['data'] = _get_rawvalue_value(complex_data_el.text)
+            inpt['mimeType'] = complex_data_el.attrib.get('mimeType', '')
             inpt['encoding'] = complex_data_el.attrib.get('encoding', '')
             inpt['schema'] = complex_data_el.attrib.get('schema', '')
             inpt['method'] = complex_data_el.attrib.get('method', 'GET')
@@ -396,3 +400,11 @@ def _get_dataelement_value(value_el):
             return lxml.etree.tostring(value_el, encoding=str)
     else:
         return value_el
+
+def _get_rawvalue_value(data):
+    """Return real value of CDATA section"""
+
+    try:
+        return base64.b64decode(data)
+    except:
+        return data

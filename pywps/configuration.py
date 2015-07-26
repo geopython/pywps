@@ -80,7 +80,7 @@ def load_configuration(cfgfiles=None):
     if PY2:
         config = ConfigParser.SafeConfigParser()
     else:
-        config = configparser.SafeConfigParser()
+        config = configparser.ConfigParser()
 
     # Set default values
     config.add_section('wps')

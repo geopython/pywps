@@ -8,7 +8,7 @@ import tempfile
 import unittest
 import lxml.etree
 import sys
-from pywps import Service, Process, ComplexInput, ComplexOutput, Format, FORMATS
+from pywps import Service, Process, ComplexInput, ComplexOutput, Format, FORMATS, get_format
 from pywps.exceptions import NoApplicableCode
 from pywps import WPS, OWS
 from pywps.wpsserver import temp_dir
@@ -55,15 +55,15 @@ def create_feature():
         outLayer.CreateFeature(outFeature)
         outFeature.Destroy()
 
-        response.outputs['output'].output_format = Format(FORMATS['GML'])
+        response.outputs['output'].output_format = Format(**FORMATS.GML._asdict())
         response.outputs['output'].file = outPath
         return response
 
     return Process(handler=feature,
                    identifier='feature',
                    title='Process Feature',
-                   inputs=[ComplexInput('input', 'Input', [Format('GML')])],
-                   outputs=[ComplexOutput('output', 'Output', [Format('GML')])])
+                   inputs=[ComplexInput('input', 'Input', supported_formats=[get_format('GML')])],
+                   outputs=[ComplexOutput('output', 'Output', supported_formats=[get_format('GML')])])
     
     
 def create_sum_one():
@@ -113,7 +113,9 @@ class ExecuteTests(unittest.TestCase):
                     OWS.Identifier('input'),
                     WPS.Reference(
                         {'{http://www.w3.org/1999/xlink}href': wfsResource},
-                        mimeType='text/xml'))),
+                        mimeType=FORMATS.GML.mime_type,
+                        encoding='',
+                        schema=''))),
             WPS.ProcessOutputs(
                 WPS.Output(
                     OWS.Identifier('output'))),

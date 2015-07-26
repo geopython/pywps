@@ -178,7 +178,7 @@ class ExecuteXmlParserTest(unittest.TestCase):
                     WPS.Data(
                         WPS.ComplexData(the_data, mimeType='text/foobar')))))
         rv = get_inputs_from_xml(request_doc)
-        assert rv['name'][0]['mime_type'] == 'text/foobar'
+        assert rv['name'][0]['mimeType'] == 'text/foobar'
         rv_doc = lxml.etree.parse(StringIO(rv['name'][0]['data'])).getroot()
         assert rv_doc.tag == 'TheData'
         assert rv_doc.text == "hello world"

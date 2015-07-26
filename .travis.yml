@@ -13,4 +13,4 @@ install:
   - "pip install ."
   - "pip install GDAL==1.10.0 --global-option=build_ext --global-option=\"-I/usr/include/gdal\""
 
-script: "python tests/__init__.py"
+script: "python -m unittest tests"

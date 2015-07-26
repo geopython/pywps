@@ -25,60 +25,30 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-from pywps.validator import ValidatorAbstract
 from pywps.validator import MODE
+from collections import namedtuple
 
+_ALLOWEDVALUETYPE = namedtuple('ALLOWEDVALUETYPE', 'VALUE, RANGE')
+_RANGELCLOSURETYPE = namedtuple('RANGECLOSURETYPE', 'OPEN, CLOSED,'
+                                'OPENCLOSED, CLOSEDOPEN')
 
-class AllowedValueType:
-    """Allowed values type
-    """
-    VALUE = 0
-    RANGE = 1
-
-
-class RangeClosureType:
-    """Range closure type
-    """
-    OPEN = 0
-    CLOSED = 1
-    OPENCLOSED = 2
-    CLOSEDOPEN = 3
-
+ALLOWEDVALUETYPE = _ALLOWEDVALUETYPE(0, 1)
+RANGECLOSURETYPE = _RANGELCLOSURETYPE(0, 1, 2, 3)
 
 class AllowedValue:
     """Allowed value parameters
     """
 
-    allowed_type = None
-    value = None
-    minval = None
-    maxval = None
-    spacing = None
-    range_closure = RangeClosureType.OPEN
+    def __init__(self, allowed_type=None, value=None, minval=None,
+                 maxval=None, spacing=None,
+                 range_closure=RANGECLOSURETYPE.OPEN):
 
-
-class BasicValidator(ValidatorAbstract):
-    """AllowedValue validator
-
-    >>> from pywps.validator import MODE
-    >>> class FakeInput:
-    ...     source_type = 'data'
-    ...     data = 1
-    >>> fake_input = FakeInput()
-    >>> validator = BasicValidator()
-    >>> validator.validate(fake_input, MODE.NONE)
-    """
-
-    def validate(self, data_input, level=MODE.VERYSTRICT):
-        """Validate allowed values input
-        """
-
-        # TODO this is where I ended
-        if level == MODE.NONE:
-            return True
-        else:
-            return False
-
+        self.allowed_type = allowed_type
+        self.value = value
+        self.minval = minval
+        self.maxval = maxval
+        self.spacing = spacing
+        self.range_closure = range_closure
 
 def validate_anyvalue(data_input, mode):
     """Just placeholder, anyvalue is always valid
@@ -87,6 +57,8 @@ def validate_anyvalue(data_input, mode):
 
 
 def validate_allowed_values(data_input, mode):
+    """Validate allowed values
+    """
 
     passed = False
     if mode == MODE.NONE:
@@ -96,10 +68,10 @@ def validate_allowed_values(data_input, mode):
 
         for value in data_input.allowed_values:
 
-            if value.allowed_type == AllowedValueType.VALUE:
+            if value.allowed_type == ALLOWEDVALUETYPE.VALUE:
                 passed = _validate_value(value, data)
 
-            elif value.allowed_type == AllowedValueType.RANGE:
+            elif value.allowed_type == ALLOWEDVALUETYPE.RANGE:
                 passed = _validate_range(value, data)
 
             if passed is True:
@@ -131,13 +103,13 @@ def _validate_range(interval, data):
             passed = True
 
         if passed:
-            if interval.range_closure == RangeClosureType.OPEN:
+            if interval.range_closure == RANGECLOSURETYPE.OPEN:
                 passed = (interval.minval <= data <= interval.maxval)
-            elif interval.range_closure == RangeClosureType.CLOSED:
+            elif interval.range_closure == RANGECLOSURETYPE.CLOSED:
                 passed = (interval.minval < data < interval.maxval)
-            elif interval.range_closure == RangeClosureType.OPENCLOSED:
+            elif interval.range_closure == RANGECLOSURETYPE.OPENCLOSED:
                 passed = (interval.minval <= data < interval.maxval)
-            elif interval.range_closure == RangeClosureType.CLOSEDOPEN:
+            elif interval.range_closure == RANGECLOSURETYPE.CLOSEDOPEN:
                 passed = (interval.minval < data <= interval.maxval)
     else:
         passed = False

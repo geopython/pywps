@@ -25,31 +25,10 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-from pywps.validator import ValidatorAbstract
 from pywps.validator import MODE
-from pywps.inout.formats import FORMATS
+from pywps import FORMATS
 import mimetypes
 import os
-
-class BasicValidator(ValidatorAbstract):
-    """Data validator implements ValidatorAbstract class
-
-    >>> from pywps.validator import MODE
-    >>> open('file.json','w').write('{"foo": "bar"}')
-    >>> class FakeInput:
-    ...     source_type = 'file'
-    ...     source = 'file.json'
-    >>> fake_input = FakeInput()
-    >>> validator = BasicValidator()
-    >>> validator.validate(input, MODE.NONE)
-    True
-    """
-
-    def validate(self, data_input, level=MODE.VERYSTRICT):
-        """Perform input validation
-
-        """
-        return True
 
 def validategml(data_input, mode):
     """GML validation example
@@ -76,11 +55,9 @@ def validategml(data_input, mode):
 
     if mode >= MODE.SIMPLE:
 
-        _get_mimetypes()
-
         name = data_input.file
         (mtype, encoding) = mimetypes.guess_type(name, strict=False)
-        passed = data_input.data_format.mime_type in {mtype, FORMATS['GML'][0]}
+        passed = data_input.data_format.mime_type in {mtype, FORMATS.GML.mime_type}
 
     if mode >= MODE.STRICT:
 
@@ -134,11 +111,9 @@ def validategeojson(data_input, mode):
 
     if mode >= MODE.SIMPLE:
 
-        _get_mimetypes()
-
         name = data_input.file
         (mtype, encoding) = mimetypes.guess_type(name, strict=False)
-        passed = data_input.data_format.mime_type in {mtype, FORMATS['GEOJSON'][0]}
+        passed = data_input.data_format.mime_type in {mtype, FORMATS.GEOJSON.mime_type}
 
     if mode >= MODE.STRICT:
 
@@ -193,10 +168,9 @@ def validateshapefile(data_input, mode):
 
     if mode >= MODE.SIMPLE:
 
-        _get_mimetypes()
         name = data_input.file
         (mtype, encoding) = mimetypes.guess_type(name, strict=False)
-        passed = data_input.data_format.mime_type in {mtype, FORMATS['SHP'][0]}
+        passed = data_input.data_format.mime_type in {mtype, FORMATS.SHP.mime_type}
 
     if mode >= MODE.STRICT:
 
@@ -220,6 +194,31 @@ def validateshapefile(data_input, mode):
 
     return passed
 
+def validategeotiff(data_input, mode):
+    """GeoTIFF validation example
+    """
+    passed = False
+
+    if mode >= MODE.NONE:
+        passed = True
+
+    if mode >= MODE.SIMPLE:
+
+        name = data_input.file
+        (mtype, encoding) = mimetypes.guess_type(name, strict=False)
+        passed = data_input.data_format.mime_type in {mtype, FORMATS.GEOTIFF.mime_type}
+
+    if mode >= MODE.STRICT:
+
+        from osgeo import gdal
+        data_source = gdal.Open(data_input.file)
+        if data_source:
+            passed = (data_source.GetDriver().ShortName == "GTiff")
+        else:
+            passed = False
+
+    return passed
+
 def _get_schemas_home():
     """Get path to schemas directory
     """
@@ -229,15 +228,6 @@ def _get_schemas_home():
         ),
         os.path.pardir,
         "schemas")
-
-def _get_mimetypes():
-    mimetypes.init()
-    for pywps_format in FORMATS:
-        (mtype, ext) = FORMATS[pywps_format]
-
-        # NOTE: strict is set to True: mimetype will be added to system
-        # mimetypes, zip -> application/zipped-shapefile
-        mimetypes.add_type(mtype, ext, True)
 
 
 if __name__ == "__main__":

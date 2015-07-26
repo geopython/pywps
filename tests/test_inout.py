@@ -54,21 +54,22 @@ class IOHandlerTest(unittest.TestCase):
             self.iohandler.stream = source
 
         stream_val = self.iohandler.stream.read()
+        self.iohandler.stream.close()
+
         if type(stream_val) == type(b''):
             self.assertEqual(str.encode(self._value), stream_val,
-                            'Stream obtained')
+                             'Stream obtained')
         else:
             self.assertEqual(self._value, stream_val,
-                            'Stream obtained')
-        self.iohandler.stream.close()
+                             'Stream obtained')
 
         if self.iohandler.source_type == SOURCE_TYPE.STREAM:
             source = StringIO(text_type(self._value))
             self.iohandler.stream = source
 
         self.skipTest('Memory object not implemented')
-        self.assertEqual(data, self.iohandler.memory_object,
-                          'Memory object obtained')
+        self.assertEqual(stream_val, self.iohandler.memory_object,
+                         'Memory object obtained')
 
 
     def test_data(self):
@@ -115,13 +116,13 @@ class ComplexInputTest(unittest.TestCase):
         tmp_dir = tempfile.mkdtemp()
         data_format = get_data_format()
         self.complex_in = ComplexInput(identifier="complexinput", workdir=tmp_dir,
-                                       data_format=data_format)
+                                       supported_formats=[data_format])
 
     def test_contruct(self):
         self.assertIsInstance(self.complex_in, ComplexInput)
 
     def test_data_format(self):
-        self.assertIsInstance(self.complex_in.data_format, Format)
+        self.assertIsInstance(self.complex_in.supported_formats[0], Format)
 
 
 class ComplexOutputTest(unittest.TestCase):

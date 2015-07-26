@@ -26,23 +26,15 @@ class ValidateTest(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_basic_validator(self):
-        """Test basic validator"""
-        inpt = get_input(allowed_values = None)
-        validator = BasicValidator()
-        self.assertTrue(validator.validate(inpt, MODE.NONE), 'NONE validation')
-        self.assertFalse(validator.validate(inpt), 'Strict validation')
-
     def test_anyvalue_validator(self):
         """Test anyvalue validator"""
         inpt = get_input(allowed_values = None)
-        validator = BasicValidator()
         self.assertTrue(validate_anyvalue(inpt, MODE.NONE))
 
     def test_allowedvalues_values_validator(self):
         """Test allowed values - values"""
         allowed_value = AllowedValue()
-        allowed_value.allowed_type = AllowedValueType.VALUE
+        allowed_value.allowed_type = ALLOWEDVALUETYPE.VALUE
         allowed_value.value = 1
 
         inpt = get_input(allowed_values = [allowed_value])
@@ -55,11 +47,11 @@ class ValidateTest(unittest.TestCase):
         """Test allowed values - ranges"""
 
         allowed_value = AllowedValue()
-        allowed_value.allowed_type = AllowedValueType.RANGE
+        allowed_value.allowed_type = ALLOWEDVALUETYPE.RANGE
         allowed_value.minval = 1
         allowed_value.maxval = 11
         allowed_value.spacing = 2
-        allowed_value.range_closure = RangeClosureType.OPEN
+        allowed_value.range_closure = RANGECLOSURETYPE.OPEN
 
         inpt = get_input(allowed_values = [allowed_value])
 
@@ -76,28 +68,28 @@ class ValidateTest(unittest.TestCase):
         self.assertFalse(validate_allowed_values(inpt, MODE.SIMPLE), 'Spacing fits')
 
         inpt.data = 11
-        allowed_value.range_closure = RangeClosureType.OPEN
+        allowed_value.range_closure = RANGECLOSURETYPE.OPEN
         self.assertTrue(validate_allowed_values(inpt, MODE.SIMPLE), 'Open Range')
 
-        allowed_value.range_closure = RangeClosureType.OPENCLOSED
+        allowed_value.range_closure = RANGECLOSURETYPE.OPENCLOSED
         self.assertFalse(validate_allowed_values(inpt, MODE.SIMPLE), 'OPENCLOSED Range')
 
         inpt.data = 1
-        allowed_value.range_closure = RangeClosureType.CLOSEDOPEN
+        allowed_value.range_closure = RANGECLOSURETYPE.CLOSEDOPEN
         self.assertFalse(validate_allowed_values(inpt, MODE.SIMPLE), 'CLOSEDOPEN Range')
 
     def test_combined_validator(self):
         """Test allowed values - ranges and values combination"""
 
         allowed_value1 = AllowedValue()
-        allowed_value1.allowed_type = AllowedValueType.RANGE
+        allowed_value1.allowed_type = ALLOWEDVALUETYPE.RANGE
         allowed_value1.minval = 1
         allowed_value1.maxval = 11
         allowed_value1.spacing = 2
-        allowed_value1.range_closure = RangeClosureType.OPEN
+        allowed_value1.range_closure = RANGECLOSURETYPE.OPEN
 
         allowed_value2 = AllowedValue()
-        allowed_value2.allowed_type = AllowedValueType.VALUE
+        allowed_value2.allowed_type = ALLOWEDVALUETYPE.VALUE
         allowed_value2.value = 15
 
         inpt = get_input(allowed_values = [allowed_value1, allowed_value2])

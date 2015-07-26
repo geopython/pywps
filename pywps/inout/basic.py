@@ -4,6 +4,8 @@ import tempfile, os
 from pywps.inout.literaltypes import LITERAL_DATA_TYPES
 from pywps import OWS, OGCUNIT, NAMESPACES
 from pywps import configuration
+from pywps.exceptions import InvalidParameterValue
+import base64
 
 
 class SOURCE_TYPE:
@@ -85,7 +87,7 @@ class IOHandler(object):
     def set_file(self, filename):
         """Set source as file name"""
         self.source_type = SOURCE_TYPE.FILE
-        self.source = filename
+        self.source = os.path.abspath(filename)
 
     def set_workdir(self, workdirpath):
         """Set working temporary directory for files to be stored in"""
@@ -109,6 +111,11 @@ class IOHandler(object):
         """Set source as simple datatype e.g. string, number"""
         self.source_type = SOURCE_TYPE.DATA
         self.source = data
+
+    def set_base64(self, data):
+        """Set data encoded in base64"""
+
+        self.data = base64.b64decode(data)
 
     def get_file(self):
         """Get source as file name"""
@@ -164,11 +171,15 @@ class IOHandler(object):
         elif self.source_type == SOURCE_TYPE.DATA:
             return self.source
 
+    def get_base64(self):
+        return base64.b64encode(self.data)
+
     # Properties
     file = property(fget=get_file, fset=set_file)
     memory_object = property(fget=get_memory_object, fset=set_memory_object)
     stream = property(fget=get_stream, fset=set_stream)
     data = property(fget=get_data, fset=set_data)
+    base64 = property(fget=get_base64, fset=set_base64)
     workdir = property(fget=get_workdir, fset=set_workdir)
 
 
@@ -281,8 +292,41 @@ class BasicComplex(object):
     """Basic complex input/output class
     """
 
-    def __init__(self, data_format=None):
-        self.data_format = data_format
+    def __init__(self, data_format=None, supported_formats=None):
+        self._data_format = None
+        self.supported_formats = supported_formats
+        if self.supported_formats:
+            self.data_format = supported_formats[0]
+        if data_format:
+            self.data_format = data_format
+
+    @property
+    def data_format(self):
+        return self._data_format
+
+
+    @data_format.setter
+    def data_format(self, data_format):
+        """self data_format setter
+        """
+        if self._is_supported(data_format):
+            self._data_format = data_format
+        else:
+            raise InvalidParameterValue("Requested format "
+                                        "%s, %s, %s not supported" %\
+                                        (data_format.mime_type,
+                                         data_format.encoding,
+                                         data_format.schema))
+
+    def _is_supported(self, data_format):
+
+        for frmt in self.supported_formats:
+            if frmt.same_as(data_format):
+                return True
+
+        return False
+
+        
 
 class BasicBoundingBox(object):
     """Basic BoundingBox input/output class
@@ -369,9 +413,9 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
     """
 
     def __init__(self, identifier, title=None, abstract=None,
-                 workdir=None, data_format=None):
+                 workdir=None, data_format=None, supported_formats=None):
         BasicIO.__init__(self, identifier, title, abstract)
-        BasicComplex.__init__(self, data_format)
+        BasicComplex.__init__(self, data_format, supported_formats)
         IOHandler.__init__(self, workdir)
 
 
@@ -405,9 +449,9 @@ class ComplexOutput(BasicIO, BasicComplex, IOHandler):
     """
 
     def __init__(self, identifier, title=None, abstract=None,
-                 workdir=None, data_format=None):
+                 workdir=None, data_format=None, supported_formats=None):
         BasicIO.__init__(self, identifier, title, abstract)
-        BasicComplex.__init__(self, data_format)
+        BasicComplex.__init__(self, data_format, supported_formats)
         IOHandler.__init__(self, workdir)
 
         self._storage = None

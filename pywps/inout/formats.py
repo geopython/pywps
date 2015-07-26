@@ -8,41 +8,67 @@
 """
 
 from lxml.builder import ElementMaker
+from collections import namedtuple
+import mimetypes
 
-FORMATS = {
-    'GEOJSON': ['application/vnd.geo+json', '.geojson'],
-    'JSON': ['application/json', '.json'],
-    'SHP': ['application/x-zipped-shp', '.zip'],
-    'GML': ['application/gml+xml', '.gml'],
-    'GEOTIFF': ['image/tiff; subtype=geotiff', '.tiff'],
-    'WCS': ['application/xogc-wcs', '.xml'],
-    'WCS100': ['application/x-ogc-wcs; version=1.0.0', '.xml'],
-    'WCS110': ['application/x-ogc-wcs; version=1.1.0', '.xml'],
-    'WCS20': ['application/x-ogc-wcs; version=2.0', '.xml'],
-    'WFS': ['application/x-ogc-wfs', '.xml'],
-    'WFS100': ['application/x-ogc-wfs; version=1.0.0', '.xml'],
-    'WFS110': ['application/x-ogc-wfs; version=1.1.0', '.xml'],
-    'WFS20': ['application/x-ogc-wfs; version=2.0', '.xml'],
-    'WMS': ['application/x-ogc-wms', '.xml'],
-    'WMS130': ['application/x-ogc-wms; version=1.3.0', '.xml'],
-    'WMS110': ['application/x-ogc-wms; version=1.1.0', '.xml'],
-    'WMS100': ['application/x-ogc-wms; version=1.0.0','.xml']
-}
+_FORMAT = namedtuple('FormatDefintion', 'mime_type,'
+                     'extension, schema')
+_FORMATS = namedtuple('FORMATS', 'GEOJSON, JSON, SHP, GML, GEOTIFF, WCS,'
+                                 'WCS100, WCS110, WCS20, WFS, WFS100,'
+                                 'WFS110, WFS20, WMS, WMS130, WMS110,'
+                                 'WMS100')
+FORMATS = _FORMATS(
+    _FORMAT('application/vnd.geo+json', '.geojson',  None),
+    _FORMAT('application/json', '.json',  None),
+    _FORMAT('application/x-zipped-shp', '.zip',  None),
+    _FORMAT('application/gml+xml', '.gml', None),
+    _FORMAT('image/tiff; subtype=geotiff', '.tiff', None),
+    _FORMAT('application/xogc-wcs', '.xml', None),
+    _FORMAT('application/x-ogc-wcs; version=1.0.0', '.xml', None),
+    _FORMAT('application/x-ogc-wcs; version=1.1.0', '.xml', None),
+    _FORMAT('application/x-ogc-wcs; version=2.0', '.xml', None),
+    _FORMAT('application/x-ogc-wfs', '.xml', None),
+    _FORMAT('application/x-ogc-wfs; version=1.0.0', '.xml', None),
+    _FORMAT('application/x-ogc-wfs; version=1.1.0', '.xml', None),
+    _FORMAT('application/x-ogc-wfs; version=2.0', '.xml', None),
+    _FORMAT('application/x-ogc-wms', '.xml', None),
+    _FORMAT('application/x-ogc-wms; version=1.3.0', '.xml', None),
+    _FORMAT('application/x-ogc-wms; version=1.1.0', '.xml', None),
+    _FORMAT('application/x-ogc-wms; version=1.0.0', '.xml', None)
+)
+
+def _get_mimetypes():
+    """Add FORMATS to system wide mimetypes
+    """
+    mimetypes.init()
+    for pywps_format in FORMATS:
+        mimetypes.add_type(pywps_format.mime_type, pywps_format.extension, True)
+_get_mimetypes()
+
 
 class Format(object):
     """Input/output format specification
     """
-    def __init__(self, mime_type, schema=None, encoding=None, validator=None):
+    def __init__(self, mime_type,
+                 schema=None, encoding=None, validate=None, extension=None):
+        """Constructor
+
+        :param mime_type: mimetype definition
+        :schema: xml schema definition
+        :encoding: base64 or not
+        :validate: function, which will perform validation. e.g.
+        pywps.validator.complexvalidator.validategml
+        """
 
         self._mime_type = None
         self._encoding = None
         self._schema = None
-        self._validator = None
 
         self.mime_type = mime_type
         self.encoding = encoding
         self.schema = schema
-        self.validator = validator
+        self.validate = validate
+        self.extension = extension
 
 
     @property
@@ -51,10 +77,7 @@ class Format(object):
         :rtype: String
         """
 
-        if self._mime_type in FORMATS.keys():
-            return FORMATS[self._mime_type][0]
-        else:
-            return self._mime_type
+        return self._mime_type
 
     @mime_type.setter
     def mime_type(self, mime_type):
@@ -62,9 +85,6 @@ class Format(object):
         """
 
         self._mime_type = mime_type
-
-    def get_extension(self):
-        return self._mime_type[1]
 
     @property
     def encoding(self):
@@ -100,36 +120,42 @@ class Format(object):
         """
         self._schema = schema
 
-    @property
-    def validator(self):
-        """Get format validator
-        :rtype: String
-        """
-        if self._validator:
-            return self._validator
-        else:
-            return ''
 
-
-    @validator.setter
-    def validator(self, validator):
-        """Set format validator
+    def same_as(self, frmt):
+        """Check input frmt, if it seems to be the same as self
         """
-        self._validator = validator
-        
-        
+        return frmt.mime_type == self.mime_type and\
+               frmt.encoding == self.encoding and\
+               frmt.schema == self.schema
+
     def describe_xml(self):
-        
-        E = ElementMaker()
-        doc = E.Format(
-            E.MimeType(self.mime_type)
+        """Return describe process response element
+        """
+
+        elmar = ElementMaker()
+        doc = elmar.Format(
+            elmar.MimeType(self.mime_type)
         )
 
+
         if self.encoding:
-            doc.append(E.Encoding(self.encoding))
+            doc.append(elmar.Encoding(self.encoding))
 
         if self.schema:
-            doc.append(E.Schema(self.schema))
-    
+            doc.append(elmar.Schema(self.schema))
+
         return doc
 
+def get_format(frmt, validator=None):
+    """Return Format instance based on given pywps.inout.FORMATS keyword
+    """
+
+    outfrmt = None
+
+    if frmt in FORMATS._asdict():
+        formatdef = FORMATS._asdict()[frmt]
+        outfrmt = Format(**formatdef._asdict())
+        outfrmt.validate=validator
+        return outfrmt
+    else:
+        return Format('None', validate=validator)

@@ -3,6 +3,81 @@ from pywps.inout import basic
 from copy import deepcopy
 
 
+class BoundingBoxInput(basic.BBoxInput):
+    """
+    :param identifier: The name of this input.
+    :param data_type: Type of literal input (e.g. `string`, `float`...).
+    """
+
+    def __init__(self, identifier, title, crss, abstract='',
+                 dimensions=2, metadata=[], min_occurs=1,
+                 max_occurs=1, as_reference=False):
+        basic.BBoxInput.__init__(self, identifier, title=title,
+                                 abstract=abstract, crss=crss,
+                                 dimensions=dimensions)
+
+        self.metadata = metadata
+        self.min_occurs = int(min_occurs)
+        self.max_occurs = int(max_occurs)
+        self.as_reference = as_reference
+
+    def describe_xml(self):
+        doc = E.Input(
+            OWS.Identifier(self.identifier),
+            OWS.Title(self.title)
+        )
+
+        doc.attrib['minOccurs'] = str(self.min_occurs)
+        doc.attrib['maxOccurs'] = str(self.max_occurs)
+
+        if self.abstract:
+            doc.append(OWS.Abstract(self.abstract))
+
+        if self.metadata:
+            doc.append(OWS.Metadata(*self.metadata))
+
+        bbox_data_doc = E.BoundingBoxData()
+        doc.append(bbox_data_doc)
+
+        default_doc = E.Default()
+        default_doc.append(E.CRS(self.crss[0]))
+
+        supported_doc = E.Supported()
+        for c in self.crss:
+            supported_doc.append(E.CRS(c))
+
+        bbox_data_doc.append(default_doc)
+        bbox_data_doc.append(supported_doc)
+
+        return doc
+
+    def execute_xml(self):
+        doc = WPS.Input(
+            OWS.Identifier(self.identifier),
+            OWS.Title(self.title)
+        )
+
+        if self.abstract:
+            doc.append(OWS.Abstract(self.abstract))
+
+        bbox_data_doc = OWS.BoundingBox()
+
+        bbox_data_doc.attrib['crs'] = self.crs
+        bbox_data_doc.attrib['dimensions'] = str(self.dimensions)
+
+        bbox_data_doc.append(OWS.LowerCorner('{0[0]} {0[1]}'.format(self.data)))
+        bbox_data_doc.append(OWS.UpperCorner('{0[2]} {0[3]}'.format(self.data)))
+
+        doc.append(bbox_data_doc)
+
+        return doc
+
+    def clone(self):
+        """Create copy of yourself
+        """
+        return deepcopy(self)
+
+
 class ComplexInput(basic.ComplexInput):
     """
     :param identifier: The name of this input.
@@ -11,12 +86,15 @@ class ComplexInput(basic.ComplexInput):
     :param data_format: Format of the passed input. Should be :class:`~Format` object
     """
 
-    def __init__(self, identifier, title, allowed_formats=None,
+    def __init__(self, identifier, title, supported_formats=None,
                  data_format=None, abstract='', metadata=[], min_occurs=1,
                  max_occurs=1, as_reference=False):
-        basic.ComplexInput.__init__(self, identifier=identifier, title=title, abstract=abstract,
-                                    data_format=data_format)
-        self.allowed_formats = allowed_formats
+
+        basic.ComplexInput.__init__(self, identifier=identifier, title=title,
+                                    abstract=abstract,
+                                    data_format=data_format,
+                                    supported_formats=supported_formats)
+
         self.metadata = metadata
         self.min_occurs = int(min_occurs)
         self.max_occurs = int(max_occurs)
@@ -31,13 +109,15 @@ class ComplexInput(basic.ComplexInput):
 
         :return: maximum file size bytes
         """
-        maxSize = configuration.get_config_value('server', 'maxsingleinputsize')
-        self.max_size = configuration.get_size_mb(maxSize)
+        max_size = configuration.get_config_value('server', 'maxsingleinputsize')
+        self.max_size = configuration.get_size_mb(max_size)
 
     def describe_xml(self):
-        default_format_el = self.allowed_formats[0].describe_xml()
-        supported_format_elements = [f.describe_xml() for f in self.allowed_formats]
-        
+        """Return Describe process element
+        """
+        default_format_el = self.supported_formats[0].describe_xml()
+        supported_format_elements = [f.describe_xml() for f in self.supported_formats]
+
         doc = E.Input(
             OWS.Identifier(self.identifier),
             OWS.Title(self.title)
@@ -130,10 +210,11 @@ class LiteralInput(basic.LiteralInput):
     """
 
     def __init__(self, identifier, title, data_type='string', abstract='',
-                 metadata=[], uoms=[], default='',
+                 metadata=None, uoms=None, default=None,
                  min_occurs=1, max_occurs=1, as_reference=False):
         basic.LiteralInput.__init__(self, identifier=identifier, title=title,
-                                    abstract=abstract, data_type=data_type, uoms=uoms)
+                                    abstract=abstract, data_type=data_type,
+                                    uoms=uoms)
         self.metadata = metadata
         self.default = default
         self.min_occurs = int(min_occurs)
@@ -141,6 +222,8 @@ class LiteralInput(basic.LiteralInput):
         self.as_reference = as_reference
 
     def describe_xml(self):
+        """Return DescribeProcess Output element
+        """
         doc = E.Input(
             OWS.Identifier(self.identifier),
             OWS.Title(self.title)
@@ -227,81 +310,6 @@ class LiteralInput(basic.LiteralInput):
         doc.append(literal_doc)
         return doc
 
-
-    def clone(self):
-        """Create copy of yourself
-        """
-        return deepcopy(self)
-
-
-class BoundingBoxInput(basic.BBoxInput):
-    """
-    :param identifier: The name of this input.
-    :param data_type: Type of literal input (e.g. `string`, `float`...).
-    """
-
-    def __init__(self, identifier, title, crss, abstract='',
-                 dimensions=2, metadata=[], min_occurs=1,
-                 max_occurs=1, as_reference=False):
-        basic.BBoxInput.__init__(self, identifier, title=title,
-                                 abstract=abstract, crss=crss,
-                                 dimensions=dimensions)
-
-        self.metadata = metadata
-        self.min_occurs = int(min_occurs)
-        self.max_occurs = int(max_occurs)
-        self.as_reference = as_reference
-
-    def describe_xml(self):
-        doc = E.Input(
-            OWS.Identifier(self.identifier),
-            OWS.Title(self.title)
-        )
-
-        doc.attrib['minOccurs'] = str(self.min_occurs)
-        doc.attrib['maxOccurs'] = str(self.max_occurs)
-
-        if self.abstract:
-            doc.append(OWS.Abstract(self.abstract))
-
-        if self.metadata:
-            doc.append(OWS.Metadata(*self.metadata))
-
-        bbox_data_doc = E.BoundingBoxData()
-        doc.append(bbox_data_doc)
-
-        default_doc = E.Default()
-        default_doc.append(E.CRS(self.crss[0]))
-
-        supported_doc = E.Supported()
-        for c in self.crss:
-            supported_doc.append(E.CRS(c))
-
-        bbox_data_doc.append(default_doc)
-        bbox_data_doc.append(supported_doc)
-
-        return doc
-
-    def execute_xml(self):
-        doc = WPS.Input(
-            OWS.Identifier(self.identifier),
-            OWS.Title(self.title)
-        )
-
-        if self.abstract:
-            doc.append(OWS.Abstract(self.abstract))
-
-        bbox_data_doc = OWS.BoundingBox()
-
-        bbox_data_doc.attrib['crs'] = self.crs
-        bbox_data_doc.attrib['dimensions'] = str(self.dimensions)
-
-        bbox_data_doc.append(OWS.LowerCorner('{0[0]} {0[1]}'.format(self.data)))
-        bbox_data_doc.append(OWS.UpperCorner('{0[2]} {0[3]}'.format(self.data)))
-
-        doc.append(bbox_data_doc)
-
-        return doc
 
     def clone(self):
         """Create copy of yourself

@@ -2,6 +2,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 import os
 from pywps._compat import PY2
 from pywps.exceptions import NotEnoughStorage, NoApplicableCode
+from pywps import configuration as config
 
 
 class STORE_TYPE:
@@ -33,11 +34,9 @@ class DummyStorage(StorageAbstract):
     >>> assert store.store
     """
 
-    def __init__(self, config=None):
+    def __init__(self):
         """
-        :param config: storage configuration object
         """
-        self.config = config
 
     def store(self, ouput):
         pass
@@ -53,7 +52,7 @@ class FileStorage(StorageAbstract):
     >>> config.add_section('server')
     >>> config.set('server', 'outputurl', 'http://foo/bar/filestorage')
     >>>
-    >>> store = FileStorage(config = config)
+    >>> store = FileStorage()
     >>>
     >>> class FakeOutput(object):
     ...     def __init__(self):
@@ -68,9 +67,8 @@ class FileStorage(StorageAbstract):
     True
     """
 
-    def __init__(self, config):
+    def __init__(self):
         """
-        :param config: storage configuration object
         """
         self.target = config.get_config_value('server', 'outputPath')
         self.output_url = '%s:%s%s' % (

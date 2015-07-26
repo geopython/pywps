@@ -15,8 +15,8 @@ class ConvertorTest(unittest.TestCase):
 
     def test_float(self):
         """Test float convertor"""
-        self.assertEquals(convert_float('1.0'), 1.0)
-        self.assertEquals(convert_float(1), 1.0)
+        self.assertEqual(convert_float('1.0'), 1.0)
+        self.assertEqual(convert_float(1), 1.0)
         with self.assertRaises(ValueError):
             convert_float('a')
 
@@ -28,14 +28,14 @@ class ConvertorTest(unittest.TestCase):
 
     def test_boolean(self):
         """Test boolean convertor"""
-        self.assertEquals(convert_boolean('1.0'), True)
-        self.assertEquals(convert_boolean(1), True)
-        self.assertEquals(convert_boolean('a'), True)
-        self.assertEquals(convert_boolean('f'), False)
-        self.assertEquals(convert_boolean('falSe'), False)
-        self.assertEquals(convert_boolean(False), False)
-        self.assertEquals(convert_boolean(0), False)
-        self.assertEquals(convert_boolean(-1), True)
+        self.assertTrue(convert_boolean('1.0'))
+        self.assertTrue(convert_boolean(1))
+        self.assertTrue(convert_boolean('a'))
+        self.assertFalse(convert_boolean('f'))
+        self.assertFalse(convert_boolean('falSe'))
+        self.assertFalse(convert_boolean(False))
+        self.assertFalse(convert_boolean(0))
+        self.assertTrue(convert_boolean(-1))
 
 
 def load_tests(loader=None, tests=None, pattern=None):

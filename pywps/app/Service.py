@@ -12,6 +12,7 @@ from pywps.inout.inputs import ComplexInput, LiteralInput, BoundingBoxInput
 
 from collections import deque
 import shutil
+import os
 
 
 class Service(object):
@@ -264,9 +265,10 @@ class Service(object):
             raise BadRequest("Unknown process %r" % identifier)
 
         try:
-            response = None
+            olddir = os.path.abspath(os.curdir)
+            os.chdir(process.workdir)
             response = self._parse_and_execute(process, wps_request)
-            shutil.rmtree(process.workdir)
+            os.chdir(olddir)
             return response
         except Exception as e:
             shutil.rmtree(process.workdir)
@@ -404,11 +406,16 @@ class Service(object):
 
         for inpt in inputs:
             data_input = source.clone()
-            data_input.data_format = Format(
-                inpt.get('mime_type'),
-                inpt.get('encoding'),
-                inpt.get('schema')
-            )
+            if inpt.get('mimeType'):
+                frmt = Format(
+                    inpt.get('mimeType'),
+                    inpt.get('encoding'),
+                    inpt.get('schema')
+                )
+                data_input.data_format = frmt
+            else:
+                data_input.data_format = data_input.supported_formats[0]
+
             data_input.method = inpt.get('method', 'GET')
 
             # get the referenced input otherwise get the value of the field

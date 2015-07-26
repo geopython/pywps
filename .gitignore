@@ -9,3 +9,8 @@ build
 # vim, mac os
 *.sw*
 .DS_Store
+.*.un~
+
+# git
+
+*.orig

@@ -159,9 +159,15 @@ class WPSResponse(object):
         # Process outputs XML
         output_elements = [self.outputs[o].execute_xml() for o in self.outputs]
         doc.append(WPS.ProcessOutputs(*output_elements))
-
         return doc
 
     @Request.application
     def __call__(self, request):
+        try:
+            self._construct_doc()
+        except HTTPException as httpexp:
+            raise httpexp
+        except Exception as exp:
+            raise NoApplicableCode(exp)
+
         return xml_response(self._construct_doc())
