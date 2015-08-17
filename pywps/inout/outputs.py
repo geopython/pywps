@@ -75,21 +75,20 @@ class BoundingBoxOutput(basic.BBoxInput):
 class ComplexOutput(basic.ComplexOutput):
     """
     :param identifier: The name of this output.
-    :param formats: Possible output formats for this output.
+    :param title: Readable form of the output name.
+    :param output_formats: List of supported
+            output formats for this output.
             Should be list of :class:`~Format` object.
-    :param output_format: Required format for this output.
-            Should be :class:`~Format` object.
-    :param encoding: The encoding of this input or requested for this output
-            (e.g., UTF-8).
+            The first format in the list will be used as the default.
+    :param abstract: Description of the output
     """
 
-    def __init__(self, identifier, title,  output_format=None,
-                 abstract='', supported_formats=None, metadata=[]):
+    def __init__(self, identifier, title,  output_formats=None,
+                 abstract='', metadata=[]):
 
         basic.ComplexOutput.__init__(self, identifier, title=title,
                                      abstract=abstract,
-                                     data_format=output_format,
-                                     supported_formats=supported_formats)
+                                     output_formats=output_formats)
         self.metadata = metadata
         self.as_reference = False
 

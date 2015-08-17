@@ -290,15 +290,11 @@ class BasicLiteral:
 
 class BasicComplex(object):
     """Basic complex input/output class
+
     """
 
-    def __init__(self, data_format=None, supported_formats=None):
-        self._data_format = None
-        self.supported_formats = supported_formats
-        if self.supported_formats:
-            self.data_format = supported_formats[0]
-        if data_format:
-            self.data_format = data_format
+    def __init__(self, data_formats=None):
+        self.data_formats = data_formats
 
     @property
     def data_format(self):
@@ -320,7 +316,7 @@ class BasicComplex(object):
 
     def _is_supported(self, data_format):
 
-        for frmt in self.supported_formats:
+        for frmt in self.data_formats:
             if frmt.same_as(data_format):
                 return True
 
@@ -413,9 +409,9 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
     """
 
     def __init__(self, identifier, title=None, abstract=None,
-                 workdir=None, data_format=None, supported_formats=None):
+                 workdir=None, data_formats=None):
         BasicIO.__init__(self, identifier, title, abstract)
-        BasicComplex.__init__(self, data_format, supported_formats)
+        BasicComplex.__init__(self, data_formats)
         IOHandler.__init__(self, workdir)
 
 
@@ -449,9 +445,9 @@ class ComplexOutput(BasicIO, BasicComplex, IOHandler):
     """
 
     def __init__(self, identifier, title=None, abstract=None,
-                 workdir=None, data_format=None, supported_formats=None):
+                 workdir=None, output_formats=None):
         BasicIO.__init__(self, identifier, title, abstract)
-        BasicComplex.__init__(self, data_format, supported_formats)
+        BasicComplex.__init__(self, output_formats)
         IOHandler.__init__(self, workdir)
 
         self._storage = None
