@@ -445,9 +445,9 @@ class ComplexOutput(BasicIO, BasicComplex, IOHandler):
     """
 
     def __init__(self, identifier, title=None, abstract=None,
-                 workdir=None, output_formats=None):
+                 workdir=None, data_formats=None):
         BasicIO.__init__(self, identifier, title, abstract)
-        BasicComplex.__init__(self, output_formats)
+        BasicComplex.__init__(self, data_formats)
         IOHandler.__init__(self, workdir)
 
         self._storage = None

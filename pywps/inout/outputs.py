@@ -76,19 +76,19 @@ class ComplexOutput(basic.ComplexOutput):
     """
     :param identifier: The name of this output.
     :param title: Readable form of the output name.
-    :param output_formats: List of supported
+    :param supported_formats: List of supported
             output formats for this output.
             Should be list of :class:`~Format` object.
             The first format in the list will be used as the default.
     :param abstract: Description of the output
     """
 
-    def __init__(self, identifier, title,  output_formats=None,
+    def __init__(self, identifier, title,  supported_formats=None,
                  abstract='', metadata=[]):
 
         basic.ComplexOutput.__init__(self, identifier, title=title,
                                      abstract=abstract,
-                                     output_formats=output_formats)
+                                     supported_formats=supported_formats)
         self.metadata = metadata
         self.as_reference = False
 

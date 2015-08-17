@@ -86,13 +86,13 @@ class ComplexInput(basic.ComplexInput):
                     be the default. 
     """
 
-    def __init__(self, identifier, title, data_formats=None,
+    def __init__(self, identifier, title, supported_formats=None,
                  abstract='', metadata=[], min_occurs=1,
                  max_occurs=1, as_reference=False):
 
         basic.ComplexInput.__init__(self, identifier=identifier, title=title,
                                     abstract=abstract,
-                                    data_formats=data_formats)
+                                    supported_formats=supported_formats)
         self.metadata = metadata
         self.min_occurs = int(min_occurs)
         self.max_occurs = int(max_occurs)
@@ -113,8 +113,8 @@ class ComplexInput(basic.ComplexInput):
     def describe_xml(self):
         """Return Describe process element
         """
-        default_format_el = self.data_formats[0].describe_xml()
-        supported_format_elements = [f.describe_xml() for f in self.data_formats]
+        default_format_el = self.supported_formats[0].describe_xml()
+        supported_format_elements = [f.describe_xml() for f in self.supported_formats]
 
         doc = E.Input(
             OWS.Identifier(self.identifier),
