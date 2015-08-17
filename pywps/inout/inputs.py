@@ -7,6 +7,7 @@ class BoundingBoxInput(basic.BBoxInput):
     """
     :param identifier: The name of this input.
     :param data_type: Type of literal input (e.g. `string`, `float`...).
+    :param crss: List of supported coordinate reference system (e.g. ['EPSG:4326'])
     """
 
     def __init__(self, identifier, title, crss, abstract='',

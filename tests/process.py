@@ -12,25 +12,35 @@ sys.path.append(pywpsPath)
 
 import unittest
 
-from pywps.process import Process
-from pywps.process.inout.standards import LiteralLengthInput
-from pywps.process.inout.standards import BBoxInput
-from pywps.process.inout.standards import ComplexVectorInput
+from pywps import Process
+from pywps.inout import LiteralInput
+from pywps.inout import BoundingBoxInput
+from pywps.inout import ComplexInput
 
 class ProcessTestCase(unittest.TestCase):
 
-    def test_get_input_type(self):
-        """Test returning the proper input type"""
+    def test_get_input_title(self):
+        """Test returning the proper input title"""
 
         # configure
-        process = Process("process")
-        process.add_input(LiteralLengthInput())
-        process.add_input(BBoxInput())
-        process.add_input(ComplexVectorInput())
-        
-        self.assertEquals("literal",process.get_input_type("length"))
-        self.assertEquals("bbox",process.get_input_type("bbox"))
-        self.assertEquals("complex",process.get_input_type("vector"))
+        def donothing(*args, **kwargs):
+            pass
+        process = Process(donothing, "process", title="Process",
+                          inputs=[
+                              LiteralInput("length", title="Length"),
+                              BoundingBoxInput("bbox", title="BBox", crss=[]),
+                              ComplexInput("vector", title="Vector")
+                          ],
+                          outputs=[]
+        )
+        inputs = {
+            input.identifier: input.title
+            for input
+            in process.inputs
+        }
+        self.assertEquals("Length", inputs['length'])
+        self.assertEquals("BBox", inputs["bbox"])
+        self.assertEquals("Vector", inputs["vector"])
 
 if __name__ == "__main__":
    suite = unittest.TestLoader().loadTestsFromTestCase(ProcessTestCase)
