@@ -12,8 +12,10 @@ class BoundingBoxOutput(basic.BBoxInput):
     """
 
     def __init__(self, identifier, title, crss, abstract='',
-                 dimensions=2, metadata=[], min_occurs='1',
+                 dimensions=2, metadata=None, min_occurs='1',
                  max_occurs='1', as_reference=False):
+        if metadata is None:
+            metadata = []
         basic.BBoxInput.__init__(self, identifier, title=title,
                                  abstract=abstract, crss=crss,
                                  dimensions=dimensions)
@@ -84,7 +86,9 @@ class ComplexOutput(basic.ComplexOutput):
     """
 
     def __init__(self, identifier, title,  supported_formats=None,
-                 abstract='', metadata=[]):
+                 abstract='', metadata=None):
+        if metadata is None:
+            metadata = []
 
         basic.ComplexOutput.__init__(self, identifier, title=title,
                                      abstract=abstract,
@@ -199,7 +203,11 @@ class LiteralOutput(basic.LiteralOutput):
     """
 
     def __init__(self, identifier, title, data_type='string', abstract='',
-            metadata=[], uoms=[]):
+                 metadata=None, uoms=None):
+        if metadata is None:
+            metadata = []
+        if uoms is None:
+            uoms = []
         basic.LiteralOutput.__init__(self, identifier, title=title, data_type=data_type, uoms=uoms)
         self.abstract = abstract
         self.metadata = metadata

@@ -263,21 +263,23 @@ class BasicLiteral:
             data_type = LITERAL_DATA_TYPES[2]
         assert data_type in LITERAL_DATA_TYPES
         self.data_type = data_type
-        self.uoms = None
+        # list of uoms
+        self.uoms = []
+        # current uom
         self._uom = None
 
-        if self.uoms:
-            self.uom = self.uoms[0]
-
-        if uoms:
-            if type(uoms) is not type([]):
-                uoms = [uoms]
-
-            self.uoms = []
+        # add all uoms (upcasting to UOM)
+        if uoms is not None:
             for uom in uoms:
                 if not isinstance(uom, UOM):
                     uom = UOM(uom)
                 self.uoms.append(uom)
+
+        if self.uoms:
+            # default/current uom
+            self.uom = self.uoms[0]
+
+
 
     @property
     def uom(self):
@@ -293,8 +295,12 @@ class BasicComplex(object):
 
     """
 
-    def __init__(self, data_formats=None):
-        self.data_formats = data_formats
+    def __init__(self, supported_formats=None):
+        self.supported_formats = supported_formats
+        self._data_format = None
+        if self.supported_formats:
+            # not an empty list, set the default/current format to the first
+            self.data_format = supported_formats[0]
 
     @property
     def data_format(self):
@@ -316,7 +322,7 @@ class BasicComplex(object):
 
     def _is_supported(self, data_format):
 
-        for frmt in self.data_formats:
+        for frmt in self.supported_formats:
             if frmt.same_as(data_format):
                 return True
 
@@ -409,9 +415,9 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
     """
 
     def __init__(self, identifier, title=None, abstract=None,
-                 workdir=None, data_formats=None):
+                 workdir=None, supported_formats=None):
         BasicIO.__init__(self, identifier, title, abstract)
-        BasicComplex.__init__(self, data_formats)
+        BasicComplex.__init__(self, supported_formats)
         IOHandler.__init__(self, workdir)
 
 
@@ -445,9 +451,9 @@ class ComplexOutput(BasicIO, BasicComplex, IOHandler):
     """
 
     def __init__(self, identifier, title=None, abstract=None,
-                 workdir=None, data_formats=None):
+                 workdir=None, supported_formats=None):
         BasicIO.__init__(self, identifier, title, abstract)
-        BasicComplex.__init__(self, data_formats)
+        BasicComplex.__init__(self, supported_formats)
         IOHandler.__init__(self, workdir)
 
         self._storage = None

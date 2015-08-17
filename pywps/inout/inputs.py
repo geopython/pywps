@@ -10,8 +10,10 @@ class BoundingBoxInput(basic.BBoxInput):
     """
 
     def __init__(self, identifier, title, crss, abstract='',
-                 dimensions=2, metadata=[], min_occurs=1,
+                 dimensions=2, metadata=None, min_occurs=1,
                  max_occurs=1, as_reference=False):
+        if metadata is None:
+            metadata = []
         basic.BBoxInput.__init__(self, identifier, title=title,
                                  abstract=abstract, crss=crss,
                                  dimensions=dimensions)
@@ -87,9 +89,10 @@ class ComplexInput(basic.ComplexInput):
     """
 
     def __init__(self, identifier, title, supported_formats=None,
-                 abstract='', metadata=[], min_occurs=1,
+                 abstract='', metadata=None, min_occurs=1,
                  max_occurs=1, as_reference=False):
-
+        if metadata is None:
+            metadata = []
         basic.ComplexInput.__init__(self, identifier=identifier, title=title,
                                     abstract=abstract,
                                     supported_formats=supported_formats)

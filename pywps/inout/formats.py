@@ -83,8 +83,13 @@ class Format(object):
     def mime_type(self, mime_type):
         """Set format mime type
         """
-
-        self._mime_type = mime_type
+        try:
+            # support Format('GML')
+            formatdef = getattr(FORMATS, mime_type)
+            self._mime_type = formatdef.mime_type
+        except AttributeError:
+            # if we don't have this as a shortcut, assume it's a real mime type
+            self._mime_type = mime_type
 
     @property
     def encoding(self):
