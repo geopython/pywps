@@ -74,10 +74,8 @@ Apache configuration
 
 3. Create wsgi file:
 
-
-    
+    ```python
     #!/usr/bin/env python3
-
     import sys
     sys.path.append('/path/to/src/pywps-4/')
     
@@ -91,7 +89,7 @@ Apache configuration
     
     
     application = Service(processes=[Process(pr1)])
-
+    ```
 
 4. Run via web browser
 
