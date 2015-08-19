@@ -62,10 +62,10 @@ Apache configuration
 
 2. Add configuration:
 
+    ```apache
     WSGIDaemonProcess pywps user=user group=group processes=2 threads=5
     WSGIScriptAlias /pywps /path/to/www/htdocs/wps/pywps.wsgi
 
-    ```xml
     <Directory /path/to/www/htdocs/wps/>
         WSGIProcessGroup group
         WSGIApplicationGroup %{GLOBAL}
