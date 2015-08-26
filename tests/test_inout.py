@@ -4,6 +4,7 @@ import os
 import tempfile
 import unittest
 from pywps import Format
+from pywps.validator import get_validator
 from pywps import NAMESPACES
 from pywps.inout.basic import IOHandler, SOURCE_TYPE, DataTypeAbstract, SimpleHandler, BBoxInput, BBoxOutput, \
     ComplexInput, ComplexOutput, LiteralInput, LiteralOutput
@@ -13,10 +14,9 @@ from pywps._compat import StringIO, text_type
 from lxml import etree
 
 
-def get_data_format():
-    class DataFormat(Format):
-        pass
-    return DataFormat(mime_type= 'text/plain')
+def get_data_format(mime_type):
+    return Format(mime_type=mime_type,
+    validate=get_validator(mime_type))
 
 class IOHandlerTest(unittest.TestCase):
     """IOHandler test cases"""
@@ -114,9 +114,13 @@ class ComplexInputTest(unittest.TestCase):
 
     def setUp(self):
         tmp_dir = tempfile.mkdtemp()
-        data_format = get_data_format()
+        data_format = get_data_format('application/json')
         self.complex_in = ComplexInput(identifier="complexinput", workdir=tmp_dir,
                                        supported_formats=[data_format])
+
+    def test_validator(self):
+        self.assertEqual(self.complex_in.data_format.validate,
+                       get_validator('application/json')) 
 
     def test_contruct(self):
         self.assertIsInstance(self.complex_in, ComplexInput)
@@ -130,7 +134,7 @@ class ComplexOutputTest(unittest.TestCase):
 
     def setUp(self):
         tmp_dir = tempfile.mkdtemp()
-        data_format = get_data_format()
+        data_format = get_data_format('application/json')
         self.complex_out = ComplexOutput(identifier="complexinput", workdir=tmp_dir,
                                          data_format=data_format)
 

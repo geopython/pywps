@@ -1,6 +1,10 @@
 import unittest
 import lxml.etree
-from pywps import Service, Process, LiteralOutput, LiteralInput, BoundingBoxOutput, BoundingBoxInput
+from pywps import Service, Process, LiteralOutput, LiteralInput,\
+    BoundingBoxOutput, BoundingBoxInput, Format, ComplexInput, ComplexOutput
+from pywps.validator.base import emptyvalidator
+from pywps.validator.complexvalidator import validategml
+from pywps.exceptions import InvalidParameterValue
 from pywps import get_inputs_from_xml, get_output_from_xml
 from pywps import E, WPS, OWS
 from pywps.app.basic import xpath_ns
@@ -52,6 +56,29 @@ def create_bbox_process():
                    inputs=[BoundingBoxInput('mybbox', 'Input name', ["EPSG:4326"])],
                    outputs=[BoundingBoxOutput('outbbox', 'Output message', ["EPSG:4326"])])
 
+def create_complex_proces():
+    def complex_proces(request, response):
+        response.outputs['complex'].data = request.inputs['complex'][0].data
+        return response
+
+    frmt = Format(mime_type='application/gml') # this is unknown mimetype
+
+    return Process(handler=complex_proces,
+            identifier='my_complex_process',
+            title='Complex process',
+            inputs=[
+                ComplexInput(
+                    'complex',
+                    'Complex input',
+                    supported_formats=[frmt])
+            ],
+            outputs=[
+                ComplexOutput(
+                    'complex',
+                    'Complex output',
+                    supported_formats=[frmt])
+             ])
+
 
 def get_output(doc):
     output = {}
@@ -65,6 +92,61 @@ def get_output(doc):
 
 class ExecuteTest(unittest.TestCase):
     """Test for Exeucte request KVP request"""
+
+    def test_input_parser(self):
+        """Test input parsing
+        """
+        my_process = create_complex_proces()
+        service = Service(processes=[my_process])
+        self.assertEqual(len(service.processes.keys()), 1)
+        self.assertTrue(service.processes['my_complex_process'])
+
+        class FakeRequest():
+            identifier = 'complex_process'
+            service='wps'
+            version='1.0.0'
+            inputs = {'complex': [{
+                    'identifier': 'complex',
+                    'mimeType': 'text/gml',
+                    'data': 'the data'
+                }]}
+        request = FakeRequest();
+
+        try:
+            service.execute('my_complex_process', request)
+        except InvalidParameterValue as e:
+            self.assertEqual(e.locator, 'mimeType')
+
+        request.inputs['complex'][0]['mimeType'] = 'application/gml'
+        parsed_inputs = service.create_complex_inputs(my_process.inputs[0],
+                                                      request.inputs['complex'])
+
+        # TODO parse outputs and their validators too
+
+        self.assertEqual(parsed_inputs[0].data_format.validate, emptyvalidator)
+
+        request.inputs['complex'][0]['mimeType'] = 'application/xml+gml'
+        try:
+            parsed_inputs = service.create_complex_inputs(my_process.inputs[0],
+                                                      request.inputs['complex'])
+        except InvalidParameterValue as e:
+            self.assertEqual(e.locator, 'mimeType')
+
+        try:
+            my_process.inputs[0].data_format = Format(mime_type='application/xml+gml')
+        except InvalidParameterValue as e:
+            self.assertEqual(e.locator, 'mimeType')
+
+        frmt = Format(mime_type='application/xml+gml', validate=validategml)
+        self.assertEqual(frmt.validate, validategml)
+
+        my_process.inputs[0].supported_formats = [frmt]
+        my_process.inputs[0].data_format = Format(mime_type='application/xml+gml')
+        parsed_inputs = service.create_complex_inputs(my_process.inputs[0],
+                                              request.inputs['complex'])
+
+        self.assertEqual(parsed_inputs[0].data_format.validate, validategml)
+
 
     def test_missing_process_error(self):
         client = client_for(Service(processes=[create_ultimate_question()]))

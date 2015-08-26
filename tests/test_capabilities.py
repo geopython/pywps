@@ -1,6 +1,6 @@
 import unittest
 import lxml.etree
-from pywps import Process, Service
+from pywps.app import Process, Service
 from pywps import WPS, OWS
 from tests.common import client_for
 

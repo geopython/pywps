@@ -3,6 +3,8 @@ from pywps import E, WPS, OWS, OGCTYPE, NAMESPACES
 from pywps.inout import basic
 from pywps.inout.storage import FileStorage
 from pywps.inout.formats import Format
+from pywps.validator import emptyvalidator
+from pywps.validator.mode import MODE
 import lxml.etree as etree
 
 
@@ -200,8 +202,10 @@ class LiteralOutput(basic.LiteralOutput):
     """
 
     def __init__(self, identifier, title, data_type='string', abstract='',
-            metadata=[], uoms=[]):
-        basic.LiteralOutput.__init__(self, identifier, title=title, data_type=data_type, uoms=uoms)
+            metadata=[], uoms=[], validator=emptyvalidator, mode=MODE.SIMPLE):
+        basic.LiteralOutput.__init__(self, identifier, title=title,
+                data_type=data_type, uoms=uoms, validator=validator,
+                mode=mode)
         self.abstract = abstract
         self.metadata = metadata
 

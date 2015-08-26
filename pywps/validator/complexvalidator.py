@@ -25,8 +25,8 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-from pywps.validator import MODE
-from pywps import FORMATS
+from pywps.validator.mode import MODE
+from pywps.inout.formats.lists import FORMATS
 import mimetypes
 import os
 

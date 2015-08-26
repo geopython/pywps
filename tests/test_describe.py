@@ -148,15 +148,22 @@ class InputDescriptionTest(unittest.TestCase):
         assert len(anyvalue) == 1
 
     def test_complex_input_identifier(self):
-        complex = ComplexInput('foo', 'Complex foo', supported_formats=[Format('bar/baz')])
-        doc = complex.describe_xml()
+        complex_in = ComplexInput('foo', 'Complex foo', supported_formats=[Format('bar/baz')])
+        doc = complex_in.describe_xml()
         assert doc.tag == E.Input().tag
         [identifier_el] = xpath_ns(doc, './ows:Identifier')
         assert identifier_el.text == 'foo'
 
     def test_complex_input_default_and_supported(self):
-        complex = ComplexInput('foo', 'Complex foo', supported_formats=[Format('a/b'), Format('c/d')])
-        doc = complex.describe_xml()
+        complex_in = ComplexInput(
+            'foo',
+            'Complex foo',
+            supported_formats=[
+                Format('a/b'),
+                Format('c/d')
+            ]
+        )
+        doc = complex_in.describe_xml()
         [default_format] = xpath_ns(doc, './ComplexData/Default/Format')
         [default_mime_el] = xpath_ns(default_format, './MimeType')
         assert default_mime_el.text == 'a/b'

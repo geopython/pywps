@@ -3,7 +3,9 @@ from pywps._compat import text_type, StringIO
 import tempfile, os
 from pywps.inout.literaltypes import LITERAL_DATA_TYPES
 from pywps import OWS, OGCUNIT, NAMESPACES
-from pywps import configuration
+from pywps.validator.mode import MODE
+from pywps.validator.base import emptyvalidator
+from pywps.validator import get_validator
 from pywps.exceptions import InvalidParameterValue
 import base64
 
@@ -78,16 +80,31 @@ class IOHandler(object):
     >>> # skipped assert isinstance(ioh_mo.memory_object, POSH)
     """
 
-    def __init__(self, workdir=None):
+    def __init__(self, workdir=None, validator=None, mode=MODE.NONE):
         self.source_type = None
         self.source = None
         self._tempfile = None
         self.workdir = workdir
 
+        self.valid_mode = mode
+        self._validated = False
+        self.validator = validator
+
+    def _check_valid(self):
+        """Validate this input usig given validator
+        """
+
+        if self.validator and not self._validated:
+            _valid = self.validator(self, self.valid_mode)
+            if not _valid:
+                raise InvalidParameterValue('Input data not valid using '
+                                            'mode %s' % (self.valid_mode))
+
     def set_file(self, filename):
         """Set source as file name"""
         self.source_type = SOURCE_TYPE.FILE
         self.source = os.path.abspath(filename)
+        self._check_valid()
 
     def set_workdir(self, workdirpath):
         """Set working temporary directory for files to be stored in"""
@@ -101,21 +118,25 @@ class IOHandler(object):
     def set_memory_object(self, memory_object):
         """Set source as in memory object"""
         self.source_type = SOURCE_TYPE.MEMORY
+        self._check_valid()
 
     def set_stream(self, stream):
         """Set source as stream object"""
         self.source_type = SOURCE_TYPE.STREAM
         self.source = stream
+        self._check_valid()
 
     def set_data(self, data):
         """Set source as simple datatype e.g. string, number"""
         self.source_type = SOURCE_TYPE.DATA
         self.source = data
+        self._check_valid()
 
     def set_base64(self, data):
         """Set data encoded in base64"""
 
         self.data = base64.b64decode(data)
+        self._check_valid()
 
     def get_file(self):
         """Get source as file name"""
@@ -294,11 +315,43 @@ class BasicComplex(object):
 
     def __init__(self, data_format=None, supported_formats=None):
         self._data_format = None
-        self.supported_formats = supported_formats
+        self._supported_formats = None
+        self.validator = None
+        if supported_formats:
+            self.supported_formats = supported_formats
         if self.supported_formats:
             self.data_format = supported_formats[0]
         if data_format:
             self.data_format = data_format
+
+    def get_format(self, mime_type):
+        """
+        :param mime_type: given mimetype
+        :return: Format
+        """
+        
+        for frmt in self.supported_formats:
+            if frmt.mime_type == mime_type:
+                return frmt
+        else:
+            return None
+
+    @property
+    def supported_formats(self):
+        return self._supported_formats
+
+    @supported_formats.setter
+    def supported_formats(self, supported_formats):
+        """Setter of supported formats
+        """
+       
+        def set_validator(supported_format):
+            if not supported_format.validate:
+                supported_format.validate =\
+                    get_validator(supported_format.mime_type)
+            return supported_format
+
+        self._supported_formats = list(map(set_validator, supported_formats))
 
     @property
     def data_format(self):
@@ -311,12 +364,15 @@ class BasicComplex(object):
         """
         if self._is_supported(data_format):
             self._data_format = data_format
+            if not data_format.validate:
+                data_format.validate = get_validator(data_format.mime_type)
         else:
             raise InvalidParameterValue("Requested format "
                                         "%s, %s, %s not supported" %\
                                         (data_format.mime_type,
                                          data_format.encoding,
-                                         data_format.schema))
+                                         data_format.schema),
+                                        'mimeType')
 
     def _is_supported(self, data_format):
 
@@ -344,7 +400,8 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
     """
 
     def __init__(self, identifier, title=None, abstract=None,
-                 data_type=None, workdir=None, allowed_values=None, uoms=None):
+                 data_type=None, workdir=None, allowed_values=None, uoms=None,
+                 validator=None, mode=None):
         BasicIO.__init__(self, identifier, title, abstract)
         BasicLiteral.__init__(self, data_type, uoms)
         SimpleHandler.__init__(self, workdir, data_type)
@@ -358,7 +415,8 @@ class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
     """
 
     def __init__(self, identifier, title=None, abstract=None,
-                 data_type=None, workdir=None, uoms=None):
+                 data_type=None, workdir=None, uoms=None, validator=None, 
+                 mode=None):
         BasicIO.__init__(self, identifier, title, abstract)
         BasicLiteral.__init__(self, data_type, uoms)
         SimpleHandler.__init__(self, workdir=None, data_type=data_type)
@@ -413,10 +471,11 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
     """
 
     def __init__(self, identifier, title=None, abstract=None,
-                 workdir=None, data_format=None, supported_formats=None):
+                 workdir=None, data_format=None, supported_formats=None,
+                 validator=None):
         BasicIO.__init__(self, identifier, title, abstract)
+        IOHandler.__init__(self, workdir, validator)
         BasicComplex.__init__(self, data_format, supported_formats)
-        IOHandler.__init__(self, workdir)
 
 
 
@@ -449,10 +508,16 @@ class ComplexOutput(BasicIO, BasicComplex, IOHandler):
     """
 
     def __init__(self, identifier, title=None, abstract=None,
-                 workdir=None, data_format=None, supported_formats=None):
+                 workdir=None, data_format=None, supported_formats=None,
+                 validator=None):
         BasicIO.__init__(self, identifier, title, abstract)
-        BasicComplex.__init__(self, data_format, supported_formats)
         IOHandler.__init__(self, workdir)
+        BasicComplex.__init__(self, data_format, supported_formats)
+
+        # set validator dererived from BasicComplex data_format it not set
+        if not validator:
+            validator = self.validator
+        IOHandler.__init__(self, workdir, validator)
 
         self._storage = None
 
