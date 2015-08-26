@@ -287,7 +287,7 @@ class Service(object):
         data_inputs = {}
         for inpt in process.inputs:
             if inpt.identifier not in wps_request.inputs:
-                if inpt.min_occurs < 1:
+                if inpt.min_occurs > 0:
                     raise MissingParameterValue('', inpt.identifier)
                 else:
                     data_inputs[inpt.identifier] = inpt.clone()
