@@ -57,7 +57,7 @@ def setConfigValue(*args):
 
 
 
-def loadConfiguration(cfgfiles=None):
+def loadConfiguration(cfgfiles=None, environ=None):
     """Load PyWPS configuration from configuration files.
     The later configuration file in the array overwrites configuration
     from the first.
@@ -83,9 +83,15 @@ def loadConfiguration(cfgfiles=None):
 
     # adapting config from env_vars
     # each env_var following the format PYWPS_CONFIG_section_option is added to the config
-    # In linux we can have camel case env_vars. In windows we'll run unto some trouble.
+    _overrideConfigFromConfigDict({k.split("_",2)[-1]:v for k,v in os.environ.iteritems() if k.startswith('PYWPS_CONFIG_')})
+
+    # same trick for request environ, overriding previous config settings 
+    if environ:
+        _overrideConfigFromConfigDict({k.split("_",2)[-1]:v for k,v in environ.iteritems() if k.startswith('PYWPS_CONFIG_')})
+
+def _overrideConfigFromConfigDict(env_config):
+    # In linux we can have camel case env_vars. In windows we'll run into some trouble.
     # for now, for windows we'll force section and option to lowercase
-    env_config = {k.split("_",2)[-1]:v for k,v in os.environ.iteritems() if k.startswith('PYWPS_CONFIG_')}
     for k,v in env_config.iteritems():
         section, option = k.split("_",1)
         try:
@@ -94,8 +100,8 @@ def loadConfiguration(cfgfiles=None):
             else:
                 config.set(section, option, v)
         except:
-            pass    # fail silent 
-   
+            pass    # fail silent logging is not ready yet
+     
 def _getDefaultConfigFilesLocation():
     """Get the locations of the standard configuration files. This are
 

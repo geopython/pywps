@@ -171,12 +171,12 @@ class Pywps:
     versions=[DEFAULT_VERSION]
     UUID = None
 
-    def __init__(self, method=METHOD_GET, configFiles=None):
+    def __init__(self, environ, configFiles=None):
         """Class constructor
         """
 
         # get settings
-        config.loadConfiguration(configFiles)
+        config.loadConfiguration(configFiles, environ)
         self.setLogFile()
         self.UUID = uuid.uuid1().__str__()
 
@@ -188,7 +188,7 @@ class Pywps:
         DEFAULT_VERSION = self.versions[0]
 
         # find out the request method
-        self.method = method
+        self.method = environ["REQUEST_METHOD"]
 
 
     def parseRequest(self,queryStringObject):

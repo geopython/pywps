@@ -54,7 +54,7 @@ def application(environ, start_response):
 
     # create the WPS object
     try:
-        wps = pywps.Pywps(environ["REQUEST_METHOD"])
+        wps = pywps.Pywps(environ)
         if wps.parseRequest(inputQuery):
             pywps.debug(wps.inputs)
             wps.performRequest()
