@@ -184,8 +184,8 @@ class OutputDescriptionTest(unittest.TestCase):
         doc = literal.describe_xml()
         [output] = xpath_ns(doc, '/Output')
         [identifier] = xpath_ns(doc, '/Output/ows:Identifier')
-        [data_type] = xpath_ns(doc, '/Output/LiteralData/ows:DataType')
-        [uoms] = xpath_ns(doc, '/Output/LiteralData/UOMs')
+        [data_type] = xpath_ns(doc, '/Output/LiteralOutput/ows:DataType')
+        [uoms] = xpath_ns(doc, '/Output/LiteralOutput/UOMs')
         [default_uom] = xpath_ns(uoms, './Default/ows:UOM')
         supported_uoms = xpath_ns(uoms, './Supported/ows:UOM')
         
@@ -198,7 +198,7 @@ class OutputDescriptionTest(unittest.TestCase):
         assert len(supported_uoms) == 1
 
     def test_complex_output(self):
-        complexo = ComplexOutput('complex', 'Complex foo', Format('GML'))
+        complexo = ComplexOutput('complex', 'Complex foo', [Format('GML')])
         doc = complexo.describe_xml()
         [outpt] = xpath_ns(doc, '/Output')
         [default] = xpath_ns(doc, '/Output/ComplexOutput/Default/Format/MimeType')
@@ -212,10 +212,9 @@ class OutputDescriptionTest(unittest.TestCase):
         bbox = BoundingBoxOutput('bbox', 'BBox foo',
                 crss=["EPSG:4326"])
         doc = bbox.describe_xml()
-        [inpt] = xpath_ns(doc, '/Output')
+        [outpt] = xpath_ns(doc, '/Output')
         [default_crs] = xpath_ns(doc, './BoundingBoxOutput/Default/CRS')
         supported = xpath_ns(doc, './BoundingBoxOutput/Supported/CRS')
-        assert inpt.attrib['minOccurs'] == '1'
         assert default_crs.text == 'EPSG:4326'
         assert len(supported) == 1
 

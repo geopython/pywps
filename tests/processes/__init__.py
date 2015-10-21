@@ -1,8 +1,8 @@
-from pywps.process import Process
-from pywps.process.inout.standards import LiteralLengthInput
+from pywps import Process
+from pywps.inout import LiteralInput
 
 class SimpleProcess(Process):
     identifier = "simpleprocess"
 
     def __init__(self):
-        self.add_input(LiteralLengthInput())
+        self.add_input(LiteralInput())

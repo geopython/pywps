@@ -7,11 +7,14 @@ class BoundingBoxInput(basic.BBoxInput):
     """
     :param identifier: The name of this input.
     :param data_type: Type of literal input (e.g. `string`, `float`...).
+    :param crss: List of supported coordinate reference system (e.g. ['EPSG:4326'])
     """
 
     def __init__(self, identifier, title, crss, abstract='',
-                 dimensions=2, metadata=[], min_occurs=1,
+                 dimensions=2, metadata=None, min_occurs=1,
                  max_occurs=1, as_reference=False):
+        if metadata is None:
+            metadata = []
         basic.BBoxInput.__init__(self, identifier, title=title,
                                  abstract=abstract, crss=crss,
                                  dimensions=dimensions)
@@ -82,19 +85,18 @@ class ComplexInput(basic.ComplexInput):
     """
     :param identifier: The name of this input.
     :param allowed_formats: Allowed formats for this input. Should be a list of
-                    one or more :class:`~Format` objects.
-    :param data_format: Format of the passed input. Should be :class:`~Format` object
+                    one or more :class:`~Format` objects. First one is assumed to 
+                    be the default. 
     """
 
     def __init__(self, identifier, title, supported_formats=None,
-                 data_format=None, abstract='', metadata=[], min_occurs=1,
+                 abstract='', metadata=None, min_occurs=1,
                  max_occurs=1, as_reference=False):
-
+        if metadata is None:
+            metadata = []
         basic.ComplexInput.__init__(self, identifier=identifier, title=title,
                                     abstract=abstract,
-                                    data_format=data_format,
                                     supported_formats=supported_formats)
-
         self.metadata = metadata
         self.min_occurs = int(min_occurs)
         self.max_occurs = int(max_occurs)

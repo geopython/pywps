@@ -132,7 +132,7 @@ class ComplexOutputTest(unittest.TestCase):
         tmp_dir = tempfile.mkdtemp()
         data_format = get_data_format()
         self.complex_out = ComplexOutput(identifier="complexinput", workdir=tmp_dir,
-                                         data_format=data_format)
+                                         supported_formats=[data_format])
 
     def test_contruct(self):
         self.assertIsInstance(self.complex_out, ComplexOutput)
