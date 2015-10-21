@@ -62,6 +62,7 @@ Apache configuration
 
 2. Add configuration:
 
+    ```apache
     WSGIDaemonProcess pywps user=user group=group processes=2 threads=5
     WSGIScriptAlias /pywps /path/to/www/htdocs/wps/pywps.wsgi
 
@@ -71,13 +72,11 @@ Apache configuration
         Order deny,allow
         Allow from all
     </Directory>
-
+    ```
 3. Create wsgi file:
 
-
-    
+    ```python
     #!/usr/bin/env python3
-
     import sys
     sys.path.append('/path/to/src/pywps-4/')
     
@@ -91,13 +90,17 @@ Apache configuration
     
     
     application = Service(processes=[Process(pr1)])
-
+    ```
 
 4. Run via web browser
 
-    http://localhost/pywps/?service=wps&request=getcapabilities
+    `http://localhost/pywps/?service=wps&request=getcapabilities&version=1.0.0`
 
-5. Run in command line: TBD
+5. Run in command line:
+  
+    ```bash
+    curl 'http://localhost/pywps/?service=wps&request=GetCapabilities&version=1.0.0'
+    ```
 
 
 Issues
