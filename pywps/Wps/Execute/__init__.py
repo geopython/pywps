@@ -365,7 +365,7 @@ class Execute(Request):
             self.outputFile.name
             new_env = self._prepare_env()
             subprocess.Popen([sys.executable, __file__, picklePath, self.outputFile.name],
-                             stdout=None, stderr=None, env=new_env)
+                             stdout=None, stderr=None, close_fds=True, env=new_env)
             logging.info("This is parent process, end.")
 
             # close the outputs ..
@@ -487,6 +487,8 @@ class Execute(Request):
         self.process.status.onStatusChanged = self.onStatusChanged
         self.process.debug = config.getConfigValue("server","debug")
         self.process.logFile = pywps.logFile
+        # tell execute() that we are async
+        self.process.spawned = self.spawned
 
     def consolidateInputs(self):
         """ Donwload and control input data, defined by the client """
@@ -1441,6 +1443,15 @@ if __name__ == "__main__":
         # Redirect stdout to stderr, as per instructions in
         # https://code.google.com/p/modwsgi/wiki/ApplicationIssues
         sys.stdout = sys.stderr
+    else:
+         #redirect stdin, stderr and stdout to free(unblock) appache imediatly
+         si = file(os.devnull, 'r')
+         so = file(os.devnull, 'a+')
+         se = file(os.devnull, 'a+', 0)
+         os.dup2(si.fileno(), sys.stdin.fileno())
+         os.dup2(so.fileno(), sys.stdout.fileno())
+         os.dup2(se.fileno(), sys.stderr.fileno())
+
     # load the pickeled file from the disc
     picklePath = sys.argv[1] if len(sys.argv) else ''
     if os.path.isfile(picklePath):
