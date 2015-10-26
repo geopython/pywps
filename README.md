@@ -6,7 +6,6 @@ New version of PyWPS, written from scratch.
 * [Documentation](http://pywps.rtfd.org), hosted by ReadTheDocs.
 * Continuous integration with Travis: 
   [![Build Status](https://travis-ci.org/jachym/pywps-4.png)](https://travis-ci.org/jachym/pywps-4)
-* [Demo application](http://pywps.grep.ro/)
 
 License
 =======
@@ -52,7 +51,7 @@ Clone PyWPS-4 recursively with the demo application:
     
 Or clone only demo app after having installed PyWPS-4:
 
-    $ git clone git://github.com/ldesousa/pywps-4-demo.git
+    $ git clone git://github.com/PyWPS/pywps-4-demo.git
     $ cd demo/
     $ python demo.py
  
