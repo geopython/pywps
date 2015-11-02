@@ -459,7 +459,7 @@ class Service(object):
 
         if len(outinputs) < source.min_occurs:
             raise MissingParameterValue(locator = source.identifier)
-    
+
         return outinputs
 
 
