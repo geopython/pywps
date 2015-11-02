@@ -208,8 +208,10 @@ class ExecuteTest(unittest.TestCase):
 
         [output] = xpath_ns(resp.xml, '/wps:ExecuteResponse'
                                    '/wps:ProcessOutputs/Output')
-        assert 'outbbox' == xpath_ns(output, './ows:Identifier')[0].text
-        assert '15 50' == xpath_ns(output, './ows:BoundingBox/ows:LowerCorner')[0].text
+        self.assertEqual('outbbox', xpath_ns(output,
+            './ows:Identifier')[0].text)
+        self.assertEqual('15 50', xpath_ns(output,
+            './ows:BoundingBox/ows:LowerCorner')[0].text)
 
 class ExecuteXmlParserTest(unittest.TestCase):
     """Tests for Execute request XML Parser

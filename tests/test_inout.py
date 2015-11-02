@@ -10,6 +10,7 @@ from pywps.inout.basic import IOHandler, SOURCE_TYPE, DataTypeAbstract, SimpleHa
     ComplexInput, ComplexOutput, LiteralInput, LiteralOutput
 from pywps.inout import BoundingBoxInput as BoundingBoxInputXML
 from pywps._compat import StringIO, text_type
+from pywps.validator.base import emptyvalidator
 
 from lxml import etree
 
@@ -32,6 +33,11 @@ class IOHandlerTest(unittest.TestCase):
     def test_basic_IOHandler(self):
         """Test basic IOHandler"""
         self.assertTrue(os.path.isdir(self.iohandler.workdir))
+
+    def test_validator(self):
+        """Test available validation function
+        """
+        self.assertEqual(self.iohandler.validator, emptyvalidator)
 
     def _test_outout(self, source_type):
         """Test all outputs"""
@@ -121,12 +127,20 @@ class ComplexInputTest(unittest.TestCase):
     def test_validator(self):
         self.assertEqual(self.complex_in.data_format.validate,
                        get_validator('application/json')) 
+        self.assertEqual(self.complex_in.validator,
+                         get_validator('application/json'))
+        frmt = get_data_format('application/json')
+        def my_validate():
+            return True
+        frmt.validate = my_validate
+        self.assertNotEqual(self.complex_in.validator, frmt.validate)
 
     def test_contruct(self):
         self.assertIsInstance(self.complex_in, ComplexInput)
 
     def test_data_format(self):
         self.assertIsInstance(self.complex_in.supported_formats[0], Format)
+
 
 
 class ComplexOutputTest(unittest.TestCase):
@@ -136,7 +150,8 @@ class ComplexOutputTest(unittest.TestCase):
         tmp_dir = tempfile.mkdtemp()
         data_format = get_data_format('application/json')
         self.complex_out = ComplexOutput(identifier="complexinput", workdir=tmp_dir,
-                                         data_format=data_format)
+                                         data_format=data_format,
+                                         supported_formats=[data_format])
 
     def test_contruct(self):
         self.assertIsInstance(self.complex_out, ComplexOutput)
@@ -150,6 +165,11 @@ class ComplexOutputTest(unittest.TestCase):
         storage = Storage()
         self.complex_out.store = storage
         self.assertEqual(self.complex_out.store, storage)
+
+    def test_validator(self):
+        self.assertEqual(self.complex_out.validator,
+                         get_validator('application/json'))
+
 
 
 class SimpleHandlerTest(unittest.TestCase):
@@ -232,6 +252,7 @@ def load_tests(loader=None, tests=None, pattern=None):
     suite_list = [
         loader.loadTestsFromTestCase(IOHandlerTest),
         loader.loadTestsFromTestCase(ComplexInputTest),
+        loader.loadTestsFromTestCase(ComplexOutputTest),
         loader.loadTestsFromTestCase(SimpleHandlerTest),
         loader.loadTestsFromTestCase(LiteralInputTest),
         loader.loadTestsFromTestCase(LiteralOutputTest),

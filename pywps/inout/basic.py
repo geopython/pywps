@@ -6,6 +6,8 @@ from pywps import OWS, OGCUNIT, NAMESPACES
 from pywps.validator.mode import MODE
 from pywps.validator.base import emptyvalidator
 from pywps.validator import get_validator
+from pywps.validator.literalvalidator import validate_anyvalue,\
+    validate_allowed_values 
 from pywps.exceptions import InvalidParameterValue
 import base64
 
@@ -80,25 +82,27 @@ class IOHandler(object):
     >>> # skipped assert isinstance(ioh_mo.memory_object, POSH)
     """
 
-    def __init__(self, workdir=None, validator=None, mode=MODE.NONE):
+    def __init__(self, workdir=None, mode=MODE.NONE):
         self.source_type = None
         self.source = None
         self._tempfile = None
+        self._validated = False
         self.workdir = workdir
 
         self.valid_mode = mode
-        self._validated = False
-        self.validator = validator
 
     def _check_valid(self):
         """Validate this input usig given validator
         """
 
-        if self.validator and not self._validated:
-            _valid = self.validator(self, self.valid_mode)
+        if not self._validated:
+            validate = self.validator
+            _valid = validate(self, self.valid_mode)
             if not _valid:
                 raise InvalidParameterValue('Input data not valid using '
                                             'mode %s' % (self.valid_mode))
+            else:
+                self._validated = True
 
     def set_file(self, filename):
         """Set source as file name"""
@@ -192,6 +196,16 @@ class IOHandler(object):
         elif self.source_type == SOURCE_TYPE.DATA:
             return self.source
 
+    @property
+    def validator(self):
+        """Return the function suitable for validation
+        This method should be overridden by class children
+
+        :return: validating function
+        """
+
+        return emptyvalidator
+
     def get_base64(self):
         return base64.b64encode(self.data)
 
@@ -226,10 +240,9 @@ class SimpleHandler(IOHandler):
     False
     """
 
-    def __init__(self, workdir=None, data_type=None):
-        IOHandler.__init__(self, workdir)
+    def __init__(self, workdir=None, data_type=None, mode=MODE.NONE):
+        IOHandler.__init__(self, workdir=workdir, mode=mode)
         self.data_type = data_type
-        self._validator = None
 
     def get_data(self):
         return IOHandler.get_data(self)
@@ -254,15 +267,12 @@ class SimpleHandler(IOHandler):
                         data = False
                 #data = self.data_type.convert(data)
 
+                _valid = self.validator(self, self.valid_mode)
+                if not _valid:
+                    raise InvalidParameterValue('Input data not valid using '
+                                                'mode %s' % (self.valid_mode))
+
                 IOHandler.set_data(self, data)
-
-    @property
-    def validator(self):
-        return self._validator
-
-    @validator.setter
-    def validator(self, validator):
-        self._validator = validator
 
     data = property(fget=get_data, fset=set_data)
 
@@ -316,7 +326,6 @@ class BasicComplex(object):
     def __init__(self, data_format=None, supported_formats=None):
         self._data_format = None
         self._supported_formats = None
-        self.validator = None
         if supported_formats:
             self.supported_formats = supported_formats
         if self.supported_formats:
@@ -335,6 +344,13 @@ class BasicComplex(object):
                 return frmt
         else:
             return None
+
+    @property
+    def validator(self):
+        """Return the proper validator for given data_format
+        """
+
+        return self.data_format.validate
 
     @property
     def supported_formats(self):
@@ -376,9 +392,10 @@ class BasicComplex(object):
 
     def _is_supported(self, data_format):
 
-        for frmt in self.supported_formats:
-            if frmt.same_as(data_format):
-                return True
+        if self.supported_formats:
+            for frmt in self.supported_formats:
+                if frmt.same_as(data_format):
+                    return True
 
         return False
 
@@ -401,13 +418,23 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
 
     def __init__(self, identifier, title=None, abstract=None,
                  data_type=None, workdir=None, allowed_values=None, uoms=None,
-                 validator=None, mode=None):
+                 mode=MODE.NONE):
         BasicIO.__init__(self, identifier, title, abstract)
         BasicLiteral.__init__(self, data_type, uoms)
-        SimpleHandler.__init__(self, workdir, data_type)
+        SimpleHandler.__init__(self, workdir, data_type, mode=mode)
 
         self.allowed_values = allowed_values
         self.any_value = self.allowed_values is None
+
+    @property
+    def validator(self):
+        """Get validator for any value as well as allowed_values
+        """
+
+        if self.any_value:
+            return validate_anyvalue
+        else:
+            return validate_allowed_values
 
 
 class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
@@ -415,11 +442,12 @@ class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
     """
 
     def __init__(self, identifier, title=None, abstract=None,
-                 data_type=None, workdir=None, uoms=None, validator=None, 
-                 mode=None):
+                 data_type=None, workdir=None, uoms=None, validate=None, 
+                 mode=MODE.NONE):
         BasicIO.__init__(self, identifier, title, abstract)
         BasicLiteral.__init__(self, data_type, uoms)
-        SimpleHandler.__init__(self, workdir=None, data_type=data_type)
+        SimpleHandler.__init__(self, workdir=None, data_type=data_type,
+                mode=mode)
 
         self._storage = None
 
@@ -431,25 +459,32 @@ class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
     def storage(self, storage):
         self._storage = storage
 
+    @property
+    def validator(self):
+        """Get validator for any value as well as allowed_values
+        """
+
+        return validate_anyvalue
+
 class BBoxInput(BasicIO, BasicBoundingBox, IOHandler):
     """Basic Bounding box input abstract class
     """
 
     def __init__(self, identifier, title=None, abstract=None, crss=None,
-            dimensions=None, workdir=None):
+            dimensions=None, workdir=None, mode=MODE.NONE):
         BasicIO.__init__(self, identifier, title, abstract)
         BasicBoundingBox.__init__(self, crss, dimensions)
-        IOHandler.__init__(self, workdir=None)
+        IOHandler.__init__(self, workdir=None, mode=mode)
 
 class BBoxOutput(BasicIO, BasicBoundingBox, SimpleHandler):
     """Basic BoundingBox output class
     """
 
     def __init__(self, identifier, title=None, abstract=None, crss=None,
-            dimensions=None, workdir=None):
+            dimensions=None, workdir=None, mode=MODE.NONE):
         BasicIO.__init__(self, identifier, title, abstract)
         BasicBoundingBox.__init__(self, crss, dimensions)
-        SimpleHandler.__init__(self, workdir=None)
+        SimpleHandler.__init__(self, workdir=None, mode=mode)
         self._storage = None
 
     @property
@@ -472,9 +507,9 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
 
     def __init__(self, identifier, title=None, abstract=None,
                  workdir=None, data_format=None, supported_formats=None,
-                 validator=None):
+                 mode=MODE.NONE):
         BasicIO.__init__(self, identifier, title, abstract)
-        IOHandler.__init__(self, workdir, validator)
+        IOHandler.__init__(self, workdir=workdir, mode=mode)
         BasicComplex.__init__(self, data_format, supported_formats)
 
 
@@ -509,15 +544,10 @@ class ComplexOutput(BasicIO, BasicComplex, IOHandler):
 
     def __init__(self, identifier, title=None, abstract=None,
                  workdir=None, data_format=None, supported_formats=None,
-                 validator=None):
+                 mode=MODE.NONE):
         BasicIO.__init__(self, identifier, title, abstract)
-        IOHandler.__init__(self, workdir)
+        IOHandler.__init__(self, workdir=workdir, mode=mode)
         BasicComplex.__init__(self, data_format, supported_formats)
-
-        # set validator dererived from BasicComplex data_format it not set
-        if not validator:
-            validator = self.validator
-        IOHandler.__init__(self, workdir, validator)
 
         self._storage = None
 
