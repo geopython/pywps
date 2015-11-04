@@ -16,11 +16,19 @@ else:
 
 def get_input(name, schema, mime_type):
 
+    class FakeFormat(object):
+        mimetype = 'text/plain'
+        schema = None
+        units = None
+        def validate(self, data):
+            return True
+
     class FakeInput(object):
         tempdir = tempfile.mkdtemp()
         file = os.path.join(
             os.path.abspath(os.path.dirname(__file__)),
             '..', 'data', name)
+        format = FakeFormat()
 
     class data_format(object):
         file = os.path.join(

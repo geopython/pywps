@@ -5,6 +5,7 @@ import unittest
 from pywps.inout.formats import Format, get_format, FORMATS
 from lxml import etree
 from pywps.app.basic import xpath_ns
+from pywps.validator.base import emptyvalidator
 
 
 class FormatsTest(unittest.TestCase):
@@ -28,13 +29,13 @@ class FormatsTest(unittest.TestCase):
         frmt = Format('mimetype', schema='halloworld', encoding='asdf',
                       validate=self.validate)
 
-        self.assertEquals(frmt.mime_type, 'mimetype')
-        self.assertEquals(frmt.schema, 'halloworld')
-        self.assertEquals(frmt.encoding, 'asdf')
+        self.assertEqual(frmt.mime_type, 'mimetype')
+        self.assertEqual(frmt.schema, 'halloworld')
+        self.assertEqual(frmt.encoding, 'asdf')
         self.assertTrue(frmt.validate('the input', 1))
 
         describeel = frmt.describe_xml()
-        self.assertEquals('Format', describeel.tag)
+        self.assertEqual('Format', describeel.tag)
         mimetype = xpath_ns(describeel, '/Format/MimeType')
         encoding = xpath_ns(describeel, '/Format/Encoding')
         schema = xpath_ns(describeel, '/Format/Schema')
@@ -43,9 +44,9 @@ class FormatsTest(unittest.TestCase):
         self.assertTrue(encoding)
         self.assertTrue(schema)
 
-        self.assertEquals(mimetype[0].text, 'mimetype')
-        self.assertEquals(encoding[0].text, 'asdf')
-        self.assertEquals(schema[0].text, 'halloworld')
+        self.assertEqual(mimetype[0].text, 'mimetype')
+        self.assertEqual(encoding[0].text, 'asdf')
+        self.assertEqual(schema[0].text, 'halloworld')
 
         frmt2 = get_format('GML')
 

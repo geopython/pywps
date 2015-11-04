@@ -1,7 +1,8 @@
 import tempfile
 from werkzeug.exceptions import BadRequest, HTTPException
 from werkzeug.wrappers import Request, Response
-from pywps import WPS, OWS, Format
+from pywps import WPS, OWS
+from pywps.inout import Format
 from pywps._compat import PY2
 from pywps.app.basic import xml_response
 from pywps.app.WPSRequest import WPSRequest
@@ -254,7 +255,7 @@ class Service(object):
         :param identifier: process identifier string
         :param wps_request: pywps.WPSRequest structure with parsed inputs, still in memory
         """
-
+        response = None
         try:
             process = self.processes[identifier]
 
@@ -262,17 +263,20 @@ class Service(object):
             tempdir = tempfile.mkdtemp(prefix='pypws_process_', dir=workdir)
             process.set_workdir(tempdir)
         except KeyError:
-            raise BadRequest("Unknown process %r" % identifier)
+            raise InvalidParameterValue("Unknown process '%r'" % identifier)
 
+        olddir = os.path.abspath(os.curdir)
         try:
-            olddir = os.path.abspath(os.curdir)
             os.chdir(process.workdir)
             response = self._parse_and_execute(process, wps_request)
             os.chdir(olddir)
-            return response
+            shutil.rmtree(process.workdir)
         except Exception as e:
+            os.chdir(olddir)
             shutil.rmtree(process.workdir)
             raise e
+
+        return response
 
     def _parse_and_execute(self, process, wps_request):
         """Parse and execute request
@@ -288,7 +292,7 @@ class Service(object):
         for inpt in process.inputs:
             if inpt.identifier not in wps_request.inputs:
                 if inpt.min_occurs > 0:
-                    raise MissingParameterValue('', inpt.identifier)
+                    raise MissingParameterValue(inpt.identifier, inpt.identifier)
                 else:
                     data_inputs[inpt.identifier] = inpt.clone()
 
@@ -406,15 +410,17 @@ class Service(object):
 
         for inpt in inputs:
             data_input = source.clone()
-            if inpt.get('mimeType'):
-                frmt = Format(
-                    inpt.get('mimeType'),
-                    inpt.get('encoding'),
-                    inpt.get('schema')
-                )
+            frmt = data_input.supported_formats[0]
+            if 'mimeType' in inpt:
+                frmt = data_input.get_format(inpt['mimeType'])
+
+            if frmt:
                 data_input.data_format = frmt
             else:
-                data_input.data_format = data_input.supported_formats[0]
+                raise InvalidParameterValue(
+                    'Invalid mimeType value %s for input %s' %\
+                    (inpt.get('mimeType'), source.identifier),
+                    'mimeType') 
 
             data_input.method = inpt.get('method', 'GET')
 
@@ -453,7 +459,7 @@ class Service(object):
 
         if len(outinputs) < source.min_occurs:
             raise MissingParameterValue(locator = source.identifier)
-    
+
         return outinputs
 
 
@@ -489,7 +495,6 @@ class Service(object):
 
             elif wps_request.operation == 'execute':
                 return self.execute(wps_request.identifier, wps_request)
-
             else:
                 raise RuntimeError("Unknown operation %r"
                                    % wps_request.operation)

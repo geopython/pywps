@@ -31,6 +31,7 @@ responses back to client.
 import os
 from lxml.builder import ElementMaker
 
+
 PYWPS_INSTALL_DIR = os.path.dirname(os.path.abspath(__file__))
 
 NAMESPACES = {
@@ -76,9 +77,12 @@ OGCUNIT = {
     'unity': 'urn:ogc:def:uom:OGC:1.0:unity'
 }
 
-
-from pywps.inout import *
-from pywps.app import *
+from pywps.app import Process, Service, WPSRequest
+from pywps.app.WPSRequest import get_inputs_from_xml, get_output_from_xml
+from pywps.inout.inputs import LiteralInput, ComplexInput, BoundingBoxInput
+from pywps.inout.outputs import LiteralOutput, ComplexOutput, BoundingBoxOutput
+from pywps.inout.formats import Format, FORMATS, get_format
+from pywps.inout import UOM
 
 if __name__ == "__main__":
     pass

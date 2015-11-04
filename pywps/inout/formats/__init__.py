@@ -10,6 +10,8 @@
 from lxml.builder import ElementMaker
 from collections import namedtuple
 import mimetypes
+from pywps.validator.mode import MODE
+from pywps.validator.base import emptyvalidator
 
 _FORMAT = namedtuple('FormatDefintion', 'mime_type,'
                      'extension, schema')
@@ -50,13 +52,17 @@ class Format(object):
     """Input/output format specification
     """
     def __init__(self, mime_type,
-                 schema=None, encoding=None, validate=None, extension=None):
+                 schema=None, encoding=None,
+                 validate=emptyvalidator, mode=MODE.SIMPLE,
+                 extension=None):
         """Constructor
 
         :param mime_type: mimetype definition
-        :schema: xml schema definition
-        :encoding: base64 or not
-        :validate: function, which will perform validation. e.g.
+        :param schema: xml schema definition
+        :param encoding: base64 or not
+        :param validate: function, which will perform validation. e.g.
+        :param mode: validation mode
+        :param extension: file extension
         pywps.validator.complexvalidator.validategml
         """
 
@@ -154,6 +160,7 @@ class Format(object):
 def get_format(frmt, validator=None):
     """Return Format instance based on given pywps.inout.FORMATS keyword
     """
+    # TODO this should be probably removed, it's used only in tests
 
     outfrmt = None
 

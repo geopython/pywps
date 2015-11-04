@@ -8,8 +8,8 @@ class ConvertorTest(unittest.TestCase):
 
     def test_integer(self):
         """Test integer convertor"""
-        self.assertEquals(convert_integer('1.0'), 1)
-        self.assertEquals(convert_integer(1), 1)
+        self.assertEqual(convert_integer('1.0'), 1)
+        self.assertEqual(convert_integer(1), 1)
         with self.assertRaises(ValueError):
             convert_integer('a')
 
@@ -22,9 +22,9 @@ class ConvertorTest(unittest.TestCase):
 
     def test_string(self):
         """Test string convertor"""
-        self.assertEquals(convert_string('1.0'), '1.0')
-        self.assertEquals(convert_string(1), '1')
-        self.assertEquals(convert_string('a'), 'a')
+        self.assertEqual(convert_string('1.0'), '1.0')
+        self.assertEqual(convert_string(1), '1')
+        self.assertEqual(convert_string('a'), 'a')
 
     def test_boolean(self):
         """Test boolean convertor"""

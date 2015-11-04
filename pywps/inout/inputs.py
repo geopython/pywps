@@ -2,7 +2,6 @@ from pywps import configuration, E, OWS, WPS, OGCTYPE, NAMESPACES
 from pywps.inout import basic
 from copy import deepcopy
 
-
 class BoundingBoxInput(basic.BBoxInput):
     """
     :param identifier: The name of this input.
@@ -90,8 +89,9 @@ class ComplexInput(basic.ComplexInput):
     """
 
     def __init__(self, identifier, title, supported_formats=None,
-                 abstract='', metadata=None, min_occurs=1,
-                 max_occurs=1, as_reference=False):
+                 data_format=None, abstract='', metadata=[], min_occurs=1,
+                 max_occurs=1, as_reference=False): 
+
         if metadata is None:
             metadata = []
         basic.ComplexInput.__init__(self, identifier=identifier, title=title,

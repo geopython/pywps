@@ -1,3 +1,5 @@
+import sys
+
 try:
     from setuptools import setup
 except ImportError:
@@ -15,5 +17,8 @@ config = {
     'scripts': [],
     'name': 'pywps'
 }
+
+if sys.version_info.major < 3:
+    config['install_requires'].append('flufl.enum')
 
 setup(**config)
