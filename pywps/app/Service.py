@@ -281,7 +281,6 @@ class Service(object):
     def _parse_and_execute(self, process, wps_request):
         """Parse and execute request
         """
-
         # check if datainputs is required and has been passed
         if process.inputs:
             if wps_request.inputs is None:
@@ -412,7 +411,10 @@ class Service(object):
             data_input = source.clone()
             frmt = data_input.supported_formats[0]
             if 'mimeType' in inpt:
-                frmt = data_input.get_format(inpt['mimeType'])
+                if inpt['mimeType']:
+                    frmt = data_input.get_format(inpt['mimeType'])
+                else:
+                    frmt = data_input.data_format
 
             if frmt:
                 data_input.data_format = frmt
@@ -486,7 +488,6 @@ class Service(object):
     def __call__(self, http_request):
         try:
             wps_request = WPSRequest(http_request)
-
             if wps_request.operation == 'getcapabilities':
                 return self.get_capabilities()
 

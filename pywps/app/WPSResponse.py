@@ -163,11 +163,12 @@ class WPSResponse(object):
 
     @Request.application
     def __call__(self, request):
+        doc = None
         try:
-            self._construct_doc()
+            doc = self._construct_doc()
         except HTTPException as httpexp:
             raise httpexp
         except Exception as exp:
             raise NoApplicableCode(exp)
 
-        return xml_response(self._construct_doc())
+        return xml_response(doc)
