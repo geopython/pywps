@@ -83,7 +83,7 @@ def validategml(data_input, mode):
             gmlschema_doc = etree.parse(urlopen(schema_url))
             gmlschema = etree.XMLSchema(gmlschema_doc)
             passed = gmlschema.validate(etree.parse(data_input.stream))
-        except:
+        except Exception as e:
             passed = False
 
     return passed

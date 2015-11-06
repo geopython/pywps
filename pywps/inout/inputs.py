@@ -1,6 +1,7 @@
 from pywps import configuration, E, OWS, WPS, OGCTYPE, NAMESPACES
 from pywps.inout import basic
 from copy import deepcopy
+from pywps.validator.mode import MODE
 
 class BoundingBoxInput(basic.BBoxInput):
     """
@@ -11,12 +12,13 @@ class BoundingBoxInput(basic.BBoxInput):
 
     def __init__(self, identifier, title, crss, abstract='',
                  dimensions=2, metadata=None, min_occurs=1,
-                 max_occurs=1, as_reference=False):
+                 max_occurs=1, as_reference=False,
+                 mode=MODE.NONE):
         if metadata is None:
             metadata = []
         basic.BBoxInput.__init__(self, identifier, title=title,
                                  abstract=abstract, crss=crss,
-                                 dimensions=dimensions)
+                                 dimensions=dimensions, mode=mode)
 
         self.metadata = metadata
         self.min_occurs = int(min_occurs)
@@ -90,13 +92,14 @@ class ComplexInput(basic.ComplexInput):
 
     def __init__(self, identifier, title, supported_formats=None,
                  data_format=None, abstract='', metadata=[], min_occurs=1,
-                 max_occurs=1, as_reference=False): 
+                 max_occurs=1, as_reference=False, mode=MODE.NONE): 
 
         if metadata is None:
             metadata = []
         basic.ComplexInput.__init__(self, identifier=identifier, title=title,
                                     abstract=abstract,
-                                    supported_formats=supported_formats)
+                                    supported_formats=supported_formats,
+                                    mode=mode)
         self.metadata = metadata
         self.min_occurs = int(min_occurs)
         self.max_occurs = int(max_occurs)
@@ -213,10 +216,11 @@ class LiteralInput(basic.LiteralInput):
 
     def __init__(self, identifier, title, data_type='string', abstract='',
                  metadata=None, uoms=None, default=None,
-                 min_occurs=1, max_occurs=1, as_reference=False):
+                 min_occurs=1, max_occurs=1, as_reference=False,
+                 mode=MODE.NONE):
         basic.LiteralInput.__init__(self, identifier=identifier, title=title,
                                     abstract=abstract, data_type=data_type,
-                                    uoms=uoms)
+                                    uoms=uoms, mode=mode)
         self.metadata = metadata
         self.default = default
         self.min_occurs = int(min_occurs)

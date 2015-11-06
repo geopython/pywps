@@ -364,7 +364,8 @@ class BasicComplex(object):
         """
        
         def set_validator(supported_format):
-            if not supported_format.validate:
+            if not supported_format.validate or \
+               supported_format.validate == emptyvalidator:
                 supported_format.validate =\
                     get_validator(supported_format.mime_type)
             return supported_format
@@ -382,7 +383,8 @@ class BasicComplex(object):
         """
         if self._is_supported(data_format):
             self._data_format = data_format
-            if not data_format.validate:
+            if not data_format.validate or\
+                data_format.validate == emptyvalidator:
                 data_format.validate = get_validator(data_format.mime_type)
         else:
             raise InvalidParameterValue("Requested format "

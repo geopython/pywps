@@ -14,12 +14,13 @@ class BoundingBoxOutput(basic.BBoxInput):
 
     def __init__(self, identifier, title, crss, abstract='',
                  dimensions=2, metadata=None, min_occurs='1',
-                 max_occurs='1', as_reference=False):
+                 max_occurs='1', as_reference=False,
+                 mode=MODE.NONE):
         if metadata is None:
             metadata = []
         basic.BBoxInput.__init__(self, identifier, title=title,
                                  abstract=abstract, crss=crss,
-                                 dimensions=dimensions)
+                                 dimensions=dimensions, mode=mode)
 
         self.metadata = metadata
         self.min_occurs = min_occurs
@@ -87,13 +88,14 @@ class ComplexOutput(basic.ComplexOutput):
     """
 
     def __init__(self, identifier, title,  supported_formats=None,
-                 abstract='', metadata=None):
+                 abstract='', metadata=None, mode=MODE.NONE):
         if metadata is None:
             metadata = []
 
         basic.ComplexOutput.__init__(self, identifier, title=title,
                                      abstract=abstract,
-                                     supported_formats=supported_formats)
+                                     supported_formats=supported_formats,
+                                     mode=mode)
         self.metadata = metadata
         self.as_reference = False
 
