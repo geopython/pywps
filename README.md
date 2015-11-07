@@ -7,6 +7,8 @@ New version of PyWPS, written from scratch.
 * Continuous integration with Travis: 
   [![Build Status](https://travis-ci.org/jachym/pywps-4.png)](https://travis-ci.org/jachym/pywps-4)
 
+* Chat: https://gitter.im/PyWPS
+
 License
 =======
 
