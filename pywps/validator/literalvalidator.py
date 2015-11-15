@@ -26,29 +26,7 @@
 # IN THE SOFTWARE.
 
 from pywps.validator.mode import MODE
-from collections import namedtuple
-
-_ALLOWEDVALUETYPE = namedtuple('ALLOWEDVALUETYPE', 'VALUE, RANGE')
-_RANGELCLOSURETYPE = namedtuple('RANGECLOSURETYPE', 'OPEN, CLOSED,'
-                                'OPENCLOSED, CLOSEDOPEN')
-
-ALLOWEDVALUETYPE = _ALLOWEDVALUETYPE(0, 1)
-RANGECLOSURETYPE = _RANGELCLOSURETYPE(0, 1, 2, 3)
-
-class AllowedValue:
-    """Allowed value parameters
-    """
-
-    def __init__(self, allowed_type=None, value=None, minval=None,
-                 maxval=None, spacing=None,
-                 range_closure=RANGECLOSURETYPE.OPEN):
-
-        self.allowed_type = allowed_type
-        self.value = value
-        self.minval = minval
-        self.maxval = maxval
-        self.spacing = spacing
-        self.range_closure = range_closure
+from pywps.inout.literal_types import ALLOWEDVALUETYPE, RANGECLOSURETYPE, AllowedValue
 
 def validate_anyvalue(data_input, mode):
     """Just placeholder, anyvalue is always valid

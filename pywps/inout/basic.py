@@ -10,13 +10,10 @@ from pywps.validator.literalvalidator import validate_anyvalue,\
     validate_allowed_values 
 from pywps.exceptions import InvalidParameterValue
 import base64
+from collections import namedtuple
 
-
-class SOURCE_TYPE:
-    MEMORY = 0
-    FILE = 1
-    STREAM = 2
-    DATA = 3
+_SOURCE_TYPE = namedtuple('SOURCE_TYPE', 'MEMORY, FILE, STREAM, DATA')
+SOURCE_TYPE = _SOURCE_TYPE(0, 1, 2, 3)
 
 class DataTypeAbstract(object):
     """LiteralObject data_type abstract class
@@ -27,7 +24,6 @@ class DataTypeAbstract(object):
     @abstractmethod
     def convert(self, value):
         return value
-
 
 class IOHandler(object):
     """Basic IO class. Provides functions, to accept input data in file,

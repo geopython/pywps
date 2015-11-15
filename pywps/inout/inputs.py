@@ -217,10 +217,11 @@ class LiteralInput(basic.LiteralInput):
     def __init__(self, identifier, title, data_type='string', abstract='',
                  metadata=None, uoms=None, default=None,
                  min_occurs=1, max_occurs=1, as_reference=False,
-                 mode=MODE.NONE):
+                 mode=MODE.SIMPLE, allowed_values=None):
         basic.LiteralInput.__init__(self, identifier=identifier, title=title,
                                     abstract=abstract, data_type=data_type,
-                                    uoms=uoms, mode=mode)
+                                    uoms=uoms, mode=mode,
+                                    allowed_values=allowed_values)
         self.metadata = metadata
         self.default = default
         self.min_occurs = int(min_occurs)

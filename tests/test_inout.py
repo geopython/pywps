@@ -195,7 +195,9 @@ class LiteralInputTest(unittest.TestCase):
 
     def setUp(self):
 
-        self.literal_input = LiteralInput(identifier="literalinput")
+        self.literal_input = LiteralInput(
+                identifier="literalinput",
+                allowed_values=(1, 2, (3, 10)))
 
     def test_contruct(self):
         self.assertIsInstance(self.literal_input, LiteralInput)
