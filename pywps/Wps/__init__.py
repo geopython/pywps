@@ -250,18 +250,19 @@ http://wiki.rsg.pml.ac.uk/pywps/Introduction
         :returns: url to w3.org
         """
 
+        import types
         data_type = {"type": None, "reference": None}
-        if isinstance(inoutput.dataType, str):
+        if inoutput.dataType == types.StringType:
             data_type["type"] = "string"
             data_type["reference"] = "http://www.w3.org/TR/xmlschema-2/#string"
-        elif isinstance(inoutput.dataType, float):
+        elif inoutput.dataType == types.FloatType:
             data_type["type"] = "float"
             data_type["reference"] = "http://www.w3.org/TR/xmlschema-2/#float"
-        elif isinstance(inoutput.dataType, int):
+        elif inoutput.dataType == types.IntType:
             data_type["type"] = "integer"
             data_type["reference"] = \
                 "http://www.w3.org/TR/xmlschema-2/#integer"
-        elif isinstance(inoutput.dataType, bool):
+        elif inoutput.dataType == types.BooleanType:
             data_type["type"] = "boolean"
             data_type["reference"] = \
                 "http://www.w3.org/TR/xmlschema-2/#boolean"
