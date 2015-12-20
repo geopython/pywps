@@ -1,6 +1,10 @@
 HOWTO manage PyWPS Homepage
 ===========================
 
+.. note:: PYWPS Webpage moved to https://github.com/PyWPS/pywps.github.io
+    Therefore, we just edit build/html/index.html and redirect the web page
+
+
 step #1: edit source/*
 
 
@@ -11,4 +15,4 @@ step #2: run
 
 step #3: rsync
 
-    sync --delete-excluded --del -r build/ $DEVELOPERNAME@wald.intevation.org:/pywps/htdocs/
+    rsync --delete-excluded --del -r build/ $DEVELOPERNAME@wald.intevation.org:/pywps/htdocs/
