@@ -56,11 +56,15 @@ def setConfigValue(*args):
     # Convert Boolean string to real Boolean values
 
 
-
 def loadConfiguration(cfgfiles=None):
     """Load PyWPS configuration from configuration files.
     The later configuration file in the array overwrites configuration
     from the first.
+
+    After that, environmental variables following the format 
+        PYWPS_CONFIG_section_option 
+    are added to the config. Sections must exist, otherwise
+    the option is not set.
 
     :param cfgfiles: list of file names, where to get configuration from.
     :type cfgfiles: list of strings
@@ -76,6 +80,23 @@ def loadConfiguration(cfgfiles=None):
     config = ConfigParser.ConfigParser()
     config.read(cfgfiles)
    
+    # adapting config from env_vars
+    # each env_var following the format PYWPS_CONFIG_section_option is added to the config
+    _overrideConfigFromConfigDict({k.split("_",2)[-1]:v for k,v in os.environ.iteritems() if k.startswith('PYWPS_CONFIG_')})
+
+def _overrideConfigFromConfigDict(env_config):
+    # In linux we can have camel case env_vars. In windows we'll run into some trouble.
+    # for now, for windows we'll force section and option to lowercase
+    for k,v in env_config.iteritems():
+        section, option = k.split("_",1)
+        try:
+            if sys.platform == 'win32':
+                config.set(section.lower(), option.lower(), v)
+            else:
+                config.set(section, option, v)
+        except:
+            pass    # fail silent logging is not ready yet
+     
 def _getDefaultConfigFilesLocation():
     """Get the locations of the standard configuration files. This are
 
