@@ -33,8 +33,10 @@ if PY2:
     text_type = unicode
     from StringIO import StringIO
     from flufl.enum import Enum
+    from urlparse import urlparse
 
 else:
     text_type = str
     from io import StringIO
     from enum import Enum
+    from urllib.parse import urlparse

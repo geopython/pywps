@@ -269,12 +269,9 @@ class Service(object):
         try:
             os.chdir(process.workdir)
             response = self._parse_and_execute(process, wps_request)
+        finally:
             os.chdir(olddir)
             shutil.rmtree(process.workdir)
-        except Exception as e:
-            os.chdir(olddir)
-            shutil.rmtree(process.workdir)
-            raise e
 
         return response
 

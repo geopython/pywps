@@ -118,9 +118,13 @@ class DescribeProcessInputTest(unittest.TestCase):
 
     def test_one_literal_string_input(self):
         def hello(request): pass
-        hello_process = Process(hello, 'hello', 'Process Hello', inputs=[LiteralInput('the_name', 'Input name')])
+        hello_process = Process(
+                hello,
+                'hello',
+                'Process Hello',
+                inputs=[LiteralInput('the_name', 'Input name')])
         result = self.describe_process(hello_process)
-        assert result.inputs == [('the_name', 'literal', 'string')]
+        assert result.inputs == [('the_name', 'literal', 'integer')]
 
     def test_one_literal_integer_input(self):
         def hello(request): pass

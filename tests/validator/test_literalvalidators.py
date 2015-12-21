@@ -2,6 +2,7 @@
 """
 import unittest
 from pywps.validator.literalvalidator import *
+from pywps.inout.literaltypes import AllowedValue
 
 def get_input(allowed_values, data = 1):
 

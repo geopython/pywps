@@ -6,9 +6,10 @@ import unittest
 from pywps import Format
 from pywps.validator import get_validator
 from pywps import NAMESPACES
-from pywps.inout.basic import IOHandler, SOURCE_TYPE, DataTypeAbstract, SimpleHandler, BBoxInput, BBoxOutput, \
+from pywps.inout.basic import IOHandler, SOURCE_TYPE, SimpleHandler, BBoxInput, BBoxOutput, \
     ComplexInput, ComplexOutput, LiteralInput, LiteralOutput
 from pywps.inout import BoundingBoxInput as BoundingBoxInputXML
+from pywps.inout.literaltypes import convert
 from pywps._compat import StringIO, text_type
 from pywps.validator.base import emptyvalidator
 
@@ -177,10 +178,7 @@ class SimpleHandlerTest(unittest.TestCase):
 
     def setUp(self):
 
-        class IntegerDataType(DataTypeAbstract):
-            def convert(self, value):
-                return int(value)
-        data_type = IntegerDataType()
+        data_type = 'integer'
 
         self.simple_handler = SimpleHandler(data_type=data_type)
 
@@ -188,7 +186,7 @@ class SimpleHandlerTest(unittest.TestCase):
         self.assertIsInstance(self.simple_handler, SimpleHandler)
 
     def test_data_type(self):
-        self.assertEqual(self.simple_handler.data_type.convert('1'), 1)
+        self.assertEqual(convert(self.simple_handler.data_type, '1'), 1)
 
 class LiteralInputTest(unittest.TestCase):
     """LiteralInput test cases"""
@@ -208,7 +206,7 @@ class LiteralOutputTest(unittest.TestCase):
 
     def setUp(self):
 
-        self.literal_output = LiteralOutput("literaloutput")
+        self.literal_output = LiteralOutput("literaloutput", data_type="integer")
 
     def test_contruct(self):
         self.assertIsInstance(self.literal_output, LiteralOutput)

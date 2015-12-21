@@ -26,11 +26,12 @@
 # IN THE SOFTWARE.
 
 from pywps.validator.mode import MODE
-from pywps.inout.literal_types import ALLOWEDVALUETYPE, RANGECLOSURETYPE, AllowedValue
+from pywps.validator.allowed_value import ALLOWEDVALUETYPE, RANGECLOSURETYPE
 
 def validate_anyvalue(data_input, mode):
     """Just placeholder, anyvalue is always valid
     """
+
     return True
 
 

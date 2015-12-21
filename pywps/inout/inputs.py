@@ -2,6 +2,7 @@ from pywps import configuration, E, OWS, WPS, OGCTYPE, NAMESPACES
 from pywps.inout import basic
 from copy import deepcopy
 from pywps.validator.mode import MODE
+from pywps.inout.literaltypes import AnyValue
 
 class BoundingBoxInput(basic.BBoxInput):
     """
@@ -84,15 +85,27 @@ class BoundingBoxInput(basic.BBoxInput):
 
 class ComplexInput(basic.ComplexInput):
     """
-    :param identifier: The name of this input.
-    :param allowed_formats: Allowed formats for this input. Should be a list of
-                    one or more :class:`~Format` objects. First one is assumed to 
-                    be the default. 
+    Complex Input
     """
 
     def __init__(self, identifier, title, supported_formats=None,
                  data_format=None, abstract='', metadata=[], min_occurs=1,
                  max_occurs=1, as_reference=False, mode=MODE.NONE): 
+        """
+        :param str identifier: The name of this input.
+        :param str title: Title of the input
+        :param list supported_formats: List of supported
+            :py:class:`pywps.inout.formats.Format` 
+        :param :py:class:`pywps.inout.formats.Format data_format`
+            default data format
+        :param str abstract: Input abstract
+        :param list metada: TODO
+        :param int min_occurs: minimum occurence
+        :param int max_occurs: maximum occurence
+        :param bool as_reference: input is reference to URL
+        :param :py:obj:`pywps.validator.mode.MODE` mode: validation mode (none to
+            strict)
+        """
 
         if metadata is None:
             metadata = []
@@ -210,14 +223,30 @@ class ComplexInput(basic.ComplexInput):
 
 class LiteralInput(basic.LiteralInput):
     """
-    :param identifier: The name of this input.
-    :param data_type: Type of literal input (e.g. `string`, `float`...).
+    Literal Input class
     """
 
-    def __init__(self, identifier, title, data_type='string', abstract='',
+    def __init__(self, identifier, title, data_type='integer', abstract='',
                  metadata=None, uoms=None, default=None,
                  min_occurs=1, max_occurs=1, as_reference=False,
-                 mode=MODE.SIMPLE, allowed_values=None):
+                 mode=MODE.SIMPLE, allowed_values=AnyValue):
+        """
+        :param str identifier: The name of this input.
+        :param str title: Title of the input
+        :param :py:class:`pywps.inout.literalatypes.LITERAL_DATA_TYPES` data_type:
+           data type
+        :param str abstract: Input abstract
+        :param list metadata: TODO
+        :param str uoms: units
+        :param int min_occurs: minimum occurence
+        :param int max_occurs: maximum occurence
+        :param bool as_reference: input is reference to URL
+        :param :py:obj:`pywps.validator.mode.MODE` mode: validation mode
+            (none to strict)
+        :param allowed_values: :py:class:`pywps.inout.literal_types.AnyValue`
+            or :py:class:`pywps.inout.literaltypes.AllowedValue` object
+        """
+
         basic.LiteralInput.__init__(self, identifier=identifier, title=title,
                                     abstract=abstract, data_type=data_type,
                                     uoms=uoms, mode=mode,

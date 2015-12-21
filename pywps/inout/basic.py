@@ -1,7 +1,6 @@
-from abc import ABCMeta, abstractmethod
 from pywps._compat import text_type, StringIO
 import tempfile, os
-from pywps.inout.literaltypes import LITERAL_DATA_TYPES
+from pywps.inout.literaltypes import LITERAL_DATA_TYPES, convert, AnyValue
 from pywps import OWS, OGCUNIT, NAMESPACES
 from pywps.validator.mode import MODE
 from pywps.validator.base import emptyvalidator
@@ -14,16 +13,6 @@ from collections import namedtuple
 
 _SOURCE_TYPE = namedtuple('SOURCE_TYPE', 'MEMORY, FILE, STREAM, DATA')
 SOURCE_TYPE = _SOURCE_TYPE(0, 1, 2, 3)
-
-class DataTypeAbstract(object):
-    """LiteralObject data_type abstract class
-    """
-
-    __metaclass__ = ABCMeta
-
-    @abstractmethod
-    def convert(self, value):
-        return value
 
 class IOHandler(object):
     """Basic IO class. Provides functions, to accept input data in file,
@@ -247,28 +236,15 @@ class SimpleHandler(IOHandler):
         """Set data value. input data are converted into target format
         """
         if self.data_type:
-            # TODO: check datatypeabstract class somethings missing here
-            # check if it is a valid data_type
-            if self.data_type.lower() in LITERAL_DATA_TYPES:
-                if self.data_type.lower() == 'string':
-                    data = text_type(data)
-                elif self.data_type.lower() == 'integer':
-                    data = int(data)
-                elif self.data_type.lower() == 'float':
-                    data = float(data)
-                elif self.data_type.lower() == 'boolean':
-                    if data.lower() == 'true':
-                        data = True
-                    else:
-                        data = False
-                #data = self.data_type.convert(data)
-
-                _valid = self.validator(self, self.valid_mode)
-                if not _valid:
-                    raise InvalidParameterValue('Input data not valid using '
-                                                'mode %s' % (self.valid_mode))
-
+            data_type = self.data_type.lower()
+            data = convert(data_type, data)
+            _valid = self.validator(self, self.valid_mode)
+            if _valid:
                 IOHandler.set_data(self, data)
+            else:
+                raise InvalidParameterValue('Input data not valid using '
+                                            'mode %s' % (self.valid_mode))
+
 
     data = property(fget=get_data, fset=set_data)
 
@@ -285,9 +261,7 @@ class BasicLiteral:
     """Basic literal input/output class
     """
 
-    def __init__(self, data_type=None, uoms=None):
-        if not data_type:
-            data_type = LITERAL_DATA_TYPES[2]
+    def __init__(self, data_type="integer", uoms=None):
         assert data_type in LITERAL_DATA_TYPES
         self.data_type = data_type
         # list of uoms
@@ -359,14 +333,14 @@ class BasicComplex(object):
         """Setter of supported formats
         """
        
-        def set_validator(supported_format):
+        def set_format_validator(supported_format):
             if not supported_format.validate or \
                supported_format.validate == emptyvalidator:
                 supported_format.validate =\
                     get_validator(supported_format.mime_type)
             return supported_format
 
-        self._supported_formats = list(map(set_validator, supported_formats))
+        self._supported_formats = list(map(set_format_validator, supported_formats))
 
     @property
     def data_format(self):
@@ -417,24 +391,44 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
     """
 
     def __init__(self, identifier, title=None, abstract=None,
-                 data_type=None, workdir=None, allowed_values=None, uoms=None,
-                 mode=MODE.NONE):
+                 data_type="integer", workdir=None, allowed_values=None,
+                 uoms=None, mode=MODE.NONE):
         BasicIO.__init__(self, identifier, title, abstract)
         BasicLiteral.__init__(self, data_type, uoms)
         SimpleHandler.__init__(self, workdir, data_type, mode=mode)
 
         self.allowed_values = allowed_values
-        self.any_value = self.allowed_values is None
+        self.any_value = self._is_anyvalue(allowed_values)
 
     @property
     def validator(self):
         """Get validator for any value as well as allowed_values
+        :rtype: function
         """
 
         if self.any_value:
             return validate_anyvalue
         else:
             return validate_allowed_values
+
+    def _is_anyvalue(self, any_value):
+        """Check for any value
+        """
+
+        is_anyvalue = False
+
+        if any_value == AnyValue:
+            is_anyvalue = True
+        elif any_value == None:
+            is_anyvalue = True
+        elif isinstance(any_value, AnyValue):
+            is_anyvalue = True
+        elif str(any_value).lower() == 'anyvalue':
+            is_anyvalue = True
+
+        return is_anyvalue
+
+
 
 
 class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):

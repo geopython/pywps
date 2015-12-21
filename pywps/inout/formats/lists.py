@@ -2,7 +2,7 @@
 """
 from collections import namedtuple
 
-_FORMAT = namedtuple('FormatDefintion', 'mime_type,'
+_FORMAT = namedtuple('FormatDefinition', 'mime_type,'
                      'extension, schema')
 _FORMATS = namedtuple('FORMATS', 'GEOJSON, JSON, SHP, GML, GEOTIFF, WCS,'
                                  'WCS100, WCS110, WCS20, WFS, WFS100,'

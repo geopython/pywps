@@ -5,6 +5,7 @@ from pywps import WPS, OWS, E
 from pywps.app.WPSResponse import WPSResponse
 from pywps.exceptions import StorageNotSupported, OperationNotSupported
 import pywps.configuration as config
+import traceback
 
 
 class Process(object):
@@ -155,6 +156,7 @@ class Process(object):
                 # update the process status to 100% if everything went correctly
                 wps_response.update_status('PyWPS Process finished', 100)
         except Exception as e:
+            traceback.print_exc()
             # retrieve the file and line number where the exception occurred
             exc_type, exc_obj, exc_tb = sys.exc_info()
             found = False
