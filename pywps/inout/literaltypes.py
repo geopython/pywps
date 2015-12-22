@@ -6,6 +6,7 @@ from pywps._compat import urlparse
 import time
 from pywps.exceptions import InvalidParameterValue
 from pywps.validator.allowed_value import RANGECLOSURETYPE
+from pywps.validator.allowed_value import ALLOWEDVALUETYPE
 from pywps._compat import PY2
 
 LITERAL_DATA_TYPES = ('float', 'boolean', 'integer', 'string',
@@ -28,13 +29,17 @@ class AnyValue(object):
     """
     pass
 
-class AllowedValue(AnyValue):
+class AllowedValues(AnyValue):
     """Allowed value parameters
+    the values are evaluated in literal validator functions
+
+    :param pywps.validator.allowed_value.ALLOWEDVALUETYPE allowed_type: VALUE or RANGE
+    :param value:
     """
 
-    def __init__(self, allowed_type=None, value=None, minval=None,
-                 maxval=None, spacing=None,
-                 range_closure=RANGECLOSURETYPE.OPEN):
+    def __init__(self, allowed_type=ALLOWEDVALUETYPE.VALUE, value=None,
+                 minval=None, maxval=None, spacing=None,
+                 range_closure=RANGECLOSURETYPE.CLOSED):
 
         AnyValue.__init__(self)
 

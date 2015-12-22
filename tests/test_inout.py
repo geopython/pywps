@@ -9,7 +9,7 @@ from pywps import NAMESPACES
 from pywps.inout.basic import IOHandler, SOURCE_TYPE, SimpleHandler, BBoxInput, BBoxOutput, \
     ComplexInput, ComplexOutput, LiteralInput, LiteralOutput
 from pywps.inout import BoundingBoxInput as BoundingBoxInputXML
-from pywps.inout.literaltypes import convert
+from pywps.inout.literaltypes import convert, AllowedValues
 from pywps._compat import StringIO, text_type
 from pywps.validator.base import emptyvalidator
 
@@ -195,10 +195,23 @@ class LiteralInputTest(unittest.TestCase):
 
         self.literal_input = LiteralInput(
                 identifier="literalinput",
-                allowed_values=(1, 2, (3, 10)))
+                mode=2,
+                allowed_values=(1, 2, 3, 10))
 
     def test_contruct(self):
         self.assertIsInstance(self.literal_input, LiteralInput)
+        self.assertIsInstance(self.literal_input.allowed_values, AllowedValues)
+
+    def test_valid(self):
+        self.literal_input.data = 1
+        self.assertEqual(self.literal_input.data, 1)
+        self.literal_input.data = 5
+        try:
+            self.literal_input.data = "a"
+            self.assertTrue(False, '"a" should not be allowed to be set')
+        except:
+            self.assertTrue(True)
+
 
 
 class LiteralOutputTest(unittest.TestCase):

@@ -2,7 +2,7 @@
 """
 import unittest
 from pywps.validator.literalvalidator import *
-from pywps.inout.literaltypes import AllowedValue
+from pywps.inout.literaltypes import AllowedValues
 
 def get_input(allowed_values, data = 1):
 
@@ -34,7 +34,7 @@ class ValidateTest(unittest.TestCase):
 
     def test_allowedvalues_values_validator(self):
         """Test allowed values - values"""
-        allowed_value = AllowedValue()
+        allowed_value = AllowedValues()
         allowed_value.allowed_type = ALLOWEDVALUETYPE.VALUE
         allowed_value.value = 1
 
@@ -47,7 +47,7 @@ class ValidateTest(unittest.TestCase):
     def test_allowedvalues_ranges_validator(self):
         """Test allowed values - ranges"""
 
-        allowed_value = AllowedValue()
+        allowed_value = AllowedValues()
         allowed_value.allowed_type = ALLOWEDVALUETYPE.RANGE
         allowed_value.minval = 1
         allowed_value.maxval = 11
@@ -82,14 +82,14 @@ class ValidateTest(unittest.TestCase):
     def test_combined_validator(self):
         """Test allowed values - ranges and values combination"""
 
-        allowed_value1 = AllowedValue()
+        allowed_value1 = AllowedValues()
         allowed_value1.allowed_type = ALLOWEDVALUETYPE.RANGE
         allowed_value1.minval = 1
         allowed_value1.maxval = 11
         allowed_value1.spacing = 2
         allowed_value1.range_closure = RANGECLOSURETYPE.OPEN
 
-        allowed_value2 = AllowedValue()
+        allowed_value2 = AllowedValues()
         allowed_value2.allowed_type = ALLOWEDVALUETYPE.VALUE
         allowed_value2.value = 15
 
@@ -99,7 +99,7 @@ class ValidateTest(unittest.TestCase):
         self.assertTrue(validate_allowed_values(inpt, MODE.SIMPLE), 'Range OPEN closure')
 
         inpt.data = 15
-        self.assertTrue(validate_allowed_values(inpt, MODE.SIMPLE), 'AllowedValue')
+        self.assertTrue(validate_allowed_values(inpt, MODE.SIMPLE), 'AllowedValues')
 
         inpt.data = 13
         self.assertFalse(validate_allowed_values(inpt, MODE.SIMPLE), 'Out of range')

@@ -243,7 +243,7 @@ class LiteralInput(basic.LiteralInput):
         :param bool as_reference: input is reference to URL
         :param :py:obj:`pywps.validator.mode.MODE` mode: validation mode
             (none to strict)
-        :param allowed_values: :py:class:`pywps.inout.literal_types.AnyValue`
+        :param allowed_values: :py:class:`pywps.inout.literal_types.AnyValues`
             or :py:class:`pywps.inout.literaltypes.AllowedValue` object
         """
 

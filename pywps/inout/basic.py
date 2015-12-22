@@ -1,15 +1,18 @@
 from pywps._compat import text_type, StringIO
 import tempfile, os
-from pywps.inout.literaltypes import LITERAL_DATA_TYPES, convert, AnyValue
+from pywps.inout.literaltypes import LITERAL_DATA_TYPES, convert,\
+    AnyValue, AllowedValues
 from pywps import OWS, OGCUNIT, NAMESPACES
 from pywps.validator.mode import MODE
 from pywps.validator.base import emptyvalidator
 from pywps.validator import get_validator
 from pywps.validator.literalvalidator import validate_anyvalue,\
     validate_allowed_values 
+from pywps.validator.allowed_value import ALLOWEDVALUETYPE
 from pywps.exceptions import InvalidParameterValue
 import base64
 from collections import namedtuple
+from types import TupleType, ListType
 
 _SOURCE_TYPE = namedtuple('SOURCE_TYPE', 'MEMORY, FILE, STREAM, DATA')
 SOURCE_TYPE = _SOURCE_TYPE(0, 1, 2, 3)
@@ -71,7 +74,6 @@ class IOHandler(object):
         self.source_type = None
         self.source = None
         self._tempfile = None
-        self._validated = False
         self.workdir = workdir
 
         self.valid_mode = mode
@@ -80,14 +82,11 @@ class IOHandler(object):
         """Validate this input usig given validator
         """
 
-        if not self._validated:
-            validate = self.validator
-            _valid = validate(self, self.valid_mode)
-            if not _valid:
-                raise InvalidParameterValue('Input data not valid using '
-                                            'mode %s' % (self.valid_mode))
-            else:
-                self._validated = True
+        validate = self.validator
+        _valid = validate(self, self.valid_mode)
+        if not _valid:
+            raise InvalidParameterValue('Input data not valid using '
+                                        'mode %s' % (self.valid_mode))
 
     def set_file(self, filename):
         """Set source as file name"""
@@ -397,7 +396,7 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
         BasicLiteral.__init__(self, data_type, uoms)
         SimpleHandler.__init__(self, workdir, data_type, mode=mode)
 
-        self.allowed_values = allowed_values
+        self.allowed_values = self._make_allowedvalues(allowed_values)
         self.any_value = self._is_anyvalue(allowed_values)
 
     @property
@@ -411,6 +410,20 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
         else:
             return validate_allowed_values
 
+    def _make_allowedvalues(self, allowed_values):
+        """set allowed values
+
+        :return: pywps.inout.literaltypes.AllowedValue
+        """
+        if isinstance(allowed_values, AllowedValues):
+            return allowed_values
+        if type(allowed_values) == TupleType or\
+           type(allowed_values) == ListType:
+            
+               return AllowedValues(allowed_type=ALLOWEDVALUETYPE.VALUE,
+                                    value=allowed_values)
+
+        
     def _is_anyvalue(self, any_value):
         """Check for any value
         """

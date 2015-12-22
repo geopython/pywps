@@ -13,10 +13,10 @@
 # rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
 # sell copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -45,7 +45,7 @@ def validate_allowed_values(data_input, mode):
     else:
         data = data_input.data
 
-        for value in data_input.allowed_values:
+        for value in data_input.allowed_values.value:
 
             if value.allowed_type == ALLOWEDVALUETYPE.VALUE:
                 passed = _validate_value(value, data)
@@ -61,9 +61,16 @@ def validate_allowed_values(data_input, mode):
 
 def _validate_value(value, data):
     """Validate data against given value directly
+
+    :param value: list or tupple with allowed data
+    :param data: the data itself (string or number)
     """
 
-    return value.value == data
+    passed = False
+    if data in value.value:
+        passed = True
+
+    return passed
 
 
 def _validate_range(interval, data):
@@ -94,8 +101,3 @@ def _validate_range(interval, data):
         passed = False
 
     return passed
-
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
