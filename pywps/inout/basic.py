@@ -1,7 +1,7 @@
 from pywps._compat import text_type, StringIO
 import tempfile, os
 from pywps.inout.literaltypes import LITERAL_DATA_TYPES, convert,\
-    AnyValue, AllowedValues
+    AnyValue, AllowedValue, make_allowedvalues, is_anyvalue
 from pywps import OWS, OGCUNIT, NAMESPACES
 from pywps.validator.mode import MODE
 from pywps.validator.base import emptyvalidator
@@ -12,7 +12,6 @@ from pywps.validator.allowed_value import ALLOWEDVALUETYPE
 from pywps.exceptions import InvalidParameterValue
 import base64
 from collections import namedtuple
-from types import TupleType, ListType
 
 _SOURCE_TYPE = namedtuple('SOURCE_TYPE', 'MEMORY, FILE, STREAM, DATA')
 SOURCE_TYPE = _SOURCE_TYPE(0, 1, 2, 3)
@@ -234,16 +233,11 @@ class SimpleHandler(IOHandler):
     def set_data(self, data):
         """Set data value. input data are converted into target format
         """
-        if self.data_type:
-            data_type = self.data_type.lower()
-            data = convert(data_type, data)
-            _valid = self.validator(self, self.valid_mode)
-            if _valid:
-                IOHandler.set_data(self, data)
-            else:
-                raise InvalidParameterValue('Input data not valid using '
-                                            'mode %s' % (self.valid_mode))
 
+        if self.data_type:
+            data = convert(self.data_type, data)
+
+        IOHandler.set_data(self, data)
 
     data = property(fget=get_data, fset=set_data)
 
@@ -396,8 +390,9 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
         BasicLiteral.__init__(self, data_type, uoms)
         SimpleHandler.__init__(self, workdir, data_type, mode=mode)
 
-        self.allowed_values = self._make_allowedvalues(allowed_values)
-        self.any_value = self._is_anyvalue(allowed_values)
+        self.any_value = is_anyvalue(allowed_values)
+        if not self.any_value:
+            self.allowed_values = make_allowedvalues(allowed_values)
 
     @property
     def validator(self):
@@ -409,39 +404,6 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
             return validate_anyvalue
         else:
             return validate_allowed_values
-
-    def _make_allowedvalues(self, allowed_values):
-        """set allowed values
-
-        :return: pywps.inout.literaltypes.AllowedValue
-        """
-        if isinstance(allowed_values, AllowedValues):
-            return allowed_values
-        if type(allowed_values) == TupleType or\
-           type(allowed_values) == ListType:
-            
-               return AllowedValues(allowed_type=ALLOWEDVALUETYPE.VALUE,
-                                    value=allowed_values)
-
-        
-    def _is_anyvalue(self, any_value):
-        """Check for any value
-        """
-
-        is_anyvalue = False
-
-        if any_value == AnyValue:
-            is_anyvalue = True
-        elif any_value == None:
-            is_anyvalue = True
-        elif isinstance(any_value, AnyValue):
-            is_anyvalue = True
-        elif str(any_value).lower() == 'anyvalue':
-            is_anyvalue = True
-
-        return is_anyvalue
-
-
 
 
 class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):

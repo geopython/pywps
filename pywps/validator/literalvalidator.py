@@ -45,7 +45,7 @@ def validate_allowed_values(data_input, mode):
     else:
         data = data_input.data
 
-        for value in data_input.allowed_values.value:
+        for value in data_input.allowed_values:
 
             if value.allowed_type == ALLOWEDVALUETYPE.VALUE:
                 passed = _validate_value(value, data)
@@ -67,7 +67,7 @@ def _validate_value(value, data):
     """
 
     passed = False
-    if data in value.value:
+    if data == value.value:
         passed = True
 
     return passed

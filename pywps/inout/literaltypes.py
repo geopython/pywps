@@ -1,7 +1,6 @@
 """Literaltypes are used for LiteralInputs, to make sure, input data are OK
 """
 
-from abc import ABCMeta, abstractmethod, abstractproperty
 from pywps._compat import urlparse
 import time
 from pywps.exceptions import InvalidParameterValue
@@ -19,7 +18,7 @@ LITERAL_DATA_TYPES = ('float', 'boolean', 'integer', 'string',
 # 'angle', 'integerList',
 # 'positiveIntegerList',
 # 'lengthOrAngle', 'gridLength',
-# 'measureList', 'lengthList', 
+# 'measureList', 'lengthList',
 # 'gridLengthList', 'scaleList', 'timeList',
 # 'nonNegativeInteger', 'length'
 
@@ -29,7 +28,7 @@ class AnyValue(object):
     """
     pass
 
-class AllowedValues(AnyValue):
+class AllowedValue(AnyValue):
     """Allowed value parameters
     the values are evaluated in literal validator functions
 
@@ -52,6 +51,9 @@ class AllowedValues(AnyValue):
 
 
 def get_converter(convertor):
+    """function for decoration of convert
+    """
+
     def decorator_selector(data_type, data):
         convert = None
         if data_type in LITERAL_DATA_TYPES:
@@ -206,3 +208,56 @@ def convert_angle(inpt):
 
     inpt = convert_float(inpt)
     return inpt%360
+
+
+def make_allowedvalues(allowed_values):
+    """convert given value list to AllowedValue objects
+
+    :return: list of pywps.inout.literaltypes.AllowedValue
+    """
+
+    new_allowedvalues = []
+
+    for value in allowed_values:
+
+        if isinstance(value, AllowedValue):
+            new_allowedvalues.append(value)
+
+        elif type(value) == tuple or\
+           type(value) == list:
+            minval = maxval = spacing = None
+            if len(value) == 2:
+                minval = value[0]
+                maxval = value[1]
+            else:
+                minval = value[0]
+                spacing = value[1]
+                maxval = value[2]
+            new_allowedvalues.append(
+                AllowedValue(allowed_type=ALLOWEDVALUETYPE.RANGE,
+                             minval=minval, maxval=maxval,
+                             spacing=spacing)
+            )
+
+        else:
+            new_allowedvalues.append(AllowedValue(value=value))
+
+    return new_allowedvalues
+
+
+def is_anyvalue(value):
+    """Check for any value object of given value
+    """
+
+    is_av = False
+
+    if value == AnyValue:
+        is_av = True
+    elif value == None:
+        is_av = True
+    elif isinstance(value, AnyValue):
+        is_av = True
+    elif str(value).lower() == 'anyvalue':
+        is_av = True
+
+    return is_av
