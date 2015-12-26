@@ -295,7 +295,10 @@ class LiteralInput(basic.LiteralInput):
         doc.append(literal_data_doc)
 
         # TODO: refer to table 29 and 30
-        literal_data_doc.append(OWS.AnyValue())
+        if self.any_value:
+            literal_data_doc.append(OWS.AnyValue())
+        else:
+            literal_data_doc.append(self._describe_xml_allowedvalues())
 
         if self.default:
             doc.append(E.DefaultValue(self.default))
@@ -322,6 +325,14 @@ class LiteralInput(basic.LiteralInput):
             doc.append(OWS.Abstract(self.abstract))
         doc.append(node)
 
+        return doc
+
+    def _describe_xml_allowedvalues(self):
+        """Return AllowedValues node
+        """
+        doc = OWS.AllowedValues()
+        for value in self.allowed_values:
+            doc.append(value.describe_xml())
         return doc
 
     def _execute_xml_reference(self):

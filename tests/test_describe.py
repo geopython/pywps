@@ -6,6 +6,8 @@ from pywps import E, WPS, OWS, OGCTYPE, Format, NAMESPACES, OGCUNIT
 from pywps.inout.literaltypes import LITERAL_DATA_TYPES
 from pywps.app.basic import xpath_ns
 from pywps.inout.formats import Format
+from pywps.inout.literaltypes import AllowedValue
+from pywps.validator.allowed_value import ALLOWEDVALUETYPE
 
 from tests.common import client_for
 
@@ -142,21 +144,52 @@ class InputDescriptionTest(unittest.TestCase):
     def test_literal_integer_input(self):
         literal = LiteralInput('foo', 'Literal foo', data_type='positiveInteger', uoms=['metre'])
         doc = literal.describe_xml()
-        assert doc.tag == E.Input().tag
+        self.assertEqual(doc.tag, E.Input().tag)
         [identifier_el] = xpath_ns(doc, './ows:Identifier')
-        assert identifier_el.text == 'foo'
+        self.assertEqual(identifier_el.text, 'foo')
         [type_el] = xpath_ns(doc, './LiteralData/ows:DataType')
-        assert type_el.text == 'positiveInteger'
-        assert type_el.attrib['{%s}reference' % NAMESPACES['ows']] == OGCTYPE['positiveInteger']
+        self.assertEqual(type_el.text, 'positiveInteger')
+        self.assertEqual(type_el.attrib['{%s}reference' % NAMESPACES['ows']],
+            OGCTYPE['positiveInteger'])
         anyvalue = xpath_ns(doc, './LiteralData/ows:AnyValue')
-        assert len(anyvalue) == 1
+        self.assertEqual(len(anyvalue), 1)
+
+    def test_literal_allowed_values_input(self):
+        """Test all around allowed_values
+        """
+        literal = LiteralInput(
+            'foo',
+            'Foo',
+            data_type='integer',
+            uoms=['metre'],
+            allowed_values=(
+                1, 2, (5, 10), (12, 4, 24),
+                AllowedValue(
+                    allowed_type=ALLOWEDVALUETYPE.RANGE,
+                    minval=30,
+                    maxval=33,
+                    range_closure='closed-open')
+            )
+        )
+        doc = literal.describe_xml()
+
+        allowed_values = xpath_ns(doc, './LiteralData/ows:AllowedValues')
+        self.assertEqual(len(allowed_values), 1)
+
+        allowed_value = allowed_values[0]
+
+        values = xpath_ns(allowed_value, './ows:Value')
+        ranges = xpath_ns(allowed_value, './ows:Range')
+
+        self.assertEqual(len(values), 2)
+        self.assertEqual(len(ranges), 3)
 
     def test_complex_input_identifier(self):
         complex_in = ComplexInput('foo', 'Complex foo', supported_formats=[Format('bar/baz')])
         doc = complex_in.describe_xml()
-        assert doc.tag == E.Input().tag
+        self.assertEqual(doc.tag, E.Input().tag)
         [identifier_el] = xpath_ns(doc, './ows:Identifier')
-        assert identifier_el.text == 'foo'
+        self.assertEqual(identifier_el.text, 'foo')
 
     def test_complex_input_default_and_supported(self):
         complex_in = ComplexInput(
@@ -170,12 +203,12 @@ class InputDescriptionTest(unittest.TestCase):
         doc = complex_in.describe_xml()
         [default_format] = xpath_ns(doc, './ComplexData/Default/Format')
         [default_mime_el] = xpath_ns(default_format, './MimeType')
-        assert default_mime_el.text == 'a/b'
+        self.assertEqual(default_mime_el.text, 'a/b')
         supported_mime_types = []
         for supported_el in xpath_ns(doc, './ComplexData/Supported/Format'):
             [mime_el] = xpath_ns(supported_el, './MimeType')
             supported_mime_types.append(mime_el.text)
-        assert supported_mime_types == ['a/b', 'c/d']
+        self.assertEqual(supported_mime_types, ['a/b', 'c/d'])
 
     def test_bbox_input(self):
         bbox = BoundingBoxInput('bbox', 'BBox foo',
@@ -184,9 +217,9 @@ class InputDescriptionTest(unittest.TestCase):
         [inpt] = xpath_ns(doc, '/Input')
         [default_crs] = xpath_ns(doc, './BoundingBoxData/Default/CRS')
         supported = xpath_ns(doc, './BoundingBoxData/Supported/CRS')
-        assert inpt.attrib['minOccurs'] == '1'
-        assert default_crs.text == 'EPSG:4326'
-        assert len(supported) == 2
+        self.assertEqual(inpt.attrib['minOccurs'], '1')
+        self.assertEqual(default_crs.text, 'EPSG:4326')
+        self.assertEqual(len(supported), 2)
 
 class OutputDescriptionTest(unittest.TestCase):
 
@@ -199,7 +232,7 @@ class OutputDescriptionTest(unittest.TestCase):
         [uoms] = xpath_ns(doc, '/Output/LiteralOutput/UOMs')
         [default_uom] = xpath_ns(uoms, './Default/ows:UOM')
         supported_uoms = xpath_ns(uoms, './Supported/ows:UOM')
-        
+
         assert output is not None
         assert identifier.text == 'literal'
         assert data_type.attrib['{%s}reference' % NAMESPACES['ows']] == OGCTYPE['string']

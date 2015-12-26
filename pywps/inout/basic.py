@@ -7,7 +7,7 @@ from pywps.validator.mode import MODE
 from pywps.validator.base import emptyvalidator
 from pywps.validator import get_validator
 from pywps.validator.literalvalidator import validate_anyvalue,\
-    validate_allowed_values 
+    validate_allowed_values
 from pywps.validator.allowed_value import ALLOWEDVALUETYPE
 from pywps.exceptions import InvalidParameterValue
 import base64
@@ -366,7 +366,7 @@ class BasicComplex(object):
 
         return False
 
-        
+
 
 class BasicBoundingBox(object):
     """Basic BoundingBox input/output class
@@ -411,7 +411,7 @@ class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
     """
 
     def __init__(self, identifier, title=None, abstract=None,
-                 data_type=None, workdir=None, uoms=None, validate=None, 
+                 data_type=None, workdir=None, uoms=None, validate=None,
                  mode=MODE.NONE):
         BasicIO.__init__(self, identifier, title, abstract)
         BasicLiteral.__init__(self, data_type, uoms)
