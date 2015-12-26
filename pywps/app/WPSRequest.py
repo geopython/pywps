@@ -259,15 +259,17 @@ def get_inputs_from_xml(doc):
             complex_data_el = complex_data[0]
             inpt = {}
             inpt['identifier'] = identifier_el.text
+            inpt['mimeType'] = complex_data_el.attrib.get('mimeType', '')
+            inpt['encoding'] = complex_data_el.attrib.get(
+                'encoding', '').lower()
+            inpt['schema'] = complex_data_el.attrib.get('schema', '')
+            inpt['method'] = complex_data_el.attrib.get('method', 'GET')
             if len(complex_data_el.getchildren()) > 0:
                 value_el = complex_data_el[0]
                 inpt['data'] = _get_dataelement_value(value_el)
             else:
-                inpt['data'] = _get_rawvalue_value(complex_data_el.text)
-            inpt['mimeType'] = complex_data_el.attrib.get('mimeType', '')
-            inpt['encoding'] = complex_data_el.attrib.get('encoding', '')
-            inpt['schema'] = complex_data_el.attrib.get('schema', '')
-            inpt['method'] = complex_data_el.attrib.get('method', 'GET')
+                inpt['data'] = _get_rawvalue_value(
+                    complex_data_el.text, inpt['encoding'])
             the_inputs[identifier].append(inpt)
             continue
 
@@ -277,7 +279,8 @@ def get_inputs_from_xml(doc):
             inpt = {}
             inpt['identifier'] = identifier_el.text
             inpt[identifier_el.text] = reference_data_el.text
-            inpt['href'] = reference_data_el.attrib.get('{http://www.w3.org/1999/xlink}href', '')
+            inpt['href'] = reference_data_el.attrib.get(
+                '{http://www.w3.org/1999/xlink}href', '')
             inpt['mimeType'] = reference_data_el.attrib.get('mimeType', '')
             the_inputs[identifier].append(inpt)
             continue
@@ -401,10 +404,14 @@ def _get_dataelement_value(value_el):
     else:
         return value_el
 
-def _get_rawvalue_value(data):
+def _get_rawvalue_value(data, encoding=None):
     """Return real value of CDATA section"""
 
     try:
+        if encoding is None or encoding == "":
+            return data
+        elif encoding == 'base64':
+            return base64.b64decode(data)
         return base64.b64decode(data)
     except:
         return data

@@ -1,5 +1,6 @@
 import unittest
 import lxml.etree
+import json
 from pywps import Service, Process, LiteralOutput, LiteralInput,\
     BoundingBoxOutput, BoundingBoxInput, Format, ComplexInput, ComplexOutput
 from pywps.validator.base import emptyvalidator
@@ -233,10 +234,10 @@ class ExecuteXmlParserTest(unittest.TestCase):
                     WPS.Data(WPS.LiteralData('bar')))
                 ))
         rv = get_inputs_from_xml(request_doc)
-        assert 'name' in rv
-        assert len(rv['name']) == 2
-        assert rv['name'][0]['data'] == 'foo'
-        assert rv['name'][1]['data'] == 'bar'
+        self.assertTrue('name' in rv)
+        self.assertEquals(len(rv['name']), 2)
+        self.assertEquals(rv['name'][0]['data'], 'foo')
+        self.assertEquals(rv['name'][1]['data'], 'bar')
 
     def test_two_strings(self):
         request_doc = WPS.Execute(
@@ -249,8 +250,8 @@ class ExecuteXmlParserTest(unittest.TestCase):
                     OWS.Identifier('name2'),
                     WPS.Data(WPS.LiteralData('bar')))))
         rv = get_inputs_from_xml(request_doc)
-        assert rv['name1'][0]['data'] == 'foo'
-        assert rv['name2'][0]['data'] == 'bar'
+        self.assertEquals(rv['name1'][0]['data'], 'foo')
+        self.assertEquals(rv['name2'][0]['data'], 'bar')
 
     def test_complex_input(self):
         the_data = E.TheData("hello world")
@@ -262,10 +263,43 @@ class ExecuteXmlParserTest(unittest.TestCase):
                     WPS.Data(
                         WPS.ComplexData(the_data, mimeType='text/foobar')))))
         rv = get_inputs_from_xml(request_doc)
-        assert rv['name'][0]['mimeType'] == 'text/foobar'
+        self.assertEquals(rv['name'][0]['mimeType'], 'text/foobar')
         rv_doc = lxml.etree.parse(StringIO(rv['name'][0]['data'])).getroot()
-        assert rv_doc.tag == 'TheData'
-        assert rv_doc.text == "hello world"
+        self.assertEquals(rv_doc.tag, 'TheData')
+        self.assertEquals(rv_doc.text, 'hello world')
+
+    def test_complex_input_raw_value(self):
+        the_data = '{ "plot":{ "Version" : "0.1" } }'
+
+        request_doc = WPS.Execute(
+            OWS.Identifier('foo'),
+            WPS.DataInputs(
+                WPS.Input(
+                    OWS.Identifier('json'),
+                    WPS.Data(
+                        WPS.ComplexData(the_data, mimeType='application/json')))))
+        rv = get_inputs_from_xml(request_doc)
+        self.assertEquals(rv['json'][0]['mimeType'], 'application/json')
+        json_data = json.loads(rv['json'][0]['data'])
+        self.assertEquals(json_data['plot']['Version'], '0.1')
+
+    def test_complex_input_base64_value(self):
+        the_data = 'eyAicGxvdCI6eyAiVmVyc2lvbiIgOiAiMC4xIiB9IH0='
+
+        request_doc = WPS.Execute(
+            OWS.Identifier('foo'),
+            WPS.DataInputs(
+                WPS.Input(
+                    OWS.Identifier('json'),
+                    WPS.Data(
+                        WPS.ComplexData(the_data,
+                            encoding='base64',
+                            mimeType='application/json')))))
+        rv = get_inputs_from_xml(request_doc)
+        self.assertEqual(rv['json'][0]['mimeType'], 'application/json')
+        json_data = json.loads(rv['json'][0]['data'].decode())
+        self.assertEquals(json_data['plot']['Version'], '0.1')
+
 
     def test_bbox_input(self):
         if not PY2:
