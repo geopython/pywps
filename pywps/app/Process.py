@@ -1,5 +1,4 @@
 import os
-from uuid import uuid4
 import sys
 from pywps import WPS, OWS, E
 from pywps.app.WPSResponse import WPSResponse
@@ -108,11 +107,11 @@ class Process(object):
 
         return doc
 
-    def execute(self, wps_request):
+    def execute(self, wps_request, uuid):
         import multiprocessing
-        self.uuid = str(uuid4())
+        self.uuid = uuid
         async = False
-        wps_response = WPSResponse(self, wps_request)
+        wps_response = WPSResponse(self, wps_request, self.uuid)
 
         # check if status storage and updating are supported by this process
         if wps_request.store_execute == 'true':

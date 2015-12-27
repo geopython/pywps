@@ -44,7 +44,7 @@ def temp_dir():
 class PyWPSServerAbstract(object):
     """General stub for the PyWPS Server class.
     """
-    
+
     __metaclass__ = ABCMeta
 
     route_base = '/'

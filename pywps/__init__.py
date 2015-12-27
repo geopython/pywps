@@ -31,6 +31,8 @@ responses back to client.
 import os
 from lxml.builder import ElementMaker
 
+__version__ = '4.0.0-dev'
+
 
 PYWPS_INSTALL_DIR = os.path.dirname(os.path.abspath(__file__))
 

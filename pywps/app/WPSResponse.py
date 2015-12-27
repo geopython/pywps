@@ -6,6 +6,7 @@ from pywps import WPS, OWS
 from pywps.app.basic import xml_response
 from pywps.exceptions import NoApplicableCode
 import pywps.configuration as config
+from pywps.dblog import update_response
 
 
 class WPSResponse(object):
@@ -14,7 +15,14 @@ class WPSResponse(object):
     STORE_STATUS = 1
     STORE_AND_UPDATE_STATUS = 2
 
-    def __init__(self, process, wps_request):
+    def __init__(self, process, wps_request, uuid):
+        """constructor
+
+        :param process: instance of  class:`pywps.app.Process.Process`
+        :param wps_request: instance of class:`pywps.app.WPSRequest.WPSRequest`
+        :param uuid: string this request uuid
+        """
+
         self.process = process
         self.wps_request = wps_request
         self.outputs = {o.identifier: o for o in process.outputs}
@@ -22,6 +30,7 @@ class WPSResponse(object):
         self.status = self.NO_STATUS
         self.status_percentage = 0
         self.doc = None
+        self.uuid = uuid
 
     def update_status(self, message, status_percentage=None):
         self.message = message
@@ -34,6 +43,8 @@ class WPSResponse(object):
         # check if storing of the status is requested
         if self.status >= self.STORE_STATUS:
             self.write_response_doc(self.doc)
+
+        update_response(self.uuid, self)
 
     def write_response_doc(self, doc):
         # TODO: check if file/directory is still present, maybe deleted in mean time

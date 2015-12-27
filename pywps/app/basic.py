@@ -8,5 +8,7 @@ def xpath_ns(el, path):
 
 
 def xml_response(doc):
-    return Response(lxml.etree.tostring(doc, pretty_print=True),
+    response = Response(lxml.etree.tostring(doc, pretty_print=True),
                     content_type='text/xml')
+    response.status_percentage = 100;
+    return response

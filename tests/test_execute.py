@@ -114,7 +114,7 @@ class ExecuteTest(unittest.TestCase):
         request = FakeRequest();
 
         try:
-            service.execute('my_complex_process', request)
+            service.execute('my_complex_process', request, 'fakeuuid')
         except InvalidParameterValue as e:
             self.assertEqual(e.locator, 'mimeType')
 
