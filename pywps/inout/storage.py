@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
 import os
-from pywps._compat import PY2
+from pywps._compat import urljoin
 from pywps.exceptions import NotEnoughStorage, NoApplicableCode
 from pywps import configuration as config
 
@@ -103,12 +103,7 @@ class FileStorage(StorageAbstract):
 
         just_file_name = os.path.basename(output_name)
 
-        if PY2:
-            from urlparse import urljoin
-            url = urljoin(self.output_url, just_file_name)
-        else:
-            from urllib.parse import urljoin
-            url = urljoin(self.output_url, just_file_name)
+        url = urljoin(self.output_url, just_file_name)
 
         return (STORE_TYPE.PATH, output_name, url)
 

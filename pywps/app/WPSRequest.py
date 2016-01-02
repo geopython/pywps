@@ -282,6 +282,18 @@ def get_inputs_from_xml(doc):
             inpt['href'] = reference_data_el.attrib.get(
                 '{http://www.w3.org/1999/xlink}href', '')
             inpt['mimeType'] = reference_data_el.attrib.get('mimeType', '')
+            inpt['method'] = reference_data_el.attrib.get('method', 'GET')
+            header_element = xpath_ns(reference_data_el, './wps:Header')
+            if header_element:
+                inpt['header'] = _get_reference_header(header_element)
+            body_element = xpath_ns(reference_data_el, './wps:Body')
+            if body_element:
+                inpt['body'] = _get_reference_body(body_element[0])
+            bodyreference_element = xpath_ns(reference_data_el,
+                                             './wps:BodyReference')
+            if bodyreference_element:
+                inpt['bodyreference'] = _get_reference_bodyreference(
+                    bodyreference_element[0])
             the_inputs[identifier].append(inpt)
             continue
 
@@ -362,7 +374,7 @@ def get_data_from_kvp(data, part=None):
 
     return the_data
 
-def _check_version(version):    
+def _check_version(version):
     """ check given version
     """
     if version != '1.0.0':
@@ -370,7 +382,7 @@ def _check_version(version):
     else:
         return True
 
-    
+
 
 def _get_get_param(http_request, key, default=None, aslist=False):
     """Returns value from the key:value pair, of the HTTP GET request, for
@@ -415,3 +427,30 @@ def _get_rawvalue_value(data, encoding=None):
         return base64.b64decode(data)
     except:
         return data
+
+def _get_reference_header(header_element):
+    """Parses ReferenceInput Header element
+    """
+    header = {}
+    header['key'] = header_element.attrib('key')
+    header['value'] = header_element.attrib('value')
+    return header
+
+def _get_reference_body(body_element):
+    """Parses ReferenceInput Body element
+    """
+
+    body = None
+    if len(body_element.getchildren()) > 0:
+        value_el = body_element[0]
+        body = _get_dataelement_value(value_el)
+    else:
+        body = _get_rawvalue_value(body_element.text)
+
+    return body
+
+def _get_reference_bodyreference(referencebody_element):
+    """Parse ReferenceInput BodyReference element
+    """
+    return referencebody_element.attrib.get(
+        '{http://www.w3.org/1999/xlink}href', '')

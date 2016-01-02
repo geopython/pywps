@@ -21,7 +21,7 @@ wcsResource = "http://mapservices-gent.tudor.lu/gent_ows?&SERVICE=WCS&FORMAT=ima
 
 
 def create_feature():
-    
+
     def feature(request, response):
         input = request.inputs['input'][0].file
         # What do we need to assert a Complex input?
@@ -79,14 +79,14 @@ def create_sum_one():
         # Import the raster and set the region
         if grass.run_command("r.in.gdal", flags="o", out="input", input=input) != 0:
             raise NoApplicableCode("Could not import cost map. Please check the WCS service.")
-        
+
         if grass.run_command("g.region", flags="ap", rast="input") != 0:
             raise NoApplicableCode("Could not set GRASS region.")
-        
+
         # Add 1
         if grass.mapcalc("$output = $input + $value", output="output", input="input", value=1.0) != 0:
             raise NoApplicableCode("Could not set GRASS region.")
-        
+
         # Export the result
         out = "./output.tif"
         if grass.run_command("r.out.gdal", input="output", type="Float32", output=out) != 0:
@@ -100,8 +100,8 @@ def create_sum_one():
                    title='Process Sum One',
                    inputs=[ComplexInput('input', [Format('image/img')])],
                    outputs=[ComplexOutput('output', [Format('image/tiff')])])
-    
-    
+
+
 class ExecuteTests(unittest.TestCase):
 
     def test_wfs(self):
@@ -128,7 +128,7 @@ class ExecuteTests(unittest.TestCase):
         # Other things to assert:
         # . the inclusion of output
         # . the type of output
-        
+
     def test_wcs(self):
         try:
             sys.path.append("/usr/lib/grass64/etc/python/")
@@ -151,12 +151,12 @@ class ExecuteTests(unittest.TestCase):
         # Other things to assert:
         # . the inclusion of output
         # . the type of output
-   
-   
+
+
 def load_tests(loader=None, tests=None, pattern=None):
     if not loader:
         loader = unittest.TestLoader()
     suite_list = [
         loader.loadTestsFromTestCase(ExecuteTests),
     ]
-    return unittest.TestSuite(suite_list)     
+    return unittest.TestSuite(suite_list)

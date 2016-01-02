@@ -34,9 +34,13 @@ if PY2:
     from StringIO import StringIO
     from flufl.enum import Enum
     from urlparse import urlparse
+    from urlparse import urljoin
+    from urllib2 import urlopen
 
 else:
     text_type = str
     from io import StringIO
     from enum import Enum
     from urllib.parse import urlparse
+    from urllib.parse import urljoin
+    from urllib.request import urlopen

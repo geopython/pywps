@@ -29,6 +29,18 @@ class AnyValue(object):
     """
     pass
 
+class NoValue(object):
+    """No value allowed
+    NOTE: not really implemented
+    """
+    pass
+
+class ValuesReference(object):
+    """Any value for literal input
+    NOTE: not really implemented
+    """
+    pass
+
 class AllowedValue(AnyValue):
     """Allowed value parameters
     the values are evaluated in literal validator functions

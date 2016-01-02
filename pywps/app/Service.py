@@ -4,6 +4,7 @@ from werkzeug.wrappers import Request, Response
 from pywps import WPS, OWS
 from pywps.inout import Format
 from pywps._compat import PY2
+from pywps._compat import urlopen
 from pywps.app.basic import xml_response
 from pywps.app.WPSRequest import WPSRequest
 import pywps.configuration as config
@@ -17,7 +18,9 @@ import shutil
 import os
 import uuid
 
+
 class Service(object):
+
     """ The top-level object that represents a WPS service. It's a WSGI
     application.
 
@@ -37,7 +40,8 @@ class Service(object):
         doc.attrib['service'] = 'WPS'
         doc.attrib['version'] = '1.0.0'
         doc.attrib['{http://www.w3.org/XML/1998/namespace}lang'] = 'en-CA'
-        doc.attrib['{http://www.w3.org/2001/XMLSchema-instance}schemaLocation'] = 'http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd'
+        doc.attrib[
+            '{http://www.w3.org/2001/XMLSchema-instance}schemaLocation'] = 'http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd'
         # TODO: check Table 7 in OGC 05-007r7
         doc.attrib['updateSequence'] = '1'
 
@@ -47,7 +51,8 @@ class Service(object):
         )
 
         if config.get_config_value('wps', 'abstract'):
-            service_ident_doc.append(OWS.Abstract(config.get_config_value('wps', 'abstract')))
+            service_ident_doc.append(
+                OWS.Abstract(config.get_config_value('wps', 'abstract')))
 
         if config.get_config_value('wps', 'keywords'):
             keywords_doc = OWS.Keywords()
@@ -61,18 +66,21 @@ class Service(object):
         for v in config.get_config_value('wps', 'version').split(','):
             service_ident_doc.append(OWS.ServiceTypeVersion(v))
 
-        service_ident_doc.append(OWS.Fees(config.get_config_value('wps', 'fees')))
+        service_ident_doc.append(
+            OWS.Fees(config.get_config_value('wps', 'fees')))
 
         for con in config.get_config_value('wps', 'constraints').split(','):
             service_ident_doc.append(OWS.AccessConstraints(con))
 
         if config.get_config_value('wps', 'profile'):
-            service_ident_doc.append(OWS.Profile(config.get_config_value('wps', 'profile')))
+            service_ident_doc.append(
+                OWS.Profile(config.get_config_value('wps', 'profile')))
 
         doc.append(service_ident_doc)
 
         # Service Provider
-        service_prov_doc = OWS.ServiceProvider(OWS.ProviderName(config.get_config_value('provider', 'providerName')))
+        service_prov_doc = OWS.ServiceProvider(
+            OWS.ProviderName(config.get_config_value('provider', 'providerName')))
 
         if config.get_config_value('provider', 'providerSite'):
             service_prov_doc.append(OWS.ProviderSite(
@@ -84,33 +92,42 @@ class Service(object):
 
         # Add Contact information only if a name is set
         if config.get_config_value('provider', 'individualName'):
-            service_contact_doc.append(OWS.IndividualName(config.get_config_value('provider', 'individualName')))
+            service_contact_doc.append(
+                OWS.IndividualName(config.get_config_value('provider', 'individualName')))
             if config.get_config_value('provider', 'positionName'):
-                service_contact_doc.append(OWS.PositionName(config.get_config_value('provider', 'positionName')))
+                service_contact_doc.append(
+                    OWS.PositionName(config.get_config_value('provider', 'positionName')))
 
             contact_info_doc = OWS.ContactInfo()
 
             phone_doc = OWS.Phone()
             if config.get_config_value('provider', 'phoneVoice'):
-                phone_doc.append(OWS.Voice(config.get_config_value('provider', 'phoneVoice')))
+                phone_doc.append(
+                    OWS.Voice(config.get_config_value('provider', 'phoneVoice')))
             if config.get_config_value('provider', 'phoneFacsimile'):
-                phone_doc.append(OWS.Facsimile(config.get_config_value('provider', 'phoneFacsimile')))
+                phone_doc.append(
+                    OWS.Facsimile(config.get_config_value('provider', 'phoneFacsimile')))
             # Add Phone if not empty
             if len(phone_doc):
                 contact_info_doc.append(phone_doc)
 
             address_doc = OWS.Address()
             if config.get_config_value('provider', 'deliveryPoint'):
-                address_doc.append(OWS.DeliveryPoint(config.get_config_value('provider', 'deliveryPoint')))
+                address_doc.append(
+                    OWS.DeliveryPoint(config.get_config_value('provider', 'deliveryPoint')))
             if config.get_config_value('provider', 'city'):
-                address_doc.append(OWS.City(config.get_config_value('provider', 'city')))
+                address_doc.append(
+                    OWS.City(config.get_config_value('provider', 'city')))
             if config.get_config_value('provider', 'postalCode'):
-                address_doc.append(OWS.PostalCode(config.get_config_value('provider', 'postalCode')))
+                address_doc.append(
+                    OWS.PostalCode(config.get_config_value('provider', 'postalCode')))
             if config.get_config_value('provider', 'country'):
-                address_doc.append(OWS.Country(config.get_config_value('provider', 'country')))
+                address_doc.append(
+                    OWS.Country(config.get_config_value('provider', 'country')))
             if config.get_config_value('provider', 'electronicalMailAddress'):
                 address_doc.append(
-                    OWS.ElectronicMailAddress(config.get_config_value('provider', 'electronicalMailAddress'))
+                    OWS.ElectronicMailAddress(
+                        config.get_config_value('provider', 'electronicalMailAddress'))
                 )
             # Add Address if not empty
             if len(address_doc):
@@ -121,16 +138,19 @@ class Service(object):
                     {'{http://www.w3.org/1999/xlink}href': config.get_config_value('provider', 'onlineResource')})
                 )
             if config.get_config_value('provider', 'hoursOfService'):
-                contact_info_doc.append(OWS.HoursOfService(config.get_config_value('provider', 'hoursOfService')))
+                contact_info_doc.append(
+                    OWS.HoursOfService(config.get_config_value('provider', 'hoursOfService')))
             if config.get_config_value('provider', 'contactInstructions'):
-                contact_info_doc.append(OWS.ContactInstructions(config.get_config_value('provider', 'contactInstructions')))
+                contact_info_doc.append(OWS.ContactInstructions(
+                    config.get_config_value('provider', 'contactInstructions')))
 
             # Add Contact information if not empty
             if len(contact_info_doc):
                 service_contact_doc.append(contact_info_doc)
 
             if config.get_config_value('provider', 'role'):
-                service_contact_doc.append(OWS.Role(config.get_config_value('provider', 'role')))
+                service_contact_doc.append(
+                    OWS.Role(config.get_config_value('provider', 'role')))
 
         # Add Service Contact only if ProviderName and PositionName are set
         if len(service_contact_doc):
@@ -226,7 +246,8 @@ class Service(object):
         if 'all' in (ident.lower() for ident in identifiers):
             for process in self.processes:
                 try:
-                    identifier_elements.append(self.processes[process].describe_xml())
+                    identifier_elements.append(
+                        self.processes[process].describe_xml())
                 except Exception as e:
                     raise NoApplicableCode(e)
         else:
@@ -234,7 +255,8 @@ class Service(object):
                 try:
                     process = self.processes[identifier]
                 except KeyError:
-                    raise InvalidParameterValue("Unknown process %r" % identifier, "identifier")
+                    raise InvalidParameterValue(
+                        "Unknown process %r" % identifier, "identifier")
                 else:
                     try:
                         identifier_elements.append(process.describe_xml())
@@ -244,7 +266,8 @@ class Service(object):
         doc = WPS.ProcessDescriptions(
             *identifier_elements
         )
-        doc.attrib['{http://www.w3.org/2001/XMLSchema-instance}schemaLocation'] = 'http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd'
+        doc.attrib[
+            '{http://www.w3.org/2001/XMLSchema-instance}schemaLocation'] = 'http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd'
         doc.attrib['service'] = 'WPS'
         doc.attrib['version'] = '1.0.0'
         doc.attrib['{http://www.w3.org/XML/1998/namespace}lang'] = 'en-CA'
@@ -290,7 +313,8 @@ class Service(object):
         for inpt in process.inputs:
             if inpt.identifier not in wps_request.inputs:
                 if inpt.min_occurs > 0:
-                    raise MissingParameterValue(inpt.identifier, inpt.identifier)
+                    raise MissingParameterValue(
+                        inpt.identifier, inpt.identifier)
                 else:
                     data_inputs[inpt.identifier] = inpt.clone()
 
@@ -298,13 +322,13 @@ class Service(object):
             # set the input to the type defined in the process
             if isinstance(inpt, ComplexInput):
                 data_inputs[inpt.identifier] = self.create_complex_inputs(inpt,
-                    wps_request.inputs[inpt.identifier])
+                                                                          wps_request.inputs[inpt.identifier])
             elif isinstance(inpt, LiteralInput):
                 data_inputs[inpt.identifier] = self.create_literal_inputs(inpt,
-                    wps_request.inputs[inpt.identifier])
+                                                                          wps_request.inputs[inpt.identifier])
             elif isinstance(inpt, BoundingBoxInput):
                 data_inputs[inpt.identifier] = self.create_bbox_inputs(inpt,
-                    wps_request.inputs[inpt.identifier])
+                                                                       wps_request.inputs[inpt.identifier])
 
         wps_request.inputs = data_inputs
 
@@ -313,11 +337,13 @@ class Service(object):
         if not wps_request.raw:
             for wps_outpt in wps_request.outputs:
 
-                is_reference = wps_request.outputs[wps_outpt].get('asReference', 'false')
+                is_reference = wps_request.outputs[
+                    wps_outpt].get('asReference', 'false')
                 if is_reference.lower() == 'true':
                     # check if store is supported
                     if process.store_supported == 'false':
-                        raise StorageNotSupported('The storage of data is not supported for this process.')
+                        raise StorageNotSupported(
+                            'The storage of data is not supported for this process.')
 
                     is_reference = True
                 else:
@@ -353,17 +379,19 @@ class Service(object):
         def href_handler(complexinput, datain):
             """<wps:Reference /> handler"""
             tmp_dir = config.get_config_value('server', 'workdir')
-    
+
             # save the reference input in workdir
             tmp_file = tempfile.mkstemp(dir=complexinput.workdir)[1]
-    
+
+
             try:
-                (reference_file, reference_file_data) = _openurl(href)
+                (reference_file, reference_file_data) = _openurl(datain)
                 data_size = reference_file.headers.get('Content-Length', 0)
             except Exception as e:
                 raise NoApplicableCode('File reference error: %s' % e)
 
-            # if the response did not return a 'Content-Length' header then calculate the size
+            # if the response did not return a 'Content-Length' header then
+            # calculate the size
             if data_size == 0:
                 data_size = _get_datasize(reference_file_data)
 
@@ -372,8 +400,8 @@ class Service(object):
             byte_size = complexinput.max_size * 1024 * 1024
             if int(data_size) > int(byte_size):
                 raise FileSizeExceeded('File size for input exceeded.'
-                                       ' Maximum allowed: %i megabytes' %\
-                       complexinput.max_size, complexinput.get('identifier'))
+                                       ' Maximum allowed: %i megabytes' %
+                                       complexinput.max_size, complexinput.get('identifier'))
 
             try:
                 with open(tmp_file, 'w') as f:
@@ -381,9 +409,9 @@ class Service(object):
                     f.close()
             except Exception as e:
                 raise NoApplicableCode(e)
-    
+
             complexinput.file = tmp_file
-            complexinput.url = href
+            complexinput.url = datain.get('href')
             complexinput.as_reference = True
 
         def data_handler(complexinput, datain):
@@ -391,12 +419,10 @@ class Service(object):
 
             complexinput.data = datain.get('data')
 
-
         if href:
             return href_handler
         else:
             return data_handler
-
 
     def create_complex_inputs(self, source, inputs):
         """Create new ComplexInput as clone of original ComplexInput
@@ -419,9 +445,9 @@ class Service(object):
                 data_input.data_format = frmt
             else:
                 raise InvalidParameterValue(
-                    'Invalid mimeType value %s for input %s' %\
+                    'Invalid mimeType value %s for input %s' %
                     (inpt.get('mimeType'), source.identifier),
-                    'mimeType') 
+                    'mimeType')
 
             data_input.method = inpt.get('method', 'GET')
 
@@ -434,9 +460,8 @@ class Service(object):
             outinputs.append(data_input)
 
         if len(outinputs) < source.min_occurs:
-            raise MissingParameterValue(locator = source.identifier)
+            raise MissingParameterValue(locator=source.identifier)
         return outinputs
-
 
     def create_literal_inputs(self, source, inputs):
         """ Takes the http_request and parses the input to objects
@@ -452,17 +477,16 @@ class Service(object):
             data_type = inpt.get('datatype')
             if data_type:
                 newinpt.data_type = data_type
-        
+
             # get the value of the field
             newinpt.data = inpt.get('data')
 
             outinputs.append(newinpt)
 
         if len(outinputs) < source.min_occurs:
-            raise MissingParameterValue(locator = source.identifier)
+            raise MissingParameterValue(locator=source.identifier)
 
         return outinputs
-
 
     def create_bbox_inputs(self, source, inputs):
         """ Takes the http_request and parses the input to objects
@@ -478,10 +502,9 @@ class Service(object):
             outinputs.append(newinpt)
 
         if len(outinputs) < source.min_occurs:
-            raise MissingParameterValue(locator = source.identifier)
+            raise MissingParameterValue(locator=source.identifier)
 
         return outinputs
-
 
     @Request.application
     def __call__(self, http_request):
@@ -520,24 +543,36 @@ class Service(object):
             class FakeResponse:
                 message = e.locator
                 status = e.code
-                status_percentage = 100;
+                status_percentage = 100
             update_response(request_uuid, FakeResponse)
             return e
 
 
-def _openurl(href):
+def _openurl(inpt):
     """use urllib to open given href
     """
+    data = None
+    reference_file = None
+    href = inpt.get('href')
+
+    if inpt.get('method') == 'POST':
+        if inpt.has_key('body'):
+            data = inpt.get('body')
+        elif inpt.has_key('bodyreference'):
+            data = urlopen(url=inpt.get('bodyreference')).read()
+
+        reference_file = urlopen(url=href, data=data)
+    else:
+        reference_file = urlopen(url=href)
+
+
     if PY2:
-        import urllib2
-        reference_file = urllib2.urlopen(href)
         reference_file_data = reference_file.read()
     else:
-        from urllib.request import urlopen
-        reference_file = urlopen(href)
         reference_file_data = reference_file.read().decode('utf-8')
 
     return (reference_file, reference_file_data)
+
 
 def _get_datasize(reference_file_data):
 

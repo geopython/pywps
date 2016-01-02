@@ -4,7 +4,9 @@ from copy import deepcopy
 from pywps.validator.mode import MODE
 from pywps.inout.literaltypes import AnyValue
 
+
 class BoundingBoxInput(basic.BBoxInput):
+
     """
     :param identifier: The name of this input.
     :param data_type: Type of literal input (e.g. `string`, `float`...).
@@ -27,6 +29,9 @@ class BoundingBoxInput(basic.BBoxInput):
         self.as_reference = as_reference
 
     def describe_xml(self):
+        """
+        :return: describeprocess response xml element
+        """
         doc = E.Input(
             OWS.Identifier(self.identifier),
             OWS.Title(self.title)
@@ -57,6 +62,9 @@ class BoundingBoxInput(basic.BBoxInput):
         return doc
 
     def execute_xml(self):
+        """
+        :return: execute response element
+        """
         doc = WPS.Input(
             OWS.Identifier(self.identifier),
             OWS.Title(self.title)
@@ -70,8 +78,10 @@ class BoundingBoxInput(basic.BBoxInput):
         bbox_data_doc.attrib['crs'] = self.crs
         bbox_data_doc.attrib['dimensions'] = str(self.dimensions)
 
-        bbox_data_doc.append(OWS.LowerCorner('{0[0]} {0[1]}'.format(self.data)))
-        bbox_data_doc.append(OWS.UpperCorner('{0[2]} {0[3]}'.format(self.data)))
+        bbox_data_doc.append(
+            OWS.LowerCorner('{0[0]} {0[1]}'.format(self.data)))
+        bbox_data_doc.append(
+            OWS.UpperCorner('{0[2]} {0[3]}'.format(self.data)))
 
         doc.append(bbox_data_doc)
 
@@ -84,18 +94,19 @@ class BoundingBoxInput(basic.BBoxInput):
 
 
 class ComplexInput(basic.ComplexInput):
+
     """
     Complex Input
     """
 
     def __init__(self, identifier, title, supported_formats=None,
                  data_format=None, abstract='', metadata=[], min_occurs=1,
-                 max_occurs=1, as_reference=False, mode=MODE.NONE): 
+                 max_occurs=1, as_reference=False, mode=MODE.NONE):
         """
         :param str identifier: The name of this input.
         :param str title: Title of the input
         :param list supported_formats: List of supported
-            :py:class:`pywps.inout.formats.Format` 
+            :py:class:`pywps.inout.formats.Format`
         :param :py:class:`pywps.inout.formats.Format data_format`
             default data format
         :param str abstract: Input abstract
@@ -127,14 +138,16 @@ class ComplexInput(basic.ComplexInput):
 
         :return: maximum file size bytes
         """
-        max_size = configuration.get_config_value('server', 'maxsingleinputsize')
+        max_size = configuration.get_config_value(
+            'server', 'maxsingleinputsize')
         self.max_size = configuration.get_size_mb(max_size)
 
     def describe_xml(self):
         """Return Describe process element
         """
         default_format_el = self.supported_formats[0].describe_xml()
-        supported_format_elements = [f.describe_xml() for f in self.supported_formats]
+        supported_format_elements = [f.describe_xml()
+                                     for f in self.supported_formats]
 
         doc = E.Input(
             OWS.Identifier(self.identifier),
@@ -158,7 +171,7 @@ class ComplexInput(basic.ComplexInput):
         )
 
         return doc
-    
+
     def execute_xml(self):
         """Render Execute response XML node
 
@@ -213,8 +226,7 @@ class ComplexInput(basic.ComplexInput):
                 complex_doc.attrib['schema'] = self.data_format.schema
         doc.append(complex_doc)
         return doc
-    
-    
+
     def clone(self):
         """Create copy of yourself
         """
@@ -222,6 +234,7 @@ class ComplexInput(basic.ComplexInput):
 
 
 class LiteralInput(basic.LiteralInput):
+
     """
     Literal Input class
     """
@@ -278,7 +291,8 @@ class LiteralInput(basic.LiteralInput):
 
         if self.data_type:
             data_type = OWS.DataType(self.data_type)
-            data_type.attrib['{%s}reference' % NAMESPACES['ows']] = OGCTYPE[self.data_type]
+            data_type.attrib['{%s}reference' %
+                             NAMESPACES['ows']] = OGCTYPE[self.data_type]
             literal_data_doc.append(data_type)
 
         if self.uoms:
@@ -356,7 +370,6 @@ class LiteralInput(basic.LiteralInput):
             literal_doc.attrib['uom'] = self.uom
         doc.append(literal_doc)
         return doc
-
 
     def clone(self):
         """Create copy of yourself

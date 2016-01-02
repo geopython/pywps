@@ -158,7 +158,7 @@ class ExecuteTest(unittest.TestCase):
         client = client_for(Service(processes=[create_ultimate_question()]))
         resp = client.get('?service=wps&version=1.0.0&Request=Execute&identifier=ultimate_question')
         assert_response_success(resp)
-        
+
         assert get_output(resp.xml) == {'outvalue': '42'}
 
     def test_post_with_no_inputs(self):
@@ -320,6 +320,45 @@ class ExecuteXmlParserTest(unittest.TestCase):
         assert bbox.miny == '50'
         assert bbox.maxx == '60'
         assert bbox.maxy == '70'
+
+    def test_reference_post_input(self):
+        request_doc = WPS.Execute(
+            OWS.Identifier('foo'),
+            WPS.DataInputs(
+                WPS.Input(
+                    OWS.Identifier('name'),
+                    WPS.Reference(
+                        WPS.Body('request body'),
+                        {'{http://www.w3.org/1999/xlink}href': 'http://foo/bar/service'},
+                        method='POST'
+                    )
+                )
+            )
+        )
+        rv = get_inputs_from_xml(request_doc)
+        self.assertEquals(rv['name'][0]['href'], 'http://foo/bar/service')
+        self.assertEquals(rv['name'][0]['method'], 'POST')
+        self.assertEquals(rv['name'][0]['body'], 'request body')
+
+    def test_reference_post_bodyreference_input(self):
+        request_doc = WPS.Execute(
+            OWS.Identifier('foo'),
+            WPS.DataInputs(
+                WPS.Input(
+                    OWS.Identifier('name'),
+                    WPS.Reference(
+                        WPS.BodyReference(
+                        {'{http://www.w3.org/1999/xlink}href': 'http://foo/bar/reference'}),
+                        {'{http://www.w3.org/1999/xlink}href': 'http://foo/bar/service'},
+                        method='POST'
+                    )
+                )
+            )
+        )
+        rv = get_inputs_from_xml(request_doc)
+        self.assertEquals(rv['name'][0]['href'], 'http://foo/bar/service')
+        self.assertEquals(rv['name'][0]['bodyreference'], 'http://foo/bar/reference')
+
 
 def load_tests(loader=None, tests=None, pattern=None):
     if not loader:
