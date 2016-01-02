@@ -288,7 +288,7 @@ class Service(object):
             tempdir = tempfile.mkdtemp(prefix='pypws_process_', dir=workdir)
             process.set_workdir(tempdir)
         except KeyError:
-            raise InvalidParameterValue("Unknown process '%r'" % identifier)
+            raise InvalidParameterValue("Unknown process '%r'" % identifier, 'Identifier')
 
         olddir = os.path.abspath(os.curdir)
         try:
@@ -528,10 +528,10 @@ class Service(object):
                         wps_request,
                         request_uuid
                     )
-                update_response(request_uuid, response)
+                update_response(request_uuid, response, close=True)
                 return response
             else:
-                update_response(request_uuid, response)
+                update_response(request_uuid, response, close=True)
                 raise RuntimeError("Unknown operation %r"
                                    % wps_request.operation)
 
@@ -544,7 +544,7 @@ class Service(object):
                 message = e.locator
                 status = e.code
                 status_percentage = 100
-            update_response(request_uuid, FakeResponse)
+            update_response(request_uuid, FakeResponse, close=True)
             return e
 
 

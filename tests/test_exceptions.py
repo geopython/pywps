@@ -35,7 +35,7 @@ class ExceptionsTest(unittest.TestCase):
     def test_bad_request(self):
         resp = self.client.get("?service=wps&request=xyz")
         exception_el = resp.xpath('/ows:ExceptionReport/ows:Exception')[0]
-        assert exception_el.attrib['exceptionCode'] == 'InvalidParameterValue'
+        assert exception_el.attrib['exceptionCode'] == 'OperationNotSupported'
         assert resp.headers['Content-Type'] == 'text/xml'
 
 def load_tests(loader=None, tests=None, pattern=None):

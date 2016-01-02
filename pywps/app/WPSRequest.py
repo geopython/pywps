@@ -12,12 +12,12 @@ from pywps._compat import PY2
 
 
 class WPSRequest(object):
+
     def __init__(self, http_request):
         self.http_request = http_request
 
         request_parser = self._get_request_parser_method(http_request.method)
         request_parser()
-
 
     def _get_request_parser_method(self, method):
 
@@ -27,7 +27,6 @@ class WPSRequest(object):
             return self._post_request
         else:
             raise MethodNotAllowed()
-
 
     def _get_request(self):
         """HTTP GET request parser
@@ -44,7 +43,7 @@ class WPSRequest(object):
         if service:
             if str(service).lower() != 'wps':
                 raise InvalidParameterValue(
-                    'parameter SERVICE [%s] not supported' % service)
+                    'parameter SERVICE [%s] not supported' % service, 'service')
         else:
             raise MissingParameterValue('service', 'service')
 
@@ -52,7 +51,6 @@ class WPSRequest(object):
 
         request_parser = self._get_request_parser(operation)
         request_parser(self.http_request)
-
 
     def _post_request(self):
         """HTTP GET request parser
@@ -65,7 +63,7 @@ class WPSRequest(object):
                                    ' Maximum request size allowed: %i megabytes' % maxsize / 1024 / 1024)
 
         try:
-                doc = lxml.etree.fromstring(self.http_request.get_data())
+            doc = lxml.etree.fromstring(self.http_request.get_data())
         except Exception as e:
             if PY2:
                 raise NoApplicableCode(e.message)
@@ -75,7 +73,6 @@ class WPSRequest(object):
         operation = doc.tag
         request_parser = self._post_request_parser(operation)
         request_parser(doc)
-
 
     def _get_request_parser(self, operation):
         """Factory function returing propper parsing function
@@ -95,33 +92,47 @@ class WPSRequest(object):
             """
             version = _get_get_param(http_request, 'version')
             wpsrequest.check_and_set_version(version)
-            wpsrequest.identifiers = _get_get_param(http_request, 'identifier', aslist=True)
+
+            language = _get_get_param(http_request, 'language')
+            wpsrequest.check_and_set_language(language)
+
+            wpsrequest.identifiers = _get_get_param(
+                http_request, 'identifier', aslist=True)
 
         def parse_get_execute(http_request):
             """Parse GET Execute request
             """
             version = _get_get_param(http_request, 'version')
             wpsrequest.check_and_set_version(version)
+
+            language = _get_get_param(http_request, 'language')
+            wpsrequest.check_and_set_language(language)
+
             wpsrequest.identifier = _get_get_param(http_request, 'identifier')
-            wpsrequest.store_execute = _get_get_param(http_request, 'storeExecuteResponse', 'false')
+            wpsrequest.store_execute = _get_get_param(
+                http_request, 'storeExecuteResponse', 'false')
             wpsrequest.status = _get_get_param(http_request, 'status', 'false')
-            wpsrequest.lineage = _get_get_param(http_request, 'lineage', 'false')
-            wpsrequest.inputs = get_data_from_kvp(_get_get_param(http_request, 'DataInputs'), 'DataInputs')
+            wpsrequest.lineage = _get_get_param(
+                http_request, 'lineage', 'false')
+            wpsrequest.inputs = get_data_from_kvp(
+                _get_get_param(http_request, 'DataInputs'), 'DataInputs')
             wpsrequest.outputs = {}
 
             # take responseDocument preferably
-            resp_outputs = get_data_from_kvp(_get_get_param(http_request, 'ResponseDocument'))
-            raw_outputs = get_data_from_kvp(_get_get_param(http_request, 'RawDataOutput'))
+            resp_outputs = get_data_from_kvp(
+                _get_get_param(http_request, 'ResponseDocument'))
+            raw_outputs = get_data_from_kvp(
+                _get_get_param(http_request, 'RawDataOutput'))
             wpsrequest.raw = False
             if resp_outputs:
                 wpsrequest.outputs = resp_outputs
             elif raw_outputs:
                 wpsrequest.outputs = raw_outputs
                 wpsrequest.raw = True
-                # executeResponse XML will not be stored and no updating of status
+                # executeResponse XML will not be stored and no updating of
+                # status
                 wpsrequest.store_execute = 'false'
                 wpsrequest.status = 'false'
-
 
         if not operation:
             raise MissingParameterValue('Missing request value', 'request')
@@ -135,9 +146,8 @@ class WPSRequest(object):
         elif self.operation == 'execute':
             return parse_get_execute
         else:
-            raise InvalidParameterValue('Unknown request %r' % self.operation, 'request')
-
-
+            raise OperationNotSupported(
+                'Unknown request %r' % self.operation, operation)
 
     def _post_request_parser(self, tagname):
         """Factory function returing propper parsing function
@@ -148,8 +158,10 @@ class WPSRequest(object):
         def parse_post_getcapabilities(doc):
             """Parse POST GetCapabilities request
             """
-            acceptedversions = xpath_ns(doc, '/wps:GetCapabilities/ows:AcceptVersions/ows:Version')
-            acceptedversions = ','.join(map(lambda v: v.text, acceptedversions))
+            acceptedversions = xpath_ns(
+                doc, '/wps:GetCapabilities/ows:AcceptVersions/ows:Version')
+            acceptedversions = ','.join(
+                map(lambda v: v.text, acceptedversions))
             wpsrequest.check_accepted_versions(acceptedversions)
 
         def parse_post_describeprocess(doc):
@@ -159,9 +171,12 @@ class WPSRequest(object):
             version = doc.attrib.get('version')
             wpsrequest.check_and_set_version(version)
 
+            language = doc.attrib.get('language')
+            wpsrequest.check_and_set_language(language)
+
             wpsrequest.operation = 'describeprocess'
             wpsrequest.identifiers = [identifier_el.text for identifier_el in
-                                xpath_ns(doc, './ows:Identifier')]
+                                      xpath_ns(doc, './ows:Identifier')]
 
         def parse_post_execute(doc):
             """Parse POST Execute request
@@ -170,8 +185,18 @@ class WPSRequest(object):
             version = doc.attrib.get('version')
             wpsrequest.check_and_set_version(version)
 
+            language = doc.attrib.get('language')
+            wpsrequest.check_and_set_language(language)
+
             wpsrequest.operation = 'execute'
-            wpsrequest.identifier = xpath_ns(doc, './ows:Identifier')[0].text
+
+            identifier = xpath_ns(doc, './ows:Identifier')
+
+            if not identifier:
+                raise MissingParameterValue(
+                    'Process identifier not set', 'Identifier')
+
+            wpsrequest.identifier = identifier[0].text
             wpsrequest.lineage = 'false'
             wpsrequest.store_execute = 'false'
             wpsrequest.status = 'false'
@@ -184,12 +209,15 @@ class WPSRequest(object):
                 wpsrequest.store_execute = 'false'
 
             # check if response document tag has been set then retrieve
-            response_document = xpath_ns(doc, './wps:ResponseForm/wps:ResponseDocument')
+            response_document = xpath_ns(
+                doc, './wps:ResponseForm/wps:ResponseDocument')
             if len(response_document) > 0:
-                wpsrequest.lineage = response_document[0].attrib.get('lineage', 'false')
-                wpsrequest.store_execute = response_document[0].attrib.get('storeExecuteResponse', 'false')
-                wpsrequest.status = response_document[0].attrib.get('status', 'false')
-
+                wpsrequest.lineage = response_document[
+                    0].attrib.get('lineage', 'false')
+                wpsrequest.store_execute = response_document[
+                    0].attrib.get('storeExecuteResponse', 'false')
+                wpsrequest.status = response_document[
+                    0].attrib.get('status', 'false')
 
         if tagname == WPS.GetCapabilities().tag:
             self.operation = 'getcapabilities'
@@ -201,7 +229,8 @@ class WPSRequest(object):
             self.operation = 'execute'
             return parse_post_execute
         else:
-            raise InvalidParameterValue('Unknown request %r' % tagname, 'request')
+            raise InvalidParameterValue(
+                'Unknown request %r' % tagname, 'request')
 
     def check_accepted_versions(self, acceptedversions):
         """
@@ -214,15 +243,16 @@ class WPSRequest(object):
             acceptedversions_array = acceptedversions.split(',')
             for aversion in acceptedversions_array:
                 if _check_version(aversion):
-                    version  = aversion
+                    version = aversion
         else:
             version = '1.0.0'
 
         if version:
             self.check_and_set_version(version)
         else:
-            raise VersionNegotiationFailed('The requested version "%s" is not supported by this server' % acceptedversions, 'version')
-    
+            raise VersionNegotiationFailed(
+                'The requested version "%s" is not supported by this server' % acceptedversions, 'version')
+
     def check_and_set_version(self, version):
         """set this.version
         """
@@ -230,9 +260,23 @@ class WPSRequest(object):
         if not version:
             raise MissingParameterValue('Missing version', 'version')
         elif not _check_version(version):
-            raise VersionNegotiationFailed('The requested version "%s" is not supported by this server' % version, 'version')
+            raise VersionNegotiationFailed(
+                'The requested version "%s" is not supported by this server' % version, 'version')
         else:
             self.version = version
+
+    def check_and_set_language(self, language):
+        """set this.language
+        """
+
+        if not language:
+            language = 'None'
+        elif language not in configuration.get_config_value('wps', 'lang').split(','):
+            raise InvalidParameterValue(
+                'The requested language "%s" is not supported by this server' % language, 'language')
+        else:
+            self.language = language
+
 
 def get_inputs_from_xml(doc):
     the_inputs = {}
@@ -309,6 +353,7 @@ def get_inputs_from_xml(doc):
 
     return the_inputs
 
+
 def get_output_from_xml(doc):
     the_output = {}
 
@@ -332,6 +377,7 @@ def get_output_from_xml(doc):
             the_output[identifier_el.text] = outpt
 
     return the_output
+
 
 def get_data_from_kvp(data, part=None):
     """Get execute DataInputs and ResponseDocument from URL (key-value-pairs) encoding
@@ -362,7 +408,8 @@ def get_data_from_kvp(data, part=None):
                 else:
                     io[attribute] = attr_val
 
-            # Add the input/output with all its attributes and values to the dictionary
+            # Add the input/output with all its attributes and values to the
+            # dictionary
             if part == 'DataInputs':
                 if identifier not in the_data:
                     the_data[identifier] = []
@@ -374,6 +421,7 @@ def get_data_from_kvp(data, part=None):
 
     return the_data
 
+
 def _check_version(version):
     """ check given version
     """
@@ -381,7 +429,6 @@ def _check_version(version):
         return False
     else:
         return True
-
 
 
 def _get_get_param(http_request, key, default=None, aslist=False):
@@ -394,7 +441,8 @@ def _get_get_param(http_request, key, default=None, aslist=False):
 
     key = key.lower()
     value = default
-    # http_request.args.keys will make + sign disappear in GET url if not urlencoded
+    # http_request.args.keys will make + sign disappear in GET url if not
+    # urlencoded
     for k in http_request.args.keys():
         if k.lower() == key:
             value = http_request.args.get(k)
@@ -402,6 +450,7 @@ def _get_get_param(http_request, key, default=None, aslist=False):
                 value = value.split(",")
 
     return value
+
 
 def _get_dataelement_value(value_el):
     """Return real value of XML Element (e.g. convert Element.FeatureCollection
@@ -416,6 +465,7 @@ def _get_dataelement_value(value_el):
     else:
         return value_el
 
+
 def _get_rawvalue_value(data, encoding=None):
     """Return real value of CDATA section"""
 
@@ -428,6 +478,7 @@ def _get_rawvalue_value(data, encoding=None):
     except:
         return data
 
+
 def _get_reference_header(header_element):
     """Parses ReferenceInput Header element
     """
@@ -435,6 +486,7 @@ def _get_reference_header(header_element):
     header['key'] = header_element.attrib('key')
     header['value'] = header_element.attrib('value')
     return header
+
 
 def _get_reference_body(body_element):
     """Parses ReferenceInput Body element
@@ -448,6 +500,7 @@ def _get_reference_body(body_element):
         body = _get_rawvalue_value(body_element.text)
 
     return body
+
 
 def _get_reference_bodyreference(referencebody_element):
     """Parse ReferenceInput BodyReference element

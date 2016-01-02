@@ -30,8 +30,9 @@ def log_request(uuid, request):
     cur = conn.cursor()
     cur.execute(insert)
     conn.commit()
+    close_connection()
 
-def update_response(uuid, response):
+def update_response(uuid, response, close=False):
     """Writes response to database
     """
 
@@ -65,6 +66,7 @@ def update_response(uuid, response):
     cur = conn.cursor()
     cur.execute(update)
     conn.commit()
+    close_connection()
 
 
 def _get_identifier(request):
@@ -119,7 +121,7 @@ def get_connection():
                 status varchar(30)
             )
             """
-        _CONNECTION = sqlite3.connect(database)
+        _CONNECTION = sqlite3.connect(database, check_same_thread=False)
         cursor = _CONNECTION.cursor()
         cursor.execute(createsql)
         _CONNECTION.commit()
@@ -175,4 +177,10 @@ def check_db_columns(connection):
         return True
     else:
         return False
+
+def close_connection():
+    global _CONNECTION
+    if _CONNECTION:
+        _CONNECTION.close()
+    _CONNECTION = None
 
