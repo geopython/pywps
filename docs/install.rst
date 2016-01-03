@@ -1,6 +1,6 @@
-============
+====================
 PyWPS-4 Installation
-============
+====================
 
 Note that PyWPS-4 is still under development, there is no stable release yet.
 
@@ -86,4 +86,4 @@ It can be cloned directly into the user area:
 It may be run right away through the *demo.py* script. 
 First time users should start by studying the demo project structure and then code their own processes.
 
-Full more details please consult the `process`_ section.
+Full more details please consult the :ref:`process` section.

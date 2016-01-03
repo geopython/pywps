@@ -1,5 +1,6 @@
-Welcome to the PyWPS documentation!
-=================================
+=====================================
+Welcome to the PyWPS-4 documentation!
+=====================================
 
 Contents:
 
@@ -12,6 +13,7 @@ Contents:
    api
 
 
+==================
 Indices and tables
 ==================
 

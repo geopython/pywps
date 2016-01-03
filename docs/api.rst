@@ -12,8 +12,6 @@ Defining processes
 
 .. autoclass:: Service
 
-.. autoclass:: PyWPSServerAbstract
-
 .. autoclass:: LiteralInput
 
 .. autoclass:: ComplexInput
@@ -23,7 +21,6 @@ Defining processes
 .. autoclass:: ComplexOutput
 
 .. autoclass:: Format
-
 
 
 Request and response objects

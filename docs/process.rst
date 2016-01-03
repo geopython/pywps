@@ -1,5 +1,7 @@
 .. currentmodule:: pywps
 
+.. _process:
+
 =========
 Processes
 =========
@@ -161,7 +163,7 @@ Or a POST request::
 
 **output** is the identifier of the output the user wishes to have be stored
 and accessible from a URL. The user may request as many outputs by reference
-as need, but only *one may be requested in RAW format.
+as need, but only *one* may be requested in RAW format.
 
 
 Publishing a process
