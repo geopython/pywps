@@ -105,7 +105,7 @@ class WPSResponse(object):
         doc.attrib['{http://www.w3.org/2001/XMLSchema-instance}schemaLocation'] = 'http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd'
         doc.attrib['service'] = 'WPS'
         doc.attrib['version'] = '1.0.0'
-        doc.attrib['{http://www.w3.org/XML/1998/namespace}lang'] = 'en-CA'
+        doc.attrib['{http://www.w3.org/XML/1998/namespace}lang'] = 'en-US'
         doc.attrib['serviceInstance'] = '%s:%s%s' % (
             config.get_config_value('wps', 'serveraddress'),
             config.get_config_value('wps', 'serverport'),

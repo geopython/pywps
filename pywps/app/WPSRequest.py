@@ -271,7 +271,7 @@ class WPSRequest(object):
 
         if not language:
             language = 'None'
-        elif language not in configuration.get_config_value('wps', 'lang').split(','):
+        elif language != 'en-US':
             raise InvalidParameterValue(
                 'The requested language "%s" is not supported by this server' % language, 'language')
         else:

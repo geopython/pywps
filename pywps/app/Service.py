@@ -39,7 +39,7 @@ class Service(object):
 
         doc.attrib['service'] = 'WPS'
         doc.attrib['version'] = '1.0.0'
-        doc.attrib['{http://www.w3.org/XML/1998/namespace}lang'] = 'en-CA'
+        doc.attrib['{http://www.w3.org/XML/1998/namespace}lang'] = 'en-US'
         doc.attrib[
             '{http://www.w3.org/2001/XMLSchema-instance}schemaLocation'] = 'http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd'
         # TODO: check Table 7 in OGC 05-007r7
@@ -270,7 +270,7 @@ class Service(object):
             '{http://www.w3.org/2001/XMLSchema-instance}schemaLocation'] = 'http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd'
         doc.attrib['service'] = 'WPS'
         doc.attrib['version'] = '1.0.0'
-        doc.attrib['{http://www.w3.org/XML/1998/namespace}lang'] = 'en-CA'
+        doc.attrib['{http://www.w3.org/XML/1998/namespace}lang'] = 'en-US'
         return xml_response(doc)
 
     def execute(self, identifier, wps_request, uuid):
