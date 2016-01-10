@@ -6,6 +6,7 @@ project = u'PyWPS'
 copyright = u'2013, Jachym Cepicky'
 version = '4.0'
 release = '4.0'
+latex_logo = 'pywps.png'
 
 extensions = ['sphinx.ext.autodoc']
 exclude_patterns = ['_build']
@@ -16,6 +17,7 @@ pygments_style = 'sphinx'
 
 html_theme = 'default'
 htmlhelp_basename = 'PyWPSdoc'
+html_logo = 'pywps.png'
 
 
 class Mock(object):
