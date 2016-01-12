@@ -24,7 +24,9 @@ Contents:
    configuration
    process
    exceptions
+   migration
    api
+
 
 
 ==================
