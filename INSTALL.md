@@ -10,14 +10,14 @@ In Debian based systems these can be installed with:
 
     $ sudo apt-get install git python-gdal
     
-In Windows systems a GIT client should be installed (e.g. GitHub for Windows).
+In Windows systems a Git client should be installed (e.g. GitHub for Windows).
     
 Install PyWPS 4
-----------------
+---------------
 
-Using Pip: 
+Using pip: 
 
-	$ sudo pip install -e git+https://github.com/jachym/pywps-4.git@master#egg=pywps
+    $ sudo pip install -e git+https://github.com/jachym/pywps-4.git@master#egg=pywps
 
 Or in alternative install it manually:
 
@@ -30,15 +30,15 @@ Or in alternative install it manually:
 Install demo service
 --------------------
 
-	$ git clone git@github.com:ldesousa/pywps-4-demo.git pywps-4-demo
-	
+    $ git clone git@github.com:ldesousa/pywps-4-demo.git pywps-4-demo
+    
 
 Run demo
 --------
 
-	$ python demo.py
-	
+    $ python demo.py
+    
 Access demo
 -----------
 
-	http://localhost:5000
+    http://localhost:5000
