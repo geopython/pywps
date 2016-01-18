@@ -41,6 +41,7 @@ An example again for Debian based systems (note the usage of *sudo* for install)
 Then install deps using pip::
 
     $ pip install -r requirements.txt
+    $ pip install -r requirements-dev.txt  # for developer tasks
 
 And install PyWPS system-wide::
 
