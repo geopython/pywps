@@ -118,18 +118,25 @@ class Input:
                 return resp
         return
 
-    def _setValueWithOccurence(self,oldValues, newValue):
-        """Check min and max occurrence and set this.value"""
-        if self.maxOccurs > 1:
+    def _setValueWithOccurence(self, oldValues, newValue):
+        """Check max occurrence and set this.value"""
+        maxOccursViolated = False
+
+        if (self.maxOccurs == 0) or (self.maxOccurs == 1 and oldValues):
+            maxOccursViolated = True
+        elif self.maxOccurs > 1:
             if not oldValues:
                 oldValues =  [newValue]
             else:
                 if self.maxOccurs > len(oldValues):
                     oldValues.append(newValue)
                 else:
-                    return "Too many occurrences of input [%s]: %s" % (self.identifier,newValue)
+                    maxOccursViolated = True
         else:
             oldValues = newValue
+
+        if maxOccursViolated:
+            return "Too many occurrences of input [%s]: %s" % (self.identifier, newValue)
 
         self.value = oldValues
         return
