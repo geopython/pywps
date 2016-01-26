@@ -541,6 +541,11 @@ class Execute(Request):
             except KeyError,e:
                 pass
 
+        # make sure, all inputs are defined
+        for inp in self.wps.inputs["datainputs"]:
+            if not inp["identifier"] in self.process.inputs:
+                raise pywps.pywps.InvalidParameterValue("Input [%s] is not defined" % inp["identifier"])
+
         # make sure, all inputs have minimum required number of values
         for identifier in self.process.inputs:
             input = self.process.inputs[identifier]
