@@ -339,7 +339,8 @@ http://wiki.rsg.pml.ac.uk/pywps/Introduction
                 continue
             if process.identifier == identifier:
                 return process
-        raise pywps.Exceptions.InvalidParameterValue(identifier)
+        raise pywps.Exceptions.InvalidParameterValue("identifier",
+            "Unknown identifier '%s'" % identifier)
 
     def getProcesses(self, identifiers=None):
         """Get list of processes identified by list of identifiers
@@ -348,7 +349,6 @@ http://wiki.rsg.pml.ac.uk/pywps/Introduction
             or 'all'
         :returns: list of process instances or none
         """
-
         if not identifiers:
             raise pywps.Exceptions.MissingParameterValue("Identifier")
 
@@ -366,7 +366,7 @@ http://wiki.rsg.pml.ac.uk/pywps/Introduction
                     processes.append(self.getProcess(identifier))
 
             if len(processes) == 0:
-                raise pywps.Exceptions.InvalidParameterValue(identifier)
+                raise pywps.Exceptions.InvalidParameterValue("identifier")
             else:
                 return processes
 

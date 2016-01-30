@@ -138,7 +138,8 @@ class Get(Parser):
             self.requestParser = Execute.Get(self.wps)
             self.inputs["request"] = self.EXECUTE
         else:
-            raise InvalidParameterValue("request")
+            raise InvalidParameterValue("request",
+                "Unsupported request type '%s'" % self.unparsedInputs["request"])
 
 
     def checkService(self):
@@ -151,7 +152,8 @@ class Get(Parser):
             if value.lower() == "wsdl":
                 self.inputs["service"] = "wsdl"
             elif value.lower() != "wps":
-                raise InvalidParameterValue("service")
+                raise InvalidParameterValue("service",
+                    "Unsupported service type '%s'" % self.unparsedInputs["service"])
             else:
                 self.inputs["service"] = "wps"
         else:
@@ -164,7 +166,8 @@ class Get(Parser):
         if "language" in self.unparsedInputs:
             value=Lang.getCode(self.unparsedInputs["language"].lower())
             if value not in self.wps.languages:
-                raise InvalidParameterValue("language")
+                raise InvalidParameterValue("language",
+                    "Unsupported language type '%s'" % value)
             else:
                 self.inputs["language"] = value
         else:

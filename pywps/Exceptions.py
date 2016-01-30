@@ -82,10 +82,15 @@ class MissingParameterValue(WPSException):
 
 class InvalidParameterValue(WPSException):
     """InvalidParameterValue WPS Exception"""
-    def __init__(self,value):
+    def __init__(self,value,text=None):
         self.code = "InvalidParameterValue"
         self.locator = str(value)
         self._make_xml()
+        if text:
+            self.ExceptionText = self.document.createElement("ExceptionText")
+            self.ExceptionText.appendChild(self.document.createTextNode(str(text)))
+            self.Exception.appendChild(self.ExceptionText)
+            self.value = xml_text_escape(text)
 
 class NoApplicableCode(WPSException):
     """NoApplicableCode WPS Exception"""
@@ -97,7 +102,7 @@ class NoApplicableCode(WPSException):
         self.message = value
         if value:
             self.ExceptionText = self.document.createElement("ExceptionText")
-            self.ExceptionText.appendChild(self.document.createTextNode(repr(value)))
+            self.ExceptionText.appendChild(self.document.createTextNode(str(value)))
             self.Exception.appendChild(self.ExceptionText)
             self.value = xml_text_escape(value)
 

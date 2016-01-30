@@ -110,7 +110,7 @@ class Post(PostParser):
             self.inputs["responseform"].has_key("responsedocument")) and \
             self.inputs["responseform"]["responsedocument"] and \
             self.inputs["responseform"]["rawdataoutput"]:
-            raise pywps.InvalidParameterValue(
+            raise pywps.InvalidParameterValue("responseDocument",
                 "Either responseDocument or rawDataOutput should be specified, but not both")
         if not self.inputs["responseform"].has_key("rawdataoutput"):
                self.inputs["responseform"]["rawdataoutput"] = {}
@@ -517,7 +517,7 @@ class Get(GetParser):
         # Either responseDocument or rawDataOutput should be specified, not both
         if len(self.inputs["responseform"]["rawdataoutput"])>0 and \
             len(self.inputs["responseform"]["responsedocument"])>0:
-            raise pywps.InvalidParameterValue(
+            raise pywps.InvalidParameterValue("responseDocument",
                 "Either responseDocument or rawDataOutput should be specified, but not both")
         return self.inputs
 
