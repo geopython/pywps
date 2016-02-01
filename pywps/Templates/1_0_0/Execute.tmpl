@@ -35,7 +35,7 @@
         </TMPL_IF>
         <TMPL_IF processfailed>
         <wps:ProcessFailed>
-            <ows:ExceptionReport version=1.0.0>
+            <ows:ExceptionReport version="1.0.0">
                 <TMPL_IF exceptiontext>
                 <ows:Exception exceptionCode="<TMPL_VAR exceptioncode>" locator="<TMPL_VAR locator>">
                     <ows:ExceptionText><TMPL_VAR exceptiontext></ows:ExceptionText>
