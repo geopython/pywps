@@ -85,6 +85,7 @@ class InvalidParameterValue(WPSException):
     def __init__(self,value,text=None):
         self.code = "InvalidParameterValue"
         self.locator = str(value)
+        self.message = text
         self._make_xml()
         if text:
             self.ExceptionText = self.document.createElement("ExceptionText")
