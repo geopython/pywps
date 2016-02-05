@@ -1,55 +1,59 @@
 SOURCE
 ======
-1 - Make new branch/tag
 
-git clone https://github.com/geopython/PyWPS.git
-git checkout $VERSION-branch
-git tag $VERSION
-git push
+git clone git@github.com:geopython/pywps.git
 
 Fix versions in the source
-==========================
+--------------------------
+
+cd pywps
 edit setup.py <- fix version
 edit wps.py <- fix version
 
-svn ci -m"Releasing new version of PyWPS: X.Y.X" .
+git commit -m 'Releasing new version of PyWPS: x.y.z' setup.py wps.py
 
-Make the package
-================
+Make new branch/tag
+-------------------
+
+git tag -a pywps-x.y.z -m 'tagging PyWPS version x.y.z'
+git push --tags
+
+Update PyPI
+-----------
+
 cd /tmp
-svn export svn copy svn+ssh://$DEVELOPER@svn.wald.intevation.org/pywps/branches/branch
-
-tar czf branch.tgz branch
-
-Upload file to file repository
-==============================
-
-http://wald.intevation.org/frs/?group_id=22
+git clone git@github.com:geopython/pywps.git
+cd pywps
+git checkout x.y.z
+python setup.py bdist_egg upload
 
 WEB PAGES
 =========
-1 - source/index.rst <- new version
-2 - source/download/index.rst
 
-Maling List
-===========
+git clone git@github.com:geopython/pywps.org.git
 
-PyWPS [VERSION]
-###############
+edit download/index.md <- new version https://github.com/geopython/pywps/archive/pywps-x.y.z.[tar.gz|zip]
+edit history/index.md <- new version
+add new blogpost as per https://github.com/geopython/pywps.org/blob/gh-pages/README.md#workflow
 
-PyWPS Development team announces new stable version of
-PyWPS[1] with number [VERSION]
+Mailing List
+============
+
+PyWPS [x.y.z]
+#############
+
+The PyWPS Development team announces the release of PyWPS x.y.z.
 
 Features of this version:
  - [SHOULD COPY THIS FROM Changelog]
 
-For download this version,  please follow the
-link below [2] or download PyWPS from subversion directly [3].
+To download this version, please follow the link below [2].
 
-NOTE:  [IF ANY]
+NOTE: [IF ANY]
 
 What is PyWPS:
 --------------
+
 PyWPS (Python Web Processing Service) is implementation of Web
 Processing Service standard from Open Geospatial Consortium (OGC(R)). 
 Processes can be written using GRASS GIS, but usage of other programs, like
@@ -59,6 +63,5 @@ Happy GISing!
 
 PyWPS Development team
 
-[1] http://pywps.wald.intevation.org
-[2] http://wald.intevation.org/frs/download.php/[FIX THE LINK]
-[3] svn checkout https://svn.wald.intevation.org/svn/pywps/tags/pywps-[FIX THE VERSION]
+[1] http://pywps.org
+[2] http://pywps.org/download
