@@ -26,10 +26,12 @@ from pywps import Exceptions
 import sys
 import urllib, tempfile
 
+LOGGER = logging.getLogger(__name__)
+
 try:
     import magic
 except:
-    logging.debug("Could not import magic module")
+    LOGGER.debug("Could not import magic module")
 
 class Input:
     """Class WPS Input
@@ -407,14 +409,14 @@ class ComplexInput(Input):
                 if key in input.keys():
                     self.format[key]=input[key]
                 else:
-                    logging.debug("input define by user didnt contain %s" % key)
+                    LOGGER.debug("input define by user didnt contain %s" % key)
                     self.format[key]=None
         else:
             for key in keys:
                 if key in input.keys():
                     self.format[key]=input[key]
                 else:
-                    logging.debug("input define by user didnt contain %s" % key)
+                    LOGGER.debug("input define by user didnt contain %s" % key)
                     self.format[key]=None
 
         return
@@ -462,7 +464,7 @@ class ComplexInput(Input):
         try:
             mimeTypeMagic=self.ms.file(fileName).split(';')[0]
             if self.format["mimetype"]!=mimeTypeMagic:
-                logging.debug("ComplexDataInput defines mimeType %s (default set) but libMagic detects %s" % (str(self.format["mimetype"]),mimeTypeMagic))
+                LOGGER.debug("ComplexDataInput defines mimeType %s (default set) but libMagic detects %s" % (str(self.format["mimetype"]),mimeTypeMagic))
         except:
             pass
 
@@ -502,7 +504,7 @@ class ComplexInput(Input):
         try:
             symlink(url_parsed.path, outputName)
         except Exception, what:
-            logging.exception('could not create symbolic link for file %s.', url_parsed.path)
+            LOGGER.exception('could not create symbolic link for file %s.', url_parsed.path)
             return self.downloadData(url)
 
         self.checkMimeTypeIn(outputName)
@@ -587,29 +589,29 @@ class ComplexInput(Input):
          #Note: magic output something like: 'image/tiff; charset=binary' we only need the typeContent
         if (self.format["mimetype"] is None) or (self.format["mimetype"]==""):
             #No mimeType let's set it from default
-            logging.debug("Missing ComplexDataInput mimeType in: %s, adopting default mimeType (first in formats list)" % self.identifier)
+            LOGGER.debug("Missing ComplexDataInput mimeType in: %s, adopting default mimeType (first in formats list)" % self.identifier)
             self.format["mimetype"]=self.formats[0]["mimeType"]
             #wps-grass bridge, default schema and encoding
             try:
                 self.format["schema"]=self.formats[0]["schema"]
-                logging.debug("Adding schema: %s" % self.format["schema"])
+                LOGGER.debug("Adding schema: %s" % self.format["schema"])
                 self.format["encoding"]=self.formats[0]["encoding"]
-                logging.debug("Adding encoding: %s" % self.format["encoding"])
+                LOGGER.debug("Adding encoding: %s" % self.format["encoding"])
             except:
-                logging.debug("Adding schema and/or encoding failed, ")
+                LOGGER.debug("Adding schema and/or encoding failed, ")
             #checking format with libmagic
             #--> new funcion aget base64 change
             #mimeTypeMagic=self.ms.file(fileName).split(';')[0]
             #if self.format["mimetype"]!=mimeTypeMagic:
-            #    logging.debug("ComplexDataInput defines mimeType %s (default set) but libMagic detects %s" % (str(self.format["mimetype"]),mimeTypeMagic))
+            #    LOGGER.debug("ComplexDataInput defines mimeType %s (default set) but libMagic detects %s" % (str(self.format["mimetype"]),mimeTypeMagic))
         else:
             #Checking is mimeType is in the acceptable formats
             if self.format["mimetype"] not in [dic["mimeType"] for dic in self.formats]:
                 #ATTENTION: False positive if dictionary is not set in process/empty
                 if (len(self.formats)==1) and (type(self.formats[0]["mimeType"])==types.NoneType):
-                    logging.debug("Input %s without mimetype list, cant check if ComplexDataInput mimtype is correct or not" % self.identifier)
+                    LOGGER.debug("Input %s without mimetype list, cant check if ComplexDataInput mimtype is correct or not" % self.identifier)
                 else:
-                    logging.debug("ComplexDataInputXML defines mimeType %s  which is not in Input %s formats list" % (str(self.format["mimetype"]),str(self.identifier)))
+                    LOGGER.debug("ComplexDataInputXML defines mimeType %s  which is not in Input %s formats list" % (str(self.format["mimetype"]),str(self.identifier)))
                     self.onProblem("InvalidParameterValue",self.identifier)
 
 
@@ -1036,15 +1038,15 @@ class ComplexOutput(Output):
         try:
             if (self.format["schema"] is None) or (self.format["schema"]==""):
                 self.format["schema"]=self.formats[0]["schema"]
-                logging.debug("Adding schema: %s" % self.format["schema"])
+                LOGGER.debug("Adding schema: %s" % self.format["schema"])
             if (self.format["encoding"] is None) or (self.format["schema"]==""):
                 self.format["encoding"]=self.formats[0]["encoding"]
-                logging.debug("Adding encoding: %s" % self.format["encoding"])
+                LOGGER.debug("Adding encoding: %s" % self.format["encoding"])
         except:
-            logging.debug("Adding schema and/or encoding failed, ")
+            LOGGER.debug("Adding schema and/or encoding failed, ")
 
         if (self.format["mimetype"] is None) or (self.format["mimetype"]==""):
-                logging.debug("Missing ComplexDataOutput mimeType in %s, adopting default mimeType %s (first in formats list)" % (self.identifier,self.formats[0]["mimeType"]))
+                LOGGER.debug("Missing ComplexDataOutput mimeType in %s, adopting default mimeType %s (first in formats list)" % (self.identifier,self.formats[0]["mimeType"]))
                 self.format["mimetype"]=self.formats[0]["mimeType"]
                 #wps-grass-bridge
         else:
@@ -1052,9 +1054,9 @@ class ComplexOutput(Output):
             if self.format["mimetype"] not in [dic["mimeType"] for dic in self.formats]:
                 #ATTENTION: False positive if dictionary is not set in process/empty formats list
                 if (len(self.formats)==1) and (type(self.formats[0]["mimeType"])==types.NoneType):
-                    logging.debug("Process without mimetype list, cant check if ComplexDataOutput mimtype is correct or not")
+                    LOGGER.debug("Process without mimetype list, cant check if ComplexDataOutput mimtype is correct or not")
                 else:
-                    logging.debug("ComplexDataOutputXML defines mimeType %s  which is not in process %s formats list" % (str(self.format["mimetype"]),str(self.identifier)))
+                    LOGGER.debug("ComplexDataOutputXML defines mimeType %s  which is not in process %s formats list" % (str(self.format["mimetype"]),str(self.identifier)))
                     self.onProblem("InvalidParameterValue",self.identifier)
 
 

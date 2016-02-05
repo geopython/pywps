@@ -35,6 +35,7 @@ import types
 import traceback
 import logging
 
+LOGGER = logging.getLogger(__name__)
 
 class Request:
     """WPS Request performing, and response formating
@@ -174,7 +175,7 @@ http://wiki.rsg.pml.ac.uk/pywps/Introduction
                 except Exception, e:
                     # async process has problems reporting missing modules.
                     traceback.print_exc(file=pywps.logFile)
-                    logging.warning("Could not import processes from "
+                    LOGGER.warning("Could not import processes from "
                                     "%s: %s" % (repr(processSources.__name__),
                                                 repr(e))
                                     )
@@ -192,7 +193,7 @@ http://wiki.rsg.pml.ac.uk/pywps/Introduction
                             try:
                                 processes.append(member())
                             except Exception, e:
-                                logging.warning(
+                                LOGGER.warning(
                                     "Could not import process "
                                     "[%s]: %s" % (repr(member), repr(e))
                                 )
@@ -293,19 +294,19 @@ http://wiki.rsg.pml.ac.uk/pywps/Introduction
         global pywps
 
         if processes and isinstance(processes, str):
-            logging.info("Reading processes from directory [%s]" % processes)
+            LOGGER.info("Reading processes from directory [%s]" % processes)
             self.processes = self._init_from_directory(processes)
 
         # processes are some list -- use them directly
         elif processes and type(processes) in [type(()), type([])]:
 
-            logging.info("Setting PYWPS_PROCESSES not set, we are using "
+            LOGGER.info("Setting PYWPS_PROCESSES not set, we are using "
                          "the processes array directly")
             self.processes = self._init_from_code(processes)
 
         # processes will be set from configuration file
         elif config.getConfigValue("server", "processesPath"):
-            logging.info(
+            LOGGER.info(
                 "Setting PYWPS_PROCESSES from configuration file "
                 "to %s" % config.getConfigValue("server", "processesPath")
             )
@@ -314,17 +315,17 @@ http://wiki.rsg.pml.ac.uk/pywps/Introduction
 
         # processes will be set from default directory
         else:
-            logging.info("Importing the processes from default "
+            LOGGER.info("Importing the processes from default "
                          "(pywps/processes) location")
             from pywps import processes as pywpsprocesses
             self.processes = self._init_from_directory(
                 os.path.abspath(pywpsprocesses.__path__[-1]))
 
         if len(self.processes) == 0:
-            logging.warning("No processes found in any place. Continuing, "
+            LOGGER.warning("No processes found in any place. Continuing, "
                             "but you can not execute anything.")
 
-        logging.info("Following processes are imported: "
+        LOGGER.info("Following processes are imported: "
                      "%s" % map(lambda p: p.identifier, self.processes))
         return self.processes
 

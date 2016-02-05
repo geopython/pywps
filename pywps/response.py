@@ -17,7 +17,7 @@ from os import name as OSNAME
 from pywps import Soap 
 import pywps.Ftp
 
-
+LOGGER = logging.getLogger(__name__)
 
 def response(response,targets,soapVersion=None,isSoap=False,isSoapExecute=False,contentType="application/xml",isPromoteStatus=False):
     """
@@ -59,7 +59,7 @@ def response(response,targets,soapVersion=None,isSoap=False,isSoapExecute=False,
         # pywps.Ftp.FTP object 
         elif isinstance(f, pywps.Ftp.FTP):
              _sendResponseFTP(f,response)
-             logging.debug("Response document successfuly send to ftp server")
+             LOGGER.debug("Response document successfuly send to ftp server")
 
         # java servlet response
         elif OSNAME == "java" :
