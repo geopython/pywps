@@ -65,14 +65,14 @@ doclines = __doc__.split("\n")
 
 dist =  setup(
         name = name,
-        version = '3.2.2',
+        version = '3.2.3',
         maintainer="Jachym Cepicky",
         maintainer_email = 'jachym.cepicky@gmail.com',
         author = 'Jachym Cepicky',
         author_email = 'jachym.cepicky@gmail.com',
-        url = 'http://pywps.wald.intevation.org',
+        url = 'http://pywps.org',
         license = "http://www.gnu.org/licenses/gpl.html",
-        download_url="http://pywps.wald.intevation.org",
+        download_url="http://pywps.org/download/",
         description=doclines[0],
         zip_safe=False,
         platforms=["any"],

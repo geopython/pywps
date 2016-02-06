@@ -1,3 +1,9 @@
+pywps (3.2.3) precise; urgency=low
+
+  * Release of current minor bug fixing patches
+
+ -- Jachym Cepicky <jachym.cepicky@gmail.com>  Sat, 06 Feb 2016 19:22:22 +0000
+
 pywps (3.2.2) precise; urgency=low
 
   * Changelog version number updated to 3.2.2 and removing of entries in /debian/docs as the files don't exist in the doc directory. 
