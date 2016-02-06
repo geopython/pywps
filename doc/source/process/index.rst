@@ -32,11 +32,12 @@ something you need to log (activity, variable content for debug or
 anything else), just import the module and use accordingly::
 
     import logging
+    LOGGER = logging.getLogger(__name__)
     ...
 
-    logging.info("Just information message")
-    logging.debug("Variable content: %s" % variable)
-    logging.error("Error occured: %s" % e)
+    LOGGER.info("Just information message")
+    LOGGER.debug("Variable content: %s" % variable)
+    LOGGER.error("Error occured: %s" % e)
 
 The logs are printed to standard error, or to a file set in the configuration
 file :ref:`configuration`. Log level is set with `logLevel` option, also in

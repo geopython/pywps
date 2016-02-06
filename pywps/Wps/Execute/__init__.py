@@ -51,6 +51,8 @@ import pickle, subprocess
 
 from xml.sax.saxutils import escape
 
+LOGGER = logging.getLogger(__name__)
+
 TEMPDIRPREFIX="pywps-instance"
 
 #Note: saxutils to escape &,< and > from URLs. Applied to _lineageComplexRerenceInput,_asReferenceOutput. in the last case
@@ -356,17 +358,17 @@ class Execute(Request):
             self.promoteStatus(self.accepted,"Process %s accepted" %\
                     self.process.identifier)
 
-            logging.debug("Store and Status are both set to True, let's be async")
+            LOGGER.debug("Store and Status are both set to True, let's be async")
             picklePath = self._store_state(wps, config.config)
-            logging.debug("PickleFile: %s" % picklePath)
+            LOGGER.debug("PickleFile: %s" % picklePath)
 
             # spawn this process
-            logging.info("Spawning process to the background")
+            LOGGER.info("Spawning process to the background")
             self.outputFile.name
             new_env = self._prepare_env()
             subprocess.Popen([sys.executable, __file__, picklePath, self.outputFile.name],
                              stdout=None, stderr=None, close_fds=True, env=new_env)
-            logging.info("This is parent process, end.")
+            LOGGER.info("This is parent process, end.")
 
             # close the outputs ..
 
@@ -760,10 +762,10 @@ class Execute(Request):
                                     self.contentType,isPromoteStatus=True)
             #self.wps.parser.isSoapExecute
         if self.status == self.started:
-            logging.info("Status [%s][%.1f]: %s" %\
+            LOGGER.info("Status [%s][%.1f]: %s" %\
                     (self.status,float(self.percent), self.statusMessage))
         else:
-            logging.info("Status [%s]: %s" % (self.status, self.statusMessage))
+            LOGGER.info("Status [%s]: %s" % (self.status, self.statusMessage))
 
 
     def lineageInputs(self):
@@ -1092,7 +1094,7 @@ class Execute(Request):
                         output.value=re.findall(r'<wps:Data>(.*?)</wps:Data>', bboxXMLOut)[0]
                     except Exception,e:
                         #log the error and continue as simple string
-                        logging.debug("Problems generating the BBOX XML content asReference")
+                        LOGGER.debug("Problems generating the BBOX XML content asReference")
                         traceback.print_exc(file=pywps.logFile)
                 if outputType == "ftp":
                     
@@ -1128,10 +1130,10 @@ class Execute(Request):
                 elif not self._samefile(output.value,outFile):
                     # TODO: dirty hack to avoid copy time
                     try:
-                        logging.debug("link output: from=%s, to=%s", os.path.abspath(output.value), outFile)
+                        LOGGER.debug("link output: from=%s, to=%s", os.path.abspath(output.value), outFile)
                         os.link(os.path.abspath(output.value), outFile)
                     except:
-                        logging.warn("failed to link output")
+                        LOGGER.warn("failed to link output")
                         COPY(os.path.abspath(output.value), outFile)
                     import stat
                     os.chmod(outFile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
@@ -1190,7 +1192,7 @@ class Execute(Request):
             #mimeType=output.ms.file(output.value).split(';')[0]
             #if (output.format["mimetype"] is None) or (output.format["mimetype"]==""):
             #    output.format["mimetype"]=mimeType
-            #    logging.debug("Since there is absolutely no mimeType information for %s, using libmagic mimeType %s " % (output.identifier,mimeType))
+            #    LOGGER.debug("Since there is absolutely no mimeType information for %s, using libmagic mimeType %s " % (output.identifier,mimeType))
             #else:
             #    #check if output.format is in output.formats
             #    if output.format["mimetype"] in [item["mimeType"] for item in output.formats]:
@@ -1199,7 +1201,7 @@ class Execute(Request):
             #        output.format["mimetype"]=output.format["mimeType"]
             #        del output.format["mimeType"]
             #    else:
-            #         logging.debug("ComplexOut %s has libMagic mimeType: %s but its format is %s (not in output list)" % (output.identifier,mimeType,output.format["mimetype"]))
+            #         LOGGER.debug("ComplexOut %s has libMagic mimeType: %s but its format is %s (not in output list)" % (output.identifier,mimeType,output.format["mimetype"]))
             #         raise pywps.InvalidParameterValue(output.identifier)
      
             #return
@@ -1207,10 +1209,10 @@ class Execute(Request):
                 mimeType=output.ms.file(output.value).split(';')[0]
                 if (output.format["mimetype"] is None) or (output.format["mimetype"]==""):
                     output.format["mimetype"]=mimeType
-                    logging.debug("Since there is absolutely no mimeType information for %s, using libmagic mimeType %s " % (output.identifier,mimeType))
+                    LOGGER.debug("Since there is absolutely no mimeType information for %s, using libmagic mimeType %s " % (output.identifier,mimeType))
                 else:
                     if (mimeType.lower()!=output.format["mimetype"].lower()):
-                        logging.debug("ComplexOut %s has libMagic mimeType: %s but its format is %s" % (output.identifier,mimeType,output.format["mimetype"]))
+                        LOGGER.debug("ComplexOut %s has libMagic mimeType: %s but its format is %s" % (output.identifier,mimeType,output.format["mimetype"]))
             except:
                 pass
 
@@ -1322,7 +1324,7 @@ class Execute(Request):
         
         os.chdir(self.curdir)
         def onError(*args):
-            logging.error("Could not remove temporary dir")
+            LOGGER.error("Could not remove temporary dir")
 
         for i in range(len(self.dirsToBeRemoved)):
             dir = self.dirsToBeRemoved[0]
@@ -1335,7 +1337,7 @@ class Execute(Request):
                 tmpPath=config.getConfigValue("server","tempPath")
                 os.remove(os.path.join(tmpPath, self.__pickleFileName+"-"+self.wps.UUID))
             except Exception, e:
-                logging.debug(str(e))
+                LOGGER.debug(str(e))
                     
 
 
@@ -1405,10 +1407,10 @@ class Execute(Request):
         new_env = os.environ.copy()
         try:
             import mod_wsgi
-            logging.debug('Running under mod_wsgi')
+            LOGGER.debug('Running under mod_wsgi')
             new_env['MOD_WSGI'] = 'MOD_WSGI'
         except:
-            logging.debug('Nah, no mod_wsgi here. Move along')
+            LOGGER.debug('Nah, no mod_wsgi here. Move along')
         return new_env
 
     def _store_state(self, wps_instance, config_instance):
@@ -1467,7 +1469,7 @@ if __name__ == "__main__":
             if os.path.isfile(activate_script):
                 execfile(activate_script, dict(__file__=activate_script))
         wps.setLogFile()
-        logging.info("Spawn process started, continuting to execute the process")
+        LOGGER.info("Spawn process started, continuting to execute the process")
         # fix some inputs
         wps.inputs["responseform"]["responsedocument"]["status"] = False
 
@@ -1476,7 +1478,7 @@ if __name__ == "__main__":
             try:
                 ex = Execute(wps,spawned = True)
             except Exception,e:
-                logging.warning(e)
+                LOGGER.warning(e)
             # that's all folks
     else:
         try:

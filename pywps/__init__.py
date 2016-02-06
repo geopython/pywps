@@ -106,6 +106,8 @@ PYWPS_INSTALL_DIR = None # this working directory
 DEFAULT_LANG = "en-CA"
 DEFAULT_VERSION = "1.0.0"
 
+LOGGER = logging.getLogger(__name__)
+
 logFile = None
 
 class Pywps:
@@ -153,7 +155,8 @@ class Pywps:
         .. note:: Use ::
 
                 import logging
-                logging.debug("hallo world")
+                LOGGER = logging.getLogger(__name__)
+                LOGGER.debug("hallo world")
 
             for any debugging information, you want to get
 
@@ -250,12 +253,12 @@ class Pywps:
         """
         global logFile
         fileName = config.getConfigValue("server","logFile")
-        logLevel = eval("logging."+config.getConfigValue("server","logLevel").upper())
+        logLevel = eval("LOGGER."+config.getConfigValue("server","logLevel").upper())
         format = "PyWPS [%(asctime)s] %(levelname)s: %(message)s"
         if not fileName:
-            logging.basicConfig(level=logLevel,format=format)
+            LOGGER.basicConfig(level=logLevel,format=format)
         else:
-            logging.basicConfig(filename=fileName,level=logLevel,format=format)
+            LOGGER.basicConfig(filename=fileName,level=logLevel,format=format)
             logFile = open(fileName, "a")
 
 
@@ -265,8 +268,9 @@ def debug(debug,code="Debug"):
     .. note:: Deprecated from 3.2, use ::
 
             import logging
+            LOGGER = logging.getLogger(__name__)
             ...
-            logging.debug("Hallo world")
+            LOGGER.debug("Hallo world")
 
         or similar. See Python module :mod:`logging` for more details
 
@@ -278,7 +282,7 @@ def debug(debug,code="Debug"):
         direct after 'PyWPS' and before the debug text
     :type code: string.
     """
-    logging.debug(debug)
+    LOGGER.debug(debug)
 
     #dbg = config.getConfigValue("server","debug")
     #if dbg == True or (type(dbg) == type("") and \

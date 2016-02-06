@@ -26,6 +26,8 @@ from pywps.Template import TemplateError
 import os,types,traceback
 import logging
 
+LOGGER = logging.getLogger(__name__)
+
 class DescribeProcess(Request):
     """
     Parses input request obtained via HTTP POST encoding - should be XML
@@ -221,7 +223,7 @@ class DescribeProcess(Request):
                         valrecord["discrete"] = 1
                         valrecord["value"] = val
                     processInOutput["allowedValues"].append(valrecord)
-                    logging.debug(str(processInOutput["allowedValues"]))
+                    LOGGER.debug(str(processInOutput["allowedValues"]))
         except AttributeError:
             pass
 

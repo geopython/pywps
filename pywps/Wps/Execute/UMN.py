@@ -27,6 +27,8 @@ import urllib2
 import logging
 import tempfile
 
+LOGGER = logging.getLogger(__name__)
+
 mapscript=False
 gdal=False
 try:
@@ -34,7 +36,7 @@ try:
     mapscript=True
 except Exception,e:
     mapscript=False
-    logging.info("MapScript could not be loaded, mapserver not supported: %s" %e)
+    LOGGER.info("MapScript could not be loaded, mapserver not supported: %s" %e)
 
 try:
     from osgeo import gdal
@@ -42,7 +44,7 @@ try:
     from osgeo import osr
 except Exception,e:
     gdal=False
-    logging.info("osgeo package could not be loaded, mapserver not supported: %s" %e)
+    LOGGER.info("osgeo package could not be loaded, mapserver not supported: %s" %e)
 
 
 
@@ -278,7 +280,7 @@ class UMN:
         :returns: "raster" or "vector"
         """
 
-        logging.debug("Importing given output [%s] using gdal" % output.value)
+        LOGGER.debug("Importing given output [%s] using gdal" % output.value)
         #If dataset is XML it will make an error like ERROR 4: `/var/www/html/wpsoutputs/vectorout-26317EUFxeb' not recognised as a supported file format.
         self.dataset = gdal.Open(output.value)
 
@@ -286,7 +288,7 @@ class UMN:
             return "raster"
 
         if not self.dataset:
-            logging.debug("Importing given output [%s] using ogr" % output.value)
+            LOGGER.debug("Importing given output [%s] using ogr" % output.value)
             self.dataset = ogr.Open(output.value)
 
         if self.dataset:
