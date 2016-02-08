@@ -65,8 +65,8 @@ example how to use this module::
 
 __all__ = [ "Parser","processes", "Process", "Exceptions", "Wps", "Templates","Template","XSLT","Ftp"]
 
-# Author:	Jachym Cepicky
-#        	http://les-ejk.cz
+# Author:   Jachym Cepicky
+#           http://les-ejk.cz
 # License:
 #
 # Web Processing Service implementation
@@ -248,13 +248,18 @@ class Pywps:
         self.response = self.request.response
         return self.response
 
-    def setLogFile(self):
+    def setLogFile(self, clear_handlers=False):
         """Set :data:`logFile`. Default is sys.stderr
         """
         global logFile
         fileName = config.getConfigValue("server","logFile")
         logLevel = eval("LOGGER."+config.getConfigValue("server","logLevel").upper())
         format = "PyWPS [%(asctime)s] %(levelname)s: %(message)s"
+
+        if clear_handlers and len(logging.root.handlers) > 0:
+            # somehow need to clear handlers for async processes
+            logging.root.handlers[:] = []
+        
         if not fileName:
             LOGGER.basicConfig(level=logLevel,format=format)
         else:
