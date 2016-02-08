@@ -1468,7 +1468,7 @@ if __name__ == "__main__":
             activate_script = os.path.join(venv, 'bin', 'activate_this.py')
             if os.path.isfile(activate_script):
                 execfile(activate_script, dict(__file__=activate_script))
-        wps.setLogFile()
+        wps.setLogFile(clear_handlers=True)
         LOGGER.info("Spawn process started, continuting to execute the process")
         # fix some inputs
         wps.inputs["responseform"]["responsedocument"]["status"] = False
