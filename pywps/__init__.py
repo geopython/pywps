@@ -110,7 +110,7 @@ LOGGER = logging.getLogger(__name__)
 
 logFile = None
 
-class Pywps:
+class Pywps(object):
     """This is main PyWPS Class, which parses the request, performs the
     desired operation and writes required response back.
 
@@ -253,7 +253,7 @@ class Pywps:
         """
         global logFile
         fileName = config.getConfigValue("server","logFile")
-        logLevel = eval("LOGGER."+config.getConfigValue("server","logLevel").upper())
+        logLevel = eval("logging."+config.getConfigValue("server","logLevel").upper())
         format = "PyWPS [%(asctime)s] %(levelname)s: %(message)s"
 
         if clear_handlers and len(logging.root.handlers) > 0:
@@ -261,9 +261,9 @@ class Pywps:
             logging.root.handlers[:] = []
         
         if not fileName:
-            LOGGER.basicConfig(level=logLevel,format=format)
+            logging.basicConfig(level=logLevel,format=format)
         else:
-            LOGGER.basicConfig(filename=fileName,level=logLevel,format=format)
+            logging.basicConfig(filename=fileName,level=logLevel,format=format)
             logFile = open(fileName, "a")
 
 
