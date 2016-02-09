@@ -31,5 +31,5 @@ class Process(WPSProcess):
      def execute(self):
 
         self.Output1.setValue(int(self.Input1.getValue())+1)
-        self.Output2.setValue(int(self.Input1.getValue())-1)
+        self.Output2.setValue(int(self.Input2.getValue())-1)
         return
