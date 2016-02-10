@@ -12,6 +12,10 @@
 # serve to show the default.
 
 import sys, os
+import mock
+
+sys.modules['GDAL'] = mock.Mock()
+sys.modules['lxml'] = mock.Mock()
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
