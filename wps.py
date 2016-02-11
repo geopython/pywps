@@ -30,7 +30,7 @@ License.
 
 Enjoy and happy GISing!
 """
-__version__ = "3.2.2"
+__version__ = "3.2.4"
 
 
 # Author:    Jachym Cepicky
