@@ -1,3 +1,12 @@
+pywps (3.2.4) precise; urgency=low
+
+  * fix logging bugs
+  * fix output type handling
+
+ -- Tom Kralidis <tomkralidis@gmail.com>  Thu, 11 Feb 2016 00:49:14 +0000
+
+Wed Feb 10 19:47:05 EST 2016
+
 pywps (3.2.3) precise; urgency=low
 
   * Release of current minor bug fixing patches

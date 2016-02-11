@@ -1,7 +1,8 @@
 #
-# spec file for package pywps (3.2.1)
+# spec file for package pywps (3.2.4)
 #
 # Copyright (c) 2012 Angelos Tzotsos <tzotsos@opensuse.org>
+# Copyright (c) 2016 Tom Kralidis <tomkralidis@gmail.com>
 #
 # This file and all modifications and additions to the pristine
 # package are under the same license as the package itself.
@@ -15,7 +16,7 @@
 %define pyname pywps
 
 Name:           python-%{pyname}
-Version:        3.2.1
+Version:        3.2.4
 Release:        1
 License:        GPL
 Summary:        OGC Web Processing Servisce in Python

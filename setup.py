@@ -65,7 +65,7 @@ doclines = __doc__.split("\n")
 
 dist =  setup(
         name = name,
-        version = '3.2.3',
+        version = '3.2.4',
         maintainer="Jachym Cepicky",
         maintainer_email = 'jachym.cepicky@gmail.com',
         author = 'Jachym Cepicky',
