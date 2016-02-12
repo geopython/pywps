@@ -25,7 +25,6 @@ from pywps import config
 import os
 import urllib2
 import logging
-import tempfile
 
 LOGGER = logging.getLogger(__name__)
 
