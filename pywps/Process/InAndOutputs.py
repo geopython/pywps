@@ -1014,12 +1014,10 @@ class ComplexOutput(Output):
         elif value.__class__.__name__=='StringIO' or value.__class__.__name__=='StringO':
             import tempfile
             from os import curdir
-            stringIOName = tempfile.mkstemp(prefix="pywpsOutput",dir=curdir) #(5, '/tmp/pywps-instanceS2j6ve/pywpsOutputZxSM6V')
-            stringIOName=stringIOName[1]
-
-            stringIOFile=open(stringIOName,"w")
-            stringIOFile.write(value.getvalue())
-            stringIOFile.close()
+            fh, stringIOName = tempfile.mkstemp(prefix="pywpsOutput",
+                                                dir=curdir) #(5, '/tmp/pywps-instanceS2j6ve/pywpsOutputZxSM6V')
+            fh.write(value.getvalue())
+            fh.close()
             self.value=stringIOName
         # TODO add more types, like Arrays and lists for example
         else:

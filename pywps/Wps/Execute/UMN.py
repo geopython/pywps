@@ -25,7 +25,6 @@ from pywps import config
 import os
 import urllib2
 import logging
-import tempfile
 
 LOGGER = logging.getLogger(__name__)
 
@@ -95,7 +94,6 @@ class UMN:
         if ((mapscript == False) or (gdal== False)):
             return
         
-        tmp = os.path.basename(tempfile.mkstemp()[1])
         self.outputs = {}
         self.process = process
         self.sessionId = sessId

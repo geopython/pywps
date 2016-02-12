@@ -1379,11 +1379,14 @@ class Execute(Request):
              # copy the file to safe place
             outName = os.path.basename(output.value)
             outSuffix = os.path.splitext(outName)[1]
-            tmp = tempfile.mkstemp(suffix=outSuffix, prefix="%s-%s" % (output.identifier,self.pid),dir=os.path.join(config.getConfigValue("server","outputPath")))
-            outFile = tmp[1]
-
+            fh, outFile = tempfile.mkstemp(
+                suffix=outSuffix, 
+                prefix="%s-%s" % (output.identifier, self.pid),
+                dir=os.path.join(config.getConfigValue("server", "outputPath"))
+            )
             if not self._samefile(output.value,outFile):
                 COPY(os.path.abspath(output.value), outFile)
+            fh.close()
 
             #check 
             self.contentType = output.format["mimetype"]
