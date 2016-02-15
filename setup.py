@@ -62,6 +62,9 @@ import sys,os,traceback
 
 doclines = __doc__.split("\n")
 
+with open('requirements.txt') as fh:
+  install_requires = fh.read()
+
 
 dist =  setup(
         name = name,
@@ -111,5 +114,6 @@ dist =  setup(
         requires=[
             'ordereddict',
             ],
+        install_requires=install_requires,
         scripts=['wps.py']
 )
