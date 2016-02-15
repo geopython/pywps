@@ -1,64 +1,13 @@
 #!/usr/bin/make -f
+# -*- makefile -*-
 # Sample debian/rules that uses debhelper.
-# GNU copyright 1997 to 1999 by Joey Hess.
+# This file was originally written by Joey Hess and Craig Small.
+# As a special exception, when this file is copied by dh-make into a
+# dh-make output file, you may use that output file without restriction.
+# This special exception was added by Craig Small in version 0.37 of dh-make.
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-# This is the debhelper compatibility version to use.
-export DH_COMPAT=4
-
-ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
-	CFLAGS += -g
-endif
-ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
-	INSTALL_PROGRAM += -s
-endif
-
-build: build-stamp
-
-build-stamp: 
-	dh_testdir
-
-	python setup.py build
-	touch build-stamp
-
-clean::
-	dh_testdir
-	dh_testroot
-	python setup.py clean
-	rm -f build-stamp 
-	rm -rf build 
-
-	dh_clean
-
-install: build
-	dh_testdir
-	dh_testroot
-	dh_clean 
-	dh_installdirs
-
-	python setup.py install --no-compile --root=`pwd`/debian/pywps
-
-# Build architecture-dependent files here.
-binary-arch: build install
-	dh_testdir
-	dh_testroot
-	dh_installdocs
-	dh_installexamples
-	dh_installmenu
-	dh_installmanpages
-	dh_installchangelogs 
-	dh_link
-	dh_strip
-	dh_compress
-	dh_fixperms
-	dh_python
-	dh_installdeb
-	dh_shlibdeps
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
-
-binary: binary-arch
-.PHONY: build clean binary-arch binary install 
+%:
+	dh $@ --with python2 --build=pybuild
