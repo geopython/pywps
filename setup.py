@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# Copyright (C) 2014-2015 PyWPS Development Team, represented by Jachym Cepicky
+# Copyright (C) 2014-2016 PyWPS Development Team, represented by Jachym Cepicky
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to
@@ -29,15 +29,38 @@ try:
 except ImportError:
     from distutils.core import setup
 
-DESCRIPTION = 'PyWPS - Python implementation of OGC Web Processing Service'
+with open('VERSION.txt') as ff:
+    VERSION = ff.read().strip()
+
+DESCRIPTION = ('PyWPS is an implementation of the Web Processing Service '
+               'standard from the Open Geospatial Consortium. PyWPS is '
+               'written in Python.')
+
+KEYWORDS = 'PyWPS WPS OGC processing'
 
 CONFIG = {
+    'name': 'pywps',
+    'version': VERSION,
     'description': DESCRIPTION,
+    'keywords': KEYWORDS,
+    'license': 'MIT',
+    'platforms': 'all',
     'author': 'Jachym Cepicky',
-    'url': 'http://pywps.org',
-    'download_url': 'https://github.com/PyWPS/pywps-4',
     'author_email': 'jachym.cepicky@gmail.com',
-    'version': '4.0',
+    'maintainer': 'Jachym Cepicky',
+    'maintainer_email': 'jachym.cepicky@gmail.com',
+    'url': 'http://pywps.org',
+    'download_url': 'https://github.com/geopython/pywps',
+    'classifiers': [
+        'Development Status :: 5 - Production/Stable',
+        'Environment :: Web Environment',
+        'Intended Audience :: Developers',
+        'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Topic :: Scientific/Engineering :: GIS'
+    ],
     'install_requires': [
         'lxml',
         'werkzeug',
@@ -54,7 +77,6 @@ CONFIG = {
         'pywps/inout/formats'
     ],
     'scripts': [],
-    'name': 'pywps'
 }
 
 if sys.version_info.major < 3:

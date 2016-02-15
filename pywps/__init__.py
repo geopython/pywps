@@ -4,7 +4,7 @@ working with list of processes, executing them and redirecting OGC WPS
 responses back to client.
 """
 # Author:    Alex Morega & Calin Ciociu
-#            
+#
 # License:
 #
 # Web Processing Service implementation
@@ -16,10 +16,10 @@ responses back to client.
 # rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
 # sell copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -31,7 +31,7 @@ responses back to client.
 import os
 from lxml.builder import ElementMaker
 
-__version__ = '4.0.0-dev'
+__version__ = '4.0.0-alpha2'
 
 
 PYWPS_INSTALL_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -88,4 +88,3 @@ from pywps.inout import UOM
 
 if __name__ == "__main__":
     pass
-
