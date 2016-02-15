@@ -14,3 +14,8 @@ install:
   - "pip install GDAL==1.10.0 --global-option=build_ext --global-option=\"-I/usr/include/gdal\""
 
 script: "python -m unittest tests"
+
+# whitelist
+branches:
+  only:
+    - master
