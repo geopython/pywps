@@ -1,11 +1,17 @@
+pywps (3.2.4-1) precise; urgency=medium
+
+  * Overhauled debian build
+  * Moved all pkg reqs from control file to requirements.txt
+  * renamed binary package to python-pywps
+
+ -- Khosrow Ebrahimpour <khosrow@khosrow.ca>  Fri, 12 Feb 2016 02:47:46 +0000
+
 pywps (3.2.4) precise; urgency=low
 
   * fix logging bugs
   * fix output type handling
 
  -- Tom Kralidis <tomkralidis@gmail.com>  Thu, 11 Feb 2016 00:49:14 +0000
-
-Wed Feb 10 19:47:05 EST 2016
 
 pywps (3.2.3) precise; urgency=low
 
@@ -28,6 +34,7 @@ pywps (3.0.0-1) stable; urgency=low
   * See change log for more details
 
  -- Jachym Cepicky <jachym@les-ejk.cz>  Thu, 16 Sep 2008 10:00:00 +0100
+
 pywps (2.0.0-1) stable; urgency=low
 
   * New version
@@ -35,6 +42,7 @@ pywps (2.0.0-1) stable; urgency=low
   * See change log for more details
 
  -- Jachym Cepicky <jachym@les-ejk.cz>  Mon, 4 Jun 2007 15:38:00 +0200
+
 pywps (1.1.0-1) stable; urgency=low
 
   1.1.0 devel
@@ -47,7 +55,6 @@ pywps (1.1.0-1) stable; urgency=low
   * Basic support for Range in LiteralValue definition
 
  -- Jachym Cepicky <jachym@les-ejk.cz>  Fri, 2 Nov 2006 15:38:00 +0200
- pywps (1.0.0rc3-1) unstable; urgency=low
 
 pywps (1.0.0-1) stable; urgency=low
 
@@ -58,13 +65,14 @@ pywps (1.0.0-1) stable; urgency=low
   * Fixed small bug in BoundingBox 
 
  -- Jachym Cepicky <jachym@les-ejk.cz>  Fri, 2 Nov 2006 15:38:00 +0200
- pywps (1.0.0rc3-1) unstable; urgency=low
+
+pywps (1.0.0rc3-1) unstable; urgency=low
 
   * Release candidate 3
 
  -- Jachym Cepicky <jachym@les-ejk.cz>  Fri, 2 Nov 2006 15:38:00 +0200
  
- pywps (1.0.0-1) unstable; urgency=low
+pywps (1.0.0-1) unstable; urgency=low
 
   * Initial release
 
