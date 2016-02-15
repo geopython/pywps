@@ -1,0 +1,79 @@
+pywps (3.2.4-1) precise; urgency=medium
+
+  * Overhauled debian build
+  * Moved all pkg reqs from control file to requirements.txt
+  * renamed binary package to python-pywps
+
+ -- Khosrow Ebrahimpour <khosrow@khosrow.ca>  Fri, 12 Feb 2016 02:47:46 +0000
+
+pywps (3.2.4) precise; urgency=low
+
+  * fix logging bugs
+  * fix output type handling
+
+ -- Tom Kralidis <tomkralidis@gmail.com>  Thu, 11 Feb 2016 00:49:14 +0000
+
+pywps (3.2.3) precise; urgency=low
+
+  * Release of current minor bug fixing patches
+
+ -- Jachym Cepicky <jachym.cepicky@gmail.com>  Sat, 06 Feb 2016 19:22:22 +0000
+
+pywps (3.2.2) precise; urgency=low
+
+  * Changelog version number updated to 3.2.2 and removing of entries in /debian/docs as the files don't exist in the doc directory. 
+
+ -- Jachym Cepicky <jachym@les-ejk.cz>  Tue, 02 Feb 2016 19:22:22 +0000
+
+pywps (3.0.0-1) stable; urgency=low
+
+  * New version
+  * New code structure
+  * New processes examples
+  * New configuration file
+  * See change log for more details
+
+ -- Jachym Cepicky <jachym@les-ejk.cz>  Thu, 16 Sep 2008 10:00:00 +0100
+
+pywps (2.0.0-1) stable; urgency=low
+
+  * New version
+  * New code structure
+  * See change log for more details
+
+ -- Jachym Cepicky <jachym@les-ejk.cz>  Mon, 4 Jun 2007 15:38:00 +0200
+
+pywps (1.1.0-1) stable; urgency=low
+
+  1.1.0 devel
+  Changes since 1.0.0:
+  * ComplexValueReference input type definition is depredecated, 
+    use only ComplexValue - PyWPS will recognise the input type and handle
+    it according to it.
+  * GRASS location not created automaticly any more. 
+  * Rewritten exception handeling
+  * Basic support for Range in LiteralValue definition
+
+ -- Jachym Cepicky <jachym@les-ejk.cz>  Fri, 2 Nov 2006 15:38:00 +0200
+
+pywps (1.0.0-1) stable; urgency=low
+
+  1.0.0 Stable
+  Changes since RC3:
+  * Fixed HTTP POST method
+  * Added longer name for PyWPS PID file
+  * Fixed small bug in BoundingBox 
+
+ -- Jachym Cepicky <jachym@les-ejk.cz>  Fri, 2 Nov 2006 15:38:00 +0200
+
+pywps (1.0.0rc3-1) unstable; urgency=low
+
+  * Release candidate 3
+
+ -- Jachym Cepicky <jachym@les-ejk.cz>  Fri, 2 Nov 2006 15:38:00 +0200
+ 
+pywps (1.0.0-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Jachym Cepicky <jachym@les-ejk.cz>  Fri, 20 Oct 2006 12:02:58 +0200
