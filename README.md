@@ -1,32 +1,25 @@
-pywps-4
-=======
+# PyWPS 
 
-New version of PyWPS, written from scratch.
+PyWPS is an implementation of the Web Processing Service standard from
+the Open Geospatial Consortium. PyWPS is written in Python.
 
-* [Documentation](http://pywps.rtfd.org), hosted by ReadTheDocs.
-* Continuous integration with Travis: 
-  [![Build Status](https://travis-ci.org/PyWPS/pywps-4.png)](https://travis-ci.org/PyWPS/pywps-4)
+[![Documentation Status](https://readthedocs.org/projects/pywps/badge/?version=latest)](http://pywps.readthedocs.org/en/latest/?badge=latest)
+[![Build Status](https://travis-ci.org/geopython/pywps.png)](https://travis-ci.org/geopython/pywps)
+[![PyPI](https://img.shields.io/pypi/dm/pywps.svg)]()
+[![GitHub license](https://img.shields.io/github/license/geopython/pywps.svg)]()
+[![Gitter Chat](http://img.shields.io/badge/chat-online-brightgreen.svg)](https://gitter.im/PyWPS)
 
-* Chat: https://gitter.im/PyWPS
+# License
 
-License
-=======
+As of PyWPS 4.0.0, PyWPS is released under an
+[MIT](https://en.wikipedia.org/wiki/MIT_License) license
+(see [LICENSE.txt](LICENSE.txt)).
 
-Short version: [MIT](https://en.wikipedia.org/wiki/MIT_License)
-Long version: see [LICENSE.txt](LICENSE.txt) file
+# Dependencies
 
-Dependencies
-============
+See [requirements.txt](requirements.txt) file
 
-* lxml (http://lxml.de)
-* werkzeug (http://werkzeug.pocoo.org)
-* libxml2-dev, libxslt1-dev
-* GDAL (http://www.gdal.org/)
-* owslib (http://geopython.github.io/OWSLib/)
-* jsonschema (http://json-schema.org/)
-
-Run tests
-=========
+# Run tests
 
 Install and run [tox](http://testrun.org/tox/latest/):
 
@@ -41,11 +34,9 @@ Or run the tests by hand, with either Python 2 or 3:
 python tests/__init__.py
 ```
 
-Run web application
-===================
+# Run web application
 
-Demo application
-----------------
+## Demo application
 
 Clone PyWPS-4 recursively with the demo application:
 
@@ -64,8 +55,7 @@ cd demo/
 python demo.py
 ```
  
-Apache configuration
---------------------
+## Apache configuration
 
 1. Enable WSGI extension
 
@@ -104,18 +94,17 @@ Apache configuration
 
 4. Run via web browser
 
-    `http://localhost/pywps/?service=wps&request=GetCapabilities&version=1.0.0`
+    `http://localhost/pywps/?service=WPS&request=GetCapabilities&version=1.0.0`
 
 5. Run in command line:
   
     ```bash
-    curl 'http://localhost/pywps/?service=wps&request=GetCapabilities&version=1.0.0'
+    curl 'http://localhost/pywps/?service=WPS&request=GetCapabilities&version=1.0.0'
     ```
 
 
-Issues
-======
+# Issues
 
-On Windows PyWPS-4 does not support multiprocessing which is used when making
-requests storing the response document and updating the status to displaying to the user
-the progression of a process.
+On Windows PyWPS does not support multiprocessing which is used when making
+requests storing the response document and updating the status to displaying
+to the user the progression of a process.
