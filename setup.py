@@ -63,7 +63,7 @@ import sys,os,traceback
 doclines = __doc__.split("\n")
 
 with open('requirements.txt') as fh:
-  install_requires = fh.read()
+  install_requires = fh.read().splitlines()
 
 
 dist =  setup(
