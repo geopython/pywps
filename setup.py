@@ -64,7 +64,6 @@ CONFIG = {
     'install_requires': [
         'lxml',
         'werkzeug',
-        'unipath',
         'OWSLib',
         'jsonschema'
     ],

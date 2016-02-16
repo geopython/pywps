@@ -5,6 +5,5 @@ jsonschema
 lxml
 geojson
 shapely
-unipath
 werkzeug
 GDAL==1.10.0 --global-option=build_ext --global-option="-I/usr/include/gdal"
