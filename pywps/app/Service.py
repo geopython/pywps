@@ -357,7 +357,9 @@ class Service(object):
         try:
             wps_response = process.execute(wps_request, uuid)
         except Exception as e:
-            raise NoApplicableCode('Service error: %s' % e)
+            if not isinstance(e, NoApplicableCode):
+                raise NoApplicableCode('Service error: %s' % e)
+            raise e
 
         # get the specified output as raw
         if wps_request.raw:

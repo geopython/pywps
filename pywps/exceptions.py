@@ -125,7 +125,6 @@ class StorageNotSupported(NoApplicableCode):
     """
     code = 400
 
-
 class NotEnoughStorage(NoApplicableCode):
     """Storage not supported exception implementation
     """
