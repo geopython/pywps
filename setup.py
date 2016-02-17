@@ -38,6 +38,12 @@ DESCRIPTION = ('PyWPS is an implementation of the Web Processing Service '
 
 KEYWORDS = 'PyWPS WPS OGC processing'
 
+with open('requirements.txt') as f:
+    INSTALL_REQUIRES = f.read().splitlines()
+
+with open('requirements-py2.txt') as f:
+    INSTALL_REQUIRES_PY2 = f.read().splitlines()
+
 CONFIG = {
     'name': 'pywps',
     'version': VERSION,
@@ -61,12 +67,7 @@ CONFIG = {
         'Programming Language :: Python',
         'Topic :: Scientific/Engineering :: GIS'
     ],
-    'install_requires': [
-        'lxml',
-        'werkzeug',
-        'OWSLib',
-        'jsonschema'
-    ],
+    'install_requires': INSTALL_REQUIRES,
     'packages': [
         'pywps',
         'pywps/app',
@@ -79,6 +80,6 @@ CONFIG = {
 }
 
 if sys.version_info.major < 3:
-    CONFIG['install_requires'].append('flufl.enum')
+    CONFIG['install_requires'] += INSTALL_REQUIRES_PY2
 
 setup(**CONFIG)
