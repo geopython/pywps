@@ -513,8 +513,9 @@ class Service(object):
 
         request_uuid = uuid.uuid1()
 
-        if not 'PYWPS_CFG' in os.environ:
-            os.environ['PYWPS_CFG'] = http_request.environ.get('PYWPS_CFG')
+        environ_cfg = http_request.environ.get('PYWPS_CFG')
+        if not 'PYWPS_CFG' in os.environ and environ_cfg:
+            os.environ['PYWPS_CFG'] = environ_cfg
 
         try:
             wps_request = WPSRequest(http_request)
