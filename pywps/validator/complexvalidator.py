@@ -133,15 +133,23 @@ def validategeojson(data_input, mode):
         # https://github.com/om-henners/GeoJSON_Validation/blob/master/geojsonvalidation/geojson_validation.py
         schema_home = os.path.join(_get_schemas_home(), "geojson")
         base_schema = os.path.join(schema_home, "geojson.json")
-        geojson_base = json.load(open(base_schema))
+
+        with open(base_schema) as fh:
+            geojson_base = json.load(fh)
+
+        with open(os.path.join(schema_home, "crs.json")) as fh:
+            crs_json = json.load(fh)
+
+        with open(os.path.join(schema_home, "bbox.json")) as fh:
+            bbox_json = json.load(fh)
+
+        with open(os.path.join(schema_home, "geometry.json")) as fh:
+            geometry_json = json.load(fh)
 
         cached_json = {
-            "http://json-schema.org/geojson/crs.json":
-            json.load(open(os.path.join(schema_home, "crs.json"))),
-            "http://json-schema.org/geojson/bbox.json":
-            json.load(open(os.path.join(schema_home, "bbox.json"))),
-            "http://json-schema.org/geojson/geometry.json":
-            json.load(open(os.path.join(schema_home, "geometry.json")))
+            "http://json-schema.org/geojson/crs.json": crs_json,
+            "http://json-schema.org/geojson/bbox.json": bbox_json,
+            "http://json-schema.org/geojson/geometry.json": geometry_json
         }
 
         resolver = jsonschema.RefResolver(

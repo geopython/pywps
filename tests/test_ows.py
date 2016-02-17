@@ -9,11 +9,11 @@ import unittest
 import lxml.etree
 import sys
 from pywps import Service, Process, ComplexInput, ComplexOutput, Format, FORMATS, get_format
+from pywps.dependencies import ogr
 from pywps.exceptions import NoApplicableCode
 from pywps import WPS, OWS
 from pywps.wpsserver import temp_dir
 from tests.common import client_for, assert_response_success
-from osgeo import ogr
 
 # Layers from the MUSIC project - must be replaced by something simpler
 wfsResource = "http://maps.iguess.list.lu/cgi-bin/mapserv?map=/srv/mapserv/MapFiles/LB_localOWS_test.map&SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TYPENAME=LB_building_footprints&MAXFEATURES=10"
@@ -122,7 +122,6 @@ class ExecuteTests(unittest.TestCase):
             version='1.0.0'
         )
         resp = client.post_xml(doc=request_doc)
-        from lxml import etree
 
         assert_response_success(resp)
         # Other things to assert:
