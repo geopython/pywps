@@ -38,16 +38,16 @@ python tests/__init__.py
 
 ## Demo application
 
-Clone PyWPS-4 recursively with the demo application:
+Clone PyWPS recursively with the demo application:
 
 ```bash
-git clone --recursive git://github.com/PyWPS/pywps-4.git
+git clone --recursive git://github.com/geopython/pywps.git pywps-src
 sudo python setup.py install
 cd demo/
 python demo.py
 ```
     
-Or clone only demo app after having installed PyWPS-4:
+Or clone only demo app after having installed PyWPS:
 
 ```bash
 git clone git://github.com/PyWPS/pywps-4-demo.git
@@ -78,7 +78,7 @@ python demo.py
     ```python
     #!/usr/bin/env python3
     import sys
-    sys.path.append('/path/to/src/pywps-4/')
+    sys.path.append('/path/to/src/pywps/')
     
     import pywps
     from pywps.app import Service, WPS, Process
