@@ -61,7 +61,7 @@ def validategml(data_input, mode):
 
     if mode >= MODE.STRICT:
 
-        from osgeo import ogr
+        from pywps.dependencies import ogr
         data_source = ogr.Open(data_input.file)
         if data_source:
             passed = (data_source.GetDriver().GetName() == "GML")
@@ -117,7 +117,7 @@ def validategeojson(data_input, mode):
 
     if mode >= MODE.STRICT:
 
-        from osgeo import ogr
+        from pywps.dependencies import ogr
         data_source = ogr.Open(data_input.file)
         if data_source:
             passed = (data_source.GetDriver().GetName() == "GeoJSON")
@@ -174,7 +174,7 @@ def validateshapefile(data_input, mode):
 
     if mode >= MODE.STRICT:
 
-        from osgeo import ogr
+        from pywps.dependencies import ogr
 
         import zipfile
         z = zipfile.ZipFile(data_input.file)
@@ -210,7 +210,7 @@ def validategeotiff(data_input, mode):
 
     if mode >= MODE.STRICT:
 
-        from osgeo import gdal
+        from pywps.dependencies import gdal
         data_source = gdal.Open(data_input.file)
         if data_source:
             passed = (data_source.GetDriver().ShortName == "GTiff")
