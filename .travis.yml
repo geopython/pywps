@@ -1,17 +1,28 @@
 language: python
+
+sudo: false
+
 python:
   - "2.7"
   - "3.4"
 
-# Handle git submodules yourself
+addons:
+  apt:
+    packages:
+      - gdal-bin
+      - libgdal-dev
+      - libgdal1h
+      - libgdal1-dev
+      - libgeos-dev
+
+# Handle Git submodules yourself
 git:
     submodules: false
 
 install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq gdal-bin libgdal-dev libgdal1h libgdal1-dev libgeos-dev
-  - "pip install ."
-  - "pip install GDAL==1.10.0 --global-option=build_ext --global-option=\"-I/usr/include/gdal\""
+  - pip install pip --upgrade
+  - pip install .
+  - pip install -r requirements-gdal.txt
 
 script: "python -m unittest tests"
 
