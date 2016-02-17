@@ -1003,13 +1003,13 @@ class Execute(Request):
         # CDATA section in output
             #attention to application/xml
             if output.format["mimetype"].find("text") < 0 and output.format["mimetype"].find("xml")<0:
-            #complexOutput["cdata"] = 1
-                os.rename(output.value, output.value+".binary")
-                base64.encode(open(output.value+".binary"),open(output.value,"w"))
-            
+                with open(output.value, "rb") as f:
+                    complexOutput["complexdata"] = base64.encodestring(f.read()) 
         
         # set output value
-        complexOutput["complexdata"] = open(output.value,"r").read()
+        if not "complexdata" in complexOutput:
+            with open(output.value, "r") as f:
+                complexOutput["complexdata"] = f.read()
 
         # remove <?xml version= ... part from beginning of some xml
         # documents
