@@ -21,17 +21,8 @@ See [requirements.txt](requirements.txt) file
 
 # Run tests
 
-Install and run [tox](http://testrun.org/tox/latest/):
-
 ```bash
-pip install tox
-tox
-```
-
-Or run the tests by hand, with either Python 2 or 3:
-
-```bash
-python tests/__init__.py
+python -m unittest tests
 ```
 
 # Run web application
