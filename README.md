@@ -3,7 +3,7 @@
 PyWPS is an implementation of the Web Processing Service standard from
 the Open Geospatial Consortium. PyWPS is written in Python.
 
-[![Documentation Status](https://readthedocs.org/projects/pywps/badge/?version=latest)](http://pywps.readthedocs.org/en/latest/?badge=latest)
+[![Documentation Status](https://img.shields.io/badge/docs-latest-brightgreen.svg)](http://pywps.readthedocs.org/en/latest/?badge=latest)
 [![Build Status](https://travis-ci.org/geopython/pywps.png)](https://travis-ci.org/geopython/pywps)
 [![PyPI](https://img.shields.io/pypi/dm/pywps.svg)]()
 [![GitHub license](https://img.shields.io/github/license/geopython/pywps.svg)]()
