@@ -1,3 +1,9 @@
+pywps (4.0.0-alpha2) trusty; urgency=medium
+
+  * Re-did debian packaging for v4.0
+
+ -- Khosrow Ebrahimpour <khosrow@khosrow.ca>  Wed, 17 Feb 2016 14:21:27 -0500
+
 pywps (3.2.4-1) precise; urgency=medium
 
   * Overhauled debian build
