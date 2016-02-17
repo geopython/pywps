@@ -508,7 +508,12 @@ class Service(object):
 
     @Request.application
     def __call__(self, http_request):
+
         request_uuid = uuid.uuid1()
+
+        if not 'PYWPS_CFG' in os.environ:
+            os.environ['PYWPS_CFG'] = http_request.environ.get('PYWPS_CFG')
+
         try:
             wps_request = WPSRequest(http_request)
             if wps_request.operation in ['getcapabilities',
