@@ -26,10 +26,10 @@ import sys
 
 project = u'PyWPS'
 
-license = ('This work is licensed under a Creative Commons Attribution 4.0 ',
+license = ('This work is licensed under a Creative Commons Attribution 4.0 '
            'International License')
 
-copyright = ('Copyright (C) 2014-2016 PyWPS Development Team, ',
+copyright = ('Copyright (C) 2014-2016 PyWPS Development Team, '
              'represented by Jachym Cepicky.')
 copyright += license
 
