@@ -1,9 +1,7 @@
-"""
-Abstract Server class
-"""
 ###############################################################################
 #
-# Copyright (C) 2014-2016 PyWPS Development Team, represented by Jachym Cepicky
+# Copyright (C) 2014-2016 PyWPS Development Team, represented by 
+# PyWPS Project Steering Committee
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to
@@ -25,30 +23,8 @@ Abstract Server class
 #
 ###############################################################################
 
-from abc import abstractmethod, ABCMeta
-from contextlib import contextmanager
-import shutil
-import tempfile
-
-
-@contextmanager
-def temp_dir():
-    """Creates temporary directory"""
-    tmp = tempfile.mkdtemp()
-    try:
-        yield tmp
-    finally:
-        shutil.rmtree(tmp)
-
-
-class PyWPSServerAbstract(object):
-    """General stub for the PyWPS Server class.
-    """
-
-    __metaclass__ = ABCMeta
-
-    route_base = '/'
-
-    @abstractmethod
-    def run(self):
-        raise NotImplementedError()
+try:
+    from osgeo import gdal, ogr
+except ImportError as err:
+    from pywps.exceptions import NoApplicableCode
+    raise NoApplicableCode('Complex validation requires GDAL/OGR support')

@@ -3,6 +3,7 @@
 *.egg-info
 dist
 build
+tmp
 .tox
 /docs/_build
 

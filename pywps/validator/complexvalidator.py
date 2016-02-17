@@ -61,7 +61,7 @@ def validategml(data_input, mode):
 
     if mode >= MODE.STRICT:
 
-        from osgeo import ogr
+        from pywps.dependencies import ogr
         data_source = ogr.Open(data_input.file)
         if data_source:
             passed = (data_source.GetDriver().GetName() == "GML")
@@ -117,7 +117,7 @@ def validategeojson(data_input, mode):
 
     if mode >= MODE.STRICT:
 
-        from osgeo import ogr
+        from pywps.dependencies import ogr
         data_source = ogr.Open(data_input.file)
         if data_source:
             passed = (data_source.GetDriver().GetName() == "GeoJSON")
@@ -133,15 +133,23 @@ def validategeojson(data_input, mode):
         # https://github.com/om-henners/GeoJSON_Validation/blob/master/geojsonvalidation/geojson_validation.py
         schema_home = os.path.join(_get_schemas_home(), "geojson")
         base_schema = os.path.join(schema_home, "geojson.json")
-        geojson_base = json.load(open(base_schema))
+
+        with open(base_schema) as fh:
+            geojson_base = json.load(fh)
+
+        with open(os.path.join(schema_home, "crs.json")) as fh:
+            crs_json = json.load(fh)
+
+        with open(os.path.join(schema_home, "bbox.json")) as fh:
+            bbox_json = json.load(fh)
+
+        with open(os.path.join(schema_home, "geometry.json")) as fh:
+            geometry_json = json.load(fh)
 
         cached_json = {
-            "http://json-schema.org/geojson/crs.json":
-            json.load(open(os.path.join(schema_home, "crs.json"))),
-            "http://json-schema.org/geojson/bbox.json":
-            json.load(open(os.path.join(schema_home, "bbox.json"))),
-            "http://json-schema.org/geojson/geometry.json":
-            json.load(open(os.path.join(schema_home, "geometry.json")))
+            "http://json-schema.org/geojson/crs.json": crs_json,
+            "http://json-schema.org/geojson/bbox.json": bbox_json,
+            "http://json-schema.org/geojson/geometry.json": geometry_json
         }
 
         resolver = jsonschema.RefResolver(
@@ -174,7 +182,7 @@ def validateshapefile(data_input, mode):
 
     if mode >= MODE.STRICT:
 
-        from osgeo import ogr
+        from pywps.dependencies import ogr
 
         import zipfile
         z = zipfile.ZipFile(data_input.file)
@@ -210,7 +218,7 @@ def validategeotiff(data_input, mode):
 
     if mode >= MODE.STRICT:
 
-        from osgeo import gdal
+        from pywps.dependencies import gdal
         data_source = gdal.Open(data_input.file)
         if data_source:
             passed = (data_source.GetDriver().ShortName == "GTiff")

@@ -357,7 +357,9 @@ class Service(object):
         try:
             wps_response = process.execute(wps_request, uuid)
         except Exception as e:
-            raise NoApplicableCode('Service error: %s' % e)
+            if not isinstance(e, NoApplicableCode):
+                raise NoApplicableCode('Service error: %s' % e)
+            raise e
 
         # get the specified output as raw
         if wps_request.raw:
@@ -508,7 +510,13 @@ class Service(object):
 
     @Request.application
     def __call__(self, http_request):
+
         request_uuid = uuid.uuid1()
+
+        environ_cfg = http_request.environ.get('PYWPS_CFG')
+        if not 'PYWPS_CFG' in os.environ and environ_cfg:
+            os.environ['PYWPS_CFG'] = environ_cfg
+
         try:
             wps_request = WPSRequest(http_request)
             if wps_request.operation in ['getcapabilities',

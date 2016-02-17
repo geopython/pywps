@@ -38,9 +38,9 @@ class ProcessTestCase(unittest.TestCase):
             for input
             in process.inputs
         }
-        self.assertEquals("Length", inputs['length'])
-        self.assertEquals("BBox", inputs["bbox"])
-        self.assertEquals("Vector", inputs["vector"])
+        self.assertEqual("Length", inputs['length'])
+        self.assertEqual("BBox", inputs["bbox"])
+        self.assertEqual("Vector", inputs["vector"])
 
 if __name__ == "__main__":
    suite = unittest.TestLoader().loadTestsFromTestCase(ProcessTestCase)
