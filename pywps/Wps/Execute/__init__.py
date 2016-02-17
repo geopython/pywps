@@ -493,7 +493,7 @@ class Execute(Request):
         self.process.spawned = self.spawned
 
     def consolidateInputs(self):
-        """ Donwload and control input data, defined by the client """
+        """ Download and control input data, defined by the client """
         # calculate maximum allowed input size
         maxFileSize = self.calculateMaxInputSize()
 
@@ -538,12 +538,26 @@ class Execute(Request):
             except KeyError,e:
                 pass
 
-        # make sure, all inputs do have values
+        # make sure, all inputs have minimum required number of values
         for identifier in self.process.inputs:
             input = self.process.inputs[identifier]
-            if input.getValue() == None and input.minOccurs > 0:
-                self.cleanEnv()
-                raise pywps.MissingParameterValue(identifier)
+            if input.minOccurs > 0:
+                val = input.getValue()
+
+                if val == None:
+                    self.cleanEnv()
+                    raise pywps.MissingParameterValue(identifier)
+                else:
+                    if type(val) == types.ListType:
+                        numOccurs = len(val)
+                    else:
+                        numOccurs = 1
+
+                    if numOccurs < input.minOccurs: 
+                        self.cleanEnv()
+                        raise pywps.MissingParameterValue(
+                            "Too few occurrences of input [%s]: expected %d found %d" % 
+                            (identifier, input.minOccurs, numOccurs))
 
     def consolidateOutputs(self):
         """Set desired attributes (e.g. asReference) for each output"""
