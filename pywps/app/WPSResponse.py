@@ -106,9 +106,8 @@ class WPSResponse(object):
         doc.attrib['service'] = 'WPS'
         doc.attrib['version'] = '1.0.0'
         doc.attrib['{http://www.w3.org/XML/1998/namespace}lang'] = 'en-US'
-        doc.attrib['serviceInstance'] = '%s:%s%s' % (
-            config.get_config_value('wps', 'serveraddress'),
-            config.get_config_value('wps', 'serverport'),
+        doc.attrib['serviceInstance'] = '%s%s' % (
+            config.get_config_value('server', 'url'),
             '/wps?service=wps&request=getcapabilities'
         )
 
