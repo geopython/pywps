@@ -235,9 +235,9 @@ class ExecuteXmlParserTest(unittest.TestCase):
                 ))
         rv = get_inputs_from_xml(request_doc)
         self.assertTrue('name' in rv)
-        self.assertEquals(len(rv['name']), 2)
-        self.assertEquals(rv['name'][0]['data'], 'foo')
-        self.assertEquals(rv['name'][1]['data'], 'bar')
+        self.assertEqual(len(rv['name']), 2)
+        self.assertEqual(rv['name'][0]['data'], 'foo')
+        self.assertEqual(rv['name'][1]['data'], 'bar')
 
     def test_two_strings(self):
         request_doc = WPS.Execute(
@@ -250,8 +250,8 @@ class ExecuteXmlParserTest(unittest.TestCase):
                     OWS.Identifier('name2'),
                     WPS.Data(WPS.LiteralData('bar')))))
         rv = get_inputs_from_xml(request_doc)
-        self.assertEquals(rv['name1'][0]['data'], 'foo')
-        self.assertEquals(rv['name2'][0]['data'], 'bar')
+        self.assertEqual(rv['name1'][0]['data'], 'foo')
+        self.assertEqual(rv['name2'][0]['data'], 'bar')
 
     def test_complex_input(self):
         the_data = E.TheData("hello world")
@@ -263,10 +263,10 @@ class ExecuteXmlParserTest(unittest.TestCase):
                     WPS.Data(
                         WPS.ComplexData(the_data, mimeType='text/foobar')))))
         rv = get_inputs_from_xml(request_doc)
-        self.assertEquals(rv['name'][0]['mimeType'], 'text/foobar')
+        self.assertEqual(rv['name'][0]['mimeType'], 'text/foobar')
         rv_doc = lxml.etree.parse(StringIO(rv['name'][0]['data'])).getroot()
-        self.assertEquals(rv_doc.tag, 'TheData')
-        self.assertEquals(rv_doc.text, 'hello world')
+        self.assertEqual(rv_doc.tag, 'TheData')
+        self.assertEqual(rv_doc.text, 'hello world')
 
     def test_complex_input_raw_value(self):
         the_data = '{ "plot":{ "Version" : "0.1" } }'
@@ -279,9 +279,9 @@ class ExecuteXmlParserTest(unittest.TestCase):
                     WPS.Data(
                         WPS.ComplexData(the_data, mimeType='application/json')))))
         rv = get_inputs_from_xml(request_doc)
-        self.assertEquals(rv['json'][0]['mimeType'], 'application/json')
+        self.assertEqual(rv['json'][0]['mimeType'], 'application/json')
         json_data = json.loads(rv['json'][0]['data'])
-        self.assertEquals(json_data['plot']['Version'], '0.1')
+        self.assertEqual(json_data['plot']['Version'], '0.1')
 
     def test_complex_input_base64_value(self):
         the_data = 'eyAicGxvdCI6eyAiVmVyc2lvbiIgOiAiMC4xIiB9IH0='
@@ -298,7 +298,7 @@ class ExecuteXmlParserTest(unittest.TestCase):
         rv = get_inputs_from_xml(request_doc)
         self.assertEqual(rv['json'][0]['mimeType'], 'application/json')
         json_data = json.loads(rv['json'][0]['data'].decode())
-        self.assertEquals(json_data['plot']['Version'], '0.1')
+        self.assertEqual(json_data['plot']['Version'], '0.1')
 
 
     def test_bbox_input(self):
@@ -336,9 +336,9 @@ class ExecuteXmlParserTest(unittest.TestCase):
             )
         )
         rv = get_inputs_from_xml(request_doc)
-        self.assertEquals(rv['name'][0]['href'], 'http://foo/bar/service')
-        self.assertEquals(rv['name'][0]['method'], 'POST')
-        self.assertEquals(rv['name'][0]['body'], 'request body')
+        self.assertEqual(rv['name'][0]['href'], 'http://foo/bar/service')
+        self.assertEqual(rv['name'][0]['method'], 'POST')
+        self.assertEqual(rv['name'][0]['body'], 'request body')
 
     def test_reference_post_bodyreference_input(self):
         request_doc = WPS.Execute(
@@ -356,8 +356,8 @@ class ExecuteXmlParserTest(unittest.TestCase):
             )
         )
         rv = get_inputs_from_xml(request_doc)
-        self.assertEquals(rv['name'][0]['href'], 'http://foo/bar/service')
-        self.assertEquals(rv['name'][0]['bodyreference'], 'http://foo/bar/reference')
+        self.assertEqual(rv['name'][0]['href'], 'http://foo/bar/service')
+        self.assertEqual(rv['name'][0]['bodyreference'], 'http://foo/bar/reference')
 
 
 def load_tests(loader=None, tests=None, pattern=None):
