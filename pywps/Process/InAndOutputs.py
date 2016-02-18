@@ -269,7 +269,8 @@ class LiteralInput(Input):
         if  type(value)!= types.BooleanType:
             for char in self.restrictedCharacters:
                 if value.find(char) > -1:
-                    raise Exceptions.InvalidParameterValue(value)
+                    raise Exceptions.InvalidParameterValue("datainputs",
+                        "Input [%s] has a value %s which contains unallowed characters." % (self.identifier, str(value)))
 
         # type
         try:
@@ -283,7 +284,8 @@ class LiteralInput(Input):
                 value = bool(value)
             #TODO other types missing
         except (ValueError), e:
-            raise Exceptions.InvalidParameterValue(value)
+            raise Exceptions.InvalidParameterValue("datainputs",
+                "Input [%s] has a value %s which is the wrong data type." % (self.identifier, str(value)))
 
         # value list
         if "*" in self.values:
@@ -302,7 +304,8 @@ class LiteralInput(Input):
                 if str(value) == str(allowed):
                     return value
 
-        raise Exceptions.InvalidParameterValue(value)
+        raise Exceptions.InvalidParameterValue("datainputs",
+            "Input [%s] has a value %s which is out of range." % (self.identifier, str(value)))
 
 class ComplexInput(Input):
     """ComplexInput type

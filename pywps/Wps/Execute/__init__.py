@@ -306,7 +306,8 @@ class Execute(Request):
         # check rawdataoutput against process
         if self.rawDataOutput and self.rawDataOutput not in self.process.outputs:
             self.cleanEnv()
-            raise pywps.InvalidParameterValue("rawDataOutput")
+            raise pywps.InvalidParameterValue("rawDataOutput",
+                "Output [%s] is not defined" % self.rawDataOutput)
 
         # check storeExecuteResponse against process
         if self.storeRequired and not self.process.storeSupported:
@@ -317,14 +318,14 @@ class Execute(Request):
         # check status against process
         if self.statusRequired and not self.process.statusSupported:
             self.cleanEnv()
-            raise pywps.InvalidParameterValue(
+            raise pywps.InvalidParameterValue("status",
                 "status is true, but the process does not support status updates")
 
         # OGC 05-007r7 page 43
         # if status is true and storeExecuteResponse is false, raise an exception
         if self.statusRequired and not self.storeRequired:
             self.cleanEnv()
-            raise pywps.InvalidParameterValue(
+            raise pywps.InvalidParameterValue("status"
                 "status is true, but storeExecuteResponse is false")
       
        #check storeExecuteResponse agains asReference=true
@@ -332,7 +333,8 @@ class Execute(Request):
            #check the array for asreference': True
                if len([item for item in  self.wps.inputs["responseform"]["responsedocument"]["outputs"] if ("asreference" in item and item["asreference"]==True) ]):
                    self.cleanEnv()
-                   raise pywps.InvalidParameterValue("storeExecuteResponse is false, but output(s) are requested as reference(s)")
+                   raise pywps.InvalidParameterValue("storeExecuteResponse",
+                       "storeExecuteResponse is false, but output(s) are requested as reference(s)")
            
         
             
@@ -473,16 +475,17 @@ class Execute(Request):
         # import the right package
         self.process = None
         try:
-            self.process = self.getProcess(self.wps.inputs["identifier"])
+            id = self.wps.inputs["identifier"]
+            self.process = self.getProcess(id)
         except Exception, e:
             self.cleanEnv()
-            raise pywps.InvalidParameterValue(
-                    self.wps.inputs["identifier"])
+            raise pywps.InvalidParameterValue("identifier", 
+                "Unknown identifier '%s'" % (id[0] if isinstance(id,list) else id))
 
         if not self.process:
             self.cleanEnv()
-            raise pywps.InvalidParameterValue(
-                    self.wps.inputs["identifier"])
+            raise pywps.InvalidParameterValue("identifier",
+                "Unknown identifier '%s'" % (id[0] if isinstance(id,list) else id))
 
         # set proper method for status change
         self.process.pywps = self.wps
@@ -534,7 +537,7 @@ class Execute(Request):
                             resp = input.setValue(inp)
                             if resp:
                                 self.cleanEnv()
-                                raise pywps.InvalidParameterValue(resp)
+                                raise pywps.InvalidParameterValue("datainputs", resp)
             except KeyError,e:
                 pass
 
