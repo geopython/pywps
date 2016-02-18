@@ -35,34 +35,38 @@ PyWPS wsgi script
 import pywps
 from pywps.Exceptions import *
 
+
 def application(environ, start_response):
 
     status = '200 OK'
-    response_headers = [('Content-type','text/xml')]
-    start_response(status, response_headers)
+    response_headers = [('Content-type', 'text/xml')]
 
     inputQuery = None
-    if "REQUEST_METHOD" in environ and environ["REQUEST_METHOD"] == "GET":
-        inputQuery = environ["QUERY_STRING"]
+    if environ.get("REQUEST_METHOD", '') == "GET":
+        inputQuery = environ.get("QUERY_STRING")
     elif "wsgi.input" in environ:
-        inputQuery = environ['wsgi.input']
+        inputQuery = environ.get('wsgi.input')
 
-    if not inputQuery:
-        err =  NoApplicableCode("No query string found.")
-        return [err.getResponse()]
-
-
-    # create the WPS object
+    response = ''
     try:
-        wps = pywps.Pywps(environ["REQUEST_METHOD"])
+        if not inputQuery:
+            raise NoApplicableCode("No query string found.")
+
+        # create the WPS object
+        wps = pywps.Pywps(environ["REQUEST_METHOD"], environ.get("PYWPS_CFG"))
         if wps.parseRequest(inputQuery):
             pywps.debug(wps.inputs)
-            wps.performRequest()
-            return wps.response
-    except WPSException,e:
-        return [e]
+            wps.performRequest(processes=environ.get("PYWPS_PROCESSES"))
+            response_headers = [('Content-type', wps.request.contentType)]
+            response = wps.response
+
+    except WPSException, e:
+        response = str(e)
     except Exception, e:
-        return [e]
+        response = str(e)
+
+    start_response(status, response_headers)
+    return response
 
 
 if __name__ == '__main__':
