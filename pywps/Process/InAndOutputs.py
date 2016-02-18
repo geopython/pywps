@@ -435,7 +435,6 @@ class ComplexInput(Input):
         :param data: the data, which should be stored
         :type data: string
         """
-        import tempfile
         from os import curdir, rename
 
         outputName = tempfile.mktemp(prefix="pywpsInput",dir=curdir)
@@ -1019,12 +1018,11 @@ class ComplexOutput(Output):
         elif type(value) == types.FileType:
             self.value = value.name
         elif value.__class__.__name__=='StringIO' or value.__class__.__name__=='StringO':
-            import tempfile
             from os import curdir
             fh, stringIOName = tempfile.mkstemp(prefix="pywpsOutput",
                                                 dir=curdir) #(5, '/tmp/pywps-instanceS2j6ve/pywpsOutputZxSM6V')
-            fh.write(value.getvalue())
-            fh.close()
+            os.write(fh, value.getvalue())
+            os.close(fh)
             self.value=stringIOName
         # TODO add more types, like Arrays and lists for example
         else:

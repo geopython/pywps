@@ -1400,7 +1400,7 @@ class Execute(Request):
             )
             if not self._samefile(output.value,outFile):
                 COPY(os.path.abspath(output.value), outFile)
-            fh.close()
+            os.close(fh)
 
             #check 
             self.contentType = output.format["mimetype"]
