@@ -217,7 +217,7 @@ class Pywps(object):
         return self.inputs
 
     def performRequest(self,inputs = None, processes=None):
-        """Performs the desired WSP Request.
+        """Performs the desired WPS Request.
 
         :param inputs: idealy self.inputs (Default) object, result from
             parseRequest. Default is self.inputs
@@ -243,8 +243,8 @@ class Pywps(object):
             from pywps.Wps.Wsdl import Wsdl
             self.request = Wsdl(self)
         else:
-            raise Exceptions.InvalidParameterValue(
-                    "request: "+inputs["request"])
+            raise Exceptions.InvalidParameterValue("request",
+                "Unsupported request type '%s'" % inputs["request"])
         self.response = self.request.response
         return self.response
 

@@ -290,7 +290,7 @@ class TemplateProcessor:
         # store to binary form
         if self._compile:
             try:
-                cPickle.dump(self.tokens, open(self._cfile,"w"), True)
+                cPickle.dump(self.tokens, open(self._cfile,"wb"), True)
             except Exception,e:
                 raise TemplateError("Could not store file in compiled form: %s. Try to set permission for this directory to 777" % e)
 

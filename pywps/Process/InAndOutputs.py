@@ -120,18 +120,25 @@ class Input:
                 return resp
         return
 
-    def _setValueWithOccurence(self,oldValues, newValue):
-        """Check min and max occurrence and set this.value"""
-        if self.maxOccurs > 1:
+    def _setValueWithOccurence(self, oldValues, newValue):
+        """Check max occurrence and set this.value"""
+        maxOccursViolated = False
+
+        if (self.maxOccurs == 0) or (self.maxOccurs == 1 and oldValues):
+            maxOccursViolated = True
+        elif self.maxOccurs > 1:
             if not oldValues:
                 oldValues =  [newValue]
             else:
                 if self.maxOccurs > len(oldValues):
                     oldValues.append(newValue)
                 else:
-                    return "Too many occurrences of input [%s]: %s" % (self.identifier,newValue)
+                    maxOccursViolated = True
         else:
             oldValues = newValue
+
+        if maxOccursViolated:
+            return "Too many occurrences of input [%s]: %s" % (self.identifier, newValue)
 
         self.value = oldValues
         return
@@ -262,7 +269,8 @@ class LiteralInput(Input):
         if  type(value)!= types.BooleanType:
             for char in self.restrictedCharacters:
                 if value.find(char) > -1:
-                    raise Exceptions.InvalidParameterValue(value)
+                    raise Exceptions.InvalidParameterValue("datainputs",
+                        "Input [%s] has a value %s which contains unallowed characters." % (self.identifier, str(value)))
 
         # type
         try:
@@ -276,7 +284,8 @@ class LiteralInput(Input):
                 value = bool(value)
             #TODO other types missing
         except (ValueError), e:
-            raise Exceptions.InvalidParameterValue(value)
+            raise Exceptions.InvalidParameterValue("datainputs",
+                "Input [%s] has a value %s which is the wrong data type." % (self.identifier, str(value)))
 
         # value list
         if "*" in self.values:
@@ -295,7 +304,8 @@ class LiteralInput(Input):
                 if str(value) == str(allowed):
                     return value
 
-        raise Exceptions.InvalidParameterValue(value)
+        raise Exceptions.InvalidParameterValue("datainputs",
+            "Input [%s] has a value %s which is out of range." % (self.identifier, str(value)))
 
 class ComplexInput(Input):
     """ComplexInput type
@@ -428,7 +438,6 @@ class ComplexInput(Input):
         :param data: the data, which should be stored
         :type data: string
         """
-        import tempfile
         from os import curdir, rename
 
         outputName = tempfile.mktemp(prefix="pywpsInput",dir=curdir)
@@ -1012,12 +1021,11 @@ class ComplexOutput(Output):
         elif type(value) == types.FileType:
             self.value = value.name
         elif value.__class__.__name__=='StringIO' or value.__class__.__name__=='StringO':
-            import tempfile
             from os import curdir
             fh, stringIOName = tempfile.mkstemp(prefix="pywpsOutput",
                                                 dir=curdir) #(5, '/tmp/pywps-instanceS2j6ve/pywpsOutputZxSM6V')
-            fh.write(value.getvalue())
-            fh.close()
+            os.write(fh, value.getvalue())
+            os.close(fh)
             self.value=stringIOName
         # TODO add more types, like Arrays and lists for example
         else:
