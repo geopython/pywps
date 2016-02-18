@@ -661,6 +661,18 @@ class WPSProcess:
         except:
             return None
 
+    def getInputValues(self, identifier):
+        """Get input values according to identifier
+        :param identifier: input identifier
+        :return: a list of input values
+        """
+        values = self.getInputValue(identifier)
+        if values is None:
+            values = []
+        elif type(values) != types.ListType:
+            values = [values]
+        return values
+        
     def setOutputValue(self,identifier,value):
         """Set output value
 
