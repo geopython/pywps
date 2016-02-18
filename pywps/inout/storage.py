@@ -70,11 +70,10 @@ class FileStorage(StorageAbstract):
     def __init__(self):
         """
         """
-        self.target = config.get_config_value('server', 'outputPath')
-        self.output_url = '%s:%s%s' % (
-            config.get_config_value('wps', 'serveraddress'),
-            config.get_config_value('wps', 'serverport'),
-            config.get_config_value('server', 'outputUrl')
+        self.target = config.get_config_value('server', 'outputpath')
+        self.output_url = '%s%s' % (
+            config.get_config_value('server', 'url'),
+            config.get_config_value('server', 'outputurl')
         )
 
     def store(self, output):

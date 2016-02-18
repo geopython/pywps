@@ -118,11 +118,10 @@ class Process(object):
             if self.store_supported != 'true':
                 raise StorageNotSupported('Process does not support the storing of the execute response')
 
-            file_path = config.get_config_value('server', 'outputPath')
-            file_url = '%s:%s%s' % (
-                config.get_config_value('wps', 'serveraddress'),
-                config.get_config_value('wps', 'serverport'),
-                config.get_config_value('server', 'outputUrl')
+            file_path = config.get_config_value('server', 'outputpath')
+            file_url = '%s%s' % (
+                config.get_config_value('server', 'url'),
+                config.get_config_value('server', 'outputurl')
             )
 
             self.status_location = os.path.join(file_path, self.uuid) + '.xml'
