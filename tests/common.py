@@ -1,7 +1,7 @@
 import lxml.etree
 from werkzeug.test import Client
 from werkzeug.wrappers import BaseResponse
-from pywps import NAMESPACES
+from pywps import __version__, NAMESPACES
 
 import logging
 
@@ -58,3 +58,13 @@ def assert_response_success(resp):
     assert resp.headers['Content-Type'] == 'text/xml'
     success = resp.xpath('/wps:ExecuteResponse/wps:Status/wps:ProcessSucceeded')
     assert len(success) == 1
+
+
+def assert_pywps_version(resp):
+    # get first child of root element
+    root_firstchild = resp.xpath('/*')[0].getprevious()
+    assert isinstance(root_firstchild, lxml.etree._Comment)
+    tokens = root_firstchild.text.split()
+    assert len(tokens) == 2
+    assert tokens[0] == 'PyWPS'
+    assert tokens[1] == __version__

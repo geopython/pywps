@@ -1,9 +1,8 @@
 import unittest
 from pywps import Process, Service, WPS, OWS
 from pywps.app.basic import xpath_ns
-from tests.common import client_for
+from tests.common import assert_pywps_version, client_for
 import lxml.etree
-
 
 
 class ExceptionsTest(unittest.TestCase):
@@ -17,6 +16,7 @@ class ExceptionsTest(unittest.TestCase):
         assert exception_el.attrib['exceptionCode'] == 'InvalidParameterValue'
         assert resp.status_code == 400
         assert resp.headers['Content-Type'] == 'text/xml'
+        assert_pywps_version(resp)
 
     def test_missing_parameter_value(self):
         resp = self.client.get()
