@@ -54,8 +54,8 @@ To use PyWPS-4 the user must code processes and publish them through a service.
 A demo service is available that makes up a good starting point for first time users.
 It can be cloned directly into the user area:
 
-	$ git clone https://github.com/pywps/pywps-4-demo.git
-	
+    $ git clone https://github.com/pywps/pywps-4-demo.git
+
 It may be run right away through the *demo.py* script. 
 First time users should start by studying the demo project structure and then code their own processes.
 
