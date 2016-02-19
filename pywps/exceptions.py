@@ -37,6 +37,7 @@ from werkzeug.http import HTTP_STATUS_CODES
 
 import logging
 
+from pywps import __version__
 
 class NoApplicableCode(HTTPException):
     """No applicable code exception implementation
@@ -77,12 +78,14 @@ class NoApplicableCode(HTTPException):
         """Get the XML body."""
         return text_type((
             u'<?xml version="1.0" encoding="UTF-8"?>\n'
+            u'<!-- PyWPS %(version)s -->\n'
             u'<ows:ExceptionReport xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/ows/1.1 ../../../ows/1.1.0/owsExceptionReport.xsd" version="1.0.0">'
             u'<ows:Exception exceptionCode="%(name)s" locator="%(locator)s" >'
             u'%(description)s'
             u'</ows:Exception>'
             u'</ows:ExceptionReport>'
         ) % {
+            'version': __version__,
             'code':         self.code,
             'locator':         escape(self.locator),
             'name':         escape(self.name),

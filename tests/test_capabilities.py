@@ -2,7 +2,7 @@ import unittest
 import lxml.etree
 from pywps.app import Process, Service
 from pywps import WPS, OWS
-from tests.common import client_for
+from tests.common import assert_pywps_version, client_for
 
 class BadRequestTest(unittest.TestCase):
 
@@ -84,6 +84,9 @@ class CapabilitiesTest(unittest.TestCase):
         assert resp.status_code == 400
         assert exception[0].attrib['exceptionCode'] == 'VersionNegotiationFailed'
 
+    def test_pywps_version(self):
+        resp = self.client.get('?service=WPS&request=GetCapabilities')
+        assert_pywps_version(resp)
 
 
 def load_tests(loader=None, tests=None, pattern=None):

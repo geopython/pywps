@@ -9,7 +9,7 @@ from pywps.inout.formats import Format
 from pywps.inout.literaltypes import AllowedValue
 from pywps.validator.allowed_value import ALLOWEDVALUETYPE
 
-from tests.common import client_for
+from tests.common import assert_pywps_version, client_for
 
 ProcessDescription = namedtuple('ProcessDescription', ['identifier', 'inputs'])
 
@@ -64,6 +64,7 @@ class DescribeProcessTest(unittest.TestCase):
         identifiers = [desc.identifier for desc in get_describe_result(resp)]
         assert 'ping' in identifiers
         assert 'hello' in identifiers
+        assert_pywps_version(resp)
 
     def test_get_request_zero_args(self):
         resp = self.client.get('?Request=DescribeProcess&version=1.0.0&service=wps')
