@@ -23,8 +23,14 @@ install:
   - pip install pip --upgrade
   - pip install .
   - pip install -r requirements-gdal.txt
+  - pip install coveralls
 
-script: "python -m unittest tests"
+script:
+  - python -m unittest tests
+  - coverage run --source=pywps -m unittest tests
+
+after_success:
+  - coveralls
 
 # whitelist
 branches:
