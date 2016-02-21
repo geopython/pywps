@@ -5,7 +5,7 @@ the Open Geospatial Consortium. PyWPS is written in Python.
 
 [![Documentation Status](https://img.shields.io/badge/docs-latest-brightgreen.svg)](http://pywps.readthedocs.org/en/latest/?badge=latest)
 [![Build Status](https://travis-ci.org/geopython/pywps.png)](https://travis-ci.org/geopython/pywps)
-![Coverage Status](https://coveralls.io/repos/github/geopython/pywps/badge.svg?branch=master)](https://coveralls.io/github/geopython/PyWPS?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/geopython/PyWPS/badge.svg?branch=master)](https://coveralls.io/github/geopython/PyWPS?branch=master)
 [![PyPI](https://img.shields.io/pypi/dm/pywps.svg)]()
 [![GitHub license](https://img.shields.io/github/license/geopython/pywps.svg)]()
 [![Gitter Chat](http://img.shields.io/badge/chat-online-brightgreen.svg)](https://gitter.im/PyWPS)
