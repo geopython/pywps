@@ -23,7 +23,12 @@ See [requirements.txt](requirements.txt) file
 # Run tests
 
 ```bash
+pip install -r requirements-dev.txt
+# run unit tests
 python -m unittest tests
+# run code coverage
+coverage run --source=pywps -m unittest tests
+coverage report -m
 ```
 
 # Run web application
