@@ -1,3 +1,0 @@
-[submodule "demo"]
-	path = demo
-	url = https://github.com/PyWPS/pywps-4-demo.git
