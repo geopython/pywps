@@ -15,10 +15,6 @@ addons:
       - libgdal1-dev
       - libgeos-dev
 
-# Handle Git submodules yourself
-git:
-    submodules: false
-
 install:
   - pip install pip --upgrade
   - pip install .
