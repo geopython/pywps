@@ -146,8 +146,8 @@ class Process(object):
                 config.get_config_value('server', 'outputurl')
             )
 
-            self.status_location = os.path.join(file_path, self.uuid) + '.xml'
-            self.status_url = os.path.join(file_url, self.uuid) + '.xml'
+            self.status_location = os.path.join(file_path, str(self.uuid)) + '.xml'
+            self.status_url = os.path.join(file_url, str(self.uuid)) + '.xml'
 
             if wps_request.status == 'true':
                 if self.status_supported != 'true':
