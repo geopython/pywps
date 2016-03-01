@@ -18,6 +18,9 @@ addons:
       - libgdal1h
       - libgdal1-dev
       - libgeos-dev
+      - devscripts
+      - debhelper
+      - python-setuptools
 
 # Handle Git submodules yourself
 git:
@@ -35,6 +38,7 @@ script:
 
 after_success:
   - coveralls
+  - debuild -b -uc -us
 
 # whitelist
 branches:
