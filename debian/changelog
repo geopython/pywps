@@ -1,4 +1,4 @@
-pywps (3.2.5) trusty; urgency=medium
+pywps (3.2.5-1) trusty; urgency=medium
 
   * Added lxml to control file
 
