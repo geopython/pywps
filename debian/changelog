@@ -1,3 +1,9 @@
+pywps (3.2.5-1) trusty; urgency=medium
+
+  * Added lxml to control file
+
+ -- Angelos Tzotsos <gcpp.kalxas@gmail.com>  Tue, 01 Mar 2016 18:53:00 +0200
+
 pywps (3.2.5) precise; urgency=medium
 
   * file handling fixes

@@ -2,7 +2,7 @@ Source: pywps
 Section: python
 Priority: optional
 Maintainer: Jachym Cepicky <jachym@les-ejk.cz>
-Build-Depends: debhelper (>= 9), python, python-setuptools
+Build-Depends: debhelper (>= 9), python, python-setuptools, python-lxml
 Standards-Version: 3.9.5
 X-Python-Version: >= 2.7
 Vcs-Git: https://github.com/geopython/pywps.git
