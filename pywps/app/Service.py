@@ -64,7 +64,7 @@ class Service(object):
         if config.get_config_value('metadata:main', 'identification_keywords_type'):
             keywords_type = OWS.Type(config.get_config_value('metadata:main', 'identification_keywords_type'))
             keywords_type.attrib['codeSpace'] = 'ISOTC211/19115'
-            service_ident_doc.append(keywords_type)
+            keywords_doc.append(keywords_type)
 
         service_ident_doc.append(OWS.ServiceType('WPS'))
 
