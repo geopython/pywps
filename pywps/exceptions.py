@@ -79,7 +79,7 @@ class NoApplicableCode(HTTPException):
         return text_type((
             u'<?xml version="1.0" encoding="UTF-8"?>\n'
             u'<!-- PyWPS %(version)s -->\n'
-            u'<ows:ExceptionReport xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/ows/1.1 ../../../ows/1.1.0/owsExceptionReport.xsd" version="1.0.0">'
+            u'<ows:ExceptionReport xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/ows/1.1 http://schemas.opengis.net/ows/1.1.0/owsExceptionReport.xsd" version="1.0.0">'
             u'<ows:Exception exceptionCode="%(name)s" locator="%(locator)s" >'
             u'%(description)s'
             u'</ows:Exception>'
