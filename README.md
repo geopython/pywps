@@ -35,16 +35,7 @@ coverage report -m
 
 ## Demo application
 
-Clone PyWPS recursively with the demo application:
-
-```bash
-git clone --recursive git://github.com/geopython/pywps.git pywps-src
-sudo python setup.py install
-cd demo/
-python demo.py
-```
-    
-Or clone only demo app after having installed PyWPS:
+Clone demo app after having installed PyWPS:
 
 ```bash
 git clone git://github.com/PyWPS/pywps-4-demo.git
