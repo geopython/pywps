@@ -32,12 +32,6 @@ class WPSRequest(object):
         """HTTP GET request parser
         """
 
-        # WSDL request
-        wsdl = _get_get_param(self.http_request, 'WSDL')
-        if wsdl is not None:
-            # TODO: fix #57 then remove the exception
-            raise NoApplicableCode('WSDL not implemented')
-
         # service shall be WPS
         service = _get_get_param(self.http_request, 'service', aslist=False)
         if service:

@@ -24,7 +24,7 @@ class Process(object):
                    objects.
     """
 
-    def __init__(self, handler, identifier, title, abstract='', profile=[], wsdl='', metadata=[], inputs=[],
+    def __init__(self, handler, identifier, title, abstract='', profile=[], metadata=[], inputs=[],
                  outputs=[], version='None', store_supported=False, status_supported=False):
         self.identifier = identifier
         self.handler = handler
@@ -32,7 +32,6 @@ class Process(object):
         self.abstract = abstract
         self.metadata = metadata
         self.profile = profile
-        self.wsdl = wsdl
         self.version = version
         self.inputs = inputs
         self.outputs = outputs
@@ -63,8 +62,6 @@ class Process(object):
         #    doc.append(OWS.Metadata(m))
         if self.profile:
             doc.append(OWS.Profile(self.profile))
-        if self.wsdl:
-            doc.append(OWS.WSDL(self.wsdl))
         if self.version != 'None':
             doc.attrib['{http://www.opengis.net/wps/1.0.0}processVersion'] = self.version
         else:
@@ -96,9 +93,6 @@ class Process(object):
 
         for p in self.profile:
             doc.append(WPS.Profile(p))
-
-        if self.wsdl:
-            doc.append(WPS.WSDL({'{http://www.w3.org/1999/xlink}href': self.wsdl}))
 
         if input_elements:
             doc.append(E.DataInputs(*input_elements))

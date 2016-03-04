@@ -127,8 +127,6 @@ class WPSResponse(object):
         #    process_doc.append(OWS.Metadata(m))
         if self.process.profile:
             process_doc.append(OWS.Profile(self.process.profile))
-        if self.process.wsdl:
-            process_doc.append(OWS.WSDL(self.process.wsdl))
         process_doc.attrib['{http://www.opengis.net/wps/1.0.0}processVersion'] = self.process.version
 
         doc.append(process_doc)
