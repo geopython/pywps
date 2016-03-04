@@ -1,8 +1,5 @@
-"""
-This package contains classes necessary for input parsing OGC WPS requests,
-working with list of processes, executing them and redirecting OGC WPS
-responses back to client.
-"""
+##############################################################################
+#
 # Author:    Alex Morega & Calin Ciociu
 #
 # License:
@@ -27,12 +24,19 @@ responses back to client.
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
+#
+##############################################################################
 
+import logging
 import os
+
 from lxml.builder import ElementMaker
 
 __version__ = '4.0.0-alpha2'
 
+LOGGER = logging.getLogger(__name__)
+
+LOGGER.debug('setting core variables')
 
 PYWPS_INSTALL_DIR = os.path.dirname(os.path.abspath(__file__))
 

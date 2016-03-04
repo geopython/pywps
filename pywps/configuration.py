@@ -26,6 +26,7 @@ Reads the PyWPS configuration file
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
+import logging
 import sys
 import os
 import tempfile
@@ -39,6 +40,7 @@ else:
 
 
 config = None
+LOGGER = logging.getLogger(__name__)
 
 
 def get_config_value(section, option):
@@ -77,12 +79,13 @@ def load_configuration(cfgfiles=None):
 
     global config
 
+    LOGGER.info('loading configuration')
     if PY2:
         config = ConfigParser.SafeConfigParser()
     else:
         config = configparser.ConfigParser()
 
-    # Set default values
+    LOGGER.debug('setting default values')
     config.add_section('server')
     config.set('server', 'encoding', 'utf-8')
     config.set('server', 'language', 'en-US')
@@ -130,9 +133,9 @@ def load_configuration(cfgfiles=None):
 
     loaded_files = config.read(cfgfiles)
     if loaded_files:
-        print('Configuration file(s) {} loaded'.format(loaded_files))
+        LOGGER.info('Configuration file(s) %s loaded', loaded_files)
     else:
-        print('No configuration files loaded. Using default values.')
+        LOGGER.info('No configuration files loaded. Using default values')
 
 def _get_default_config_files_location():
     """Get the locations of the standard configuration files. These are
@@ -148,20 +151,25 @@ def _get_default_config_files_location():
     :rtype: list of strings
     """
 
-    # configuration file as environment variable
-    if os.getenv("PYWPS_CFG"):
+    is_win32 = sys.platform == 'win32'
+    if is_win32:
+        LOGGER.debug('Windows based environment')
+    else:
+        LOGGER.debug('UNIX based environment')
 
+    if os.getenv("PYWPS_CFG"):
+        LOGGER.debug('using PYWPS_CFG environment variable')
         # Windows or Unix
-        if sys.platform == 'win32':
+        if is_win32:
             PYWPS_INSTALL_DIR = os.path.abspath(os.path.join(os.getcwd(), os.path.dirname(sys.argv[0])))
             cfgfiles = (os.getenv("PYWPS_CFG"))
         else:
             cfgfiles = (os.getenv("PYWPS_CFG"))
 
-    # try to eastimate the default location
     else:
+        LOGGER.debug('trying to estimate the default location')
         # Windows or Unix
-        if sys.platform == 'win32':
+        if is_win32:
             PYWPS_INSTALL_DIR = os.path.abspath(os.path.join(os.getcwd(), os.path.dirname(sys.argv[0])))
             cfgfiles = (os.path.join(PYWPS_INSTALL_DIR, "pywps", "etc", "pywps.cfg"))
         else:
@@ -195,4 +203,5 @@ def get_size_mb(mbsize):
         newsize /= 1024
     else:
         newsize *= 1
+    LOGGER.debug('Calculated real size of %s is %s', mbsize, newsize)
     return newsize

@@ -1,11 +1,39 @@
+###############################################################################
+#
+# Copyright (C) 2014-2016 PyWPS Development Team, represented by
+# PyWPS Project Steering Committee
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to
+# deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+#
+###############################################################################
+
+import logging
 import os
 import sys
-from pywps import WPS, OWS, E
-from pywps.app.WPSResponse import WPSResponse
-from pywps.exceptions import StorageNotSupported, OperationNotSupported
-import pywps.configuration as config
 import traceback
 
+from pywps import WPS, OWS, E
+from pywps.app.WPSResponse import WPSResponse
+import pywps.configuration as config
+from pywps.exceptions import StorageNotSupported, OperationNotSupported
+
+LOGGER = logging.getLogger(__name__)
 
 class Process(object):
     """
@@ -107,7 +135,7 @@ class Process(object):
         async = False
         wps_response = WPSResponse(self, wps_request, self.uuid)
 
-        # check if status storage and updating are supported by this process
+        LOGGER.debug('Check if status storage and updating are supported by this process')
         if wps_request.store_execute == 'true':
             if self.store_supported != 'true':
                 raise StorageNotSupported('Process does not support the storing of the execute response')
@@ -130,7 +158,7 @@ class Process(object):
             else:
                 wps_response.status = WPSResponse.STORE_STATUS
 
-        # check if updating of status is not required then no need to spawn a process
+        LOGGER.debug('Check if updating of status is not required then no need to spawn a process')
         if async:
             process = multiprocessing.Process(target=self._run_process, args=(wps_request, wps_response))
             process.start()
@@ -145,11 +173,11 @@ class Process(object):
 
             # if status not yet set to 100% then do it after execution was successful
             if wps_response.status_percentage != 100:
-                # update the process status to 100% if everything went correctly
+                LOGGER.debug('Updating process status to 100% if everything went correctly')
                 wps_response.update_status('PyWPS Process finished', 100)
         except Exception as e:
             traceback.print_exc()
-            # retrieve the file and line number where the exception occurred
+            LOGGER.debug('Retrieving file and line number where exception occurred')
             exc_type, exc_obj, exc_tb = sys.exc_info()
             found = False
             while not found:
@@ -168,7 +196,9 @@ class Process(object):
             method_name = exc_tb.tb_frame.f_code.co_name
 
             # update the process status to display process failed
-            wps_response.update_status('Process error: %s.%s Line %i %s' % (fname, method_name, exc_tb.tb_lineno, e), -1)
+            msg = 'Process error: %s.%s Line %i %s' % (fname, method_name, exc_tb.tb_lineno, e)
+            LOGGER.error(msg)
+            wps_response.update_status(msg, -1)
 
         return wps_response
 

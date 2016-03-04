@@ -1,9 +1,11 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
+import logging
 import os
 from pywps._compat import urljoin
 from pywps.exceptions import NotEnoughStorage, NoApplicableCode
 from pywps import configuration as config
 
+LOGGER = logging.getLogger(__name__)
 
 class STORE_TYPE:
     PATH = 0
@@ -98,11 +100,14 @@ class FileStorage(StorageAbstract):
         output_name = tempfile.mkstemp(suffix=suffix, prefix=file_name,
                                        dir=self.target)[1]
 
-        shutil.copy2(output.file, os.path.join(self.target, output_name))
+        full_output_name  = os.path.join(self.target, output_name)
+        LOGGER.info('Storing file output to %s', full_output_name)
+        shutil.copy2(output.file, full_output_name)
 
         just_file_name = os.path.basename(output_name)
 
         url = urljoin(self.output_url, just_file_name)
+        LOGGER.info('File output URI: %s', url)
 
         return (STORE_TYPE.PATH, output_name, url)
 
@@ -117,6 +122,9 @@ def get_free_space(folder):
 
         free_bytes = ctypes.c_ulonglong(0)
         ctypes.windll.kernel32.GetDiskFreeSpaceExW(ctypes.c_wchar_p(folder), None, None, ctypes.pointer(free_bytes))
-        return free_bytes.value
+        free_space = free_bytes.value
     else:
-        return os.statvfs(folder).f_bfree
+        free_space = os.statvfs(folder).f_bfree
+
+    LOGGER.debug('Free space: %s', free_space)
+    return free_space

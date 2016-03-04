@@ -1,5 +1,5 @@
-""" Compatibility support for Python 2 and 3 """
-
+###############################################################################
+#
 # Author:    Alex Morega (?)
 #            
 # License:
@@ -24,12 +24,17 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
+#
+###############################################################################
 
+import logging
 import sys
 
+LOGGER = logging.getLogger(__name__)
 PY2 = sys.version_info[0] == 2
 
 if PY2:
+    LOGGER.debug('Python 2.x')
     text_type = unicode
     from StringIO import StringIO
     from flufl.enum import Enum
@@ -38,6 +43,7 @@ if PY2:
     from urllib2 import urlopen
 
 else:
+    LOGGER.debug('Python 3.x')
     text_type = str
     from io import StringIO
     from enum import Enum
