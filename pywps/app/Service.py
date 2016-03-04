@@ -225,10 +225,6 @@ class Service(object):
 
         doc.append(languages_doc)
 
-        doc.append(WPS.WSDL({'{http://www.w3.org/1999/xlink}href':  '%s%s' % (
-            config.get_config_value('server', 'url'), '?WSDL')
-        }))
-
         return xml_response(doc)
 
     def describe(self, identifiers):
