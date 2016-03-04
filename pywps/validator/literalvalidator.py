@@ -25,8 +25,13 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
+import logging
+
 from pywps.validator.mode import MODE
 from pywps.validator.allowed_value import ALLOWEDVALUETYPE, RANGECLOSURETYPE
+
+
+LOGGER = logging.getLogger(__name__)
 
 def validate_anyvalue(data_input, mode):
     """Just placeholder, anyvalue is always valid
@@ -45,6 +50,7 @@ def validate_allowed_values(data_input, mode):
     else:
         data = data_input.data
 
+        LOGGER.debug('validating allowed values: %s in %s', data, data_input.allowed_values)
         for value in data_input.allowed_values:
 
             if value.allowed_type == ALLOWEDVALUETYPE.VALUE:
@@ -56,6 +62,7 @@ def validate_allowed_values(data_input, mode):
             if passed is True:
                 break
 
+    LOGGER.debug('validation result: %r', passed)
     return passed
 
 
@@ -79,6 +86,7 @@ def _validate_range(interval, data):
 
     passed = False
 
+    LOGGER.debug('validating range: %s in %r', data, interval)
     if interval.minval <= data <= interval.maxval:
 
         if interval.spacing:
@@ -100,4 +108,5 @@ def _validate_range(interval, data):
     else:
         passed = False
 
+    LOGGER.debug('validation result: %r', passed)
     return passed

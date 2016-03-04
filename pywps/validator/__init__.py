@@ -1,5 +1,6 @@
 """Validatating functions for various inputs
 """
+import logging
 from collections import namedtuple
 from pywps.validator.complexvalidator import validategml, validateshapefile, validategeojson, validategeotiff
 from pywps.validator.literalvalidator import validate_anyvalue, validate_allowed_values
@@ -7,6 +8,7 @@ import logging
 from pywps.validator.mode import MODE
 from pywps.validator.base import emptyvalidator
 
+LOGGER = logging.getLogger(__name__)
 
 _VALIDATORS = {
     'application/vnd.geo+json': validategeojson,
@@ -36,6 +38,8 @@ def get_validator(identifier):
     """
 
     if identifier in _VALIDATORS:
+        LOGGER.debug('validator: %s', _VALIDATORS[identifier])
         return _VALIDATORS[identifier]
     else:
+        LOGGER.debug('empty validator')
         return emptyvalidator

@@ -39,6 +39,8 @@ import logging
 
 from pywps import __version__
 
+LOGGER = logging.getLogger(__name__)
+
 class NoApplicableCode(HTTPException):
     """No applicable code exception implementation
 
@@ -54,7 +56,8 @@ class NoApplicableCode(HTTPException):
         self.code = code
         self.description = description
         self.locator = locator
-        logging.exception(description)
+        msg = 'Exception: code: %s, locator: %s, description: %s' % (self.code, self.description, self.locator)
+        LOGGER.exception(msg)
 
         HTTPException.__init__(self)
 

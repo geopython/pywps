@@ -1,3 +1,4 @@
+import logging
 import tempfile
 from werkzeug.exceptions import BadRequest, HTTPException
 from werkzeug.wrappers import Request, Response
@@ -18,6 +19,7 @@ import shutil
 import os
 import uuid
 
+LOGGER = logging.getLogger(__name__)
 
 class Service(object):
 
@@ -30,6 +32,15 @@ class Service(object):
 
     def __init__(self, processes=[]):
         self.processes = {p.identifier: p for p in processes}
+
+        if config.get_config_value('server', 'logfile') and config.get_config_value('server', 'loglevel'):
+            LOGGER.setLevel(getattr(logging, config.get_config_value('server', 'loglevel')))
+            msg_fmt = '%(asctime)s] [%(levelname)s] file=%(pathname)s line=%(lineno)s module=%(module)s function=%(funcName)s %(message)s'
+            fh = logging.FileHandler(config.get_config_value('server', 'logfile'))
+            fh.setFormatter(logging.Formatter(msg_fmt))
+            LOGGER.addHandler(fh)
+        else:  # NullHandler
+            LOGGER.addHandler(logging.NullHandler())
 
     def get_capabilities(self):
         process_elements = [p.capabilities_xml()
@@ -293,16 +304,17 @@ class Service(object):
     def _parse_and_execute(self, process, wps_request, uuid):
         """Parse and execute request
         """
-        # check if datainputs is required and has been passed
+        LOGGER.debug('Checking if datainputs is required and has been passed')
         if process.inputs:
             if wps_request.inputs is None:
                 raise MissingParameterValue('', 'datainputs')
 
-        # check if all mandatory inputs have been passed
+        LOGGER.debug('Checking if all mandatory inputs have been passed')
         data_inputs = {}
         for inpt in process.inputs:
             if inpt.identifier not in wps_request.inputs:
                 if inpt.min_occurs > 0:
+                    LOGGER.error('Missing parameter value: %s', inpt.identifier)
                     raise MissingParameterValue(
                         inpt.identifier, inpt.identifier)
                 else:
@@ -385,6 +397,7 @@ class Service(object):
             # if the response did not return a 'Content-Length' header then
             # calculate the size
             if data_size == 0:
+                LOGGER.debug('no Content-Length, calculating size')
                 data_size = _get_datasize(reference_file_data)
 
             # check if input file size was not exceeded
@@ -398,7 +411,6 @@ class Service(object):
             try:
                 with open(tmp_file, 'w') as f:
                     f.write(reference_file_data)
-                    f.close()
             except Exception as e:
                 raise NoApplicableCode(e)
 
@@ -505,10 +517,12 @@ class Service(object):
 
         environ_cfg = http_request.environ.get('PYWPS_CFG')
         if not 'PYWPS_CFG' in os.environ and environ_cfg:
+            LOGGER.debug('Setting PYWPS_CFG to %s', environ_cfg)
             os.environ['PYWPS_CFG'] = environ_cfg
 
         try:
             wps_request = WPSRequest(http_request)
+            LOGGER.info('Request: %s', wps_request.operation)
             if wps_request.operation in ['getcapabilities',
                                          'describeprocess',
                                          'execute']:
@@ -553,6 +567,7 @@ def _openurl(inpt):
     reference_file = None
     href = inpt.get('href')
 
+    LOGGER.debug('Fetching URL %s', href)
     if inpt.get('method') == 'POST':
         if inpt.has_key('body'):
             data = inpt.get('body')

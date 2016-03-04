@@ -25,10 +25,14 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
+import logging
+
 from pywps.validator.mode import MODE
 from pywps.inout.formats.lists import FORMATS
 import mimetypes
 import os
+
+LOGGER = logging.getLogger(__name__)
 
 def validategml(data_input, mode):
     """GML validation example
@@ -47,6 +51,8 @@ def validategml(data_input, mode):
     >>> validategml(fake_input, MODE.SIMPLE)
     True
     """
+
+    LOGGER.info('validating GML; Mode: %s', mode)
     passed = False
 
     if mode >= MODE.NONE:
@@ -104,6 +110,8 @@ def validategeojson(data_input, mode):
     >>> validategeojson(fake_input, MODE.SIMPLE)
     True
     """
+
+    LOGGER.info('validating GeoJSON; Mode: %s', mode)
     passed = False
 
     if mode >= MODE.NONE:
@@ -169,6 +177,8 @@ def validateshapefile(data_input, mode):
     """ESRI Shapefile validation example
 
     """
+
+    LOGGER.info('validating Shapefile; Mode: %s', mode)
     passed = False
 
     if mode >= MODE.NONE:
@@ -205,6 +215,8 @@ def validateshapefile(data_input, mode):
 def validategeotiff(data_input, mode):
     """GeoTIFF validation example
     """
+
+    LOGGER.info('Validating Shapefile; Mode: %s', mode)
     passed = False
 
     if mode >= MODE.NONE:
@@ -230,12 +242,14 @@ def validategeotiff(data_input, mode):
 def _get_schemas_home():
     """Get path to schemas directory
     """
-    return os.path.join(
+    schema_dir = os.path.join(
         os.path.abspath(
             os.path.dirname(__file__)
         ),
         os.path.pardir,
         "schemas")
+    LOGGER.debug('Schemas directory: %s', schema_dir)
+    return schema_dir
 
 
 if __name__ == "__main__":

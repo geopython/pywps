@@ -2,11 +2,13 @@
 Implementation of logging for PyWPS-4
 """
 
+import logging
 from pywps import configuration
 from pywps.exceptions import NoApplicableCode
 import sqlite3
 import datetime
 
+LOGGER = logging.getLogger(__name__)
 _CONNECTION = None
 
 def log_request(uuid, request):
@@ -27,6 +29,7 @@ def log_request(uuid, request):
         time_start=datetime.datetime.now().isoformat(),
         identifier=_get_identifier(request)
     )
+    LOGGER.debug(insert)
     cur = conn.cursor()
     cur.execute(insert)
     conn.commit()
@@ -63,6 +66,7 @@ def update_response(uuid, response, close=False):
         status=status,
         uuid=uuid
     )
+    LOGGER.debug(update)
     cur = conn.cursor()
     cur.execute(update)
     conn.commit()
@@ -87,6 +91,7 @@ def get_connection():
     """Get Connection for database
     """
 
+    LOGGER.debug('Initializing database connection')
     global _CONNECTION
 
     if _CONNECTION:
@@ -145,8 +150,10 @@ def check_db_table(connection):
     """)
     table = cursor.fetchone()
     if table:
+        LOGGER.debug('pywps_requests table exists')
         return True
     else:
+        LOGGER.debug('pywps_requests table does not exist')
         return False
 
 
@@ -179,6 +186,8 @@ def check_db_columns(connection):
         return False
 
 def close_connection():
+    """close connection"""
+    LOGGER.debug('Closing DB connection')
     global _CONNECTION
     if _CONNECTION:
         _CONNECTION.close()
