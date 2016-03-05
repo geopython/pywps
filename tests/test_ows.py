@@ -15,9 +15,8 @@ from pywps import WPS, OWS
 from pywps.wpsserver import temp_dir
 from tests.common import client_for, assert_response_success
 
-# Layers from the MUSIC project - must be replaced by something simpler
-wfsResource = "http://maps.iguess.list.lu/cgi-bin/mapserv?map=/srv/mapserv/MapFiles/LB_localOWS_test.map&SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TYPENAME=LB_building_footprints&MAXFEATURES=10"
-wcsResource = "http://mapservices-gent.tudor.lu/gent_ows?&SERVICE=WCS&FORMAT=image/img&BBOX=103757,192665,104721,193770&RESX=1.0&RESY=1.0&RESPONSE_CRS=EPSG:31370&CRS=EPSG:31370&VERSION=1.0.0&REQUEST=GetCoverage&COVERAGE=GE_dsm"
+wfsResource = 'http://demo.mapserver.org/cgi-bin/wfs?service=WFS&version=1.1.0&request=GetFeature&typename=continents&maxfeatures=10'
+wcsResource = 'http://demo.mapserver.org/cgi-bin/wcs?service=WCS&version=1.0.0&request=GetCoverage&coverage=ndvi&crs=EPSG:4326&bbox=-92,42,-85,45&format=image/tiff&width=400&height=300'
 
 
 def create_feature():
@@ -140,7 +139,7 @@ class ExecuteTests(unittest.TestCase):
             WPS.DataInputs(
                 WPS.Input(
                     OWS.Identifier('input'),
-                    WPS.Reference(href=wcsResource, mimeType='image/img'))),
+                    WPS.Reference(href=wcsResource, mimeType='image/tiff'))),
             WPS.ProcessOutputs(
                 WPS.Output(
                     OWS.Identifier('output'))),
