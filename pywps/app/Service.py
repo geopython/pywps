@@ -286,7 +286,7 @@ class Service(object):
             process = self.processes[identifier]
 
             workdir = config.get_config_value('server', 'workdir')
-            tempdir = tempfile.mkdtemp(prefix='pypws_process_', dir=workdir)
+            tempdir = tempfile.mkdtemp(prefix='pywps_process_', dir=workdir)
             process.set_workdir(tempdir)
         except KeyError:
             raise InvalidParameterValue("Unknown process '%r'" % identifier, 'Identifier')
