@@ -33,7 +33,7 @@ class WPSRequest(object):
         """
 
         # service shall be WPS
-        service = _get_get_param(self.http_request, 'service', aslist=False)
+        service = _get_get_param(self.http_request, 'service')
         if service:
             if str(service).lower() != 'wps':
                 raise InvalidParameterValue(
@@ -41,7 +41,7 @@ class WPSRequest(object):
         else:
             raise MissingParameterValue('service', 'service')
 
-        operation = _get_get_param(self.http_request, 'request', aslist=False)
+        operation = _get_get_param(self.http_request, 'request')
 
         request_parser = self._get_request_parser(operation)
         request_parser(self.http_request)
