@@ -28,15 +28,14 @@ Contributors are asked to confirm that they comply with project `license
 GitHub Commit Access
 ^^^^^^^^^^^^^^^^^^^^
 
-Proposals to provide developers with GitHub commit access shall be emailed to
-the pywps-devel `mailing list`_.  Proposals shall be approved by the PyWPS
-development team.  Committers shall be added by the project admin - removal of
-commit access shall be handled in the same manner - each committer must send
-an email to the PyWPS mailing list agreeing to the license guidelines (see
-`Contributions and Licensing Agreement Template
-<#contributions-and-licensing-agreement-template>`_).  **This is only required
-once** - each committer shall be listed in
-https://github.com/geopython/pywps/blob/master/COMMITTERS.txt
+- proposals to provide developers with GitHub commit access shall be emailed to
+  the pywps-devel `mailing list`_.  Proposals shall be approved by the PyWPS
+  development team.  Committers shall be added by the project admin
+- removal of commit access shall be handled in the same manner
+- each committer must send an email to the PyWPS mailing list agreeing to the license guidelines (see
+  `Contributions and Licensing Agreement Template
+  <#contributions-and-licensing-agreement-template>`_).  **This is only required once**
+- each committer shall be listed in https://github.com/geopython/pywps/blob/master/COMMITTERS.txt
 
 GitHub Pull Requests
 ^^^^^^^^^^^^^^^^^^^^
@@ -81,12 +80,12 @@ Documentation
 - documentation is managed in ``docs/``, in reStructuredText format
 - `Sphinx`_ is used to generate the documentation
 - See the `reStructuredText Primer <http://sphinx-doc.org/rest.html>`_ on rST
-  markup and syntax.
+  markup and syntax
 
 Bugs
 ----
 
-PyWPS's `issue tracker <https://github.com/geopython/pywps/issues>`_ is the
+PyWPS' `issue tracker <https://github.com/geopython/pywps/issues>`_ is the
 place to report bugs or request enhancements. To submit a bug be sure to specify
 the PyWPS version you are using, the appropriate component, a description of how
 to reproduce the bug, as well as what version of Python and platform.
@@ -116,27 +115,26 @@ GitHub Commit Guidelines
 - Git commits shall include a description of changes
 - Git commits shall include the GitHub issue number (i.e. ``#1234``) in the Git
   commit log message
-- all enhancements or bug fixes must successfully pass all :ref:`ogc-cite` tests
+- all enhancements or bug fixes must successfully pass all
+  `OGC CITE <http://cite.opengeospatial.org>`_ tests before they are committed
+- all enhancements or bug fixes must successfully pass all tests
   before they are committed
-- all enhancements or bug fixes must successfully pass all :ref:`tests` tests
-  before they are committed
-- enhancements which can be demonstrated from the PyWPS :ref:`tests` should be
+- enhancements which can be demonstrated from the PyWPS tests should be
   accompanied by example WPS request XML or KVP
 
 Coding Guidelines
 ^^^^^^^^^^^^^^^^^
 
-- PyWPS instead of pywps, pyWPS, Pywps
+- PyWPS instead of pywps, pyWPS, Pywps, PYWPS
 - always code with `PEP 8`_ conventions
-- always run source code through ``pep8`` and `pylint`_, using all pylint
-  defaults except for ``C0111``.  Use ``autopep`` script for automatic fixing.
-- for exceptions which make their way to OGC ``ExceptionReport`` XML, always
+- always run source code through ``flake8``
+- for exceptions which make their way to OGC ``ows:ExceptionReport`` XML, always
   specify the appropriate ``locator`` and ``code`` parameters
 
 Submitting a Pull Request
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This section will guide you through steps of working on .  This section
+This section will guide you through steps of working on PyWPS.  This section
 assumes you have forked PyWPS into your own GitHub repository.
 
 .. code-block:: bash
@@ -185,7 +183,6 @@ master:
 .. _`info@osgeo.org`: mailto:info@osgeo.org
 .. _`OSGeo`: http://www.osgeo.org/content/foundation/legal/licenses.html
 .. _`PEP 8`: http://www.python.org/dev/peps/pep-0008/
-.. _`pep8`: http://pypi.python.org/pypi/pep8/
-.. _`pylint`: http://www.logilab.org/857
+.. _`flake8`: https://flake8.readthedocs.org/en/latest/
 .. _`Sphinx`: http://sphinx-doc.org/
 .. _`mailing list`: http://pywps.org/community
