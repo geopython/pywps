@@ -1,8 +1,4 @@
-flask
 owslib
-simplejson
 jsonschema
 lxml
-geojson
-shapely
 werkzeug
