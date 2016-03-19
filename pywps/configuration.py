@@ -95,11 +95,13 @@ def load_configuration(cfgfiles=None):
     config.set('server', 'maxrequestsize', '3mb')
     config.set('server', 'temp_path', tempfile.gettempdir())
     config.set('server', 'processes_path', '')
-    config.set('server', 'outputurl', '/')
-    config.set('server', 'outputpath', tempfile.gettempdir())
+    outputpath = tempfile.gettempdir()
+    config.set('server', 'outputurl', 'file:///%s' % outputpath)
+    config.set('server', 'outputpath', outputpath)
     config.set('server', 'logfile', '')
     config.set('server', 'loglevel', 'INFO')
     config.set('server', 'workdir',  tempfile.gettempdir())
+    config.set('server', 'parallelprocesses', '2')
 
     config.add_section('metadata:main')
     config.set('metadata:main', 'identification_title', 'PyWPS Processing Service')
@@ -136,6 +138,18 @@ def load_configuration(cfgfiles=None):
         LOGGER.info('Configuration file(s) %s loaded', loaded_files)
     else:
         LOGGER.info('No configuration files loaded. Using default values')
+
+    _check_config()
+
+def _check_config():
+    """Check some configuration values
+    """
+    workdir = get_config_value('server', 'workdir')
+
+    if not os.path.isdir(workdir):
+        LOGGER.warning('server->workdir configuration value %s is not directory'
+                % workdir)
+
 
 def _get_default_config_files_location():
     """Get the locations of the standard configuration files. These are

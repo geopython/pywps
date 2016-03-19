@@ -303,7 +303,7 @@ class BasicComplex(object):
         :param mime_type: given mimetype
         :return: Format
         """
-        
+
         for frmt in self.supported_formats:
             if frmt.mime_type == mime_type:
                 return frmt
@@ -325,7 +325,7 @@ class BasicComplex(object):
     def supported_formats(self, supported_formats):
         """Setter of supported formats
         """
-       
+
         def set_format_validator(supported_format):
             if not supported_format.validate or \
                supported_format.validate == emptyvalidator:
@@ -391,6 +391,7 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
         SimpleHandler.__init__(self, workdir, data_type, mode=mode)
 
         self.any_value = is_anyvalue(allowed_values)
+        self.allowed_values = []
         if not self.any_value:
             self.allowed_values = make_allowedvalues(allowed_values)
 
@@ -404,6 +405,24 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
             return validate_anyvalue
         else:
             return validate_allowed_values
+
+    @property
+    def json(self):
+        """Get JSON representation of the input
+        """
+        return {
+            'identifier': self.identifier,
+            'title': self.title,
+            'abstract': self.abstract,
+            'type': 'literal',
+            'data_type': self.data_type,
+            'workdir': self.workdir,
+            'allowed_values': [value.json for value in self.allowed_values],
+            'uoms': self.uoms,
+            'uom': self.uom,
+            'mode': self.valid_mode,
+            'data': self.data
+        }
 
 
 class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
@@ -445,6 +464,23 @@ class BBoxInput(BasicIO, BasicBoundingBox, IOHandler):
         BasicBoundingBox.__init__(self, crss, dimensions)
         IOHandler.__init__(self, workdir=None, mode=mode)
 
+    @property
+    def json(self):
+        """Get JSON representation of the input
+        """
+        return {
+            'identifier': self.identifier,
+            'title': self.title,
+            'abstract': self.abstract,
+            'type': 'bbox',
+            'crs': self.crss,
+            'bbox': (self.ll, self.ur),
+            'dimensions': self.dimensions,
+            'workdir': self.workdir,
+            'mode': self.valid_mode
+        }
+
+
 class BBoxOutput(BasicIO, BasicBoundingBox, SimpleHandler):
     """Basic BoundingBox output class
     """
@@ -481,6 +517,21 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
         IOHandler.__init__(self, workdir=workdir, mode=mode)
         BasicComplex.__init__(self, data_format, supported_formats)
 
+    @property
+    def json(self):
+        """Get JSON representation of the input
+        """
+        return {
+            'identifier': self.identifier,
+            'title': self.title,
+            'abstract': self.abstract,
+            'type': 'complex',
+            'data_format': self.data_format.json,
+            'supported_formats': [frmt.json for frmt in self.supported_formats],
+            'file': self.file,
+            'workdir': self.workdir,
+            'mode': self.valid_mode
+        }
 
 
 class ComplexOutput(BasicIO, BasicComplex, IOHandler):

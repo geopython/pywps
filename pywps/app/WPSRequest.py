@@ -5,19 +5,39 @@ import base64
 from pywps import WPS
 from pywps._compat import text_type, PY2
 from pywps.app.basic import xpath_ns
+from pywps.inout.basic import LiteralInput, ComplexInput, BBoxInput
 from pywps.exceptions import NoApplicableCode, OperationNotSupported, MissingParameterValue, VersionNegotiationFailed, \
     InvalidParameterValue, FileSizeExceeded
 from pywps import configuration
 from pywps._compat import PY2
+from pywps.validator.base import emptyvalidator
+from pywps.validator.mode import MODE
+from pywps.inout.literaltypes import AnyValue, NoValue, ValuesReference, AllowedValue
+
+from pywps.inout.formats import Format
+
+import json
 
 
 class WPSRequest(object):
 
-    def __init__(self, http_request):
+    def __init__(self, http_request=None):
         self.http_request = http_request
 
-        request_parser = self._get_request_parser_method(http_request.method)
-        request_parser()
+        self.operation = None
+        self.version = None
+        self.language = None
+        self.identifiers = None
+        self.store_execute = None
+        self.status = None
+        self.lineage = None
+        self.inputs = None
+        self.outputs = None
+        self.raw = None
+
+        if self.http_request:
+            request_parser = self._get_request_parser_method(http_request.method)
+            request_parser()
 
     def _get_request_parser_method(self, method):
 
@@ -271,6 +291,123 @@ class WPSRequest(object):
         else:
             self.language = language
 
+    @property
+    def json(self):
+        """Return JSON encoded representation of the request
+        """
+
+        obj = {
+            'operation': self.operation,
+            'version': self.version,
+            'language': self.language,
+            'identifiers': self.identifiers,
+            'store_execute': self.store_execute,
+            'status': self.status,
+            'lineage': self.lineage,
+            'inputs': dict((i, [inpt.json for inpt in self.inputs[i]]) for i in self.inputs),
+            'outputs': self.outputs,
+            'raw': self.raw
+        }
+
+        return json.dumps(obj, allow_nan=False)
+
+    @json.setter
+    def json(self, value):
+        """init this request from json back again
+
+        :param value: the json (not string) representation
+        """
+
+        self.operation = value['operation']
+        self.version = value['version']
+        self.language = value['language']
+        self.identifiers = value['identifiers']
+        self.store_execute = value['store_execute']
+        self.status = value['status']
+        self.lineage = value['lineage']
+        self.outputs = value['outputs']
+        self.raw = value['raw']
+        self.inputs = {}
+
+        for identifier in value['inputs']:
+            inpt = None
+            inpt_defs = value['inputs'][identifier]
+
+            for inpt_def in inpt_defs:
+
+                if inpt_def['type'] == 'complex':
+                    inpt = ComplexInput(
+                        identifier=inpt_def['identifier'],
+                        title=inpt_def.get('title'),
+                        abstract=inpt_def.get('abstract'),
+                        workdir=inpt_def.get('workdir'),
+                        data_format=Format(
+                            schema=inpt_def['data_format'].get('schema'),
+                            extension=inpt_def['data_format'].get('extension'),
+                            mime_type=inpt_def['data_format']['mime_type'],
+                            encoding=inpt_def['data_format'].get('encoding')
+                        ),
+                        supported_formats=[
+                            Format(
+                                schema=infrmt.get('schema'),
+                                extension=infrmt.get('extension'),
+                                mime_type=infrmt['mime_type'],
+                                encoding=infrmt.get('encoding')
+                            ) for infrmt in inpt_def['supported_formats']
+                        ],
+                        mode=MODE.NONE
+                    )
+                    inpt.file = inpt_def['file']
+                elif inpt_def['type'] == 'literal':
+
+                    allowed_values = []
+                    for allowed_value in inpt_def['allowed_values']:
+                        if allowed_value['type'] == 'anyvalue':
+                            allowed_values.append(AnyValue())
+                        elif allowed_value['type'] == 'novalue':
+                            allowed_values.append(NoValue())
+                        elif allowed_value['type'] == 'valuesreference':
+                            allowed_values.append(ValuesReference())
+                        elif allowed_value['type'] == 'allowedvalue':
+                            allowed_values.append(AllowedValue(
+                                allowed_type=allowed_value['allowed_type'],
+                                value=allowed_value['value'],
+                                minval=allowed_value['minval'],
+                                maxval=allowed_value['maxval'],
+                                spacing=allowed_value['spacing'],
+                                range_closure=allowed_value['range_closure']
+                            ))
+
+                    inpt = LiteralInput(
+                        identifier = inpt_def['identifier'],
+                        title = inpt_def.get('title'),
+                        abstract = inpt_def.get('abstract'),
+                        data_type = inpt_def.get('data_type'),
+                        workdir = inpt_def.get('workdir'),
+                        allowed_values = AnyValue,
+                        uoms = inpt_def.get('uoms'),
+                        mode = inpt_def.get('mode')
+                    )
+                    inpt.uom = inpt_def.get('uom')
+                    inpt.data = inpt_def.get('data')
+
+                elif inpt_def['type'] == 'bbox':
+                    inpt = BBoxInput(
+                         identifier = inpt_def['identifier'],
+                         title = inpt_def['title'],
+                         abstract = inpt_def['abstract'],
+                         crss = inpt_def['crs'],
+                         dimensions = inpt_def['dimensions'],
+                         workdir = inpt_def['workdir'],
+                         mode = inpt_def['mode']
+                     )
+                    inpt.ll = inpt_def['bbox'][0]
+                    inpt.ur = inpt_def['bbox'][1]
+
+            if identifier in self.inputs:
+                self.inputs[identifier].append(inpt)
+            else:
+                self.inputs[identifier] = [inpt]
 
 def get_inputs_from_xml(doc):
     the_inputs = {}
@@ -344,7 +481,6 @@ def get_inputs_from_xml(doc):
                     bbox_data_el = bbox_data
                     bbox = BoundingBox(bbox_data_el)
                     the_inputs[identifier].append(bbox)
-
     return the_inputs
 
 

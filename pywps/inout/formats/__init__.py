@@ -157,6 +157,30 @@ class Format(object):
 
         return doc
 
+    @property
+    def json(self):
+        """Get format as json
+        :rtype: dict
+        """
+        return {
+            'mime_type': self.mime_type,
+            'encoding': self.encoding,
+            'schema': self.schema,
+            'extension': self.extension
+        }
+
+    @json.setter
+    def json(self, jsonin):
+        """Set format from json
+        :param jsonin:
+        """
+
+        self.mime_type = jsonin['mime_type']
+        self.encoding = jsonin['encoding']
+        self.schema = jsonin['schema']
+        self.extension = jsonin['extension']
+
+
 def get_format(frmt, validator=None):
     """Return Format instance based on given pywps.inout.FORMATS keyword
     """

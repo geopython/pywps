@@ -2,6 +2,7 @@ import os
 from lxml import etree
 import time
 from werkzeug.wrappers import Request
+from werkzeug.exceptions import HTTPException
 from pywps import WPS, OWS
 from pywps.app.basic import xml_response
 from pywps.exceptions import NoApplicableCode
@@ -14,6 +15,7 @@ class WPSResponse(object):
     NO_STATUS = 0
     STORE_STATUS = 1
     STORE_AND_UPDATE_STATUS = 2
+    DONE_STATUS = 3
 
     def __init__(self, process, wps_request, uuid):
         """constructor
@@ -32,13 +34,20 @@ class WPSResponse(object):
         self.doc = None
         self.uuid = uuid
 
-    def update_status(self, message, status_percentage=None):
-        self.message = message
+    def update_status(self, message=None, status_percentage=None, status=None):
+
+        if message:
+            self.message = message
+
+        if status:
+            self.status = status
+
         if status_percentage:
             self.status_percentage = status_percentage
 
-            # rebuild the doc and update the status xml file
-            self.doc = self._construct_doc()
+        # rebuild the doc and update the status xml file
+        self.doc = self._construct_doc()
+
 
         # check if storing of the status is requested
         if self.status >= self.STORE_STATUS:
@@ -48,6 +57,7 @@ class WPSResponse(object):
 
     def write_response_doc(self, doc):
         # TODO: check if file/directory is still present, maybe deleted in mean time
+
         try:
             with open(self.process.status_location, 'w') as f:
                 f.write(etree.tostring(doc, pretty_print=True, encoding='utf-8').decode('utf-8'))
