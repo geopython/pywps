@@ -7,6 +7,9 @@ from pywps import configuration
 from pywps.exceptions import NoApplicableCode
 import sqlite3
 import datetime
+import pickle
+import json
+import os
 
 LOGGER = logging.getLogger(__name__)
 _CONNECTION = None
@@ -19,11 +22,12 @@ def log_request(uuid, request):
     conn = get_connection()
     insert = """
         INSERT INTO
-            pywps_requests (uuid, operation, version, time_start, identifier)
+            pywps_requests (uuid, pid, operation, version, time_start, identifier)
         VALUES
-            ('{uuid}', '{operation}', '{version}', '{time_start}', '{identifier}')
+            ('{uuid}', {pid}, '{operation}', '{version}', '{time_start}', '{identifier}')
     """.format(
         uuid=uuid,
+        pid=os.getpid(),
         operation=request.operation,
         version=request.version,
         time_start=datetime.datetime.now().isoformat(),
@@ -34,6 +38,42 @@ def log_request(uuid, request):
     cur.execute(insert)
     conn.commit()
     close_connection()
+
+def get_running():
+    """Returns running processes ids
+    """
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    res = cur.execute('SELECT uuid FROM pywps_requests WHERE percent_done < 100')
+
+    return res.fetchall()
+
+
+def get_stored():
+    """Returns running processes ids
+    """
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    res = cur.execute('SELECT uuid FROM pywps_stored_requests')
+
+    return res.fetchall()
+
+def get_first_stored():
+    """Returns running processes ids
+    """
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    res = cur.execute('SELECT uuid,  request FROM pywps_stored_requests LIMIT 1')
+
+    return res.fetchall()
+
+
 
 def update_response(uuid, response, close=False):
     """Writes response to database
@@ -55,12 +95,14 @@ def update_response(uuid, response, close=False):
         UPDATE
             pywps_requests
         SET
+            pid = {pid},
             time_end = '{time_end}', message={message},
             percent_done = {percent_done}, status={status}
         WHERE
             uuid = '{uuid}'
     """.format(
         time_end=datetime.datetime.now().isoformat(),
+        pid=os.getpid(),
         message=message,
         percent_done=status_percentage,
         status=status,
@@ -108,14 +150,17 @@ def get_connection():
             _CONNECTION = connection
         else:
             raise NoApplicableCode("""
-                Columns in the table 'pywps_requests' in database '%s' are in
+                Columns in the table 'pywps_requests' or 'pywps_stored_requests' in database '%s' are in
                 conflict
             """ % database)
 
     else:
+        _CONNECTION = sqlite3.connect(database, check_same_thread=False)
+        cursor = _CONNECTION.cursor()
         createsql = """
             CREATE TABLE pywps_requests(
                 uuid VARCHAR(255) not null primary key,
+                pid INTEGER not null,
                 operation varchar(30) not null,
                 version varchar(5) not null,
                 time_start text not null,
@@ -125,9 +170,15 @@ def get_connection():
                 percent_done float,
                 status varchar(30)
             )
+        """
+        cursor.execute(createsql)
+
+        createsql = """
+            CREATE TABLE pywps_stored_requests(
+                uuid VARCHAR(255) not null primary key,
+                request BLOB not null
+            )
             """
-        _CONNECTION = sqlite3.connect(database, check_same_thread=False)
-        cursor = _CONNECTION.cursor()
         cursor.execute(createsql)
         _CONNECTION.commit()
 
@@ -166,24 +217,32 @@ def check_db_columns(connection):
     :rtype: boolean
     """
 
-    cur = connection.cursor()
-    cur.execute("""PRAGMA table_info('pywps_requests')""")
-    metas = cur.fetchall()
-    columns = []
-    for column in metas:
-        columns.append(column[1])
+    def _check_table(name, needed_columns):
+        cur = connection.cursor()
+        cur.execute("""PRAGMA table_info('%s')""" % name)
+        metas = cur.fetchall()
+        columns = []
+        for column in metas:
+            columns.append(column[1])
 
-    needed_columns = ['uuid', 'operation', 'version', 'time_start',
+        needed_columns.sort()
+        columns.sort()
+
+        if columns == needed_columns:
+            return True
+        else:
+            return False
+
+    name = 'pywps_requests'
+    needed_columns = ['uuid', 'pid', 'operation', 'version', 'time_start',
                       'time_end', 'identifier', 'message', 'percent_done',
                       'status']
-    needed_columns.sort()
 
-    columns.sort()
+    pywps_requests = _check_table(name, needed_columns)
+    pywps_stored_requests = _check_table('pywps_stored_requests', ['uuid', 'request'])
 
-    if columns == needed_columns:
-        return True
-    else:
-        return False
+
+    return pywps_requests and pywps_stored_requests
 
 def close_connection():
     """close connection"""
@@ -193,3 +252,38 @@ def close_connection():
         _CONNECTION.close()
     _CONNECTION = None
 
+def store_process(uuid, request):
+    """Save given request under given UUID for later usage
+    """
+
+    conn = get_connection()
+    insert = """
+        INSERT INTO
+            pywps_stored_requests (uuid, request)
+        VALUES
+            ('{uuid}', '{request}')
+    """.format(
+        uuid=uuid,
+        request=request.json
+    )
+    cur = conn.cursor()
+    cur.execute(insert)
+    conn.commit()
+    close_connection()
+
+def remove_stored(uuid):
+    """Remove given request from stored requests
+    """
+
+    conn = get_connection()
+    insert = """
+        DELETE FROM
+            pywps_stored_requests
+        WHERE uuid = '{uuid}'
+    """.format(
+        uuid=uuid
+    )
+    cur = conn.cursor()
+    cur.execute(insert)
+    conn.commit()
+    close_connection()

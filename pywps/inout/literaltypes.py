@@ -27,19 +27,28 @@ LITERAL_DATA_TYPES = ('float', 'boolean', 'integer', 'string',
 class AnyValue(object):
     """Any value for literal input
     """
-    pass
+
+    @property
+    def json(self):
+        return {'type': 'anyvalue'}
 
 class NoValue(object):
     """No value allowed
     NOTE: not really implemented
     """
-    pass
+
+    @property
+    def json(self):
+        return {'type': 'novalue'}
 
 class ValuesReference(object):
     """Any value for literal input
     NOTE: not really implemented
     """
-    pass
+
+    @property
+    def json(self):
+        return {'type': 'valuesreference'}
 
 class AllowedValue(AnyValue):
     """Allowed value parameters
@@ -77,6 +86,20 @@ class AllowedValue(AnyValue):
                 doc.append(OWS.Spacing(str(self.spacing)))
         return doc
 
+    @property
+    def json(self):
+        value = self.value
+        if hasattr(value, 'json'):
+            value = value.json
+        return {
+            'type': 'allowedvalue',
+            'allowed_type': self.allowed_type,
+            'value': value,
+            'minval': self.minval,
+            'maxval': self.maxval,
+            'spacing': self.spacing,
+            'range_closure': self.range_closure
+        }
 
 def get_converter(convertor):
     """function for decoration of convert

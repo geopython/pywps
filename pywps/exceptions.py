@@ -39,6 +39,7 @@ import logging
 
 from pywps import __version__
 
+logging.basicConfig()
 LOGGER = logging.getLogger(__name__)
 
 class NoApplicableCode(HTTPException):
@@ -135,3 +136,24 @@ class NotEnoughStorage(NoApplicableCode):
     """Storage not supported exception implementation
     """
     code = 400
+
+class ServerBusy(NoApplicableCode):
+    """Max number of operations exceeded
+    """
+
+    code = 400
+    description = 'Maximum number of processes exceeded'
+
+    def get_body(self, environ=None):
+        """Get the XML body."""
+        return text_type((
+            u'<?xml version="1.0" encoding="UTF-8"?>\n'
+            u'<ows:ExceptionReport xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/ows/1.1 ../../../ows/1.1.0/owsExceptionReport.xsd" version="1.0.0">'
+            u'<ows:Exception exceptionCode="%(name)s">'
+            u'%(description)s'
+            u'</ows:Exception>'
+            u'</ows:ExceptionReport>'
+        ) % {
+            'name':         escape(self.name),
+            'description':  self.get_description(environ)
+        })

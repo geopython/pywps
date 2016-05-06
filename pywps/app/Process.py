@@ -27,11 +27,15 @@ import logging
 import os
 import sys
 import traceback
+import json
 
-from pywps import WPS, OWS, E
+from pywps import WPS, OWS, E, dblog
 from pywps.app.WPSResponse import WPSResponse
+from pywps.app.WPSRequest import WPSRequest
 import pywps.configuration as config
-from pywps.exceptions import StorageNotSupported, OperationNotSupported
+from pywps.exceptions import StorageNotSupported, OperationNotSupported, \
+    ServerBusy
+
 
 LOGGER = logging.getLogger(__name__)
 
@@ -130,8 +134,8 @@ class Process(object):
         return doc
 
     def execute(self, wps_request, uuid):
-        import multiprocessing
-        self.uuid = uuid
+
+        self._set_uuid(uuid)
         async = False
         wps_response = WPSResponse(self, wps_request, self.uuid)
 
@@ -140,14 +144,6 @@ class Process(object):
             if self.store_supported != 'true':
                 raise StorageNotSupported('Process does not support the storing of the execute response')
 
-            file_path = config.get_config_value('server', 'outputpath')
-            file_url = '%s%s' % (
-                config.get_config_value('server', 'url'),
-                config.get_config_value('server', 'outputurl')
-            )
-
-            self.status_location = os.path.join(file_path, str(self.uuid)) + '.xml'
-            self.status_url = os.path.join(file_url, str(self.uuid)) + '.xml'
 
             if wps_request.status == 'true':
                 if self.status_supported != 'true':
@@ -159,11 +155,76 @@ class Process(object):
                 wps_response.status = WPSResponse.STORE_STATUS
 
         LOGGER.debug('Check if updating of status is not required then no need to spawn a process')
+
+        wps_response = self._execute_process(async, wps_request, wps_response)
+
+        return wps_response
+
+    def _set_uuid(self, uuid):
+        """Set uuid and status ocation apth and url
+        """
+
+        self.uuid = uuid
+
+        file_path = config.get_config_value('server', 'outputpath')
+
+        file_url = config.get_config_value('server', 'outputurl')
+
+        self.status_location = os.path.join(file_path, str(self.uuid)) + '.xml'
+        self.status_url = os.path.join(file_url, str(self.uuid)) + '.xml'
+
+    def _execute_process(self, async, wps_request, wps_response):
+        """Uses :module:`multiprocessing` module for sending process to
+        background BUT first, check for maxprocesses configuration value
+
+        :param async: run in asynchronous mode
+        :return: wps_response or None
+        """
+
+        maxparalel = int(config.get_config_value('server', 'parallelprocesses'))
+        running = len(dblog.get_running())
+        stored = len(dblog.get_stored())
+
+        # async
         if async:
-            process = multiprocessing.Process(target=self._run_process, args=(wps_request, wps_response))
-            process.start()
+
+            # run immedietly
+            if running < maxparalel:
+                self._run_async(wps_request, wps_response)
+
+            # try to store for later usage
+            else:
+                wps_response = self._store_process(stored,
+                                                   wps_request, wps_response)
+
+        # not async
         else:
-            wps_response = self._run_process(wps_request, wps_response)
+            if running < maxparalel:
+                wps_response = self._run_process(wps_request, wps_response)
+            else:
+                raise ServerBusy('Maximum number of paralel running processes reached. Please try later.')
+
+        return wps_response
+
+    def _run_async(self, wps_request, wps_response):
+        import multiprocessing
+        process = multiprocessing.Process(
+            target=self._run_process,
+            args=(wps_request, wps_response)
+        )
+        process.start()
+
+
+    def _store_process(self, stored, wps_request, wps_response):
+        """Try to store given requests
+        """
+
+        maxprocesses = int(config.get_config_value('server', 'maxprocesses'))
+
+        if stored < maxprocesses:
+            dblog.store_process(self.uuid, wps_request)
+        else:
+            raise ServerBusy('Maximum number of paralel running processes reached. Please try later.')
 
         return wps_response
 
@@ -199,6 +260,19 @@ class Process(object):
             msg = 'Process error: %s.%s Line %i %s' % (fname, method_name, exc_tb.tb_lineno, e)
             LOGGER.error(msg)
             wps_response.update_status(msg, -1)
+
+        # tr
+        stored_requests = dblog.get_first_stored()
+        if len(stored_requests) > 0:
+            (uuid, request_json) = stored_requests[0]
+            new_wps_request = WPSRequest()
+            new_wps_request.json = json.loads(request_json)
+            new_wps_response = WPSResponse(self, new_wps_request, uuid)
+            new_wps_response.status = WPSResponse.STORE_AND_UPDATE_STATUS
+            self._set_uuid(uuid)
+            self._run_async(new_wps_request, new_wps_response)
+            dblog.remove_stored(uuid)
+
 
         return wps_response
 

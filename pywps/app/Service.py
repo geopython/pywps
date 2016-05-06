@@ -30,8 +30,11 @@ class Service(object):
                       provided by this service.
     """
 
-    def __init__(self, processes=[]):
+    def __init__(self, processes=[], cfgfile=None):
         self.processes = {p.identifier: p for p in processes}
+
+        if cfgfile:
+            config.load_configuration(cfgfile)
 
         if config.get_config_value('server', 'logfile') and config.get_config_value('server', 'loglevel'):
             LOGGER.setLevel(getattr(logging, config.get_config_value('server', 'loglevel')))
@@ -286,7 +289,7 @@ class Service(object):
             process = self.processes[identifier]
 
             workdir = config.get_config_value('server', 'workdir')
-            tempdir = tempfile.mkdtemp(prefix='pywps_process_', dir=workdir)
+            tempdir = tempfile.mkdtemp(prefix='pyws_process_', dir=workdir)
             process.set_workdir(tempdir)
         except KeyError:
             raise InvalidParameterValue("Unknown process '%r'" % identifier, 'Identifier')
@@ -323,14 +326,14 @@ class Service(object):
             # Replace the dicts with the dict of Literal/Complex inputs
             # set the input to the type defined in the process
             if isinstance(inpt, ComplexInput):
-                data_inputs[inpt.identifier] = self.create_complex_inputs(inpt,
-                                                                          wps_request.inputs[inpt.identifier])
+                data_inputs[inpt.identifier] = self.create_complex_inputs(
+                    inpt, wps_request.inputs[inpt.identifier])
             elif isinstance(inpt, LiteralInput):
-                data_inputs[inpt.identifier] = self.create_literal_inputs(inpt,
-                                                                          wps_request.inputs[inpt.identifier])
+                data_inputs[inpt.identifier] = self.create_literal_inputs(
+                    inpt, wps_request.inputs[inpt.identifier])
             elif isinstance(inpt, BoundingBoxInput):
-                data_inputs[inpt.identifier] = self.create_bbox_inputs(inpt,
-                                                                       wps_request.inputs[inpt.identifier])
+                data_inputs[inpt.identifier] = self.create_bbox_inputs(
+                    inpt, wps_request.inputs[inpt.identifier])
 
         wps_request.inputs = data_inputs
 

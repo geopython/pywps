@@ -13,6 +13,7 @@ from pywps.inout.literaltypes import convert, AllowedValue
 from pywps._compat import StringIO, text_type
 from pywps.validator.base import emptyvalidator
 from pywps.exceptions import InvalidParameterValue
+from pywps.validator.mode import MODE
 
 from lxml import etree
 
@@ -121,14 +122,19 @@ class ComplexInputTest(unittest.TestCase):
     """ComplexInput test cases"""
 
     def setUp(self):
-        tmp_dir = tempfile.mkdtemp()
+        self.tmp_dir = tempfile.mkdtemp()
         data_format = get_data_format('application/json')
-        self.complex_in = ComplexInput(identifier="complexinput", workdir=tmp_dir,
+        self.complex_in = ComplexInput(identifier="complexinput",
+                                       title='MyComplex',
+                                       abstract='My complex input',
+                                       workdir=self.tmp_dir,
                                        supported_formats=[data_format])
+
+        self.complex_in.data = "Hallo world!"
 
     def test_validator(self):
         self.assertEqual(self.complex_in.data_format.validate,
-                       get_validator('application/json')) 
+                       get_validator('application/json'))
         self.assertEqual(self.complex_in.validator,
                          get_validator('application/json'))
         frmt = get_data_format('application/json')
@@ -143,7 +149,19 @@ class ComplexInputTest(unittest.TestCase):
     def test_data_format(self):
         self.assertIsInstance(self.complex_in.supported_formats[0], Format)
 
+    def test_json_out(self):
+        out = self.complex_in.json
 
+        self.assertEqual(out['workdir'], self.tmp_dir, 'Workdir defined')
+        self.assertTrue(out['file'], 'There is no file')
+        self.assertTrue(out['supported_formats'], 'There are some formats')
+        self.assertEqual(len(out['supported_formats']), 1, 'There is one formats')
+        self.assertEqual(out['title'], 'MyComplex', 'Title not set but existing')
+        self.assertEqual(out['abstract'], 'My complex input', 'Abstract not set but existing')
+        self.assertEqual(out['identifier'], 'complexinput', 'identifier set')
+        self.assertEqual(out['type'], 'complex', 'it is complex input')
+        self.assertTrue(out['data_format'], 'data_format set')
+        self.assertEqual(out['data_format']['mime_type'], 'application/json', 'data_format set')
 
 class ComplexOutputTest(unittest.TestCase):
     """ComplexOutput test cases"""
@@ -199,6 +217,7 @@ class LiteralInputTest(unittest.TestCase):
                 mode=2,
                 allowed_values=(1, 2, (3, 3, 12)))
 
+
     def test_contruct(self):
         self.assertIsInstance(self.literal_input, LiteralInput)
         self.assertEqual(len(self.literal_input.allowed_values), 3)
@@ -231,6 +250,22 @@ class LiteralInputTest(unittest.TestCase):
         self.literal_input.data = 6
         self.assertEqual(self.literal_input.data, 6)
 
+    def test_json_out(self):
+        self.literal_input.data = 9
+        out = self.literal_input.json
+
+        self.assertFalse(out['uoms'], 'UOMs exist')
+        self.assertFalse(out['workdir'], 'Workdir exist')
+        self.assertEqual(out['data_type'], 'integer', 'Data type is integer')
+        self.assertFalse(out['abstract'], 'abstract exist')
+        self.assertFalse(out['title'], 'title exist')
+        self.assertEqual(out['data'], 9, 'data set')
+        self.assertEqual(out['mode'], MODE.STRICT, 'Mode set')
+        self.assertEqual(out['identifier'], 'literalinput', 'identifier set')
+        self.assertEqual(out['type'], 'literal', 'it\'s literal input')
+        self.assertFalse(out['uom'], 'uom exists')
+        self.assertEqual(len(out['allowed_values']), 3, '3 allowed values')
+        self.assertEqual(out['allowed_values'][0]['value'], 1, 'allowed value 1')
 
 
 class LiteralOutputTest(unittest.TestCase):
@@ -255,10 +290,22 @@ class BoxInputTest(unittest.TestCase):
 
     def setUp(self):
 
-        self.bbox_input = BBoxInput("bboxinput")
+        self.bbox_input = BBoxInput("bboxinput", dimensions=2)
+        self.bbox_input.ll = [0, 1]
+        self.bbox_input.ur = [2, 4]
 
     def test_contruct(self):
         self.assertIsInstance(self.bbox_input, BBoxInput)
+
+    def test_json_out(self):
+        out = self.bbox_input.json
+
+        self.assertTrue(out['identifier'], 'identifier exists')
+        self.assertFalse(out['title'], 'title exists')
+        self.assertFalse(out['abstract'], 'abstract set')
+        self.assertEqual(out['type'], 'bbox', 'type set')
+        self.assertTupleEqual(out['bbox'], ([0, 1], [2, 4]), 'data are tehre')
+        self.assertEqual(out['dimensions'], 2, 'Dimensions set')
 
 
 class BoxOutputTest(unittest.TestCase):

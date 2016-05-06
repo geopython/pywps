@@ -64,6 +64,36 @@ class FormatsTest(unittest.TestCase):
 
         self.assertTrue(frmt.same_as(frmt2))
 
+    def test_json_out(self):
+        """Test json export
+        """
+
+        frmt = get_format('GML')
+        outjson = frmt.json
+        self.assertEqual(outjson['schema'], '')
+        self.assertEqual(outjson['extension'], '.gml')
+        self.assertEqual(outjson['mime_type'], 'application/gml+xml')
+        self.assertEqual(outjson['encoding'], '')
+
+    def test_json_in(self):
+        """Test json import
+        """
+
+        injson = {}
+        injson['schema'] = 'elcepelce'
+        injson['extension'] = '.gml'
+        injson['mime_type'] = 'application/gml+xml'
+        injson['encoding'] = 'utf-8'
+
+        frmt = Format(injson['mime_type'])
+        frmt.json = injson
+
+        self.assertEqual(injson['schema'], frmt.schema)
+        self.assertEqual(injson['extension'], frmt.extension)
+        self.assertEqual(injson['mime_type'], frmt.mime_type)
+        self.assertEqual(injson['encoding'], frmt.encoding)
+
+
 
 
 def load_tests(loader=None, tests=None, pattern=None):
@@ -75,3 +105,4 @@ def load_tests(loader=None, tests=None, pattern=None):
         loader.loadTestsFromTestCase(FormatsTest)
     ]
     return unittest.TestSuite(suite_list)
+
