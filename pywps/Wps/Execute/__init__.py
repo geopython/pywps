@@ -838,9 +838,12 @@ class Execute(Request):
         """
        
         #complexInput needs to be replicated
-        complexInput["encoding"]=wpsInput["encoding"]
-        complexInput["mimetype"]=wpsInput["mimetype"]
-        complexInput["schema"]=wpsInput["schema"]
+        if wpsInput.has_key("encoding"):
+            complexInput["encoding"]=wpsInput["encoding"]
+        if wpsInput.has_key("mimetype"):
+            complexInput["mimetype"]=wpsInput["mimetype"]
+        if wpsInput.has_key("schema"):
+            complexInput["schema"]=wpsInput["schema"]
         complexInput["complexdata"]=wpsInput["value"]
         
         return complexInput
