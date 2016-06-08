@@ -1,10 +1,15 @@
 from flask import Flask
+from pywps.app import Service
 
 app = Flask(__name__)
 
 @app.route('/')
 def hello_world():
 	return "Hello world!"
+
+@app.route('/wps')
+def wps():
+	return Service(processes=[]) 
 
 @app.route('/user/<username>')
 def show_user_profile(username):
