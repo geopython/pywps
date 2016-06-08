@@ -1,11 +1,13 @@
 from flask import Flask
+
 from pywps.app import Service
+
 
 app = Flask(__name__)
 
 @app.route('/')
 def hello_world():
-	return "Hello world!"
+	return "Hello PyWPS!"
 
 @app.route('/wps')
 def wps():
