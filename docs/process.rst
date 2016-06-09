@@ -109,7 +109,7 @@ values are found in the `inputs` dictionary::
 
     @staticmethod
     def _handler(request, response):
-        name = request.inputs['name'].data
+        name = request.inputs['name'][0].data
         response.outputs['output'].data = 'Hello world %s!' % name
         return response
 
@@ -117,16 +117,17 @@ values are found in the `inputs` dictionary::
 Input can be set and read in different ways including as a file, as data
 - like string or numbers - or as a stream::
 
-    request.inputs['file_input'].file
-    request.inputs['data_input'].data
-    request.inputs['stream_input'].stream
+    request.inputs['file_input'][0].file
+    request.inputs['data_input'][0].data
+    request.inputs['stream_input'][0].stream
 
+Because there could be multiple input values with the same identifier, the inputs are accessed with an index.
 For `LiteralInput`, the value is a string. For `ComplexInput`, the value
 is an open file object, with a `mime_type` attribute::
 
     @staticmethod
     def handler(request, response):
-        layer_file = request.inputs['layer'].file
+        layer_file = request.inputs['layer'][0].file
         mime_type = layer_file.mime_type
         bytes = layer_file.read()
         msg = ("You gave me a file of type %s and size %d"
