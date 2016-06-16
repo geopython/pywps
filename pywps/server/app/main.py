@@ -14,7 +14,7 @@ class ServerConnection():
 
 		self.application = Flask(__name__)
 
-		self.db_cnt = postgresql.connect("dbname= 'pywps' user='janrudolf' password='1Straskov-Vodochody12'")
+		self.db_cnt = postgresql.connect("dbname= 'pywps' user='janrudolf' password=''")
 		self.db_cursor = self.db_cnt.cursor()
 
 		self.wps = Service(processes=processes)
