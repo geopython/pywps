@@ -19,6 +19,21 @@ class ServerConnection():
 
 		self.wps = Service(processes=processes)
 
+	def __del__(self):
+		self.db_cnt.close()
+
+	def get_process_pid(process_id):
+		sql_query = "SELECT pid FROM pywps_requests WHERE uuid = '{}';".format(process_id)
+
+		self.db_cursor.execute(sql_query)
+		
+		data = self.db_cursor.fetchone()
+
+		if data:
+			return data[0]
+		
+		return None
+
 	def run(self):
 		@self.application.route('/')
 		def home():
@@ -30,15 +45,9 @@ class ServerConnection():
 
 		@self.application.route('/processes/stop/<process_id>')
 		def wps_process_stop(process_id):
-			sql_query = "SELECT pid FROM pywps_requests WHERE uuid = '{}';".format(process_id)
+			pid = self.get_process_pid(process_id)
 
-			self.db_cursor.execute(sql_query)
-
-			data = self.db_cursor.fetchone()
-
-			if data:
-				pid = data[0]
-
+			if pid:
 				try:
 					process = psutil.Process(pid=pid)
 				except psutil.NoSuchProcess:
@@ -54,15 +63,9 @@ class ServerConnection():
 
 		@self.application.route('/processes/pause/<process_id>')
 		def wps_process_pause(process_id):
-			sql_query = "SELECT pid FROM pywps_requests WHERE uuid = '{}';".format(process_id)
+			pid = self.get_process_pid(process_id)
 
-			self.db_cursor.execute(sql_query)
-
-			data = self.db_cursor.fetchone()
-
-			if data:
-				pid = data[0]
-
+			if pid:
 				try:
 					process = psutil.Process(pid=pid)
 				except psutil.NoSuchProcess:
@@ -78,15 +81,9 @@ class ServerConnection():
 
 		@self.application.route('/processes/resume/<process_id>')
 		def wps_process_resume(process_id):
-			sql_query = "SELECT pid FROM pywps_requests WHERE uuid = '{}';".format(process_id)
+			pid = self.get_process_pid(process_id)
 
-			self.db_cursor.execute(sql_query)
-
-			data = self.db_cursor.fetchone()
-
-			if data:
-				pid = data[0]
-
+			if pid:
 				try:
 					process = psutil.Process(pid=pid)
 				except psutil.NoSuchProcess:
@@ -105,9 +102,6 @@ class ServerConnection():
 			return 'Manage'
 
 		return self.application
-
-	def __del__(self):
-		self.db_cnt.close()
 
 #if __name__ == '__main__':
 #	app.run(host='127.0.0.1', port=5005)
