@@ -11,7 +11,10 @@ import pickle
 import json
 import os
 
-LOGGER = logging.getLogger('PYWPS')
+
+import psycopg2 as postgresql
+
+LOGGER = logging.getLogger(__name__)
 _CONNECTION = None
 
 def log_request(uuid, request):
@@ -24,21 +27,21 @@ def log_request(uuid, request):
         INSERT INTO
             pywps_requests (uuid, pid, operation, version, time_start, identifier)
         VALUES
-            (?, ?, ?, ?, ?, ?)
-    """
-
-    pid = os.getpid()
-    operation = request.operation
-    version = request.version
-    time_start = datetime.datetime.now().isoformat()
-    identifier = _get_identifier(request)
-
-    #LOGGER.debug(str((insert, str(uuid), pid, operation, version, time_start, identifier)))
+            ('{uuid}', {pid}, '{operation}', '{version}', '{time_start}', '{identifier}');
+    """.format(
+        uuid=uuid,
+        pid=os.getpid(),
+        operation=request.operation,
+        version=request.version,
+        time_start=datetime.datetime.now().isoformat(),
+        identifier=_get_identifier(request)
+    )
+    LOGGER.debug(insert)
 
     cur = conn.cursor()
     cur.execute(insert, (str(uuid), pid, operation, version, time_start, identifier))
     conn.commit()
-    close_connection()
+    
 
 def get_running():
     """Returns running processes ids
@@ -47,9 +50,9 @@ def get_running():
     conn = get_connection()
     cur = conn.cursor()
 
-    res = cur.execute('SELECT uuid FROM pywps_requests WHERE percent_done < 100')
+    cur.execute('SELECT uuid FROM pywps_requests WHERE percent_done < 100;')
 
-    return res.fetchall()
+    return cur.fetchall()
 
 
 def get_stored():
@@ -59,9 +62,9 @@ def get_stored():
     conn = get_connection()
     cur = conn.cursor()
 
-    res = cur.execute('SELECT uuid FROM pywps_stored_requests')
+    cur.execute('SELECT uuid FROM pywps_stored_requests;')
 
-    return res.fetchall()
+    return cur.fetchall()
 
 def get_first_stored():
     """Returns running processes ids
@@ -70,9 +73,9 @@ def get_first_stored():
     conn = get_connection()
     cur = conn.cursor()
 
-    res = cur.execute('SELECT uuid,  request FROM pywps_stored_requests LIMIT 1')
+    cur.execute('SELECT uuid,  request FROM pywps_stored_requests LIMIT 1;')
 
-    return res.fetchall()
+    return cur.fetchall()
 
 
 
@@ -96,21 +99,24 @@ def update_response(uuid, response, close=False):
         UPDATE
             pywps_requests
         SET
-            pid = ?,
-            time_end = ?, message=?,
-            percent_done = ?, status=?
+            pid = '{pid}',
+            time_end = '{time_end}', message={message},
+            percent_done = {percent_done}, status={status}
         WHERE
-            uuid = ?
-    """
+            uuid = '{uuid}';
+    """.format(
+        time_end=datetime.datetime.now().isoformat(),
+        pid=os.getpid(),
+        message=message,
+        percent_done=status_percentage,
+        status=status,
+        uuid=uuid
+    )
+    LOGGER.debug(update)
 
-    pid = os.getpid()
-    time_end = datetime.datetime.now().isoformat()
-
-    #LOGGER.debug(update % (pid, time_end, message, status_percentage, status, uuid))
     cur = conn.cursor()
     cur.execute(update, (pid, time_end, message, status_percentage, status, str(uuid)))
     conn.commit()
-    close_connection()
 
 
 def _get_identifier(request):
@@ -131,54 +137,60 @@ def get_connection():
     """Get Connection for database
     """
 
+
     LOGGER.debug('Initializing database connection')
     global _CONNECTION
 
     if _CONNECTION:
         return _CONNECTION
 
-    database = configuration.get_config_value('server', 'logdatabase')
+    #database = configuration.get_config_value('server', 'logdatabase')
 
-    if not database:
-        database = ':memory:'
+    #if not database:
+    #    database = 'file:memdb1?mode=memory&cache=shared'
 
-    connection = sqlite3.connect(database)
-    if check_db_table(connection):
-        if check_db_columns(connection):
-            _CONNECTION = connection
-        else:
-            raise NoApplicableCode("""
-                Columns in the table 'pywps_requests' or 'pywps_stored_requests' in database '%s' are in
-                conflict
-            """ % database)
+    #print(database)
 
-    else:
-        _CONNECTION = sqlite3.connect(database, check_same_thread=False)
-        cursor = _CONNECTION.cursor()
-        createsql = """
-            CREATE TABLE pywps_requests(
-                uuid VARCHAR(255) not null primary key,
-                pid INTEGER not null,
-                operation varchar(30) not null,
-                version varchar(5) not null,
-                time_start text not null,
-                time_end text,
-                identifier text,
-                message text,
-                percent_done float,
-                status varchar(30)
-            )
-        """
-        cursor.execute(createsql)
+    #connection = sqlite3.connect(database)
+    _CONNECTION = postgresql.connect("dbname= 'pywps' user='janrudolf' password='1Straskov-Vodochody12'")
+    
+    #if check_db_table(connection):
+    #    if check_db_columns(connection):
+    #        _CONNECTION = connection
+     #   else:
+     #       raise NoApplicableCode("""
+     #           Columns in the table 'pywps_requests' or 'pywps_stored_requests' in database '%s' are in
+    #            conflict
+    #        """ % database)
 
-        createsql = """
-            CREATE TABLE pywps_stored_requests(
-                uuid VARCHAR(255) not null primary key,
-                request BLOB not null
-            )
-            """
-        cursor.execute(createsql)
-        _CONNECTION.commit()
+    #else:
+    #    _CONNECTION = sqlite3.connect(database, check_same_thread=False)
+    #    print("vytvarim novou")
+   #     cursor = _CONNECTION.cursor()
+    #    createsql = """
+    #        CREATE TABLE pywps_requests(
+   #             uuid VARCHAR(255) not null primary key,
+   #             pid INTEGER not null,
+   #             operation varchar(30) not null,
+   #             version varchar(5) not null,
+   #             time_start text not null,
+   #             time_end text,
+   #             identifier text,
+   #             message text,
+   #             percent_done float,
+   #             status varchar(30)
+   #         );
+   #     """
+   #     cursor.execute(createsql)
+
+    #    createsql = """
+    #        CREATE TABLE pywps_stored_requests(
+    #            uuid VARCHAR(255) not null primary key,
+    #            request BLOB not null
+    #        );
+    #        """
+    #    cursor.execute(createsql)
+    #    _CONNECTION.commit()
 
     return _CONNECTION
 
@@ -195,7 +207,7 @@ def check_db_table(connection):
         FROM
             sqlite_master
         WHERE
-            name='pywps_requests'
+            name='pywps_requests';
     """)
     table = cursor.fetchone()
     if table:
@@ -259,13 +271,16 @@ def store_process(uuid, request):
         INSERT INTO
             pywps_stored_requests (uuid, request)
         VALUES
-            (?, ?)
-    """
+            ('{uuid}', '{request}');
+    """.format(
+        uuid=uuid,
+        request=request.json
+    )
 
     cur = conn.cursor()
     cur.execute(insert, (str(uuid), request.json))
     conn.commit()
-    close_connection()
+    
 
 def remove_stored(uuid):
     """Remove given request from stored requests
@@ -275,9 +290,12 @@ def remove_stored(uuid):
     insert = """
         DELETE FROM
             pywps_stored_requests
-        WHERE uuid = ?
-    """
+        WHERE uuid = '{uuid}';
+    """.format(
+        uuid=uuid
+    )
+
     cur = conn.cursor()
     cur.execute(insert, (str(uuid)))
     conn.commit()
-    close_connection()
+
