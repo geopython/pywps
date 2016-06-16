@@ -15,23 +15,23 @@ class ServerConnection():
 		def home():
 			return "Home PyWPS"
 
-		@self.application.route('/wps')
+		@self.application.route('/wps', methods=['POST', 'GET'])
 		def wps():
 			return self.wps
 
-		@self.application.route('/process/stop/<process_id>')
+		@self.application.route('/processes/stop/<process_id>')
 		def wps_process_stop(process_id):
 			return 'Proces stop %s' % process_id
 
-		@self.application.route('/process/pause/<process_id>')
+		@self.application.route('/processes/pause/<process_id>')
 		def wps_process_pause(process_id):
 			return 'Process pause %s' % process_id
 
-		@self.application.route('/process/resume/<process_id>')
+		@self.application.route('/processes/resume/<process_id>')
 		def wps_process_resume(process_id):
 			return 'Process resume %s' % process_id
 
-		@self.application.route('/manage')
+		@self.application.route('/manage') # or /processes
 		def wps_manage():
 			return 'Manage'
 
