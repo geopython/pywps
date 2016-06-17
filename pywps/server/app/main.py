@@ -4,20 +4,20 @@ import psycopg2 as postgresql
 from flask import Flask
 
 from pywps.app import Service
-from pywps import dblog
-
-from pywps import configuration
+from pywps import dblog, configuration
 
 
 class ServerConnection():
-	def __init__(self, processes=list()):
-
+	def __init__(self, processes=None, configuration_file=None):
+		configuration.load_configuration(configuration_file)
+		self.processes = processes
+		
 		self.application = Flask(__name__)
 
 		self.db_connect = postgresql.connect("dbname= 'pywps' user='janrudolf' password=''")
 		self.db_cursor = self.db_connect.cursor()
 
-		self.wps = Service(processes=processes)
+		self.wps_service = Service(processes=processes)
 
 	def __del__(self):
 		self.db_connect.close()
@@ -36,10 +36,13 @@ class ServerConnection():
 				process = psutil.Process(pid=pid)
 			except psutil.NoSuchProcess:
 				print("Error: No such process with {}".format(pid))
+				return None
 			except psutil.ZombieProcess:
 				print("Error: Zombie process")
+				return None
 			except psutil.AccessDenied:
 				print("Error: Access denied")
+				return None
 
 			return process
 		
@@ -47,12 +50,12 @@ class ServerConnection():
 
 	def run(self):
 		@self.application.route('/')
-		def home():
+		def wps_home():
 			return "Home PyWPS"
 
 		@self.application.route('/wps', methods=['POST', 'GET'])
 		def wps():
-			return self.wps
+			return self.wps_service
 
 		@self.application.route('/processes/stop/<uuid>')
 		def wps_process_stop(uuid):
