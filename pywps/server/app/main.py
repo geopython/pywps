@@ -1,20 +1,23 @@
+import flask
 import psutil
 import psycopg2 as postgresql
 
-from flask import Flask
-
 from pywps.app import Service
-from pywps import dblog, configuration
+from pywps import configuration
 
 
 class ServerConnection():
 	def __init__(self, processes=None, configuration_file=None):
 		configuration.load_configuration(configuration_file)
 		self.processes = processes
-		
-		self.application = Flask(__name__)
 
-		self.db_connect = postgresql.connect("dbname= 'pywps' user='janrudolf' password=''")
+		self.application = flask.Flask(__name__)
+
+		db_user = configuration.get_config_value('server', 'dbuser')
+		db_password = configuration.get_config_value('server', 'dbpassword')
+		db_name = configuration.get_config_value('server', 'dbname')
+
+		self.db_connect = postgresql.connect("dbname= '{}' user='{}' password='{}'".format(db_name, db_user, db_password))
 		self.db_cursor = self.db_connect.cursor()
 
 		self.wps_service = Service(processes=processes)
@@ -22,15 +25,18 @@ class ServerConnection():
 	def __del__(self):
 		self.db_connect.close()
 
-	def get_process_by_uuid(self, uuid):
-		sql_query = "SELECT pid FROM pywps_requests WHERE uuid = '{}';".format(uuid)
+	def _get_process_data_from_db_by_uuid(self, uuid):
+		sql_query = "SELECT uuid, pid, operation, version, time_start, time_end, identifier, message, percent_done, status FROM pywps_requests WHERE uuid = '{}';".format(uuid)
 
 		self.db_cursor.execute(sql_query)
-		
-		data = self.db_cursor.fetchone()
+
+		return self.db_cursor.fetchone()
+
+	def _get_process_by_uuid(self, uuid):
+		data = self._get_process_data_from_db_by_uuid(uuid)
 
 		if data:
-			pid = data[0]
+			pid = data[1]
 
 			try:
 				process = psutil.Process(pid=pid)
@@ -59,42 +65,69 @@ class ServerConnection():
 
 		@self.application.route('/processes/stop/<uuid>')
 		def wps_process_stop(uuid):
-			process = self.get_process_by_uuid(uuid)
+			process = self._get_process_by_uuid(uuid)
 
 			if process:
 				process.terminate()
 			else:
 				return 'No known process with uuid=%s' % uuid
 
-			return 'Proces killed - %s' % uuid
+			data = self._get_process_data_from_db_by_uuid(uuid)
+
+			response = {
+				'uuid': data[0],
+				'pid': data[1],
+				'time_start': data[4],
+				'identifier': data[6],
+				'status': 'stopped' 
+			}
+
+			return flask.jsonify(response)
 
 		@self.application.route('/processes/pause/<uuid>')
 		def wps_process_pause(uuid):
-			process = self.get_process_by_uuid(uuid)
+			process = self._get_process_by_uuid(uuid)
 
 			if process:
 				process.suspend()
 			else:
 				return 'No known process with uuid=%s' % uuid
 
-			return 'Process suspend - %s' % uuid
+			data = self._get_process_data_from_db_by_uuid(uuid)
+
+			response = {
+				'uuid': data[0],
+				'pid': data[1],
+				'time_start': data[4],
+				'identifier': data[6],
+				'status': 'paused' 
+			}
+
+			return flask.jsonify(response)
 
 		@self.application.route('/processes/resume/<uuid>')
 		def wps_process_resume(uuid):
-			process = self.get_process_by_uuid(uuid)
+			process = self._get_process_by_uuid(uuid)
 
 			if process:
 				process.resume()
 			else:
 				return 'No known process with uuid=%s' % uuid
 
-			return 'Process resume - %s' % uuid
+			data = self._get_process_data_from_db_by_uuid(uuid)
 
-		@self.application.route('/manage') # or /processes
-		def wps_manage():
-			return 'Manage'
+			response = {
+				'uuid': data[0],
+				'pid': data[1],
+				'time_start': data[4],
+				'identifier': data[6],
+				'status': 'resumed' 
+			}
+
+			return flask.jsonify(response)
+
+		@self.application.route('/processes')
+		def wps_processes():
+			return 'Processes'
 
 		return self.application
-
-#if __name__ == '__main__':
-#	app.run(host='127.0.0.1', port=5005)

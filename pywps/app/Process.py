@@ -78,6 +78,8 @@ class Process(object):
         self.grass_location = grass_location
 
 
+        self.wps_response = WPSResponse.NO_STATUS
+
         if store_supported:
             self.store_supported = 'true'
         else:
@@ -284,7 +286,6 @@ class Process(object):
             self._set_uuid(uuid)
             self._run_async(new_wps_request, new_wps_response)
             dblog.remove_stored(uuid)
-
 
         return wps_response
 
