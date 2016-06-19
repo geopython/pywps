@@ -151,7 +151,7 @@ def get_connection():
 
     connection = postgresql.connect("dbname='{}' user='{}' password='{}'".format(db_name, db_user, db_password))
     
-    if True:#check_db_table(connection):
+    if check_db_table(connection):
         if True:#check_db_columns(connection):
             _CONNECTION = connection
         else:
@@ -196,21 +196,16 @@ def check_db_table(connection):
     """
 
     cursor = connection.cursor()
-    cursor.execute("""
-        SELECT
-            name
-        FROM
-            sqlite_master
-        WHERE
-            name='pywps_requests';
-    """)
-    table = cursor.fetchone()
-    if table:
-        LOGGER.debug('pywps_requests table exists')
-        return True
-    else:
+
+    try:
+        cursor.execute("select * from pywps_requests;")
+    
+    except postgresql.ProgrammingError:
         LOGGER.debug('pywps_requests table does not exist')
         return False
+
+    LOGGER.debug('pywps_requests table exists')
+    return True
 
 
 def check_db_columns(connection):
