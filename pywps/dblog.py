@@ -3,16 +3,16 @@ Implementation of logging for PyWPS-4
 """
 
 import logging
-from pywps import configuration
-from pywps.exceptions import NoApplicableCode
 import sqlite3
 import datetime
 import pickle
 import json
 import os
-
-
 import psycopg2 as postgresql
+
+from pywps import configuration
+from pywps.exceptions import NoApplicableCode
+
 
 LOGGER = logging.getLogger(__name__)
 _CONNECTION = None
@@ -144,53 +144,48 @@ def get_connection():
     if _CONNECTION:
         return _CONNECTION
 
-    #database = configuration.get_config_value('server', 'logdatabase')
 
-    #if not database:
-    #    database = 'file:memdb1?mode=memory&cache=shared'
+    db_user = configuration.get_config_value('server', 'dbuser')
+    db_password = configuration.get_config_value('server', 'dbpassword')
+    db_name = configuration.get_config_value('server', 'dbname')
 
-    #print(database)
-
-    #connection = sqlite3.connect(database)
-    _CONNECTION = postgresql.connect("dbname= 'pywps' user='janrudolf' password='1Straskov-Vodochody12'")
+    connection = postgresql.connect("dbname='{}' user='{}' password='{}'".format(db_name, db_user, db_password))
     
-    #if check_db_table(connection):
-    #    if check_db_columns(connection):
-    #        _CONNECTION = connection
-     #   else:
-     #       raise NoApplicableCode("""
-     #           Columns in the table 'pywps_requests' or 'pywps_stored_requests' in database '%s' are in
-    #            conflict
-    #        """ % database)
+    if True:#check_db_table(connection):
+        if True:#check_db_columns(connection):
+            _CONNECTION = connection
+        else:
+            raise NoApplicableCode("""
+                Columns in the table 'pywps_requests' or 'pywps_stored_requests' in database '%s' are in conflict
+                """ % database)
+    else:
+    
+        print("vytvarim novou")
+        cursor = _CONNECTION.cursor()
+        createsql = """
+            CREATE TABLE pywps_requests(
+                uuid VARCHAR(255) not null primary key,
+                pid INTEGER not null,
+                operation varchar(30) not null,
+                version varchar(5) not null,
+                time_start text not null,
+                time_end text,
+                identifier text,
+                message text,
+                percent_done float,
+                status varchar(30)
+            );
+        """
+        cursor.execute(createsql)
 
-    #else:
-    #    _CONNECTION = sqlite3.connect(database, check_same_thread=False)
-    #    print("vytvarim novou")
-   #     cursor = _CONNECTION.cursor()
-    #    createsql = """
-    #        CREATE TABLE pywps_requests(
-   #             uuid VARCHAR(255) not null primary key,
-   #             pid INTEGER not null,
-   #             operation varchar(30) not null,
-   #             version varchar(5) not null,
-   #             time_start text not null,
-   #             time_end text,
-   #             identifier text,
-   #             message text,
-   #             percent_done float,
-   #             status varchar(30)
-   #         );
-   #     """
-   #     cursor.execute(createsql)
-
-    #    createsql = """
-    #        CREATE TABLE pywps_stored_requests(
-    #            uuid VARCHAR(255) not null primary key,
-    #            request BLOB not null
-    #        );
-    #        """
-    #    cursor.execute(createsql)
-    #    _CONNECTION.commit()
+        createsql = """
+            CREATE TABLE pywps_stored_requests(
+                uuid VARCHAR(255) not null primary key,
+                request BYTEA  not null
+            );
+            """
+        cursor.execute(createsql)
+        _CONNECTION.commit()
 
     return _CONNECTION
 
