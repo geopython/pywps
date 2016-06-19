@@ -152,7 +152,7 @@ def get_connection():
     connection = postgresql.connect("dbname='{}' user='{}' password='{}'".format(db_name, db_user, db_password))
     
     if check_db_table(connection):
-        if True:#check_db_columns(connection):
+        if check_db_columns(connection):
             _CONNECTION = connection
         else:
             raise NoApplicableCode("""
@@ -219,19 +219,14 @@ def check_db_columns(connection):
 
     def _check_table(name, needed_columns):
         cur = connection.cursor()
-        cur.execute("""PRAGMA table_info('%s')""" % name)
-        metas = cur.fetchall()
-        columns = []
-        for column in metas:
-            columns.append(column[1])
+    
+        for column in needed_columns:
+            try:
+                cur.execute('select {} from {}'.format(column, name))
+            except postgresql.ProgrammingError:
+                return False
 
-        needed_columns.sort()
-        columns.sort()
-
-        if columns == needed_columns:
-            return True
-        else:
-            return False
+        return True
 
     name = 'pywps_requests'
     needed_columns = ['uuid', 'pid', 'operation', 'version', 'time_start',

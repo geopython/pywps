@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="robots" content="index,follow">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <title>{% block HeadTitle %}{% endblock %} - PyWPS web administration</title>
+
+        <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-3.3.6/css/bootstrap.min.css')}}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/design.css')}}"/>
+    </head>
+    <body>
+    	<div class="container-fluid">
+    		<header class="row">
+    			<div class="col-xs-2" id="header-left">
+                    <a href="/" title="">
+                        <img src="{{ url_for('static', filename='img/pywps_logo.png')}}">
+                    </a>
+                </div>
+    			<h1 class="col-xs-10">
+    				<span class="underline"><a href="/" title="">Web administration &amp; process management</a></span>
+    				<br>
+    				<span class="font-size-80">{% block H1Title %}{% endblock %}</span>
+    			</h1>
+    		</header>
+    		<div class="row margin-top-20">
+    			<div class="col-xs-2">
+    				<ul>
+    					<li><a href="/">Home</a></li>
+    					<li><a href="/wps">WPS</a></li>
+    					<li><a href="/processes">Processes</a></li>
+    				</ul>
+    			</div>
+    			<div class="col-xs-10">
+    				{% block Content %}{% endblock %}
+    			</div>
+    		</div>
+    	</div>
+    </body>
+</html>

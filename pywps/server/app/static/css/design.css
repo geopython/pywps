@@ -1,0 +1,30 @@
+.font-size-80 {
+	font-size: 80%;
+}
+
+.margin-top-20 {
+	margin-top: 20px;
+}
+
+.underline {
+	text-decoration: underline;
+}
+
+header {
+	margin-top: 10px;
+}
+
+ul li {
+	line-height: 1.8;
+}
+
+#header-left img {
+	max-width: 100%;
+}
+
+h1 {
+	padding-top: 0px;
+	margin-top: 4px;
+	line-height: 1.3;
+}
+

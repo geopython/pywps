@@ -12,7 +12,7 @@ class ServerConnection():
 		configuration.load_configuration(configuration_file)
 
 		#assing Flask application handler
-		self.application = flask.Flask(__name__)
+		self.application = flask.Flask(__name__, template_folder='templates')
 
 		#load DB entries from the configuration files
 		db_user = configuration.get_config_value('server', 'dbuser')
@@ -56,15 +56,15 @@ class ServerConnection():
 
 	def run(self):
 		@self.application.route('/')
-		def wps_home():
-			return "Home PyWPS"
+		def pywps_index():
+			return flask.render_template('index.html')
 
 		@self.application.route('/wps', methods=['POST', 'GET'])
-		def wps():
+		def pywps_wps():
 			return self.wps_service
 
 		@self.application.route('/processes/stop/<uuid>')
-		def wps_process_stop(uuid):
+		def pywps_process_stop(uuid):
 			process = self._get_process_by_uuid(uuid)
 
 			if process:
@@ -91,7 +91,7 @@ class ServerConnection():
 			return flask.jsonify(response)
 
 		@self.application.route('/processes/pause/<uuid>')
-		def wps_process_pause(uuid):
+		def pywps_process_pause(uuid):
 			process = self._get_process_by_uuid(uuid)
 
 			if process:
@@ -118,7 +118,7 @@ class ServerConnection():
 			return flask.jsonify(response)
 
 		@self.application.route('/processes/resume/<uuid>')
-		def wps_process_resume(uuid):
+		def pywps_process_resume(uuid):
 			process = self._get_process_by_uuid(uuid)
 
 			if process:
@@ -146,6 +146,6 @@ class ServerConnection():
 
 		@self.application.route('/processes')
 		def wps_processes():
-			return 'Processes [to be added]'
+			return flask.render_template('processes.html')
 
 		return self.application
