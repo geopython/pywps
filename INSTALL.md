@@ -30,7 +30,7 @@ Or in alternative install it manually:
 Install demo service
 --------------------
 
-    $ git clone git@github.com:ldesousa/pywps-4-demo.git pywps-4-demo
+    $ git clone https://github.com/ldesousa/pywps-4-demo.git pywps-4-demo
     
 
 Run demo
