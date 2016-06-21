@@ -90,7 +90,7 @@ def load_configuration(cfgfiles=None):
     config.set('server', 'encoding', 'utf-8')
     config.set('server', 'language', 'en-US')
     config.set('server', 'url', 'http://localhost/wps')
-    config.set('server', 'maxoperations', '30')
+    config.set('server', 'maxprocesses', '30')
     config.set('server', 'maxsingleinputsize', '1mb')
     config.set('server', 'maxrequestsize', '3mb')
     config.set('server', 'temp_path', tempfile.gettempdir())

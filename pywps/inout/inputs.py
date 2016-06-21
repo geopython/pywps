@@ -362,7 +362,7 @@ class LiteralInput(basic.LiteralInput):
         """Return Data node
         """
         doc = WPS.Data()
-        literal_doc = WPS.LiteralData(self.data)
+        literal_doc = WPS.LiteralData(str(self.data))
 
         if self.data_type:
             literal_doc.attrib['dataType'] = self.data_type
