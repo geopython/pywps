@@ -40,7 +40,7 @@ import logging
 from pywps import __version__
 
 logging.basicConfig()
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger('PYWPS')
 
 class NoApplicableCode(HTTPException):
     """No applicable code exception implementation

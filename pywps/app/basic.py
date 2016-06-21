@@ -3,7 +3,7 @@ import lxml
 from werkzeug.wrappers import Response
 from pywps import __version__, OWS, NAMESPACES, OGCUNIT
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger('PYWPS')
 
 def xpath_ns(el, path):
     return el.xpath(path, namespaces=NAMESPACES)

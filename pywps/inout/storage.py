@@ -5,7 +5,7 @@ from pywps._compat import urljoin
 from pywps.exceptions import NotEnoughStorage, NoApplicableCode
 from pywps import configuration as config
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger('PYWPS')
 
 class STORE_TYPE:
     PATH = 0

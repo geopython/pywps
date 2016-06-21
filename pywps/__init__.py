@@ -34,7 +34,7 @@ from lxml.builder import ElementMaker
 
 __version__ = '4.0.0-alpha2'
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger('PYWPS')
 
 LOGGER.debug('setting core variables')
 

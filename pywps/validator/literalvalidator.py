@@ -31,7 +31,7 @@ from pywps.validator.mode import MODE
 from pywps.validator.allowed_value import ALLOWEDVALUETYPE, RANGECLOSURETYPE
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger('PYWPS')
 
 def validate_anyvalue(data_input, mode):
     """Just placeholder, anyvalue is always valid
