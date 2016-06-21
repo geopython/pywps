@@ -11,7 +11,7 @@ import pickle
 import json
 import os
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger('PYWPS')
 _CONNECTION = None
 
 def log_request(uuid, request):
@@ -24,18 +24,19 @@ def log_request(uuid, request):
         INSERT INTO
             pywps_requests (uuid, pid, operation, version, time_start, identifier)
         VALUES
-            ('{uuid}', {pid}, '{operation}', '{version}', '{time_start}', '{identifier}')
-    """.format(
-        uuid=uuid,
-        pid=os.getpid(),
-        operation=request.operation,
-        version=request.version,
-        time_start=datetime.datetime.now().isoformat(),
-        identifier=_get_identifier(request)
-    )
-    LOGGER.debug(insert)
+            (?, ?, ?, ?, ?, ?)
+    """
+
+    pid = os.getpid()
+    operation = request.operation
+    version = request.version
+    time_start = datetime.datetime.now().isoformat()
+    identifier = _get_identifier(request)
+
+    #LOGGER.debug(str((insert, str(uuid), pid, operation, version, time_start, identifier)))
+
     cur = conn.cursor()
-    cur.execute(insert)
+    cur.execute(insert, (str(uuid), pid, operation, version, time_start, identifier))
     conn.commit()
     close_connection()
 
@@ -85,32 +86,29 @@ def update_response(uuid, response, close=False):
     status = 'Null'
 
     if hasattr(response, 'message'):
-        message = "'%s'" % response.message
+        message = response.message
     if hasattr(response, 'status_percentage'):
         status_percentage = response.status_percentage
     if hasattr(response, 'status'):
-        status = "'%s'" % response.status
+        status = response.status
 
     update = """
         UPDATE
             pywps_requests
         SET
-            pid = {pid},
-            time_end = '{time_end}', message={message},
-            percent_done = {percent_done}, status={status}
+            pid = ?,
+            time_end = ?, message=?,
+            percent_done = ?, status=?
         WHERE
-            uuid = '{uuid}'
-    """.format(
-        time_end=datetime.datetime.now().isoformat(),
-        pid=os.getpid(),
-        message=message,
-        percent_done=status_percentage,
-        status=status,
-        uuid=uuid
-    )
-    LOGGER.debug(update)
+            uuid = ?
+    """
+
+    pid = os.getpid()
+    time_end = datetime.datetime.now().isoformat()
+
+    #LOGGER.debug(update % (pid, time_end, message, status_percentage, status, uuid))
     cur = conn.cursor()
-    cur.execute(update)
+    cur.execute(update, (pid, time_end, message, status_percentage, status, str(uuid)))
     conn.commit()
     close_connection()
 
@@ -261,13 +259,11 @@ def store_process(uuid, request):
         INSERT INTO
             pywps_stored_requests (uuid, request)
         VALUES
-            ('{uuid}', '{request}')
-    """.format(
-        uuid=uuid,
-        request=request.json
-    )
+            (?, ?)
+    """
+
     cur = conn.cursor()
-    cur.execute(insert)
+    cur.execute(insert, (str(uuid), request.json))
     conn.commit()
     close_connection()
 
@@ -279,11 +275,9 @@ def remove_stored(uuid):
     insert = """
         DELETE FROM
             pywps_stored_requests
-        WHERE uuid = '{uuid}'
-    """.format(
-        uuid=uuid
-    )
+        WHERE uuid = ?
+    """
     cur = conn.cursor()
-    cur.execute(insert)
+    cur.execute(insert, (str(uuid)))
     conn.commit()
     close_connection()
