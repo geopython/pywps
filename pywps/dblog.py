@@ -161,7 +161,7 @@ def get_connection():
     else:
     
         print("vytvarim novou")
-        cursor = _CONNECTION.cursor()
+        cursor = connection.cursor()
         createsql = """
             CREATE TABLE pywps_requests(
                 uuid VARCHAR(255) not null primary key,
@@ -185,9 +185,9 @@ def get_connection():
             );
             """
         cursor.execute(createsql)
-        _CONNECTION.commit()
+        connection.commit()
 
-    return _CONNECTION
+    return connection
 
 def check_db_table(connection):
     """Check for existing pywps_requests table in the datase
