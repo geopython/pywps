@@ -13,7 +13,6 @@ psycopg2==2.6.1
 pyproj==1.9.5.1
 python-dateutil==2.5.3
 pytz==2016.4
--e git+https://github.com/jan-rudolf/pywps@4d1cb081233e49590d8f049115d4376bd7e643d2#egg=pywps
 requests==2.10.0
 six==1.10.0
 Werkzeug==0.11.10
