@@ -136,7 +136,7 @@ def _get_identifier(request):
 def get_connection():
     """Get Connection for database
     """
-
+    print("jsem v connection")
 
     LOGGER.debug('Initializing database connection')
     global _CONNECTION
@@ -154,37 +154,25 @@ def get_connection():
     if check_db_table(connection):
         if check_db_columns(connection):
             _CONNECTION = connection
-        else:
+        else
             raise NoApplicableCode("""
                 Columns in the table 'pywps_requests' or 'pywps_stored_requests' in database '%s' are in conflict
-                """ % database)
+                """ % dbname)
     else:
     
         print("vytvarim novou")
         cursor = connection.cursor()
-        createsql = """
-            CREATE TABLE pywps_requests(
-                uuid VARCHAR(255) not null primary key,
-                pid INTEGER not null,
-                operation varchar(30) not null,
-                version varchar(5) not null,
-                time_start text not null,
-                time_end text,
-                identifier text,
-                message text,
-                percent_done float,
-                status varchar(30)
-            );
-        """
-        cursor.execute(createsql)
+        createsql = "CREATE TABLE pywps_requests(uuid VARCHAR(255) not null primary key, pid INTEGER not null, operation varchar(30) not null, version varchar(5) not null, time_start text not null, time_end text, identifier text, message text, percent_done float, status varchar(30));"
+        try:
+            cursor.execute(createsql)
+        except Exception, e:
+            print(e.pgerror)
 
-        createsql = """
-            CREATE TABLE pywps_stored_requests(
-                uuid VARCHAR(255) not null primary key,
-                request BYTEA  not null
-            );
-            """
-        cursor.execute(createsql)
+        createsql = "CREATE TABLE pywps_stored_requests(uuid VARCHAR(255) not null primary key, request BYTEA  not null);"
+        try:
+            cursor.execute(createsql)
+        except Exception, e:
+            print(e.pgerror)
         connection.commit()
 
     return connection
