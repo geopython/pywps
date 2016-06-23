@@ -154,7 +154,7 @@ def get_connection():
     if check_db_table(connection):
         if check_db_columns(connection):
             _CONNECTION = connection
-        else
+        else:
             raise NoApplicableCode("""
                 Columns in the table 'pywps_requests' or 'pywps_stored_requests' in database '%s' are in conflict
                 """ % dbname)
