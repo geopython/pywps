@@ -34,7 +34,7 @@ from pywps.app.WPSResponse import WPSResponse
 from pywps.app.WPSRequest import WPSRequest
 import pywps.configuration as config
 from pywps.exceptions import StorageNotSupported, OperationNotSupported, \
-    ServerBusy
+    ServerBusy, NoApplicableCode
 
 
 LOGGER = logging.getLogger(__name__)
@@ -224,7 +224,7 @@ class Process(object):
         if stored < maxprocesses:
             dblog.store_process(self.uuid, wps_request)
         else:
-            raise ServerBusy('Maximum number of paralel running processes reached. Please try later.')
+            raise ServerBusy('Maximum number of parallel running processes reached. Please try later.')
 
         return wps_response
 
@@ -233,7 +233,7 @@ class Process(object):
             wps_response = self.handler(wps_request, wps_response)
 
             # if status not yet set to 100% then do it after execution was successful
-            if wps_response.status_percentage != 100:
+            if (not wps_response.status_percentage) or (wps_response.status_percentage != 100):
                 LOGGER.debug('Updating process status to 100% if everything went correctly')
                 wps_response.update_status('PyWPS Process finished', 100)
         except Exception as e:
@@ -259,7 +259,11 @@ class Process(object):
             # update the process status to display process failed
             msg = 'Process error: %s.%s Line %i %s' % (fname, method_name, exc_tb.tb_lineno, e)
             LOGGER.error(msg)
-            wps_response.update_status(msg, -1)
+            
+            if not wps_response:
+                raise NoApplicableCode('Response is empty. Make sure the _handler method is returning a valid object.')
+            else:
+                wps_response.update_status(msg, -1)
 
         # tr
         stored_requests = dblog.get_first_stored()
