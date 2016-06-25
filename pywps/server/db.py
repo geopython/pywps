@@ -1,4 +1,5 @@
 import psycopg2 as postgresql
+import sqlite3 as sqlite
 
 
 class DBPostgreSQL():
@@ -17,3 +18,5 @@ class DBPostgreSQL():
 
 	def fetchall(self):
 		return self.cursor.fetchall()
+
+		

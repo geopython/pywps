@@ -1,5 +1,6 @@
 click==6.6
 Flask==0.11.1
+Flask-SQLAlchemy==2.1
 flufl.enum==4.1
 functools32==3.2.3.post2
 itsdangerous==0.24

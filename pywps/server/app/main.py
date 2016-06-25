@@ -1,36 +1,34 @@
 import flask
 import psutil
 
+from flask_sqlalchemy import SQLAlchemy
+
 from pywps.app import Service
-from pywps.server import db
 from pywps import configuration
+
+import models
+
+
+application = flask.Flask(__name__, template_folder='templates')
+application.config['SQLALCHEMY_DATABASE_URI'] = r'postgresql://pywps_db_user@localhost/pywps'
+application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(application)
 
 
 class ServerConnection():
 	def __init__(self, processes=None, configuration_file=None):
 		#load configuration file
-		configuration.load_configuration(configuration_file)
+		#configuration.load_configuration(configuration_file)
 
 		#assing Flask application handler
-		self.application = flask.Flask(__name__, template_folder='templates')
-
-		#load DB entries from the configuration files
-		db_user = configuration.get_config_value('server', 'dbuser')
-		db_password = configuration.get_config_value('server', 'dbpassword')
-		db_name = configuration.get_config_value('server', 'dbname')
-
-		#DB connect
-		self.db = db.DBPostgreSQL(db_name, db_user, db_password)
+		self.application = application
 
 		#WPS Service
 		self.wps_service = Service(processes=processes)
 
 	def _get_process_data_from_db_by_uuid(self, uuid):
-		sql_query = "SELECT uuid, pid, operation, version, time_start, time_end, identifier, message, percent_done, status FROM pywps_requests WHERE uuid = '{}';".format(uuid)
-
-		self.db.execute(sql_query)
-
-		return self.db.fetchone()
+		return models.Request.query.filter_by(uuid=uuid).first()
 
 	def _get_process_by_uuid(self, uuid):
 		data = self._get_process_data_from_db_by_uuid(uuid)
@@ -55,7 +53,7 @@ class ServerConnection():
 		return None
 
 	def run(self):
-		@self.application.route('/')
+		@self.application.route('/', methods=['GET', 'POST'])
 		def pywps_index():
 			return flask.render_template('index.html')
 
@@ -146,6 +144,7 @@ class ServerConnection():
 
 		@self.application.route('/processes')
 		def wps_processes():
-			return flask.render_template('processes.html')
+
+			return flask.render_template('processes.html', )
 
 		return self.application
