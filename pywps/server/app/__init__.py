@@ -1,15 +1,13 @@
 import flask
-import flask_sqlalchemy
 
-from pywps.server.app.main import MyFlask
+from flask_sqlalchemy import SQLAlchemy
+
+from pywps.server.app.pywps_flask import PyWPSFlask
 
 
-application = MyFlask(__name__)
-application.config['SQLALCHEMY_DATABASE_URI'] = r'postgresql://pywps_db_user@localhost/pywps'
-application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+application = PyWPSFlask(__name__)
 
-db = flask_sqlalchemy.SQLAlchemy(application)
+db = SQLAlchemy(application)
 
 
 from pywps.server.app import views, models
-
