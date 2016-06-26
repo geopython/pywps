@@ -1,4 +1,5 @@
-from main import db
+from pywps.server.app import db
+
 
 class Request(db.Model):
 	uuid = db.Column(db.String(length=255), nullable=False, primary_key=True)
@@ -23,6 +24,7 @@ class Request(db.Model):
 		self.message = message
 		self.percent_done = percent_done
 		self.status = status
+
 
 class StoredRequest(db.Model):
 	uuid = db.Column(db.String(length=255), nullable=False, primary_key=True)
