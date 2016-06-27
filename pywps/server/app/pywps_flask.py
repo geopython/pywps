@@ -1,6 +1,5 @@
 from flask import Flask
 
-from pywps.app import Service
 from pywps import configuration
 
 
@@ -17,6 +16,7 @@ class PyWPSFlask(Flask):
 		#store processes in method attribute
 		self.pywps_processes = processes
 		#WPS service
+		from pywps import Service
 		self.pywps_wps_service = Service(processes=processes)
 		#set database connection
 		self.config['SQLALCHEMY_DATABASE_URI'] = configuration.get_config_value('server', 'SQLAlchemyDatabaseUri')

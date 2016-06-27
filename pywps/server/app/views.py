@@ -2,7 +2,6 @@ import flask
 import psutil
 
 from pywps.server.app import application
-from pywps.app import Service
 from pywps import configuration
 
 import models

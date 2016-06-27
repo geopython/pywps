@@ -6,7 +6,7 @@ import datetime
 import json
 import os
 
-#from pywps.server.app import db
+from pywps.server.app import db
 from pywps.server.app import models
 
 
