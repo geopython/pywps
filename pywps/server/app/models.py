@@ -13,7 +13,7 @@ class Request(db.Model):
 	percent_done = db.Column(db.Float)
 	status = db.Column(db.String(length=30))
 
-	def __init__(uuid, pid, operation, version, time_start, time_end, identifier, message, percent_done, status):
+	def __init__(self, uuid, pid=None, operation=None, version=None, time_start=None, time_end=None, identifier=None, message=None, percent_done=None, status=None):
 		self.uuid = uuid
 		self.pid = pid
 		self.operation = operation
@@ -30,6 +30,6 @@ class StoredRequest(db.Model):
 	uuid = db.Column(db.String(length=255), nullable=False, primary_key=True)
 	request = db.Column(db.LargeBinary)
 
-	def __init__(uuid, request):
+	def __init__(self, uuid, request=None):
 		self.uuid = uuid
 		self.request = request

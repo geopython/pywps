@@ -17,7 +17,14 @@ def log_request(uuid, request):
     """Write OGC WPS request (only the necessary parts) to database logging
     system
     """
-    r = models.Request(uuid=uuid, pid=os.getpid(), operation=request.operation, version=request.version, time_start=datetime.datetime.now().isoformat(), identifier=_get_identifier(request))
+    r = models.Request(
+        uuid=uuid, 
+        pid=os.getpid(), 
+        operation=request.operation, 
+        version=request.version, 
+        time_start=datetime.datetime.now().isoformat(), 
+        identifier=_get_identifier(request)
+    )
 
     db.session.add(r)
     db.session.commit()
@@ -114,14 +121,15 @@ def update_response(uuid, response, close=False):
     #cur = conn.cursor()
     #cur.execute(update)
     #conn.commit()
-    r = models.Request.query.get(uuid)
-    r.time_end = datetime.datetime.now().isoformat()
-    r.pid = os.getpid()
-    r.message = message
-    r.percent_done = status_percentage
-    r.status = status
+    r = models.Request.query.filter(models.Request.uuid == uuid)
+    if r:
+        r.time_end = datetime.datetime.now().isoformat()
+        r.pid = os.getpid()
+        r.message = message
+        r.percent_done = status_percentage
+        r.status = status
 
-    db.session.commit()
+        db.session.commit()
 
 
 def _get_identifier(request):
