@@ -57,13 +57,28 @@ def get_running():
     #cur.execute('SELECT uuid FROM pywps_requests WHERE percent_done < 100;')
 
     #return cur.fetchall()
-    return models.Request.query.filter_by(Request.percent_done < 100)
+    result = []
+
+    data = models.Request.query.filter(models.Request.percent_done < 100)
+
+    for entry in data:
+        result.append(entry)
+
+    return result
 
 
 def get_stored():
     """Returns running processes ids
     """
-    return models.StoredRequest.query.with_entities(StoredRequest.uuid)
+    result = []
+
+    data = models.StoredRequest.query.with_entities(models.StoredRequest.uuid)
+
+    for entry in data:
+        result.append(entry)
+
+    return result
+
     #conn = get_connection()
     #cur = conn.cursor()
 

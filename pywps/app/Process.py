@@ -277,8 +277,8 @@ class Process(object):
 
         # tr
         stored_requests = dblog.get_first_stored()
-        if len(stored_requests) > 0:
-            (uuid, request_json) = stored_requests[0]
+        if stored_requests:
+            (uuid, request_json) = stored_requests
             new_wps_request = WPSRequest()
             new_wps_request.json = json.loads(request_json)
             new_wps_response = WPSResponse(self, new_wps_request, uuid)
