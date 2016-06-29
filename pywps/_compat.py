@@ -30,7 +30,7 @@
 import logging
 import sys
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger('PYWPS')
 PY2 = sys.version_info[0] == 2
 
 if PY2:
