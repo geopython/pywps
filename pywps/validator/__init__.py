@@ -8,7 +8,7 @@ import logging
 from pywps.validator.mode import MODE
 from pywps.validator.base import emptyvalidator
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger('PYWPS')
 
 _VALIDATORS = {
     'application/vnd.geo+json': validategeojson,

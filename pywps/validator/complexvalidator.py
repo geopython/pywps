@@ -32,7 +32,7 @@ from pywps.inout.formats.lists import FORMATS
 import mimetypes
 import os
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger('PYWPS')
 
 def validategml(data_input, mode):
     """GML validation example

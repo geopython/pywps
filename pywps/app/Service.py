@@ -15,11 +15,11 @@ from pywps.inout.inputs import ComplexInput, LiteralInput, BoundingBoxInput
 from pywps.dblog import log_request, update_response
 
 from collections import deque
-import shutil
 import os
+import sys
 import uuid
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger("PYWPS")
 
 class Service(object):
 
@@ -44,6 +44,7 @@ class Service(object):
             LOGGER.addHandler(fh)
         else:  # NullHandler
             LOGGER.addHandler(logging.NullHandler())
+
 
     def get_capabilities(self):
         process_elements = [p.capabilities_xml()
@@ -284,6 +285,7 @@ class Service(object):
         :param wps_request: pywps.WPSRequest structure with parsed inputs, still in memory
         :param uuid: string identifier of the request
         """
+        self._set_grass()
         response = None
         try:
             process = self.processes[identifier]
@@ -300,7 +302,6 @@ class Service(object):
             response = self._parse_and_execute(process, wps_request, uuid)
         finally:
             os.chdir(olddir)
-            shutil.rmtree(process.workdir)
 
         return response
 
@@ -373,7 +374,9 @@ class Service(object):
             for outpt in wps_request.outputs:
                 for proc_outpt in process.outputs:
                     if outpt == proc_outpt.identifier:
-                        return Response(proc_outpt.data)
+                        resp = Response(proc_outpt.data)
+                        resp.call_on_close(process.clean)
+                        return resp
 
             # if the specified identifier was not found raise error
             raise InvalidParameterValue('')
@@ -497,6 +500,38 @@ class Service(object):
 
         return outinputs
 
+    def _set_grass(self):
+        """Set environment variables needed for GRASS GIS support
+        """
+
+        if not PY2:
+            LOGGER.debug('Python3 is not supported by GRASS')
+            return
+
+        gisbase = config.get_config_value('grass', 'gisbase')
+        if gisbase and os.path.isdir(gisbase):
+            LOGGER.debug('GRASS GISBASE set to %s' % gisbase)
+
+            os.environ['GISBASE'] = gisbase
+
+            os.environ['LD_LIBRARY_PATH'] = '{}:{}'.format(
+                os.environ.get('LD_LIBRARY_PATH'),
+                os.path.join(gisbase, 'lib'))
+            os.putenv('LD_LIBRARY_PATH', os.environ.get('LD_LIBRARY_PATH'))
+
+            os.environ['PATH'] = '{}:{}:{}'.format(
+                os.environ.get('PATH'),
+                os.path.join(gisbase, 'bin'),
+                os.path.join(gisbase, 'scripts'))
+            os.putenv('PATH', os.environ.get('PATH'))
+
+            python_path = os.path.join(gisbase, 'etc', 'python')
+            os.environ['PYTHONPATH'] = '{}:{}'.format(os.environ.get('PYTHONPATH'),
+                    python_path)
+            os.putenv('PYTHONPATH', os.environ.get('PYTHONPATH'))
+            sys.path.insert(0, python_path)
+
+
     def create_bbox_inputs(self, source, inputs):
         """ Takes the http_request and parses the input to objects
         :return collections.deque:
@@ -511,7 +546,9 @@ class Service(object):
             outinputs.append(newinpt)
 
         if len(outinputs) < source.min_occurs:
-            raise MissingParameterValue(locator=source.identifier)
+            raise MissingParameterValue(
+                description='Number of inputs is lower than minium required number of inputs',
+                locator=source.identifier)
 
         return outinputs
 

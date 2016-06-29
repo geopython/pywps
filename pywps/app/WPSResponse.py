@@ -63,6 +63,10 @@ class WPSResponse(object):
                 f.write(etree.tostring(doc, pretty_print=True, encoding='utf-8').decode('utf-8'))
                 f.flush()
                 os.fsync(f.fileno())
+
+            if self.status >= self.DONE_STATUS:
+                self.process.clean()
+
         except IOError as e:
             raise NoApplicableCode('Writing Response Document failed with : %s' % e)
 
@@ -179,6 +183,12 @@ class WPSResponse(object):
         doc.append(WPS.ProcessOutputs(*output_elements))
         return doc
 
+    def call_on_close(self, function):
+        """Custom implementation of call_on_close of werkzeug
+        TODO: rewrite this using werkzeug's tools
+        """
+        self._close_functions.push(function)
+
     @Request.application
     def __call__(self, request):
         doc = None
@@ -188,5 +198,8 @@ class WPSResponse(object):
             raise httpexp
         except Exception as exp:
             raise NoApplicableCode(exp)
+
+        if self.status >= self.DONE_STATUS:
+            self.process.clean()
 
         return xml_response(doc)
