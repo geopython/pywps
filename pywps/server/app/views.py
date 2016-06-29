@@ -3,7 +3,6 @@ import psutil
 
 from pywps.server.app import application
 from pywps.server.app import db
-from pywps import configuration
 
 import models
 
@@ -124,7 +123,9 @@ def pywps_process_resume(uuid):
 
 @application.route('/processes')
 def wps_processes():
-	return flask.render_template('processes.html')
+	processes = models.Request.query.all()
+
+	return flask.render_template('processes.html', processes=processes)
 
 @application.route('/create-db')
 def create_db():

@@ -5,5 +5,35 @@
 {% block H1Title %}Processes{% endblock %}
 
 {% block Content %}
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam nec tempor sem, sit amet imperdiet diam. Pellentesque ullamcorper ligula eu condimentum elementum. Ut pulvinar augue felis, in pulvinar mi ultricies vitae. Curabitur consequat nisl vel tempus bibendum. Sed tincidunt vel ex vel lacinia. Vestibulum vel ipsum condimentum tortor convallis tristique. Pellentesque nec sem elementum, porta erat sit amet, pretium enim. Sed eu elementum nisl. Mauris et ex malesuada, laoreet urna in, efficitur nisi. Integer elementum diam magna, eget lacinia neque mattis vel. Nunc sed arcu eget ante semper malesuada ac ut erat.</p>
+
+<table class="table">
+	<tr>
+		<th>UUID</th>
+		<th>PID</th>
+		<th>Operation</th>
+		<th>Time Start</th>
+		<th>Time End</th>
+		<th>Identifier</th>
+		<th>Message</th>
+		<th>Percent Done</th>
+		<th>Status</th>
+	</tr>
+
+
+	{% for process in processes %}
+	<tr>
+		<td>{{ process.uuid }}</td>
+		<td>{{ process.pid }}</td>
+		<td>{{ process.operation }}</td>
+		<td>{{ process.time_start }}</td>
+		<td>{{ process.time_end }}</td>
+		<td>{{ process.identifier }}</td>
+		<td>{{ process.message }}</td>
+		<td>{{ process.percent_done }}</td>
+		<td>{{ process.status }}</td>
+	</tr>
+	{% endfor %}
+
+</table>
+
 {% endblock %}
