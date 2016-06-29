@@ -321,7 +321,9 @@ class Service(object):
                     raise MissingParameterValue(
                         inpt.identifier, inpt.identifier)
                 else:
-                    data_inputs[inpt.identifier] = inpt.clone()
+                    inputs = deque(maxlen=inpt.max_occurs)
+                    inputs.append(inpt.clone())
+                    data_inputs[inpt.identifier] = inputs
 
             # Replace the dicts with the dict of Literal/Complex inputs
             # set the input to the type defined in the process
