@@ -45,7 +45,7 @@ copyright = u'2010, Jachym Cepicky'
 # built documents.
 #
 # The short X.Y version.
-version = '3.2.5'
+version = '3.2.6'
 # The full version, including alpha/beta/rc tags.
 release = version
 

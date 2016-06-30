@@ -1,3 +1,9 @@
+pywps (3.2.6) trusty; urgency=medium
+
+  * check complexinputs
+
+ -- Tom Kralidis <tomkralidis@gmail.com>  Thu, 30 Jun 2016 10:51:32 -0000
+
 pywps (3.2.5-1) trusty; urgency=medium
 
   * Added lxml to control file

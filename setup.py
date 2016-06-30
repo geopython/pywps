@@ -68,7 +68,7 @@ with open('requirements.txt') as fh:
 
 dist =  setup(
         name = name,
-        version = '3.2.5',
+        version = '3.2.6',
         maintainer="Jachym Cepicky",
         maintainer_email = 'jachym.cepicky@gmail.com',
         author = 'Jachym Cepicky',
