@@ -29,13 +29,17 @@ def _get_process_by_uuid(uuid):
 	return None
 
 
-@application.route('/', methods=['GET', 'POST'])
+@application.route('/', methods=['GET'])
 def pywps_index():
 	return flask.render_template('index.html')
 
 @application.route('/wps', methods=['POST', 'GET'])
 def pywps_wps():
 	return application.pywps_wps_service
+
+@application.route('/processes/pokus', methods=['GET', 'POST', 'PUT'])
+def pywps_processes_pokud():
+	return 'OK'
 
 @application.route('/processes/stop/<uuid>')
 def pywps_process_stop(uuid):

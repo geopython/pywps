@@ -7,8 +7,44 @@
 {% block Content %}
 
 {% if processes %}
+
+
+<script>
+
+function pywps_pause_process(uuid) {
+	$.ajax({
+	  url: "/processes/pokus",
+	  method: "GET"
+	}).done(function() {
+	  alert("done " + uuid);
+	});
+}
+
+
+function pywps_stop_process(uuid) {
+	$.ajax({
+	  url: "/processes/pokus",
+	  method: "POST"
+	}).done(function() {
+	  alert("done " + uuid);
+	});
+}
+
+function pywps_resume_process(uuid) {
+	$.ajax({
+	  url: "/processes/pokus",
+	  method: "PUT"
+	}).done(function() {
+	  alert("done " + uuid);
+	});
+}
+
+</script>
+
 <table class="table">
 	<tr>
+		<th>Action</th>
+
 		<th>UUID</th>
 		<th>PID</th>
 		<th>Operation</th>
@@ -18,11 +54,17 @@
 		<th>Message</th>
 		<th>Percent Done</th>
 		<th>Status</th>
+
 	</tr>
 
 
 	{% for process in processes %}
 	<tr>
+		<td>
+			<a href="javascript:pywps_pause_process('{{ process.uuid }}')" title="">Pause</a> | 
+			<a href="javascript:pywps_stop_process('{{ process.uuid }}')" title="">Stop</a>
+		</td>
+
 		<td>{{ process.uuid }}</td>
 		<td>{{ process.pid }}</td>
 		<td>{{ process.operation }}</td>
@@ -39,5 +81,8 @@
 {% else %}
 	<p>No processes.</p>
 {% endif %}
+
+
+
 
 {% endblock %}
