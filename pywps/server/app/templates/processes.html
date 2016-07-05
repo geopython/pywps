@@ -6,6 +6,7 @@
 
 {% block Content %}
 
+{% if processes %}
 <table class="table">
 	<tr>
 		<th>UUID</th>
@@ -35,5 +36,8 @@
 	{% endfor %}
 
 </table>
+{% else %}
+	<p>No processes.</p>
+{% endif %}
 
 {% endblock %}

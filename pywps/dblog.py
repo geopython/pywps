@@ -10,7 +10,21 @@ from pywps.server.app import db, models
 
 
 #LOGGER = logging.getLogger(__name__)
-#_CONNECTION = None
+
+def _get_identifier(request):
+    """Get operation identifier
+    """
+
+    if request.operation == 'execute':
+        return request.identifier
+    elif request.operation == 'describeprocess':
+        if request.identifiers:
+            return ','.join(request.identifiers)
+        else:
+            return 'Null'
+    else:
+        return 'NULL'
+
 
 def log_request(uuid, request):
     """Write OGC WPS request (only the necessary parts) to database logging
@@ -28,6 +42,7 @@ def log_request(uuid, request):
     if r:
         db.session.add(r)
         db.session.commit()
+
 
 def get_running():
     """Returns running processes ids
@@ -64,17 +79,16 @@ def get_first_stored():
 def update_response(uuid, response, close=False):
     """Writes response to database
     """
-    #conn = get_connection()
-    message = 'Null'
-    status_percentage = 'Null'
-    status = 'Null'
+    message = None
+    status_percentage = None
+    status = None
 
     if hasattr(response, 'message'):
-        message = response.message
+        message = "%s" % response.message
     if hasattr(response, 'status_percentage'):
         status_percentage = response.status_percentage
     if hasattr(response, 'status'):
-        status = response.status
+        status = "%s" % response.status
 
     r = models.Request.query.filter(models.Request.uuid == str(uuid)).one()
 
@@ -86,21 +100,6 @@ def update_response(uuid, response, close=False):
         r.status = status
 
         db.session.commit()
-
-
-def _get_identifier(request):
-    """Get operation identifier
-    """
-
-    if request.operation == 'execute':
-        return request.identifier
-    elif request.operation == 'describeprocess':
-        if request.identifiers:
-            return ','.join(request.identifiers)
-        else:
-            return 'Null'
-    else:
-        return 'NULL'
 
 
 def store_process(uuid, request):

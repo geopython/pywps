@@ -7,14 +7,11 @@ from pywps.server.app import db
 import models
 
 
-def get_process_data_from_db_by_uuid(uuid):
-	return models.Request.query.filter_by(uuid=uuid).first()
-
-def get_process_by_uuid(uuid):
-	data = get_process_data_from_db_by_uuid(uuid)
+def _get_process_by_uuid(uuid):
+	data = models.Request.query.filter(models.Request.uuid == uuid).first()
 
 	if data:
-		pid = data[1]
+		pid = data.pid
 
 		try:
 			process = psutil.Process(pid=pid)
@@ -42,7 +39,7 @@ def pywps_wps():
 
 @application.route('/processes/stop/<uuid>')
 def pywps_process_stop(uuid):
-	process = get_process_by_uuid(uuid)
+	process = _get_process_by_uuid(uuid)
 
 	if process:
 		process.terminate()
@@ -55,13 +52,13 @@ def pywps_process_stop(uuid):
 
 		return flask.jsonify(response)
 
-	data = get_process_data_from_db_by_uuid(uuid)
+	model_request = models.Request.query.filter(models.Request.uuid == uuid).first()
 
 	response = {
-	'uuid': data[0],
-	'pid': data[1],
-	'time_start': data[4],
-	'identifier': data[6],
+	'uuid': data.uuid,
+	'pid': data.pid,
+	'time_start': data.time_start,
+	'identifier': data.identifier,
 	'status': 'stopped'
 	}
 
@@ -69,7 +66,7 @@ def pywps_process_stop(uuid):
 
 @application.route('/processes/pause/<uuid>')
 def pywps_process_pause(uuid):
-	process = get_process_by_uuid(uuid)
+	process = _get_process_by_uuid(uuid)
 
 	if process:
 		process.suspend()
@@ -82,21 +79,25 @@ def pywps_process_pause(uuid):
 
 		return flask.jsonify(response)
 
-	data = get_process_data_from_db_by_uuid(uuid)
+	request_data = models.Request.query.filter(models.Request.uuid == uuid).first()
 
-	response = {
-	'uuid': data[0],
-	'pid': data[1],
-	'time_start': data[4],
-	'identifier': data[6],
-	'status': 'paused'
-	}
+	if request_data:
+		request_data.message = 'PyWPS: process paused'
+
+		db.session.commit()
+
+		response = {
+		'uuid': request_data.uuid,
+		'pid': request_data.uuid,
+		'time_start': request_data.time_start,
+		'identifier': request_data.identifier
+		}
 
 	return flask.jsonify(response)
 
 @application.route('/processes/resume/<uuid>')
 def pywps_process_resume(uuid):
-	process = get_process_by_uuid(uuid)
+	process = _get_process_by_uuid(uuid)
 
 	if process:
 		process.resume()
@@ -109,15 +110,20 @@ def pywps_process_resume(uuid):
 
 		return flask.jsonify(response)
 
-	data = get_process_data_from_db_by_uuid(uuid)
+	request_data = models.Request.query.filter(models.Request.uuid == uuid).first()
 
-	response = {
-	'uuid': data[0],
-	'pid': data[1],
-	'time_start': data[4],
-	'identifier': data[6],
-	'status': 'resumed'
-	}
+	if request_data:
+		request_data.message = 'PyWPS: process resumed'
+
+		db.session.commit()
+
+		response = {
+		'uuid': request_data.uuid,
+		'pid': request_data.pid,
+		'time_start': request_data.time_start,
+		'identifier': request_data.identifier,
+		'status': 'resumed'
+		}
 
 	return flask.jsonify(response)
 

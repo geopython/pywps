@@ -45,6 +45,9 @@ class WPSResponse(object):
         if status_percentage:
             self.status_percentage = status_percentage
 
+        #if int(status_percentage) == 100:
+        #    self.status = self.DONE_STATUS
+
         # rebuild the doc and update the status xml file
         self.doc = self._construct_doc()
 
