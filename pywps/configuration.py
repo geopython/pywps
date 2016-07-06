@@ -75,6 +75,8 @@ def load_configuration(cfgfiles=None):
     """Load PyWPS configuration from configuration files.
     The later configuration file in the array overwrites configuration
     from the first.
+
+    :param cfgfiles: list of configuration files
     """
 
     global config
@@ -130,8 +132,8 @@ def load_configuration(cfgfiles=None):
     if not cfgfiles:
         cfgfiles = _get_default_config_files_location()
 
-    if type(cfgfiles) != type(()):
-        cfgfiles = (cfgfiles)
+    if isinstance(cfgfiles, str):
+        cfgfiles = [cfgfiles]
 
     loaded_files = config.read(cfgfiles)
     if loaded_files:

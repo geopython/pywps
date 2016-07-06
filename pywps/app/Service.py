@@ -28,13 +28,15 @@ class Service(object):
 
     :param processes: A list of :class:`~Process` objects that are
                       provided by this service.
+
+    :param cfgfiles: A list of configuration files
     """
 
-    def __init__(self, processes=[], cfgfile=None):
+    def __init__(self, processes=[], cfgfiles=None):
         self.processes = {p.identifier: p for p in processes}
 
-        if cfgfile:
-            config.load_configuration(cfgfile)
+        if cfgfiles:
+            config.load_configuration(cfgfiles)
 
         if config.get_config_value('server', 'logfile') and config.get_config_value('server', 'loglevel'):
             LOGGER.setLevel(getattr(logging, config.get_config_value('server', 'loglevel')))

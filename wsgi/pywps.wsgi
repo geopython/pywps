@@ -23,4 +23,4 @@ processes = [
     Area()
 ]
 
-application = Service(processes, '/var/www/pywps/pywps.cfg')
+application = Service(processes, ['/var/www/pywps/pywps.cfg'])
