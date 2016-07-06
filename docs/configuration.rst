@@ -57,6 +57,9 @@ PyWPS ships with a sample configuration (``default-sample.cfg``).  Copy the file
 - **contact_instructions**: the how to contact the provider contact
 - **contact_role**: the role of the provider contact as per the `ISO 19115 CI_RoleCode codelist <http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode>`_).  Accepted values are ``author``, ``processor``, ``publisher``, ``custodian``, ``pointOfContact``, ``distributor``, ``user``, ``resourceProvider``, ``originator``, ``owner``, ``principalInvestigator``
 
+**[grass]**
+- **gisbase**: directory of GRASS GIS instalation, refered as `GISBASE <https://grass.osgeo.org/grass73/manuals/variables.html>`_
+
 -----------
 Sample file
 -----------
@@ -102,3 +105,6 @@ Sample file
   contact_hours=Hours of Service
   contact_instructions=During hours of service.  Off on weekends.
   contact_role=pointOfContact
+
+  [grass]
+  gisbase=/usr/local/grass-7.3.svn/

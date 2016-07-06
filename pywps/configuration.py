@@ -40,7 +40,7 @@ else:
 
 
 config = None
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger("PYWPS")
 
 
 def get_config_value(section, option):
@@ -128,6 +128,9 @@ def load_configuration(cfgfiles=None):
     config.set('metadata:main', 'contact_hours', 'Hours of Service')
     config.set('metadata:main', 'contact_instructions', 'During hours of service.  Off on weekends.')
     config.set('metadata:main', 'contact_role', 'pointOfContact')
+
+    config.add_section('grass')
+    config.set('grass', 'gisbase', '')
 
     if not cfgfiles:
         cfgfiles = _get_default_config_files_location()
