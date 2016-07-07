@@ -6,6 +6,10 @@
 	margin-top: 20px;
 }
 
+.margin-top-10 {
+	margin-top: 10px;
+}
+
 .underline {
 	text-decoration: underline;
 }
@@ -14,17 +18,38 @@ header {
 	margin-top: 10px;
 }
 
+
 ul li {
 	line-height: 1.8;
 }
 
 #header-left img {
 	max-width: 100%;
+	padding-top: 20px;
 }
 
 h1 {
 	padding-top: 0px;
-	margin-top: 4px;
-	line-height: 1.3;
 }
 
+
+header h1 a {
+	text-decoration: none;
+}
+
+#menu {
+	background-color: #337ab7; 
+	color : #ffffff;
+	padding: 10px;
+}
+
+#menu a {
+	color: #ffffff;
+	margin-right: 10px;
+	margin-left: 10px;
+	text-decoration: underline;
+}
+
+#menu a.active, #menu a:hover {
+	text-decoration: none;
+}

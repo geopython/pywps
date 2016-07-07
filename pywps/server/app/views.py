@@ -31,7 +31,7 @@ def _get_process_by_uuid(uuid):
 
 @application.route('/', methods=['GET'])
 def pywps_index():
-	return flask.render_template('index.html')
+	return flask.render_template('index.html', active_page='home')
 
 @application.route('/wps', methods=['POST', 'GET'])
 def pywps_wps():
@@ -135,7 +135,7 @@ def pywps_process_resume(uuid):
 def wps_processes():
 	processes = models.Request.query.all()
 
-	return flask.render_template('processes.html', processes=processes)
+	return flask.render_template('processes.html', active_page='processes', processes=processes)
 
 @application.route('/create-db')
 def create_db():
