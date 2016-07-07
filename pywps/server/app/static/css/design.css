@@ -53,3 +53,20 @@ header h1 a {
 #menu a.active, #menu a:hover {
 	text-decoration: none;
 }
+
+.pause-btn, .resume-btn {
+	color: orange;
+}
+
+.stop-btn {
+	color: red;
+}
+
+a.pause-btn, a.resume-btn, a.stop-btn {
+	text-decoration: underline;
+}
+
+a.pause-btn:hover, a.resume-btn:hover, a.stop-btn:hover {
+	text-decoration: none;
+}
+

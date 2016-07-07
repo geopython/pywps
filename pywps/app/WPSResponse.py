@@ -10,12 +10,15 @@ import pywps.configuration as config
 from pywps.dblog import update_response
 
 
+
 class WPSResponse(object):
 
     NO_STATUS = 0
     STORE_STATUS = 1
     STORE_AND_UPDATE_STATUS = 2
     DONE_STATUS = 3
+    PAUSED = 4
+    STOPPED = 5
 
     def __init__(self, process, wps_request, uuid):
         """constructor
@@ -45,8 +48,8 @@ class WPSResponse(object):
         if status_percentage:
             self.status_percentage = status_percentage
 
-        #if int(status_percentage) == 100:
-        #    self.status = self.DONE_STATUS
+        if int(status_percentage) == 100:
+            self.status = self.DONE_STATUS
 
         # rebuild the doc and update the status xml file
         self.doc = self._construct_doc()

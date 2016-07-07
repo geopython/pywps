@@ -17,8 +17,8 @@
 			<th>UUID</th>
 			<th>PID</th>
 			<th>Operation</th>
-			<th>Time Start</th>
-			<th>Time End</th>
+			<!--<th>Time Start</th>
+			<th>Time End</th>-->
 			<th>Identifier</th>
 			<th>Message</th>
 			<th>Percent Done</th>
@@ -30,15 +30,28 @@
 		{% for process in processes %}
 		<tr>
 			<td>
-				<a href="javascript:pywps_pause_process('{{ process.uuid }}')" title="">Pause</a> | 
-				<a href="javascript:pywps_stop_process('{{ process.uuid }}')" title="">Stop</a>
+				<a href="javascript:pywps_pause_process('{{ process.uuid }}')" title="Pause the process {{ process.uuid }}" class="pause-btn pause-btn-{{ process.uuid }}" style="color: orange;">
+					Pause
+				</a> 
+				
+				<br>
+
+				<a href="javascript:pywps_pause_process('{{ process.uuid }}')" title="Resume the process {{ process.uuid }}" class="resume-btn pause-btn-{{ process.uuid }}" style="color: orange;">
+					Resume
+				</a> 
+
+				<br>
+				
+				<a href="javascript:pywps_stop_process('{{ process.uuid }}')" title="Stop the process {{ process.uuid }}" class="stop-btn stop-btn-{{ process.uuid }}">
+					Stop
+				</a>
 			</td>
 
 			<td>{{ process.uuid }}</td>
 			<td>{{ process.pid }}</td>
 			<td>{{ process.operation }}</td>
-			<td>{{ process.time_start }}</td>
-			<td>{{ process.time_end }}</td>
+			<!--<td>{{ process.time_start }}</td>
+			<td>{{ process.time_end }}</td>-->
 			<td>{{ process.identifier }}</td>
 			<td>{{ process.message }}</td>
 			<td>{{ process.percent_done }}</td>
