@@ -37,6 +37,10 @@ header h1 a {
 	text-decoration: none;
 }
 
+table th {
+	text-align: center;
+}
+
 #menu {
 	background-color: #337ab7; 
 	color : #ffffff;
@@ -54,11 +58,15 @@ header h1 a {
 	text-decoration: none;
 }
 
-.pause-btn, .resume-btn {
+.pause-btn, .resume-btn, .pause-btn {
+	display: none;
+}
+
+a.pause-btn, a.resume-btn, a.pause-btn:hover, a.resume-btn:hover {
 	color: orange;
 }
 
-.stop-btn {
+a.stop-btn, a.stop-btn:hover {
 	color: red;
 }
 
@@ -70,3 +78,6 @@ a.pause-btn:hover, a.resume-btn:hover, a.stop-btn:hover {
 	text-decoration: none;
 }
 
+a.display-block {
+	display: block;
+}

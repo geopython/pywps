@@ -29,40 +29,45 @@ def pywps_wps():
 
 
 @application.route('/processes/<uuid>', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def pywps_processes():
+def pywps_processes(uuid):
+	process = None
+	process_error = None
+
 	model_request = models.Request.query.filter(models.Request.uuid == uuid).first()
 
 	if model_request:
 		process, process_error = _get_process(model_request.pid)
 
 		if not process:
-			return 'NOT OK - {}'.format(process_error) 
+			return 'NOT OK - {}'.format(process_error)
 
 		if flask.request.method == 'GET':
-			return 'NOT IMPLEMENTED'
+			pass
 
 		if flask.request.method == 'POST':
 			#pause process
 			process.suspend()
 
-			model_request.message = 'PyWPS: process paused'
+			model_request.status = 4 #status PAUSED running in WPSResponse.py
 
 		if flask.request.method == 'PUT':
 			#resume process
 			process.resume()
 
-			model_request.message = 'PyWPS: process resumed'
+			model_request.status = 2 #status STORE_AND_UPDATE_STATUS running in WPSResponse.py
 
 		if flask.request.method == 'DELETE':
 			#stop process
 			process.terminate()
 
-			model_request.message = 'PyWPS: process stopped'
+			model_request.status = 5 #status STOPPED in WPSResponse.py
+
+		db.session.commit()
 
 	response = {
-	'status': model_request.status,
-	'time_end': model_request.time_end,
-	'error': process_error
+		'status': model_request.status,
+		'time_end': model_request.time_end,
+		'error': process_error
 	}
 
 	return flask.jsonify(response)
@@ -158,7 +163,7 @@ def pywps_processes():
 #	return flask.jsonify(response)
 
 @application.route('/processes')
-def wps_processes_page():
+def pywps_processes_page():
 	processes = models.Request.query.all()
 
 	return flask.render_template('processes.html', active_page='processes', processes=processes)

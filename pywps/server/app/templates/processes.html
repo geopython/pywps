@@ -10,10 +10,11 @@
 
 {% block content %}
 	{% if processes %}
-	<table class="table">
+	<table class="table text-center">
 		<tr>
 			<th>Action</th>
 
+			<th>Status</th>
 			<th>UUID</th>
 			<th>PID</th>
 			<th>Operation</th>
@@ -22,31 +23,55 @@
 			<th>Identifier</th>
 			<th>Message</th>
 			<th>Percent Done</th>
-			<th>Status</th>
 
 		</tr>
 
 
 		{% for process in processes %}
 		<tr>
-			<td>
-				<a href="javascript:pywps_pause_process('{{ process.uuid }}')" title="Pause the process {{ process.uuid }}" class="pause-btn pause-btn-{{ process.uuid }}" style="color: orange;">
+			<td id="action-btn-{{ process.uuid  }}">
+				<!-- show the pause button for running processes -->
+				<a href="javascript:pywps_pause_process('{{ process.uuid }}')" title="Pause the process {{ process.uuid }}" id="pause-btn-{{ process.uuid }}" class="pause-btn btn {% if process.status == '1' or process.status == '2' or process.status == '5' %}display-block{% endif %}" style="color: orange;">
 					Pause
-				</a> 
-				
-				<br>
+				</a>
 
-				<a href="javascript:pywps_pause_process('{{ process.uuid }}')" title="Resume the process {{ process.uuid }}" class="resume-btn pause-btn-{{ process.uuid }}" style="color: orange;">
+				<!-- show the resume button for paused processes  -->
+				<a href="javascript:pywps_resume_process('{{ process.uuid }}')" title="Resume the process {{ process.uuid }}" id="resume-btn-{{ process.uuid }}" class="resume-btn btn {% if process.status == '5'%}display-block{% endif %}" style="color: orange;">
 					Resume
 				</a> 
 
-				<br>
-				
-				<a href="javascript:pywps_stop_process('{{ process.uuid }}')" title="Stop the process {{ process.uuid }}" class="stop-btn stop-btn-{{ process.uuid }}">
+				<!-- show the stop button for running and paused processes -->
+				<a href="javascript:pywps_stop_process('{{ process.uuid }}')" title="Stop the process {{ process.uuid }}" id="stop-btn-{{ process.uuid }}" class="stop-btn btn {% if process.status == '1' or process.status == '2' or process.status == '5' %}display-block{% endif %}">
 					Stop
 				</a>
 			</td>
+			<td>
+				{% if process.status == "0" %}
+					Starting
+				{% endif %}
 
+				{% if process.status == "1" %}
+					Running
+				{% endif %}
+
+				{% if process.status == "2" %}
+					Running
+				{% endif %}
+
+				{% if process.status == "3" %}
+					Finished
+				{% endif %}
+
+				{% if process.status == "4" %}
+					Paused
+				{% endif %}
+
+				{% if process.status == "5" %}
+					Stopped
+				{% endif %}
+
+					({{ process.status }})
+			</td>
 			<td>{{ process.uuid }}</td>
 			<td>{{ process.pid }}</td>
 			<td>{{ process.operation }}</td>
@@ -55,7 +80,6 @@
 			<td>{{ process.identifier }}</td>
 			<td>{{ process.message }}</td>
 			<td>{{ process.percent_done }}</td>
-			<td>{{ process.status }}</td>
 		</tr>
 		{% endfor %}
 
