@@ -39,7 +39,13 @@ def pywps_processes(uuid):
 		process, process_error = _get_process(model_request.pid)
 
 		if not process:
-			return 'NOT OK - {}'.format(process_error)
+			response = {
+				'status': model_request.status,
+				'time_end': model_request.time_end,
+				'error': process_error
+			}
+			
+			return flask.jsonify(response)
 
 		if flask.request.method == 'GET':
 			pass

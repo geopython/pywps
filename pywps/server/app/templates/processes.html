@@ -46,6 +46,7 @@
 				</a>
 			</td>
 			<td>
+				<span id="status-text-{{ process.uuid }}">
 				{% if process.status == "0" %}
 					Starting
 				{% endif %}
@@ -69,8 +70,7 @@
 				{% if process.status == "5" %}
 					Stopped
 				{% endif %}
-
-					({{ process.status }})
+				</span>
 			</td>
 			<td>{{ process.uuid }}</td>
 			<td>{{ process.pid }}</td>
