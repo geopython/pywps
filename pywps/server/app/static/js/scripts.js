@@ -1,8 +1,12 @@
 function pywps_pause_process(uuid) {
-	$.ajax({
+	
+	var xhr = $.ajax( {
 	  url: "/processes/" + uuid,
-	  method: "GET"
-	}).done(function(data) {
+	  method: "POST"
+	
+	} );
+
+	xhr.done( function (data) {
 		console.log("DONE pause " + uuid);
 
 		console.log(data)
@@ -12,18 +16,30 @@ function pywps_pause_process(uuid) {
 			$("#resume-btn-" + uuid).addClass("display-block");
 
 			$("#status-text-" + uuid).html("Paused");
+
 		} else{
 			alert("Error - " + data.error);
+
 		}
-	});
+
+	} );
+
+	xhr.fail( function () {
+		alert("error");
+
+	} );
+
 }
 
 
 function pywps_stop_process(uuid) {
-	$.ajax({
+	var xhr = $.ajax( {
 	  url: "/processes/" + uuid,
 	  method: "POST"
-	}).done(function(data) {
+
+	} ); 
+
+	xhr.done( function( data ) {
 	 	console.log("DONE stop " + uuid);
 
 		console.log(data)
@@ -39,15 +55,26 @@ function pywps_stop_process(uuid) {
 
 		} else{
 			alert("Error - " + data.error);
+
 		}
-	});
+
+	} ); 
+
+	xhr.fail( function () {
+		alert("error");
+
+	} );
+
 }
 
 function pywps_resume_process(uuid) {
-	$.ajax({
+	var xhr = $.ajax( {
 	  url: "/processes/" + uuid,
 	  method: "PUT"
-	}).done(function(data) {
+
+	} );
+
+	xhr.done(function (data) {
 		console.log("DONE resume " + uuid);
 
 		data = jQuery.parseJSON(data);
@@ -59,8 +86,16 @@ function pywps_resume_process(uuid) {
 			$("#resume-btn-" + uuid).removeClass("display-block");
 
 			$("#status-text-" + uuid).html("Running");
+
 		} else {
 			alert("Error - " + data.error);
+
 		}
-	});
+
+	} );
+
+	xhr.fail( function() {
+		alert("error");
+	} );
+	
 }

@@ -37,7 +37,11 @@ from pywps.app.WPSRequest import WPSRequest
 import pywps.configuration as config
 from pywps._compat import PY2
 from pywps.exceptions import StorageNotSupported, OperationNotSupported, \
+
     ServerBusy, NoApplicableCode
+
+from pywps.server.app import application, db
+
 
 
 LOGGER = logging.getLogger("PYWPS")
@@ -238,6 +242,9 @@ class Process(object):
         return wps_response
 
     def _run_process(self, wps_request, wps_response):
+        #added because of http://stackoverflow.com/questions/30241911/psycopg2-error-databaseerror-error-with-no-message-from-the-libpq
+        db.get_engine(application).dispose()
+
         try:
             self._set_grass()
             wps_response = self.handler(wps_request, wps_response)

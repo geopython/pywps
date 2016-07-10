@@ -41,7 +41,14 @@ def log_request(uuid, request):
 
     if r:
         db.session.add(r)
-        db.session.commit()
+
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
+            raise
+        finally:
+            db.session.close()
 
 
 def get_running():
@@ -99,7 +106,13 @@ def update_response(uuid, response, close=False):
         r.percent_done = status_percentage
         r.status = status
 
-        db.session.commit()
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
+            raise
+        finally:
+            db.session.close()
 
 
 def store_process(uuid, request):
@@ -109,7 +122,14 @@ def store_process(uuid, request):
 
     if r:
         db.session.add(r)
-        db.session.commit()
+
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
+            raise
+        finally:
+            db.session.close()
     
 
 def remove_stored(uuid):

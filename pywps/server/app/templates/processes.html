@@ -36,7 +36,7 @@
 				</a>
 
 				<!-- show the resume button for paused processes  -->
-				<a href="javascript:pywps_resume_process('{{ process.uuid }}')" title="Resume the process {{ process.uuid }}" id="resume-btn-{{ process.uuid }}" class="resume-btn btn {% if process.status == '5'%}display-block{% endif %}" style="color: orange;">
+				<a href="javascript:pywps_resume_process('{{ process.uuid }}')" title="Resume the process {{ process.uuid }}" id="resume-btn-{{ process.uuid }}" class="resume-btn btn {% if process.status == '4'%}display-block{% endif %}" style="color: orange;">
 					Resume
 				</a> 
 
@@ -44,6 +44,9 @@
 				<a href="javascript:pywps_stop_process('{{ process.uuid }}')" title="Stop the process {{ process.uuid }}" id="stop-btn-{{ process.uuid }}" class="stop-btn btn {% if process.status == '1' or process.status == '2' or process.status == '5' %}display-block{% endif %}">
 					Stop
 				</a>
+				{% if process.status == '3'  or process.status == '5'%} 
+				-
+				{% endif %}
 			</td>
 			<td>
 				<span id="status-text-{{ process.uuid }}">

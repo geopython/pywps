@@ -68,7 +68,13 @@ def pywps_processes(uuid):
 
 			model_request.status = 5 #status STOPPED in WPSResponse.py
 
-		db.session.commit()
+		try:
+			db.session.commit()
+		except:
+			db.session.rollback()
+			raise
+		finally:
+			db.session.close()
 
 	response = {
 		'status': model_request.status,
