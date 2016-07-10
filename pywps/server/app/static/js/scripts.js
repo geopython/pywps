@@ -2,14 +2,12 @@ function pywps_pause_process(uuid) {
 	
 	var xhr = $.ajax( {
 	  url: "/processes/" + uuid,
-	  method: "POST"
-	
+	  method: "POST",
+
 	} );
 
 	xhr.done( function (data) {
 		console.log("DONE pause " + uuid);
-
-		console.log(data)
 
 		if (!data.error) {
 			$("#pause-btn-" + uuid).removeClass("display-block");
@@ -41,8 +39,6 @@ function pywps_stop_process(uuid) {
 
 	xhr.done( function( data ) {
 	 	console.log("DONE stop " + uuid);
-
-		console.log(data)
 
 		if (!data.error) {
 			$("#pause-btn-" + uuid).removeClass("display-block");
@@ -77,10 +73,6 @@ function pywps_resume_process(uuid) {
 	xhr.done(function (data) {
 		console.log("DONE resume " + uuid);
 
-		data = jQuery.parseJSON(data);
-
-		console.log(data)
-
 		if (!data.error) {
 			$("#pause-btn-" + uuid).addClass("display-block");
 			$("#resume-btn-" + uuid).removeClass("display-block");
@@ -97,5 +89,28 @@ function pywps_resume_process(uuid) {
 	xhr.fail( function() {
 		alert("error");
 	} );
-	
+
 }
+
+function pywps_refresh_processes_table () {
+	var xhr = $.ajax( {
+	  url: "/processes/table-entries",
+	  method: "POST"
+
+	} );
+
+	xhr.done(function (data) {
+		console.log("DONE processes_table");
+
+		$('#processes_table').html(data);
+
+	} );
+
+	xhr.fail( function() {
+		console.log("Error - processes table refresh");
+	} );
+}
+
+//setTimeout(pywps_refresh_processes_table, 2000);
+
+window.setInterval(pywps_refresh_processes_table, 5000);

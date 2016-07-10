@@ -41,6 +41,11 @@ table th {
 	text-align: center;
 }
 
+table td {
+	height: 51px;
+	/*background-color: yellow;*/
+}
+
 #menu {
 	background-color: #337ab7; 
 	color : #ffffff;
@@ -58,12 +63,17 @@ table th {
 	text-decoration: none;
 }
 
-.pause-btn, .resume-btn, .pause-btn {
+.pause-btn, .resume-btn, .stop-btn {	
 	display: none;
+	float: left;
 }
 
-a.pause-btn, a.resume-btn, a.pause-btn:hover, a.resume-btn:hover {
+a.pause-btn, a.pause-btn:hover {
 	color: orange;
+}
+
+a.resume-btn, a.resume-btn:hover {
+	color: green;
 }
 
 a.stop-btn, a.stop-btn:hover {
@@ -80,4 +90,8 @@ a.pause-btn:hover, a.resume-btn:hover, a.stop-btn:hover {
 
 a.display-block {
 	display: block;
+}
+
+.table tbody tr td {
+    vertical-align: middle;
 }
