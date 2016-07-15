@@ -95,3 +95,15 @@ a.display-block {
 .table tbody tr td {
     vertical-align: middle;
 }
+
+#processes h4 {
+	font-size: 95%;
+}
+
+.border-right {
+	border-right: 1px solid #ccc;
+}
+
+.border-top {
+	border-top: 1px solid #ccc;
+}

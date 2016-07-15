@@ -8,7 +8,8 @@
 
         <title>{% block head_title %}{% endblock %} - PyWPS Web administration &amp; process management</title>
 
-        <script type=text/javascript src="{{ url_for('static', filename='js/jquery-3.0.0.min.js') }}"></script>
+        <script type=text/javascript src="{{ url_for('static', filename='js/jquery-2.2.4.min.js') }}"></script>
+        <script type=text/javascript src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
 
         <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-3.3.6/css/bootstrap.min.css')}}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/design.css')}}"/>
@@ -38,7 +39,7 @@
                 <div class="col-xs-12">
                     <h2>{% block h2_title %}{% endblock %}</h2>
 
-                    <div class="col-xs-12 margin-top-20">
+                    <div class="col-xs-12">
                         {% block content %}{% endblock %}
                     </div>
                 </div>

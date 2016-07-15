@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import flask
 import psutil
 
@@ -28,7 +29,7 @@ def pywps_wps():
 	return application.pywps_wps_service
 
 
-@application.route('/processes/<uuid>', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@application.route('/processes/<uuid>', methods=['POST', 'PUT', 'DELETE'])
 def pywps_processes(uuid):
 	process = None
 	process_error = None
@@ -47,8 +48,8 @@ def pywps_processes(uuid):
 			
 			return flask.jsonify(response)
 
-		if flask.request.method == 'GET':
-			pass
+		#if flask.request.method == 'GET':
+		#	pass
 
 		if flask.request.method == 'POST':
 			#pause process
@@ -93,9 +94,19 @@ def pywps_processes_page():
 
 @application.route('/processes/table-entries', methods=['POST'])
 def pywps_processes_table_entries():
-	processes = models.Request.query.all()
+	data = flask.request.get_json()
+	#print(data)
+	#print(data['status'])
 
-	return flask.render_template('processes_table_entries.html', processes=processes)
+	query = models.Request.query
+
+	if len(data['pid']) > 0:
+		query = query.filter(models.Request.pid == int(data['pid']))
+
+	if len(data['uuid']) > 0:
+		query = query.filter(models.Request.uuid.like('%{}%'.format(str(data['uuid']))))
+
+	return flask.render_template('processes_table_entries.html', processes=query.all())
 
 
 @application.route('/create-db')

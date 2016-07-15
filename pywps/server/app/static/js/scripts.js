@@ -1,3 +1,5 @@
+var data_GLOBAL = null;
+
 function pywps_pause_process(uuid) {
 	
 	var xhr = $.ajax( {
@@ -92,17 +94,47 @@ function pywps_resume_process(uuid) {
 
 }
 
+function get_filter() {
+	var filter = {
+		status: $('#filter-status').val(),
+		operation: $('#filter-operation').val(),
+		identifier: $('#filter-identifier').val(),
+		uuid: $('#filter-uuid').val(),
+		pid: $('#filter-pid').val()
+	}
+
+	return filter;
+}
+
+function clear_filter() {
+	$('#filter-status').val(0);
+	$('#filter-operation').val(0);
+	$('#filter-identifier').val(0);
+	$('#filter-uuid').val("");
+	$('#filter-pid').val("");
+}
+
 function pywps_refresh_processes_table () {
+	var filter = get_filter();
+
 	var xhr = $.ajax( {
 	  url: "/processes/table-entries",
-	  method: "POST"
-
+	  method: "POST",
+	  contentType: 'application/json;charset=UTF-8',
+	  data: JSON.stringify(filter)
 	} );
 
 	xhr.done(function (data) {
 		console.log("DONE processes_table");
 
 		$('#processes_table').html(data);
+
+		data_GLOBAL = data;
+
+		var filter = get_filter()
+
+		console.log("status: " + $('#filter-status').val());
+		console.log('filter: ' + filter.uuid + " " + "filter: " + filter.status);
 
 	} );
 
@@ -111,6 +143,11 @@ function pywps_refresh_processes_table () {
 	} );
 }
 
-//setTimeout(pywps_refresh_processes_table, 2000);
+console.log();
 
-window.setInterval(pywps_refresh_processes_table, 5000);
+//check the processes data two second (= 2000ms) 
+window.setInterval(pywps_refresh_processes_table, 1000);
+
+
+
+
