@@ -48,9 +48,6 @@ def pywps_processes(uuid):
 			
 			return flask.jsonify(response)
 
-		#if flask.request.method == 'GET':
-		#	pass
-
 		if flask.request.method == 'POST':
 			#pause process
 			process.suspend()
@@ -90,23 +87,47 @@ def pywps_processes(uuid):
 def pywps_processes_page():
 	processes = models.Request.query.all()
 
-	return flask.render_template('processes.html', active_page='processes', processes=processes)
+	filter_identifiers = db.session.query(models.Request.identifier.distinct().label('identifier')).all()
+	filter_identifiers = [filter_identifier.identifier for filter_identifier in filter_identifiers]
+
+	return flask.render_template('processes.html', active_page='processes', processes=processes, filter_identifiers=filter_identifiers)
 
 @application.route('/processes/table-entries', methods=['POST'])
 def pywps_processes_table_entries():
+	error = False
+
 	data = flask.request.get_json()
-	#print(data)
-	#print(data['status'])
 
 	query = models.Request.query
 
-	if len(data['pid']) > 0:
-		query = query.filter(models.Request.pid == int(data['pid']))
+	data_status = int(data['status']) if int(data['status']) > 0 else False
+	data_operation = str(data['operation']) if str(data['operation']) != '0' else False
+	data_identifier = str(data['identifier']) if str(data['identifier']) != '0' else False
+	try:
+		data_pid = int(data['pid'])
+	except:
+		data_pid = 0 if (len(str(data['pid'])) > 0) else None
 
-	if len(data['uuid']) > 0:
-		query = query.filter(models.Request.uuid.like('%{}%'.format(str(data['uuid']))))
+	data_uuid = str(data['uuid'])
 
-	return flask.render_template('processes_table_entries.html', processes=query.all())
+	if not error and data_status:
+		query = query.filter(models.Request.status == str(data_status))
+
+	if not error and  data_operation:
+		query = query.filter(models.Request.operation == data_operation)
+
+	if not error and  data_identifier:
+		query = query.filter(models.Request.identifier == data_identifier)
+
+	if not error and data_pid != None:
+		query = query.filter(models.Request.pid == data_pid)
+
+	if not error and len(data_uuid) > 0:
+		query = query.filter(models.Request.uuid.like('%{}%'.format(data_uuid)))
+
+	query = query.all()
+
+	return flask.render_template('processes_table_entries.html', processes=query)
 
 
 @application.route('/create-db')

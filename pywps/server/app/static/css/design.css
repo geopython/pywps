@@ -107,3 +107,20 @@ a.display-block {
 .border-top {
 	border-top: 1px solid #ccc;
 }
+
+#pywps_home a.btn {
+	width: 100%;
+	background-color: #c3def7;
+	height: 100px;
+	padding-top: 28px;
+	font-size: 30px;
+}
+
+#pywps_home a.btn:hover {
+	background-color: #337ab7;
+	color: #ffffff;
+}
+
+#pywps_home p {
+	margin-top: 20px;
+}

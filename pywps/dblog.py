@@ -97,7 +97,11 @@ def update_response(uuid, response, close=False):
     if hasattr(response, 'status'):
         status = "%s" % response.status
 
-    r = models.Request.query.filter(models.Request.uuid == str(uuid)).one()
+
+    try:
+        r = models.Request.query.filter(models.Request.uuid == str(uuid)).one()
+    except:
+        r = None
 
     if r:
         r.time_end = datetime.datetime.now().isoformat()

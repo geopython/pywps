@@ -16,9 +16,9 @@ class WPSResponse(object):
     NO_STATUS = 0
     STORE_STATUS = 1
     STORE_AND_UPDATE_STATUS = 2
-    DONE_STATUS = 3
-    PAUSED = 4
-    STOPPED = 5
+    FINISHED_STATUS = 3
+    PAUSED_STATUS = 4
+    STOPPED_STATUS = 5
 
     def __init__(self, process, wps_request, uuid):
         """constructor
@@ -49,7 +49,7 @@ class WPSResponse(object):
             self.status_percentage = status_percentage
 
         if int(status_percentage) == 100:
-            self.status = self.DONE_STATUS
+            self.status = self.FINISHED_STATUS
 
         # rebuild the doc and update the status xml file
         self.doc = self._construct_doc()
