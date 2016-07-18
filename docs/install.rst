@@ -13,12 +13,31 @@ PyWPS-4 Installation
 Dependencies
 ~~~~~~~~~~~~
 
-PyWPS-4 runs on Python 2.7, 3.3 or newer.
+In the command line tool::
 
-Prior to installing PyWPS-4, Git and the Python bindings for GDAL must be installed in the system. 
-In Debian based systems these packages can be installed with a tool like *apt*::
+    $ sudo apt-get install git python-gdal python-pip
+    $ sudo apt-get install python-dev libxml2-dev libxslt1-dev zlib1g-dev libpq-dev
+    $ sudo apt install apache2
+    $ sudo apt-get install postgresql postgresql-contrib
+    $ sudo pip install virtualenv
 
-    $ sudo apt-get install git python-gdal
+Create a virtual enviroment and clone the PyWPS project
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In the command line tool::
+
+    $ sudo virtualenv /var/www/gsoc-pywps-env
+    $ cd /var/www/gsoc-pywps-env
+    $ source bin/activate
+
+Clone the PyWPS and an example application into the virtual enviroment::
+
+    $ sudo git clone https://github.com/jan-rudolf/pywps
+    $ sudo git clone https://github.com/jan-rudolf/gsoc-pywps-app
+
+Change ownership and group permission according to your user account, replace the string user with your username::
+
+    $ sudo chown -R user:user /var/www/gsoc-pywps-env
 
 
 PyWPS-4
