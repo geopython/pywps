@@ -18,7 +18,7 @@
 		<tr>
 			<td id="action-btn-{{ process.uuid  }}">
 				<!-- show the pause button for running processes -->
-				<a href="javascript:pywps_pause_process('{{ process.uuid }}')" title="Pause the process {{ process.uuid }}" id="pause-btn-{{ process.uuid }}" class="pause-btn btn {% if process.status == '1' or process.status == '2' or process.status == '5' %}display-block{% endif %}" style="color: orange;">
+				<a href="javascript:pywps_pause_process('{{ process.uuid }}')" title="Pause the process {{ process.uuid }}" id="pause-btn-{{ process.uuid }}" class="pause-btn btn {% if process.status == '1' or process.status == '2' %}display-block{% endif %}" style="color: orange;">
 					Pause
 				</a>
 

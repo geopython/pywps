@@ -35,7 +35,7 @@ function pywps_pause_process(uuid) {
 function pywps_stop_process(uuid) {
 	var xhr = $.ajax( {
 	  url: "/processes/" + uuid,
-	  method: "POST"
+	  method: "DELETE"
 
 	} ); 
 
