@@ -26,6 +26,8 @@ Defining processes
 Request and response objects
 ----------------------------
 
+.. module:: pywps.app
+
 .. autoclass:: WPSRequest
    :members:
 
