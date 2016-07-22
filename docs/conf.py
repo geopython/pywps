@@ -69,8 +69,8 @@ class Mock(object):
 
 MOCK_MODULES = ['lxml', 'lxml.etree', 'lxml.builder']
 
-with open('../requirements.txt') as f:
-    MOCK_MODULES = f.read().splitlines()
+#with open('../requirements.txt') as f:
+#    MOCK_MODULES = f.read().splitlines()
 
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()

@@ -7,8 +7,11 @@ Welcome to the PyWPS-4 documentation!
 
 PyWPS is implementation of `OGC Web Processing Service (OGC WPS) standard
 <http://opengeospatial.org/standards/wps>`_ on the server side, using `Python
-<http://python.org>`_ programming language. PyWPS has a bicycle in it's logo,
-because:
+<http://python.org>`_ programming language. PyWPS is currently supporting WPS
+1.0.0. Support for the version 2.0.0. of OGC WPS standard is not been started
+yet.
+
+PyWPS has a bicycle in it's logo, because:
 
 * It's simple maintain
 * It's fast to drive

@@ -26,7 +26,7 @@ Defining processes
 Request and response objects
 ----------------------------
 
-.. autoclass:: WPSRequest
+.. autoclass:: pywps.app.WPSRequest
    :members:
 
    .. attribute:: operation
@@ -46,5 +46,5 @@ Request and response objects
 
       A MultiDict object containing input values sent by the client.
 
-.. autoclass:: WPSResponse
+.. autoclass:: pywps.app.WPSResponse
 
