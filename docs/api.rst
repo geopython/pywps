@@ -48,3 +48,4 @@ Request and response objects
 
 .. autoclass:: pywps.app.WPSResponse
 
+Refer :ref:`exceptions` for their description.

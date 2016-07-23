@@ -1,3 +1,5 @@
+.. _installation:
+
 ====================
 PyWPS-4 Installation
 ====================

@@ -18,7 +18,10 @@ PyWPS has a bicycle in it's logo, because:
 * It can carry a lot
 * It's easy to hack
 
+**Mount your bike and setup & configure your PyWPS instance!**
+
 Contents:
+---------
 
 .. toctree::
    :maxdepth: 2
@@ -27,6 +30,7 @@ Contents:
    configuration
    process
    exceptions
+   deployment
    migration
    api
 
