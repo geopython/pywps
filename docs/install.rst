@@ -2,6 +2,8 @@
 PyWPS-4 Installation
 ====================
 
+.. note:: This installation documentation was tested on the Ubuntu 14.04 LTS operating system.
+
 .. note:: PyWPS-4 is not tested on MS Windows platform. Please join the
     development, if you need this platform to be supported. It's mainly because
     lack of multiprocessing library.  It is used to process asynchronous
@@ -21,10 +23,10 @@ In the command line::
 Installation
 ============
 
-Standard installation is standard Python package installation. If you want to contribute or work on PyWPS, installation in the develop mode is also described.
+Normal installation is standard Python package installation. If you want to contribute or work on PyWPS, the installation in the develop mode is also described.
 
-Standard
---------
+Normal installation
+-------------------
 
 In the command line::
 
@@ -47,7 +49,7 @@ Install Python packages and install the PyWPS::
     $ pip install -r requirements.txt
     $ python setup.py install
 
-Create /tmp/outputs directory and change group and owner to the user that runs the Apache, that is www-data by default::
+Create **/tmp/outputs** directory and change group and owner to the user that runs the Apache, that is **www-data** by default::
 
     $ sudo mkdir /tmp/outputs
     $ sudo chown www-data:www-data /tmp/outputs
@@ -58,8 +60,8 @@ PyWPS is installed and you can remove it now::
     $ sudo rm -Rf pywps
 
 
-Develop 
--------
+Develop installation
+--------------------
 
 In the command line::
 
@@ -82,10 +84,75 @@ Install Python packages and install the PyWPS::
     $ pip install -r requirements.txt
     $ python setup.py develop
 
-Create /tmp/outputs directory and change group and owner to the user that runs the Apache, that is www-data by default::
+Create **/tmp/outputs** directory and change group and owner to the user that runs the Apache, that is **www-data** by default::
 
     $ sudo mkdir /tmp/outputs
     $ sudo chown www-data:www-data /tmp/outputs
+
+
+Database
+========
+
+This section describes how to setup and connect SQLite and PostgreSQL with the PyWPS. 
+
+More about how to connect other engines in the `SQLAlchemy Documentation <http://docs.sqlalchemy.org/en/latest/core/engines.html>`_.
+
+
+SQLite
+------
+
+Change the **SQLAlchemyDatabaseUri** in the PyWPS configuration file under the **server** section::
+
+   SQLAlchemyDatabaseUri=sqlite:////absolute/path/to/<database_name>
+
+
+PostgreSQL
+----------
+
+System configuration
+~~~~~~~~~~~~~~~~~~~~
+
+In the command line, switch to the postgres user::
+
+   $ sudo su postgres
+
+Create a user for the database system, fill your username::
+
+   $ createuser --pwprompt <username>
+
+Create a database with the utf-8 encoding, fill your username from the previous step and the desired database name::
+
+   $ createdb -O<username> -Eutf-8 <database_name>
+
+Exit the postgres's user prompt::
+
+   $ exit
+
+Edit the table, that looks like the one below, so that the **METHOD** column has only **md5** entries (in case you have a different version of PostgreSQL, edit the path to the file with proper version)::
+
+   $ sudo $EDITOR /etc/postgresql/9.3/main/pg_hba.conf
+
++------------+------------+-----------+--------------+---------+ 
+| TYPE       | DATABASE   | USER      | ADDRESS      | METHOD  |
++============+============+===========+==============+=========+
+| local      | all        | all       |              | peer    |
++------------+------------+-----------+--------------+---------+
+| host       | all        | all       | 127.0.0.1/32 | md5     |
++------------+------------+-----------+--------------+---------+
+| host       | all        | all       | ::1/128      | md5     |
++------------+------------+-----------+--------------+---------+ 
+
+Restart the PostgreSQL service::
+
+   $ sudo service postgresql restart
+
+
+PyWPS configuration file setting
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Change the **SQLAlchemyDatabaseUri** in the PyWPS configuration file under the **server** section::
+
+   SQLAlchemyDatabaseUri=postgresql://<username>@localhost/<database_name>
 
 
 Apache
@@ -139,41 +206,6 @@ In the case you want to server PyWPS on the Apache web server, here is an exampl
             Allow from all 
         </Directory> 
     </VirtualHost>
-
-
-
-Database
-========
-
-TBA
-
-
-SQLite
-------
-
-TBA
-
-
-PostgreSQL
-----------
-
-This describe how to create a database and set it up with the PyWPS.
-
-In the command line, switch to postgres user::
-
-   $ sudo su postgre
-
-Create a user for the database system::
-
-   $ createuser --pwprompt <user>
-
-Create a database with the utf-8 encoding::
-
-   $ createdb -O<user> -Eutf-8 <database_name>
-
-dskfjsdlkfj::
-
-   $ exit
 
 
 
