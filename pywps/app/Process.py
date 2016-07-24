@@ -37,7 +37,6 @@ from pywps.app.WPSRequest import WPSRequest
 import pywps.configuration as config
 from pywps._compat import PY2
 from pywps.exceptions import StorageNotSupported, OperationNotSupported, \
-
     ServerBusy, NoApplicableCode
 
 from pywps.server.app import application, db
