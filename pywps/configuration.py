@@ -39,7 +39,7 @@ else:
     import configparser
 
 
-config = None
+CONFIG = None
 LOGGER = logging.getLogger("PYWPS")
 
 
@@ -53,14 +53,14 @@ def get_config_value(section, option):
     :returns: value found in the configuration file
     """
 
-    if not config:
+    if not CONFIG:
         load_configuration()
 
     value = ''
 
-    if config.has_section(section):
-        if config.has_option(section, option):
-            value = config.get(section, option)
+    if CONFIG.has_section(section):
+        if CONFIG.has_option(section, option):
+            value = CONFIG.get(section, option)
 
             # Convert Boolean string to real Boolean values
             if value.lower() == "false":
@@ -79,58 +79,59 @@ def load_configuration(cfgfiles=None):
     :param cfgfiles: list of configuration files
     """
 
-    global config
+    global CONFIG
 
     LOGGER.info('loading configuration')
     if PY2:
-        config = ConfigParser.SafeConfigParser()
+        CONFIG = ConfigParser.SafeConfigParser()
     else:
-        config = configparser.ConfigParser()
+        CONFIG = configparser.ConfigParser()
 
     LOGGER.debug('setting default values')
-    config.add_section('server')
-    config.set('server', 'encoding', 'utf-8')
-    config.set('server', 'language', 'en-US')
-    config.set('server', 'url', 'http://localhost/wps')
-    config.set('server', 'maxprocesses', '30')
-    config.set('server', 'maxsingleinputsize', '1mb')
-    config.set('server', 'maxrequestsize', '3mb')
-    config.set('server', 'temp_path', tempfile.gettempdir())
-    config.set('server', 'processes_path', '')
+    CONFIG.add_section('server')
+    CONFIG.set('server', 'encoding', 'utf-8')
+    CONFIG.set('server', 'language', 'en-US')
+    CONFIG.set('server', 'url', 'http://localhost/wps')
+    CONFIG.set('server', 'maxprocesses', '30')
+    CONFIG.set('server', 'maxsingleinputsize', '1mb')
+    CONFIG.set('server', 'maxrequestsize', '3mb')
+    CONFIG.set('server', 'temp_path', tempfile.gettempdir())
+    CONFIG.set('server', 'processes_path', '')
     outputpath = tempfile.gettempdir()
-    config.set('server', 'outputurl', 'file:///%s' % outputpath)
-    config.set('server', 'outputpath', outputpath)
-    config.set('server', 'logfile', '')
-    config.set('server', 'loglevel', 'INFO')
-    config.set('server', 'workdir',  tempfile.gettempdir())
-    config.set('server', 'parallelprocesses', '2')
+    CONFIG.set('server', 'outputurl', 'file:///%s' % outputpath)
+    CONFIG.set('server', 'outputpath', outputpath)
+    CONFIG.set('server', 'logfile', '')
+    CONFIG.set('server', 'logdatabase', ':memory:')
+    CONFIG.set('server', 'loglevel', 'INFO')
+    CONFIG.set('server', 'workdir',  tempfile.gettempdir())
+    CONFIG.set('server', 'parallelprocesses', '2')
 
-    config.add_section('metadata:main')
-    config.set('metadata:main', 'identification_title', 'PyWPS Processing Service')
-    config.set('metadata:main', 'identification_abstract', 'PyWPS is an implementation of the Web Processing Service standard from the Open Geospatial Consortium. PyWPS is written in Python.')
-    config.set('metadata:main', 'identification_keywords', 'PyWPS,WPS,OGC,processing')
-    config.set('metadata:main', 'identification_keywords_type', 'theme')
-    config.set('metadata:main', 'identification_fees', 'NONE')
-    config.set('metadata:main', 'identification_accessconstraints', 'NONE')
-    config.set('metadata:main', 'provider_name', 'Organization Name')
-    config.set('metadata:main', 'provider_url', 'http://pywps.org/')
-    config.set('metadata:main', 'contact_name', 'Lastname, Firstname')
-    config.set('metadata:main', 'contact_position', 'Position Title')
-    config.set('metadata:main', 'contact_address', 'Mailing Address')
-    config.set('metadata:main', 'contact_city', 'City')
-    config.set('metadata:main', 'contact_stateorprovince', 'Administrative Area')
-    config.set('metadata:main', 'contact_postalcode', 'Zip or Postal Code')
-    config.set('metadata:main', 'contact_country', 'Country')
-    config.set('metadata:main', 'contact_phone', '+xx-xxx-xxx-xxxx')
-    config.set('metadata:main', 'contact_fax', '+xx-xxx-xxx-xxxx')
-    config.set('metadata:main', 'contact_email', 'Email Address')
-    config.set('metadata:main', 'contact_url', 'Contact URL')
-    config.set('metadata:main', 'contact_hours', 'Hours of Service')
-    config.set('metadata:main', 'contact_instructions', 'During hours of service.  Off on weekends.')
-    config.set('metadata:main', 'contact_role', 'pointOfContact')
+    CONFIG.add_section('metadata:main')
+    CONFIG.set('metadata:main', 'identification_title', 'PyWPS Processing Service')
+    CONFIG.set('metadata:main', 'identification_abstract', 'PyWPS is an implementation of the Web Processing Service standard from the Open Geospatial Consortium. PyWPS is written in Python.')
+    CONFIG.set('metadata:main', 'identification_keywords', 'PyWPS,WPS,OGC,processing')
+    CONFIG.set('metadata:main', 'identification_keywords_type', 'theme')
+    CONFIG.set('metadata:main', 'identification_fees', 'NONE')
+    CONFIG.set('metadata:main', 'identification_accessconstraints', 'NONE')
+    CONFIG.set('metadata:main', 'provider_name', 'Organization Name')
+    CONFIG.set('metadata:main', 'provider_url', 'http://pywps.org/')
+    CONFIG.set('metadata:main', 'contact_name', 'Lastname, Firstname')
+    CONFIG.set('metadata:main', 'contact_position', 'Position Title')
+    CONFIG.set('metadata:main', 'contact_address', 'Mailing Address')
+    CONFIG.set('metadata:main', 'contact_city', 'City')
+    CONFIG.set('metadata:main', 'contact_stateorprovince', 'Administrative Area')
+    CONFIG.set('metadata:main', 'contact_postalcode', 'Zip or Postal Code')
+    CONFIG.set('metadata:main', 'contact_country', 'Country')
+    CONFIG.set('metadata:main', 'contact_phone', '+xx-xxx-xxx-xxxx')
+    CONFIG.set('metadata:main', 'contact_fax', '+xx-xxx-xxx-xxxx')
+    CONFIG.set('metadata:main', 'contact_email', 'Email Address')
+    CONFIG.set('metadata:main', 'contact_url', 'Contact URL')
+    CONFIG.set('metadata:main', 'contact_hours', 'Hours of Service')
+    CONFIG.set('metadata:main', 'contact_instructions', 'During hours of service.  Off on weekends.')
+    CONFIG.set('metadata:main', 'contact_role', 'pointOfContact')
 
-    config.add_section('grass')
-    config.set('grass', 'gisbase', '')
+    CONFIG.add_section('grass')
+    CONFIG.set('grass', 'gisbase', '')
 
     if not cfgfiles:
         cfgfiles = _get_default_config_files_location()
@@ -138,7 +139,7 @@ def load_configuration(cfgfiles=None):
     if isinstance(cfgfiles, str):
         cfgfiles = [cfgfiles]
 
-    loaded_files = config.read(cfgfiles)
+    loaded_files = CONFIG.read(cfgfiles)
     if loaded_files:
         LOGGER.info('Configuration file(s) %s loaded', loaded_files)
     else:
@@ -149,11 +150,25 @@ def load_configuration(cfgfiles=None):
 def _check_config():
     """Check some configuration values
     """
-    workdir = get_config_value('server', 'workdir')
+    global CONFIG
 
-    if not os.path.isdir(workdir):
-        LOGGER.warning('server->workdir configuration value %s is not directory'
-                % workdir)
+    def checkdir(confid):
+
+        confvalue = get_config_value('server', confid)
+
+        if not os.path.isdir(confvalue):
+            LOGGER.warning('server->%s configuration value %s is not directory'
+                    % (confid, confvalue))
+
+        if not os.path.isabs(confvalue):
+            LOGGER.warning(
+                    'server->%s configuration value %s is not absolute path, making it absolute to %s' %\
+                        (confid, confvalue, os.path.abspath(confvalue)))
+            CONFIG.set('server', confid, os.path.abspath(confvalue))
+
+
+    [checkdir(n) for n in  ['workdir', 'outputpath']]
+
 
 
 def _get_default_config_files_location():
