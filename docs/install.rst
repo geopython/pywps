@@ -105,6 +105,10 @@ Change the **SQLAlchemyDatabaseUri** in the PyWPS configuration file under the *
 
    SQLAlchemyDatabaseUri=sqlite:////absolute/path/to/<database_name>
 
+Create database tables by the GET HTTP request to::
+
+   http://<URL_address>/create-db
+
 
 PostgreSQL
 ----------
@@ -147,12 +151,16 @@ Restart the PostgreSQL service::
    $ sudo service postgresql restart
 
 
-PyWPS configuration file setting
+PyWPS's configuration file setting
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Change the **SQLAlchemyDatabaseUri** in the PyWPS configuration file under the **server** section::
 
    SQLAlchemyDatabaseUri=postgresql://<username>@localhost/<database_name>
+
+Create database tables by the GET HTTP request to::
+
+   http://<URL_address>/create-db
 
 
 Apache
