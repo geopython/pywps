@@ -7,13 +7,28 @@ Processes
 =========
 
 PyWPS-4 works with processes and services. A process is a class containing an handler method
-and specifying inputs and outputs. A service is a collection of processes.
-
+and specifying inputs and outputs. A service is a collection of processes. 
 
 Writing a process class
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
+
 A processes is coded as a class inheriting from :class:`Process`.
-In the *demo* server they are kept inside the *processes* folder.
+In the *demo* server they are kept inside the *processes* folder, usually in
+separated files.
+
+The instance of an *Process* need following attributes to gete configured:
+
+:identifier:
+    unique identifier of the process
+:title:
+    corresponding title
+:inputs:
+    list of process inputs
+:outputs:
+    list of process outputs
+:handler:
+    function, which gets :class:`pywps.app.WPSRequest` and :class:`pywps.app.WPSResponse` as inputs.
+    
 Here is a very basic example::
 
     from pywps import Process, LiteralInput, LiteralOutput

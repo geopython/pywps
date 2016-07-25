@@ -19,8 +19,11 @@ The configuration file has 3 sections:
     * `grass` for *optional* configuration of support `GRASS GIS
       <http://grass.osgeo.org>`_
 
-PyWPS demo ships with a sample configuration (``default-sample.cfg``).  Copy the
-file to ``default.cfg`` and edit the following: 
+PyWPS demo ships with a sample configuration (``default-sample.cfg``). The
+sample configuration file is also available in the `demo` application as
+described in :ref:`demo` section.
+
+Copy the file to ``default.cfg`` and edit the following: 
 
 [metadata:main]
 ---------------
@@ -30,22 +33,17 @@ configuration file <http://docs.pycsw.org/en/latest/configuration.html>`_.
 
 :identification_title:
     the title of the service
-
 :identification_abstract:
     some descriptive text about the service
-
 :identification_keywords:
     comma delimited list of keywords about the service
-
 :identification_keywords_type:
     keyword type as per the `ISO 19115 MD_KeywordTypeCode codelist
     <http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode>`_).
     Accepted values are ``discipline``, ``temporal``, ``place``, ``theme``,
     ``stratum``
-
 :identification_fees:
     fees associated with the service
-
 :identification_accessconstraints:
     access constraints associated with the service
 :provider_name:

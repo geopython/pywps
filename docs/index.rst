@@ -26,6 +26,8 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   wps
+   pywps
    install
    configuration
    process

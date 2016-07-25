@@ -39,7 +39,7 @@ with open('../VERSION.txt') as f:
 release = version
 latex_logo = 'pywps.png'
 
-extensions = ['sphinx.ext.autodoc']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo']
 exclude_patterns = ['_build']
 source_suffix = '.rst'
 master_doc = 'index'
@@ -74,3 +74,5 @@ MOCK_MODULES = ['lxml', 'lxml.etree', 'lxml.builder']
 
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
+
+todo_include_todos = True
