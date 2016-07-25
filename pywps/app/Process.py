@@ -40,6 +40,7 @@ from pywps.exceptions import StorageNotSupported, OperationNotSupported, \
     ServerBusy, NoApplicableCode
 
 from pywps.server.app import application, db
+from pywps.constants import wps_response_status
 
 
 
@@ -81,7 +82,7 @@ class Process(object):
         self.grass_location = grass_location
 
 
-        self.wps_response = WPSResponse.NO_STATUS
+        self.wps_response = wps_response_status.NO_STATUS
 
         if store_supported:
             self.store_supported = 'true'
@@ -161,10 +162,10 @@ class Process(object):
                 if self.status_supported != 'true':
                     raise OperationNotSupported('Process does not support the updating of status')
 
-                wps_response.status = WPSResponse.STORE_AND_UPDATE_STATUS
+                wps_response.status = wps_response_status.STORE_AND_UPDATE_STATUS
                 async = True
             else:
-                wps_response.status = WPSResponse.STORE_STATUS
+                wps_response.status = wps_response_status.STORE_STATUS
 
         LOGGER.debug('Check if updating of status is not required then no need to spawn a process')
 
@@ -288,7 +289,7 @@ class Process(object):
             new_wps_request = WPSRequest()
             new_wps_request.json = json.loads(request_json)
             new_wps_response = WPSResponse(self, new_wps_request, uuid)
-            new_wps_response.status = WPSResponse.STORE_AND_UPDATE_STATUS
+            new_wps_response.status = wps_response_status.STORE_AND_UPDATE_STATUS
             self._set_uuid(uuid)
             self._run_async(new_wps_request, new_wps_response)
             dblog.remove_stored(uuid)

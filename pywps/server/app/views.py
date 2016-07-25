@@ -2,7 +2,7 @@
 import flask
 import psutil
 
-from pywps.constants import response_status
+from pywps.constants import wps_response_status
 from pywps.server.app import application, db
 
 import models
@@ -91,7 +91,7 @@ def pywps_processes_page():
 	filter_identifiers = db.session.query(models.Request.identifier.distinct().label('identifier')).all()
 	filter_identifiers = [filter_identifier.identifier for filter_identifier in filter_identifiers]
 
-	return flask.render_template('processes.html', active_page='processes', processes=processes, filter_identifiers=filter_identifiers, response_status=response_status)
+	return flask.render_template('processes.html', active_page='processes', processes=processes, filter_identifiers=filter_identifiers, wps_response_status=wps_response_status)
 
 @application.route('/processes/table-entries', methods=['POST'])
 def pywps_processes_table_entries():
@@ -128,7 +128,7 @@ def pywps_processes_table_entries():
 
 	query = query.all()
 
-	return flask.render_template('processes_table_entries.html', processes=query, response_status=response_status)
+	return flask.render_template('processes_table_entries.html', processes=query, wps_response_status=wps_response_status)
 
 
 @application.route('/create-db')
