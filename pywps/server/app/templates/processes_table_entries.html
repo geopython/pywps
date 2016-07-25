@@ -37,27 +37,27 @@
 			</td>
 			<td>
 				<span id="status-text-{{ process.uuid }}">
-				{% if process.status == "0" %}
+				{% if process.status == response_status.NO_STATUS %}
 					Starting
 				{% endif %}
 
-				{% if process.status == "1" %}
+				{% if process.status == response_status.STORE_STATUS %}
 					Running
 				{% endif %}
 
-				{% if process.status == "2" %}
+				{% if process.status == response_status.STORE_AND_UPDATE_STATUS  %}
 					Running
 				{% endif %}
 
-				{% if process.status == "3" %}
+				{% if process.status == response_status.FINISHED_STATUS %}
 					Finished
 				{% endif %}
 
-				{% if process.status == "4" %}
+				{% if process.status == response_status.PAUSED_STATUS  %}
 					Paused
 				{% endif %}
 
-				{% if process.status == "5" %}
+				{% if process.status == response_status.STOPPED_STATUS  %}
 					Stopped
 				{% endif %}
 				</span>

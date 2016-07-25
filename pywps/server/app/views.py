@@ -2,6 +2,7 @@
 import flask
 import psutil
 
+from pywps.constants import response_status
 from pywps.server.app import application, db
 
 import models
@@ -52,7 +53,7 @@ def pywps_processes(uuid):
 			#pause process
 			process.suspend()
 
-			model_request.status = 4 #status PAUSED running in WPSResponse.py
+			model_request.status = response_status.PAUSED_STATUS #status PAUSED running in WPSResponse.py
 
 		if flask.request.method == 'PUT':
 			#resume process
@@ -64,7 +65,7 @@ def pywps_processes(uuid):
 			#stop process
 			process.terminate()
 
-			model_request.status = 5 #status STOPPED in WPSResponse.py
+			model_request.status = response_status.STOPPED_STATUS #status STOPPED in WPSResponse.py
 
 		try:
 			db.session.commit()
@@ -90,7 +91,7 @@ def pywps_processes_page():
 	filter_identifiers = db.session.query(models.Request.identifier.distinct().label('identifier')).all()
 	filter_identifiers = [filter_identifier.identifier for filter_identifier in filter_identifiers]
 
-	return flask.render_template('processes.html', active_page='processes', processes=processes, filter_identifiers=filter_identifiers)
+	return flask.render_template('processes.html', active_page='processes', processes=processes, filter_identifiers=filter_identifiers, response_status=response_status)
 
 @application.route('/processes/table-entries', methods=['POST'])
 def pywps_processes_table_entries():
@@ -127,7 +128,7 @@ def pywps_processes_table_entries():
 
 	query = query.all()
 
-	return flask.render_template('processes_table_entries.html', processes=query)
+	return flask.render_template('processes_table_entries.html', processes=query, response_status=response_status)
 
 
 @application.route('/create-db')

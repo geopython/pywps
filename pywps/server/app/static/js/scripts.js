@@ -143,7 +143,6 @@ function pywps_refresh_processes_table () {
 	} );
 }
 
-console.log();
 
 //check the processes data two second (= 2000ms) 
 window.setInterval(pywps_refresh_processes_table, 1000);

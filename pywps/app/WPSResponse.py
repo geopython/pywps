@@ -1,24 +1,20 @@
 import os
-from lxml import etree
 import time
+
+from lxml import etree
 from werkzeug.wrappers import Request
 from werkzeug.exceptions import HTTPException
+
+import pywps.configuration as config
+
 from pywps import WPS, OWS
+from pywps.constants import response_status
 from pywps.app.basic import xml_response
 from pywps.exceptions import NoApplicableCode
-import pywps.configuration as config
 from pywps.dblog import update_response
 
 
-
 class WPSResponse(object):
-
-    NO_STATUS = 0
-    STORE_STATUS = 1
-    STORE_AND_UPDATE_STATUS = 2
-    FINISHED_STATUS = 3
-    PAUSED_STATUS = 4
-    STOPPED_STATUS = 5
 
     def __init__(self, process, wps_request, uuid):
         """constructor
@@ -32,7 +28,7 @@ class WPSResponse(object):
         self.wps_request = wps_request
         self.outputs = {o.identifier: o for o in process.outputs}
         self.message = ''
-        self.status = self.NO_STATUS
+        self.status = response_status.NO_STATUS
         self.status_percentage = 0
         self.doc = None
         self.uuid = uuid
@@ -49,14 +45,14 @@ class WPSResponse(object):
             self.status_percentage = status_percentage
 
         if int(status_percentage) == 100:
-            self.status = self.FINISHED_STATUS
+            self.status = response_status.FINISHED_STATUS
 
         # rebuild the doc and update the status xml file
         self.doc = self._construct_doc()
 
 
         # check if storing of the status is requested
-        if self.status >= self.STORE_STATUS:
+        if self.status >= response_status.STORE_STATUS:
             self.write_response_doc(self.doc)
 
         update_response(self.uuid, self)
@@ -131,7 +127,7 @@ class WPSResponse(object):
             '?service=WPS&request=GetCapabilities'
         )
 
-        if self.status >= self.STORE_STATUS:
+        if self.status >= response_status.STORE_STATUS:
             if self.process.status_location:
                 doc.attrib['statusLocation'] = self.process.status_url
 
@@ -153,7 +149,7 @@ class WPSResponse(object):
 
         # Status XML
         # return the correct response depending on the progress of the process
-        if self.status >= self.STORE_AND_UPDATE_STATUS:
+        if self.status >= response_status.STORE_AND_UPDATE_STATUS:
             if self.status_percentage == 0:
                 self.message = 'PyWPS Process %s accepted' % self.process.identifier
                 status_doc = self._process_accepted()
