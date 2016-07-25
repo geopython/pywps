@@ -53,7 +53,7 @@ def pywps_processes(uuid):
 			#pause process
 			process.suspend()
 
-			model_request.status = response_status.PAUSED_STATUS #status PAUSED running in WPSResponse.py
+			model_request.status = wps_response_status.PAUSED_STATUS #status PAUSED running in WPSResponse.py
 
 		if flask.request.method == 'PUT':
 			#resume process
@@ -65,7 +65,7 @@ def pywps_processes(uuid):
 			#stop process
 			process.terminate()
 
-			model_request.status = response_status.STOPPED_STATUS #status STOPPED in WPSResponse.py
+			model_request.status = wps_response_status.STOPPED_STATUS #status STOPPED in WPSResponse.py
 
 		try:
 			db.session.commit()
