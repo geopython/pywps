@@ -37,27 +37,27 @@
 			</td>
 			<td>
 				<span id="status-text-{{ process.uuid }}">
-				{% if process.status == wps_response_status.NO_STATUS %}
+				{% if process.status | int() == wps_response_status.NO_STATUS | int() %}
 					Starting
 				{% endif %}
 
-				{% if process.status == wps_response_status.STORE_STATUS %}
+				{% if process.status | int() == wps_response_status.STORE_STATUS | int() %}
 					Running
 				{% endif %}
 
-				{% if process.status == wps_response_status.STORE_AND_UPDATE_STATUS  %}
+				{% if process.status | int() == wps_response_status.STORE_AND_UPDATE_STATUS | int()  %}
 					Running
 				{% endif %}
 
-				{% if process.status == wps_response_status.FINISHED_STATUS %}
+				{% if process.status | int() == wps_response_status.FINISHED_STATUS | int() %}
 					Finished
 				{% endif %}
 
-				{% if process.status == wps_response_status.PAUSED_STATUS  %}
+				{% if process.status | int() == wps_response_status.PAUSED_STATUS | int()  %}
 					Paused
 				{% endif %}
 
-				{% if process.status == wps_response_status.STOPPED_STATUS  %}
+				{% if process.status | int() == wps_response_status.STOPPED_STATUS | int()  %}
 					Stopped
 				{% endif %}
 				</span>
