@@ -12,8 +12,8 @@ class PyWPSFlask(Flask):
 
     def wsgi_app(self, *args):
         #create database tables if doesnt exist with first request
-        from pywps.server.app import db
-        db.create_all()
+        #from pywps.server.app import db
+        #db.create_all()
 
         return super(PyWPSFlask, self).wsgi_app(*args)
 
@@ -28,5 +28,6 @@ class PyWPSFlask(Flask):
         #set database connection
         self.config['SQLALCHEMY_DATABASE_URI'] = configuration.get_config_value('server', 'SQLAlchemyDatabaseUri')
 
-        if run_locally:
+        if run_locally == True:
+            #run Flask's development web server
             self.run(host='0.0.0.0')

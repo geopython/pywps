@@ -88,7 +88,7 @@ def pywps_processes(uuid):
 
 @application.route('/processes')
 def pywps_processes_page():
-	processes = models.Request.query.all()
+	processes = models.Request.query.order_by(models.Request.time_start)
 
 	filter_identifiers = db.session.query(models.Request.identifier.distinct().label('identifier')).all()
 	filter_identifiers = [filter_identifier.identifier for filter_identifier in filter_identifiers]
@@ -128,6 +128,6 @@ def pywps_processes_table_entries():
 	if not error and len(data_uuid) > 0:
 		query = query.filter(models.Request.uuid.like('%{}%'.format(data_uuid)))
 
-	query = query.all()
+	query = query.order_by(models.Request.time_start)
 
 	return flask.render_template('processes_table_entries.html', processes=query, wps_response_status=wps_response_status)
