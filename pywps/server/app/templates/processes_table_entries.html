@@ -1,5 +1,5 @@
 {% if processes %}
-	<table id="processes_table" class="table text-center">
+	<table class="table text-center">
 
 		<tr>
 			<th>Action</th>
@@ -49,7 +49,7 @@
 					Running
 				{% endif %}
 
-				{% if process.status | int() == wps_response_status.FINISHED_STATUS | int() %}
+				{% if process.status | int() == wps_response_status.DONE_STATUS | int() %}
 					Finished
 				{% endif %}
 

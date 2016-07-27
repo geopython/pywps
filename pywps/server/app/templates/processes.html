@@ -75,16 +75,18 @@
 		</div>
 	</form>
 
+    <div class="col-xs-12" id="processes_table">
+	    {% include "processes_table_entries.html" %}
+    </div>
 
-
-	{% include "processes_table_entries.html" %}
-
+	<!--
 	<script type="text/javascript">
-		/*$('#errorModal').modal("show");
+		$('#errorModal').modal("show");
 
 		$('#errorModalBtn').click( function () {
 			$('#errorModal').modal('hide');
-		} );*/
+		} );
 	</script>
+    -->
 </div>
 {% endblock %}
