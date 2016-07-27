@@ -129,13 +129,6 @@ function pywps_refresh_processes_table () {
 
 		$('#processes_table').html(data);
 
-		data_GLOBAL = data;
-
-		var filter = get_filter()
-
-		console.log("status: " + $('#filter-status').val());
-		console.log('filter: ' + filter.uuid + " " + "filter: " + filter.status);
-
 	} );
 
 	xhr.fail( function() {
