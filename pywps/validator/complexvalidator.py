@@ -28,7 +28,7 @@
 import logging
 
 from pywps.validator.mode import MODE
-from pywps.inout.formats.lists import FORMATS
+from pywps.inout.formats import FORMATS
 import mimetypes
 import os
 
