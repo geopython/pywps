@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import flask
+import sqlalchemy
 import psutil
 
 from pywps.constants import wps_response_status
@@ -103,7 +104,7 @@ def pywps_processes_table_entries():
 
 	query = models.Request.query
 
-	data_status = int(data['status']) if int(data['status']) > 0 else False
+	data_status = str(data['status']) if str(data['status']) != 'none' else False
 	data_operation = str(data['operation']) if str(data['operation']) != '0' else False
 	data_identifier = str(data['identifier']) if str(data['identifier']) != '0' else False
 	try:
@@ -114,7 +115,19 @@ def pywps_processes_table_entries():
 	data_uuid = str(data['uuid'])
 
 	if not error and data_status:
-		query = query.filter(models.Request.status == str(data_status))
+
+		if data_status == "running":
+			query = query.filter(
+				sqlalchemy.or_(
+					models.Request.status == str(wps_response_status.STORE_AND_UPDATE_STATUS), models.Request.status == str(wps_response_status.STORE_STATUS)
+				)
+			)
+		elif data_status == "paused":
+			query = query.filter(models.Request.status == str(wps_response_status.PAUSED_STATUS))
+		elif data_status == "stopped":
+			query = query.filter(models.Request.status == str(wps_response_status.STOPPED_STATUS))
+		elif data_status == "finished":
+			query = query.filter(models.Request.status == str(wps_response_status.DONE_STATUS))
 
 	if not error and  data_operation:
 		query = query.filter(models.Request.operation == data_operation)
