@@ -22,12 +22,14 @@ def _get_process(pid):
 
 @application.route('/', methods=['GET'])
 def pywps_index():
+	db.create_all()
+
 	return flask.render_template('index.html', active_page='home')
 
 
 @application.route('/wps', methods=['POST', 'GET'])
 def pywps_wps():
-	return application.pywps_wps_service
+	return application.pywps_service
 
 
 @application.route('/processes/<uuid>', methods=['POST', 'PUT', 'DELETE'])
@@ -129,10 +131,3 @@ def pywps_processes_table_entries():
 	query = query.all()
 
 	return flask.render_template('processes_table_entries.html', processes=query, wps_response_status=wps_response_status)
-
-
-@application.route('/create-db')
-def create_db():
-	db.create_all()
-
-	return 'OK'
