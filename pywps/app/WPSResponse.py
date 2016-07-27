@@ -45,7 +45,7 @@ class WPSResponse(object):
             self.status_percentage = status_percentage
 
         if int(status_percentage) == 100:
-            self.status = wps_response_status.FINISHED_STATUS
+            self.status = wps_response_status.DONE_STATUS
 
         # rebuild the doc and update the status xml file
         self.doc = self._construct_doc()
@@ -66,7 +66,7 @@ class WPSResponse(object):
                 f.flush()
                 os.fsync(f.fileno())
 
-            if self.status >= self.DONE_STATUS:
+            if self.status >= wps_response_status.DONE_STATUS:
                 self.process.clean()
 
         except IOError as e:
@@ -201,7 +201,7 @@ class WPSResponse(object):
         except Exception as exp:
             raise NoApplicableCode(exp)
 
-        if self.status >= self.DONE_STATUS:
+        if self.status >= wps_response_status.DONE_STATUS:
             self.process.clean()
 
         return xml_response(doc)
