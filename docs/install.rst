@@ -158,10 +158,6 @@ Change the **SQLAlchemyDatabaseUri** in the PyWPS configuration file under the *
 
    SQLAlchemyDatabaseUri=postgresql://<username>@localhost/<database_name>
 
-Create database tables by the GET HTTP request to::
-
-   http://<URL_address>/create-db
-
 
 Apache
 ======
