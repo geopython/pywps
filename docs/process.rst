@@ -182,8 +182,8 @@ and accessible from a URL. The user may request as many outputs by reference
 as need, but only *one* may be requested in RAW format.
 
 
-Publishing a process
-~~~~~~~~~~~~~~~~~~~~
+Process deployment
+~~~~~~~~~~~~~~~~~~
 In order for clients to invoke processes, a PyWPS
 :class:`Service` class must be present with the ability to listen for requests. 
 An instance of this class must created, receiving instances of
