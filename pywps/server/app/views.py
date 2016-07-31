@@ -87,7 +87,7 @@ def pywps_processes(uuid):
 	return flask.jsonify(response)
 
 
-@application.route('/processes')
+@application.route('/manage')
 def pywps_processes_page():
 	processes = models.Request.query.order_by(models.Request.time_start)
 

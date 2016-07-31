@@ -137,7 +137,7 @@ function pywps_refresh_processes_table () {
 }
 
 
-//check the processes data two second (= 2000ms) 
+//check the processes data every second (1000ms)
 window.setInterval(pywps_refresh_processes_table, 1000);
 
 
