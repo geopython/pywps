@@ -2,6 +2,7 @@
 import flask
 import sqlalchemy
 import psutil
+import json
 
 from pywps.constants import wps_response_status
 from pywps.server.app import application, db
@@ -33,7 +34,7 @@ def pywps_wps():
 	return application.pywps_service
 
 
-@application.route('/processes/<uuid>', methods=['POST', 'PUT', 'DELETE'])
+@application.route('/processes/<uuid>', methods=['GET', 'PUT', 'DELETE'])
 def pywps_processes(uuid):
 	process = None
 	process_error = None
@@ -45,30 +46,42 @@ def pywps_processes(uuid):
 
 		if not process:
 			response = {
-				'status': model_request.status,
-				'time_end': model_request.time_end,
+				'success': False,
 				'error': process_error
 			}
 			
 			return flask.jsonify(response)
 
-		if flask.request.method == 'POST':
-			#pause process
-			process.suspend()
+		if flask.request.method == 'GET':
+			response = {
+				'success': True,
+				'status': model_request.status,
+				'message': model_request.message
+			}
 
-			model_request.status = wps_response_status.PAUSED_STATUS #status PAUSED running in WPSResponse.py
+			return flask.jsonify(response)
 
 		if flask.request.method == 'PUT':
-			#resume process
-			process.resume()
+			data = json.loads(flask.request.data)
 
-			model_request.status = 2 #status STORE_AND_UPDATE_STATUS running in WPSResponse.py
+			if ('action' in data) and (data['action'] == 'pause'):
+				process.suspend()
+				model_request.status = wps_response_status.PAUSED_STATUS
+			elif ('action' in data) and (data['action'] == 'resume'):
+				process.resume()
+				model_request.status = wps_response_status.STORE_AND_UPDATE_STATUS
+			else:
+				response = {
+					'success': False,
+					'error': 'Unknown action'
+				}
+				return flask.jsonify(response)
 
 		if flask.request.method == 'DELETE':
 			#stop process
 			process.terminate()
 
-			model_request.status = wps_response_status.STOPPED_STATUS #status STOPPED in WPSResponse.py
+			model_request.status = wps_response_status.STOPPED_STATUS
 
 		try:
 			db.session.commit()
@@ -78,11 +91,14 @@ def pywps_processes(uuid):
 		finally:
 			db.session.close()
 
-	response = {
-		'status': model_request.status,
-		'time_end': model_request.time_end,
-		'error': process_error
-	}
+		response = {
+			'success': True
+		}
+	else:
+		response = {
+			'success': False,
+			'error': 'Invalid UUID'
+		}
 
 	return flask.jsonify(response)
 

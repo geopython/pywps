@@ -3,9 +3,10 @@ var data_GLOBAL = null;
 function pywps_pause_process(uuid) {
 	
 	var xhr = $.ajax( {
-	  url: "/processes/" + uuid,
-	  method: "POST",
-
+		url: "/processes/" + uuid,
+		method: "PUT",
+		contentType: "application/json;charset=UTF-8",
+		data: JSON.stringify({"action": "pause"})
 	} );
 
 	xhr.done( function (data) {
@@ -68,8 +69,9 @@ function pywps_stop_process(uuid) {
 function pywps_resume_process(uuid) {
 	var xhr = $.ajax( {
 	  url: "/processes/" + uuid,
-	  method: "PUT"
-
+	  method: "PUT",
+	  contentType: "application/json;charset=UTF-8",
+	  data: JSON.stringify({"action": "resume"})
 	} );
 
 	xhr.done(function (data) {
