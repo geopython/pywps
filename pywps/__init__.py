@@ -32,7 +32,7 @@ import os
 
 from lxml.builder import ElementMaker
 
-__version__ = '4.0.0-alpha2'
+__version__ = '4.0.0-beta1'
 
 LOGGER = logging.getLogger('PYWPS')
 
