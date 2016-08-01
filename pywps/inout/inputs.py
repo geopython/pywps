@@ -15,7 +15,7 @@ class BoundingBoxInput(basic.BBoxInput):
 
     def __init__(self, identifier, title, crss, abstract='',
                  dimensions=2, metadata=None, min_occurs=1,
-                 max_occurs=1, as_reference=False,
+                 max_occurs=1,
                  mode=MODE.NONE):
         if metadata is None:
             metadata = []
@@ -26,7 +26,7 @@ class BoundingBoxInput(basic.BBoxInput):
         self.metadata = metadata
         self.min_occurs = int(min_occurs)
         self.max_occurs = int(max_occurs)
-        self.as_reference = as_reference
+        self.as_reference = False
 
     def describe_xml(self):
         """
@@ -101,7 +101,7 @@ class ComplexInput(basic.ComplexInput):
 
     def __init__(self, identifier, title, supported_formats=None,
                  data_format=None, abstract='', metadata=[], min_occurs=1,
-                 max_occurs=1, as_reference=False, mode=MODE.NONE):
+                 max_occurs=1, mode=MODE.NONE):
         """
         :param str identifier: The name of this input.
         :param str title: Title of the input
@@ -113,7 +113,6 @@ class ComplexInput(basic.ComplexInput):
         :param list metada: TODO
         :param int min_occurs: minimum occurence
         :param int max_occurs: maximum occurence
-        :param bool as_reference: input is reference to URL
         :param :py:obj:`pywps.validator.mode.MODE` mode: validation mode (none to
             strict)
         """
@@ -127,7 +126,7 @@ class ComplexInput(basic.ComplexInput):
         self.metadata = metadata
         self.min_occurs = int(min_occurs)
         self.max_occurs = int(max_occurs)
-        self.as_reference = as_reference
+        self.as_reference = False
         self.url = ''
         self.method = ''
         self.max_size = int(0)
@@ -234,30 +233,25 @@ class ComplexInput(basic.ComplexInput):
 
 
 class LiteralInput(basic.LiteralInput):
+    """Literal Input class
 
-    """
-    Literal Input class
+    :param str identifier: The name of this input.
+    :param str title: Title of the input
+    :param `pywps.inout.literaltypes.LITERAL_DATA_TYPES` data_type: data type
+    :param str abstract: Input abstract
+    :param list metadata: TODO
+    :param str uoms: units
+    :param int min_occurs: minimum occurence
+    :param int max_occurs: maximum occurence
+    :param `pywps.validator.mode.MODE` mode: validation mode (none to strict)
+    :param allowed_values: :class:`pywps.inout.literaltypes.AnyValue` or :py:class:`pywps.inout.literaltypes.AllowedValue` object
     """
 
     def __init__(self, identifier, title, data_type='integer', abstract='',
                  metadata=None, uoms=None, default=None,
-                 min_occurs=1, max_occurs=1, as_reference=False,
+                 min_occurs=1, max_occurs=1,
                  mode=MODE.SIMPLE, allowed_values=AnyValue):
-        """
-        :param str identifier: The name of this input.
-        :param str title: Title of the input
-        :param :py:class:`pywps.inout.literalatypes.LITERAL_DATA_TYPES` data_type:
-           data type
-        :param str abstract: Input abstract
-        :param list metadata: TODO
-        :param str uoms: units
-        :param int min_occurs: minimum occurence
-        :param int max_occurs: maximum occurence
-        :param bool as_reference: input is reference to URL
-        :param :py:obj:`pywps.validator.mode.MODE` mode: validation mode
-            (none to strict)
-        :param allowed_values: :py:class:`pywps.inout.literal_types.AnyValues`
-            or :py:class:`pywps.inout.literaltypes.AllowedValue` object
+        """Constructor
         """
 
         basic.LiteralInput.__init__(self, identifier=identifier, title=title,
@@ -268,7 +262,7 @@ class LiteralInput(basic.LiteralInput):
         self.default = default
         self.min_occurs = int(min_occurs)
         self.max_occurs = int(max_occurs)
-        self.as_reference = as_reference
+        self.as_reference = False
 
     def describe_xml(self):
         """Return DescribeProcess Output element

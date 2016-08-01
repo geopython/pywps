@@ -22,6 +22,12 @@ Defining processes
 
 .. autoclass:: Format
 
+.. autoclass:: pywps.inout.literaltypes.AnyValue
+
+.. autoclass:: pywps.inout.literaltypes.AllowedValue
+
+.. autoclass:: pywps.validator.mode.MODE
+
 
 Request and response objects
 ----------------------------

@@ -20,6 +20,10 @@ PyWPS has a bicycle in it's logo, because:
 
 **Mount your bike and setup & configure your PyWPS instance!**
 
+.. todo::
+    * request qeue management (probably linked from documentation)
+    * inputs and outputs IOhandler class description (file, stream, ...)
+
 Contents:
 ---------
 

@@ -55,7 +55,11 @@ class AllowedValue(AnyValue):
     the values are evaluated in literal validator functions
 
     :param pywps.validator.allowed_value.ALLOWEDVALUETYPE allowed_type: VALUE or RANGE
-    :param value:
+    :param value: single value
+    :param minval: minimal value in case of Range
+    :param maxval: maximal value in case of Range
+    :param spacing: spacing in case of Range
+    :param range_closure: `pywps.input.literaltypes.RANGECLOSURETYPE`
     """
 
     def __init__(self, allowed_type=ALLOWEDVALUETYPE.VALUE, value=None,
