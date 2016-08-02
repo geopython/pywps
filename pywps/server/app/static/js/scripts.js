@@ -1,5 +1,3 @@
-var data_GLOBAL = null;
-
 function pywps_pause_process(uuid) {
 	
 	var xhr = $.ajax( {
@@ -120,24 +118,20 @@ function pywps_refresh_processes_table () {
 	var filter = get_filter();
 
 	var xhr = $.ajax( {
-	  url: "/processes/table-entries",
+	  url: "/manage/table-entries",
 	  method: "POST",
 	  contentType: 'application/json;charset=UTF-8',
 	  data: JSON.stringify(filter)
 	} );
 
 	xhr.done(function (data) {
-		console.log("DONE processes_table");
-
 		$('#processes_table').html(data);
 
 	} );
 
 	xhr.fail( function() {
-		console.log("Error - processes table refresh");
 	} );
 }
-
 
 //check the processes data every second (1000ms)
 window.setInterval(pywps_refresh_processes_table, 1000);

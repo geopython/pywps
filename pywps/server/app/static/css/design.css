@@ -16,6 +16,7 @@
 
 header {
 	margin-top: 10px;
+    padding-left: 30px;
 }
 
 
@@ -46,10 +47,16 @@ table td {
 	/*background-color: yellow;*/
 }
 
+h2 {
+	padding-left: 30px;
+}
+
 #menu {
 	background-color: #337ab7; 
 	color : #ffffff;
 	padding: 10px;
+    padding-left: 38px;
+    padding-right: 40px;
 }
 
 #menu a {
