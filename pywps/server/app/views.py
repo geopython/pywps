@@ -12,99 +12,127 @@ import models
 
 def _get_process(pid):
 	try:
-		process = psutil.Process(pid=pid)
+		(psutil.Process(pid=pid), None)
 	except psutil.NoSuchProcess:
 		return (None, 'No Such Process')
 	except psutil.ZombieProcess:
 		return (None, 'Zombie Process')
 	except psutil.AccessDenied:
 		return (None, 'Access Denied')
-	return (process, None)
 
+def _pause_process(process, model_wps_request):
+    process.suspend()
+
+    model_wps_request.status = wps_response_status.PAUSED_STATUS
+
+def _stop_process(process, model_wps_request):
+    process.terminate()
+
+    model_wps_request.status = wps_response_status.STOPPED_STATUS
+
+def _resume_process(process, model_wps_request):
+    process.resume()
+
+    model_wps_request.status = wps_response_status.STORE_AND_UPDATE_STATUS
+
+def _db_commit():
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    finally:
+        db.session.close()
+
+        return True
 
 @application.route('/', methods=['GET'])
 def pywps_index():
-	db.create_all()
-
 	return flask.render_template('index.html', active_page='home')
-
 
 @application.route('/wps', methods=['POST', 'GET'])
 def pywps_wps():
 	return application.pywps_service
 
+@application.route('/processes', methods=['GET'])
+def pywps_processes():
+    model_wps_requests = models.Request.query.filter(
+        sqlalchemy.or_(
+            models.Request.status == str(wps_response_status.STORE_AND_UPDATE_STATUS),
+            models.Request.status == str(wps_response_status.STORE_STATUS)
+        )
+    )
+
+    running_processes = []
+    for model_wps_request in model_wps_requests:
+        running_processes.append(
+            {
+                "uuid": model_wps_request.uuid
+            }
+        )
+
+    return flask.jsonify({'processes': running_processes})
 
 @application.route('/processes/<uuid>', methods=['GET', 'PUT', 'DELETE'])
-def pywps_processes(uuid):
-	process = None
-	process_error = None
+def pywps_processes_uuid(uuid):
+    model_wps_request = models.Request.query.filter(models.Request.uuid == uuid).first()
 
-	model_request = models.Request.query.filter(models.Request.uuid == uuid).first()
+    if not model_wps_request:
+        response = {
+            'success': False,
+            'error': 'Invalid UUID'
+        }
 
-	if model_request:
-		process, process_error = _get_process(model_request.pid)
+        return flask.jsonify(response)
 
-		if not process:
-			response = {
-				'success': False,
-				'error': process_error
-			}
-			
-			return flask.jsonify(response)
+    process, process_error = _get_process(model_wps_request.pid)
 
-		if flask.request.method == 'GET':
-			response = {
-				'success': True,
-				'status': model_request.status,
-				'message': model_request.message
-			}
+    if not process:
+        response = {
+            'success': False,
+            'error': process_error
+        }
 
-			return flask.jsonify(response)
+        return flask.jsonify(response)
 
-		if flask.request.method == 'PUT':
-			data = json.loads(flask.request.data)
+    if flask.request.method == 'GET':
+        response = {
+            'success': True,
+            'status': model_wps_request.status,
+            'message': model_wps_request.message
+        }
 
-			if ('action' in data) and (data['action'] == 'pause'):
-				process.suspend()
-				model_request.status = wps_response_status.PAUSED_STATUS
-			elif ('action' in data) and (data['action'] == 'resume'):
-				process.resume()
-				model_request.status = wps_response_status.STORE_AND_UPDATE_STATUS
-			else:
-				response = {
-					'success': False,
-					'error': 'Unknown action'
-				}
-				return flask.jsonify(response)
+        return flask.jsonify(response)
 
-		if flask.request.method == 'DELETE':
-			#stop process
-			process.terminate()
+    if flask.request.method == 'PUT':
+        data = json.loads(flask.request.data)
 
-			model_request.status = wps_response_status.STOPPED_STATUS
+        if 'action' in data and data['action'] == 'pause':
+            _pause_process(process, model_wps_request)
 
-		try:
-			db.session.commit()
-		except:
-			db.session.rollback()
-			raise
-		finally:
-			db.session.close()
+        elif 'action' in data and data['action'] == 'resume':
+            _resume_process(process, model_wps_request)
+        else:
+            response = {
+                'success': False,
+                'error': 'Unknown action'
+            }
 
-		response = {
-			'success': True
-		}
-	else:
-		response = {
-			'success': False,
-			'error': 'Invalid UUID'
-		}
+            return flask.jsonify(response)
 
-	return flask.jsonify(response)
+    if flask.request.method == 'DELETE':
+        _stop_process(process, model_wps_request)
 
+    _db_commit()
+
+    response = {
+        'success': True
+    }
+
+    return flask.jsonify(response)
 
 @application.route('/manage')
-def pywps_processes_page():
+def pywps_manage_page():
 	processes = models.Request.query.order_by(models.Request.time_start)
 
 	filter_identifiers = db.session.query(models.Request.identifier.distinct().label('identifier')).all()
