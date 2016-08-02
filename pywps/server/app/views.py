@@ -64,6 +64,7 @@ def pywps_processes():
     )
 
     running_processes = []
+
     for model_wps_request in model_wps_requests:
         running_processes.append(
             {
@@ -138,9 +139,9 @@ def pywps_manage_page():
 	filter_identifiers = db.session.query(models.Request.identifier.distinct().label('identifier')).all()
 	filter_identifiers = [filter_identifier.identifier for filter_identifier in filter_identifiers]
 
-	return flask.render_template('processes.html', active_page='processes', processes=processes, filter_identifiers=filter_identifiers, wps_response_status=wps_response_status)
+	return flask.render_template('manage_processes.html', active_page='manage_processes', processes=processes, filter_identifiers=filter_identifiers, wps_response_status=wps_response_status)
 
-@application.route('/processes/table-entries', methods=['POST'])
+@application.route('/manage/table-entries', methods=['POST'])
 def pywps_processes_table_entries():
 	error = False
 
@@ -187,4 +188,4 @@ def pywps_processes_table_entries():
 
 	query = query.order_by(models.Request.time_start)
 
-	return flask.render_template('processes_table_entries.html', processes=query, wps_response_status=wps_response_status)
+	return flask.render_template('manage_processes_table_entries.html', processes=query, wps_response_status=wps_response_status)
