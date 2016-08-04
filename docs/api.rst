@@ -1,33 +1,54 @@
-===
-API
-===
+#############
+PyWPS API Doc
+#############
 
 .. module:: pywps
 
 
-Defining processes
-------------------
+Process
+=======
 
 .. autoclass:: Process
 
-.. autoclass:: Service
+Inputs and outputs
+==================
+
+.. autoclass:: pywps.validator.mode.MODE
+    :members:
+    :undoc-members:
+
+
+LiteralData
+-----------
 
 .. autoclass:: LiteralInput
 
-.. autoclass:: ComplexInput
-
 .. autoclass:: LiteralOutput
-
-.. autoclass:: ComplexOutput
-
-.. autoclass:: Format
 
 .. autoclass:: pywps.inout.literaltypes.AnyValue
 
 .. autoclass:: pywps.inout.literaltypes.AllowedValue
 
-.. autoclass:: pywps.validator.mode.MODE
+.. autodata:: pywps.inout.literaltypes.LITERAL_DATA_TYPES
 
+
+ComplexData
+-----------
+
+.. autoclass:: ComplexInput
+
+.. autoclass:: ComplexOutput
+
+.. autoclass:: Format
+    
+.. autodata:: pywps.inout.formats.FORMATS
+
+BoundingBoxData
+---------------
+
+.. autoclass:: BoundingBoxInput
+
+.. autoclass:: BoundingBoxOutput
 
 Request and response objects
 ----------------------------

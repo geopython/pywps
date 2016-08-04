@@ -50,20 +50,22 @@ _get_mimetypes()
 
 class Format(object):
     """Input/output format specification
+
+    Predefined Formats are stored in :class:`pywps.inout.formats.FORMATS`
+
+    :param str mime_type: mimetype definition
+    :param str schema: xml schema definition
+    :param str encoding: base64 or not
+    :param function validate: function, which will perform validation. e.g.
+    :param number mode: validation mode
+    :param str extension: file extension
     """
+
     def __init__(self, mime_type,
                  schema=None, encoding=None,
                  validate=emptyvalidator, mode=MODE.SIMPLE,
                  extension=None):
         """Constructor
-
-        :param mime_type: mimetype definition
-        :param schema: xml schema definition
-        :param encoding: base64 or not
-        :param validate: function, which will perform validation. e.g.
-        :param mode: validation mode
-        :param extension: file extension
-        pywps.validator.complexvalidator.validategml
         """
 
         self._mime_type = None
