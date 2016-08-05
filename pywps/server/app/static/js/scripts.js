@@ -8,7 +8,6 @@ function pywps_pause_process(uuid) {
 	} );
 
 	xhr.done( function (data) {
-		console.log("DONE pause " + uuid);
 
 		if (!data.error) {
 			$("#pause-btn-" + uuid).removeClass("display-block");
