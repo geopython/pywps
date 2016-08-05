@@ -152,7 +152,7 @@ Restart the PostgreSQL service::
 
 
 PyWPS's configuration file setting
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Change the **SQLAlchemyDatabaseUri** in the PyWPS configuration file under the **server** section::
 

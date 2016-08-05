@@ -21,6 +21,7 @@ Contents:
    :maxdepth: 2
 
    install
+   rest_api
    configuration
    process
    exceptions
