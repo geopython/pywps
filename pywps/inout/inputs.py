@@ -229,8 +229,7 @@ class ComplexInput(basic.ComplexInput):
 
 
 class LiteralInput(basic.LiteralInput):
-    """Literal Input class
-
+    """
     :param str identifier: The name of this input.
     :param str title: Title of the input
     :param data_type: :class:`pywps.inout.literaltypes.LITERAL_DATA_TYPES` data type

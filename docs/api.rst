@@ -42,6 +42,10 @@ ComplexData
 .. autoclass:: Format
     
 .. autodata:: pywps.inout.formats.FORMATS
+    :annotation:
+    
+    List of out of the box supported formats. User can add custom formats to the
+    array.
 
 BoundingBoxData
 ---------------

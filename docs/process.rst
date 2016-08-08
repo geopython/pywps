@@ -85,6 +85,7 @@ Here is a very basic example:
    :language: python
    :lines: 10-12
    :linenos:
+   :lineno-start: 10
 
 As next step, we will define list of inputs. First input is
 :class:`pywps.ComplexInput` with identifier `vector`, title `Vector map`
@@ -97,6 +98,7 @@ data type set to `float`:
    :language: python
    :lines: 14-21
    :linenos:
+   :lineno-start: 14
 
 Next we define output `output` as :class:`pywps.ComplexOutput`. This
 output supports GML format only.
@@ -105,6 +107,7 @@ output supports GML format only.
    :language: python
    :lines: 23-27
    :linenos:
+   :lineno-start: 23
 
 Next we create new list variables for inputs and outputs.
 
@@ -112,6 +115,7 @@ Next we create new list variables for inputs and outputs.
    :language: python
    :lines: 29-30
    :linenos:
+   :lineno-start: 29
 
 Next we define the *handler* function. In this function, *geospatial analysis
 may happen*. The function gets :class:`pywps.app.WPSRequest` and
@@ -126,6 +130,7 @@ object and how to set data to outputs in the WPSResponse object.
    :pyobject: _handler
    :emphasize-lines: 8-12, 50-54
    :linenos:
+   :lineno-start: 45
 
 At the end, we put everything together and create new `DemoBuffer` class with
 handler, inputs and outputs. It's based on :class:`pywps.Process`:
@@ -134,9 +139,12 @@ handler, inputs and outputs. It's based on :class:`pywps.Process`:
    :pyobject: DemoBuffer
    :language: python
    :linenos:
+   :lineno-start: 32
 
-vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+Process deployment to PyWPS instance
+====================================
 
+.. todo:: START HERE
 
 
 Declaring inputs and outputs
