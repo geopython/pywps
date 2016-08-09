@@ -141,11 +141,6 @@ handler, inputs and outputs. It's based on :class:`pywps.Process`:
    :linenos:
    :lineno-start: 32
 
-Process deployment to PyWPS instance
-====================================
-
-.. todo:: START HERE
-
 
 Declaring inputs and outputs
 ============================
@@ -176,48 +171,42 @@ as :class:`pywps.Input` objects in the :class:`Process` class declaration::
 
 .. note:: More generic description can be found in :ref:`wps` chapter.
 
-:class:`LiteralInput`
----------------------
+LiteralData
+-----------
+
+* :class:`LiteralInput` 
+* :class:`LiteralOutput`
 
 A simple value embedded in the request. The first argument is a
 name. The second argument is the type, one of `string`, `float`,
 `integer` or `boolean`.
 
-:class:`ComplexInput`
----------------------
+ComplexData
+-----------
 
-A large data object, for example a layer. The first argument is a
-name. The second argument is a list of one or more formats, e.g.
-``text/xml`` for GML files or ``application/json`` for GeoJSON
-files.
+* :class:`ComplexInput`
+* :class:`ComplexOutput`
 
-:class:`BoundingBoxInput`
--------------------------
+A large data object, for example a layer. ComplexData do have `format` attribute
+as one of their key property. It's either list of supported formats or single
+(already selected) format. It shall be instance of
+:class:`pywps.inout.formats.Format` class
 
-.. todo:: :class:`BoundingBoxInput`
+ComplexData :class:`Format`
+---------------------------
+asdfjlk alsjf jasfk jaslf kja
 
-:class:`LiteralOutput`
-----------------------
+.. todo:: TODO
 
-    A simple value embedded in the response. The first argument is a
-    name. The second argument is the type, one of `string`, `float`,
-    `integer` or `boolean`.
+BoundingBoxData
+---------------
 
-:class:`ComplexOutput`
-----------------------
+* :class:`BoundingBoxInput`
+* :class:`BoundingBoxOutput`
 
-Same as :class:`ComplexInput`. The first argument is a
-name. The second argument is a list of one or more formats, e.g.
-``text/xml`` for GML files or ``application/json`` for GeoJSON
-files.
+Accessing the inputs and outputs in the `handler`
+=================================================
 
-:class:`BoundingBoxOutput`
---------------------------
-
-.. todo:: :class:`BoundingBoxOutput`
-
-Reading input
--------------
 Handlers receive an input argument, a :class:`WPSRequest` object. Input
 values are found in the `inputs` dictionary::
 
@@ -228,16 +217,19 @@ values are found in the `inputs` dictionary::
         return response
 
 `inputs` is a plain Python dictionary.
-Input can be set and read in different ways including as a file, as data
-- like string or numbers - or as a stream::
+Most of the inputs and outputs are derived from :class:`IOHandler`. This enables
+the user to access the data in 3 different ways: As `file name`, using `file`
+attribute, as direct data object using `data` attribute and as IOStream object,
+using `stream` attribute::
 
     request.inputs['file_input'][0].file
     request.inputs['data_input'][0].data
     request.inputs['stream_input'][0].stream
 
-Because there could be multiple input values with the same identifier, the inputs are accessed with an index.
-For `LiteralInput`, the value is a string. For `ComplexInput`, the value
-is an open file object, with a `mime_type` attribute::
+Because there could be multiple input values with the same identifier, the
+inputs are accessed with an index.  For `LiteralInput`, the value is a string.
+For `ComplexInput`, the value is an open file object, with a `mime_type`
+attribute::
 
     @staticmethod
     def handler(request, response):
@@ -251,7 +243,7 @@ is an open file object, with a `mime_type` attribute::
 
 
 Returning large data
-~~~~~~~~~~~~~~~~~~~~
+====================
 WPS allows for a clever method of returning a large data file: instead
 of embedding the data in the response, it can be saved separately, and
 a URL returned from where the data can be downloaded. In the current
@@ -282,7 +274,7 @@ as need, but only *one* may be requested in RAW format.
 
 
 Process deployment
-~~~~~~~~~~~~~~~~~~
+==================
 In order for clients to invoke processes, a PyWPS
 :class:`Service` class must be present with the ability to listen for requests. 
 An instance of this class must created, receiving instances of
@@ -296,14 +288,19 @@ passes a list of processes instances to the :class:`Server` class::
 
     from pywps import Service
     from processes.helloworld import HelloWorld
+    from processes.demobuffer import DemoBuffer
 
     ...
-    processes = [ HelloWorld() ]
+    processes = [ DemoBuffer(), ... ]
 
     server = Server(processes=processes)
+
     ...
 
-The *demo* application is a `WSGI application`_ that accepts incoming `Execute`
+Running the dev server
+======================
+
+The :ref:`demo` application is a `WSGI application`_ that accepts incoming `Execute`
 requests and calls the appropriate process to handle them. It also
 answers `GetCapabilities` and `DescribeProcess` requests based on the
 process identifier and their inputs and outputs.

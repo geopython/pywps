@@ -17,6 +17,10 @@ Inputs and outputs
     :members:
     :undoc-members:
 
+Most of the inputs nad outputs are derived from the `IOHandler` class
+
+.. autoclass:: pywps.inout.basic.IOHandler
+
 
 LiteralData
 -----------
