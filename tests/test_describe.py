@@ -1,5 +1,8 @@
 import unittest
+
+from flask_testing import TestCase
 from collections import namedtuple
+
 from pywps import Process, Service, LiteralInput, ComplexInput, BoundingBoxInput
 from pywps import LiteralOutput, ComplexOutput, BoundingBoxOutput
 from pywps import E, WPS, OWS, OGCTYPE, Format, NAMESPACES, OGCUNIT
@@ -8,6 +11,7 @@ from pywps.app.basic import xpath_ns
 from pywps.inout.formats import Format
 from pywps.inout.literaltypes import AllowedValue
 from pywps.validator.allowed_value import ALLOWEDVALUETYPE
+from pywps.server.app import application, db
 
 from tests.common import assert_pywps_version, client_for
 
@@ -51,13 +55,24 @@ def get_describe_result(resp):
     return result
 
 
-class DescribeProcessTest(unittest.TestCase):
+class DescribeProcessTest(TestCase):
+    SQLALCHEMY_DATABASE_URI = 'sqlite://'
+    TESTING = True
+
+    def create_app(self):
+        return application
 
     def setUp(self):
+        db.create_all()
+
         def hello(request): pass
         def ping(request): pass
         processes = [Process(hello, 'hello', 'Process Hello'), Process(ping, 'ping', 'Process Ping')]
         self.client = client_for(Service(processes=processes))
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
 
     def test_get_request_all_args(self):
         resp = self.client.get('?Request=DescribeProcess&service=wps&version=1.0.0&identifier=all')
@@ -110,7 +125,19 @@ class DescribeProcessTest(unittest.TestCase):
         assert [pr.identifier for pr in result] == ['hello', 'ping']
 
 
-class DescribeProcessInputTest(unittest.TestCase):
+class DescribeProcessInputTest(TestCase):
+    SQLALCHEMY_DATABASE_URI = 'sqlite://'
+    TESTING = True
+
+    def create_app(self):
+        return application
+
+    def setUp(self):
+        db.create_all()
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
 
     def describe_process(self, process):
         client = client_for(Service(processes=[process]))
@@ -273,3 +300,6 @@ def load_tests(loader=None, tests=None, pattern=None):
         loader.loadTestsFromTestCase(InputDescriptionTest),
     ]
     return unittest.TestSuite(suite_list)
+
+if __name__ == '__main__':
+    unittest.main()
