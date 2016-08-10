@@ -8,9 +8,13 @@ from pywps.inout.literaltypes import AnyValue
 class BoundingBoxInput(basic.BBoxInput):
 
     """
-    :param identifier: The name of this input.
-    :param data_type: Type of literal input (e.g. `string`, `float`...).
+    :param string identifier: The name of this input.
+    :param string title: Human readable title
+    :param string abstract: Longer text description
     :param crss: List of supported coordinate reference system (e.g. ['EPSG:4326'])
+    :param int dimensions: 2 or 3
+    :param int min_occurs: how many times this input occurs
+    :param int max_occurs: how many times this input occurs
     """
 
     def __init__(self, identifier, title, crss, abstract='',

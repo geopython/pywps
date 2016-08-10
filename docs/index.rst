@@ -35,10 +35,11 @@ Contents:
    install
    configuration
    process
-   exceptions
    deployment
    migration
+   external_tools
    api
+   exceptions
 
 
 

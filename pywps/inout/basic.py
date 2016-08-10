@@ -466,7 +466,18 @@ class BBoxInput(BasicIO, BasicBoundingBox, IOHandler):
 
     @property
     def json(self):
-        """Get JSON representation of the input
+        """Get JSON representation of the input. It returns following keys in
+        the JSON object:
+
+            * identifier
+            * title
+            * abstract
+            * type
+            * crs
+            * bbox
+            * dimensions
+            * workdir
+            * mode
         """
         return {
             'identifier': self.identifier,

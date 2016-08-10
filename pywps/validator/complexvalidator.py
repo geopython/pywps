@@ -35,21 +35,23 @@ import os
 LOGGER = logging.getLogger('PYWPS')
 
 def validategml(data_input, mode):
-    """GML validation example
+    """GML validation function
 
-    >>> import StringIO
-    >>> class FakeInput(object):
-    ...     gml = open('point.gml','w')
-    ...     gml.write('''<?xml version="1.0" ?>
-    ...     <gml:featureMember xmlns:gml="http://www.opengis.net/gml" xsi:schemaLocation="http://www.opengis.net/gml http://schemas.opengis.net/gml/2.1.2/feature.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><feature:feature xmlns:feature="http://example.com/feature"><feature:geometry><gml:Point><gml:coordinates decimal="." cs=", " ts=" ">-1, 1</gml:coordinates></gml:Point></feature:geometry></feature:feature></gml:featureMember>''')
-    ...     gml.close()
-    ...     file = 'point.gml'
-    >>> class fake_data_format(object):
-    ...     mimetype = 'application/gml+xml'
-    >>> fake_input = FakeInput()
-    >>> fake_input.data_format = fake_data_format()
-    >>> validategml(fake_input, MODE.SIMPLE)
-    True
+    :param data_input: :class:`ComplexInput`
+    :param mode: :class:`pywps.validator.mode.MODE`
+
+    This function validates GML input based on given validation mode. Following
+    happens, if `mode` parameter is given:
+
+    `MODE.NONE`
+        it will return always `True`
+    `MODE.SIMPLE`
+        the mimetype will be checked
+    `MODE.STRICT`
+        `GDAL/OGR <http://gdal.org/>`_ is used for getting the propper format.
+    `MODE.VERYSTRICT`
+        the :class:`lxml.etree` is used along with given input `schema` and the
+        GML file is properly validated against given schema.
     """
 
     LOGGER.info('validating GML; Mode: %s', mode)

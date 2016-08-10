@@ -51,6 +51,8 @@ ComplexData
     List of out of the box supported formats. User can add custom formats to the
     array.
 
+.. autofunction:: pywps.validator.complexvalidator.validategml
+
 BoundingBoxData
 ---------------
 

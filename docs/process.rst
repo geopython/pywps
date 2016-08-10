@@ -190,19 +190,50 @@ ComplexData
 A large data object, for example a layer. ComplexData do have `format` attribute
 as one of their key property. It's either list of supported formats or single
 (already selected) format. It shall be instance of
-:class:`pywps.inout.formats.Format` class
+:class:`pywps.inout.formats.Format` class. 
 
-ComplexData :class:`Format`
----------------------------
-asdfjlk alsjf jasfk jaslf kja
+ComplexData :class:`Format` and input validation
+------------------------------------------------
+The ComplexData needs as one of the parameters list of supported data formats.
+They are derived from the :class:`Format`. The :class:`Format` needs among
+others `mime_type` parameter and also `validate` -- function, which is used
+for in put data validation, and also there is `mode` parameter -- defining how
+strict the validation should be (see :class:`pywps.validator.mode.MODE`).
 
-.. todo:: TODO
+`Validate` function is any function you, as our user, will write, with two input
+paramers - `data_input` (which is :class:`ComplexInput`), and `mode`. The
+function shall return `boolean` value indicating, whether the input data are
+considered valid or not for given `mode`. As example, get inspired by
+:py:func:`pywps.validator.complexvalidator.validategml` function.
+
+The good news is: there are already predefined validationg functions for ESRI
+Shapefile, GML and GeoJSON formats using GDAL/OGR, XML Schema validaton and JSON
+schema validator - you just have to pick propper supported formats from
+:class:`pywps.inout.formats.FORMATS` list and set the validation mode to your
+:class:`ComplexInput`.
+
+Even better news is: you can define custom validation functions and validate
+input data according to your needs.
 
 BoundingBoxData
 ---------------
 
 * :class:`BoundingBoxInput`
 * :class:`BoundingBoxOutput`
+
+BoundingBoxData are containging information about bounding box of desired area
+and coordinate reference system. Interesting attributes of the BoundingBoxData
+are
+
+`crs`
+    current coordinate reference system
+`dimensions`
+    number of dimensions
+`ll`
+    pair of coordinates (or triplet) of the lower-left corner
+`ur`
+    pair of coordinates (or triplet) of the upper-right corner
+
 
 Accessing the inputs and outputs in the `handler`
 =================================================
@@ -218,9 +249,24 @@ values are found in the `inputs` dictionary::
 
 `inputs` is a plain Python dictionary.
 Most of the inputs and outputs are derived from :class:`IOHandler`. This enables
-the user to access the data in 3 different ways: As `file name`, using `file`
-attribute, as direct data object using `data` attribute and as IOStream object,
-using `stream` attribute::
+the user to access the data in 3 different ways:
+
+`input.file`
+    Will return file name - you can access the data using name of the file
+    stored on the hard drive.
+`input.data`
+    is the direct link to the data themselves. No need for creating file object
+    on the hard drive or opening the file and closing it - PyWPS will do
+    everything for you
+`input.stream`
+    will give you IOStream of the data. No need for opening the file, you just
+    have to `read()` the data.
+
+PyWPS will persistently transform the input (and output) data to desired form.
+You can also set the data for your `Output` object like `output.data = 1` or
+`output.file = "myfile.json"` - works the same way.
+
+Example::
 
     request.inputs['file_input'][0].file
     request.inputs['data_input'][0].data
