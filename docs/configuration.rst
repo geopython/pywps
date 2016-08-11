@@ -4,23 +4,23 @@
 Configuration
 =============
 
-PyWPS is configured using a configuration file. The file uses
+PyWPS is configured using a configuration file. The file uses the
 `ConfigParser <https://wiki.python.org/moin/ConfigParserExamples>`_ format.
 
 .. versionadded:: 4.0.0
 .. warning:: Compatibility with PyWPS 3.x: major changes have been made
-  to the config file in order to allow for shared configurations with pycsw
-  and other projects.
+  to the config file in order to allow for shared configurations with `PyCSW
+  <http://pycsw.org/>`_ and other projects.
 
 The configuration file has 3 sections:
 
-    * `metadata:main` for server's metadata inputs
+    * `metadata:main` for the server metadata inputs
     * `server` for server configuration
-    * `grass` for *optional* configuration of support `GRASS GIS
+    * `grass` for *optional* configuration to support `GRASS GIS
       <http://grass.osgeo.org>`_
 
-PyWPS demo ships with a sample configuration (``default-sample.cfg``). The
-sample configuration file is also available in the `demo` application as
+PyWPS ships with a sample configuration file (``default-sample.cfg``). 
+A similar file is also available in the `demo` service as
 described in :ref:`demo` section.
 
 Copy the file to ``default.cfg`` and edit the following: 
@@ -28,7 +28,7 @@ Copy the file to ``default.cfg`` and edit the following:
 [metadata:main]
 ---------------
 
-The `[metadata:main]` section was designed accoridng to `pycsw project
+The `[metadata:main]` section was designed according to the `PyCSW project
 configuration file <http://docs.pycsw.org/en/latest/configuration.html>`_.
 
 :identification_title:
@@ -107,27 +107,33 @@ configuration file <http://docs.pycsw.org/en/latest/configuration.html>`_.
 
 :parallelprocesses:
     maximum number of parallel running processes - set this number carefully.
-    Effective number of parallel running processes is limited by number of cores
-    of the processor of the hosting machine, as well as speed and response time
-    of harddrives. Reasonable number of parallel running processes is not
-    higher, then number of processor cores.
+    The effective number of parallel running processes is limited by the number 
+    of cores  in the processor of the hosting machine. As well, speed and 
+    response time of harddrives impact ultimate processing performance. A 
+    reasonable number of parallel running processes is not higher than the 
+    number of processor cores.
 
 :logdatabase:
-    SQLite3 file, where the login about requests/responses will be provided. You
-    can set this to `":memory:"` for having the database in memory
+    SQLite3 file, where the login about requests/responses is to be stored. It
+    can be set to `":memory:"` to store the database in memory.
 
 :maxrequestsize:
-    maximal request size. 0 for no limit :workdir: temporary
-    directory for all temporary files (which should be always deleted, once the
-    process is finished :outputpath: server path for storing output files
+    maximal request size. 0 for no limit 
+    
+:workdir: 
+    a directory to store all temporary files (which should be always deleted, 
+    once the process is finished).
+    
+:outputpath: 
+    server path where to store output files.
 
 :outputurl:
     corresponding URL
 
-.. note:: `outputpath` and `outputurl` must corespond. `outputpath` is name
+.. note:: `outputpath` and `outputurl` must corespond. `outputpath` is the name
         of the resulting target directory, where all output data files are
-        stored (with unique names). `outputurl` is corresponding full URL, which
-        is targeting to `outputpath` directory.
+        stored (with unique names). `outputurl` is the corresponding full URL, 
+        which is targeting to `outputpath` directory.
 
         Example: `outputpath=/var/www/wps/outputs` shell correspond with
         `outputurl=http://foo.bar/wps/outputs`
@@ -137,7 +143,7 @@ configuration file <http://docs.pycsw.org/en/latest/configuration.html>`_.
 -------
 
 :gisbase:
-  directory of GRASS GIS instalation, refered as `GISBASE
+  directory of the GRASS GIS instalation, refered as `GISBASE
   <https://grass.osgeo.org/grass73/manuals/variables.html>`_
 
 -----------

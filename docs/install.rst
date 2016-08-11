@@ -5,25 +5,26 @@ Installation
 ============
 
 
-.. note:: PyWPS-4 is not tested on MS Windows platform. Please join the
-    development, if you need this platform to be supported. It's mainly because
-    lack of multiprocessing library.  It is used to process asynchronous
-    execution, i.e., when making requests storing the response document and
-    updating a status document displaying the progress of execution.
+.. note:: PyWPS-4 is not tested on the MS Windows platform. Please join the
+    development team if you need this platform to be supported. This is mainly 
+    because of the lack of a multiprocessing library.  It is used to process 
+    asynchronous execution, i.e., when making requests storing the response 
+    document and updating a status document displaying the progress of 
+    execution.
 
 
 Dependencies and requirements
 -----------------------------
 
 PyWPS-4 runs on Python 2.7, 3.3 or newer. PyWPS is currently tested and
-developed on Linux (mostly Ubuntu). In the documentation we are going to take
-this distribution as reference.
+developed on Linux (mostly Ubuntu). In the documentation we take this 
+distribution as reference.
 
 Prior to installing PyWPS-4, Git and the Python bindings for GDAL must be
 installed in the system.  In Debian based systems these packages can be
 installed with a tool like *apt*::
 
-    $ sudo apt-get install git python-gdal
+    $ sudo apt install git python-gdal
 
 
 Download and install
@@ -47,25 +48,25 @@ Manual installation
 
             $ cd pywps-4/
 
-        Then install deps using pip::
+        Then install the package dependenciess using pip::
 
             $ pip install -r requirements.txt
             $ pip install -r requirements-dev.txt  # for developer tasks
 
-        And install PyWPS system-wide::
+        To install PyWPS system-wide run::
 
             $ sudo python setup.py install
 
 .. _demo:
 
-The demo service and sample processes
--------------------------------------
+The demo service and its sample processes
+-----------------------------------------
 
 To use PyWPS-4 the user must code processes and publish them through a service.
 A demo service is available that makes up a good starting point for first time
-users. This launches a very simple builtin server (`flask
+users. This launches a very simple built-in server (relying on `flask
 <http://flask.pocoo.org/>`_), which is good enough for testing but probably not
-what you want to use in production.  It can be cloned directly into the user
+appropriate for production.  It can be cloned directly into the user
 area::
 
     $ git clone https://github.com/geopython/pywps-demo.git
@@ -73,8 +74,8 @@ area::
 It may be run right away through the `demo.py` script.  First time users should
 start by studying the demo project structure and then code their own processes.
 
-Full more details please consult the :ref:`process` section. The `demo` contains
-some basic processes too, so you could get started with some examples (like
-`area`, `buffer`, `feature_count` and `grassbuffer`). These processes are to be
-taken just as for your inspiration and code documentation - most of them do not
+Full more details please consult the :ref:`process` section. The `demo` service 
+contains some basic processes too, so you could get started with some examples 
+(like `area`, `buffer`, `feature_count` and `grassbuffer`). These processes are 
+to be taken just as inspiration and code documentation - most of them do not
 make any sense (e.g. `sayhello`).
