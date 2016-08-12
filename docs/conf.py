@@ -39,7 +39,12 @@ with open('../VERSION.txt') as f:
 release = version
 latex_logo = 'pywps.png'
 
-extensions = ['sphinx.ext.extlinks', 'sphinx.ext.autodoc', 'sphinx.ext.todo', 'sphinx.ext.mathjax']
+extensions = ['sphinx.ext.extlinks',
+              'sphinx.ext.autodoc',
+              'sphinx.ext.todo',
+              'sphinx.ext.mathjax',
+              'sphinx.ext.viewcode'
+            ]
 exclude_patterns = ['_build']
 source_suffix = '.rst'
 master_doc = 'index'
