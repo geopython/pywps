@@ -31,7 +31,7 @@ def log_request(uuid, request):
     system
     """
     r = models.Request(
-        uuid=uuid, 
+        uuid=str(uuid),
         pid=os.getpid(), 
         operation=request.operation, 
         version=request.version, 
@@ -122,7 +122,8 @@ def update_response(uuid, response, close=False):
 def store_process(uuid, request):
     """Save given request under given UUID for later usage
     """
-    r = models.StoredRequest(uuid=uuid, request=request.json)
+    print("bum")
+    r = models.StoredRequest(uuid=str(uuid), request=request.json)
 
     if r:
         db.session.add(r)
@@ -139,6 +140,7 @@ def store_process(uuid, request):
 def remove_stored(uuid):
     """Remove given request from stored requests
     """
+    print("bum2")
     models.StoredRequest.query.delete()
 
 

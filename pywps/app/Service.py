@@ -12,7 +12,7 @@ import pywps.configuration as config
 from pywps.exceptions import MissingParameterValue, NoApplicableCode, InvalidParameterValue, FileSizeExceeded, \
     StorageNotSupported
 from pywps.inout.inputs import ComplexInput, LiteralInput, BoundingBoxInput
-from pywps.dblog import log_request, update_response
+from pywps.dblog import log_request, update_response, db
 
 from collections import deque
 import os

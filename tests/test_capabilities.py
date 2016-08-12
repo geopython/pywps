@@ -117,5 +117,11 @@ class CapabilitiesTest(TestCase):
         resp = self.client.get('?service=WPS&request=GetCapabilities')
         assert_pywps_version(resp)
 
-if __name__ == '__main__':
-    unittest.main()
+def load_tests(loader=None, tests=None, pattern=None):
+    if not loader:
+        loader = unittest.TestLoader()
+    suite_list = [
+        loader.loadTestsFromTestCase(BadRequestTest),
+        loader.loadTestsFromTestCase(CapabilitiesTest),
+    ]
+    return unittest.TestSuite(suite_list)
