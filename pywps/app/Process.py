@@ -33,6 +33,7 @@ import tempfile
 
 from pywps import WPS, OWS, E, dblog
 from pywps.app.WPSResponse import WPSResponse
+from pywps.app.WPSResponse import STATUS
 from pywps.app.WPSRequest import WPSRequest
 import pywps.configuration as config
 from pywps._compat import PY2
@@ -156,10 +157,10 @@ class Process(object):
                 if self.status_supported != 'true':
                     raise OperationNotSupported('Process does not support the updating of status')
 
-                wps_response.status = WPSResponse.STORE_AND_UPDATE_STATUS
+                wps_response.status = STATUS.STORE_AND_UPDATE_STATUS
                 async = True
             else:
-                wps_response.status = WPSResponse.STORE_STATUS
+                wps_response.status = STATUS.STORE_STATUS
 
         LOGGER.debug('Check if updating of status is not required then no need to spawn a process')
 
@@ -280,7 +281,7 @@ class Process(object):
             new_wps_request = WPSRequest()
             new_wps_request.json = json.loads(request_json)
             new_wps_response = WPSResponse(self, new_wps_request, uuid)
-            new_wps_response.status = WPSResponse.STORE_AND_UPDATE_STATUS
+            new_wps_response.status = STATUS.STORE_AND_UPDATE_STATUS
             self._set_uuid(uuid)
             self._run_async(new_wps_request, new_wps_response)
             dblog.remove_stored(uuid)

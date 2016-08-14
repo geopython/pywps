@@ -63,6 +63,11 @@ BoundingBoxData
 Request and response objects
 ----------------------------
 
+.. autodata:: pywps.app.WPSResponse.STATUS
+    :annotation:
+
+    Process status information
+
 .. autoclass:: pywps.app.WPSRequest
    :members:
 
@@ -83,6 +88,14 @@ Request and response objects
 
       A MultiDict object containing input values sent by the client.
 
+
 .. autoclass:: pywps.app.WPSResponse
+    :members:
+
+    .. attribute:: status
+
+        Information about currently running process status
+        :class:`pywps.app.WPSResponse.STATUS`
+
 
 Refer :ref:`exceptions` for their description.
