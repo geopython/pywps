@@ -48,7 +48,7 @@ def get_running():
     conn = get_connection()
     cur = conn.cursor()
 
-    res = cur.execute('SELECT uuid FROM pywps_requests WHERE percent_done < 100')
+    res = cur.execute('SELECT uuid FROM pywps_requests WHERE percent_done < 100 and percent_done > -1')
 
     return res.fetchall()
 
