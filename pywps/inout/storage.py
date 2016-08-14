@@ -73,10 +73,7 @@ class FileStorage(StorageAbstract):
         """
         """
         self.target = config.get_config_value('server', 'outputpath')
-        self.output_url = '%s%s' % (
-            config.get_config_value('server', 'url'),
-            config.get_config_value('server', 'outputurl')
-        )
+        self.output_url = config.get_config_value('server', 'outputurl')
 
     def store(self, output):
         import shutil, tempfile, math
@@ -95,7 +92,7 @@ class FileStorage(StorageAbstract):
 
         (prefix, suffix) = os.path.splitext(file_name)
         if not suffix:
-            suffix = output.output_format.get_extension()
+            suffix = output.output_format.extension
         (file_dir, file_name) = os.path.split(prefix)
         output_name = tempfile.mkstemp(suffix=suffix, prefix=file_name,
                                        dir=self.target)[1]

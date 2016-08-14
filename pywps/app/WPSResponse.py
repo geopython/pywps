@@ -53,11 +53,11 @@ class WPSResponse(object):
         if status_percentage:
             self.status_percentage = status_percentage
 
-        # rebuild the doc and update the status xml file
-        self.doc = self._construct_doc()
-
         # check if storing of the status is requested
-        if self.status >= STATUS.STORE_STATUS:
+        if self.status >= STATUS.STORE_AND_UPDATE_STATUS:
+
+            # rebuild the doc and update the status xml file
+            self.doc = self._construct_doc()
             self.write_response_doc(self.doc)
 
         update_response(self.uuid, self)
@@ -154,7 +154,6 @@ class WPSResponse(object):
 
         # Status XML
         # return the correct response depending on the progress of the process
-        print("#############x", self.status_percentage, self.status, STATUS.STORE_AND_UPDATE_STATUS)
         if self.status >= STATUS.STORE_AND_UPDATE_STATUS:
             if self.status_percentage == 0:
                 self.message = 'PyWPS Process %s accepted' % self.process.identifier
