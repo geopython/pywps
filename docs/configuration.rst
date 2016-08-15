@@ -135,7 +135,7 @@ configuration file <http://docs.pycsw.org/en/latest/configuration.html>`_.
         stored (with unique names). `outputurl` is the corresponding full URL, 
         which is targeting to `outputpath` directory.
 
-        Example: `outputpath=/var/www/wps/outputs` shell correspond with
+        Example: `outputpath=/var/www/wps/outputs` shall correspond with
         `outputurl=http://foo.bar/wps/outputs`
 
 
