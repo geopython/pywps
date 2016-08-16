@@ -11,14 +11,14 @@ import models
 
 
 def _get_process(pid):
-	try:
-		(psutil.Process(pid=pid), None)
-	except psutil.NoSuchProcess:
-		return (None, 'No Such Process')
-	except psutil.ZombieProcess:
-		return (None, 'Zombie Process')
-	except psutil.AccessDenied:
-		return (None, 'Access Denied')
+    try:
+        (psutil.Process(pid=pid), None)
+    except psutil.NoSuchProcess:
+        return (None, 'No Such Process')
+    except psutil.ZombieProcess:
+        return (None, 'Zombie Process')
+    except psutil.AccessDenied:
+        return (None, 'Access Denied')
 
 def _pause_process(process, model_wps_request):
     process.suspend()
@@ -48,11 +48,11 @@ def _db_commit():
 
 @application.route('/', methods=['GET'])
 def pywps_index():
-	return flask.render_template('index.html', active_page='home')
+    return flask.render_template('index.html', active_page='home')
 
 @application.route('/wps', methods=['POST', 'GET'])
 def pywps_wps():
-	return application.pywps_service
+    return application.pywps_service
 
 @application.route('/processes', methods=['GET'])
 def pywps_processes():
@@ -134,12 +134,12 @@ def pywps_processes_uuid(uuid):
 
 @application.route('/manage')
 def pywps_manage_page():
-	processes = models.Request.query.order_by(models.Request.time_start)
+    processes = models.Request.query.order_by(models.Request.time_start)
 
-	filter_identifiers = db.session.query(models.Request.identifier.distinct().label('identifier')).all()
-	filter_identifiers = [filter_identifier.identifier for filter_identifier in filter_identifiers]
+    filter_identifiers = db.session.query(models.Request.identifier.distinct().label('identifier')).all()
+    filter_identifiers = [filter_identifier.identifier for filter_identifier in filter_identifiers]
 
-	return flask.render_template('manage_processes.html', active_page='manage_processes', processes=processes, filter_identifiers=filter_identifiers, wps_response_status=wps_response_status)
+    return flask.render_template('manage_processes.html', active_page='manage_processes', processes=processes, filter_identifiers=filter_identifiers, wps_response_status=wps_response_status)
 
 @application.route('/manage/table-entries', methods=['POST'])
 def pywps_processes_table_entries():
