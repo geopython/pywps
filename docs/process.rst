@@ -122,7 +122,7 @@ may happen*. The method gets a :class:`pywps.app.WPSRequest` and a
 :class:`pywps.app.WPSResponse` object as parameters. In our case, we
 calculate the buffer around each vector feature using 
 `GDAL/OGR library <http://gdal.org>`_. We will not got much into the details, 
-what you should note is how to get inut data from the 
+what you should note is how to get input data from the 
 :class:`pywps.app.WPSRequest` object and how to set data as outputs in the 
 :class:`pywps.app.WPSResponse` object.
 

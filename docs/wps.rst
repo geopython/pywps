@@ -82,7 +82,7 @@ maxOccurs
     Maxium number of times, the input or output is present
 
 Depending on the data type (Literal, Complex, BoundingBox), other attributes
-might occure too.
+might occur too.
 
 LiteralData
 ~~~~~~~~~~~

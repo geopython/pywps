@@ -48,7 +48,7 @@ Manual installation
 
             $ cd pywps-4/
 
-        Then install the package dependenciess using pip::
+        Then install the package dependencies using pip::
 
             $ pip install -r requirements.txt
             $ pip install -r requirements-dev.txt  # for developer tasks

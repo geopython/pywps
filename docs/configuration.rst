@@ -103,13 +103,13 @@ configuration file <http://docs.pycsw.org/en/latest/configuration.html>`_.
     http://docs.python.org/library/logging.html#logging-levels)
 
 :logfile:
-    the full file path to the logfile
+    the full file path to the log file
 
 :parallelprocesses:
     maximum number of parallel running processes - set this number carefully.
     The effective number of parallel running processes is limited by the number 
     of cores  in the processor of the hosting machine. As well, speed and 
-    response time of harddrives impact ultimate processing performance. A 
+    response time of hard drives impact ultimate processing performance. A 
     reasonable number of parallel running processes is not higher than the 
     number of processor cores.
 

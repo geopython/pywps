@@ -36,7 +36,7 @@ which:
 
     1. Loads the configuration files
     2. Serves processes
-    3. Takes care about maximum number of concurent processes and similar
+    3. Takes care about maximum number of concurrent processes and similar
 
 Creating a PyWPS `WSGI` instance
 --------------------------------
@@ -161,7 +161,7 @@ The server responded with the :py:class:`pywps.exceptions.MissingParameterValue`
 exception, telling us that the parameter `service` was not set. This is  
 compliant with the OGC WPS standard, since each request mast have at least the 
 `service` and `request` parameters. We can say for now, that this PyWPS 
-instance is properly deployed on the server, since it returns propper exception 
+instance is properly deployed on the server, since it returns proper exception 
 report.
 
 We now have to configure the instance by editing the `pywps.cfg` file and adding

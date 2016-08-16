@@ -6,7 +6,7 @@ PyWPS
 
 .. todo:: 
 
-    * how are thigs organised
+    * how are thnigs organised
     * storage
     * dblog
     * relationship to grass gis
@@ -25,7 +25,7 @@ Why is PyWPS there
 Many scientific researchers and geospatial services provider need to setup
 system, where the geospatial operations would be calculated on the server, while
 the system resources could be exposed to clients. PyWPS is here, so that you
-could setup the server fast, deploy your awesome geospatial calculation and
+could set up the server fast, deploy your awesome geospatial calculation and
 expose it to the world. PyWPS is written in Python with support for many
 geospatial tools out there, like GRASS GIS, R-Project or GDAL. Python is the
 most geo-positive scripting language out there, therefore all the best tools
