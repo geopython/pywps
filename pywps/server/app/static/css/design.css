@@ -1,0 +1,133 @@
+.font-size-80 {
+	font-size: 80%;
+}
+
+.margin-top-20 {
+	margin-top: 20px;
+}
+
+.margin-top-10 {
+	margin-top: 10px;
+}
+
+.underline {
+	text-decoration: underline;
+}
+
+header {
+	margin-top: 10px;
+    padding-left: 30px;
+}
+
+
+ul li {
+	line-height: 1.8;
+}
+
+#header-left img {
+	max-width: 100%;
+	padding-top: 20px;
+}
+
+h1 {
+	padding-top: 0px;
+}
+
+
+header h1 a {
+	text-decoration: none;
+}
+
+table th {
+	text-align: center;
+}
+
+table td {
+	height: 51px;
+	/*background-color: yellow;*/
+}
+
+h2 {
+	padding-left: 30px;
+}
+
+#menu {
+	background-color: #337ab7; 
+	color : #ffffff;
+	padding: 10px;
+    padding-left: 38px;
+    padding-right: 40px;
+}
+
+#menu a {
+	color: #ffffff;
+	margin-right: 10px;
+	margin-left: 10px;
+	text-decoration: underline;
+}
+
+#menu a.active, #menu a:hover {
+	text-decoration: none;
+}
+
+.pause-btn, .resume-btn, .stop-btn {	
+	display: none;
+	float: left;
+}
+
+a.pause-btn, a.pause-btn:hover {
+	color: orange;
+}
+
+a.resume-btn, a.resume-btn:hover {
+	color: green;
+}
+
+a.stop-btn, a.stop-btn:hover {
+	color: red;
+}
+
+a.pause-btn, a.resume-btn, a.stop-btn {
+	text-decoration: underline;
+}
+
+a.pause-btn:hover, a.resume-btn:hover, a.stop-btn:hover {
+	text-decoration: none;
+}
+
+a.display-block {
+	display: block;
+}
+
+.table tbody tr td {
+    vertical-align: middle;
+}
+
+#processes h4 {
+	font-size: 95%;
+}
+
+.border-right {
+	border-right: 1px solid #ccc;
+}
+
+.border-top {
+	border-top: 1px solid #ccc;
+}
+
+#pywps_home a.btn {
+	width: 100%;
+	background-color: #c3def7;
+	height: 100px;
+	padding-top: 28px;
+	font-size: 30px;
+}
+
+#pywps_home a.btn:hover {
+	background-color: #337ab7;
+	color: #ffffff;
+}
+
+#pywps_home p {
+	margin-top: 20px;
+}

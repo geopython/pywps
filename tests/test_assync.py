@@ -1,7 +1,13 @@
+# -*- coding: utf-8 -*-
 import unittest
 import time
+import tempfile
+import os
+
 from pywps import Service, Process, LiteralInput, LiteralOutput
 from pywps import WPS, OWS
+from pywps.server.app import application, db
+
 from tests.common import client_for, assert_response_accepted
 
 
@@ -34,6 +40,25 @@ def create_sleep():
 
 class ExecuteTest(unittest.TestCase):
 
+    def setUp(self):
+        self.tmp_file = tempfile.mkstemp()
+
+        tmp_file_path = self.tmp_file[1]
+
+        application.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///{}'.format(tmp_file_path)
+
+        db.init_app(application)
+        db.create_all()
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+
+        tmp_file_fd, tmp_file_path = self.tmp_file
+
+        os.close(tmp_file_fd)
+        os.remove(tmp_file_path)
+
     def test_assync(self):
         client = client_for(Service(processes=[create_sleep()]))
         request_doc = WPS.Execute(
@@ -51,8 +76,12 @@ class ExecuteTest(unittest.TestCase):
             version="1.0.0"
         )
         resp = client.post_xml(doc=request_doc)
+
         assert_response_accepted(resp)
 
         # To Do:
         # . extract the status URL from the response
         # . send a status request
+
+if __name__ == '__main__':
+    unittest.main()

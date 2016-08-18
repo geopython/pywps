@@ -1,0 +1,83 @@
+{% if processes %}
+	<table class="table text-center">
+
+		<tr>
+			<th>Action</th>
+			<th>Status</th>
+			<th>UUID</th>
+			<th>PID</th>
+			<th>Operation</th>
+			<!--
+			<th>Time Start</th>
+			<th>Time End</th>
+			-->
+			<th>Identifier</th>
+			<th>Message</th>
+			<th>Percent Done</th>
+		</tr>
+
+		{% for process in processes %}
+		<tr>
+			<td id="action-btn-{{ process.uuid  }}">
+				<!-- show the pause button for running processes -->
+				<a href="javascript:pywps_pause_process('{{ process.uuid }}')" title="Pause the process {{ process.uuid }}" id="pause-btn-{{ process.uuid }}" class="pause-btn btn {% if process.status | int() == wps_response_status.STORE_STATUS | int() or process.status | int() == wps_response_status.STORE_AND_UPDATE_STATUS | int() %}display-block{% endif %}">
+					Pause
+				</a>
+
+				<!-- show the resume button for paused processes  -->
+				<a href="javascript:pywps_resume_process('{{ process.uuid }}')" title="Resume the process {{ process.uuid }}" id="resume-btn-{{ process.uuid }}" class="resume-btn btn {% if process.status | int() == wps_response_status.PAUSED_STATUS | int() %}display-block{% endif %}">
+					Resume
+				</a> 
+
+				<!-- show the stop button for running and paused processes -->
+				<a href="javascript:pywps_stop_process('{{ process.uuid }}')" title="Stop the process {{ process.uuid }}" id="stop-btn-{{ process.uuid }}" class="stop-btn btn {% if process.status | int() == wps_response_status.STORE_STATUS | int()  or process.status | int() == wps_response_status.STORE_AND_UPDATE_STATUS | int() or process.status | int() == wps_response_status.PAUSED_STATUS | int() %}display-block{% endif %}">
+					Stop
+				</a>
+				{% if process.status | int() == wps_response_status.DONE_STATUS | int()  or process.status | int() == wps_response_status.STOPPED_STATUS | int() or process.status | int() == wps_response_status.NO_STATUS | int() %}
+				-
+				{% endif %}
+			</td>
+			<td>
+				<span id="status-text-{{ process.uuid }}">
+				{% if process.status | int() == wps_response_status.NO_STATUS | int() %}
+					-
+				{% endif %}
+
+				{% if process.status | int() == wps_response_status.STORE_STATUS | int() %}
+					Running
+				{% endif %}
+
+				{% if process.status | int() == wps_response_status.STORE_AND_UPDATE_STATUS | int()  %}
+					Running
+				{% endif %}
+
+				{% if process.status | int() == wps_response_status.DONE_STATUS | int() %}
+					Finished
+				{% endif %}
+
+				{% if process.status | int() == wps_response_status.PAUSED_STATUS | int()  %}
+					Paused
+				{% endif %}
+
+				{% if process.status | int() == wps_response_status.STOPPED_STATUS | int()  %}
+					Stopped
+				{% endif %}
+				</span>
+			</td>
+			<td><a href="/outputs/{{ process.uuid }}.xml" title="See the output file">{{ process.uuid }}</a></td>
+			<td>{{ process.pid }}</td>
+			<td>{{ process.operation }}</td>
+			<!--
+			<td>{{ process.time_start }}</td>
+			<td>{{ process.time_end }}</td>
+            -->
+			<td>{{ process.identifier }}</td>
+			<td>{{ process.message }}</td>
+			<td>{{ process.percent_done }}</td>
+		</tr>
+		{% endfor %}
+
+	</table>
+{% else %}
+	<p>No process available.</p>
+{% endif %}

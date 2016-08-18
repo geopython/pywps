@@ -8,11 +8,13 @@ import tempfile
 import unittest
 import lxml.etree
 import sys
+
 from pywps import Service, Process, ComplexInput, ComplexOutput, Format, FORMATS, get_format
 from pywps.dependencies import ogr
 from pywps.exceptions import NoApplicableCode
 from pywps import WPS, OWS
 from pywps.wpsserver import temp_dir
+from pywps.server.app import application, db
 from tests.common import client_for, assert_response_success
 
 wfsResource = 'http://demo.mapserver.org/cgi-bin/wfs?service=WFS&version=1.1.0&request=GetFeature&typename=continents&maxfeatures=10'
@@ -103,6 +105,20 @@ def create_sum_one():
 
 class ExecuteTests(unittest.TestCase):
 
+    def setUp(self):
+        self.tmp_file = tempfile.NamedTemporaryFile('w+')
+
+        application.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///{}'.format(self.tmp_file.name)
+
+        db.init_app(application)
+        db.create_all()
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+
+        self.tmp_file.close()
+
     def test_wfs(self):
         client = client_for(Service(processes=[create_feature()]))
         request_doc = WPS.Execute(
@@ -158,3 +174,4 @@ def load_tests(loader=None, tests=None, pattern=None):
         loader.loadTestsFromTestCase(ExecuteTests),
     ]
     return unittest.TestSuite(suite_list)
+

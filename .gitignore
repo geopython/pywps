@@ -1,6 +1,7 @@
 *.pyc
 *.pyo
 *.egg-info
+*.idea
 dist
 build
 tmp

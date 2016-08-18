@@ -1,10 +1,27 @@
+# -*- coding: utf-8 -*-
 import unittest
-import lxml.etree
+
+from flask_testing import TestCase
+
 from pywps.app import Process, Service
 from pywps import WPS, OWS
+from pywps.server.app import application, db
+
 from tests.common import assert_pywps_version, client_for
 
-class BadRequestTest(unittest.TestCase):
+class BadRequestTest(TestCase):
+    SQLALCHEMY_DATABASE_URI = 'sqlite://'
+    TESTING = True
+
+    def create_app(self):
+        return application
+
+    def setUp(self):
+        db.create_all()
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
 
     def test_bad_http_verb(self):
         client = client_for(Service())
@@ -33,12 +50,24 @@ class BadRequestTest(unittest.TestCase):
         assert resp.status_code == 400
 
 
-class CapabilitiesTest(unittest.TestCase):
+class CapabilitiesTest(TestCase):
+    SQLALCHEMY_DATABASE_URI = 'sqlite://'
+    TESTING = True
+
+    def create_app(self):
+        return application
 
     def setUp(self):
         def pr1(): pass
         def pr2(): pass
+
+        db.create_all()
+
         self.client = client_for(Service(processes=[Process(pr1, 'pr1', 'Process 1'), Process(pr2, 'pr2', 'Process 2')]))
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
 
     def check_capabilities_response(self, resp):
         assert resp.status_code == 200
@@ -87,7 +116,6 @@ class CapabilitiesTest(unittest.TestCase):
     def test_pywps_version(self):
         resp = self.client.get('?service=WPS&request=GetCapabilities')
         assert_pywps_version(resp)
-
 
 def load_tests(loader=None, tests=None, pattern=None):
     if not loader:

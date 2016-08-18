@@ -1,21 +1,20 @@
 import os
-from lxml import etree
 import time
+
+from lxml import etree
 from werkzeug.wrappers import Request
 from werkzeug.exceptions import HTTPException
+
+import pywps.configuration as config
+
 from pywps import WPS, OWS
+from pywps.constants import wps_response_status
 from pywps.app.basic import xml_response
 from pywps.exceptions import NoApplicableCode
-import pywps.configuration as config
 from pywps.dblog import update_response
 
 
 class WPSResponse(object):
-
-    NO_STATUS = 0
-    STORE_STATUS = 1
-    STORE_AND_UPDATE_STATUS = 2
-    DONE_STATUS = 3
 
     def __init__(self, process, wps_request, uuid):
         """constructor
@@ -29,7 +28,7 @@ class WPSResponse(object):
         self.wps_request = wps_request
         self.outputs = {o.identifier: o for o in process.outputs}
         self.message = ''
-        self.status = self.NO_STATUS
+        self.status = wps_response_status.NO_STATUS
         self.status_percentage = 0
         self.doc = None
         self.uuid = uuid
@@ -45,12 +44,15 @@ class WPSResponse(object):
         if status_percentage:
             self.status_percentage = status_percentage
 
+        if int(status_percentage) == 100:
+            self.status = wps_response_status.DONE_STATUS
+
         # rebuild the doc and update the status xml file
         self.doc = self._construct_doc()
 
 
         # check if storing of the status is requested
-        if self.status >= self.STORE_STATUS:
+        if self.status >= wps_response_status.STORE_STATUS:
             self.write_response_doc(self.doc)
 
         update_response(self.uuid, self)
@@ -64,7 +66,7 @@ class WPSResponse(object):
                 f.flush()
                 os.fsync(f.fileno())
 
-            if self.status >= self.DONE_STATUS:
+            if self.status >= wps_response_status.DONE_STATUS:
                 self.process.clean()
 
         except IOError as e:
@@ -125,7 +127,7 @@ class WPSResponse(object):
             '?service=WPS&request=GetCapabilities'
         )
 
-        if self.status >= self.STORE_STATUS:
+        if self.status >= wps_response_status.STORE_STATUS:
             if self.process.status_location:
                 doc.attrib['statusLocation'] = self.process.status_url
 
@@ -147,7 +149,7 @@ class WPSResponse(object):
 
         # Status XML
         # return the correct response depending on the progress of the process
-        if self.status >= self.STORE_AND_UPDATE_STATUS:
+        if self.status >= wps_response_status.STORE_AND_UPDATE_STATUS:
             if self.status_percentage == 0:
                 self.message = 'PyWPS Process %s accepted' % self.process.identifier
                 status_doc = self._process_accepted()
@@ -199,7 +201,7 @@ class WPSResponse(object):
         except Exception as exp:
             raise NoApplicableCode(exp)
 
-        if self.status >= self.DONE_STATUS:
+        if self.status >= wps_response_status.DONE_STATUS:
             self.process.clean()
 
         return xml_response(doc)

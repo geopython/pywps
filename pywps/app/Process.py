@@ -39,6 +39,10 @@ from pywps._compat import PY2
 from pywps.exceptions import StorageNotSupported, OperationNotSupported, \
     ServerBusy, NoApplicableCode
 
+from pywps.server.app import application, db
+from pywps.constants import wps_response_status
+
+
 
 LOGGER = logging.getLogger("PYWPS")
 
@@ -77,6 +81,8 @@ class Process(object):
         self._grass_mapset = None
         self.grass_location = grass_location
 
+
+        self.wps_response = wps_response_status.NO_STATUS
 
         if store_supported:
             self.store_supported = 'true'
@@ -156,10 +162,10 @@ class Process(object):
                 if self.status_supported != 'true':
                     raise OperationNotSupported('Process does not support the updating of status')
 
-                wps_response.status = WPSResponse.STORE_AND_UPDATE_STATUS
+                wps_response.status = wps_response_status.STORE_AND_UPDATE_STATUS
                 async = True
             else:
-                wps_response.status = WPSResponse.STORE_STATUS
+                wps_response.status = wps_response_status.STORE_STATUS
 
         LOGGER.debug('Check if updating of status is not required then no need to spawn a process')
 
@@ -236,6 +242,9 @@ class Process(object):
         return wps_response
 
     def _run_process(self, wps_request, wps_response):
+        #added because of http://stackoverflow.com/questions/30241911/psycopg2-error-databaseerror-error-with-no-message-from-the-libpq
+        db.get_engine(application).dispose()
+
         try:
             self._set_grass()
             wps_response = self.handler(wps_request, wps_response)
@@ -243,7 +252,7 @@ class Process(object):
             # if status not yet set to 100% then do it after execution was successful
             if (not wps_response.status_percentage) or (wps_response.status_percentage != 100):
                 LOGGER.debug('Updating process status to 100% if everything went correctly')
-                wps_response.update_status('PyWPS Process finished', 100, wps_response.DONE_STATUS)
+                wps_response.update_status('PyWPS Process finished', 100, wps_response_status.DONE_STATUS)
         except Exception as e:
             traceback.print_exc()
             LOGGER.debug('Retrieving file and line number where exception occurred')
@@ -275,16 +284,15 @@ class Process(object):
 
         # tr
         stored_requests = dblog.get_first_stored()
-        if len(stored_requests) > 0:
-            (uuid, request_json) = stored_requests[0]
+        if stored_requests:
+            (uuid, request_json) = stored_requests
             new_wps_request = WPSRequest()
             new_wps_request.json = json.loads(request_json)
             new_wps_response = WPSResponse(self, new_wps_request, uuid)
-            new_wps_response.status = WPSResponse.STORE_AND_UPDATE_STATUS
+            new_wps_response.status = wps_response_status.STORE_AND_UPDATE_STATUS
             self._set_uuid(uuid)
             self._run_async(new_wps_request, new_wps_response)
             dblog.remove_stored(uuid)
-
 
         return wps_response
 

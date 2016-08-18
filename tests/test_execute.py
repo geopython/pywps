@@ -1,6 +1,9 @@
 import unittest
 import lxml.etree
 import json
+import tempfile
+import os
+
 from pywps import Service, Process, LiteralOutput, LiteralInput,\
     BoundingBoxOutput, BoundingBoxInput, Format, ComplexInput, ComplexOutput
 from pywps.validator.base import emptyvalidator
@@ -10,6 +13,8 @@ from pywps import get_inputs_from_xml, get_output_from_xml
 from pywps import E, WPS, OWS
 from pywps.app.basic import xpath_ns
 from pywps._compat import text_type
+from pywps.server.app import application, db
+from pywps.server.app.models import StoredRequest
 from tests.common import client_for, assert_response_success
 
 from pywps._compat import PY2
@@ -92,7 +97,21 @@ def get_output(doc):
 
 
 class ExecuteTest(unittest.TestCase):
-    """Test for Exeucte request KVP request"""
+    """Test for Execute request KVP request"""
+
+    def setUp(self):
+        self.tmp_file = tempfile.NamedTemporaryFile('w+')
+
+        application.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///{}'.format(self.tmp_file.name)
+
+        db.init_app(application)
+        db.create_all()
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+
+        self.tmp_file.close()
 
     def test_input_parser(self):
         """Test input parsing
@@ -147,7 +166,6 @@ class ExecuteTest(unittest.TestCase):
                                               request.inputs['complex'])
 
         self.assertEqual(parsed_inputs[0].data_format.validate, validategml)
-
 
     def test_missing_process_error(self):
         client = client_for(Service(processes=[create_ultimate_question()]))
@@ -204,7 +222,9 @@ class ExecuteTest(unittest.TestCase):
             ),
             version='1.0.0'
         )
+
         resp = client.post_xml(doc=request_doc)
+
         assert_response_success(resp)
 
         [output] = xpath_ns(resp.xml, '/wps:ExecuteResponse'
@@ -213,6 +233,7 @@ class ExecuteTest(unittest.TestCase):
             './ows:Identifier')[0].text)
         self.assertEqual('15 50', xpath_ns(output,
             './ows:BoundingBox/ows:LowerCorner')[0].text)
+
 
 class ExecuteXmlParserTest(unittest.TestCase):
     """Tests for Execute request XML Parser
@@ -368,3 +389,6 @@ def load_tests(loader=None, tests=None, pattern=None):
         loader.loadTestsFromTestCase(ExecuteXmlParserTest),
     ]
     return unittest.TestSuite(suite_list)
+
+if __name__ == '__main__':
+    unittest.main()
