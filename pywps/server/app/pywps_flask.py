@@ -12,8 +12,8 @@ class PyWPSFlask(Flask):
 
     def wsgi_app(self, *args):
         #create database tables if doesnt exist with first request
-        from pywps.server.app import db
-        db.create_all()
+        #from pywps.server.app import db
+        #db.create_all()
 
         return super(PyWPSFlask, self).wsgi_app(*args)
 
