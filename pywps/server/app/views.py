@@ -195,3 +195,10 @@ def pywps_processes_table_entries():
     query = query.order_by(models.Request.time_start)
 
     return flask.render_template('manage_processes_table_entries.html', processes=query.all(), wps_response_status=wps_response_status)
+
+
+@application.teardown_request
+def shutdown_db_connection(exception=None):
+    #print("teardown")
+    db.session.remove()
+    #db.get_engine(application).dispose()
