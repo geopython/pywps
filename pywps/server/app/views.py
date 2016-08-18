@@ -12,9 +12,9 @@ import models
 
 def _get_process(pid):
     try:
-        (psutil.Process(pid=pid), None)
+        return (psutil.Process(pid=pid), None)
     except psutil.NoSuchProcess:
-        return (None, 'No Such Process')
+        return (None, 'No Such Process',)
     except psutil.ZombieProcess:
         return (None, 'Zombie Process')
     except psutil.AccessDenied:
@@ -46,13 +46,16 @@ def _db_commit():
 
         return True
 
+
 @application.route('/', methods=['GET'])
 def pywps_index():
     return flask.render_template('index.html', active_page='home')
 
+
 @application.route('/wps', methods=['POST', 'GET'])
 def pywps_wps():
     return application.pywps_service
+
 
 @application.route('/processes', methods=['GET'])
 def pywps_processes():
@@ -74,9 +77,10 @@ def pywps_processes():
 
     return flask.jsonify({'processes': running_processes})
 
+
 @application.route('/processes/<uuid>', methods=['GET', 'PUT', 'DELETE'])
 def pywps_processes_uuid(uuid):
-    model_wps_request = models.Request.query.filter(models.Request.uuid == uuid).first()
+    model_wps_request = models.Request.query.filter(models.Request.uuid == str(uuid)).first()
 
     if not model_wps_request:
         response = {
@@ -88,19 +92,19 @@ def pywps_processes_uuid(uuid):
 
     process, process_error = _get_process(model_wps_request.pid)
 
-    if not process:
-        response = {
-            'success': False,
-            'error': process_error
-        }
-
-        return flask.jsonify(response)
-
     if flask.request.method == 'GET':
         response = {
             'success': True,
             'status': model_wps_request.status,
             'message': model_wps_request.message
+        }
+
+        return flask.jsonify(response)
+
+    if process_error is not None:
+        response = {
+            'success': False,
+            'error': process_error
         }
 
         return flask.jsonify(response)
@@ -132,6 +136,7 @@ def pywps_processes_uuid(uuid):
 
     return flask.jsonify(response)
 
+
 @application.route('/manage')
 def pywps_manage_page():
     processes = models.Request.query.order_by(models.Request.time_start)
@@ -140,6 +145,7 @@ def pywps_manage_page():
     filter_identifiers = [filter_identifier.identifier for filter_identifier in filter_identifiers]
 
     return flask.render_template('manage_processes.html', active_page='manage_processes', processes=processes, filter_identifiers=filter_identifiers, wps_response_status=wps_response_status)
+
 
 @application.route('/manage/table-entries', methods=['POST'])
 def pywps_processes_table_entries():
