@@ -13,6 +13,7 @@ import os
 
 LOGGER = logging.getLogger('PYWPS')
 _CONNECTION = None
+_DATABASE = None
 
 def log_request(uuid, request):
     """Write OGC WPS request (only the necessary parts) to database logging
@@ -47,7 +48,7 @@ def get_running():
     conn = get_connection()
     cur = conn.cursor()
 
-    res = cur.execute('SELECT uuid FROM pywps_requests WHERE percent_done < 100')
+    res = cur.execute('SELECT uuid FROM pywps_requests WHERE percent_done < 100 and percent_done > -1')
 
     return res.fetchall()
 
@@ -133,14 +134,22 @@ def get_connection():
 
     LOGGER.debug('Initializing database connection')
     global _CONNECTION
+    global _DATABASE
 
     if _CONNECTION:
         return _CONNECTION
 
-    database = configuration.get_config_value('server', 'logdatabase')
+    if not _DATABASE:
+        database = configuration.get_config_value('server', 'logdatabase')
 
-    if not database:
-        database = ':memory:'
+        if not database:
+            database = ':memory:'
+        else:
+            database = os.path.abspath(database)
+
+        _DATABASE = database
+    else:
+        database = _DATABASE
 
     connection = sqlite3.connect(database)
     if check_db_table(connection):

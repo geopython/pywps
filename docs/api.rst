@@ -1,32 +1,69 @@
-===
-API
-===
+#############
+PyWPS API Doc
+#############
 
 .. module:: pywps
 
 
-Defining processes
-------------------
+Process
+=======
 
 .. autoclass:: Process
 
-.. autoclass:: Service
+Inputs and outputs
+==================
+
+.. autoclass:: pywps.validator.mode.MODE
+    :members:
+    :undoc-members:
+
+Most of the inputs nad outputs are derived from the `IOHandler` class
+
+.. autoclass:: pywps.inout.basic.IOHandler
+
+
+LiteralData
+-----------
 
 .. autoclass:: LiteralInput
 
-.. autoclass:: ComplexInput
-
 .. autoclass:: LiteralOutput
+
+.. autoclass:: pywps.inout.literaltypes.AnyValue
+
+.. autoclass:: pywps.inout.literaltypes.AllowedValue
+
+.. autodata:: pywps.inout.literaltypes.LITERAL_DATA_TYPES
+
+
+ComplexData
+-----------
+
+.. autoclass:: ComplexInput
 
 .. autoclass:: ComplexOutput
 
 .. autoclass:: Format
+    
+.. autodata:: pywps.inout.formats.FORMATS
+    :annotation:
+    
+    List of out of the box supported formats. User can add custom formats to the
+    array.
 
+.. autofunction:: pywps.validator.complexvalidator.validategml
+
+BoundingBoxData
+---------------
+
+.. autoclass:: BoundingBoxInput
+
+.. autoclass:: BoundingBoxOutput
 
 Request and response objects
 ----------------------------
 
-.. autoclass:: WPSRequest
+.. autoclass:: pywps.app.WPSRequest
    :members:
 
    .. attribute:: operation
@@ -46,5 +83,6 @@ Request and response objects
 
       A MultiDict object containing input values sent by the client.
 
-.. autoclass:: WPSResponse
+.. autoclass:: pywps.app.WPSResponse
 
+Refer :ref:`exceptions` for their description.

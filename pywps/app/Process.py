@@ -46,8 +46,8 @@ class Process(object):
     """
     :param handler: A callable that gets invoked for each incoming
                     request. It should accept a single
-                    :class:`~WPSRequest` argument and return a
-                    :class:`~WPSResponse` object.
+                    :class:`pywps.app.WPSRequest` argument and return a
+                    :class:`pywps.app.WPSResponse` object.
     :param identifier: Name of this process.
     :param inputs: List of inputs accepted by this process. They
                    should be :class:`~LiteralInput` and :class:`~ComplexInput`
