@@ -243,7 +243,7 @@ class Process(object):
 
     def _run_process(self, wps_request, wps_response):
         #added because of http://stackoverflow.com/questions/30241911/psycopg2-error-databaseerror-error-with-no-message-from-the-libpq
-        db.get_engine(application).dispose()
+        #db.get_engine(application).dispose()
 
         try:
             self._set_grass()
