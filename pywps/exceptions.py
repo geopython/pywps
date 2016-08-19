@@ -39,7 +39,7 @@ import logging
 
 from pywps import __version__
 
-logging.basicConfig()
+#logging.basicConfig()
 LOGGER = logging.getLogger('PYWPS')
 
 class NoApplicableCode(HTTPException):
