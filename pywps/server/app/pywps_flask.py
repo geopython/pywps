@@ -10,13 +10,6 @@ class PyWPSFlask(Flask):
 
         super(PyWPSFlask, self).__init__(import_name)
 
-    def wsgi_app(self, *args):
-        #create database tables if doesnt exist with first request
-        #from pywps.server.app import db
-        #db.create_all()
-
-        return super(PyWPSFlask, self).wsgi_app(*args)
-
     def run_pywps(self, processes=None, configuration_file=None, run_locally=None):
         #bound PyWPS processes
         self.pywps_processes = processes

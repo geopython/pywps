@@ -197,6 +197,13 @@ def pywps_processes_table_entries():
     return flask.render_template('manage_processes_table_entries.html', processes=query.all(), wps_response_status=wps_response_status)
 
 
+@application.route('/create-database-tables', methods=['GET',])
+def create_database_tables():
+    db.create_all()
+
+    return 'OK'
+
+
 @application.teardown_request
 def shutdown_db_connection(exception=None):
     #print("teardown")
