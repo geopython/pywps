@@ -198,13 +198,13 @@ def pywps_processes_table_entries():
 
 
 @application.route('/create-database-tables', methods=['GET',])
-def create_db_tables():
+def create_database_tables():
     db.create_all()
 
     return 'OK'
 
+
 @application.before_request
 def before_request():
-    print("teardown")
     #db.session.remove()
     db.get_engine(application).dispose()

@@ -2,13 +2,10 @@
 REST API
 ========
 
-Processes
-=========
-
 Processes published in PyWPS instance.
 
 /processes
-----------
+==========
 
 Lists running processes.
 
@@ -25,14 +22,14 @@ Lists running processes.
 +--------+-----------------------------------------+----------+--------------+------------+
 
 Returns
-~~~~~~~
+-------
 
 **processes**
     Returns a list of running processes, every process is represented by *uuid*.
 
 
 /processes/<uuid>
------------------
+=================
 
 Controls a running process.
 
@@ -49,7 +46,7 @@ Controls a running process.
 +--------+--------------------------------------------+----------+--------------+------------+---------------------------------+
 
 Parameters
-~~~~~~~~~~
+----------
 
 **action**
     Specifies what action would you like a process to perform.
@@ -60,7 +57,7 @@ Parameters
         **resume** - Resume a paused process.
 
 Returns
-~~~~~~~
+-------
 
 **message**:
     The last message/status provided by a process. These messages are designed by creators of processes scripts.
@@ -93,7 +90,7 @@ Returns
         **5** - STOPPED STATUS
 
 Example
-~~~~~~~
+-------
 
 *http://localhost/wps/processes/slakdfj-234-ASDF-234* with PUT request ``{"action": "pause"}`` returns ``{"success": "true"}``
 

@@ -16,14 +16,14 @@ Dependencies
 
 In the command line::
 
-    $ sudo apt-get install git python-gdal python-pip python-dev libxml2-dev libxslt1-dev zlib1g-dev libpq-dev apache2 postgresql postgresql-contrib
+    $ sudo apt-get install git python-gdal python-pip python-dev libxml2-dev libxslt1-dev zlib1g-dev libpq-dev apache2 libapache2-mod-wsgi postgresql postgresql-contrib
     $ sudo pip install virtualenv
 
 
 Installation
 ============
 
-Normal installation is standard Python package installation. If you want to contribute or work on PyWPS, the installation in the develop mode is also described.
+A standard installation is standard Python package installation. If you want to contribute or work on PyWPS, the installation in the develop mode is also described and differs in a detail.
 
 Normal installation
 -------------------
@@ -34,14 +34,14 @@ In the command line::
     $ cd /var/www/gsoc-pywps-env
     $ source bin/activate
 
-Clone the PyWPS and the example application into the activated virtual enviroment::
-
-    $ sudo git clone https://github.com/jan-rudolf/pywps
-    $ sudo git clone https://github.com/jan-rudolf/gsoc-pywps-app
-
-Change ownership and group permission according to your user account, replace the string user with your username::
+Change ownership and group permission according to your user account, replace the string user with your username (replace ``<user>`` with your username)::
 
     $ sudo chown -R <user>:<user> /var/www/gsoc-pywps-env
+
+Clone the PyWPS and the example application into the activated virtual enviroment::
+
+    $ git clone https://github.com/jan-rudolf/pywps
+    $ git clone https://github.com/jan-rudolf/gsoc-pywps-app
 
 Install Python packages and install the PyWPS::
 
@@ -49,34 +49,29 @@ Install Python packages and install the PyWPS::
     $ pip install -r requirements.txt
     $ python setup.py install
 
-Create **/tmp/outputs** directory and change group and owner to the user that runs the Apache, that is **www-data** by default::
+Create **/tmp/outputs** directory and change group and owner to the user that runs the application, for Apache the username and the groupname would be **www-data** by default::
 
     $ sudo mkdir /tmp/outputs
-    $ sudo chown www-data:www-data /tmp/outputs
-
-PyWPS is installed and you can remove it now::
-    
-    $ cd ..    
-    $ sudo rm -Rf pywps
+    $ sudo chown <username>:<groupname> /tmp/outputs
 
 
 Develop installation
 --------------------
 
-In the command line::
+In the command lineIn the command line::
 
     $ sudo virtualenv /var/www/gsoc-pywps-env
     $ cd /var/www/gsoc-pywps-env
     $ source bin/activate
 
-Clone the PyWPS and the example application into the activated virtual enviroment::
-
-    $ sudo git clone https://github.com/jan-rudolf/pywps
-    $ sudo git clone https://github.com/jan-rudolf/gsoc-pywps-app
-
-Change ownership and group permission according to your user account, replace the string user with your username::
+Change ownership and group permission according to your user account, replace the string user with your username (replace ``<user>`` with your username)::
 
     $ sudo chown -R <user>:<user> /var/www/gsoc-pywps-env
+
+Clone the PyWPS and the example application into the activated virtual enviroment::
+
+    $ git clone https://github.com/jan-rudolf/pywps
+    $ git clone https://github.com/jan-rudolf/gsoc-pywps-app
 
 Install Python packages and install the PyWPS::
 
@@ -84,10 +79,10 @@ Install Python packages and install the PyWPS::
     $ pip install -r requirements.txt
     $ python setup.py develop
 
-Create **/tmp/outputs** directory and change group and owner to the user that runs the Apache, that is **www-data** by default::
+Create **/tmp/outputs** directory and change group and owner to the user that runs the application, for Apache the username and the groupname would be **www-data** by default::
 
     $ sudo mkdir /tmp/outputs
-    $ sudo chown www-data:www-data /tmp/outputs
+    $ sudo chown <username>:<groupname> /tmp/outputs
 
 
 Database
@@ -107,7 +102,7 @@ Change the **SQLAlchemyDatabaseUri** in the PyWPS configuration file under the *
 
 Create database tables by the GET HTTP request to::
 
-   http://<URL_address>/create-db
+   http://<URL_address>/create-database-tables
 
 
 PostgreSQL
@@ -132,7 +127,7 @@ Exit the postgres's user prompt::
 
    $ exit
 
-Edit the table, that looks like the one below, so that the **METHOD** column has only **md5** entries (in case you have a different version of PostgreSQL, edit the path to the file with proper version)::
+Edit the table (near end of the file), that looks like the one below, so that the **METHOD** column has only **md5** entries (in case you have a different version of PostgreSQL, edit the path to the file with proper version)::
 
    $ sudo $EDITOR /etc/postgresql/9.3/main/pg_hba.conf
 
