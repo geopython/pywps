@@ -144,6 +144,8 @@ def get_connection():
 
         if not database:
             database = ':memory:'
+        elif database == ':memory:':
+            pass
         else:
             database = os.path.abspath(database)
 

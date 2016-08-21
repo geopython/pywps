@@ -73,10 +73,7 @@ class FileStorage(StorageAbstract):
         """
         """
         self.target = config.get_config_value('server', 'outputpath')
-        self.output_url = '%s%s' % (
-            config.get_config_value('server', 'url'),
-            config.get_config_value('server', 'outputurl')
-        )
+        self.output_url = config.get_config_value('server', 'outputurl')
 
     def store(self, output):
         import shutil, tempfile, math
@@ -84,7 +81,8 @@ class FileStorage(StorageAbstract):
         file_name = output.file
 
         file_block_size = os.stat(file_name).st_blksize
-        avail_size = get_free_space(self.target)
+        # get_free_space delivers the numer of free blocks, not the available size!
+        avail_size = get_free_space(self.target) * file_block_size
         file_size = os.stat(file_name).st_size
 
         # calculate space used according to block size
@@ -95,7 +93,7 @@ class FileStorage(StorageAbstract):
 
         (prefix, suffix) = os.path.splitext(file_name)
         if not suffix:
-            suffix = output.output_format.get_extension()
+            suffix = output.output_format.extension
         (file_dir, file_name) = os.path.split(prefix)
         output_name = tempfile.mkstemp(suffix=suffix, prefix=file_name,
                                        dir=self.target)[1]

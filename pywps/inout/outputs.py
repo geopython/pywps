@@ -16,7 +16,7 @@ class BoundingBoxOutput(basic.BBoxInput):
     :param int dimensions: number of dimensions (2 or 3)
     :param int min_occurs: minimum occurence
     :param int max_occurs: maximum occurence
-    :param mode: validation mode (none to strict) :py:obj:`pywps.validator.mode.MODE`
+    :param pywps.validator.mode.MODE mode: validation mode (none to strict)
     """
 
     def __init__(self, identifier, title, crss, abstract='',
@@ -87,10 +87,10 @@ class ComplexOutput(basic.ComplexOutput):
     """
     :param identifier: The name of this output.
     :param title: Readable form of the output name.
-    :param list supported_formats: List of supported :class:`pywps.inout.formats.Format`
-            The first format in the list will be used as the default.
+    :param pywps.inout.formats.Format  supported_formats: List of supported
+        formats. The first format in the list will be used as the default.
     :param str abstract: Description of the output
-    :param mode: validation mode (none to strict) :py:obj:`pywps.validator.mode.MODE`
+    :param pywps.validator.mode.MODE mode: validation mode (none to strict)
     """
 
     def __init__(self, identifier, title,  supported_formats=None,
@@ -207,10 +207,10 @@ class LiteralOutput(basic.LiteralOutput):
     """
     :param identifier: The name of this output.
     :param str title: Title of the input
-    :param data_type: :class:`pywps.inout.literaltypes.LITERAL_DATA_TYPES` data type
+    :param pywps.inout.literaltypes.LITERAL_DATA_TYPES data_type: data type
     :param str abstract: Input abstract
     :param str uoms: units
-    :param mode: :class:`pywps.validator.mode.MODE` validation mode (none to strict)
+    :param pywps.validator.mode.MODE mode: validation mode (none to strict)
     """
 
     def __init__(self, identifier, title, data_type='string', abstract='',

@@ -59,7 +59,7 @@ class AllowedValue(AnyValue):
     :param minval: minimal value in case of Range
     :param maxval: maximal value in case of Range
     :param spacing: spacing in case of Range
-    :param range_closure: `pywps.input.literaltypes.RANGECLOSURETYPE`
+    :param pywps.input.literaltypes.RANGECLOSURETYPE range_closure:
     """
 
     def __init__(self, allowed_type=ALLOWEDVALUETYPE.VALUE, value=None,

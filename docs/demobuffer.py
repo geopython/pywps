@@ -9,7 +9,7 @@ __author__ = 'Jachym Cepicky'
 
 from pywps import Process, LiteralInput, ComplexOutput, ComplexInput, Format
 from pywps.validator.mode import MODE
-from pywps.input.formats import FORMATS
+from pywps.inout.formats import FORMATS
 
 inpt_vector = ComplexInput(
     'vector',
@@ -39,7 +39,9 @@ class DemoBuffer(Process):
             title='Buffer',
             abstract='This process demonstrates, how to create any process in PyWPS environment',
             inputs=inputs,
-            outputs=outputs
+            outputs=outputs,
+            store_supported=True,
+            status_supported=True
         )
 
 @staticmethod
@@ -53,8 +55,8 @@ def _handler(request, response):
     # obtaining input with identifier 'vector' as file name
     input_file = request.inputs['vector'][0].file
 
-    # obtaining input with identifier 'buffer' as data directly
-    size = request.inputs['buffer'][0].data
+    # obtaining input with identifier 'size' as data directly
+    size = request.inputs['size'][0].data
 
     # open file the "gdal way"
     input_source = ogr.Open(input_file)

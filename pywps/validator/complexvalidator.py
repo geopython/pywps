@@ -38,7 +38,7 @@ def validategml(data_input, mode):
     """GML validation function
 
     :param data_input: :class:`ComplexInput`
-    :param mode: :class:`pywps.validator.mode.MODE`
+    :param pywps.validator.mode.MODE mode:
 
     This function validates GML input based on given validation mode. Following
     happens, if `mode` parameter is given:

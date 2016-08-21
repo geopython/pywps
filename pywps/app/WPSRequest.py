@@ -431,6 +431,7 @@ def get_inputs_from_xml(doc):
 
         complex_data = xpath_ns(input_el, './wps:Data/wps:ComplexData')
         if complex_data:
+
             complex_data_el = complex_data[0]
             inpt = {}
             inpt['identifier'] = identifier_el.text

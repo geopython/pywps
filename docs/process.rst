@@ -290,6 +290,21 @@ attribute::
         response.outputs['output'].data = msg
         return response
 
+Progress and status report
+==========================
+
+OGC WPS standard enables asynchronous process execution call, that is in
+particular useful, when the process execution takes longer time - process
+instance is set to background and WPS Execute Response document with `ProcessAccepted`
+messag is returned immediately to the client. The client has to check
+`statusLocation` URL, where the current status report is deployed, say every
+n-seconds or n-minutes (depends on calculation time). Content of the response is
+usually `percentDone` information about the progress along with `statusMessage`
+text information, what is currently happening.
+
+You can set process status any time in the `handler` using the
+:py:func:`WPSResponse.update_status` function.
+
 
 Returning large data
 ====================

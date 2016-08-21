@@ -103,13 +103,13 @@ class ComplexInput(basic.ComplexInput):
 
     :param str identifier: The name of this input.
     :param str title: Title of the input
-    :param list supported_formats: List of supported :class:`pywps.inout.formats.Format`
-    :param data_format: default data format :class:`pywps.inout.formats.Format`
+    :param  pywps.inout.formats.Format supported_formats: List of supported formats
+    :param pywps.inout.formats.Format data_format: default data format
     :param str abstract: Input abstract
     :param list metada: TODO
     :param int min_occurs: minimum occurence
     :param int max_occurs: maximum occurence
-    :param mode: validation mode (none to strict) :py:obj:`pywps.validator.mode.MODE`
+    :param pywps.validator.mode.MODE mode: validation mode (none to strict)
     """
 
     def __init__(self, identifier, title, supported_formats=None,
@@ -236,14 +236,14 @@ class LiteralInput(basic.LiteralInput):
     """
     :param str identifier: The name of this input.
     :param str title: Title of the input
-    :param data_type: :class:`pywps.inout.literaltypes.LITERAL_DATA_TYPES` data type
+    :param pywps.inout.literaltypes.LITERAL_DATA_TYPES data_type: data type
     :param str abstract: Input abstract
     :param list metadata: TODO
     :param str uoms: units
     :param int min_occurs: minimum occurence
     :param int max_occurs: maximum occurence
-    :param mode: :class:`pywps.validator.mode.MODE` validation mode (none to strict)
-    :param allowed_values: :class:`pywps.inout.literaltypes.AnyValue` or :py:class:`pywps.inout.literaltypes.AllowedValue` object
+    :param pywps.validator.mode.MODE mode: validation mode (none to strict)
+    :param pywps.inout.literaltypes.AnyValue allowed_values: or :py:class:`pywps.inout.literaltypes.AllowedValue` object
     """
 
     def __init__(self, identifier, title, data_type='integer', abstract='',
