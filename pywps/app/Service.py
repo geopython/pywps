@@ -314,7 +314,7 @@ class Service(object):
         LOGGER.debug('Checking if datainputs is required and has been passed')
         if process.inputs:
             if wps_request.inputs is None:
-                raise MissingParameterValue('', 'datainputs')
+                raise MissingParameterValue('Missing "datainputs" parameter', 'datainputs')
 
         LOGGER.debug('Checking if all mandatory inputs have been passed')
         data_inputs = {}
@@ -473,9 +473,8 @@ class Service(object):
             complex_data_handler(data_input, inpt)
 
             outinputs.append(data_input)
-
         if len(outinputs) < source.min_occurs:
-            raise MissingParameterValue(locator=source.identifier)
+            raise MissingParameterValue(description="Given data input is missing", locator=source.identifier)
         return outinputs
 
     def create_literal_inputs(self, source, inputs):

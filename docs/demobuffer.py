@@ -39,7 +39,9 @@ class DemoBuffer(Process):
             title='Buffer',
             abstract='This process demonstrates, how to create any process in PyWPS environment',
             inputs=inputs,
-            outputs=outputs
+            outputs=outputs,
+            store_supported=True,
+            status_supported=True
         )
 
 @staticmethod
