@@ -241,8 +241,7 @@ class Process(object):
             self._set_grass()
             wps_response = self.handler(wps_request, wps_response)
 
-            # only for asynchronous processing: if status not yet set to 100% then do it after execution was successful
-            if (self.async and (not wps_response.status_percentage or (wps_response.status_percentage != 100))):
+            if (not wps_response.status_percentage) or (wps_response.status_percentage != 100):
                 LOGGER.debug('Updating process status to 100% if everything went correctly')
                 wps_response.update_status('PyWPS Process finished', 100, STATUS.DONE_STATUS)
         except Exception as e:
