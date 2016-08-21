@@ -144,7 +144,7 @@ class Process(object):
 
     def execute(self, wps_request, uuid):
         self._set_uuid(uuid)
-        async = False
+        self.async = False
         wps_response = WPSResponse(self, wps_request, self.uuid)
 
         LOGGER.debug('Check if status storage and updating are supported by this process')
@@ -158,13 +158,13 @@ class Process(object):
                     raise OperationNotSupported('Process does not support the updating of status')
 
                 wps_response.status = STATUS.STORE_AND_UPDATE_STATUS
-                async = True
+                self.async = True
             else:
                 wps_response.status = STATUS.STORE_STATUS
 
         LOGGER.debug('Check if updating of status is not required then no need to spawn a process')
 
-        wps_response = self._execute_process(async, wps_request, wps_response)
+        wps_response = self._execute_process(self.async, wps_request, wps_response)
 
         return wps_response
 
@@ -210,7 +210,7 @@ class Process(object):
             if running < maxparalel:
                 wps_response = self._run_process(wps_request, wps_response)
             else:
-                raise ServerBusy('Maximum number of paralel running processes reached. Please try later.')
+                raise ServerBusy('Maximum number of parallel running processes reached. Please try later.')
 
         return wps_response
 
@@ -241,8 +241,8 @@ class Process(object):
             self._set_grass()
             wps_response = self.handler(wps_request, wps_response)
 
-            # if status not yet set to 100% then do it after execution was successful
-            if (not wps_response.status_percentage) or (wps_response.status_percentage != 100):
+            # only for asynchronous processing: if status not yet set to 100% then do it after execution was successful
+            if (self.async and (not wps_response.status_percentage or (wps_response.status_percentage != 100))):
                 LOGGER.debug('Updating process status to 100% if everything went correctly')
                 wps_response.update_status('PyWPS Process finished', 100, STATUS.DONE_STATUS)
         except Exception as e:

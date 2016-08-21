@@ -81,7 +81,8 @@ class FileStorage(StorageAbstract):
         file_name = output.file
 
         file_block_size = os.stat(file_name).st_blksize
-        avail_size = get_free_space(self.target)
+        # get_free_space delivers the numer of free blocks, not the available size!
+        avail_size = get_free_space(self.target) * file_block_size
         file_size = os.stat(file_name).st_size
 
         # calculate space used according to block size
