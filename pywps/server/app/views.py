@@ -206,5 +206,4 @@ def create_database_tables():
 
 @application.before_request
 def before_request():
-    #db.session.remove()
     db.get_engine(application).dispose()
