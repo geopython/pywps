@@ -151,7 +151,9 @@ PyWPS's configuration file setting
 
 Change the **SQLAlchemyDatabaseUri** in the PyWPS configuration file under the **server** section::
 
-   SQLAlchemyDatabaseUri=postgresql://<username>@localhost/<database_name>
+   SQLAlchemyDatabaseUri=postgresql://<username>@localhost/<database_name>?sslmode=disable
+
+*Note:* I added the parameter ``sslmode=disable``, because without it it causes error and exceptions somehow randomly. I have not figured out why.
 
 
 Apache
