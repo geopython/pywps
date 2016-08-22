@@ -59,7 +59,7 @@ class WPSResponse(object):
 
             # rebuild the doc and update the status xml file
             self.doc = self._construct_doc()
-            self.write_response_doc(self.doc)
+            self.write_response_doc(self.doc, clean)
 
         update_response(self.uuid, self)
 
