@@ -34,5 +34,15 @@ class WebsiteTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
+
+def load_tests(loader=None, tests=None, pattern=None):
+    if not loader:
+        loader = unittest.TestLoader()
+    suite_list = [
+        loader.loadTestsFromTestCase(WebsiteTest),
+    ]
+    return unittest.TestSuite(suite_list)
+
+
 if __name__ == '__main__':
     unittest.main()
