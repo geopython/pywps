@@ -34,7 +34,8 @@ class WPSResponse(object):
         self.doc = None
         self.uuid = uuid
 
-    def update_status(self, message=None, status_percentage=None, status=None):
+    def update_status(self, message=None, status_percentage=None, status=None,
+            clean=True):
         """
         Update status report of currently running process instance
 
@@ -58,11 +59,11 @@ class WPSResponse(object):
 
             # rebuild the doc and update the status xml file
             self.doc = self._construct_doc()
-            self.write_response_doc(self.doc)
+            self.write_response_doc(self.doc, clean)
 
         update_response(self.uuid, self)
 
-    def write_response_doc(self, doc):
+    def write_response_doc(self, doc, clean=True):
         # TODO: check if file/directory is still present, maybe deleted in mean time
 
         try:
@@ -71,7 +72,7 @@ class WPSResponse(object):
                 f.flush()
                 os.fsync(f.fileno())
 
-            if self.status >= STATUS.DONE_STATUS:
+            if self.status >= STATUS.DONE_STATUS and clean:
                 self.process.clean()
 
         except IOError as e:
