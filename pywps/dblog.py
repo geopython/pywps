@@ -153,7 +153,7 @@ def get_connection():
     else:
         database = _DATABASE
 
-    connection = sqlite3.connect(database)
+    connection = sqlite3.connect(database, check_same_thread=False)
     if check_db_table(connection):
         if check_db_columns(connection):
             _CONNECTION = connection
