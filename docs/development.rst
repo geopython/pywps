@@ -113,8 +113,9 @@ repository::
 5. Help and discussion
 ----------------------
 
-If you have any doubts or questions about this contribution process or about the 
-code please use the `PyWPS mailing list 
-<http://lists.osgeo.org/mailman/listinfo/pywps-dev>`_ . This is also the right 
-place to propose and discuss the changes you intend to introduce.
+If you have any doubts or questions about this contribution process or about 
+the code please use the `PyWPS mailing list 
+<http://lists.osgeo.org/mailman/listinfo/pywps-dev>`_ or the `PyWPS Gitter 
+<https://gitter.im/PyWPS>`_ . This is also the right place to propose and 
+discuss the changes you intend to introduce.
 
