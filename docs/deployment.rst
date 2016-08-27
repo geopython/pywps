@@ -12,7 +12,7 @@ more advised. PyWPS is runs as a `WSGI
 <https://wsgi.readthedocs.io/en/latest/>`_ application on those servers. PyWPS
 relies on the `Werkzeug <http://werkzeug.pocoo.org/>`_ library for this purpose.
 
-Deoploying an individual PyWPS instance
+Deploying an individual PyWPS instance
 ---------------------------------------
 
 PyWPS should be installed in your computer (as per the :ref:`installation` 
@@ -23,10 +23,10 @@ It is advisable for each PyWPS instance to have its own directory, where the
 WSGI file along with available processes should reside. Therefore create a new
 directory for the PyWPS instance::
 
-    $ sudo mkdir /var/www/pywps/
+    $ sudo mkdir /path/to/pywps/
 
     # create a directory for your processes too
-    $ sudo mkdir /var/www/pywps/processes
+    $ sudo mkdir /path/to/pywps/processes
 
 .. note:: In this configuration example it is assumed that there is only one
         instance of PyWPS on the server.
@@ -47,7 +47,7 @@ straightforward - in fact, it's a just wrapper around the PyWPS server with a
 list of processes and configuration files passed as arguments. Here is an 
 example of a PyWPS WSGI script::
 
-    $ $EDITOR /var/www/pywps/pywps.wcgi
+    $ $EDITOR /path/to/pywps/pywps.wsgi
 
 .. code-block:: python
     :linenos:
@@ -80,7 +80,7 @@ example of a PyWPS WSGI script::
     # 2 - list of configuration files
     application = Service(
         processes,
-        ['/var/www/pywps/pywps.cfg']
+        ['/path/to/pywps/pywps.cfg']
     )
 
 .. note:: The WSGI script is assuming that there are already some
@@ -102,19 +102,21 @@ You then can edit your site configuration file
 (`/etc/apache2/sites-enabled/yoursite.conf`) and add the following::
 
         # PyWPS-4
-        WSGIDaemonProcess pywps user=www-data group=www-data processes=2 threads=5
-        WSGIScriptAlias /pywps /var/www/pywps/pywps.wsgi
+        WSGIDaemonProcess pywps home=/path/to/pywps user=www-data group=www-data processes=2 threads=5
+        WSGIScriptAlias /pywps /path/to/pywps/pywps.wsgi process-group=pywps
 
-        <Directory /home/jachym/www/htdocs/wps/>
+        <Directory /path/to/pywps/>
             WSGIScriptReloading On
-            WSGIProcessGroup group
+            WSGIProcessGroup pywps
             WSGIApplicationGroup %{GLOBAL}
-            Order deny,allow
-            Allow from all
+            Require all granted
         </Directory>
 
 .. note:: `WSGIScriptAlias` points to the `pywps.wsgi` script created
         before - it will be available under the url http://localhost/pywps
+
+.. note:: Please make sure that the `logs`, `workdir`, and `outputpath` directories are writeable to the Apache user.
+        The `outputpath` directory need also be accessible from the URL mentioned in `outputurl` configuration.
 
 And of course restart the server::
     
