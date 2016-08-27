@@ -160,7 +160,7 @@ class WPSResponse(object):
                 self.message = 'PyWPS Process %s accepted' % self.process.identifier
                 status_doc = self._process_accepted()
                 doc.append(status_doc)
-                self.write_response_doc(doc)
+                #self.write_response_doc(doc)
                 return doc
             elif 0 < self.status_percentage < 100:
                 status_doc = self._process_started()
