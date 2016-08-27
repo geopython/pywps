@@ -239,6 +239,7 @@ class Process(object):
     def _run_process(self, wps_request, wps_response):
         try:
             self._set_grass()
+            wps_response.update_status('PyWPS Process started', 0)
             wps_response = self.handler(wps_request, wps_response)
 
             if (not wps_response.status_percentage) or (wps_response.status_percentage != 100):
