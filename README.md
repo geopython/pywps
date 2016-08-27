@@ -27,8 +27,8 @@ pip install -r requirements-dev.txt
 # run unit tests
 python -m unittest tests
 # run code coverage
-coverage run --source=pywps -m unittest tests
-coverage report -m
+python -m coverage run --source=pywps -m unittest tests
+python -m coverage report -m
 ```
 
 # Run web application
