@@ -16,6 +16,7 @@ The configuration file has 3 sections:
 
     * `metadata:main` for the server metadata inputs
     * `server` for server configuration
+    * `loggging` for logging configuration
     * `grass` for *optional* configuration to support `GRASS GIS
       <http://grass.osgeo.org>`_
 
@@ -98,13 +99,6 @@ configuration file <http://docs.pycsw.org/en/latest/configuration.html>`_.
     https://docs.python.org/2/library/codecs.html#standard-encodings).  Default
     value is 'UTF-8'
 
-:loglevel:
-    the logging level (see
-    http://docs.python.org/library/logging.html#logging-levels)
-
-:logfile:
-    the full file path to the log file
-
 :parallelprocesses:
     maximum number of parallel running processes - set this number carefully.
     The effective number of parallel running processes is limited by the number 
@@ -112,10 +106,6 @@ configuration file <http://docs.pycsw.org/en/latest/configuration.html>`_.
     response time of hard drives impact ultimate processing performance. A 
     reasonable number of parallel running processes is not higher than the 
     number of processor cores.
-
-:logdatabase:
-    SQLite3 file, where the login about requests/responses is to be stored. It
-    can be set to `":memory:"` to store the database in memory.
 
 :maxrequestsize:
     maximal request size. 0 for no limit 
@@ -137,6 +127,21 @@ configuration file <http://docs.pycsw.org/en/latest/configuration.html>`_.
 
         Example: `outputpath=/var/www/wps/outputs` shall correspond with
         `outputurl=http://foo.bar/wps/outputs`
+
+[logging]
+---------
+
+:level:
+    the logging level (see
+    http://docs.python.org/library/logging.html#logging-levels)
+
+:file:
+    the full file path to the log file for being able to see possible error
+    messages.
+
+:database:
+    Connection string to database where the login about requests/responses is to be stored. We are using `SQLAlchemy <http://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls>`_
+    please use the configuration string. The default is SQLite3 `:memory:` object.
 
 
 [grass]

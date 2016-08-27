@@ -11,69 +11,90 @@ import pickle
 import json
 import os
 
+import sqlalchemy
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, VARCHAR, Float, DateTime, BLOB
+from sqlalchemy.orm import sessionmaker
+
 LOGGER = logging.getLogger('PYWPS')
-_CONNECTION = None
-_DATABASE = None
+_SESSION = None
+
+
+_tableprefix = configuration.get_config_value('logging', 'prefix')
+_schema = configuration.get_config_value('logging', 'schema')
+
+Base = declarative_base()
+class ProcessInstance(Base):
+    __tablename__ = '{}requests'.format(_tableprefix)
+
+
+    uuid = Column(VARCHAR(255), primary_key=True, nullable=False)
+    pid = Column(Integer, nullable=False)
+    operation = Column(VARCHAR(30), nullable=False)
+    version = Column(VARCHAR(5), nullable=False)
+    time_start = Column(DateTime(), nullable=False)
+    time_end = Column(DateTime(), nullable=True)
+    identifier = Column(VARCHAR(255), nullable=True)
+    message = Column(String, nullable=True)
+    percent_done = Column(Float, nullable=True)
+    status = Column(Integer, nullable=True)
+
+class RequestInstance(Base):
+    __tablename__ = '{}stored_requests'.format(_tableprefix)
+
+    uuid = Column(VARCHAR(255), primary_key=True, nullable=False)
+    request = Column(BLOB, nullable=False)
 
 def log_request(uuid, request):
     """Write OGC WPS request (only the necessary parts) to database logging
     system
     """
 
-    conn = get_connection()
-    insert = """
-        INSERT INTO
-            pywps_requests (uuid, pid, operation, version, time_start, identifier)
-        VALUES
-            (?, ?, ?, ?, ?, ?)
-    """
-
     pid = os.getpid()
     operation = request.operation
     version = request.version
-    time_start = datetime.datetime.now().isoformat()
+    time_start = datetime.datetime.now()
     identifier = _get_identifier(request)
 
-    #LOGGER.debug(str((insert, str(uuid), pid, operation, version, time_start, identifier)))
+    session = get_session()
+    request = ProcessInstance(
+        uuid=str(uuid), pid=pid, operation=operation, version=version,
+        time_start=time_start, identifier=identifier)
 
-    cur = conn.cursor()
-    cur.execute(insert, (str(uuid), pid, operation, version, time_start, identifier))
-    conn.commit()
-    close_connection()
+    session.add(request)
+    session.commit()
+    #NoApplicableCode("Could commit to database: {}".format(e.message))
+
 
 def get_running():
     """Returns running processes ids
     """
 
-    conn = get_connection()
-    cur = conn.cursor()
+    session = get_session()
+    running = session.query(ProcessInstance).filter(
+            ProcessInstance.percent_done < 100).filter(
+            ProcessInstance.percent_done > -1)
 
-    res = cur.execute('SELECT uuid FROM pywps_requests WHERE percent_done < 100 and percent_done > -1')
-
-    return res.fetchall()
+    return running
 
 
 def get_stored():
     """Returns running processes ids
     """
 
-    conn = get_connection()
-    cur = conn.cursor()
+    session = get_session()
+    stored = session.query(RequestInstance)
 
-    res = cur.execute('SELECT uuid FROM pywps_stored_requests')
-
-    return res.fetchall()
+    return stored
 
 def get_first_stored():
     """Returns running processes ids
     """
 
-    conn = get_connection()
-    cur = conn.cursor()
+    session = get_session()
+    request = session.query(RequestInstance).first()
 
-    res = cur.execute('SELECT uuid,  request FROM pywps_stored_requests LIMIT 1')
-
-    return res.fetchall()
+    return request
 
 
 
@@ -81,10 +102,10 @@ def update_response(uuid, response, close=False):
     """Writes response to database
     """
 
-    conn = get_connection()
-    message = 'Null'
-    status_percentage = 'Null'
-    status = 'Null'
+    session = get_session()
+    message = None
+    status_percentage = None
+    status = None
 
     if hasattr(response, 'message'):
         message = response.message
@@ -93,26 +114,19 @@ def update_response(uuid, response, close=False):
     if hasattr(response, 'status'):
         status = response.status
 
-    update = """
-        UPDATE
-            pywps_requests
-        SET
-            pid = ?,
-            time_end = ?, message=?,
-            percent_done = ?, status=?
-        WHERE
-            uuid = ?
-    """
+        if status == '200 OK':
+            status = 3
+        elif status == 400:
+            status = 0
 
-    pid = os.getpid()
-    time_end = datetime.datetime.now().isoformat()
-
-    #LOGGER.debug(update % (pid, time_end, message, status_percentage, status, uuid))
-    cur = conn.cursor()
-    cur.execute(update, (pid, time_end, message, status_percentage, status, str(uuid)))
-    conn.commit()
-    close_connection()
-
+    requests = session.query(ProcessInstance).filter_by(uuid=str(uuid))
+    if requests.count():
+        request = requests.one()
+        request.time_end = datetime.datetime.now()
+        request.message = message
+        request.percent_done = status_percentage
+        request.status = status
+        session.commit()
 
 def _get_identifier(request):
     """Get operation identifier
@@ -124,171 +138,53 @@ def _get_identifier(request):
         if request.identifiers:
             return ','.join(request.identifiers)
         else:
-            return 'Null'
+            return None
     else:
-        return 'NULL'
+        return None
 
-def get_connection():
+def get_session():
     """Get Connection for database
     """
 
     LOGGER.debug('Initializing database connection')
-    global _CONNECTION
-    global _DATABASE
+    global _SESSION
 
-    if _CONNECTION:
-        return _CONNECTION
+    if _SESSION:
+        return _SESSION
 
-    if not _DATABASE:
-        database = configuration.get_config_value('server', 'logdatabase')
+    database = configuration.get_config_value('logging', 'database')
+    echo = True
+    level = configuration.get_config_value('logging', 'level')
+    if level in ['INFO', 'DEBUG']:
+        echo = False
+    try:
+        engine = sqlalchemy.create_engine(database, echo=echo)
+    except sqlalchemy.exc.SQLAlchemyError as e:
+        raise NoApplicableCode("Could not connect to database: {}".format(e.message))
 
-        if not database:
-            database = ':memory:'
-        elif database == ':memory:':
-            pass
-        else:
-            database = os.path.abspath(database)
+    Session = sessionmaker(bind=engine)
+    ProcessInstance.metadata.create_all(engine)
+    RequestInstance.metadata.create_all(engine)
 
-        _DATABASE = database
-    else:
-        database = _DATABASE
+    _SESSION = Session()
 
-    connection = sqlite3.connect(database, check_same_thread=False)
-    if check_db_table(connection):
-        if check_db_columns(connection):
-            _CONNECTION = connection
-        else:
-            raise NoApplicableCode("""
-                Columns in the table 'pywps_requests' or 'pywps_stored_requests' in database '%s' are in
-                conflict
-            """ % database)
-
-    else:
-        _CONNECTION = sqlite3.connect(database, check_same_thread=False)
-        cursor = _CONNECTION.cursor()
-        createsql = """
-            CREATE TABLE pywps_requests(
-                uuid VARCHAR(255) not null primary key,
-                pid INTEGER not null,
-                operation varchar(30) not null,
-                version varchar(5) not null,
-                time_start text not null,
-                time_end text,
-                identifier text,
-                message text,
-                percent_done float,
-                status varchar(30)
-            )
-        """
-        cursor.execute(createsql)
-
-        createsql = """
-            CREATE TABLE pywps_stored_requests(
-                uuid VARCHAR(255) not null primary key,
-                request BLOB not null
-            )
-            """
-        cursor.execute(createsql)
-        _CONNECTION.commit()
-
-    return _CONNECTION
-
-def check_db_table(connection):
-    """Check for existing pywps_requests table in the datase
-
-    :return: boolean pywps_requests table is in database
-    """
-
-    cursor = connection.cursor()
-    cursor.execute("""
-        SELECT
-            name
-        FROM
-            sqlite_master
-        WHERE
-            name='pywps_requests'
-    """)
-    table = cursor.fetchone()
-    if table:
-        LOGGER.debug('pywps_requests table exists')
-        return True
-    else:
-        LOGGER.debug('pywps_requests table does not exist')
-        return False
-
-
-def check_db_columns(connection):
-    """Simple check for existing columns in given database
-
-    we will make just simple check, this is not django
-
-    :return: all needed columns found
-    :rtype: boolean
-    """
-
-    def _check_table(name, needed_columns):
-        cur = connection.cursor()
-        cur.execute("""PRAGMA table_info('%s')""" % name)
-        metas = cur.fetchall()
-        columns = []
-        for column in metas:
-            columns.append(column[1])
-
-        needed_columns.sort()
-        columns.sort()
-
-        if columns == needed_columns:
-            return True
-        else:
-            return False
-
-    name = 'pywps_requests'
-    needed_columns = ['uuid', 'pid', 'operation', 'version', 'time_start',
-                      'time_end', 'identifier', 'message', 'percent_done',
-                      'status']
-
-    pywps_requests = _check_table(name, needed_columns)
-    pywps_stored_requests = _check_table('pywps_stored_requests', ['uuid', 'request'])
-
-
-    return pywps_requests and pywps_stored_requests
-
-def close_connection():
-    """close connection"""
-    LOGGER.debug('Closing DB connection')
-    global _CONNECTION
-    if _CONNECTION:
-        _CONNECTION.close()
-    _CONNECTION = None
+    return _SESSION
 
 def store_process(uuid, request):
     """Save given request under given UUID for later usage
     """
 
-    conn = get_connection()
-    insert = """
-        INSERT INTO
-            pywps_stored_requests (uuid, request)
-        VALUES
-            (?, ?)
-    """
+    session = get_session()
+    request = RequestInstance(uuid=str(uuid), request=request.json)
+    session.add(request)
+    session.commit()
 
-    cur = conn.cursor()
-    cur.execute(insert, (str(uuid), request.json))
-    conn.commit()
-    close_connection()
 
 def remove_stored(uuid):
     """Remove given request from stored requests
     """
 
-    conn = get_connection()
-    insert = """
-        DELETE FROM
-            pywps_stored_requests
-        WHERE uuid = ?
-    """
-    cur = conn.cursor()
-    cur.execute(insert, (str(uuid)))
-    conn.commit()
-    close_connection()
+    session = get_session()
+    request = session.query(RequestInstance).filter_by(name='uuid').first()
+    session.delete(request)
+    session.commit()

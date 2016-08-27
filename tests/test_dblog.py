@@ -3,7 +3,8 @@
 import unittest
 
 from pywps import configuration
-from pywps.dblog import get_connection, check_db_table, check_db_columns
+from pywps.dblog import get_session
+from pywps.dblog import ProcessInstance
 
 
 class DBLogTest(unittest.TestCase):
@@ -11,33 +12,26 @@ class DBLogTest(unittest.TestCase):
 
     def setUp(self):
 
-        self.database = configuration.get_config_value('server', 'logdatabase')
-        if not self.database:
-            self.database = ':memory:'
+        self.database = configuration.get_config_value('logging', 'database')
 
     def test_0_dblog(self):
         """Test pywps.formats.Format class
         """
-        connection = get_connection()
-        self.assertTrue(connection)
-        self.assertTrue(check_db_table(connection))
-        #self.assertTrue(check_db_columns(self.database))
+        session = get_session()
+        self.assertTrue(session)
 
     def test_db_content(self):
-        connection = get_connection()
-        cur = connection.cursor()
-        cur.execute("Select * from pywps_requests WHERE time_end IS NULL")
-        null_time_end = cur.fetchall()
-        self.assertEqual(len(null_time_end), 0,
+        session = get_session()
+        null_time_end = session.query(ProcessInstance).filter(ProcessInstance.time_end == None)
+        self.assertEqual(null_time_end.count(), 0,
                          'There are no unfinished processes loged')
-        cur.execute("Select * from pywps_requests WHERE status IS NULL")
-        null_status = cur.fetchall()
-        self.assertEqual(len(null_status), 0,
+
+        null_status = session.query(ProcessInstance).filter(ProcessInstance.status == None)
+        self.assertEqual(null_status.count(), 0,
                          'There are no processes without status loged')
 
-        cur.execute("Select * from pywps_requests WHERE percent_done IS NULL")
-        null_percent = cur.fetchall()
-        self.assertEqual(len(null_percent), 0,
+        null_percent = session.query(ProcessInstance).filter(ProcessInstance.percent_done == None)
+        self.assertEqual(null_percent.count(), 0,
                          'There are no processes without percent loged')
 
 def load_tests(loader=None, tests=None, pattern=None):
