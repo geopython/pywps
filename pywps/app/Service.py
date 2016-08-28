@@ -38,10 +38,10 @@ class Service(object):
         if cfgfiles:
             config.load_configuration(cfgfiles)
 
-        if config.get_config_value('server', 'logfile') and config.get_config_value('server', 'loglevel'):
-            LOGGER.setLevel(getattr(logging, config.get_config_value('server', 'loglevel')))
+        if config.get_config_value('server', 'file') and config.get_config_value('logging', 'level'):
+            LOGGER.setLevel(getattr(logging, config.get_config_value('logging', 'level')))
             msg_fmt = '%(asctime)s] [%(levelname)s] file=%(pathname)s line=%(lineno)s module=%(module)s function=%(funcName)s %(message)s'
-            fh = logging.FileHandler(config.get_config_value('server', 'logfile'))
+            fh = logging.FileHandler(config.get_config_value('server', 'file'))
             fh.setFormatter(logging.Formatter(msg_fmt))
             LOGGER.addHandler(fh)
         else:  # NullHandler
@@ -600,7 +600,10 @@ class Service(object):
                 message = e.locator
                 status = e.code
                 status_percentage = 100
-            update_response(request_uuid, FakeResponse, close=True)
+            try:
+                update_response(request_uuid, FakeResponse, close=True)
+            except NoApplicableCode as e:
+                return e
             return e
 
 

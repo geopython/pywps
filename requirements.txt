@@ -2,3 +2,4 @@ owslib
 jsonschema
 lxml
 werkzeug
+SQLAlchemy

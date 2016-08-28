@@ -1,4 +1,5 @@
 import unittest
+import lxml
 import lxml.etree
 from pywps.app import Process, Service
 from pywps import WPS, OWS

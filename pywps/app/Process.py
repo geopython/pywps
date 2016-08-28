@@ -189,15 +189,15 @@ class Process(object):
         :return: wps_response or None
         """
 
-        maxparalel = int(config.get_config_value('server', 'parallelprocesses'))
-        running = len(dblog.get_running())
-        stored = len(dblog.get_stored())
+        maxparallel = int(config.get_config_value('server', 'parallelprocesses'))
+        running = dblog.get_running().count()
+        stored = dblog.get_stored().count()
 
         # async
         if async:
 
             # run immedietly
-            if running < maxparalel:
+            if running < maxparallel or maxparallel == -1:
                 self._run_async(wps_request, wps_response)
 
             # try to store for later usage
@@ -207,7 +207,7 @@ class Process(object):
 
         # not async
         else:
-            if running < maxparalel:
+            if running < maxparallel or maxparallel == -1:
                 wps_response = self._run_process(wps_request, wps_response)
             else:
                 raise ServerBusy('Maximum number of parallel running processes reached. Please try later.')
@@ -276,9 +276,9 @@ class Process(object):
                 wps_response.update_status(msg, -1)
 
         # tr
-        stored_requests = dblog.get_first_stored()
-        if len(stored_requests) > 0:
-            (uuid, request_json) = stored_requests[0]
+        stored_request = dblog.get_first_stored()
+        if stored_request:
+            (uuid, request_json) = (stored_request.uuid, stored_request.request)
             new_wps_request = WPSRequest()
             new_wps_request.json = json.loads(request_json)
             new_wps_response = WPSResponse(self, new_wps_request, uuid)

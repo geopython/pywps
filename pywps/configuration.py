@@ -100,11 +100,14 @@ def load_configuration(cfgfiles=None):
     outputpath = tempfile.gettempdir()
     CONFIG.set('server', 'outputurl', 'file:///%s' % outputpath)
     CONFIG.set('server', 'outputpath', outputpath)
-    CONFIG.set('server', 'logfile', '')
-    CONFIG.set('server', 'logdatabase', ':memory:')
-    CONFIG.set('server', 'loglevel', 'INFO')
     CONFIG.set('server', 'workdir',  tempfile.gettempdir())
     CONFIG.set('server', 'parallelprocesses', '2')
+
+    CONFIG.add_section('logging')
+    CONFIG.set('logging', 'file', '')
+    CONFIG.set('logging', 'level', 'DEBUG')
+    CONFIG.set('logging', 'database', 'sqlite:///:memory:')
+    CONFIG.set('logging', 'prefix', 'pywps_')
 
     CONFIG.add_section('metadata:main')
     CONFIG.set('metadata:main', 'identification_title', 'PyWPS Processing Service')
