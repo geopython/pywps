@@ -1,5 +1,7 @@
 # PyWPS 
 
+[![Join the chat at https://gitter.im/geopython/pywps](https://badges.gitter.im/geopython/pywps.svg)](https://gitter.im/geopython/pywps?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 PyWPS is an implementation of the Web Processing Service standard from
 the Open Geospatial Consortium. PyWPS is written in Python.
 
