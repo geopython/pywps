@@ -1,0 +1,414 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pywps.inout.literaltypes &mdash; PyWPS 4.0.0-rc1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '4.0.0-rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="PyWPS 4.0.0-rc1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pywps.inout.literaltypes</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Literaltypes are used for LiteralInputs, to make sure, input data are OK</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">pywps._compat</span> <span class="kn">import</span> <span class="n">urlparse</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">pywps.exceptions</span> <span class="kn">import</span> <span class="n">InvalidParameterValue</span>
+<span class="kn">from</span> <span class="nn">pywps.validator.allowed_value</span> <span class="kn">import</span> <span class="n">RANGECLOSURETYPE</span>
+<span class="kn">from</span> <span class="nn">pywps.validator.allowed_value</span> <span class="kn">import</span> <span class="n">ALLOWEDVALUETYPE</span>
+<span class="kn">from</span> <span class="nn">pywps._compat</span> <span class="kn">import</span> <span class="n">PY2</span>
+<span class="kn">from</span> <span class="nn">pywps</span> <span class="kn">import</span> <span class="n">OWS</span><span class="p">,</span> <span class="n">WPS</span><span class="p">,</span> <span class="n">OGCTYPE</span><span class="p">,</span> <span class="n">NAMESPACES</span>
+
+<span class="n">LITERAL_DATA_TYPES</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;float&#39;</span><span class="p">,</span> <span class="s1">&#39;boolean&#39;</span><span class="p">,</span> <span class="s1">&#39;integer&#39;</span><span class="p">,</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;positiveInteger&#39;</span><span class="p">,</span> <span class="s1">&#39;anyURI&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;scale&#39;</span><span class="p">,</span> <span class="s1">&#39;angle&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;nonNegativeInteger&#39;</span><span class="p">)</span>
+
+<span class="c1"># currently we are supporting just ^^^ data types, feel free to add support for</span>
+<span class="c1"># more</span>
+<span class="c1"># &#39;measure&#39;, &#39;angleList&#39;,</span>
+<span class="c1"># &#39;angle&#39;, &#39;integerList&#39;,</span>
+<span class="c1"># &#39;positiveIntegerList&#39;,</span>
+<span class="c1"># &#39;lengthOrAngle&#39;, &#39;gridLength&#39;,</span>
+<span class="c1"># &#39;measureList&#39;, &#39;lengthList&#39;,</span>
+<span class="c1"># &#39;gridLengthList&#39;, &#39;scaleList&#39;, &#39;timeList&#39;,</span>
+<span class="c1"># &#39;nonNegativeInteger&#39;, &#39;length&#39;</span>
+
+
+<div class="viewcode-block" id="AnyValue"><a class="viewcode-back" href="../../../api.html#pywps.inout.literaltypes.AnyValue">[docs]</a><span class="k">class</span> <span class="nc">AnyValue</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Any value for literal input</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;anyvalue&#39;</span><span class="p">}</span></div>
+
+<span class="k">class</span> <span class="nc">NoValue</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;No value allowed</span>
+<span class="sd">    NOTE: not really implemented</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;novalue&#39;</span><span class="p">}</span>
+
+<span class="k">class</span> <span class="nc">ValuesReference</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Any value for literal input</span>
+<span class="sd">    NOTE: not really implemented</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;valuesreference&#39;</span><span class="p">}</span>
+
+<div class="viewcode-block" id="AllowedValue"><a class="viewcode-back" href="../../../api.html#pywps.inout.literaltypes.AllowedValue">[docs]</a><span class="k">class</span> <span class="nc">AllowedValue</span><span class="p">(</span><span class="n">AnyValue</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Allowed value parameters</span>
+<span class="sd">    the values are evaluated in literal validator functions</span>
+
+<span class="sd">    :param pywps.validator.allowed_value.ALLOWEDVALUETYPE allowed_type: VALUE or RANGE</span>
+<span class="sd">    :param value: single value</span>
+<span class="sd">    :param minval: minimal value in case of Range</span>
+<span class="sd">    :param maxval: maximal value in case of Range</span>
+<span class="sd">    :param spacing: spacing in case of Range</span>
+<span class="sd">    :param pywps.input.literaltypes.RANGECLOSURETYPE range_closure:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allowed_type</span><span class="o">=</span><span class="n">ALLOWEDVALUETYPE</span><span class="o">.</span><span class="n">VALUE</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">minval</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">maxval</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">range_closure</span><span class="o">=</span><span class="n">RANGECLOSURETYPE</span><span class="o">.</span><span class="n">CLOSED</span><span class="p">):</span>
+
+        <span class="n">AnyValue</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">allowed_type</span> <span class="o">=</span> <span class="n">allowed_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minval</span> <span class="o">=</span> <span class="n">minval</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxval</span> <span class="o">=</span> <span class="n">maxval</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacing</span> <span class="o">=</span> <span class="n">spacing</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">range_closure</span> <span class="o">=</span> <span class="n">range_closure</span>
+
+    <span class="k">def</span> <span class="nf">describe_xml</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return back Element for DescribeProcess response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowed_type</span> <span class="o">==</span> <span class="n">ALLOWEDVALUETYPE</span><span class="o">.</span><span class="n">VALUE</span><span class="p">:</span>
+            <span class="n">doc</span> <span class="o">=</span> <span class="n">OWS</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">doc</span> <span class="o">=</span> <span class="n">OWS</span><span class="o">.</span><span class="n">Range</span><span class="p">()</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;{</span><span class="si">%s</span><span class="s1">}rangeClosure&#39;</span> <span class="o">%</span> <span class="n">NAMESPACES</span><span class="p">[</span><span class="s1">&#39;ows&#39;</span><span class="p">],</span>  <span class="bp">self</span><span class="o">.</span><span class="n">range_closure</span><span class="p">)</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OWS</span><span class="o">.</span><span class="n">MinimumValue</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minval</span><span class="p">)))</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OWS</span><span class="o">.</span><span class="n">MaximumValue</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxval</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">:</span>
+                <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OWS</span><span class="o">.</span><span class="n">Spacing</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">doc</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;json&#39;</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">json</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;allowedvalue&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;allowed_type&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowed_type</span><span class="p">,</span>
+            <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span>
+            <span class="s1">&#39;minval&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">minval</span><span class="p">,</span>
+            <span class="s1">&#39;maxval&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxval</span><span class="p">,</span>
+            <span class="s1">&#39;spacing&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">,</span>
+            <span class="s1">&#39;range_closure&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_closure</span>
+        <span class="p">}</span></div>
+
+<span class="k">def</span> <span class="nf">get_converter</span><span class="p">(</span><span class="n">convertor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;function for decoration of convert</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">decorator_selector</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">convert</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">data_type</span> <span class="ow">in</span> <span class="n">LITERAL_DATA_TYPES</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s1">&#39;string&#39;</span><span class="p">:</span>
+                <span class="n">convert</span> <span class="o">=</span> <span class="n">convert_string</span>
+            <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s1">&#39;integer&#39;</span><span class="p">:</span>
+                <span class="n">convert</span> <span class="o">=</span> <span class="n">convert_integer</span>
+            <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s1">&#39;float&#39;</span><span class="p">:</span>
+                <span class="n">convert</span> <span class="o">=</span> <span class="n">convert_float</span>
+            <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s1">&#39;boolean&#39;</span><span class="p">:</span>
+                <span class="n">convert</span> <span class="o">=</span> <span class="n">convert_boolean</span>
+            <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s1">&#39;positiveInteger&#39;</span><span class="p">:</span>
+                <span class="n">convert</span> <span class="o">=</span> <span class="n">convert_positiveInteger</span>
+            <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s1">&#39;anyURI&#39;</span><span class="p">:</span>
+                <span class="n">convert</span> <span class="o">=</span> <span class="n">convert_anyURI</span>
+            <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span>
+                <span class="n">convert</span> <span class="o">=</span> <span class="n">convert_time</span>
+            <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s1">&#39;scale&#39;</span><span class="p">:</span>
+                <span class="n">convert</span> <span class="o">=</span> <span class="n">convert_scale</span>
+            <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s1">&#39;angle&#39;</span><span class="p">:</span>
+                <span class="n">convert</span> <span class="o">=</span> <span class="n">convert_angle</span>
+            <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s1">&#39;nonNegativeInteger&#39;</span><span class="p">:</span>
+                <span class="n">convert</span> <span class="o">=</span> <span class="n">convert_positiveInteger</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">InvalidParameterValue</span><span class="p">(</span>
+                    <span class="s2">&quot;Invalid data_type value of LiteralInput &quot;</span> <span class="o">+</span>
+                    <span class="s2">&quot;set to &#39;{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data_type</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">convert</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidParameterValue</span><span class="p">(</span>
+                <span class="s2">&quot;Could not convert value &#39;{}&#39; to format &#39;{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">data</span><span class="p">,</span> <span class="n">data_type</span><span class="p">))</span>
+
+
+    <span class="k">return</span> <span class="n">decorator_selector</span>
+
+
+<span class="nd">@get_converter</span>
+<span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert data to target value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">data_type</span><span class="p">,</span> <span class="n">data</span>
+
+
+<span class="k">def</span> <span class="nf">convert_boolean</span><span class="p">(</span><span class="n">inpt</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return boolean value from input boolean input</span>
+
+<span class="sd">    &gt;&gt;&gt; convert_boolean(&#39;1&#39;)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; convert_boolean(&#39;-1&#39;)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; convert_boolean(&#39;FaLsE&#39;)</span>
+<span class="sd">    False</span>
+<span class="sd">    &gt;&gt;&gt; convert_boolean(&#39;FaLsEx&#39;)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; convert_boolean(0)</span>
+<span class="sd">    False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">val</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">inpt</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;false&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">]:</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">inpt</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="n">val</span>
+
+<span class="k">def</span> <span class="nf">convert_float</span><span class="p">(</span><span class="n">inpt</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return float value from inpt</span>
+
+<span class="sd">    &gt;&gt;&gt; convert_float(&#39;1&#39;)</span>
+<span class="sd">    1.0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">inpt</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">convert_integer</span><span class="p">(</span><span class="n">inpt</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return integer value from input inpt</span>
+
+<span class="sd">    &gt;&gt;&gt; convert_integer(&#39;1.0&#39;)</span>
+<span class="sd">    1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">inpt</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">convert_string</span><span class="p">(</span><span class="n">inpt</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return string value from input lit_input</span>
+
+<span class="sd">    &gt;&gt;&gt; convert_string(1)</span>
+<span class="sd">    &#39;1&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">PY2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">inpt</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">inpt</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">convert_positiveInteger</span><span class="p">(</span><span class="n">inpt</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return value of input&quot;&quot;&quot;</span>
+
+    <span class="n">inpt</span> <span class="o">=</span> <span class="n">convert_integer</span><span class="p">(</span><span class="n">inpt</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">inpt</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InvalidParameterValue</span><span class="p">(</span>
+            <span class="s1">&#39;The value &quot;{}&quot; is not of type positiveInteger&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">inpt</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">inpt</span>
+
+<span class="k">def</span> <span class="nf">convert_anyURI</span><span class="p">(</span><span class="n">inpt</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return value of input</span>
+<span class="sd">    </span>
+<span class="sd">    :rtype: url components </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">inpt</span> <span class="o">=</span> <span class="n">convert_string</span><span class="p">(</span><span class="n">inpt</span><span class="p">)</span>
+    <span class="n">components</span> <span class="o">=</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">urlparse</span><span class="p">(</span><span class="n">inpt</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">components</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">components</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">components</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InvalidParameterValue</span><span class="p">(</span>
+            <span class="s1">&#39;The value &quot;{}&quot; does not seem to be of type anyURI&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">inpt</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">convert_time</span><span class="p">(</span><span class="n">inpt</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return value of input</span>
+<span class="sd">    time formating assumed according to ISO standard</span>
+
+<span class="sd">    http://www.w3.org/TR/NOTE-datetime</span>
+
+<span class="sd">    :rtype: time object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">time_format</span> <span class="o">=</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S%z&#39;</span>
+    <span class="n">inpt</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">convert_string</span><span class="p">(</span><span class="n">inpt</span><span class="p">),</span> <span class="n">time_format</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">inpt</span>
+
+<span class="k">def</span> <span class="nf">convert_scale</span><span class="p">(</span><span class="n">inpt</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return value of input&quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">convert_float</span><span class="p">(</span><span class="n">inpt</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">convert_angle</span><span class="p">(</span><span class="n">inpt</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return value of input</span>
+
+<span class="sd">    return degrees</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">inpt</span> <span class="o">=</span> <span class="n">convert_float</span><span class="p">(</span><span class="n">inpt</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">inpt</span><span class="o">%</span><span class="mi">360</span>
+
+
+<span class="k">def</span> <span class="nf">make_allowedvalues</span><span class="p">(</span><span class="n">allowed_values</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;convert given value list to AllowedValue objects</span>
+
+<span class="sd">    :return: list of pywps.inout.literaltypes.AllowedValue</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">new_allowedvalues</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">allowed_values</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">AllowedValue</span><span class="p">):</span>
+            <span class="n">new_allowedvalues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">tuple</span> <span class="ow">or</span>\
+           <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="n">minval</span> <span class="o">=</span> <span class="n">maxval</span> <span class="o">=</span> <span class="n">spacing</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">minval</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">maxval</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">minval</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">spacing</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">maxval</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">new_allowedvalues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">AllowedValue</span><span class="p">(</span><span class="n">allowed_type</span><span class="o">=</span><span class="n">ALLOWEDVALUETYPE</span><span class="o">.</span><span class="n">RANGE</span><span class="p">,</span>
+                             <span class="n">minval</span><span class="o">=</span><span class="n">minval</span><span class="p">,</span> <span class="n">maxval</span><span class="o">=</span><span class="n">maxval</span><span class="p">,</span>
+                             <span class="n">spacing</span><span class="o">=</span><span class="n">spacing</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_allowedvalues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">AllowedValue</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">new_allowedvalues</span>
+
+
+<span class="k">def</span> <span class="nf">is_anyvalue</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check for any value object of given value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">is_av</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="n">AnyValue</span><span class="p">:</span>
+        <span class="n">is_av</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">is_av</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">AnyValue</span><span class="p">):</span>
+        <span class="n">is_av</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">elif</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;anyvalue&#39;</span><span class="p">:</span>
+        <span class="n">is_av</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">return</span> <span class="n">is_av</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/pywps.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright Copyright (C) 2014-2016 PyWPS Development Team, represented by Jachym Cepicky.This work is licensed under a Creative Commons Attribution 4.0 International License.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

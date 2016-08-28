@@ -1,0 +1,205 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installation &mdash; PyWPS 4.0.0-rc1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '4.0.0-rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="PyWPS 4.0.0-rc1 documentation" href="index.html" />
+    <link rel="next" title="Configuration" href="configuration.html" />
+    <link rel="prev" title="PyWPS" href="pywps.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="configuration.html" title="Configuration"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="pywps.html" title="PyWPS"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="installation">
+<span id="id1"></span><h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">PyWPS-4 is not tested on the MS Windows platform. Please join the
+development team if you need this platform to be supported. This is mainly
+because of the lack of a multiprocessing library.  It is used to process
+asynchronous execution, i.e., when making requests storing the response
+document and updating a status document displaying the progress of
+execution.</p>
+</div>
+<div class="section" id="dependencies-and-requirements">
+<h2>Dependencies and requirements<a class="headerlink" href="#dependencies-and-requirements" title="Permalink to this headline">¶</a></h2>
+<p>PyWPS-4 runs on Python 2.7, 3.3 or newer. PyWPS is currently tested and
+developed on Linux (mostly Ubuntu). In the documentation we take this
+distribution as reference.</p>
+<p>Prior to installing PyWPS-4, Git and the Python bindings for GDAL must be
+installed in the system.  In Debian based systems these packages can be
+installed with a tool like <em>apt</em>:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ sudo apt install git python-gdal
+</pre></div>
+</div>
+</div>
+<div class="section" id="download-and-install">
+<h2>Download and install<a class="headerlink" href="#download-and-install" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>Using PIP</dt>
+<dd><p class="first">The easiest way to install PyWPS-4 is using the Python Package Index
+(PIP).  It fetches the source code from the repository and installs it
+automatically in the system.  This might require superuser permissions
+(e.g. <em>sudo</em> in Debian based systems):</p>
+<div class="last highlight-python"><div class="highlight"><pre>$ sudo pip install -e git+https://github.com/geopython/pywps.git@master#egg=pywps-dev
+</pre></div>
+</div>
+</dd>
+<dt>Manual installation</dt>
+<dd><p class="first">In alternative PyWPS-4 can be installed manually.
+It requires the cloning of the source code from the repository and then the
+usage of the <cite>setup.py</cite> script.  An example again for Debian based systems (note
+the usage of <cite>sudo</cite> for install):</p>
+<div class="highlight-python"><div class="highlight"><pre>$ git clone https://github.com/geopython/pywps.git pywps-4
+
+$ cd pywps-4/
+</pre></div>
+</div>
+<p>Then install the package dependencies using pip:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ pip install -r requirements.txt
+$ pip install -r requirements-dev.txt  # for developer tasks
+</pre></div>
+</div>
+<p>To install PyWPS system-wide run:</p>
+<div class="last highlight-python"><div class="highlight"><pre>$ sudo python setup.py install
+</pre></div>
+</div>
+</dd>
+</dl>
+</div>
+<div class="section" id="the-demo-service-and-its-sample-processes">
+<span id="demo"></span><h2>The demo service and its sample processes<a class="headerlink" href="#the-demo-service-and-its-sample-processes" title="Permalink to this headline">¶</a></h2>
+<p>To use PyWPS-4 the user must code processes and publish them through a service.
+A demo service is available that makes up a good starting point for first time
+users. This launches a very simple built-in server (relying on <a class="reference external" href="http://flask.pocoo.org/">flask</a>), which is good enough for testing but probably not
+appropriate for production.  It can be cloned directly into the user
+area:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ git clone https://github.com/geopython/pywps-demo.git
+</pre></div>
+</div>
+<p>It may be run right away through the <cite>demo.py</cite> script.  First time users should
+start by studying the demo project structure and then code their own processes.</p>
+<p>Full more details please consult the <a class="reference internal" href="process.html#process"><span>Processes</span></a> section. The <cite>demo</cite> service
+contains some basic processes too, so you could get started with some examples
+(like <cite>area</cite>, <cite>buffer</cite>, <cite>feature_count</cite> and <cite>grassbuffer</cite>). These processes are
+to be taken just as inspiration and code documentation - most of them do not
+make any sense (e.g. <cite>sayhello</cite>).</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/pywps.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installation</a><ul>
+<li><a class="reference internal" href="#dependencies-and-requirements">Dependencies and requirements</a></li>
+<li><a class="reference internal" href="#download-and-install">Download and install</a></li>
+<li><a class="reference internal" href="#the-demo-service-and-its-sample-processes">The demo service and its sample processes</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="pywps.html"
+                        title="previous chapter">PyWPS</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="configuration.html"
+                        title="next chapter">Configuration</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/install.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="configuration.html" title="Configuration"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="pywps.html" title="PyWPS"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright Copyright (C) 2014-2016 PyWPS Development Team, represented by Jachym Cepicky.This work is licensed under a Creative Commons Attribution 4.0 International License.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

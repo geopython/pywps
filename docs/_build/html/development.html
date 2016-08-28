@@ -1,0 +1,232 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Developers Guide &mdash; PyWPS 4.0.0-rc1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '4.0.0-rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="PyWPS 4.0.0-rc1 documentation" href="index.html" />
+    <link rel="next" title="Exceptions" href="exceptions.html" />
+    <link rel="prev" title="PyWPS API Doc" href="api.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="exceptions.html" title="Exceptions"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="api.html" title="PyWPS API Doc"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="developers-guide">
+<h1>Developers Guide<a class="headerlink" href="#developers-guide" title="Permalink to this headline">¶</a></h1>
+<p>If you identify a bug in the PyWPS code base and want to fix it, if you would
+like to add further functionality, or if you wish to expand the documentation,
+you are welcomed to contribute such changes. However, contributions to the
+code base must follow an orderly process, described below. This facilitates
+both the work on your contribution as its review.</p>
+<div class="section" id="github-account">
+<h2>0. GitHub account<a class="headerlink" href="#github-account" title="Permalink to this headline">¶</a></h2>
+<p>The PyWPS source code is hosted at GitHub, therefore you need an account to contribute.
+If you do not have one, you can follow
+<a class="reference external" href="https://help.github.com/categories/setup/">these instructions</a>.</p>
+</div>
+<div class="section" id="open-a-new-issue">
+<h2>1. Open a new issue<a class="headerlink" href="#open-a-new-issue" title="Permalink to this headline">¶</a></h2>
+<p>The first action to take is to clearly identify the goal of your contribution.
+Be it a bug fix, a new feature or documentation, a clear record must be left
+for future tracking. This is made by opening an issue at the <a class="reference external" href="https://github.com/geopython/pywps/issues">GitHub issue
+tracker</a>. In this new issue you
+should identify not only the subject or goal, but also a draft
+of the changes you expect to achieve. For example:</p>
+<blockquote>
+<div><p><strong>Title</strong>: Process class must be magic</p>
+<p><strong>Description</strong>: The Process class must start performing some magics. Give it
+a magic wand.</p>
+</div></blockquote>
+</div>
+<div class="section" id="fork-and-clone-the-pywps-repository">
+<h2>2. Fork and clone the PyWPS repository<a class="headerlink" href="#fork-and-clone-the-pywps-repository" title="Permalink to this headline">¶</a></h2>
+<p>When you start modifying to the code, there is always the possibility for
+something to go wrong, rendering PyWPS unusable. The first action to avoid such
+a situation is to create a development sand box. In GitHub this can
+easily be made by creating a fork of the main PyWPS repository. Access the
+<a class="reference external" href="https://github.com/geopython/PyWPS">PyWPS code repository</a> and click the
+<em>Fork</em> button. This action creates a copy of the repository associated with
+your GitHub user. For more details please read <a class="reference external" href="https://guides.github.com/activities/forking/">the forking guide</a>.</p>
+<p>Now you can clone this forked repository into your development environment,
+issuing a command like:</p>
+<div class="highlight-python"><div class="highlight"><pre>git clone https://github.com/&lt;github-user&gt;/PyWPS.git pywps
+</pre></div>
+</div>
+<p>Where you should replace <em>&lt;github-user&gt;</em> with your GitHub user name.</p>
+<p>You can finally start programming your new feature, or fixing that bug you
+found. Keep in mind that PyWPS depends on a few libraries, refer to the
+<a class="reference internal" href="install.html#installation"><span>Installation</span></a> section to make sure you have all of them installed.</p>
+</div>
+<div class="section" id="commit-and-pull-request">
+<h2>3. Commit and pull request<a class="headerlink" href="#commit-and-pull-request" title="Permalink to this headline">¶</a></h2>
+<p>If your modification to code is relatively small and can be included in a
+single <em>commit</em> then all you need to is reference the issue in the <strong>commit</strong>
+message, e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre>git commit -m &quot;Fixes #107&quot;
+</pre></div>
+</div>
+<p>Where <em>107</em> is the number of the issue you opened initially in the PyWPS
+issue tracker. Please refer to <a class="reference external" href="https://help.github.com/articles/closing-issues-via-commit-messages/">the guide on closing issues with commits
+messages</a>. Then
+you push the changes to your forked repository, issuing a command like:</p>
+<div class="highlight-python"><div class="highlight"><pre>git push origin master
+</pre></div>
+</div>
+<p>Finally you an create a pull request. This it is a formal request to merge your
+contribution with the code base; it is fully managed by GitHub and greatly
+facilitates the review process. You do so by accessing the repository
+associated with your user and clicking the <em>New pull request</em> button. Make sure
+your contribution is not creating conflicts and click <em>Create pull request</em>.
+If needed, there is also a <a class="reference external" href="https://help.github.com/articles/creating-a-pull-request/">guide on pull requests</a>.</p>
+<p>If you contribution is more substantial, and composed of multiple commits, then
+you must identify the issue it closes in the pull request itself. Check out
+<a class="reference external" href="https://github.com/blog/1506-closing-issues-via-pull-requests">this guide</a> for
+the details.</p>
+<p>The members of the PyWPS PSC are then notified if your pull request. They
+review your contribution and hopefully accept merging it to the code base.</p>
+</div>
+<div class="section" id="updating-local-repository">
+<h2>4. Updating local repository<a class="headerlink" href="#updating-local-repository" title="Permalink to this headline">¶</a></h2>
+<p>Later on, if you wish to make further contributions, you must make sure to be
+working with the very latest version of the code base. You can add another
+<em>remote</em> reference in your local repository pointing to the main PyWPS
+repository:</p>
+<div class="highlight-python"><div class="highlight"><pre>git remote add upstream https://github.com/geopython/PyWPS
+</pre></div>
+</div>
+<p>Then you can use the <em>fetch</em> command to update your local repository metadata:</p>
+<div class="highlight-python"><div class="highlight"><pre>git fetch upstream
+</pre></div>
+</div>
+<p>Finally you use a <em>pull</em> command to merge the latest <em>commits</em> into your local
+repository:</p>
+<div class="highlight-python"><div class="highlight"><pre>git pull upstream master
+</pre></div>
+</div>
+</div>
+<div class="section" id="help-and-discussion">
+<h2>5. Help and discussion<a class="headerlink" href="#help-and-discussion" title="Permalink to this headline">¶</a></h2>
+<p>If you have any doubts or questions about this contribution process or about the
+code please use the <a class="reference external" href="http://lists.osgeo.org/mailman/listinfo/pywps-dev">PyWPS mailing list</a> . This is also the right
+place to propose and discuss the changes you intend to introduce.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/pywps.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Developers Guide</a><ul>
+<li><a class="reference internal" href="#github-account">0. GitHub account</a></li>
+<li><a class="reference internal" href="#open-a-new-issue">1. Open a new issue</a></li>
+<li><a class="reference internal" href="#fork-and-clone-the-pywps-repository">2. Fork and clone the PyWPS repository</a></li>
+<li><a class="reference internal" href="#commit-and-pull-request">3. Commit and pull request</a></li>
+<li><a class="reference internal" href="#updating-local-repository">4. Updating local repository</a></li>
+<li><a class="reference internal" href="#help-and-discussion">5. Help and discussion</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="api.html"
+                        title="previous chapter">PyWPS API Doc</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="exceptions.html"
+                        title="next chapter">Exceptions</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/development.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="exceptions.html" title="Exceptions"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="api.html" title="PyWPS API Doc"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright Copyright (C) 2014-2016 PyWPS Development Team, represented by Jachym Cepicky.This work is licensed under a Creative Commons Attribution 4.0 International License.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

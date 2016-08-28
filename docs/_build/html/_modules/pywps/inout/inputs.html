@@ -1,0 +1,466 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pywps.inout.inputs &mdash; PyWPS 4.0.0-rc1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '4.0.0-rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="PyWPS 4.0.0-rc1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pywps.inout.inputs</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">pywps</span> <span class="kn">import</span> <span class="n">configuration</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">OWS</span><span class="p">,</span> <span class="n">WPS</span><span class="p">,</span> <span class="n">OGCTYPE</span><span class="p">,</span> <span class="n">NAMESPACES</span>
+<span class="kn">from</span> <span class="nn">pywps.inout</span> <span class="kn">import</span> <span class="n">basic</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">pywps.validator.mode</span> <span class="kn">import</span> <span class="n">MODE</span>
+<span class="kn">from</span> <span class="nn">pywps.inout.literaltypes</span> <span class="kn">import</span> <span class="n">AnyValue</span>
+
+
+<div class="viewcode-block" id="BoundingBoxInput"><a class="viewcode-back" href="../../../api.html#pywps.BoundingBoxInput">[docs]</a><span class="k">class</span> <span class="nc">BoundingBoxInput</span><span class="p">(</span><span class="n">basic</span><span class="o">.</span><span class="n">BBoxInput</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param string identifier: The name of this input.</span>
+<span class="sd">    :param string title: Human readable title</span>
+<span class="sd">    :param string abstract: Longer text description</span>
+<span class="sd">    :param crss: List of supported coordinate reference system (e.g. [&#39;EPSG:4326&#39;])</span>
+<span class="sd">    :param int dimensions: 2 or 3</span>
+<span class="sd">    :param int min_occurs: how many times this input occurs</span>
+<span class="sd">    :param int max_occurs: how many times this input occurs</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">crss</span><span class="p">,</span> <span class="n">abstract</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                 <span class="n">dimensions</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">min_occurs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">max_occurs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">mode</span><span class="o">=</span><span class="n">MODE</span><span class="o">.</span><span class="n">NONE</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">metadata</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">metadata</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">basic</span><span class="o">.</span><span class="n">BBoxInput</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+                                 <span class="n">abstract</span><span class="o">=</span><span class="n">abstract</span><span class="p">,</span> <span class="n">crss</span><span class="o">=</span><span class="n">crss</span><span class="p">,</span>
+                                 <span class="n">dimensions</span><span class="o">=</span><span class="n">dimensions</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_occurs</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">min_occurs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_occurs</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_occurs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">as_reference</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">describe_xml</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: describeprocess response xml element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span>
+            <span class="n">OWS</span><span class="o">.</span><span class="n">Identifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">),</span>
+            <span class="n">OWS</span><span class="o">.</span><span class="n">Title</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;minOccurs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_occurs</span><span class="p">)</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;maxOccurs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_occurs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">abstract</span><span class="p">:</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OWS</span><span class="o">.</span><span class="n">Abstract</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">abstract</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">:</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OWS</span><span class="o">.</span><span class="n">Metadata</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">))</span>
+
+        <span class="n">bbox_data_doc</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">BoundingBoxData</span><span class="p">()</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bbox_data_doc</span><span class="p">)</span>
+
+        <span class="n">default_doc</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">Default</span><span class="p">()</span>
+        <span class="n">default_doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">E</span><span class="o">.</span><span class="n">CRS</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crss</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+        <span class="n">supported_doc</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">Supported</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">crss</span><span class="p">:</span>
+            <span class="n">supported_doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">E</span><span class="o">.</span><span class="n">CRS</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+
+        <span class="n">bbox_data_doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">default_doc</span><span class="p">)</span>
+        <span class="n">bbox_data_doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">supported_doc</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">doc</span>
+
+    <span class="k">def</span> <span class="nf">execute_xml</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: execute response element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">WPS</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span>
+            <span class="n">OWS</span><span class="o">.</span><span class="n">Identifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">),</span>
+            <span class="n">OWS</span><span class="o">.</span><span class="n">Title</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">abstract</span><span class="p">:</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OWS</span><span class="o">.</span><span class="n">Abstract</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">abstract</span><span class="p">))</span>
+
+        <span class="n">bbox_data_doc</span> <span class="o">=</span> <span class="n">OWS</span><span class="o">.</span><span class="n">BoundingBox</span><span class="p">()</span>
+
+        <span class="n">bbox_data_doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;crs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span>
+        <span class="n">bbox_data_doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;dimensions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span>
+
+        <span class="n">bbox_data_doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">OWS</span><span class="o">.</span><span class="n">LowerCorner</span><span class="p">(</span><span class="s1">&#39;{0[0]} {0[1]}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)))</span>
+        <span class="n">bbox_data_doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">OWS</span><span class="o">.</span><span class="n">UpperCorner</span><span class="p">(</span><span class="s1">&#39;{0[2]} {0[3]}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)))</span>
+
+        <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bbox_data_doc</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">doc</span>
+
+    <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create copy of yourself</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ComplexInput"><a class="viewcode-back" href="../../../api.html#pywps.ComplexInput">[docs]</a><span class="k">class</span> <span class="nc">ComplexInput</span><span class="p">(</span><span class="n">basic</span><span class="o">.</span><span class="n">ComplexInput</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Complex data input</span>
+
+<span class="sd">    :param str identifier: The name of this input.</span>
+<span class="sd">    :param str title: Title of the input</span>
+<span class="sd">    :param  pywps.inout.formats.Format supported_formats: List of supported formats</span>
+<span class="sd">    :param pywps.inout.formats.Format data_format: default data format</span>
+<span class="sd">    :param str abstract: Input abstract</span>
+<span class="sd">    :param list metada: TODO</span>
+<span class="sd">    :param int min_occurs: minimum occurence</span>
+<span class="sd">    :param int max_occurs: maximum occurence</span>
+<span class="sd">    :param pywps.validator.mode.MODE mode: validation mode (none to strict)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">supported_formats</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">data_format</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">abstract</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="p">[],</span> <span class="n">min_occurs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">max_occurs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">MODE</span><span class="o">.</span><span class="n">NONE</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;constructor&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">metadata</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">metadata</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">basic</span><span class="o">.</span><span class="n">ComplexInput</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="n">identifier</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+                                    <span class="n">abstract</span><span class="o">=</span><span class="n">abstract</span><span class="p">,</span>
+                                    <span class="n">supported_formats</span><span class="o">=</span><span class="n">supported_formats</span><span class="p">,</span>
+                                    <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_occurs</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">min_occurs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_occurs</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_occurs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">as_reference</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">calculate_max_input_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculates maximal size for input file based on configuration</span>
+<span class="sd">        and units</span>
+
+<span class="sd">        :return: maximum file size bytes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">max_size</span> <span class="o">=</span> <span class="n">configuration</span><span class="o">.</span><span class="n">get_config_value</span><span class="p">(</span>
+            <span class="s1">&#39;server&#39;</span><span class="p">,</span> <span class="s1">&#39;maxsingleinputsize&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_size</span> <span class="o">=</span> <span class="n">configuration</span><span class="o">.</span><span class="n">get_size_mb</span><span class="p">(</span><span class="n">max_size</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">describe_xml</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return Describe process element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">default_format_el</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_formats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">describe_xml</span><span class="p">()</span>
+        <span class="n">supported_format_elements</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">describe_xml</span><span class="p">()</span>
+                                     <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_formats</span><span class="p">]</span>
+
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span>
+            <span class="n">OWS</span><span class="o">.</span><span class="n">Identifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">),</span>
+            <span class="n">OWS</span><span class="o">.</span><span class="n">Title</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;minOccurs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_occurs</span><span class="p">)</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;maxOccurs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_occurs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">abstract</span><span class="p">:</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OWS</span><span class="o">.</span><span class="n">Abstract</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">abstract</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">:</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OWS</span><span class="o">.</span><span class="n">Metadata</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">))</span>
+
+        <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">E</span><span class="o">.</span><span class="n">ComplexData</span><span class="p">(</span>
+                <span class="n">E</span><span class="o">.</span><span class="n">Default</span><span class="p">(</span><span class="n">default_format_el</span><span class="p">),</span>
+                <span class="n">E</span><span class="o">.</span><span class="n">Supported</span><span class="p">(</span><span class="o">*</span><span class="n">supported_format_elements</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">doc</span>
+
+    <span class="k">def</span> <span class="nf">execute_xml</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Render Execute response XML node</span>
+
+
+<span class="sd">        :return: node</span>
+<span class="sd">        :rtype: ElementMaker</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_reference</span><span class="p">:</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_execute_xml_reference</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_execute_xml_data</span><span class="p">()</span>
+
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">WPS</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span>
+            <span class="n">OWS</span><span class="o">.</span><span class="n">Identifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">),</span>
+            <span class="n">OWS</span><span class="o">.</span><span class="n">Title</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">abstract</span><span class="p">:</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OWS</span><span class="o">.</span><span class="n">Abstract</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">abstract</span><span class="p">))</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">doc</span>
+
+    <span class="k">def</span> <span class="nf">_execute_xml_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return Reference node</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">WPS</span><span class="o">.</span><span class="n">Reference</span><span class="p">()</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;{http://www.w3.org/1999/xlink}href&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="o">.</span><span class="n">mime_type</span><span class="p">:</span>
+                <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;mimeType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="o">.</span><span class="n">mime_type</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="o">.</span><span class="n">encoding</span><span class="p">:</span>
+                <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="o">.</span><span class="n">encoding</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="o">.</span><span class="n">schema</span><span class="p">:</span>
+                <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;schema&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="o">.</span><span class="n">schema</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;GET&#39;</span><span class="p">:</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;method&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">doc</span>
+
+    <span class="k">def</span> <span class="nf">_execute_xml_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return Data node</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">WPS</span><span class="o">.</span><span class="n">Data</span><span class="p">()</span>
+        <span class="n">complex_doc</span> <span class="o">=</span> <span class="n">WPS</span><span class="o">.</span><span class="n">ComplexData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="o">.</span><span class="n">mime_type</span><span class="p">:</span>
+                <span class="n">complex_doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;mimeType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="o">.</span><span class="n">mime_type</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="o">.</span><span class="n">encoding</span><span class="p">:</span>
+                <span class="n">complex_doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="o">.</span><span class="n">encoding</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="o">.</span><span class="n">schema</span><span class="p">:</span>
+                <span class="n">complex_doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;schema&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="o">.</span><span class="n">schema</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">complex_doc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">doc</span>
+
+    <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create copy of yourself</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="LiteralInput"><a class="viewcode-back" href="../../../api.html#pywps.LiteralInput">[docs]</a><span class="k">class</span> <span class="nc">LiteralInput</span><span class="p">(</span><span class="n">basic</span><span class="o">.</span><span class="n">LiteralInput</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param str identifier: The name of this input.</span>
+<span class="sd">    :param str title: Title of the input</span>
+<span class="sd">    :param pywps.inout.literaltypes.LITERAL_DATA_TYPES data_type: data type</span>
+<span class="sd">    :param str abstract: Input abstract</span>
+<span class="sd">    :param list metadata: TODO</span>
+<span class="sd">    :param str uoms: units</span>
+<span class="sd">    :param int min_occurs: minimum occurence</span>
+<span class="sd">    :param int max_occurs: maximum occurence</span>
+<span class="sd">    :param pywps.validator.mode.MODE mode: validation mode (none to strict)</span>
+<span class="sd">    :param pywps.inout.literaltypes.AnyValue allowed_values: or :py:class:`pywps.inout.literaltypes.AllowedValue` object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;integer&#39;</span><span class="p">,</span> <span class="n">abstract</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                 <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">uoms</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">min_occurs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_occurs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">mode</span><span class="o">=</span><span class="n">MODE</span><span class="o">.</span><span class="n">SIMPLE</span><span class="p">,</span> <span class="n">allowed_values</span><span class="o">=</span><span class="n">AnyValue</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">basic</span><span class="o">.</span><span class="n">LiteralInput</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="n">identifier</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+                                    <span class="n">abstract</span><span class="o">=</span><span class="n">abstract</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
+                                    <span class="n">uoms</span><span class="o">=</span><span class="n">uoms</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
+                                    <span class="n">allowed_values</span><span class="o">=</span><span class="n">allowed_values</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="n">default</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_occurs</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">min_occurs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_occurs</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_occurs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">as_reference</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">describe_xml</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return DescribeProcess Output element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span>
+            <span class="n">OWS</span><span class="o">.</span><span class="n">Identifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">),</span>
+            <span class="n">OWS</span><span class="o">.</span><span class="n">Title</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;minOccurs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_occurs</span><span class="p">)</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;maxOccurs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_occurs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">abstract</span><span class="p">:</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OWS</span><span class="o">.</span><span class="n">Abstract</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">abstract</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">:</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OWS</span><span class="o">.</span><span class="n">Metadata</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">))</span>
+
+        <span class="n">literal_data_doc</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">LiteralData</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span><span class="p">:</span>
+            <span class="n">data_type</span> <span class="o">=</span> <span class="n">OWS</span><span class="o">.</span><span class="n">DataType</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_type</span><span class="p">)</span>
+            <span class="n">data_type</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;{</span><span class="si">%s</span><span class="s1">}reference&#39;</span> <span class="o">%</span>
+                             <span class="n">NAMESPACES</span><span class="p">[</span><span class="s1">&#39;ows&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">OGCTYPE</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data_type</span><span class="p">]</span>
+            <span class="n">literal_data_doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">uoms</span><span class="p">:</span>
+            <span class="n">default_uom_element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">describe_xml</span><span class="p">()</span>
+            <span class="n">supported_uom_elements</span> <span class="o">=</span> <span class="p">[</span><span class="n">u</span><span class="o">.</span><span class="n">describe_xml</span><span class="p">()</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">uoms</span><span class="p">]</span>
+
+            <span class="n">literal_data_doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">E</span><span class="o">.</span><span class="n">UOMs</span><span class="p">(</span>
+                    <span class="n">E</span><span class="o">.</span><span class="n">Default</span><span class="p">(</span><span class="n">default_uom_element</span><span class="p">),</span>
+                    <span class="n">E</span><span class="o">.</span><span class="n">Supported</span><span class="p">(</span><span class="o">*</span><span class="n">supported_uom_elements</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">literal_data_doc</span><span class="p">)</span>
+
+        <span class="c1"># TODO: refer to table 29 and 30</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">any_value</span><span class="p">:</span>
+            <span class="n">literal_data_doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OWS</span><span class="o">.</span><span class="n">AnyValue</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">literal_data_doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_describe_xml_allowedvalues</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">:</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">E</span><span class="o">.</span><span class="n">DefaultValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">doc</span>
+
+    <span class="k">def</span> <span class="nf">execute_xml</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Render Execute response XML node</span>
+
+<span class="sd">        :return: node</span>
+<span class="sd">        :rtype: ElementMaker</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_reference</span><span class="p">:</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_execute_xml_reference</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_execute_xml_data</span><span class="p">()</span>
+
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">WPS</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span>
+            <span class="n">OWS</span><span class="o">.</span><span class="n">Identifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">),</span>
+            <span class="n">OWS</span><span class="o">.</span><span class="n">Title</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">abstract</span><span class="p">:</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OWS</span><span class="o">.</span><span class="n">Abstract</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">abstract</span><span class="p">))</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">doc</span>
+
+    <span class="k">def</span> <span class="nf">_describe_xml_allowedvalues</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return AllowedValues node</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">OWS</span><span class="o">.</span><span class="n">AllowedValues</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowed_values</span><span class="p">:</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">describe_xml</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">doc</span>
+
+    <span class="k">def</span> <span class="nf">_execute_xml_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return Reference node</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">WPS</span><span class="o">.</span><span class="n">Reference</span><span class="p">()</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;{http://www.w3.org/1999/xlink}href&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stream</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;GET&#39;</span><span class="p">:</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;method&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">doc</span>
+
+    <span class="k">def</span> <span class="nf">_execute_xml_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return Data node</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">WPS</span><span class="o">.</span><span class="n">Data</span><span class="p">()</span>
+        <span class="n">literal_doc</span> <span class="o">=</span> <span class="n">WPS</span><span class="o">.</span><span class="n">LiteralData</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span><span class="p">:</span>
+            <span class="n">literal_doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;dataType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">uom</span><span class="p">:</span>
+            <span class="n">literal_doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;uom&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uom</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">literal_doc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">doc</span>
+
+    <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create copy of yourself</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/pywps.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright Copyright (C) 2014-2016 PyWPS Development Team, represented by Jachym Cepicky.This work is licensed under a Creative Commons Attribution 4.0 International License.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

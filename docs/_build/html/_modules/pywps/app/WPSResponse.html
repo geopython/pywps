@@ -1,0 +1,309 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pywps.app.WPSResponse &mdash; PyWPS 4.0.0-rc1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '4.0.0-rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="PyWPS 4.0.0-rc1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pywps.app.WPSResponse</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">lxml</span> <span class="kn">import</span> <span class="n">etree</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">werkzeug.wrappers</span> <span class="kn">import</span> <span class="n">Request</span>
+<span class="kn">from</span> <span class="nn">werkzeug.exceptions</span> <span class="kn">import</span> <span class="n">HTTPException</span>
+<span class="kn">from</span> <span class="nn">pywps</span> <span class="kn">import</span> <span class="n">WPS</span><span class="p">,</span> <span class="n">OWS</span>
+<span class="kn">from</span> <span class="nn">pywps.app.basic</span> <span class="kn">import</span> <span class="n">xml_response</span>
+<span class="kn">from</span> <span class="nn">pywps.exceptions</span> <span class="kn">import</span> <span class="n">NoApplicableCode</span>
+<span class="kn">import</span> <span class="nn">pywps.configuration</span> <span class="kn">as</span> <span class="nn">config</span>
+<span class="kn">from</span> <span class="nn">pywps.dblog</span> <span class="kn">import</span> <span class="n">update_response</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+
+<span class="n">_STATUS</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;Status&#39;</span><span class="p">,</span> <span class="s1">&#39;NO_STATUS, STORE_STATUS,&#39;</span>
+        <span class="s1">&#39;STORE_AND_UPDATE_STATUS, DONE_STATUS&#39;</span><span class="p">)</span>
+
+<span class="n">STATUS</span> <span class="o">=</span> <span class="n">_STATUS</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+<div class="viewcode-block" id="WPSResponse"><a class="viewcode-back" href="../../../api.html#pywps.app.WPSResponse.WPSResponse">[docs]</a><span class="k">class</span> <span class="nc">WPSResponse</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">wps_request</span><span class="p">,</span> <span class="n">uuid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;constructor</span>
+
+<span class="sd">        :param pywps.app.Process.Process process:</span>
+<span class="sd">        :param pywps.app.WPSRequest.WPSRequest wps_request:</span>
+<span class="sd">        :param uuid: string this request uuid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wps_request</span> <span class="o">=</span> <span class="n">wps_request</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span> <span class="o">=</span> <span class="p">{</span><span class="n">o</span><span class="o">.</span><span class="n">identifier</span><span class="p">:</span> <span class="n">o</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">process</span><span class="o">.</span><span class="n">outputs</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">STATUS</span><span class="o">.</span><span class="n">NO_STATUS</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status_percentage</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">doc</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uuid</span> <span class="o">=</span> <span class="n">uuid</span>
+
+<div class="viewcode-block" id="WPSResponse.update_status"><a class="viewcode-back" href="../../../api.html#pywps.app.WPSResponse.WPSResponse.update_status">[docs]</a>    <span class="k">def</span> <span class="nf">update_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">status_percentage</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+            <span class="n">clean</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update status report of currently running process instance</span>
+
+<span class="sd">        :param str message: Message you need to share with the client</span>
+<span class="sd">        :param int status_percentage: Percent done (number betwen &lt;0-100&gt;)</span>
+<span class="sd">        :param pywps.app.WPSResponse.STATUS status: process status - user should usually</span>
+<span class="sd">            ommit this parameter</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">message</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
+
+        <span class="k">if</span> <span class="n">status</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">status</span>
+
+        <span class="k">if</span> <span class="n">status_percentage</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status_percentage</span> <span class="o">=</span> <span class="n">status_percentage</span>
+
+        <span class="c1"># check if storing of the status is requested</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">&gt;=</span> <span class="n">STATUS</span><span class="o">.</span><span class="n">STORE_AND_UPDATE_STATUS</span><span class="p">:</span>
+
+            <span class="c1"># rebuild the doc and update the status xml file</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_doc</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write_response_doc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="p">,</span> <span class="n">clean</span><span class="p">)</span>
+
+        <span class="n">update_response</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uuid</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">write_response_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc</span><span class="p">,</span> <span class="n">clean</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="c1"># TODO: check if file/directory is still present, maybe deleted in mean time</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">status_location</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">etree</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">pretty_print</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">fsync</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">fileno</span><span class="p">())</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">&gt;=</span> <span class="n">STATUS</span><span class="o">.</span><span class="n">DONE_STATUS</span> <span class="ow">and</span> <span class="n">clean</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">clean</span><span class="p">()</span>
+
+        <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NoApplicableCode</span><span class="p">(</span><span class="s1">&#39;Writing Response Document failed with : </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_process_accepted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">WPS</span><span class="o">.</span><span class="n">Status</span><span class="p">(</span>
+            <span class="n">WPS</span><span class="o">.</span><span class="n">ProcessAccepted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">),</span>
+            <span class="n">creationTime</span><span class="o">=</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%SZ&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">())</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_process_started</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">WPS</span><span class="o">.</span><span class="n">Status</span><span class="p">(</span>
+            <span class="n">WPS</span><span class="o">.</span><span class="n">ProcessStarted</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
+                <span class="n">percentCompleted</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">status_percentage</span><span class="p">)</span>
+            <span class="p">),</span>
+            <span class="n">creationTime</span><span class="o">=</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%SZ&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">())</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_process_paused</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">WPS</span><span class="o">.</span><span class="n">Status</span><span class="p">(</span>
+            <span class="n">WPS</span><span class="o">.</span><span class="n">ProcessPaused</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
+                <span class="n">percentCompleted</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">status_percentage</span><span class="p">)</span>
+            <span class="p">),</span>
+            <span class="n">creationTime</span><span class="o">=</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%SZ&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">())</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_process_succeeded</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">WPS</span><span class="o">.</span><span class="n">Status</span><span class="p">(</span>
+            <span class="n">WPS</span><span class="o">.</span><span class="n">ProcessSucceeded</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">),</span>
+            <span class="n">creationTime</span><span class="o">=</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%SZ&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">())</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_process_failed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">WPS</span><span class="o">.</span><span class="n">Status</span><span class="p">(</span>
+            <span class="n">WPS</span><span class="o">.</span><span class="n">ProcessFailed</span><span class="p">(</span>
+                <span class="n">WPS</span><span class="o">.</span><span class="n">ExceptionReport</span><span class="p">(</span>
+                    <span class="n">OWS</span><span class="o">.</span><span class="n">Exception</span><span class="p">(</span>
+                        <span class="n">OWS</span><span class="o">.</span><span class="n">Exception</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">),</span>
+                        <span class="n">exceptionCode</span><span class="o">=</span><span class="s1">&#39;NoApplicableCode&#39;</span><span class="p">,</span>
+                        <span class="n">locater</span><span class="o">=</span><span class="s1">&#39;None&#39;</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">),</span>
+            <span class="n">creationTime</span><span class="o">=</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%SZ&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">())</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_construct_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">WPS</span><span class="o">.</span><span class="n">ExecuteResponse</span><span class="p">()</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;{http://www.w3.org/2001/XMLSchema-instance}schemaLocation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsExecute_response.xsd&#39;</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;service&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;WPS&#39;</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;1.0.0&#39;</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;{http://www.w3.org/XML/1998/namespace}lang&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;en-US&#39;</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;serviceInstance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">get_config_value</span><span class="p">(</span><span class="s1">&#39;server&#39;</span><span class="p">,</span> <span class="s1">&#39;url&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;?service=WPS&amp;request=GetCapabilities&#39;</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">&gt;=</span> <span class="n">STATUS</span><span class="o">.</span><span class="n">STORE_STATUS</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">status_location</span><span class="p">:</span>
+                <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;statusLocation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">status_url</span>
+
+        <span class="c1"># Process XML</span>
+        <span class="n">process_doc</span> <span class="o">=</span> <span class="n">WPS</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span>
+            <span class="n">OWS</span><span class="o">.</span><span class="n">Identifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">identifier</span><span class="p">),</span>
+            <span class="n">OWS</span><span class="o">.</span><span class="n">Title</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">abstract</span><span class="p">:</span>
+            <span class="n">process_doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OWS</span><span class="o">.</span><span class="n">Abstract</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">abstract</span><span class="p">))</span>
+        <span class="c1"># TODO: See Table 32 Metadata in OGC 06-121r3</span>
+        <span class="c1">#for m in self.process.metadata:</span>
+        <span class="c1">#    process_doc.append(OWS.Metadata(m))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">profile</span><span class="p">:</span>
+            <span class="n">process_doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OWS</span><span class="o">.</span><span class="n">Profile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">profile</span><span class="p">))</span>
+        <span class="n">process_doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;{http://www.opengis.net/wps/1.0.0}processVersion&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">version</span>
+
+        <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">process_doc</span><span class="p">)</span>
+
+        <span class="c1"># Status XML</span>
+        <span class="c1"># return the correct response depending on the progress of the process</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">&gt;=</span> <span class="n">STATUS</span><span class="o">.</span><span class="n">STORE_AND_UPDATE_STATUS</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">status_percentage</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;PyWPS Process </span><span class="si">%s</span><span class="s1"> accepted&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">identifier</span>
+                <span class="n">status_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_accepted</span><span class="p">()</span>
+                <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">status_doc</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">write_response_doc</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">doc</span>
+            <span class="k">elif</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">status_percentage</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">:</span>
+                <span class="n">status_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_started</span><span class="p">()</span>
+                <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">status_doc</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">doc</span>
+
+        <span class="c1"># check if process failed and display fail message</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">status_percentage</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">status_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_failed</span><span class="p">()</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">status_doc</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">doc</span>
+
+        <span class="c1"># TODO: add paused status</span>
+
+        <span class="n">status_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_succeeded</span><span class="p">()</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">status_doc</span><span class="p">)</span>
+
+        <span class="c1"># DataInputs and DataOutputs definition XML if lineage=true</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wps_request</span><span class="o">.</span><span class="n">lineage</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+            <span class="n">data_inputs</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">wps_request</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">execute_xml</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wps_request</span><span class="o">.</span><span class="n">inputs</span><span class="p">]</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">WPS</span><span class="o">.</span><span class="n">DataInputs</span><span class="p">(</span><span class="o">*</span><span class="n">data_inputs</span><span class="p">))</span>
+
+            <span class="n">output_definitions</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="n">o</span><span class="p">]</span><span class="o">.</span><span class="n">execute_xml_lineage</span><span class="p">()</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">]</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">WPS</span><span class="o">.</span><span class="n">OutputDefinitions</span><span class="p">(</span><span class="o">*</span><span class="n">output_definitions</span><span class="p">))</span>
+
+        <span class="c1"># Process outputs XML</span>
+        <span class="n">output_elements</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="n">o</span><span class="p">]</span><span class="o">.</span><span class="n">execute_xml</span><span class="p">()</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">]</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">WPS</span><span class="o">.</span><span class="n">ProcessOutputs</span><span class="p">(</span><span class="o">*</span><span class="n">output_elements</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">doc</span>
+
+<div class="viewcode-block" id="WPSResponse.call_on_close"><a class="viewcode-back" href="../../../api.html#pywps.app.WPSResponse.WPSResponse.call_on_close">[docs]</a>    <span class="k">def</span> <span class="nf">call_on_close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Custom implementation of call_on_close of werkzeug</span>
+<span class="sd">        TODO: rewrite this using werkzeug&#39;s tools</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_close_functions</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">function</span><span class="p">)</span></div>
+
+    <span class="nd">@Request.application</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_doc</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">HTTPException</span> <span class="k">as</span> <span class="n">httpexp</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">httpexp</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exp</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NoApplicableCode</span><span class="p">(</span><span class="n">exp</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">&gt;=</span> <span class="n">STATUS</span><span class="o">.</span><span class="n">DONE_STATUS</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">clean</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">xml_response</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/pywps.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright Copyright (C) 2014-2016 PyWPS Development Team, represented by Jachym Cepicky.This work is licensed under a Creative Commons Attribution 4.0 International License.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

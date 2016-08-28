@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome to the PyWPS-4 documentation! &mdash; PyWPS 4.0.0-rc1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '4.0.0-rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="PyWPS 4.0.0-rc1 documentation" href="#" />
+    <link rel="next" title="OGC Web Processing Service (OGC WPS)" href="wps.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="wps.html" title="OGC Web Processing Service (OGC WPS)"
+             accesskey="N">next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-the-pywps-4-documentation">
+<h1>Welcome to the PyWPS-4 documentation!<a class="headerlink" href="#welcome-to-the-pywps-4-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Please be awere that PyWPS-4 is still in pre-release state,
+there is no stable release yet.</p>
+</div>
+<p>PyWPS is a server side implementation of the <a class="reference external" href="http://opengeospatial.org/standards/wps">OGC Web Processing Service
+(OGC WPS) standard</a> , using the
+<a class="reference external" href="http://python.org">Python</a> programming language. PyWPS is currently
+supporting WPS 1.0.0. Support for the version 2.0.0. of OGC WPS standard is
+presently being planned.</p>
+<p>PyWPS has a bicycle in it&#8217;s logo, because:</p>
+<ul class="simple">
+<li>It&#8217;s simple to maintain</li>
+<li>It&#8217;s fast to drive</li>
+<li>It can carry a lot</li>
+<li>It&#8217;s easy to hack</li>
+</ul>
+<p><strong>Mount your bike and setup &amp; configure your PyWPS instance!</strong></p>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<ul class="last simple">
+<li>request queue management (probably linked from documentation)</li>
+<li>inputs and outputs IOhandler class description (file, stream, ...)</li>
+</ul>
+</div>
+<div class="section" id="contents">
+<h2>Contents:<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="wps.html">OGC Web Processing Service (OGC WPS)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="wps.html#process">Process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wps.html#data-in-and-outputs">Data in- and outputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wps.html#passing-data-to-process-instance">Passing data to process instance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wps.html#sychronous-versus-asynchronous-process-request">Sychronous versus asynchronous process request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wps.html#process-status">Process status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wps.html#request-encoding-http-get-and-post">Request encoding, HTTP GET and POST</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pywps.html">PyWPS</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pywps.html#pywps-philosophy">PyWPS philosophy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pywps.html#why-is-pywps-there">Why is PyWPS there</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pywps.html#pywps-history">PyWPS History</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#dependencies-and-requirements">Dependencies and requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#download-and-install">Download and install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#the-demo-service-and-its-sample-processes">The demo service and its sample processes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#metadata-main">[metadata:main]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#server">[server]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#grass">[grass]</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="process.html">Processes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="process.html#writing-a-process">Writing a Process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="process.html#example-vector-buffer-process">Example vector buffer process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="process.html#declaring-inputs-and-outputs">Declaring inputs and outputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="process.html#accessing-the-inputs-and-outputs-in-the-handler-method">Accessing the inputs and outputs in the <cite>handler</cite> method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="process.html#progress-and-status-report">Progress and status report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="process.html#returning-large-data">Returning large data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="process.html#process-deployment">Process deployment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="process.html#running-the-dev-server">Running the dev server</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="deployment.html">Deployment to a production server</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#deoploying-an-individual-pywps-instance">Deoploying an individual PyWPS instance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#creating-a-pywps-wsgi-instance">Creating a PyWPS <cite>WSGI</cite> instance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#deployment-on-apache2-httpd-server">Deployment on Apache2 httpd server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#deployment-on-nginx">Deployment on nginx</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#testing-the-deployment-of-a-pywps-instance">Testing the deployment of a PyWPS instance</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="migration.html">Migrating from PyWP 3.x to 4.x</a></li>
+<li class="toctree-l1"><a class="reference internal" href="external_tools.html">PyWPS and external tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="external_tools.html#grass-gis">GRASS GIS</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">PyWPS API Doc</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#process">Process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#inputs-and-outputs">Inputs and outputs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Developers Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="development.html#github-account">0. GitHub account</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development.html#open-a-new-issue">1. Open a new issue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development.html#fork-and-clone-the-pywps-repository">2. Fork and clone the PyWPS repository</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development.html#commit-and-pull-request">3. Commit and pull request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development.html#updating-local-repository">4. Updating local repository</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development.html#help-and-discussion">5. Help and discussion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span>Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span>Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span>Search Page</span></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="#">
+              <img class="logo" src="_static/pywps.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Welcome to the PyWPS-4 documentation!</a><ul>
+<li><a class="reference internal" href="#contents">Contents:</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+  <h4>Next topic</h4>
+  <p class="topless"><a href="wps.html"
+                        title="next chapter">OGC Web Processing Service (OGC WPS)</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="wps.html" title="OGC Web Processing Service (OGC WPS)"
+             >next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright Copyright (C) 2014-2016 PyWPS Development Team, represented by Jachym Cepicky.This work is licensed under a Creative Commons Attribution 4.0 International License.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

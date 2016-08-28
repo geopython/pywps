@@ -1,0 +1,651 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Processes &mdash; PyWPS 4.0.0-rc1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '4.0.0-rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="PyWPS 4.0.0-rc1 documentation" href="index.html" />
+    <link rel="next" title="Deployment to a production server" href="deployment.html" />
+    <link rel="prev" title="Configuration" href="configuration.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="deployment.html" title="Deployment to a production server"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="configuration.html" title="Configuration"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="processes">
+<span id="process"></span><h1>Processes<a class="headerlink" href="#processes" title="Permalink to this headline">¶</a></h1>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 4.0.0.</span></p>
+</div>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<ul class="last simple">
+<li>Input validation</li>
+<li>IOHandler</li>
+</ul>
+</div>
+<p>PyWPS works with processes and services. A process is a Python <cite>Class</cite>
+containing an <cite>handler</cite> method and a list of inputs and outputs. A PyWPS
+service instance is then a collection of selected processes.</p>
+<p>PyWPS does not ship with any processes predefined - it&#8217;s on you, as user of
+PyWPS to set up the processes of your choice. PyWPS is here to help you
+publishing your awesome geospatial operation on the web - it takes care of
+communication and security, you then have to add the content.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">There are some example processes in the <a class="reference external" href="http://github.com/geopython/pywps-demo">PyWPS-Demo</a> project.</p>
+</div>
+<div class="section" id="writing-a-process">
+<h2>Writing a Process<a class="headerlink" href="#writing-a-process" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>At this place, you should prepare your environment for final
+<a class="reference internal" href="deployment.html#deployment"><span>Deployment to a production server</span></a>. At least, you should create a single directory with
+your processes, which is typically named <cite>processes</cite>:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ mkdir processes
+</pre></div>
+</div>
+<p>In this directory, we will create single python scripts containing
+processes.</p>
+<p class="last">Processes can be located <em>anywhere in the system</em> as long as their
+location is identified in the <span class="target" id="index-1"></span><code class="xref std std-envvar docutils literal"><span class="pre">PYTHONPATH</span></code> environment
+variable, and can be imported in the final server instance.</p>
+</div>
+<p>A processes is coded as a class inheriting from <a class="reference internal" href="api.html#pywps.Process" title="pywps.Process"><code class="xref py py-class docutils literal"><span class="pre">Process</span></code></a>.
+In the <a class="reference external" href="http://github.com/geopython/pywps-demo">PyWPS-Demo</a> server they are
+kept inside the <em>processes</em> folder, usually in separated files.</p>
+<p>The instance of a <em>Process</em> needs following attributes to be configured:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">identifier:</th><td class="field-body">unique identifier of the process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">title:</th><td class="field-body">corresponding title</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">inputs:</th><td class="field-body">list of process inputs</td>
+</tr>
+<tr class="field-even field"><th class="field-name">outputs:</th><td class="field-body">list of process outputs</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">handler:</th><td class="field-body">method which recieves <a class="reference internal" href="api.html#pywps.app.WPSRequest" title="pywps.app.WPSRequest"><code class="xref py py-class docutils literal"><span class="pre">pywps.app.WPSRequest</span></code></a> and <a class="reference internal" href="api.html#pywps.app.WPSResponse" title="pywps.app.WPSResponse"><code class="xref py py-class docutils literal"><span class="pre">pywps.app.WPSResponse</span></code></a> as inputs.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="example-vector-buffer-process">
+<h2>Example vector buffer process<a class="headerlink" href="#example-vector-buffer-process" title="Permalink to this headline">¶</a></h2>
+<p>As an example, we will create a <em>buffer</em> process - which will take a vector
+file as the input, create specified the buffer around the data (using <a class="reference external" href="http://toblerity.org/shapely/">Shapely</a>),  and return back the result.</p>
+<p>Therefore, the process will have two inputs:</p>
+<ul class="simple">
+<li><cite>ComplexData</cite> input - the vector file</li>
+<li><cite>LiteralData</cite> input - the buffer size</li>
+</ul>
+<p>And it will have one output:</p>
+<ul class="simple">
+<li><cite>ComplexData</cite> output - the final buffer</li>
+</ul>
+<p>The process can be called <cite>demobuffer</cite> and we can now start coding it:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ cd processes
+$ $EDITOR demobuffer.py
+</pre></div>
+</div>
+<p>At the beginning, we have to import the required classes and modules</p>
+<p>Here is a very basic example:</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>10
+11
+12</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">pywps</span> <span class="kn">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">LiteralInput</span><span class="p">,</span> <span class="n">ComplexOutput</span><span class="p">,</span> <span class="n">ComplexInput</span><span class="p">,</span> <span class="n">Format</span>
+<span class="kn">from</span> <span class="nn">pywps.validator.mode</span> <span class="kn">import</span> <span class="n">MODE</span>
+<span class="kn">from</span> <span class="nn">pywps.inout.formats</span> <span class="kn">import</span> <span class="n">FORMATS</span>
+</pre></div>
+</td></tr></table></div>
+<p>As the next step, we define a list of inputs. The first input is
+<a class="reference internal" href="api.html#pywps.ComplexInput" title="pywps.ComplexInput"><code class="xref py py-class docutils literal"><span class="pre">pywps.ComplexInput</span></code></a> with the identifier <cite>vector</cite>, title <cite>Vector map</cite>
+and there is only one allowed format: GML.</p>
+<p>The next input is <a class="reference internal" href="api.html#pywps.LiteralInput" title="pywps.LiteralInput"><code class="xref py py-class docutils literal"><span class="pre">pywps.LiteralInput</span></code></a>, with the identifier <cite>size</cite> and
+the data type set to <cite>float</cite>:</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>14
+15
+16
+17
+18
+19
+20
+21</pre></div></td><td class="code"><div class="highlight"><pre><span class="n">inpt_vector</span> <span class="o">=</span> <span class="n">ComplexInput</span><span class="p">(</span>
+    <span class="s1">&#39;vector&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Vector map&#39;</span><span class="p">,</span>
+    <span class="n">supported_formats</span><span class="o">=</span><span class="p">[</span><span class="n">Format</span><span class="p">(</span><span class="s1">&#39;application/gml+xml&#39;</span><span class="p">)],</span>
+    <span class="n">mode</span><span class="o">=</span><span class="n">MODE</span><span class="o">.</span><span class="n">STRICT</span>
+<span class="p">)</span>
+
+<span class="n">inpt_size</span> <span class="o">=</span> <span class="n">LiteralInput</span><span class="p">(</span><span class="s1">&#39;size&#39;</span><span class="p">,</span> <span class="s1">&#39;Buffer size&#39;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;float&#39;</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<p>Next we define the output <cite>output</cite> as <a class="reference internal" href="api.html#pywps.ComplexOutput" title="pywps.ComplexOutput"><code class="xref py py-class docutils literal"><span class="pre">pywps.ComplexOutput</span></code></a>. This
+output supports GML format only.</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>23
+24
+25
+26
+27</pre></div></td><td class="code"><div class="highlight"><pre><span class="n">out_output</span> <span class="o">=</span> <span class="n">ComplexOutput</span><span class="p">(</span>
+    <span class="s1">&#39;output&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;HelloWorld Output&#39;</span><span class="p">,</span>
+    <span class="n">supported_formats</span><span class="o">=</span><span class="p">[</span><span class="n">Format</span><span class="p">(</span><span class="s1">&#39;application/gml+xml&#39;</span><span class="p">)]</span>
+<span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<p>Next we create a new list variables for inputs and outputs.</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>29
+30</pre></div></td><td class="code"><div class="highlight"><pre><span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">inpt_vector</span><span class="p">,</span> <span class="n">inpt_size</span><span class="p">]</span>
+<span class="n">outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">out_output</span><span class="p">]</span>
+</pre></div>
+</td></tr></table></div>
+<p>Next we define the <em>handler</em> method. In it, <em>geospatial analysis
+may happen</em>. The method gets a <a class="reference internal" href="api.html#pywps.app.WPSRequest" title="pywps.app.WPSRequest"><code class="xref py py-class docutils literal"><span class="pre">pywps.app.WPSRequest</span></code></a> and a
+<a class="reference internal" href="api.html#pywps.app.WPSResponse" title="pywps.app.WPSResponse"><code class="xref py py-class docutils literal"><span class="pre">pywps.app.WPSResponse</span></code></a> object as parameters. In our case, we
+calculate the buffer around each vector feature using
+<a class="reference external" href="http://gdal.org">GDAL/OGR library</a>. We will not got much into the details,
+what you should note is how to get input data from the
+<a class="reference internal" href="api.html#pywps.app.WPSRequest" title="pywps.app.WPSRequest"><code class="xref py py-class docutils literal"><span class="pre">pywps.app.WPSRequest</span></code></a> object and how to set data as outputs in the
+<a class="reference internal" href="api.html#pywps.app.WPSResponse" title="pywps.app.WPSResponse"><code class="xref py py-class docutils literal"><span class="pre">pywps.app.WPSResponse</span></code></a> object.</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 45
+ 46
+ 47
+ 48
+ 49
+ 50
+ 51
+ 52
+ 53
+ 54
+ 55
+ 56
+ 57
+ 58
+ 59
+ 60
+ 61
+ 62
+ 63
+ 64
+ 65
+ 66
+ 67
+ 68
+ 69
+ 70
+ 71
+ 72
+ 73
+ 74
+ 75
+ 76
+ 77
+ 78
+ 79
+ 80
+ 81
+ 82
+ 83
+ 84
+ 85
+ 86
+ 87
+ 88
+ 89
+ 90
+ 91
+ 92
+ 93
+ 94
+ 95
+ 96
+ 97
+ 98
+ 99
+100</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">def</span> <span class="nf">_handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Handler method - this method obtains request object and response</span>
+<span class="sd">    object and creates the buffer</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">osgeo</span> <span class="kn">import</span> <span class="n">ogr</span>
+
+<span class="hll">    <span class="c1"># obtaining input with identifier &#39;vector&#39; as file name</span>
+</span><span class="hll">    <span class="n">input_file</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;vector&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">file</span>
+</span><span class="hll">
+</span><span class="hll">    <span class="c1"># obtaining input with identifier &#39;size&#39; as data directly</span>
+</span><span class="hll">    <span class="n">size</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;size&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+</span>
+    <span class="c1"># open file the &quot;gdal way&quot;</span>
+    <span class="n">input_source</span> <span class="o">=</span> <span class="n">ogr</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="n">input_file</span><span class="p">)</span>
+    <span class="n">input_layer</span> <span class="o">=</span> <span class="n">input_source</span><span class="o">.</span><span class="n">GetLayer</span><span class="p">()</span>
+    <span class="n">layer_name</span> <span class="o">=</span> <span class="n">input_layer</span><span class="o">.</span><span class="n">GetName</span><span class="p">()</span>
+
+    <span class="c1"># create output file</span>
+    <span class="n">driver</span> <span class="o">=</span> <span class="n">ogr</span><span class="o">.</span><span class="n">GetDriverByName</span><span class="p">(</span><span class="s1">&#39;GML&#39;</span><span class="p">)</span>
+    <span class="n">output_source</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">CreateDataSource</span><span class="p">(</span><span class="n">layer_name</span><span class="p">,</span>
+        <span class="p">[</span><span class="s2">&quot;XSISCHEMAURI=http://schemas.opengis.net/gml/2.1.2/feature.xsd&quot;</span><span class="p">])</span>
+    <span class="n">output_layer</span> <span class="o">=</span> <span class="n">output_source</span><span class="o">.</span><span class="n">CreateLayer</span><span class="p">(</span><span class="n">layer_name</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">ogr</span><span class="o">.</span><span class="n">wkbUnknown</span><span class="p">)</span>
+
+    <span class="c1"># get feature count</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="n">input_layer</span><span class="o">.</span><span class="n">GetFeatureCount</span><span class="p">()</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># make buffer for each feature</span>
+    <span class="k">while</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="n">count</span><span class="p">:</span>
+
+        <span class="n">response</span><span class="o">.</span><span class="n">update_status</span><span class="p">(</span><span class="s1">&#39;Buffering feature </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">index</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">index</span><span class="p">)</span><span class="o">/</span><span class="n">count</span><span class="p">)</span>
+
+        <span class="c1"># get the geometry</span>
+        <span class="n">input_feature</span> <span class="o">=</span> <span class="n">input_layer</span><span class="o">.</span><span class="n">GetNextFeature</span><span class="p">()</span>
+        <span class="n">input_geometry</span> <span class="o">=</span> <span class="n">input_feature</span><span class="o">.</span><span class="n">GetGeometryRef</span><span class="p">()</span>
+
+        <span class="c1"># make the buffer</span>
+        <span class="n">buffer_geometry</span> <span class="o">=</span> <span class="n">input_geometry</span><span class="o">.</span><span class="n">Buffer</span><span class="p">(</span>
+                <span class="nb">float</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># create output feature to the file</span>
+        <span class="n">output_feature</span> <span class="o">=</span> <span class="n">ogr</span><span class="o">.</span><span class="n">Feature</span><span class="p">(</span><span class="n">feature_def</span><span class="o">=</span><span class="n">output_layer</span><span class="o">.</span><span class="n">GetLayerDefn</span><span class="p">())</span>
+        <span class="n">output_feature</span><span class="o">.</span><span class="n">SetGeometryDirectly</span><span class="p">(</span><span class="n">buffer_geometry</span><span class="p">)</span>
+        <span class="n">output_layer</span><span class="o">.</span><span class="n">CreateFeature</span><span class="p">(</span><span class="n">output_feature</span><span class="p">)</span>
+        <span class="n">output_feature</span><span class="o">.</span><span class="n">Destroy</span><span class="p">()</span>
+        <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<span class="hll">    <span class="c1"># set output format</span>
+</span><span class="hll">    <span class="n">response</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;output&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">output_format</span> <span class="o">=</span> <span class="n">FORMATS</span><span class="o">.</span><span class="n">GML</span>
+</span><span class="hll">
+</span><span class="hll">    <span class="c1"># set output data as file name</span>
+</span><span class="hll">    <span class="n">response</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;output&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">layer_name</span>
+</span>
+    <span class="k">return</span> <span class="n">response</span>
+</pre></div>
+</td></tr></table></div>
+<p>At the end, we put everything together and create new a <cite>DemoBuffer</cite> class with
+handler, inputs and outputs. It&#8217;s based on <a class="reference internal" href="api.html#pywps.Process" title="pywps.Process"><code class="xref py py-class docutils literal"><span class="pre">pywps.Process</span></code></a>:</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">class</span> <span class="nc">DemoBuffer</span><span class="p">(</span><span class="n">Process</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">DemoBuffer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span>
+            <span class="n">_handler</span><span class="p">,</span>
+            <span class="n">identifier</span><span class="o">=</span><span class="s1">&#39;demobuffer&#39;</span><span class="p">,</span>
+            <span class="n">version</span><span class="o">=</span><span class="s1">&#39;1.0.0&#39;</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Buffer&#39;</span><span class="p">,</span>
+            <span class="n">abstract</span><span class="o">=</span><span class="s1">&#39;This process demonstrates, how to create any process in PyWPS environment&#39;</span><span class="p">,</span>
+            <span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span>
+            <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">,</span>
+            <span class="n">store_supported</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+            <span class="n">status_supported</span><span class="o">=</span><span class="bp">True</span>
+        <span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="section" id="declaring-inputs-and-outputs">
+<h2>Declaring inputs and outputs<a class="headerlink" href="#declaring-inputs-and-outputs" title="Permalink to this headline">¶</a></h2>
+<p>Clients need to know which inputs the processes expects. They can be declared
+as <code class="xref py py-class docutils literal"><span class="pre">pywps.Input</span></code> objects in the <a class="reference internal" href="api.html#pywps.Process" title="pywps.Process"><code class="xref py py-class docutils literal"><span class="pre">Process</span></code></a> class declaration:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">pywps</span> <span class="kn">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">LiteralInput</span><span class="p">,</span> <span class="n">LiteralOutput</span>
+
+<span class="k">class</span> <span class="nc">FooProcess</span><span class="p">(</span><span class="n">Process</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">LiteralInput</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;string&#39;</span><span class="p">),</span>
+            <span class="n">ComplexInput</span><span class="p">(</span><span class="s1">&#39;bar&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">Format</span><span class="p">(</span><span class="s1">&#39;text/xml&#39;</span><span class="p">)])</span>
+        <span class="p">]</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">LiteralOutput</span><span class="p">(</span><span class="s1">&#39;foo_output&#39;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;string&#39;</span><span class="p">),</span>
+            <span class="n">ComplexOutput</span><span class="p">(</span><span class="s1">&#39;bar_output&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">Format</span><span class="p">(</span><span class="s1">&#39;JSON&#39;</span><span class="p">)])</span>
+        <span class="p">]</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">FooProcess</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span>
+            <span class="o">...</span>
+            <span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span>
+            <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span>
+        <span class="p">)</span>
+        <span class="o">...</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">A more generic description can be found in <a class="reference internal" href="wps.html#wps"><span>OGC Web Processing Service (OGC WPS)</span></a> chapter.</p>
+</div>
+<div class="section" id="literaldata">
+<h3>LiteralData<a class="headerlink" href="#literaldata" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference internal" href="api.html#pywps.LiteralInput" title="pywps.LiteralInput"><code class="xref py py-class docutils literal"><span class="pre">LiteralInput</span></code></a></li>
+<li><a class="reference internal" href="api.html#pywps.LiteralOutput" title="pywps.LiteralOutput"><code class="xref py py-class docutils literal"><span class="pre">LiteralOutput</span></code></a></li>
+</ul>
+<p>A simple value embedded in the request. The first argument is a
+name. The second argument is the type, one of <cite>string</cite>, <cite>float</cite>,
+<cite>integer</cite> or <cite>boolean</cite>.</p>
+</div>
+<div class="section" id="complexdata">
+<h3>ComplexData<a class="headerlink" href="#complexdata" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference internal" href="api.html#pywps.ComplexInput" title="pywps.ComplexInput"><code class="xref py py-class docutils literal"><span class="pre">ComplexInput</span></code></a></li>
+<li><a class="reference internal" href="api.html#pywps.ComplexOutput" title="pywps.ComplexOutput"><code class="xref py py-class docutils literal"><span class="pre">ComplexOutput</span></code></a></li>
+</ul>
+<p>A large data object, for example a layer. ComplexData do have a <cite>format</cite>
+attribute as one of their key properties. It&#8217;s either a list of supported
+formats or a single (already selected) format. It shall be an instance of
+the <code class="xref py py-class docutils literal"><span class="pre">pywps.inout.formats.Format</span></code> class.</p>
+</div>
+<div class="section" id="complexdata-format-and-input-validation">
+<h3>ComplexData <a class="reference internal" href="api.html#pywps.Format" title="pywps.Format"><code class="xref py py-class docutils literal"><span class="pre">Format</span></code></a> and input validation<a class="headerlink" href="#complexdata-format-and-input-validation" title="Permalink to this headline">¶</a></h3>
+<p>The ComplexData needs as one of its parameters a list of supported data
+formats. They are derived from the <a class="reference internal" href="api.html#pywps.Format" title="pywps.Format"><code class="xref py py-class docutils literal"><span class="pre">Format</span></code></a> class. A <a class="reference internal" href="api.html#pywps.Format" title="pywps.Format"><code class="xref py py-class docutils literal"><span class="pre">Format</span></code></a>
+instance needs, among others, a <cite>mime_type</cite> parameter, a <cite>validate</cite>
+method &#8211; which is used for input data validation &#8211; and also a <cite>mode</cite>
+parameter &#8211; defining how strict the validation should be (see
+<a class="reference internal" href="api.html#pywps.validator.mode.MODE" title="pywps.validator.mode.MODE"><code class="xref py py-class docutils literal"><span class="pre">pywps.validator.mode.MODE</span></code></a>).</p>
+<p>The <cite>Validate</cite> method is up to you, the user, to code. It requires two input
+paramers - <cite>data_input</cite> (a <a class="reference internal" href="api.html#pywps.ComplexInput" title="pywps.ComplexInput"><code class="xref py py-class docutils literal"><span class="pre">ComplexInput</span></code></a> object), and <cite>mode</cite>. This
+methid must return a <cite>boolean</cite> value indicating whether the input data are
+considered valid or not for given <cite>mode</cite>. You can draw inspiration from the
+<a class="reference internal" href="api.html#pywps.validator.complexvalidator.validategml" title="pywps.validator.complexvalidator.validategml"><code class="xref py py-func docutils literal"><span class="pre">pywps.validator.complexvalidator.validategml()</span></code></a> method.</p>
+<p>The good news is: there are already predefined validation methods for the ESRI
+Shapefile, GML and GeoJSON formats, using GDAL/OGR. There is also an XML Schema
+validaton and a JSON schema validator - you just have to pick the propper
+supported formats from the <a class="reference internal" href="api.html#pywps.inout.formats.FORMATS" title="pywps.inout.formats.FORMATS"><code class="xref py py-class docutils literal"><span class="pre">pywps.inout.formats.FORMATS</span></code></a> list and set
+the validation mode to your <a class="reference internal" href="api.html#pywps.ComplexInput" title="pywps.ComplexInput"><code class="xref py py-class docutils literal"><span class="pre">ComplexInput</span></code></a> object.</p>
+<p>Even better news is: you can define custom validation functions and validate
+input data according to your needs.</p>
+</div>
+<div class="section" id="boundingboxdata">
+<h3>BoundingBoxData<a class="headerlink" href="#boundingboxdata" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference internal" href="api.html#pywps.BoundingBoxInput" title="pywps.BoundingBoxInput"><code class="xref py py-class docutils literal"><span class="pre">BoundingBoxInput</span></code></a></li>
+<li><a class="reference internal" href="api.html#pywps.BoundingBoxOutput" title="pywps.BoundingBoxOutput"><code class="xref py py-class docutils literal"><span class="pre">BoundingBoxOutput</span></code></a></li>
+</ul>
+<p>BoundingBoxData contain information about the bounding box of the desired area
+and coordinate reference system. Interesting attributes of the BoundingBoxData
+are:</p>
+<dl class="docutils">
+<dt><cite>crs</cite></dt>
+<dd>current coordinate reference system</dd>
+<dt><cite>dimensions</cite></dt>
+<dd>number of dimensions</dd>
+<dt><cite>ll</cite></dt>
+<dd>pair of coordinates (or triplet) of the lower-left corner</dd>
+<dt><cite>ur</cite></dt>
+<dd>pair of coordinates (or triplet) of the upper-right corner</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="accessing-the-inputs-and-outputs-in-the-handler-method">
+<h2>Accessing the inputs and outputs in the <cite>handler</cite> method<a class="headerlink" href="#accessing-the-inputs-and-outputs-in-the-handler-method" title="Permalink to this headline">¶</a></h2>
+<p>Handlers receive as input argument a <code class="xref py py-class docutils literal"><span class="pre">WPSRequest</span></code> object. Input
+values are found in the <cite>inputs</cite> dictionary:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@staticmethod</span>
+<span class="k">def</span> <span class="nf">_handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+    <span class="n">response</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;output&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="s1">&#39;Hello world </span><span class="si">%s</span><span class="s1">!&#39;</span> <span class="o">%</span> <span class="n">name</span>
+    <span class="k">return</span> <span class="n">response</span>
+</pre></div>
+</div>
+<p><cite>inputs</cite> is a plain Python dictionary.
+Most of the inputs and outputs are derived from the <code class="xref py py-class docutils literal"><span class="pre">IOHandler</span></code> class.
+This enables the user to access the data in 3 different ways:</p>
+<dl class="docutils">
+<dt><cite>input.file</cite></dt>
+<dd>Returns a file name - you can access the data using the name of the file
+stored on the hard drive.</dd>
+<dt><cite>input.data</cite></dt>
+<dd>Is the direct link to the data themselves. No need to create a file object
+on the hard drive or opening the file and closing it - PyWPS will do
+everything for you.</dd>
+<dt><cite>input.stream</cite></dt>
+<dd>Provides the IOStream of the data. No need for opening the file, you just
+have to <cite>read()</cite> the data.</dd>
+</dl>
+<p>PyWPS will persistently transform the input (and output) data to the desired
+form. You can also set the data for your <cite>Output</cite> object like <cite>output.data = 1</cite>
+or <cite>output.file = &#8220;myfile.json&#8221;</cite> - it works the same way.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">request</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;file_input&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">file</span>
+<span class="n">request</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;data_input&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+<span class="n">request</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;stream_input&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stream</span>
+</pre></div>
+</div>
+<p>Because there could be multiple input values with the same identifier, the
+inputs are accessed with an index.  For <cite>LiteralInput</cite>, the value is a string.
+For <cite>ComplexInput</cite>, the value is an open file object, with a <cite>mime_type</cite>
+attribute:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@staticmethod</span>
+<span class="k">def</span> <span class="nf">handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+    <span class="n">layer_file</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;layer&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">file</span>
+    <span class="n">mime_type</span> <span class="o">=</span> <span class="n">layer_file</span><span class="o">.</span><span class="n">mime_type</span>
+    <span class="nb">bytes</span> <span class="o">=</span> <span class="n">layer_file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;You gave me a file of type </span><span class="si">%s</span><span class="s2"> and size </span><span class="si">%d</span><span class="s2">&quot;</span>
+           <span class="o">%</span> <span class="p">(</span><span class="n">mime_type</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nb">bytes</span><span class="p">)))</span>
+    <span class="n">response</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;output&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">msg</span>
+    <span class="k">return</span> <span class="n">response</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="progress-and-status-report">
+<h2>Progress and status report<a class="headerlink" href="#progress-and-status-report" title="Permalink to this headline">¶</a></h2>
+<p>OGC WPS standard enables asynchronous process execution call, that is in
+particular useful, when the process execution takes longer time - process
+instance is set to background and WPS Execute Response document with <cite>ProcessAccepted</cite>
+messag is returned immediately to the client. The client has to check
+<cite>statusLocation</cite> URL, where the current status report is deployed, say every
+n-seconds or n-minutes (depends on calculation time). Content of the response is
+usually <cite>percentDone</cite> information about the progress along with <cite>statusMessage</cite>
+text information, what is currently happening.</p>
+<p>You can set process status any time in the <cite>handler</cite> using the
+<code class="xref py py-func docutils literal"><span class="pre">WPSResponse.update_status()</span></code> function.</p>
+</div>
+<div class="section" id="returning-large-data">
+<h2>Returning large data<a class="headerlink" href="#returning-large-data" title="Permalink to this headline">¶</a></h2>
+<p>WPS allows for a clever method of returning a large data file: instead
+of embedding the data in the response, it can be saved separately, and
+a URL is returned from where the data can be downloaded. In the current
+implementation, PyWPS-4 saves the file in a folder specified
+in the configuration passed by the service (or in a default location).
+The URL returned is embedded in the XML response.</p>
+<p>This behaviour can be requested either by using a GET:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="o">...</span><span class="n">ResponseDocument</span><span class="o">=</span><span class="n">output</span><span class="o">=</span><span class="nd">@asReference</span><span class="o">=</span><span class="n">true</span><span class="o">...</span>
+</pre></div>
+</div>
+<p>Or a POST request:</p>
+<div class="highlight-python"><div class="highlight"><pre>...
+&lt;wps:ResponseForm&gt;
+    &lt;wps:ResponseDocument&gt;
+        &lt;wps:Output asReference=&quot;true&quot;&gt;
+            &lt;ows:Identifier&gt;output&lt;/ows:Identifier&gt;
+            &lt;ows:Title&gt;Some Output&lt;/ows:Title&gt;
+        &lt;/wps:Output&gt;
+    &lt;/wps:ResponseDocument&gt;
+&lt;/wps:ResponseForm&gt;
+...
+</pre></div>
+</div>
+<p><strong>output</strong> is the identifier of the output the user wishes to have stored
+and accessible from a URL. The user may request as many outputs by reference
+as needed, but only <em>one</em> may be requested in RAW format.</p>
+</div>
+<div class="section" id="process-deployment">
+<h2>Process deployment<a class="headerlink" href="#process-deployment" title="Permalink to this headline">¶</a></h2>
+<p>In order for clients to invoke processes, a PyWPS
+<code class="xref py py-class docutils literal"><span class="pre">Service</span></code> class must be present with the ability to listen for requests.
+An instance of this class must created, receiving instances of
+all the desired processes classes.</p>
+<p>In the <em>demo</em> service the <code class="xref py py-class docutils literal"><span class="pre">Service</span></code> class instance is created in the
+<code class="xref py py-class docutils literal"><span class="pre">Server</span></code> class. <code class="xref py py-class docutils literal"><span class="pre">Server</span></code> is a development server that relies
+on <a class="reference external" href="http://flask.pocoo.org">Flask</a>. The publication of processes is encapsulated in <em>demo.py</em>, where
+a main method passes a list of processes instances to the
+<code class="xref py py-class docutils literal"><span class="pre">Server</span></code> class:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">pywps</span> <span class="kn">import</span> <span class="n">Service</span>
+<span class="kn">from</span> <span class="nn">processes.helloworld</span> <span class="kn">import</span> <span class="n">HelloWorld</span>
+<span class="kn">from</span> <span class="nn">processes.demobuffer</span> <span class="kn">import</span> <span class="n">DemoBuffer</span>
+
+<span class="o">...</span>
+<span class="n">processes</span> <span class="o">=</span> <span class="p">[</span> <span class="n">DemoBuffer</span><span class="p">(),</span> <span class="o">...</span> <span class="p">]</span>
+
+<span class="n">server</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">processes</span><span class="p">)</span>
+
+<span class="o">...</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="running-the-dev-server">
+<h2>Running the dev server<a class="headerlink" href="#running-the-dev-server" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="install.html#demo"><span>The demo service and its sample processes</span></a> server is a <a class="reference external" href="http://werkzeug.pocoo.org/docs/terms/#wsgi">WSGI application</a> that accepts incoming <cite>Execute</cite>
+requests and calls the appropriate process to handle them. It also
+answers <cite>GetCapabilities</cite> and <cite>DescribeProcess</cite> requests based on the
+process identifier and their inputs and outputs.</p>
+<p>A host, a port, a config file and the processes can be passed as arguments to the
+<code class="xref py py-class docutils literal"><span class="pre">Server</span></code> constructor.
+<strong>host</strong> and <strong>port</strong> will be <strong>prioritised</strong> if passed to the constructor,
+otherwise the contents of the config file (<em>pywps.cfg</em>) are used.</p>
+<p>Use the <cite>run</cite> method to start the server:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="o">...</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">&#39;0.0.0.0&#39;</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="n">processes</span><span class="p">,</span> <span class="n">config_file</span><span class="o">=</span><span class="n">config_file</span><span class="p">)</span>
+
+<span class="n">s</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>To make the server visible from another computer, replace <code class="docutils literal"><span class="pre">localhost</span></code> with <code class="docutils literal"><span class="pre">0.0.0.0</span></code>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/pywps.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Processes</a><ul>
+<li><a class="reference internal" href="#writing-a-process">Writing a Process</a></li>
+<li><a class="reference internal" href="#example-vector-buffer-process">Example vector buffer process</a></li>
+<li><a class="reference internal" href="#declaring-inputs-and-outputs">Declaring inputs and outputs</a><ul>
+<li><a class="reference internal" href="#literaldata">LiteralData</a></li>
+<li><a class="reference internal" href="#complexdata">ComplexData</a></li>
+<li><a class="reference internal" href="#complexdata-format-and-input-validation">ComplexData <code class="docutils literal"><span class="pre">Format</span></code> and input validation</a></li>
+<li><a class="reference internal" href="#boundingboxdata">BoundingBoxData</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#accessing-the-inputs-and-outputs-in-the-handler-method">Accessing the inputs and outputs in the <cite>handler</cite> method</a></li>
+<li><a class="reference internal" href="#progress-and-status-report">Progress and status report</a></li>
+<li><a class="reference internal" href="#returning-large-data">Returning large data</a></li>
+<li><a class="reference internal" href="#process-deployment">Process deployment</a></li>
+<li><a class="reference internal" href="#running-the-dev-server">Running the dev server</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="configuration.html"
+                        title="previous chapter">Configuration</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="deployment.html"
+                        title="next chapter">Deployment to a production server</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/process.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="deployment.html" title="Deployment to a production server"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="configuration.html" title="Configuration"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright Copyright (C) 2014-2016 PyWPS Development Team, represented by Jachym Cepicky.This work is licensed under a Creative Commons Attribution 4.0 International License.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

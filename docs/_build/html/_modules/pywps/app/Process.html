@@ -1,0 +1,491 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pywps.app.Process &mdash; PyWPS 4.0.0-rc1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '4.0.0-rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="PyWPS 4.0.0-rc1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pywps.app.Process</h1><div class="highlight"><pre>
+<span class="c1">###############################################################################</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (C) 2014-2016 PyWPS Development Team, represented by</span>
+<span class="c1"># PyWPS Project Steering Committee</span>
+<span class="c1">#</span>
+<span class="c1"># Permission is hereby granted, free of charge, to any person obtaining a copy</span>
+<span class="c1"># of this software and associated documentation files (the &quot;Software&quot;), to</span>
+<span class="c1"># deal in the Software without restriction, including without limitation the</span>
+<span class="c1"># rights to use, copy, modify, merge, publish, distribute, sublicense, and/or</span>
+<span class="c1"># sell copies of the Software, and to permit persons to whom the Software is</span>
+<span class="c1"># furnished to do so, subject to the following conditions:</span>
+<span class="c1">#</span>
+<span class="c1"># The above copyright notice and this permission notice shall be included in</span>
+<span class="c1"># all copies or substantial portions of the Software.</span>
+<span class="c1">#</span>
+<span class="c1"># THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span>
+<span class="c1"># IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span>
+<span class="c1"># FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span>
+<span class="c1"># AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span>
+<span class="c1"># LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING</span>
+<span class="c1"># FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS</span>
+<span class="c1"># IN THE SOFTWARE.</span>
+<span class="c1">#</span>
+<span class="c1">###############################################################################</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+
+<span class="kn">from</span> <span class="nn">pywps</span> <span class="kn">import</span> <span class="n">WPS</span><span class="p">,</span> <span class="n">OWS</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">dblog</span>
+<span class="kn">from</span> <span class="nn">pywps.app.WPSResponse</span> <span class="kn">import</span> <span class="n">WPSResponse</span>
+<span class="kn">from</span> <span class="nn">pywps.app.WPSResponse</span> <span class="kn">import</span> <span class="n">STATUS</span>
+<span class="kn">from</span> <span class="nn">pywps.app.WPSRequest</span> <span class="kn">import</span> <span class="n">WPSRequest</span>
+<span class="kn">import</span> <span class="nn">pywps.configuration</span> <span class="kn">as</span> <span class="nn">config</span>
+<span class="kn">from</span> <span class="nn">pywps._compat</span> <span class="kn">import</span> <span class="n">PY2</span>
+<span class="kn">from</span> <span class="nn">pywps.exceptions</span> <span class="kn">import</span> <span class="n">StorageNotSupported</span><span class="p">,</span> <span class="n">OperationNotSupported</span><span class="p">,</span> \
+    <span class="n">ServerBusy</span><span class="p">,</span> <span class="n">NoApplicableCode</span>
+
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;PYWPS&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Process"><a class="viewcode-back" href="../../../api.html#pywps.Process">[docs]</a><span class="k">class</span> <span class="nc">Process</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param handler: A callable that gets invoked for each incoming</span>
+<span class="sd">                    request. It should accept a single</span>
+<span class="sd">                    :class:`pywps.app.WPSRequest` argument and return a</span>
+<span class="sd">                    :class:`pywps.app.WPSResponse` object.</span>
+<span class="sd">    :param identifier: Name of this process.</span>
+<span class="sd">    :param inputs: List of inputs accepted by this process. They</span>
+<span class="sd">                   should be :class:`~LiteralInput` and :class:`~ComplexInput`</span>
+<span class="sd">                   and :class:`~BoundingBoxInput`</span>
+<span class="sd">                   objects.</span>
+<span class="sd">    :param outputs: List of outputs returned by this process. They</span>
+<span class="sd">                   should be :class:`~LiteralOutput` and :class:`~ComplexOutput`</span>
+<span class="sd">                   and :class:`~BoundingBoxOutput`</span>
+<span class="sd">                   objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handler</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">abstract</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">profile</span><span class="o">=</span><span class="p">[],</span> <span class="n">metadata</span><span class="o">=</span><span class="p">[],</span> <span class="n">inputs</span><span class="o">=</span><span class="p">[],</span>
+                 <span class="n">outputs</span><span class="o">=</span><span class="p">[],</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="n">store_supported</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">status_supported</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">grass_location</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">identifier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handler</span> <span class="o">=</span> <span class="n">handler</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">title</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">abstract</span> <span class="o">=</span> <span class="n">abstract</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">profile</span> <span class="o">=</span> <span class="n">profile</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span> <span class="o">=</span> <span class="n">outputs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uuid</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status_location</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status_url</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workdir</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_grass_mapset</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grass_location</span> <span class="o">=</span> <span class="n">grass_location</span>
+
+
+        <span class="k">if</span> <span class="n">store_supported</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">store_supported</span> <span class="o">=</span> <span class="s1">&#39;true&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">store_supported</span> <span class="o">=</span> <span class="s1">&#39;false&#39;</span>
+
+        <span class="k">if</span> <span class="n">status_supported</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status_supported</span> <span class="o">=</span> <span class="s1">&#39;true&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status_supported</span> <span class="o">=</span> <span class="s1">&#39;false&#39;</span>
+
+
+
+    <span class="k">def</span> <span class="nf">capabilities_xml</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">WPS</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span>
+            <span class="n">OWS</span><span class="o">.</span><span class="n">Identifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">),</span>
+            <span class="n">OWS</span><span class="o">.</span><span class="n">Title</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">abstract</span><span class="p">:</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OWS</span><span class="o">.</span><span class="n">Abstract</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">abstract</span><span class="p">))</span>
+        <span class="c1"># TODO: See Table 32 Metadata in OGC 06-121r3</span>
+        <span class="c1">#for m in self.metadata:</span>
+        <span class="c1">#    doc.append(OWS.Metadata(m))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profile</span><span class="p">:</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OWS</span><span class="o">.</span><span class="n">Profile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">profile</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">!=</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;{http://www.opengis.net/wps/1.0.0}processVersion&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;{http://www.opengis.net/wps/1.0.0}processVersion&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;undefined&#39;</span>
+
+        <span class="k">return</span> <span class="n">doc</span>
+
+    <span class="k">def</span> <span class="nf">describe_xml</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">input_elements</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">describe_xml</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">]</span>
+        <span class="n">output_elements</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">describe_xml</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">]</span>
+
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">ProcessDescription</span><span class="p">(</span>
+            <span class="n">OWS</span><span class="o">.</span><span class="n">Identifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">),</span>
+            <span class="n">OWS</span><span class="o">.</span><span class="n">Title</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;{http://www.opengis.net/wps/1.0.0}processVersion&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">store_supported</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;storeSupported&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">store_supported</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">status_supported</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;statusSupported&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">status_supported</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">abstract</span><span class="p">:</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OWS</span><span class="o">.</span><span class="n">Abstract</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">abstract</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">:</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OWS</span><span class="o">.</span><span class="n">Metadata</span><span class="p">({</span><span class="s1">&#39;{http://www.w3.org/1999/xlink}title&#39;</span><span class="p">:</span> <span class="n">m</span><span class="p">}))</span>
+
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">profile</span><span class="p">:</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">WPS</span><span class="o">.</span><span class="n">Profile</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">input_elements</span><span class="p">:</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">E</span><span class="o">.</span><span class="n">DataInputs</span><span class="p">(</span><span class="o">*</span><span class="n">input_elements</span><span class="p">))</span>
+
+        <span class="n">doc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">E</span><span class="o">.</span><span class="n">ProcessOutputs</span><span class="p">(</span><span class="o">*</span><span class="n">output_elements</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">doc</span>
+
+    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wps_request</span><span class="p">,</span> <span class="n">uuid</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_uuid</span><span class="p">(</span><span class="n">uuid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">async</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">wps_response</span> <span class="o">=</span> <span class="n">WPSResponse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wps_request</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">uuid</span><span class="p">)</span>
+
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Check if status storage and updating are supported by this process&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">wps_request</span><span class="o">.</span><span class="n">store_execute</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">store_supported</span> <span class="o">!=</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">StorageNotSupported</span><span class="p">(</span><span class="s1">&#39;Process does not support the storing of the execute response&#39;</span><span class="p">)</span>
+
+
+            <span class="k">if</span> <span class="n">wps_request</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">status_supported</span> <span class="o">!=</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">OperationNotSupported</span><span class="p">(</span><span class="s1">&#39;Process does not support the updating of status&#39;</span><span class="p">)</span>
+
+                <span class="n">wps_response</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">STATUS</span><span class="o">.</span><span class="n">STORE_AND_UPDATE_STATUS</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">async</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">wps_response</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">STATUS</span><span class="o">.</span><span class="n">STORE_STATUS</span>
+
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Check if updating of status is not required then no need to spawn a process&#39;</span><span class="p">)</span>
+
+        <span class="n">wps_response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_execute_process</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">async</span><span class="p">,</span> <span class="n">wps_request</span><span class="p">,</span> <span class="n">wps_response</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">wps_response</span>
+
+    <span class="k">def</span> <span class="nf">_set_uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set uuid and status ocation apth and url</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">uuid</span> <span class="o">=</span> <span class="n">uuid</span>
+
+        <span class="n">file_path</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get_config_value</span><span class="p">(</span><span class="s1">&#39;server&#39;</span><span class="p">,</span> <span class="s1">&#39;outputpath&#39;</span><span class="p">)</span>
+
+        <span class="n">file_url</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get_config_value</span><span class="p">(</span><span class="s1">&#39;server&#39;</span><span class="p">,</span> <span class="s1">&#39;outputurl&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">status_location</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uuid</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;.xml&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status_url</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_url</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uuid</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;.xml&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_execute_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">async</span><span class="p">,</span> <span class="n">wps_request</span><span class="p">,</span> <span class="n">wps_response</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Uses :module:`multiprocessing` module for sending process to</span>
+<span class="sd">        background BUT first, check for maxprocesses configuration value</span>
+
+<span class="sd">        :param async: run in asynchronous mode</span>
+<span class="sd">        :return: wps_response or None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">maxparalel</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">get_config_value</span><span class="p">(</span><span class="s1">&#39;server&#39;</span><span class="p">,</span> <span class="s1">&#39;parallelprocesses&#39;</span><span class="p">))</span>
+        <span class="n">running</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dblog</span><span class="o">.</span><span class="n">get_running</span><span class="p">())</span>
+        <span class="n">stored</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dblog</span><span class="o">.</span><span class="n">get_stored</span><span class="p">())</span>
+
+        <span class="c1"># async</span>
+        <span class="k">if</span> <span class="n">async</span><span class="p">:</span>
+
+            <span class="c1"># run immedietly</span>
+            <span class="k">if</span> <span class="n">running</span> <span class="o">&lt;</span> <span class="n">maxparalel</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_run_async</span><span class="p">(</span><span class="n">wps_request</span><span class="p">,</span> <span class="n">wps_response</span><span class="p">)</span>
+
+            <span class="c1"># try to store for later usage</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">wps_response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_store_process</span><span class="p">(</span><span class="n">stored</span><span class="p">,</span>
+                                                   <span class="n">wps_request</span><span class="p">,</span> <span class="n">wps_response</span><span class="p">)</span>
+
+        <span class="c1"># not async</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">running</span> <span class="o">&lt;</span> <span class="n">maxparalel</span><span class="p">:</span>
+                <span class="n">wps_response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_process</span><span class="p">(</span><span class="n">wps_request</span><span class="p">,</span> <span class="n">wps_response</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ServerBusy</span><span class="p">(</span><span class="s1">&#39;Maximum number of parallel running processes reached. Please try later.&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">wps_response</span>
+
+    <span class="k">def</span> <span class="nf">_run_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wps_request</span><span class="p">,</span> <span class="n">wps_response</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">multiprocessing</span>
+        <span class="n">process</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span>
+            <span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_run_process</span><span class="p">,</span>
+            <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">wps_request</span><span class="p">,</span> <span class="n">wps_response</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">process</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">_store_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stored</span><span class="p">,</span> <span class="n">wps_request</span><span class="p">,</span> <span class="n">wps_response</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Try to store given requests</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">maxprocesses</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">get_config_value</span><span class="p">(</span><span class="s1">&#39;server&#39;</span><span class="p">,</span> <span class="s1">&#39;maxprocesses&#39;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">stored</span> <span class="o">&lt;</span> <span class="n">maxprocesses</span><span class="p">:</span>
+            <span class="n">dblog</span><span class="o">.</span><span class="n">store_process</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uuid</span><span class="p">,</span> <span class="n">wps_request</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ServerBusy</span><span class="p">(</span><span class="s1">&#39;Maximum number of parallel running processes reached. Please try later.&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">wps_response</span>
+
+    <span class="k">def</span> <span class="nf">_run_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wps_request</span><span class="p">,</span> <span class="n">wps_response</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_grass</span><span class="p">()</span>
+            <span class="n">wps_response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handler</span><span class="p">(</span><span class="n">wps_request</span><span class="p">,</span> <span class="n">wps_response</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">wps_response</span><span class="o">.</span><span class="n">status_percentage</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">wps_response</span><span class="o">.</span><span class="n">status_percentage</span> <span class="o">!=</span> <span class="mi">100</span><span class="p">):</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Updating process status to 100</span><span class="si">% i</span><span class="s1">f everything went correctly&#39;</span><span class="p">)</span>
+                <span class="n">wps_response</span><span class="o">.</span><span class="n">update_status</span><span class="p">(</span><span class="s1">&#39;PyWPS Process finished&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span>
+                        <span class="n">STATUS</span><span class="o">.</span><span class="n">DONE_STATUS</span><span class="p">,</span> <span class="n">clean</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">async</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Retrieving file and line number where exception occurred&#39;</span><span class="p">)</span>
+            <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_obj</span><span class="p">,</span> <span class="n">exc_tb</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
+                <span class="c1"># search for the _handler method</span>
+                <span class="n">m_name</span> <span class="o">=</span> <span class="n">exc_tb</span><span class="o">.</span><span class="n">tb_frame</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+                <span class="k">if</span> <span class="n">m_name</span> <span class="o">==</span> <span class="s1">&#39;_handler&#39;</span><span class="p">:</span>
+                    <span class="n">found</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">exc_tb</span><span class="o">.</span><span class="n">tb_next</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">exc_tb</span> <span class="o">=</span> <span class="n">exc_tb</span><span class="o">.</span><span class="n">tb_next</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># if not found then take the first</span>
+                        <span class="n">exc_tb</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span>
+                        <span class="k">break</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">exc_tb</span><span class="o">.</span><span class="n">tb_frame</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_filename</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">method_name</span> <span class="o">=</span> <span class="n">exc_tb</span><span class="o">.</span><span class="n">tb_frame</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+
+            <span class="c1"># update the process status to display process failed</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Process error: </span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1"> Line </span><span class="si">%i</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">method_name</span><span class="p">,</span> <span class="n">exc_tb</span><span class="o">.</span><span class="n">tb_lineno</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">wps_response</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">NoApplicableCode</span><span class="p">(</span><span class="s1">&#39;Response is empty. Make sure the _handler method is returning a valid object.&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">wps_response</span><span class="o">.</span><span class="n">update_status</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># tr</span>
+        <span class="n">stored_requests</span> <span class="o">=</span> <span class="n">dblog</span><span class="o">.</span><span class="n">get_first_stored</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stored_requests</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">uuid</span><span class="p">,</span> <span class="n">request_json</span><span class="p">)</span> <span class="o">=</span> <span class="n">stored_requests</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">new_wps_request</span> <span class="o">=</span> <span class="n">WPSRequest</span><span class="p">()</span>
+            <span class="n">new_wps_request</span><span class="o">.</span><span class="n">json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">request_json</span><span class="p">)</span>
+            <span class="n">new_wps_response</span> <span class="o">=</span> <span class="n">WPSResponse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_wps_request</span><span class="p">,</span> <span class="n">uuid</span><span class="p">)</span>
+            <span class="n">new_wps_response</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">STATUS</span><span class="o">.</span><span class="n">STORE_AND_UPDATE_STATUS</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_uuid</span><span class="p">(</span><span class="n">uuid</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_run_async</span><span class="p">(</span><span class="n">new_wps_request</span><span class="p">,</span> <span class="n">new_wps_response</span><span class="p">)</span>
+            <span class="n">dblog</span><span class="o">.</span><span class="n">remove_stored</span><span class="p">(</span><span class="n">uuid</span><span class="p">)</span>
+
+
+        <span class="k">return</span> <span class="n">wps_response</span>
+
+    <span class="k">def</span> <span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Clean the process working dir and other temporary files</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Removing temporary working directory: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">workdir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workdir</span><span class="p">):</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workdir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grass_mapset</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_grass_mapset</span><span class="p">):</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Removing temporary GRASS GIS mapset: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grass_mapset</span><span class="p">)</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_grass_mapset</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">set_workdir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workdir</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set working dir for all inputs and outputs</span>
+
+<span class="sd">        this is the directory, where all the data are being stored to</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">workdir</span> <span class="o">=</span> <span class="n">workdir</span>
+        <span class="k">for</span> <span class="n">inpt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">:</span>
+            <span class="n">inpt</span><span class="o">.</span><span class="n">workdir</span> <span class="o">=</span> <span class="n">workdir</span>
+
+        <span class="k">for</span> <span class="n">outpt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">:</span>
+            <span class="n">outpt</span><span class="o">.</span><span class="n">workdir</span> <span class="o">=</span> <span class="n">workdir</span>
+
+    <span class="k">def</span> <span class="nf">_set_grass</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Handle given grass_location parameter of the constructor</span>
+
+<span class="sd">        location is either directory name or &#39;epsg:1234&#39; form</span>
+
+<span class="sd">        in the first case, new temporary mapset within the location will be</span>
+<span class="sd">        created</span>
+
+<span class="sd">        in the second case, location will be created in self.workdir</span>
+
+<span class="sd">        the mapset should be deleted automatically using self.clean() method</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">PY2</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Seems PyWPS is running in Python-3 &#39;</span> <span class="o">+</span>
+                <span class="s1">&#39;environment, but GRASS GIS supports Python-2 only&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">grass_location</span><span class="p">:</span>
+
+            <span class="kn">from</span> <span class="nn">grass.script</span> <span class="kn">import</span> <span class="n">core</span> <span class="k">as</span> <span class="n">grass</span>
+            <span class="kn">import</span> <span class="nn">grass.script.setup</span> <span class="kn">as</span> <span class="nn">gsetup</span>
+
+            <span class="n">dbase</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">location</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+            <span class="c1"># HOME needs to be set - and that is usually not the case for httpd</span>
+            <span class="c1"># server</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;HOME&#39;</span><span class="p">]</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">workdir</span>
+
+            <span class="c1"># GISRC envvariable needs to be set</span>
+            <span class="n">gisrc</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workdir</span><span class="p">,</span> <span class="s1">&#39;GISRC&#39;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+            <span class="n">gisrc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;GISDBASE: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">workdir</span><span class="p">)</span>
+            <span class="n">gisrc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;GUI: txt</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">gisrc</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;GISRC&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gisrc</span><span class="o">.</span><span class="n">name</span>
+
+            <span class="c1"># create new location from epsg code</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">grass_location</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;epsg:&#39;</span><span class="p">):</span>
+                <span class="n">epsg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grass_location</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;epsg:&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">dbase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">workdir</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;GISDBASE&#39;</span><span class="p">]</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">workdir</span>
+                <span class="n">location</span> <span class="o">=</span> <span class="s1">&#39;pywps_location&#39;</span>
+                <span class="n">grass</span><span class="o">.</span><span class="n">run_command</span><span class="p">(</span><span class="s1">&#39;g.gisenv&#39;</span><span class="p">,</span> <span class="nb">set</span><span class="o">=</span><span class="s2">&quot;GISDBASE=</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">dbase</span><span class="p">)</span>
+                <span class="n">grass</span><span class="o">.</span><span class="n">run_command</span><span class="p">(</span><span class="s1">&#39;g.proj&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="n">location</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="n">epsg</span><span class="p">)</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;GRASS location based on EPSG code created&#39;</span><span class="p">)</span>
+
+            <span class="c1"># create temporary mapset within existing location</span>
+            <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grass_location</span><span class="p">):</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Temporary mapset will be created&#39;</span><span class="p">)</span>
+                <span class="n">dbase</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grass_location</span><span class="p">)</span>
+                <span class="n">location</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grass_location</span><span class="p">)</span>
+                <span class="n">grass</span><span class="o">.</span><span class="n">run_command</span><span class="p">(</span><span class="s1">&#39;g.gisenv&#39;</span><span class="p">,</span> <span class="nb">set</span><span class="o">=</span><span class="s2">&quot;GISDBASE=</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">dbase</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">NoApplicableCode</span><span class="p">(</span>
+                    <span class="s1">&#39;Location does exists or does not seem to be in &quot;EPSG:XXXX&quot; form nor is it existing directory: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">location</span><span class="p">)</span>
+
+            <span class="c1"># copy projection files from PERMAMENT mapset to temporary mapset</span>
+            <span class="n">mapset_name</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;pywps_&#39;</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dbase</span><span class="p">,</span> <span class="n">location</span><span class="p">))</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dbase</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="s1">&#39;PERMANENT&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;DEFAULT_WIND&#39;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mapset_name</span><span class="p">,</span> <span class="s1">&#39;WIND&#39;</span><span class="p">))</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dbase</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="s1">&#39;PERMANENT&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;PROJ_EPSG&#39;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mapset_name</span><span class="p">,</span> <span class="s1">&#39;PROJ_EPSG&#39;</span><span class="p">))</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dbase</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="s1">&#39;PERMANENT&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;PROJ_INFO&#39;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mapset_name</span><span class="p">,</span> <span class="s1">&#39;PROJ_INFO&#39;</span><span class="p">))</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dbase</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="s1">&#39;PERMANENT&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;PROJ_UNITS&#39;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mapset_name</span><span class="p">,</span> <span class="s1">&#39;PROJ_UNITS&#39;</span><span class="p">))</span>
+
+            <span class="c1"># set _grass_mapset attribute - will be deleted once handler ends</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_grass_mapset</span> <span class="o">=</span> <span class="n">mapset_name</span>
+
+            <span class="c1"># final initialization</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;GRASS Mapset set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">mapset_name</span><span class="p">)</span>
+            <span class="n">grass</span><span class="o">.</span><span class="n">run_command</span><span class="p">(</span><span class="s1">&#39;g.gisenv&#39;</span><span class="p">,</span> <span class="nb">set</span><span class="o">=</span><span class="s2">&quot;LOCATION_NAME=</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">location</span><span class="p">)</span>
+            <span class="n">grass</span><span class="o">.</span><span class="n">run_command</span><span class="p">(</span><span class="s1">&#39;g.gisenv&#39;</span><span class="p">,</span> <span class="nb">set</span><span class="o">=</span><span class="s2">&quot;MAPSET=</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">mapset_name</span><span class="p">))</span>
+
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="s1">&#39;GRASS environment initialised with GISRC {}, GISBASE {}, GISDBASE {}, LOCATION {}, MAPSET {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;GISRC&#39;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;GISBASE&#39;</span><span class="p">),</span>
+                <span class="n">dbase</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">mapset_name</span><span class="p">)))</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/pywps.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright Copyright (C) 2014-2016 PyWPS Development Team, represented by Jachym Cepicky.This work is licensed under a Creative Commons Attribution 4.0 International License.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

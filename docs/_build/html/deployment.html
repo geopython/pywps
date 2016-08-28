@@ -1,0 +1,322 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Deployment to a production server &mdash; PyWPS 4.0.0-rc1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '4.0.0-rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="PyWPS 4.0.0-rc1 documentation" href="index.html" />
+    <link rel="next" title="Migrating from PyWP 3.x to 4.x" href="migration.html" />
+    <link rel="prev" title="Processes" href="process.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="migration.html" title="Migrating from PyWP 3.x to 4.x"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="process.html" title="Processes"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="deployment-to-a-production-server">
+<span id="deployment"></span><h1>Deployment to a production server<a class="headerlink" href="#deployment-to-a-production-server" title="Permalink to this headline">¶</a></h1>
+<p>As already described in the <a class="reference internal" href="install.html#installation"><span>Installation</span></a> section, no specific deployment
+procedures are for PyWPS when using flask-based server. But this formula is not
+intended to be used in a production environment. For production, <a class="reference external" href="https://httpd.apache.org/">Apache httpd</a> or <a class="reference external" href="https://nginx.org/">nginx</a> servers are
+more advised. PyWPS is runs as a <a class="reference external" href="https://wsgi.readthedocs.io/en/latest/">WSGI</a> application on those servers. PyWPS
+relies on the <a class="reference external" href="http://werkzeug.pocoo.org/">Werkzeug</a> library for this purpose.</p>
+<div class="section" id="deoploying-an-individual-pywps-instance">
+<h2>Deoploying an individual PyWPS instance<a class="headerlink" href="#deoploying-an-individual-pywps-instance" title="Permalink to this headline">¶</a></h2>
+<p>PyWPS should be installed in your computer (as per the <a class="reference internal" href="install.html#installation"><span>Installation</span></a>
+section). As a following step, you can now create several instances of your WPS
+server.</p>
+<p>It is advisable for each PyWPS instance to have its own directory, where the
+WSGI file along with available processes should reside. Therefore create a new
+directory for the PyWPS instance:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ sudo mkdir /var/www/pywps/
+
+# create a directory for your processes too
+$ sudo mkdir /var/www/pywps/processes
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">In this configuration example it is assumed that there is only one
+instance of PyWPS on the server.</p>
+</div>
+<p>Each instance is represented by a single <cite>WSGI</cite> script (written in Python),
+which:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Loads the configuration files</li>
+<li>Serves processes</li>
+<li>Takes care about maximum number of concurrent processes and similar</li>
+</ol>
+</div></blockquote>
+</div>
+<div class="section" id="creating-a-pywps-wsgi-instance">
+<h2>Creating a PyWPS <cite>WSGI</cite> instance<a class="headerlink" href="#creating-a-pywps-wsgi-instance" title="Permalink to this headline">¶</a></h2>
+<p>An example WSGI script is distributed along with PyWPS-Demo service, as
+described in the <a class="reference internal" href="install.html#installation"><span>Installation</span></a> section. The script is actually
+straightforward - in fact, it&#8217;s a just wrapper around the PyWPS server with a
+list of processes and configuration files passed as arguments. Here is an
+example of a PyWPS WSGI script:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ $EDITOR /var/www/pywps/pywps.wcgi
+</pre></div>
+</div>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30</pre></div></td><td class="code"><div class="highlight"><pre><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="kn">from</span> <span class="nn">pywps.app.Service</span> <span class="kn">import</span> <span class="n">Service</span>
+
+<span class="c1"># processes need to be installed in PYTHON_PATH</span>
+<span class="kn">from</span> <span class="nn">processes.sleep</span> <span class="kn">import</span> <span class="n">Sleep</span>
+<span class="kn">from</span> <span class="nn">processes.ultimate_question</span> <span class="kn">import</span> <span class="n">UltimateQuestion</span>
+<span class="kn">from</span> <span class="nn">processes.centroids</span> <span class="kn">import</span> <span class="n">Centroids</span>
+<span class="kn">from</span> <span class="nn">processes.sayhello</span> <span class="kn">import</span> <span class="n">SayHello</span>
+<span class="kn">from</span> <span class="nn">processes.feature_count</span> <span class="kn">import</span> <span class="n">FeatureCount</span>
+<span class="kn">from</span> <span class="nn">processes.buffer</span> <span class="kn">import</span> <span class="n">Buffer</span>
+<span class="kn">from</span> <span class="nn">processes.area</span> <span class="kn">import</span> <span class="n">Area</span>
+
+<span class="n">processes</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">FeatureCount</span><span class="p">(),</span>
+    <span class="n">SayHello</span><span class="p">(),</span>
+    <span class="n">Centroids</span><span class="p">(),</span>
+    <span class="n">UltimateQuestion</span><span class="p">(),</span>
+    <span class="n">Sleep</span><span class="p">(),</span>
+    <span class="n">Buffer</span><span class="p">(),</span>
+    <span class="n">Area</span><span class="p">()</span>
+<span class="p">]</span>
+
+<span class="c1"># Service accepts two parameters:</span>
+<span class="c1"># 1 - list of process instances</span>
+<span class="c1"># 2 - list of configuration files</span>
+<span class="n">application</span> <span class="o">=</span> <span class="n">Service</span><span class="p">(</span>
+    <span class="n">processes</span><span class="p">,</span>
+    <span class="p">[</span><span class="s1">&#39;/var/www/pywps/pywps.cfg&#39;</span><span class="p">]</span>
+<span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>The WSGI script is assuming that there are already some
+processes at hand that can be directly included. Also it assumes, that
+the configuration file already exists - which is not the case yet.</p>
+<p class="last">The Configuration is described in next chapter (<a class="reference internal" href="configuration.html#configuration"><span>Configuration</span></a>),
+as well as process creation and deployment (<a class="reference internal" href="process.html#process"><span>Processes</span></a>).</p>
+</div>
+</div>
+<div class="section" id="deployment-on-apache2-httpd-server">
+<h2>Deployment on Apache2 httpd server<a class="headerlink" href="#deployment-on-apache2-httpd-server" title="Permalink to this headline">¶</a></h2>
+<p>First, the WSGI module must be installed and enabled:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ sudo apt-get install libapache2-mod-wsgi
+$ sudo a2enmod wsgi
+</pre></div>
+</div>
+<p>You then can edit your site configuration file
+(<cite>/etc/apache2/sites-enabled/yoursite.conf</cite>) and add the following:</p>
+<div class="highlight-python"><div class="highlight"><pre># PyWPS-4
+WSGIDaemonProcess pywps user=www-data group=www-data processes=2 threads=5
+WSGIScriptAlias /pywps /var/www/pywps/pywps.wsgi
+
+&lt;Directory /home/jachym/www/htdocs/wps/&gt;
+    WSGIScriptReloading On
+    WSGIProcessGroup group
+    WSGIApplicationGroup %{GLOBAL}
+    Order deny,allow
+    Allow from all
+&lt;/Directory&gt;
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><cite>WSGIScriptAlias</cite> points to the <cite>pywps.wsgi</cite> script created
+before - it will be available under the url <a class="reference external" href="http://localhost/pywps">http://localhost/pywps</a></p>
+</div>
+<p>And of course restart the server:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ sudo service apache2 restart
+</pre></div>
+</div>
+</div>
+<div class="section" id="deployment-on-nginx">
+<h2>Deployment on nginx<a class="headerlink" href="#deployment-on-nginx" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">We are currently missing documentation about <cite>nginx</cite>.
+Please help documenting the deployment of PyWPS to nginx.</p>
+</div>
+<p>You should be able to deploy PyWPS on nginx as a standard WSGI application. The
+best documentation is probably to be found at <a class="reference external" href="http://uwsgi-docs.readthedocs.io/en/latest/WSGIquickstart.html">Readthedocs</a>.</p>
+</div>
+<div class="section" id="testing-the-deployment-of-a-pywps-instance">
+<span id="deployment-testing"></span><h2>Testing the deployment of a PyWPS instance<a class="headerlink" href="#testing-the-deployment-of-a-pywps-instance" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">For the purpose of this documentation, it is assumed that you&#8217;ve
+installed PyWPS using the <cite>localhost</cite> server domain name.</p>
+</div>
+<p>As stated, before, PyWPS should be available at <a class="reference external" href="http://localhost/pywps">http://localhost/pywps</a>, we now
+can visit the url (or use <cite>wget</cite>):</p>
+<div class="highlight-python"><div class="highlight"><pre># the --content-error parameter makes sure, error response is displayed
+$ wget --content-error -O - &quot;http://localhost/pywps&quot;
+</pre></div>
+</div>
+<p>The result should be an XML-encoded error message.</p>
+<div class="highlight-xml"><div class="highlight"><pre><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<span class="c">&lt;!-- PyWPS 4.0.0-alpha2 --&gt;</span>
+<span class="nt">&lt;ows:ExceptionReport</span> <span class="na">xmlns:ows=</span><span class="s">&quot;http://www.opengis.net/ows/1.1&quot;</span> <span class="na">xmlns:xsi=</span><span class="s">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span> <span class="na">xsi:schemaLocation=</span><span class="s">&quot;http://www.opengis.net/ows/1.1 http://schemas.opengis.net/ows/1.1.0/owsExceptionReport.xsd&quot;</span> <span class="na">version=</span><span class="s">&quot;1.0.0&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;ows:Exception</span> <span class="na">exceptionCode=</span><span class="s">&quot;MissingParameterValue&quot;</span> <span class="na">locator=</span><span class="s">&quot;service&quot;</span> <span class="nt">&gt;</span>
+        <span class="nt">&lt;ows:ExceptionText&gt;</span>service<span class="nt">&lt;/ows:ExceptionText&gt;</span>
+    <span class="nt">&lt;/ows:Exception&gt;</span>
+<span class="nt">&lt;/ows:ExceptionReport&gt;</span>
+</pre></div>
+</div>
+<p>The server responded with the <a class="reference internal" href="exceptions.html#pywps.exceptions.MissingParameterValue" title="pywps.exceptions.MissingParameterValue"><code class="xref py py-class docutils literal"><span class="pre">pywps.exceptions.MissingParameterValue</span></code></a>
+exception, telling us that the parameter <cite>service</cite> was not set. This is
+compliant with the OGC WPS standard, since each request mast have at least the
+<cite>service</cite> and <cite>request</cite> parameters. We can say for now, that this PyWPS
+instance is properly deployed on the server, since it returns proper exception
+report.</p>
+<p>We now have to configure the instance by editing the <cite>pywps.cfg</cite> file and adding
+some processes.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/pywps.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Deployment to a production server</a><ul>
+<li><a class="reference internal" href="#deoploying-an-individual-pywps-instance">Deoploying an individual PyWPS instance</a></li>
+<li><a class="reference internal" href="#creating-a-pywps-wsgi-instance">Creating a PyWPS <cite>WSGI</cite> instance</a></li>
+<li><a class="reference internal" href="#deployment-on-apache2-httpd-server">Deployment on Apache2 httpd server</a></li>
+<li><a class="reference internal" href="#deployment-on-nginx">Deployment on nginx</a></li>
+<li><a class="reference internal" href="#testing-the-deployment-of-a-pywps-instance">Testing the deployment of a PyWPS instance</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="process.html"
+                        title="previous chapter">Processes</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="migration.html"
+                        title="next chapter">Migrating from PyWP 3.x to 4.x</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/deployment.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="migration.html" title="Migrating from PyWP 3.x to 4.x"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="process.html" title="Processes"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright Copyright (C) 2014-2016 PyWPS Development Team, represented by Jachym Cepicky.This work is licensed under a Creative Commons Attribution 4.0 International License.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

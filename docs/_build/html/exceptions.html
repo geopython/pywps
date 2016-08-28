@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Exceptions &mdash; PyWPS 4.0.0-rc1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '4.0.0-rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="PyWPS 4.0.0-rc1 documentation" href="index.html" />
+    <link rel="prev" title="Developers Guide" href="development.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="development.html" title="Developers Guide"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="exceptions">
+<span id="id1"></span><h1>Exceptions<a class="headerlink" href="#exceptions" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-pywps.exceptions"></span><p>PyWPS-4 will throw exceptions based on the error occurred.
+The exceptions will point out what is missing or what went wrong
+as accurately as possible.</p>
+<p>Here is the list of Exceptions and HTTP error codes associated with them:</p>
+<dl class="class">
+<dt id="pywps.exceptions.NoApplicableCode">
+<em class="property">class </em><code class="descclassname">pywps.exceptions.</code><code class="descname">NoApplicableCode</code><span class="sig-paren">(</span><em>description</em>, <em>locator=''</em>, <em>code=400</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pywps/exceptions.html#NoApplicableCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pywps.exceptions.NoApplicableCode" title="Permalink to this definition">¶</a></dt>
+<dd><p>No applicable code exception implementation</p>
+<p>also</p>
+<p>Base exception class</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pywps.exceptions.InvalidParameterValue">
+<em class="property">class </em><code class="descclassname">pywps.exceptions.</code><code class="descname">InvalidParameterValue</code><span class="sig-paren">(</span><em>description</em>, <em>locator=''</em>, <em>code=400</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pywps/exceptions.html#InvalidParameterValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pywps.exceptions.InvalidParameterValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Invalid parameter value exception implementation</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pywps.exceptions.MissingParameterValue">
+<em class="property">class </em><code class="descclassname">pywps.exceptions.</code><code class="descname">MissingParameterValue</code><span class="sig-paren">(</span><em>description</em>, <em>locator=''</em>, <em>code=400</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pywps/exceptions.html#MissingParameterValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pywps.exceptions.MissingParameterValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Missing parameter value exception implementation</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pywps.exceptions.FileSizeExceeded">
+<em class="property">class </em><code class="descclassname">pywps.exceptions.</code><code class="descname">FileSizeExceeded</code><span class="sig-paren">(</span><em>description</em>, <em>locator=''</em>, <em>code=400</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pywps/exceptions.html#FileSizeExceeded"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pywps.exceptions.FileSizeExceeded" title="Permalink to this definition">¶</a></dt>
+<dd><p>File size exceeded exception implementation</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pywps.exceptions.VersionNegotiationFailed">
+<em class="property">class </em><code class="descclassname">pywps.exceptions.</code><code class="descname">VersionNegotiationFailed</code><span class="sig-paren">(</span><em>description</em>, <em>locator=''</em>, <em>code=400</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pywps/exceptions.html#VersionNegotiationFailed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pywps.exceptions.VersionNegotiationFailed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Version negotiation exception implementation</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pywps.exceptions.OperationNotSupported">
+<em class="property">class </em><code class="descclassname">pywps.exceptions.</code><code class="descname">OperationNotSupported</code><span class="sig-paren">(</span><em>description</em>, <em>locator=''</em>, <em>code=400</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pywps/exceptions.html#OperationNotSupported"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pywps.exceptions.OperationNotSupported" title="Permalink to this definition">¶</a></dt>
+<dd><p>Operation not supported exception implementation</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pywps.exceptions.StorageNotSupported">
+<em class="property">class </em><code class="descclassname">pywps.exceptions.</code><code class="descname">StorageNotSupported</code><span class="sig-paren">(</span><em>description</em>, <em>locator=''</em>, <em>code=400</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pywps/exceptions.html#StorageNotSupported"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pywps.exceptions.StorageNotSupported" title="Permalink to this definition">¶</a></dt>
+<dd><p>Storage not supported exception implementation</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pywps.exceptions.NotEnoughStorage">
+<em class="property">class </em><code class="descclassname">pywps.exceptions.</code><code class="descname">NotEnoughStorage</code><span class="sig-paren">(</span><em>description</em>, <em>locator=''</em>, <em>code=400</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pywps/exceptions.html#NotEnoughStorage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pywps.exceptions.NotEnoughStorage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Storage not supported exception implementation</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/pywps.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="development.html"
+                        title="previous chapter">Developers Guide</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/exceptions.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="development.html" title="Developers Guide"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright Copyright (C) 2014-2016 PyWPS Development Team, represented by Jachym Cepicky.This work is licensed under a Creative Commons Attribution 4.0 International License.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

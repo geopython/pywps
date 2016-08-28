@@ -1,0 +1,724 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pywps.inout.basic &mdash; PyWPS 4.0.0-rc1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '4.0.0-rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="PyWPS 4.0.0-rc1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pywps.inout.basic</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">pywps._compat</span> <span class="kn">import</span> <span class="n">text_type</span><span class="p">,</span> <span class="n">StringIO</span>
+<span class="kn">import</span> <span class="nn">tempfile</span><span class="o">,</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">pywps.inout.literaltypes</span> <span class="kn">import</span> <span class="n">LITERAL_DATA_TYPES</span><span class="p">,</span> <span class="n">convert</span><span class="p">,</span>\
+    <span class="n">AnyValue</span><span class="p">,</span> <span class="n">AllowedValue</span><span class="p">,</span> <span class="n">make_allowedvalues</span><span class="p">,</span> <span class="n">is_anyvalue</span>
+<span class="kn">from</span> <span class="nn">pywps</span> <span class="kn">import</span> <span class="n">OWS</span><span class="p">,</span> <span class="n">OGCUNIT</span><span class="p">,</span> <span class="n">NAMESPACES</span>
+<span class="kn">from</span> <span class="nn">pywps.validator.mode</span> <span class="kn">import</span> <span class="n">MODE</span>
+<span class="kn">from</span> <span class="nn">pywps.validator.base</span> <span class="kn">import</span> <span class="n">emptyvalidator</span>
+<span class="kn">from</span> <span class="nn">pywps.validator</span> <span class="kn">import</span> <span class="n">get_validator</span>
+<span class="kn">from</span> <span class="nn">pywps.validator.literalvalidator</span> <span class="kn">import</span> <span class="n">validate_anyvalue</span><span class="p">,</span>\
+    <span class="n">validate_allowed_values</span>
+<span class="kn">from</span> <span class="nn">pywps.validator.allowed_value</span> <span class="kn">import</span> <span class="n">ALLOWEDVALUETYPE</span>
+<span class="kn">from</span> <span class="nn">pywps.exceptions</span> <span class="kn">import</span> <span class="n">InvalidParameterValue</span>
+<span class="kn">import</span> <span class="nn">base64</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+
+<span class="n">_SOURCE_TYPE</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;SOURCE_TYPE&#39;</span><span class="p">,</span> <span class="s1">&#39;MEMORY, FILE, STREAM, DATA&#39;</span><span class="p">)</span>
+<span class="n">SOURCE_TYPE</span> <span class="o">=</span> <span class="n">_SOURCE_TYPE</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+<div class="viewcode-block" id="IOHandler"><a class="viewcode-back" href="../../../api.html#pywps.inout.basic.IOHandler">[docs]</a><span class="k">class</span> <span class="nc">IOHandler</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Basic IO class. Provides functions, to accept input data in file,</span>
+<span class="sd">    memory object and stream object and give them out in all three types</span>
+
+<span class="sd">    &gt;&gt;&gt; # setting up </span>
+<span class="sd">    &gt;&gt;&gt; import os</span>
+<span class="sd">    &gt;&gt;&gt; from io import RawIOBase</span>
+<span class="sd">    &gt;&gt;&gt; from io import FileIO</span>
+<span class="sd">    &gt;&gt;&gt; import types</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; ioh_file = IOHandler(workdir=tmp)</span>
+<span class="sd">    &gt;&gt;&gt; assert isinstance(ioh_file, IOHandler)</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; # Create test file input</span>
+<span class="sd">    &gt;&gt;&gt; fileobj = open(os.path.join(tmp, &#39;myfile.txt&#39;), &#39;w&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; fileobj.write(&#39;ASDF ASFADSF ASF ASF ASDF ASFASF&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; fileobj.close()</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; # testing file object on input</span>
+<span class="sd">    &gt;&gt;&gt; ioh_file.file = fileobj.name</span>
+<span class="sd">    &gt;&gt;&gt; assert ioh_file.source_type == SOURCE_TYPE.FILE</span>
+<span class="sd">    &gt;&gt;&gt; file = ioh_file.file</span>
+<span class="sd">    &gt;&gt;&gt; stream = ioh_file.stream</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; assert file == fileobj.name</span>
+<span class="sd">    &gt;&gt;&gt; assert isinstance(stream, RawIOBase)</span>
+<span class="sd">    &gt;&gt;&gt; # skipped assert isinstance(ioh_file.memory_object, POSH)</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; # testing stream object on input</span>
+<span class="sd">    &gt;&gt;&gt; ioh_stream = IOHandler(workdir=tmp)</span>
+<span class="sd">    &gt;&gt;&gt; assert ioh_stream.workdir == tmp</span>
+<span class="sd">    &gt;&gt;&gt; ioh_stream.stream = FileIO(fileobj.name,&#39;r&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; assert ioh_stream.source_type == SOURCE_TYPE.STREAM</span>
+<span class="sd">    &gt;&gt;&gt; file = ioh_stream.file</span>
+<span class="sd">    &gt;&gt;&gt; stream = ioh_stream.stream</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; assert open(file).read() == ioh_file.stream.read()</span>
+<span class="sd">    &gt;&gt;&gt; assert isinstance(stream, RawIOBase)</span>
+<span class="sd">    &gt;&gt;&gt; # skipped assert isinstance(ioh_stream.memory_object, POSH)</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; # testing in memory object object on input</span>
+<span class="sd">    &gt;&gt;&gt; # skipped ioh_mo = IOHandler(workdir=tmp)</span>
+<span class="sd">    &gt;&gt;&gt; # skipped ioh_mo.memory_object = POSH</span>
+<span class="sd">    &gt;&gt;&gt; # skipped assert ioh_mo.source_type == SOURCE_TYPE.MEMORY</span>
+<span class="sd">    &gt;&gt;&gt; # skipped file = ioh_mo.file</span>
+<span class="sd">    &gt;&gt;&gt; # skipped stream = ioh_mo.stream</span>
+<span class="sd">    &gt;&gt;&gt; # skipped posh = ioh_mo.memory_object</span>
+<span class="sd">    &gt;&gt;&gt; #</span>
+<span class="sd">    &gt;&gt;&gt; # skipped assert open(file).read() == ioh_file.stream.read()</span>
+<span class="sd">    &gt;&gt;&gt; # skipped assert isinstance(ioh_mo.stream, RawIOBase)</span>
+<span class="sd">    &gt;&gt;&gt; # skipped assert isinstance(ioh_mo.memory_object, POSH)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workdir</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">MODE</span><span class="o">.</span><span class="n">NONE</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source_type</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tempfile</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workdir</span> <span class="o">=</span> <span class="n">workdir</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">valid_mode</span> <span class="o">=</span> <span class="n">mode</span>
+
+    <span class="k">def</span> <span class="nf">_check_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Validate this input usig given validator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">validate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validator</span>
+        <span class="n">_valid</span> <span class="o">=</span> <span class="n">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_mode</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_valid</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidParameterValue</span><span class="p">(</span><span class="s1">&#39;Input data not valid using &#39;</span>
+                                        <span class="s1">&#39;mode </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">valid_mode</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">set_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set source as file name&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source_type</span> <span class="o">=</span> <span class="n">SOURCE_TYPE</span><span class="o">.</span><span class="n">FILE</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_valid</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">set_workdir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workdirpath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set working temporary directory for files to be stored in&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">workdirpath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">workdirpath</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">workdirpath</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_workdir</span> <span class="o">=</span> <span class="n">workdirpath</span>
+
+
+    <span class="k">def</span> <span class="nf">set_memory_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memory_object</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set source as in memory object&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source_type</span> <span class="o">=</span> <span class="n">SOURCE_TYPE</span><span class="o">.</span><span class="n">MEMORY</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_valid</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">set_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stream</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set source as stream object&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source_type</span> <span class="o">=</span> <span class="n">SOURCE_TYPE</span><span class="o">.</span><span class="n">STREAM</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">stream</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_valid</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set source as simple datatype e.g. string, number&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source_type</span> <span class="o">=</span> <span class="n">SOURCE_TYPE</span><span class="o">.</span><span class="n">DATA</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_valid</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">set_base64</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set data encoded in base64&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_valid</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">get_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get source as file name&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_type</span> <span class="o">==</span> <span class="n">SOURCE_TYPE</span><span class="o">.</span><span class="n">FILE</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_type</span> <span class="o">==</span> <span class="n">SOURCE_TYPE</span><span class="o">.</span><span class="n">STREAM</span> <span class="ow">or</span>\
+             <span class="bp">self</span><span class="o">.</span><span class="n">source_type</span> <span class="o">==</span> <span class="n">SOURCE_TYPE</span><span class="o">.</span><span class="n">DATA</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tempfile</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tempfile</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="p">(</span><span class="n">opening</span><span class="p">,</span> <span class="n">stream_file_name</span><span class="p">)</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">(</span><span class="nb">dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">workdir</span><span class="p">)</span>
+                <span class="n">stream_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">stream_file_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_type</span> <span class="o">==</span> <span class="n">SOURCE_TYPE</span><span class="o">.</span><span class="n">STREAM</span><span class="p">:</span>
+                    <span class="n">stream_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">stream_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
+
+                <span class="n">stream_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_tempfile</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">stream_file_name</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tempfile</span>
+
+    <span class="k">def</span> <span class="nf">get_workdir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return working directory name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workdir</span>
+
+    <span class="k">def</span> <span class="nf">get_memory_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get source as memory object&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;setmemory_object not implemented, Soeren promissed to implement at WPS Workshop on 23rd of January 2014&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get source as stream object&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_type</span> <span class="o">==</span> <span class="n">SOURCE_TYPE</span><span class="o">.</span><span class="n">FILE</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">FileIO</span>
+            <span class="k">return</span> <span class="n">FileIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">closefd</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_type</span> <span class="o">==</span> <span class="n">SOURCE_TYPE</span><span class="o">.</span><span class="n">STREAM</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_type</span> <span class="o">==</span> <span class="n">SOURCE_TYPE</span><span class="o">.</span><span class="n">DATA</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">StringIO</span><span class="p">(</span><span class="n">text_type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get source as simple data object&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_type</span> <span class="o">==</span> <span class="n">SOURCE_TYPE</span><span class="o">.</span><span class="n">FILE</span><span class="p">:</span>
+            <span class="n">file_handler</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">file_handler</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="n">file_handler</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">content</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_type</span> <span class="o">==</span> <span class="n">SOURCE_TYPE</span><span class="o">.</span><span class="n">STREAM</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_type</span> <span class="o">==</span> <span class="n">SOURCE_TYPE</span><span class="o">.</span><span class="n">DATA</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">validator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the function suitable for validation</span>
+<span class="sd">        This method should be overridden by class children</span>
+
+<span class="sd">        :return: validating function</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">emptyvalidator</span>
+
+    <span class="k">def</span> <span class="nf">get_base64</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="c1"># Properties</span>
+    <span class="nb">file</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="n">get_file</span><span class="p">,</span> <span class="n">fset</span><span class="o">=</span><span class="n">set_file</span><span class="p">)</span>
+    <span class="n">memory_object</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="n">get_memory_object</span><span class="p">,</span> <span class="n">fset</span><span class="o">=</span><span class="n">set_memory_object</span><span class="p">)</span>
+    <span class="n">stream</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="n">get_stream</span><span class="p">,</span> <span class="n">fset</span><span class="o">=</span><span class="n">set_stream</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="n">get_data</span><span class="p">,</span> <span class="n">fset</span><span class="o">=</span><span class="n">set_data</span><span class="p">)</span>
+    <span class="n">base64</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="n">get_base64</span><span class="p">,</span> <span class="n">fset</span><span class="o">=</span><span class="n">set_base64</span><span class="p">)</span>
+    <span class="n">workdir</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="n">get_workdir</span><span class="p">,</span> <span class="n">fset</span><span class="o">=</span><span class="n">set_workdir</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">SimpleHandler</span><span class="p">(</span><span class="n">IOHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Data handler for Literal In- and Outputs</span>
+
+<span class="sd">    &gt;&gt;&gt; class Int_type(object):</span>
+<span class="sd">    ...     @staticmethod</span>
+<span class="sd">    ...     def convert(value): return int(value)</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; class MyValidator(object):</span>
+<span class="sd">    ...     @staticmethod</span>
+<span class="sd">    ...     def validate(inpt): return 0 &lt; inpt.data &lt; 3</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; inpt = SimpleHandler(data_type = Int_type)</span>
+<span class="sd">    &gt;&gt;&gt; inpt.validator = MyValidator</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; inpt.data = 1</span>
+<span class="sd">    &gt;&gt;&gt; inpt.validator.validate(inpt)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; inpt.data = 5</span>
+<span class="sd">    &gt;&gt;&gt; inpt.validator.validate(inpt)</span>
+<span class="sd">    False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workdir</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">MODE</span><span class="o">.</span><span class="n">NONE</span><span class="p">):</span>
+        <span class="n">IOHandler</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workdir</span><span class="o">=</span><span class="n">workdir</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span> <span class="o">=</span> <span class="n">data_type</span>
+
+    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">IOHandler</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set data value. input data are converted into target format</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">convert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_type</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+        <span class="n">IOHandler</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">fget</span><span class="o">=</span><span class="n">get_data</span><span class="p">,</span> <span class="n">fset</span><span class="o">=</span><span class="n">set_data</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">BasicIO</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Basic Input or Ouput class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">abstract</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">identifier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">title</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">abstract</span> <span class="o">=</span> <span class="n">abstract</span>
+
+<span class="k">class</span> <span class="nc">BasicLiteral</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Basic literal input/output class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;integer&quot;</span><span class="p">,</span> <span class="n">uoms</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">data_type</span> <span class="ow">in</span> <span class="n">LITERAL_DATA_TYPES</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span> <span class="o">=</span> <span class="n">data_type</span>
+        <span class="c1"># list of uoms</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uoms</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># current uom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_uom</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c1"># add all uoms (upcasting to UOM)</span>
+        <span class="k">if</span> <span class="n">uoms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">uom</span> <span class="ow">in</span> <span class="n">uoms</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">uom</span><span class="p">,</span> <span class="n">UOM</span><span class="p">):</span>
+                    <span class="n">uom</span> <span class="o">=</span> <span class="n">UOM</span><span class="p">(</span><span class="n">uom</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">uoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">uom</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">uoms</span><span class="p">:</span>
+            <span class="c1"># default/current uom</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">uom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">uom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uom</span>
+
+    <span class="nd">@uom.setter</span>
+    <span class="k">def</span> <span class="nf">uom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uom</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_uom</span> <span class="o">=</span> <span class="n">uom</span>
+
+
+<span class="k">class</span> <span class="nc">BasicComplex</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Basic complex input/output class</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">supported_formats</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_supported_formats</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">supported_formats</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">supported_formats</span> <span class="o">=</span> <span class="n">supported_formats</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_formats</span><span class="p">:</span>
+            <span class="c1"># not an empty list, set the default/current format to the first</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span> <span class="o">=</span> <span class="n">supported_formats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mime_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param mime_type: given mimetype</span>
+<span class="sd">        :return: Format</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">frmt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_formats</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">frmt</span><span class="o">.</span><span class="n">mime_type</span> <span class="o">==</span> <span class="n">mime_type</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">frmt</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">validator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the proper validator for given data_format</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="o">.</span><span class="n">validate</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">supported_formats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_supported_formats</span>
+
+    <span class="nd">@supported_formats.setter</span>
+    <span class="k">def</span> <span class="nf">supported_formats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">supported_formats</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Setter of supported formats</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">set_format_validator</span><span class="p">(</span><span class="n">supported_format</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">supported_format</span><span class="o">.</span><span class="n">validate</span> <span class="ow">or</span> \
+               <span class="n">supported_format</span><span class="o">.</span><span class="n">validate</span> <span class="o">==</span> <span class="n">emptyvalidator</span><span class="p">:</span>
+                <span class="n">supported_format</span><span class="o">.</span><span class="n">validate</span> <span class="o">=</span>\
+                    <span class="n">get_validator</span><span class="p">(</span><span class="n">supported_format</span><span class="o">.</span><span class="n">mime_type</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">supported_format</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_supported_formats</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">set_format_validator</span><span class="p">,</span> <span class="n">supported_formats</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">data_format</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span>
+
+
+    <span class="nd">@data_format.setter</span>
+    <span class="k">def</span> <span class="nf">data_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_format</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;self data_format setter</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_supported</span><span class="p">(</span><span class="n">data_format</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span> <span class="o">=</span> <span class="n">data_format</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">data_format</span><span class="o">.</span><span class="n">validate</span> <span class="ow">or</span>\
+                <span class="n">data_format</span><span class="o">.</span><span class="n">validate</span> <span class="o">==</span> <span class="n">emptyvalidator</span><span class="p">:</span>
+                <span class="n">data_format</span><span class="o">.</span><span class="n">validate</span> <span class="o">=</span> <span class="n">get_validator</span><span class="p">(</span><span class="n">data_format</span><span class="o">.</span><span class="n">mime_type</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidParameterValue</span><span class="p">(</span><span class="s2">&quot;Requested format &quot;</span>
+                                        <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2"> not supported&quot;</span> <span class="o">%</span>\
+                                        <span class="p">(</span><span class="n">data_format</span><span class="o">.</span><span class="n">mime_type</span><span class="p">,</span>
+                                         <span class="n">data_format</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span>
+                                         <span class="n">data_format</span><span class="o">.</span><span class="n">schema</span><span class="p">),</span>
+                                        <span class="s1">&#39;mimeType&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_is_supported</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_format</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_formats</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">frmt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_formats</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">frmt</span><span class="o">.</span><span class="n">same_as</span><span class="p">(</span><span class="n">data_format</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="bp">True</span>
+
+        <span class="k">return</span> <span class="bp">False</span>
+
+
+
+<span class="k">class</span> <span class="nc">BasicBoundingBox</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Basic BoundingBox input/output class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crss</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">dimensions</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crss</span> <span class="o">=</span> <span class="n">crss</span> <span class="ow">or</span> <span class="p">[</span><span class="s1">&#39;epsg:4326&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crss</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">dimensions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ll</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ur</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">class</span> <span class="nc">LiteralInput</span><span class="p">(</span><span class="n">BasicIO</span><span class="p">,</span> <span class="n">BasicLiteral</span><span class="p">,</span> <span class="n">SimpleHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;LiteralInput input abstract class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">abstract</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;integer&quot;</span><span class="p">,</span> <span class="n">workdir</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">allowed_values</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">uoms</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">MODE</span><span class="o">.</span><span class="n">NONE</span><span class="p">):</span>
+        <span class="n">BasicIO</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">abstract</span><span class="p">)</span>
+        <span class="n">BasicLiteral</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="p">,</span> <span class="n">uoms</span><span class="p">)</span>
+        <span class="n">SimpleHandler</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workdir</span><span class="p">,</span> <span class="n">data_type</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">any_value</span> <span class="o">=</span> <span class="n">is_anyvalue</span><span class="p">(</span><span class="n">allowed_values</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allowed_values</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">any_value</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">allowed_values</span> <span class="o">=</span> <span class="n">make_allowedvalues</span><span class="p">(</span><span class="n">allowed_values</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">validator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get validator for any value as well as allowed_values</span>
+<span class="sd">        :rtype: function</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">any_value</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">validate_anyvalue</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">validate_allowed_values</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get JSON representation of the input</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;identifier&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+            <span class="s1">&#39;abstract&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">abstract</span><span class="p">,</span>
+            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;literal&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;data_type&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span><span class="p">,</span>
+            <span class="s1">&#39;workdir&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">workdir</span><span class="p">,</span>
+            <span class="s1">&#39;allowed_values&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">value</span><span class="o">.</span><span class="n">json</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowed_values</span><span class="p">],</span>
+            <span class="s1">&#39;uoms&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">uoms</span><span class="p">,</span>
+            <span class="s1">&#39;uom&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">uom</span><span class="p">,</span>
+            <span class="s1">&#39;mode&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_mode</span><span class="p">,</span>
+            <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+        <span class="p">}</span>
+
+
+<span class="k">class</span> <span class="nc">LiteralOutput</span><span class="p">(</span><span class="n">BasicIO</span><span class="p">,</span> <span class="n">BasicLiteral</span><span class="p">,</span> <span class="n">SimpleHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Basic LiteralOutput class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">abstract</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">data_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">workdir</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">uoms</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">mode</span><span class="o">=</span><span class="n">MODE</span><span class="o">.</span><span class="n">NONE</span><span class="p">):</span>
+        <span class="n">BasicIO</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">abstract</span><span class="p">)</span>
+        <span class="n">BasicLiteral</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="p">,</span> <span class="n">uoms</span><span class="p">)</span>
+        <span class="n">SimpleHandler</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workdir</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
+                <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_storage</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">storage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_storage</span>
+
+    <span class="nd">@storage.setter</span>
+    <span class="k">def</span> <span class="nf">storage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">storage</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_storage</span> <span class="o">=</span> <span class="n">storage</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">validator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get validator for any value as well as allowed_values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">validate_anyvalue</span>
+
+<span class="k">class</span> <span class="nc">BBoxInput</span><span class="p">(</span><span class="n">BasicIO</span><span class="p">,</span> <span class="n">BasicBoundingBox</span><span class="p">,</span> <span class="n">IOHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Basic Bounding box input abstract class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">abstract</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">crss</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+            <span class="n">dimensions</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">workdir</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">MODE</span><span class="o">.</span><span class="n">NONE</span><span class="p">):</span>
+        <span class="n">BasicIO</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">abstract</span><span class="p">)</span>
+        <span class="n">BasicBoundingBox</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crss</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">)</span>
+        <span class="n">IOHandler</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workdir</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get JSON representation of the input. It returns following keys in</span>
+<span class="sd">        the JSON object:</span>
+
+<span class="sd">            * identifier</span>
+<span class="sd">            * title</span>
+<span class="sd">            * abstract</span>
+<span class="sd">            * type</span>
+<span class="sd">            * crs</span>
+<span class="sd">            * bbox</span>
+<span class="sd">            * dimensions</span>
+<span class="sd">            * workdir</span>
+<span class="sd">            * mode</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;identifier&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+            <span class="s1">&#39;abstract&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">abstract</span><span class="p">,</span>
+            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;bbox&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;crs&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">crss</span><span class="p">,</span>
+            <span class="s1">&#39;bbox&#39;</span><span class="p">:</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ll</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ur</span><span class="p">),</span>
+            <span class="s1">&#39;dimensions&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span>
+            <span class="s1">&#39;workdir&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">workdir</span><span class="p">,</span>
+            <span class="s1">&#39;mode&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_mode</span>
+        <span class="p">}</span>
+
+
+<span class="k">class</span> <span class="nc">BBoxOutput</span><span class="p">(</span><span class="n">BasicIO</span><span class="p">,</span> <span class="n">BasicBoundingBox</span><span class="p">,</span> <span class="n">SimpleHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Basic BoundingBox output class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">abstract</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">crss</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+            <span class="n">dimensions</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">workdir</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">MODE</span><span class="o">.</span><span class="n">NONE</span><span class="p">):</span>
+        <span class="n">BasicIO</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">abstract</span><span class="p">)</span>
+        <span class="n">BasicBoundingBox</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crss</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">)</span>
+        <span class="n">SimpleHandler</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workdir</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_storage</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">storage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_storage</span>
+
+    <span class="nd">@storage.setter</span>
+    <span class="k">def</span> <span class="nf">storage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">storage</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_storage</span> <span class="o">=</span> <span class="n">storage</span>
+
+
+<span class="k">class</span> <span class="nc">ComplexInput</span><span class="p">(</span><span class="n">BasicIO</span><span class="p">,</span> <span class="n">BasicComplex</span><span class="p">,</span> <span class="n">IOHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Complex input abstract class</span>
+
+<span class="sd">    &gt;&gt;&gt; ci = ComplexInput()</span>
+<span class="sd">    &gt;&gt;&gt; ci.validator = 1</span>
+<span class="sd">    &gt;&gt;&gt; ci.validator</span>
+<span class="sd">    1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">abstract</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">workdir</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">supported_formats</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">mode</span><span class="o">=</span><span class="n">MODE</span><span class="o">.</span><span class="n">NONE</span><span class="p">):</span>
+        <span class="n">BasicIO</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">abstract</span><span class="p">)</span>
+        <span class="n">IOHandler</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workdir</span><span class="o">=</span><span class="n">workdir</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+        <span class="n">BasicComplex</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_format</span><span class="p">,</span> <span class="n">supported_formats</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get JSON representation of the input</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;identifier&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+            <span class="s1">&#39;abstract&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">abstract</span><span class="p">,</span>
+            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;complex&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;data_format&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="o">.</span><span class="n">json</span><span class="p">,</span>
+            <span class="s1">&#39;supported_formats&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">frmt</span><span class="o">.</span><span class="n">json</span> <span class="k">for</span> <span class="n">frmt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_formats</span><span class="p">],</span>
+            <span class="s1">&#39;file&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">,</span>
+            <span class="s1">&#39;workdir&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">workdir</span><span class="p">,</span>
+            <span class="s1">&#39;mode&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_mode</span>
+        <span class="p">}</span>
+
+
+<span class="k">class</span> <span class="nc">ComplexOutput</span><span class="p">(</span><span class="n">BasicIO</span><span class="p">,</span> <span class="n">BasicComplex</span><span class="p">,</span> <span class="n">IOHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Complex output abstract class</span>
+
+<span class="sd">    &gt;&gt;&gt; # temporary configuration</span>
+<span class="sd">    &gt;&gt;&gt; import ConfigParser</span>
+<span class="sd">    &gt;&gt;&gt; from pywps.storage import *</span>
+<span class="sd">    &gt;&gt;&gt; config = ConfigParser.RawConfigParser()</span>
+<span class="sd">    &gt;&gt;&gt; config.add_section(&#39;FileStorage&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; config.set(&#39;FileStorage&#39;, &#39;target&#39;, &#39;./&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; config.add_section(&#39;server&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; config.set(&#39;server&#39;, &#39;outputurl&#39;, &#39;http://foo/bar/filestorage&#39;)</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; # create temporary file</span>
+<span class="sd">    &gt;&gt;&gt; tiff_file = open(&#39;file.tiff&#39;, &#39;w&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; tiff_file.write(&quot;AA&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; tiff_file.close()</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; co = ComplexOutput()</span>
+<span class="sd">    &gt;&gt;&gt; co.set_file(&#39;file.tiff&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; fs = FileStorage(config)</span>
+<span class="sd">    &gt;&gt;&gt; co.storage = fs</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; url = co.get_url() # get url, data are stored</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; co.get_stream().read() # get data - nothing is stored</span>
+<span class="sd">    &#39;AA&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">abstract</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">workdir</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">supported_formats</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">mode</span><span class="o">=</span><span class="n">MODE</span><span class="o">.</span><span class="n">NONE</span><span class="p">):</span>
+        <span class="n">BasicIO</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">abstract</span><span class="p">)</span>
+        <span class="n">IOHandler</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workdir</span><span class="o">=</span><span class="n">workdir</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+        <span class="n">BasicComplex</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_format</span><span class="p">,</span> <span class="n">supported_formats</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_storage</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">storage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_storage</span>
+
+    <span class="nd">@storage.setter</span>
+    <span class="k">def</span> <span class="nf">storage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">storage</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_storage</span> <span class="o">=</span> <span class="n">storage</span>
+
+    <span class="k">def</span> <span class="nf">get_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return URL pointing to data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="p">(</span><span class="n">outtype</span><span class="p">,</span> <span class="n">storage</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">url</span>
+
+
+<span class="k">class</span> <span class="nc">UOM</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param uom: unit of measure</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uom</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uom</span> <span class="o">=</span> <span class="n">uom</span>
+
+    <span class="k">def</span> <span class="nf">describe_xml</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="n">OWS</span><span class="o">.</span><span class="n">UOM</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">uom</span>
+        <span class="p">)</span>
+
+        <span class="n">elem</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;{</span><span class="si">%s</span><span class="s1">}reference&#39;</span> <span class="o">%</span> <span class="n">NAMESPACES</span><span class="p">[</span><span class="s1">&#39;ows&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">OGCUNIT</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">uom</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">elem</span>
+
+    <span class="k">def</span> <span class="nf">execute_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">OGCUNIT</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">uom</span><span class="p">]</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="kn">import</span> <span class="nn">os</span>
+    <span class="kn">from</span> <span class="nn">pywps.wpsserver</span> <span class="kn">import</span> <span class="n">temp_dir</span>
+
+    <span class="k">with</span> <span class="n">temp_dir</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+        <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/pywps.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright Copyright (C) 2014-2016 PyWPS Development Team, represented by Jachym Cepicky.This work is licensed under a Creative Commons Attribution 4.0 International License.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

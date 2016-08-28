@@ -1,0 +1,340 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Configuration &mdash; PyWPS 4.0.0-rc1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '4.0.0-rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="PyWPS 4.0.0-rc1 documentation" href="index.html" />
+    <link rel="next" title="Processes" href="process.html" />
+    <link rel="prev" title="Installation" href="install.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="process.html" title="Processes"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="install.html" title="Installation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="configuration">
+<span id="id1"></span><h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h1>
+<p>PyWPS is configured using a configuration file. The file uses the
+<a class="reference external" href="https://wiki.python.org/moin/ConfigParserExamples">ConfigParser</a> format.</p>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 4.0.0.</span></p>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Compatibility with PyWPS 3.x: major changes have been made
+to the config file in order to allow for shared configurations with <a class="reference external" href="http://pycsw.org/">PyCSW</a> and other projects.</p>
+</div>
+<p>The configuration file has 3 sections:</p>
+<blockquote>
+<div><ul class="simple">
+<li><cite>metadata:main</cite> for the server metadata inputs</li>
+<li><cite>server</cite> for server configuration</li>
+<li><cite>grass</cite> for <em>optional</em> configuration to support <a class="reference external" href="http://grass.osgeo.org">GRASS GIS</a></li>
+</ul>
+</div></blockquote>
+<p>PyWPS ships with a sample configuration file (<code class="docutils literal"><span class="pre">default-sample.cfg</span></code>).
+A similar file is also available in the <cite>demo</cite> service as
+described in <a class="reference internal" href="install.html#demo"><span>The demo service and its sample processes</span></a> section.</p>
+<p>Copy the file to <code class="docutils literal"><span class="pre">default.cfg</span></code> and edit the following:</p>
+<div class="section" id="metadata-main">
+<h2>[metadata:main]<a class="headerlink" href="#metadata-main" title="Permalink to this headline">¶</a></h2>
+<p>The <cite>[metadata:main]</cite> section was designed according to the <a class="reference external" href="http://docs.pycsw.org/en/latest/configuration.html">PyCSW project
+configuration file</a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">identification_title:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">the title of the service</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">identification_abstract:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">some descriptive text about the service</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">identification_keywords:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">comma delimited list of keywords about the service</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">identification_keywords_type:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">keyword type as per the <a class="reference external" href="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode">ISO 19115 MD_KeywordTypeCode codelist</a>).
+Accepted values are <code class="docutils literal"><span class="pre">discipline</span></code>, <code class="docutils literal"><span class="pre">temporal</span></code>, <code class="docutils literal"><span class="pre">place</span></code>, <code class="docutils literal"><span class="pre">theme</span></code>,
+<code class="docutils literal"><span class="pre">stratum</span></code></td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">identification_fees:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">fees associated with the service</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">identification_accessconstraints:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">access constraints associated with the service</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">provider_name:</th><td class="field-body">the name of the service provider</td>
+</tr>
+<tr class="field-even field"><th class="field-name">provider_url:</th><td class="field-body">the URL of the service provider</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">contact_name:</th><td class="field-body">the name of the provider contact</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">contact_position:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">the position title of the provider contact</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">contact_address:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">the address of the provider contact</td>
+</tr>
+<tr class="field-even field"><th class="field-name">contact_city:</th><td class="field-body">the city of the provider contact</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">contact_stateorprovince:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">the province or territory of the provider contact</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">contact_postalcode:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">the postal code of the provider contact</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">contact_country:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">the country of the provider contact</td>
+</tr>
+<tr class="field-even field"><th class="field-name">contact_phone:</th><td class="field-body">the phone number of the provider contact</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">contact_fax:</th><td class="field-body">the facsimile number of the provider contact</td>
+</tr>
+<tr class="field-even field"><th class="field-name">contact_email:</th><td class="field-body">the email address of the provider contact</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">contact_url:</th><td class="field-body">the URL to more information about the provider contact</td>
+</tr>
+<tr class="field-even field"><th class="field-name">contact_hours:</th><td class="field-body">the hours of service to contact the provider</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">contact_instructions:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">the how to contact the provider contact</td>
+</tr>
+<tr class="field-even field"><th class="field-name">contact_role:</th><td class="field-body">the role of the provider contact as per the <a class="reference external" href="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode">ISO 19115 CI_RoleCode codelist</a>).
+Accepted values are <code class="docutils literal"><span class="pre">author</span></code>, <code class="docutils literal"><span class="pre">processor</span></code>, <code class="docutils literal"><span class="pre">publisher</span></code>, <code class="docutils literal"><span class="pre">custodian</span></code>,
+<code class="docutils literal"><span class="pre">pointOfContact</span></code>, <code class="docutils literal"><span class="pre">distributor</span></code>, <code class="docutils literal"><span class="pre">user</span></code>, <code class="docutils literal"><span class="pre">resourceProvider</span></code>,
+<code class="docutils literal"><span class="pre">originator</span></code>, <code class="docutils literal"><span class="pre">owner</span></code>, <code class="docutils literal"><span class="pre">principalInvestigator</span></code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="server">
+<h2>[server]<a class="headerlink" href="#server" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">url:</th><td class="field-body">the URL of the WPS service endpoint</td>
+</tr>
+<tr class="field-even field"><th class="field-name">language:</th><td class="field-body">the ISO 639-1 language and ISO 3166-1 alpha2 country code of the service
+(e.g. <code class="docutils literal"><span class="pre">en-CA</span></code>, <code class="docutils literal"><span class="pre">fr-CA</span></code>, <code class="docutils literal"><span class="pre">en-US</span></code>)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">encoding:</th><td class="field-body">the content type encoding (e.g. <code class="docutils literal"><span class="pre">ISO-8859-1</span></code>, see
+<a class="reference external" href="https://docs.python.org/2/library/codecs.html#standard-encodings">https://docs.python.org/2/library/codecs.html#standard-encodings</a>).  Default
+value is &#8216;UTF-8&#8217;</td>
+</tr>
+<tr class="field-even field"><th class="field-name">loglevel:</th><td class="field-body">the logging level (see
+<a class="reference external" href="http://docs.python.org/library/logging.html#logging-levels">http://docs.python.org/library/logging.html#logging-levels</a>)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">logfile:</th><td class="field-body">the full file path to the log file</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">parallelprocesses:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">maximum number of parallel running processes - set this number carefully.
+The effective number of parallel running processes is limited by the number
+of cores  in the processor of the hosting machine. As well, speed and
+response time of hard drives impact ultimate processing performance. A
+reasonable number of parallel running processes is not higher than the
+number of processor cores.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">logdatabase:</th><td class="field-body">SQLite3 file, where the login about requests/responses is to be stored. It
+can be set to <cite>&#8221;:memory:&#8221;</cite> to store the database in memory.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">maxrequestsize:</th><td class="field-body">maximal request size. 0 for no limit</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">workdir:</th><td class="field-body">a directory to store all temporary files (which should be always deleted,
+once the process is finished).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">outputpath:</th><td class="field-body">server path where to store output files.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">outputurl:</th><td class="field-body">corresponding URL</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p><cite>outputpath</cite> and <cite>outputurl</cite> must corespond. <cite>outputpath</cite> is the name
+of the resulting target directory, where all output data files are
+stored (with unique names). <cite>outputurl</cite> is the corresponding full URL,
+which is targeting to <cite>outputpath</cite> directory.</p>
+<p class="last">Example: <cite>outputpath=/var/www/wps/outputs</cite> shall correspond with
+<cite>outputurl=http://foo.bar/wps/outputs</cite></p>
+</div>
+</div>
+<div class="section" id="grass">
+<h2>[grass]<a class="headerlink" href="#grass" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">gisbase:</th><td class="field-body">directory of the GRASS GIS instalation, refered as <a class="reference external" href="https://grass.osgeo.org/grass73/manuals/variables.html">GISBASE</a></td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="sample-file">
+<h3>Sample file<a class="headerlink" href="#sample-file" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre>[server]
+encoding=utf-8
+language=en-US
+url=http://localhost/wps
+maxoperations=30
+maxinputparamlength=1024
+maxsingleinputsize=
+maxrequestsize=3mb
+temp_path=/tmp/pywps/
+processes_path=
+outputurl=/data/
+outputpath=/tmp/outputs/
+logfile=
+loglevel=INFO
+logdatabase=
+workdir=
+
+[metadata:main]
+identification_title=PyWPS Processing Service
+identification_abstract=PyWPS is an implementation of the Web Processing Service standard from the Open Geospatial Consortium. PyWPS is written in Python.
+identification_keywords=PyWPS,WPS,OGC,processing
+identification_keywords_type=theme
+identification_fees=NONE
+identification_accessconstraints=NONE
+provider_name=Organization Name
+provider_url=http://pywps.org/
+contact_name=Lastname, Firstname
+contact_position=Position Title
+contact_address=Mailing Address
+contact_city=City
+contact_stateorprovince=Administrative Area
+contact_postalcode=Zip or Postal Code
+contact_country=Country
+contact_phone=+xx-xxx-xxx-xxxx
+contact_fax=+xx-xxx-xxx-xxxx
+contact_email=Email Address
+contact_url=Contact URL
+contact_hours=Hours of Service
+contact_instructions=During hours of service.  Off on weekends.
+contact_role=pointOfContact
+
+[grass]
+gisbase=/usr/local/grass-7.3.svn/
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/pywps.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Configuration</a><ul>
+<li><a class="reference internal" href="#metadata-main">[metadata:main]</a></li>
+<li><a class="reference internal" href="#server">[server]</a></li>
+<li><a class="reference internal" href="#grass">[grass]</a><ul>
+<li><a class="reference internal" href="#sample-file">Sample file</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="install.html"
+                        title="previous chapter">Installation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="process.html"
+                        title="next chapter">Processes</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/configuration.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="process.html" title="Processes"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="install.html" title="Installation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright Copyright (C) 2014-2016 PyWPS Development Team, represented by Jachym Cepicky.This work is licensed under a Creative Commons Attribution 4.0 International License.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

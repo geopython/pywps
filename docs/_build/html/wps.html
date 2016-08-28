@@ -1,0 +1,354 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>OGC Web Processing Service (OGC WPS) &mdash; PyWPS 4.0.0-rc1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '4.0.0-rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="PyWPS 4.0.0-rc1 documentation" href="index.html" />
+    <link rel="next" title="PyWPS" href="pywps.html" />
+    <link rel="prev" title="Welcome to the PyWPS-4 documentation!" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pywps.html" title="PyWPS"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to the PyWPS-4 documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="ogc-web-processing-service-ogc-wps">
+<span id="wps"></span><h1>OGC Web Processing Service (OGC WPS)<a class="headerlink" href="#ogc-web-processing-service-ogc-wps" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="http://opengeospatial.org/standards">OGC Web Processing Service</a> standard
+provides rules for standardizing how inputs and outputs (requests and
+responses) for geospatial processing services. The standard also defines how a
+client can request the execution of a process, and how the output from the
+process is handled. It defines an interface that facilitates the publishing of
+geospatial processes and clients discovery of and binding to those processes.
+The data required by the WPS can be delivered across a network or they can be
+available at the server.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This description is mainly refering to 1.0.0 version standard, since
+PyWPS implements this version only. There is also 2.0.0 version, which
+we are about to implement in near future.</p>
+</div>
+<p>WPS is intended to be state-less protocol (like any OGC services). For every
+request-response action, the negotiation between the server and the client has
+to start. There is no official way, how to make the server &#8220;remember&#8221;, what was
+before, there is no communication history between the server and the client.</p>
+<div class="section" id="process">
+<h2>Process<a class="headerlink" href="#process" title="Permalink to this headline">¶</a></h2>
+<p>A process <cite>p</cite> is a function that for each input returns a corresponding output</p>
+<div class="math">
+\[p: X \rightarrow Y\]</div>
+<p>where <cite>X</cite> denotes the domain of arguments <cite>x</cite> and <cite>Y</cite> denotes the co-domain of values <cite>y</cite>.</p>
+<p>Within the specification, process arguments are referred to as <em>process inputs</em> and result
+values are referred to as <em>process outputs</em>. Processes that have no process inputs represent
+value generators that deliver constant or random process outputs.</p>
+<p><em>Process</em> is just some geospatial operation, which has it&#8217;s in- and outputs and
+which is deployed on the server. It can be something relatively simple (adding
+two raster maps together) or very complicated (climate change model). It can
+take short time (seconds) or long (days) to be calculated. Process is, what you,
+as PyWPS user, want to expose to other people and let their data processed.</p>
+<p>Every process has</p>
+<dl class="docutils">
+<dt>Identifier</dt>
+<dd>Unique process identifier</dd>
+<dt>Title</dt>
+<dd>Human readable title</dd>
+<dt>Abstract</dt>
+<dd>Longer description of the process, what it does, how is it supposed to be
+used</dd>
+</dl>
+<p>And list of in- and outputs.</p>
+</div>
+<div class="section" id="data-in-and-outputs">
+<h2>Data in- and outputs<a class="headerlink" href="#data-in-and-outputs" title="Permalink to this headline">¶</a></h2>
+<p>OGC WPS defines 3 types of data inputs and data outputs <em>LiteralData</em>,
+<em>ComplexData</em> and <em>BoundingBoxData</em>.</p>
+<p>All data types do need to have following attributes:</p>
+<dl class="docutils">
+<dt>Identifier</dt>
+<dd>Unique input identifier</dd>
+<dt>Title</dt>
+<dd>Human readable title</dd>
+<dt>Abstract</dt>
+<dd>Longer description of data input or output, so that the user could get
+oriented.</dd>
+<dt>minOccurs</dt>
+<dd>Minimal occurrence of the input (e.g. there can be more bands of raster file
+and they all can be passed as input using the same identifier)</dd>
+<dt>maxOccurs</dt>
+<dd>Maxium number of times, the input or output is present</dd>
+</dl>
+<p>Depending on the data type (Literal, Complex, BoundingBox), other attributes
+might occur too.</p>
+<div class="section" id="literaldata">
+<h3>LiteralData<a class="headerlink" href="#literaldata" title="Permalink to this headline">¶</a></h3>
+<p>Literal data is any text string, usually short. It&#8217;s used for passing single
+parameters like numbers or text parameters. WPS enables to the server, to define
+<cite>allowedValues</cite> - list or intervals of allowed values, as well as data type
+(integer, float, string).  Additional attributes can be set, such as <cite>units</cite> or
+<cite>encoding</cite>.</p>
+</div>
+<div class="section" id="complexdata">
+<h3>ComplexData<a class="headerlink" href="#complexdata" title="Permalink to this headline">¶</a></h3>
+<p>Complex data are usually raster or vector files, but basically any (usually
+file based) data, which are usually processed (or result of the process). The
+input can be specified more using <cite>mimeType</cite>, XML <cite>schema</cite> or <cite>encoding</cite> (such
+as <cite>base64</cite> for raster data.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">PyWPS (like every server) supports limited list <cite>mimeTypes</cite>. In case
+you need some new format, just create pull request in our repository.
+Refer <a class="reference internal" href="api.html#pywps.inout.formats.FORMATS" title="pywps.inout.formats.FORMATS"><code class="xref py py-const docutils literal"><span class="pre">pywps.inout.formats.FORMATS</span></code></a> for more details.</p>
+</div>
+<p>Usually, the minimum requirement for input data identification is <cite>mimeType</cite>.
+That usually is <cite>application/gml+xml</cite> for <a class="reference external" href="http://opengeospatial.org/standards/gml">GML</a>-encoded vector files, <cite>image/tiff;
+subtype=geotiff</cite> for raster files. The input or output can also be result of any
+OGC OWS service.</p>
+</div>
+<div class="section" id="boundingboxdata">
+<h3>BoundingBoxData<a class="headerlink" href="#boundingboxdata" title="Permalink to this headline">¶</a></h3>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p class="last">add reference to OGC OWS Common spec</p>
+</div>
+<p>BoundingBox data are specified in OGC OWS Common specification as two pairs of
+coordinate (for 2D and 3D space). They can either be encoded in WGS84 or EPSG
+code can be passed too. They are intended to be used as definition of the target
+region.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">In real life, BoundingBox data are not that commonly used</p>
+</div>
+</div>
+</div>
+<div class="section" id="passing-data-to-process-instance">
+<h2>Passing data to process instance<a class="headerlink" href="#passing-data-to-process-instance" title="Permalink to this headline">¶</a></h2>
+<p>There are 3 typical ways, how to pass the input data from the client to the
+server:</p>
+<dl class="docutils">
+<dt><strong>Data are on the server already</strong></dt>
+<dd>In the first case, the data are already stored on the server (from the point
+of view of the client). This is the simplest case.</dd>
+<dt><strong>Data are send to the server along with the request</strong></dt>
+<dd>In this case, the data are directly part of the XML encoded document send via
+HTTP POST. Some clients/servers are expecting the data to be inserted in
+<cite>CDATA</cite> section. The data can be text based (JSON), XML based (GML) or even
+raster based - in this case, they are usually encoded using <a class="reference external" href="https://docs.python.org/3/library/base64.html">base64</a>.</dd>
+<dt><strong>Reference link to target service is passed</strong></dt>
+<dd><p class="first">Client does not have to pass the data itself, client can just send reference
+link to target data service (or file). In such case, for example OGC WFS
+<cite>GetFeatureType</cite> URL can be passed and server will download the data
+automatically.</p>
+<p class="last">Although this is usually used for <cite>ComplexData</cite> input type, it can be used
+for literal and bounding box data too.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="sychronous-versus-asynchronous-process-request">
+<h2>Sychronous versus asynchronous process request<a class="headerlink" href="#sychronous-versus-asynchronous-process-request" title="Permalink to this headline">¶</a></h2>
+<p>There are two modes of process instance execution: Synchronous and asynchronous.</p>
+<dl class="docutils">
+<dt>Synchronous mode</dt>
+<dd>The client sends the <cite>Execute</cite> request to the server and waits with open
+server connection, till the process is calculated and final response is
+returned back. This is useful for fast calculations which do not take
+longer then a couple of seconds (<a class="reference external" href="http://httpd.apache.org/docs/2.4/mod/core.html#timeout">Apache2 httpd server uses 300 seconds</a> as default value for ConnectionTimeout).</dd>
+<dt>Asynchronous mode</dt>
+<dd><p class="first">Client sends the <cite>Execute</cite> request with explicit request for asynchronous
+mode. If supported by the process (in PyWPS, we have a configuration for
+that), the server returns back <cite>ProcessAccepted</cite> response immediately with
+URL, where the client can regularly check for <em>process execution status</em>.</p>
+<div class="last admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">As you see, using WPS, the client has to apply <em>pull</em> method for
+the communication with the server. Client has to be the active element
+in the communication - server is just responding to clients request and
+is not actively <em>pushing</em> any information (like it would if e.g. web
+sockets would be implemented).</p>
+</div>
+</dd>
+</dl>
+</div>
+<div class="section" id="process-status">
+<h2>Process status<a class="headerlink" href="#process-status" title="Permalink to this headline">¶</a></h2>
+<p><cite>Process status</cite> is generic status of the process instance, reporting to the
+client, how does the calculation go. There are 4 types of process statuses</p>
+<dl class="docutils">
+<dt>ProcessAccepted</dt>
+<dd>Process was accepted by the server and the process execution will start
+soon.</dd>
+<dt>ProcessStarted</dt>
+<dd>Process calculation has started. The status also contains report about
+<cite>percentDone</cite> - calculation progress and <cite>statusMessage</cite> - text reporting
+current calculation state (example: <em>&#8220;Caculationg buffer&#8221;</em> - 33%).</dd>
+<dt>ProcessFinished</dt>
+<dd>Process instance performed the calculation successfully and the final
+<cite>Execute</cite> response is returned to the client and/or stored on final location</dd>
+<dt>ProcessFailed</dt>
+<dd>There was something wrong with the process instance and the server reports
+<cite>server exception</cite> (see <a class="reference internal" href="exceptions.html#module-pywps.exceptions" title="pywps.exceptions"><code class="xref py py-mod docutils literal"><span class="pre">pywps.exceptions</span></code></a>) along with the message,
+what could possibly go wrong.</dd>
+</dl>
+</div>
+<div class="section" id="request-encoding-http-get-and-post">
+<h2>Request encoding, HTTP GET and POST<a class="headerlink" href="#request-encoding-http-get-and-post" title="Permalink to this headline">¶</a></h2>
+<p>The request can be encoded either using Key-value-pairs (KVP) or as the
+XML-formatted document.</p>
+<dl class="docutils">
+<dt>Key-value-pair</dt>
+<dd><p class="first">is usually sent via <a class="reference external" href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Request_methods">HTTP GET request method</a>
+encoded directly in the URL. The keys and values are separated with <cite>=</cite> sign and
+each pair is separated with <cite>&amp;</cite> sign (with <cite>?</cite> at the beginning of the request.
+Example could be the <em>get capabilities reques</em>:</p>
+<div class="highlight-python"><div class="highlight"><pre>http://server.domain/wps?service=WPS&amp;request=GetCapabilities&amp;version=1.0.0
+</pre></div>
+</div>
+<p class="last">In this example, there are 3 pairs of input parameter: service, request and
+version with values <cite>WPS</cite>, <cite>GetCapabilities</cite> and <cite>1.0.0</cite> respectively.</p>
+</dd>
+<dt>XML</dt>
+<dd><p class="first">is document sent via <a class="reference external" href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Request_methods">HTTP POST request method</a>.
+The XML document can be more rich, having more parameters, better to be
+parsed in complex structures. Client can also encode whole datasets to the
+request, including raster (encoded using base64) or vector data (usually as GML file).:</p>
+<div class="last highlight-python"><div class="highlight"><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;wps:GetCapabilities language=&quot;cz&quot; service=&quot;WPS&quot; xmlns:ows=&quot;http://www.opengis.net/ows/1.1&quot; xmlns:wps=&quot;http://www.opengis.net/wps/1.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xsi:schemaLocation=&quot;http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsGetCapabilities_request.xsd&quot;&gt;
+  &lt;wps:AcceptVersions&gt;
+    &lt;ows:Version&gt;1.0.0&lt;/ows:Version&gt;
+  &lt;/wps:AcceptVersions&gt;
+&lt;/wps:GetCapabilities&gt;
+</pre></div>
+</div>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Even it might be looking more complicated to use XML over KVP, for
+some complex request it usually is more safe and efficient to use XML
+encoding. The KVP way, especially for WPS Execute request can be tricky
+and lead to unpredictable errors.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/pywps.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">OGC Web Processing Service (OGC WPS)</a><ul>
+<li><a class="reference internal" href="#process">Process</a></li>
+<li><a class="reference internal" href="#data-in-and-outputs">Data in- and outputs</a><ul>
+<li><a class="reference internal" href="#literaldata">LiteralData</a></li>
+<li><a class="reference internal" href="#complexdata">ComplexData</a></li>
+<li><a class="reference internal" href="#boundingboxdata">BoundingBoxData</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#passing-data-to-process-instance">Passing data to process instance</a></li>
+<li><a class="reference internal" href="#sychronous-versus-asynchronous-process-request">Sychronous versus asynchronous process request</a></li>
+<li><a class="reference internal" href="#process-status">Process status</a></li>
+<li><a class="reference internal" href="#request-encoding-http-get-and-post">Request encoding, HTTP GET and POST</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to the PyWPS-4 documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="pywps.html"
+                        title="next chapter">PyWPS</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/wps.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pywps.html" title="PyWPS"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to the PyWPS-4 documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright Copyright (C) 2014-2016 PyWPS Development Team, represented by Jachym Cepicky.This work is licensed under a Creative Commons Attribution 4.0 International License.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

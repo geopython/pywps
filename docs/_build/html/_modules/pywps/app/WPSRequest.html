@@ -1,0 +1,736 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pywps.app.WPSRequest &mdash; PyWPS 4.0.0-rc1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '4.0.0-rc1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="PyWPS 4.0.0-rc1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pywps.app.WPSRequest</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">lxml</span>
+<span class="kn">import</span> <span class="nn">lxml.etree</span>
+<span class="kn">from</span> <span class="nn">werkzeug.exceptions</span> <span class="kn">import</span> <span class="n">MethodNotAllowed</span>
+<span class="kn">import</span> <span class="nn">base64</span>
+<span class="kn">from</span> <span class="nn">pywps</span> <span class="kn">import</span> <span class="n">WPS</span>
+<span class="kn">from</span> <span class="nn">pywps._compat</span> <span class="kn">import</span> <span class="n">text_type</span><span class="p">,</span> <span class="n">PY2</span>
+<span class="kn">from</span> <span class="nn">pywps.app.basic</span> <span class="kn">import</span> <span class="n">xpath_ns</span>
+<span class="kn">from</span> <span class="nn">pywps.inout.basic</span> <span class="kn">import</span> <span class="n">LiteralInput</span><span class="p">,</span> <span class="n">ComplexInput</span><span class="p">,</span> <span class="n">BBoxInput</span>
+<span class="kn">from</span> <span class="nn">pywps.exceptions</span> <span class="kn">import</span> <span class="n">NoApplicableCode</span><span class="p">,</span> <span class="n">OperationNotSupported</span><span class="p">,</span> <span class="n">MissingParameterValue</span><span class="p">,</span> <span class="n">VersionNegotiationFailed</span><span class="p">,</span> \
+    <span class="n">InvalidParameterValue</span><span class="p">,</span> <span class="n">FileSizeExceeded</span>
+<span class="kn">from</span> <span class="nn">pywps</span> <span class="kn">import</span> <span class="n">configuration</span>
+<span class="kn">from</span> <span class="nn">pywps._compat</span> <span class="kn">import</span> <span class="n">PY2</span>
+<span class="kn">from</span> <span class="nn">pywps.validator.base</span> <span class="kn">import</span> <span class="n">emptyvalidator</span>
+<span class="kn">from</span> <span class="nn">pywps.validator.mode</span> <span class="kn">import</span> <span class="n">MODE</span>
+<span class="kn">from</span> <span class="nn">pywps.inout.literaltypes</span> <span class="kn">import</span> <span class="n">AnyValue</span><span class="p">,</span> <span class="n">NoValue</span><span class="p">,</span> <span class="n">ValuesReference</span><span class="p">,</span> <span class="n">AllowedValue</span>
+
+<span class="kn">from</span> <span class="nn">pywps.inout.formats</span> <span class="kn">import</span> <span class="n">Format</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+
+
+<div class="viewcode-block" id="WPSRequest"><a class="viewcode-back" href="../../../api.html#pywps.app.WPSRequest">[docs]</a><span class="k">class</span> <span class="nc">WPSRequest</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">http_request</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">http_request</span> <span class="o">=</span> <span class="n">http_request</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">operation</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">language</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identifiers</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">store_execute</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lineage</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">http_request</span><span class="p">:</span>
+            <span class="n">request_parser</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_request_parser_method</span><span class="p">(</span><span class="n">http_request</span><span class="o">.</span><span class="n">method</span><span class="p">)</span>
+            <span class="n">request_parser</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_get_request_parser_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;GET&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_request</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_post_request</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MethodNotAllowed</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_get_request</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;HTTP GET request parser</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># service shall be WPS</span>
+        <span class="n">service</span> <span class="o">=</span> <span class="n">_get_get_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">http_request</span><span class="p">,</span> <span class="s1">&#39;service&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">service</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">service</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s1">&#39;wps&#39;</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">InvalidParameterValue</span><span class="p">(</span>
+                    <span class="s1">&#39;parameter SERVICE [</span><span class="si">%s</span><span class="s1">] not supported&#39;</span> <span class="o">%</span> <span class="n">service</span><span class="p">,</span> <span class="s1">&#39;service&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MissingParameterValue</span><span class="p">(</span><span class="s1">&#39;service&#39;</span><span class="p">,</span> <span class="s1">&#39;service&#39;</span><span class="p">)</span>
+
+        <span class="n">operation</span> <span class="o">=</span> <span class="n">_get_get_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">http_request</span><span class="p">,</span> <span class="s1">&#39;request&#39;</span><span class="p">)</span>
+
+        <span class="n">request_parser</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_request_parser</span><span class="p">(</span><span class="n">operation</span><span class="p">)</span>
+        <span class="n">request_parser</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">http_request</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_post_request</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;HTTP GET request parser</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># check if input file size was not exceeded</span>
+        <span class="n">maxsize</span> <span class="o">=</span> <span class="n">configuration</span><span class="o">.</span><span class="n">get_config_value</span><span class="p">(</span><span class="s1">&#39;server&#39;</span><span class="p">,</span> <span class="s1">&#39;maxrequestsize&#39;</span><span class="p">)</span>
+        <span class="n">maxsize</span> <span class="o">=</span> <span class="n">configuration</span><span class="o">.</span><span class="n">get_size_mb</span><span class="p">(</span><span class="n">maxsize</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">http_request</span><span class="o">.</span><span class="n">content_length</span> <span class="o">&gt;</span> <span class="n">maxsize</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">FileSizeExceeded</span><span class="p">(</span><span class="s1">&#39;File size for input exceeded.&#39;</span>
+                                   <span class="s1">&#39; Maximum request size allowed: </span><span class="si">%i</span><span class="s1"> megabytes&#39;</span> <span class="o">%</span> <span class="n">maxsize</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">doc</span> <span class="o">=</span> <span class="n">lxml</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">http_request</span><span class="o">.</span><span class="n">get_data</span><span class="p">())</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">PY2</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">NoApplicableCode</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">NoApplicableCode</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">operation</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">tag</span>
+        <span class="n">request_parser</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_post_request_parser</span><span class="p">(</span><span class="n">operation</span><span class="p">)</span>
+        <span class="n">request_parser</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_request_parser</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operation</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Factory function returing propper parsing function</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">wpsrequest</span> <span class="o">=</span> <span class="bp">self</span>
+
+        <span class="k">def</span> <span class="nf">parse_get_getcapabilities</span><span class="p">(</span><span class="n">http_request</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Parse GET GetCapabilities request</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+            <span class="n">acceptedversions</span> <span class="o">=</span> <span class="n">_get_get_param</span><span class="p">(</span><span class="n">http_request</span><span class="p">,</span> <span class="s1">&#39;acceptversions&#39;</span><span class="p">)</span>
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">check_accepted_versions</span><span class="p">(</span><span class="n">acceptedversions</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">parse_get_describeprocess</span><span class="p">(</span><span class="n">http_request</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Parse GET DescribeProcess request</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">version</span> <span class="o">=</span> <span class="n">_get_get_param</span><span class="p">(</span><span class="n">http_request</span><span class="p">,</span> <span class="s1">&#39;version&#39;</span><span class="p">)</span>
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">check_and_set_version</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+
+            <span class="n">language</span> <span class="o">=</span> <span class="n">_get_get_param</span><span class="p">(</span><span class="n">http_request</span><span class="p">,</span> <span class="s1">&#39;language&#39;</span><span class="p">)</span>
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">check_and_set_language</span><span class="p">(</span><span class="n">language</span><span class="p">)</span>
+
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">identifiers</span> <span class="o">=</span> <span class="n">_get_get_param</span><span class="p">(</span>
+                <span class="n">http_request</span><span class="p">,</span> <span class="s1">&#39;identifier&#39;</span><span class="p">,</span> <span class="n">aslist</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">parse_get_execute</span><span class="p">(</span><span class="n">http_request</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Parse GET Execute request</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">version</span> <span class="o">=</span> <span class="n">_get_get_param</span><span class="p">(</span><span class="n">http_request</span><span class="p">,</span> <span class="s1">&#39;version&#39;</span><span class="p">)</span>
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">check_and_set_version</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+
+            <span class="n">language</span> <span class="o">=</span> <span class="n">_get_get_param</span><span class="p">(</span><span class="n">http_request</span><span class="p">,</span> <span class="s1">&#39;language&#39;</span><span class="p">)</span>
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">check_and_set_language</span><span class="p">(</span><span class="n">language</span><span class="p">)</span>
+
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">_get_get_param</span><span class="p">(</span><span class="n">http_request</span><span class="p">,</span> <span class="s1">&#39;identifier&#39;</span><span class="p">)</span>
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">store_execute</span> <span class="o">=</span> <span class="n">_get_get_param</span><span class="p">(</span>
+                <span class="n">http_request</span><span class="p">,</span> <span class="s1">&#39;storeExecuteResponse&#39;</span><span class="p">,</span> <span class="s1">&#39;false&#39;</span><span class="p">)</span>
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">_get_get_param</span><span class="p">(</span><span class="n">http_request</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">,</span> <span class="s1">&#39;false&#39;</span><span class="p">)</span>
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">lineage</span> <span class="o">=</span> <span class="n">_get_get_param</span><span class="p">(</span>
+                <span class="n">http_request</span><span class="p">,</span> <span class="s1">&#39;lineage&#39;</span><span class="p">,</span> <span class="s1">&#39;false&#39;</span><span class="p">)</span>
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="n">get_data_from_kvp</span><span class="p">(</span>
+                <span class="n">_get_get_param</span><span class="p">(</span><span class="n">http_request</span><span class="p">,</span> <span class="s1">&#39;DataInputs&#39;</span><span class="p">),</span> <span class="s1">&#39;DataInputs&#39;</span><span class="p">)</span>
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">outputs</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="c1"># take responseDocument preferably</span>
+            <span class="n">resp_outputs</span> <span class="o">=</span> <span class="n">get_data_from_kvp</span><span class="p">(</span>
+                <span class="n">_get_get_param</span><span class="p">(</span><span class="n">http_request</span><span class="p">,</span> <span class="s1">&#39;ResponseDocument&#39;</span><span class="p">))</span>
+            <span class="n">raw_outputs</span> <span class="o">=</span> <span class="n">get_data_from_kvp</span><span class="p">(</span>
+                <span class="n">_get_get_param</span><span class="p">(</span><span class="n">http_request</span><span class="p">,</span> <span class="s1">&#39;RawDataOutput&#39;</span><span class="p">))</span>
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="n">resp_outputs</span><span class="p">:</span>
+                <span class="n">wpsrequest</span><span class="o">.</span><span class="n">outputs</span> <span class="o">=</span> <span class="n">resp_outputs</span>
+            <span class="k">elif</span> <span class="n">raw_outputs</span><span class="p">:</span>
+                <span class="n">wpsrequest</span><span class="o">.</span><span class="n">outputs</span> <span class="o">=</span> <span class="n">raw_outputs</span>
+                <span class="n">wpsrequest</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="c1"># executeResponse XML will not be stored and no updating of</span>
+                <span class="c1"># status</span>
+                <span class="n">wpsrequest</span><span class="o">.</span><span class="n">store_execute</span> <span class="o">=</span> <span class="s1">&#39;false&#39;</span>
+                <span class="n">wpsrequest</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;false&#39;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">operation</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MissingParameterValue</span><span class="p">(</span><span class="s1">&#39;Missing request value&#39;</span><span class="p">,</span> <span class="s1">&#39;request&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">operation</span> <span class="o">=</span> <span class="n">operation</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">operation</span> <span class="o">==</span> <span class="s1">&#39;getcapabilities&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">parse_get_getcapabilities</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">operation</span> <span class="o">==</span> <span class="s1">&#39;describeprocess&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">parse_get_describeprocess</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">operation</span> <span class="o">==</span> <span class="s1">&#39;execute&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">parse_get_execute</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">OperationNotSupported</span><span class="p">(</span>
+                <span class="s1">&#39;Unknown request </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">operation</span><span class="p">,</span> <span class="n">operation</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_post_request_parser</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tagname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Factory function returing propper parsing function</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">wpsrequest</span> <span class="o">=</span> <span class="bp">self</span>
+
+        <span class="k">def</span> <span class="nf">parse_post_getcapabilities</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Parse POST GetCapabilities request</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">acceptedversions</span> <span class="o">=</span> <span class="n">xpath_ns</span><span class="p">(</span>
+                <span class="n">doc</span><span class="p">,</span> <span class="s1">&#39;/wps:GetCapabilities/ows:AcceptVersions/ows:Version&#39;</span><span class="p">)</span>
+            <span class="n">acceptedversions</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">acceptedversions</span><span class="p">))</span>
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">check_accepted_versions</span><span class="p">(</span><span class="n">acceptedversions</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">parse_post_describeprocess</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Parse POST DescribeProcess request</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+            <span class="n">version</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;version&#39;</span><span class="p">)</span>
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">check_and_set_version</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+
+            <span class="n">language</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;language&#39;</span><span class="p">)</span>
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">check_and_set_language</span><span class="p">(</span><span class="n">language</span><span class="p">)</span>
+
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">operation</span> <span class="o">=</span> <span class="s1">&#39;describeprocess&#39;</span>
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">identifiers</span> <span class="o">=</span> <span class="p">[</span><span class="n">identifier_el</span><span class="o">.</span><span class="n">text</span> <span class="k">for</span> <span class="n">identifier_el</span> <span class="ow">in</span>
+                                      <span class="n">xpath_ns</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="s1">&#39;./ows:Identifier&#39;</span><span class="p">)]</span>
+
+        <span class="k">def</span> <span class="nf">parse_post_execute</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Parse POST Execute request</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+            <span class="n">version</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;version&#39;</span><span class="p">)</span>
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">check_and_set_version</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+
+            <span class="n">language</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;language&#39;</span><span class="p">)</span>
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">check_and_set_language</span><span class="p">(</span><span class="n">language</span><span class="p">)</span>
+
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">operation</span> <span class="o">=</span> <span class="s1">&#39;execute&#39;</span>
+
+            <span class="n">identifier</span> <span class="o">=</span> <span class="n">xpath_ns</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="s1">&#39;./ows:Identifier&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">identifier</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">MissingParameterValue</span><span class="p">(</span>
+                    <span class="s1">&#39;Process identifier not set&#39;</span><span class="p">,</span> <span class="s1">&#39;Identifier&#39;</span><span class="p">)</span>
+
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">identifier</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span>
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">lineage</span> <span class="o">=</span> <span class="s1">&#39;false&#39;</span>
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">store_execute</span> <span class="o">=</span> <span class="s1">&#39;false&#39;</span>
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;false&#39;</span>
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="n">get_inputs_from_xml</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">outputs</span> <span class="o">=</span> <span class="n">get_output_from_xml</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+            <span class="n">wpsrequest</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="n">xpath_ns</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="s1">&#39;/wps:Execute/wps:ResponseForm/wps:RawDataOutput&#39;</span><span class="p">):</span>
+                <span class="n">wpsrequest</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="c1"># executeResponse XML will not be stored</span>
+                <span class="n">wpsrequest</span><span class="o">.</span><span class="n">store_execute</span> <span class="o">=</span> <span class="s1">&#39;false&#39;</span>
+
+            <span class="c1"># check if response document tag has been set then retrieve</span>
+            <span class="n">response_document</span> <span class="o">=</span> <span class="n">xpath_ns</span><span class="p">(</span>
+                <span class="n">doc</span><span class="p">,</span> <span class="s1">&#39;./wps:ResponseForm/wps:ResponseDocument&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">response_document</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">wpsrequest</span><span class="o">.</span><span class="n">lineage</span> <span class="o">=</span> <span class="n">response_document</span><span class="p">[</span>
+                    <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;lineage&#39;</span><span class="p">,</span> <span class="s1">&#39;false&#39;</span><span class="p">)</span>
+                <span class="n">wpsrequest</span><span class="o">.</span><span class="n">store_execute</span> <span class="o">=</span> <span class="n">response_document</span><span class="p">[</span>
+                    <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;storeExecuteResponse&#39;</span><span class="p">,</span> <span class="s1">&#39;false&#39;</span><span class="p">)</span>
+                <span class="n">wpsrequest</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">response_document</span><span class="p">[</span>
+                    <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;status&#39;</span><span class="p">,</span> <span class="s1">&#39;false&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">tagname</span> <span class="o">==</span> <span class="n">WPS</span><span class="o">.</span><span class="n">GetCapabilities</span><span class="p">()</span><span class="o">.</span><span class="n">tag</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">operation</span> <span class="o">=</span> <span class="s1">&#39;getcapabilities&#39;</span>
+            <span class="k">return</span> <span class="n">parse_post_getcapabilities</span>
+        <span class="k">elif</span> <span class="n">tagname</span> <span class="o">==</span> <span class="n">WPS</span><span class="o">.</span><span class="n">DescribeProcess</span><span class="p">()</span><span class="o">.</span><span class="n">tag</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">operation</span> <span class="o">=</span> <span class="s1">&#39;describeprocess&#39;</span>
+            <span class="k">return</span> <span class="n">parse_post_describeprocess</span>
+        <span class="k">elif</span> <span class="n">tagname</span> <span class="o">==</span> <span class="n">WPS</span><span class="o">.</span><span class="n">Execute</span><span class="p">()</span><span class="o">.</span><span class="n">tag</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">operation</span> <span class="o">=</span> <span class="s1">&#39;execute&#39;</span>
+            <span class="k">return</span> <span class="n">parse_post_execute</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidParameterValue</span><span class="p">(</span>
+                <span class="s1">&#39;Unknown request </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">tagname</span><span class="p">,</span> <span class="s1">&#39;request&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="WPSRequest.check_accepted_versions"><a class="viewcode-back" href="../../../api.html#pywps.app.WPSRequest.check_accepted_versions">[docs]</a>    <span class="k">def</span> <span class="nf">check_accepted_versions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acceptedversions</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param acceptedversions: string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">version</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="n">acceptedversions</span><span class="p">:</span>
+            <span class="n">acceptedversions_array</span> <span class="o">=</span> <span class="n">acceptedversions</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">aversion</span> <span class="ow">in</span> <span class="n">acceptedversions_array</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">_check_version</span><span class="p">(</span><span class="n">aversion</span><span class="p">):</span>
+                    <span class="n">version</span> <span class="o">=</span> <span class="n">aversion</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">version</span> <span class="o">=</span> <span class="s1">&#39;1.0.0&#39;</span>
+
+        <span class="k">if</span> <span class="n">version</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">check_and_set_version</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">VersionNegotiationFailed</span><span class="p">(</span>
+                <span class="s1">&#39;The requested version &quot;</span><span class="si">%s</span><span class="s1">&quot; is not supported by this server&#39;</span> <span class="o">%</span> <span class="n">acceptedversions</span><span class="p">,</span> <span class="s1">&#39;version&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WPSRequest.check_and_set_version"><a class="viewcode-back" href="../../../api.html#pywps.app.WPSRequest.check_and_set_version">[docs]</a>    <span class="k">def</span> <span class="nf">check_and_set_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;set this.version</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">version</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MissingParameterValue</span><span class="p">(</span><span class="s1">&#39;Missing version&#39;</span><span class="p">,</span> <span class="s1">&#39;version&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">_check_version</span><span class="p">(</span><span class="n">version</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">VersionNegotiationFailed</span><span class="p">(</span>
+                <span class="s1">&#39;The requested version &quot;</span><span class="si">%s</span><span class="s1">&quot; is not supported by this server&#39;</span> <span class="o">%</span> <span class="n">version</span><span class="p">,</span> <span class="s1">&#39;version&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span></div>
+
+<div class="viewcode-block" id="WPSRequest.check_and_set_language"><a class="viewcode-back" href="../../../api.html#pywps.app.WPSRequest.check_and_set_language">[docs]</a>    <span class="k">def</span> <span class="nf">check_and_set_language</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">language</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;set this.language</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">language</span><span class="p">:</span>
+            <span class="n">language</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
+        <span class="k">elif</span> <span class="n">language</span> <span class="o">!=</span> <span class="s1">&#39;en-US&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidParameterValue</span><span class="p">(</span>
+                <span class="s1">&#39;The requested language &quot;</span><span class="si">%s</span><span class="s1">&quot; is not supported by this server&#39;</span> <span class="o">%</span> <span class="n">language</span><span class="p">,</span> <span class="s1">&#39;language&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">language</span> <span class="o">=</span> <span class="n">language</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return JSON encoded representation of the request</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">obj</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;operation&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">operation</span><span class="p">,</span>
+            <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
+            <span class="s1">&#39;language&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">language</span><span class="p">,</span>
+            <span class="s1">&#39;identifiers&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifiers</span><span class="p">,</span>
+            <span class="s1">&#39;store_execute&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">store_execute</span><span class="p">,</span>
+            <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
+            <span class="s1">&#39;lineage&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineage</span><span class="p">,</span>
+            <span class="s1">&#39;inputs&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="p">[</span><span class="n">inpt</span><span class="o">.</span><span class="n">json</span> <span class="k">for</span> <span class="n">inpt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">),</span>
+            <span class="s1">&#39;outputs&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">,</span>
+            <span class="s1">&#39;raw&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">allow_nan</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="nd">@json.setter</span>
+    <span class="k">def</span> <span class="nf">json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;init this request from json back again</span>
+
+<span class="sd">        :param value: the json (not string) representation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">operation</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;operation&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">language</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;language&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identifiers</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;identifiers&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">store_execute</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;store_execute&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lineage</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;lineage&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;outputs&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;raw&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">identifier</span> <span class="ow">in</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;inputs&#39;</span><span class="p">]:</span>
+            <span class="n">inpt</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">inpt_defs</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;inputs&#39;</span><span class="p">][</span><span class="n">identifier</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">inpt_def</span> <span class="ow">in</span> <span class="n">inpt_defs</span><span class="p">:</span>
+
+                <span class="k">if</span> <span class="n">inpt_def</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;complex&#39;</span><span class="p">:</span>
+                    <span class="n">inpt</span> <span class="o">=</span> <span class="n">ComplexInput</span><span class="p">(</span>
+                        <span class="n">identifier</span><span class="o">=</span><span class="n">inpt_def</span><span class="p">[</span><span class="s1">&#39;identifier&#39;</span><span class="p">],</span>
+                        <span class="n">title</span><span class="o">=</span><span class="n">inpt_def</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">),</span>
+                        <span class="n">abstract</span><span class="o">=</span><span class="n">inpt_def</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;abstract&#39;</span><span class="p">),</span>
+                        <span class="n">workdir</span><span class="o">=</span><span class="n">inpt_def</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;workdir&#39;</span><span class="p">),</span>
+                        <span class="n">data_format</span><span class="o">=</span><span class="n">Format</span><span class="p">(</span>
+                            <span class="n">schema</span><span class="o">=</span><span class="n">inpt_def</span><span class="p">[</span><span class="s1">&#39;data_format&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;schema&#39;</span><span class="p">),</span>
+                            <span class="n">extension</span><span class="o">=</span><span class="n">inpt_def</span><span class="p">[</span><span class="s1">&#39;data_format&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;extension&#39;</span><span class="p">),</span>
+                            <span class="n">mime_type</span><span class="o">=</span><span class="n">inpt_def</span><span class="p">[</span><span class="s1">&#39;data_format&#39;</span><span class="p">][</span><span class="s1">&#39;mime_type&#39;</span><span class="p">],</span>
+                            <span class="n">encoding</span><span class="o">=</span><span class="n">inpt_def</span><span class="p">[</span><span class="s1">&#39;data_format&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;encoding&#39;</span><span class="p">)</span>
+                        <span class="p">),</span>
+                        <span class="n">supported_formats</span><span class="o">=</span><span class="p">[</span>
+                            <span class="n">Format</span><span class="p">(</span>
+                                <span class="n">schema</span><span class="o">=</span><span class="n">infrmt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;schema&#39;</span><span class="p">),</span>
+                                <span class="n">extension</span><span class="o">=</span><span class="n">infrmt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;extension&#39;</span><span class="p">),</span>
+                                <span class="n">mime_type</span><span class="o">=</span><span class="n">infrmt</span><span class="p">[</span><span class="s1">&#39;mime_type&#39;</span><span class="p">],</span>
+                                <span class="n">encoding</span><span class="o">=</span><span class="n">infrmt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;encoding&#39;</span><span class="p">)</span>
+                            <span class="p">)</span> <span class="k">for</span> <span class="n">infrmt</span> <span class="ow">in</span> <span class="n">inpt_def</span><span class="p">[</span><span class="s1">&#39;supported_formats&#39;</span><span class="p">]</span>
+                        <span class="p">],</span>
+                        <span class="n">mode</span><span class="o">=</span><span class="n">MODE</span><span class="o">.</span><span class="n">NONE</span>
+                    <span class="p">)</span>
+                    <span class="n">inpt</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">inpt_def</span><span class="p">[</span><span class="s1">&#39;file&#39;</span><span class="p">]</span>
+                <span class="k">elif</span> <span class="n">inpt_def</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;literal&#39;</span><span class="p">:</span>
+
+                    <span class="n">allowed_values</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">allowed_value</span> <span class="ow">in</span> <span class="n">inpt_def</span><span class="p">[</span><span class="s1">&#39;allowed_values&#39;</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">allowed_value</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;anyvalue&#39;</span><span class="p">:</span>
+                            <span class="n">allowed_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">AnyValue</span><span class="p">())</span>
+                        <span class="k">elif</span> <span class="n">allowed_value</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;novalue&#39;</span><span class="p">:</span>
+                            <span class="n">allowed_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">NoValue</span><span class="p">())</span>
+                        <span class="k">elif</span> <span class="n">allowed_value</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;valuesreference&#39;</span><span class="p">:</span>
+                            <span class="n">allowed_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ValuesReference</span><span class="p">())</span>
+                        <span class="k">elif</span> <span class="n">allowed_value</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;allowedvalue&#39;</span><span class="p">:</span>
+                            <span class="n">allowed_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">AllowedValue</span><span class="p">(</span>
+                                <span class="n">allowed_type</span><span class="o">=</span><span class="n">allowed_value</span><span class="p">[</span><span class="s1">&#39;allowed_type&#39;</span><span class="p">],</span>
+                                <span class="n">value</span><span class="o">=</span><span class="n">allowed_value</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">],</span>
+                                <span class="n">minval</span><span class="o">=</span><span class="n">allowed_value</span><span class="p">[</span><span class="s1">&#39;minval&#39;</span><span class="p">],</span>
+                                <span class="n">maxval</span><span class="o">=</span><span class="n">allowed_value</span><span class="p">[</span><span class="s1">&#39;maxval&#39;</span><span class="p">],</span>
+                                <span class="n">spacing</span><span class="o">=</span><span class="n">allowed_value</span><span class="p">[</span><span class="s1">&#39;spacing&#39;</span><span class="p">],</span>
+                                <span class="n">range_closure</span><span class="o">=</span><span class="n">allowed_value</span><span class="p">[</span><span class="s1">&#39;range_closure&#39;</span><span class="p">]</span>
+                            <span class="p">))</span>
+
+                    <span class="n">inpt</span> <span class="o">=</span> <span class="n">LiteralInput</span><span class="p">(</span>
+                        <span class="n">identifier</span> <span class="o">=</span> <span class="n">inpt_def</span><span class="p">[</span><span class="s1">&#39;identifier&#39;</span><span class="p">],</span>
+                        <span class="n">title</span> <span class="o">=</span> <span class="n">inpt_def</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">),</span>
+                        <span class="n">abstract</span> <span class="o">=</span> <span class="n">inpt_def</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;abstract&#39;</span><span class="p">),</span>
+                        <span class="n">data_type</span> <span class="o">=</span> <span class="n">inpt_def</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;data_type&#39;</span><span class="p">),</span>
+                        <span class="n">workdir</span> <span class="o">=</span> <span class="n">inpt_def</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;workdir&#39;</span><span class="p">),</span>
+                        <span class="n">allowed_values</span> <span class="o">=</span> <span class="n">AnyValue</span><span class="p">,</span>
+                        <span class="n">uoms</span> <span class="o">=</span> <span class="n">inpt_def</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;uoms&#39;</span><span class="p">),</span>
+                        <span class="n">mode</span> <span class="o">=</span> <span class="n">inpt_def</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;mode&#39;</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="n">inpt</span><span class="o">.</span><span class="n">uom</span> <span class="o">=</span> <span class="n">inpt_def</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;uom&#39;</span><span class="p">)</span>
+                    <span class="n">inpt</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">inpt_def</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="n">inpt_def</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;bbox&#39;</span><span class="p">:</span>
+                    <span class="n">inpt</span> <span class="o">=</span> <span class="n">BBoxInput</span><span class="p">(</span>
+                         <span class="n">identifier</span> <span class="o">=</span> <span class="n">inpt_def</span><span class="p">[</span><span class="s1">&#39;identifier&#39;</span><span class="p">],</span>
+                         <span class="n">title</span> <span class="o">=</span> <span class="n">inpt_def</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">],</span>
+                         <span class="n">abstract</span> <span class="o">=</span> <span class="n">inpt_def</span><span class="p">[</span><span class="s1">&#39;abstract&#39;</span><span class="p">],</span>
+                         <span class="n">crss</span> <span class="o">=</span> <span class="n">inpt_def</span><span class="p">[</span><span class="s1">&#39;crs&#39;</span><span class="p">],</span>
+                         <span class="n">dimensions</span> <span class="o">=</span> <span class="n">inpt_def</span><span class="p">[</span><span class="s1">&#39;dimensions&#39;</span><span class="p">],</span>
+                         <span class="n">workdir</span> <span class="o">=</span> <span class="n">inpt_def</span><span class="p">[</span><span class="s1">&#39;workdir&#39;</span><span class="p">],</span>
+                         <span class="n">mode</span> <span class="o">=</span> <span class="n">inpt_def</span><span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">]</span>
+                     <span class="p">)</span>
+                    <span class="n">inpt</span><span class="o">.</span><span class="n">ll</span> <span class="o">=</span> <span class="n">inpt_def</span><span class="p">[</span><span class="s1">&#39;bbox&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">inpt</span><span class="o">.</span><span class="n">ur</span> <span class="o">=</span> <span class="n">inpt_def</span><span class="p">[</span><span class="s1">&#39;bbox&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">identifier</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inpt</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">inpt</span><span class="p">]</span></div>
+
+<span class="k">def</span> <span class="nf">get_inputs_from_xml</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span>
+    <span class="n">the_inputs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">input_el</span> <span class="ow">in</span> <span class="n">xpath_ns</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="s1">&#39;/wps:Execute/wps:DataInputs/wps:Input&#39;</span><span class="p">):</span>
+        <span class="p">[</span><span class="n">identifier_el</span><span class="p">]</span> <span class="o">=</span> <span class="n">xpath_ns</span><span class="p">(</span><span class="n">input_el</span><span class="p">,</span> <span class="s1">&#39;./ows:Identifier&#39;</span><span class="p">)</span>
+        <span class="n">identifier</span> <span class="o">=</span> <span class="n">identifier_el</span><span class="o">.</span><span class="n">text</span>
+
+        <span class="k">if</span> <span class="n">identifier</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">the_inputs</span><span class="p">:</span>
+            <span class="n">the_inputs</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">literal_data</span> <span class="o">=</span> <span class="n">xpath_ns</span><span class="p">(</span><span class="n">input_el</span><span class="p">,</span> <span class="s1">&#39;./wps:Data/wps:LiteralData&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">literal_data</span><span class="p">:</span>
+            <span class="n">value_el</span> <span class="o">=</span> <span class="n">literal_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">inpt</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">inpt</span><span class="p">[</span><span class="s1">&#39;identifier&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">identifier_el</span><span class="o">.</span><span class="n">text</span>
+            <span class="n">inpt</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">text_type</span><span class="p">(</span><span class="n">value_el</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+            <span class="n">inpt</span><span class="p">[</span><span class="s1">&#39;uom&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value_el</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;uom&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">inpt</span><span class="p">[</span><span class="s1">&#39;datatype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value_el</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;datatype&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">the_inputs</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inpt</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="n">complex_data</span> <span class="o">=</span> <span class="n">xpath_ns</span><span class="p">(</span><span class="n">input_el</span><span class="p">,</span> <span class="s1">&#39;./wps:Data/wps:ComplexData&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">complex_data</span><span class="p">:</span>
+
+            <span class="n">complex_data_el</span> <span class="o">=</span> <span class="n">complex_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">inpt</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">inpt</span><span class="p">[</span><span class="s1">&#39;identifier&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">identifier_el</span><span class="o">.</span><span class="n">text</span>
+            <span class="n">inpt</span><span class="p">[</span><span class="s1">&#39;mimeType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">complex_data_el</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;mimeType&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">inpt</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">complex_data_el</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="s1">&#39;encoding&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="n">inpt</span><span class="p">[</span><span class="s1">&#39;schema&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">complex_data_el</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;schema&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">inpt</span><span class="p">[</span><span class="s1">&#39;method&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">complex_data_el</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;method&#39;</span><span class="p">,</span> <span class="s1">&#39;GET&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">complex_data_el</span><span class="o">.</span><span class="n">getchildren</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">value_el</span> <span class="o">=</span> <span class="n">complex_data_el</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">inpt</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_dataelement_value</span><span class="p">(</span><span class="n">value_el</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">inpt</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_rawvalue_value</span><span class="p">(</span>
+                    <span class="n">complex_data_el</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">inpt</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">])</span>
+            <span class="n">the_inputs</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inpt</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="n">reference_data</span> <span class="o">=</span> <span class="n">xpath_ns</span><span class="p">(</span><span class="n">input_el</span><span class="p">,</span> <span class="s1">&#39;./wps:Reference&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">reference_data</span><span class="p">:</span>
+            <span class="n">reference_data_el</span> <span class="o">=</span> <span class="n">reference_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">inpt</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">inpt</span><span class="p">[</span><span class="s1">&#39;identifier&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">identifier_el</span><span class="o">.</span><span class="n">text</span>
+            <span class="n">inpt</span><span class="p">[</span><span class="n">identifier_el</span><span class="o">.</span><span class="n">text</span><span class="p">]</span> <span class="o">=</span> <span class="n">reference_data_el</span><span class="o">.</span><span class="n">text</span>
+            <span class="n">inpt</span><span class="p">[</span><span class="s1">&#39;href&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reference_data_el</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="s1">&#39;{http://www.w3.org/1999/xlink}href&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">inpt</span><span class="p">[</span><span class="s1">&#39;mimeType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reference_data_el</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;mimeType&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">inpt</span><span class="p">[</span><span class="s1">&#39;method&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reference_data_el</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;method&#39;</span><span class="p">,</span> <span class="s1">&#39;GET&#39;</span><span class="p">)</span>
+            <span class="n">header_element</span> <span class="o">=</span> <span class="n">xpath_ns</span><span class="p">(</span><span class="n">reference_data_el</span><span class="p">,</span> <span class="s1">&#39;./wps:Header&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">header_element</span><span class="p">:</span>
+                <span class="n">inpt</span><span class="p">[</span><span class="s1">&#39;header&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_reference_header</span><span class="p">(</span><span class="n">header_element</span><span class="p">)</span>
+            <span class="n">body_element</span> <span class="o">=</span> <span class="n">xpath_ns</span><span class="p">(</span><span class="n">reference_data_el</span><span class="p">,</span> <span class="s1">&#39;./wps:Body&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">body_element</span><span class="p">:</span>
+                <span class="n">inpt</span><span class="p">[</span><span class="s1">&#39;body&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_reference_body</span><span class="p">(</span><span class="n">body_element</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">bodyreference_element</span> <span class="o">=</span> <span class="n">xpath_ns</span><span class="p">(</span><span class="n">reference_data_el</span><span class="p">,</span>
+                                             <span class="s1">&#39;./wps:BodyReference&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">bodyreference_element</span><span class="p">:</span>
+                <span class="n">inpt</span><span class="p">[</span><span class="s1">&#39;bodyreference&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_reference_bodyreference</span><span class="p">(</span>
+                    <span class="n">bodyreference_element</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">the_inputs</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inpt</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># OWSlib is not python 3 compatible yet</span>
+        <span class="k">if</span> <span class="n">PY2</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">owslib.ows</span> <span class="kn">import</span> <span class="n">BoundingBox</span>
+            <span class="n">bbox_datas</span> <span class="o">=</span> <span class="n">xpath_ns</span><span class="p">(</span><span class="n">input_el</span><span class="p">,</span> <span class="s1">&#39;./wps:Data/wps:BoundingBoxData&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">bbox_datas</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">bbox_data</span> <span class="ow">in</span> <span class="n">bbox_datas</span><span class="p">:</span>
+                    <span class="n">bbox_data_el</span> <span class="o">=</span> <span class="n">bbox_data</span>
+                    <span class="n">bbox</span> <span class="o">=</span> <span class="n">BoundingBox</span><span class="p">(</span><span class="n">bbox_data_el</span><span class="p">)</span>
+                    <span class="n">the_inputs</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bbox</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">the_inputs</span>
+
+
+<span class="k">def</span> <span class="nf">get_output_from_xml</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span>
+    <span class="n">the_output</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">xpath_ns</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="s1">&#39;/wps:Execute/wps:ResponseForm/wps:ResponseDocument&#39;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">output_el</span> <span class="ow">in</span> <span class="n">xpath_ns</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="s1">&#39;/wps:Execute/wps:ResponseForm/wps:ResponseDocument/wps:Output&#39;</span><span class="p">):</span>
+            <span class="p">[</span><span class="n">identifier_el</span><span class="p">]</span> <span class="o">=</span> <span class="n">xpath_ns</span><span class="p">(</span><span class="n">output_el</span><span class="p">,</span> <span class="s1">&#39;./ows:Identifier&#39;</span><span class="p">)</span>
+            <span class="n">outpt</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">outpt</span><span class="p">[</span><span class="n">identifier_el</span><span class="o">.</span><span class="n">text</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">outpt</span><span class="p">[</span><span class="s1">&#39;asReference&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_el</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;asReference&#39;</span><span class="p">,</span> <span class="s1">&#39;false&#39;</span><span class="p">)</span>
+            <span class="n">the_output</span><span class="p">[</span><span class="n">identifier_el</span><span class="o">.</span><span class="n">text</span><span class="p">]</span> <span class="o">=</span> <span class="n">outpt</span>
+
+    <span class="k">elif</span> <span class="n">xpath_ns</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="s1">&#39;/wps:Execute/wps:ResponseForm/wps:RawDataOutput&#39;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">output_el</span> <span class="ow">in</span> <span class="n">xpath_ns</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="s1">&#39;/wps:Execute/wps:ResponseForm/wps:RawDataOutput&#39;</span><span class="p">):</span>
+            <span class="p">[</span><span class="n">identifier_el</span><span class="p">]</span> <span class="o">=</span> <span class="n">xpath_ns</span><span class="p">(</span><span class="n">output_el</span><span class="p">,</span> <span class="s1">&#39;./ows:Identifier&#39;</span><span class="p">)</span>
+            <span class="n">outpt</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">outpt</span><span class="p">[</span><span class="n">identifier_el</span><span class="o">.</span><span class="n">text</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">outpt</span><span class="p">[</span><span class="s1">&#39;mimetype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_el</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;mimeType&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">outpt</span><span class="p">[</span><span class="s1">&#39;encoding&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_el</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;encoding&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">outpt</span><span class="p">[</span><span class="s1">&#39;schema&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_el</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;schema&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">outpt</span><span class="p">[</span><span class="s1">&#39;uom&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_el</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;uom&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">the_output</span><span class="p">[</span><span class="n">identifier_el</span><span class="o">.</span><span class="n">text</span><span class="p">]</span> <span class="o">=</span> <span class="n">outpt</span>
+
+    <span class="k">return</span> <span class="n">the_output</span>
+
+
+<span class="k">def</span> <span class="nf">get_data_from_kvp</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">part</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get execute DataInputs and ResponseDocument from URL (key-value-pairs) encoding</span>
+<span class="sd">    :param data: key:value pair list of the datainputs and responseDocument parameter</span>
+<span class="sd">    :param part: DataInputs or similar part of input url</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">the_data</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">io</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">fields</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;@&#39;</span><span class="p">)</span>
+
+            <span class="c1"># First field is identifier and its value</span>
+            <span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="o">=</span> <span class="n">fields</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
+            <span class="n">io</span><span class="p">[</span><span class="s1">&#39;identifier&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">identifier</span>
+            <span class="n">io</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+
+            <span class="c1"># Get the attributes of the data</span>
+            <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                <span class="p">(</span><span class="n">attribute</span><span class="p">,</span> <span class="n">attr_val</span><span class="p">)</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">attribute</span> <span class="o">==</span> <span class="s1">&#39;xlink:href&#39;</span><span class="p">:</span>
+                    <span class="n">io</span><span class="p">[</span><span class="s1">&#39;href&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attr_val</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">io</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">attr_val</span>
+
+            <span class="c1"># Add the input/output with all its attributes and values to the</span>
+            <span class="c1"># dictionary</span>
+            <span class="k">if</span> <span class="n">part</span> <span class="o">==</span> <span class="s1">&#39;DataInputs&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">identifier</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">the_data</span><span class="p">:</span>
+                    <span class="n">the_data</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">the_data</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">io</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">the_data</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span> <span class="o">=</span> <span class="n">io</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">the_data</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;identifier&#39;</span><span class="p">:</span> <span class="n">d</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">the_data</span>
+
+
+<span class="k">def</span> <span class="nf">_check_version</span><span class="p">(</span><span class="n">version</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; check given version</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">version</span> <span class="o">!=</span> <span class="s1">&#39;1.0.0&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+
+<span class="k">def</span> <span class="nf">_get_get_param</span><span class="p">(</span><span class="n">http_request</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">aslist</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns value from the key:value pair, of the HTTP GET request, for</span>
+<span class="sd">    example &#39;service&#39; or &#39;request&#39;</span>
+
+<span class="sd">    :param http_request: http_request object</span>
+<span class="sd">    :param key: key value you need to dig out of the HTTP GET request</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">default</span>
+    <span class="c1"># http_request.args.keys will make + sign disappear in GET url if not</span>
+    <span class="c1"># urlencoded</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">http_request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">key</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">http_request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">aslist</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">value</span>
+
+
+<span class="k">def</span> <span class="nf">_get_dataelement_value</span><span class="p">(</span><span class="n">value_el</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return real value of XML Element (e.g. convert Element.FeatureCollection</span>
+<span class="sd">    to String</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value_el</span><span class="p">,</span> <span class="n">lxml</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">_Element</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">PY2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">lxml</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="n">value_el</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="nb">unicode</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">lxml</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="n">value_el</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">value_el</span>
+
+
+<span class="k">def</span> <span class="nf">_get_rawvalue_value</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return real value of CDATA section&quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">encoding</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">encoding</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span>
+        <span class="k">elif</span> <span class="n">encoding</span> <span class="o">==</span> <span class="s1">&#39;base64&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+
+<span class="k">def</span> <span class="nf">_get_reference_header</span><span class="p">(</span><span class="n">header_element</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parses ReferenceInput Header element</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">header</span><span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">header_element</span><span class="o">.</span><span class="n">attrib</span><span class="p">(</span><span class="s1">&#39;key&#39;</span><span class="p">)</span>
+    <span class="n">header</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">header_element</span><span class="o">.</span><span class="n">attrib</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">header</span>
+
+
+<span class="k">def</span> <span class="nf">_get_reference_body</span><span class="p">(</span><span class="n">body_element</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parses ReferenceInput Body element</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">body</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">body_element</span><span class="o">.</span><span class="n">getchildren</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">value_el</span> <span class="o">=</span> <span class="n">body_element</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="n">_get_dataelement_value</span><span class="p">(</span><span class="n">value_el</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="n">_get_rawvalue_value</span><span class="p">(</span><span class="n">body_element</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">body</span>
+
+
+<span class="k">def</span> <span class="nf">_get_reference_bodyreference</span><span class="p">(</span><span class="n">referencebody_element</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parse ReferenceInput BodyReference element</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">referencebody_element</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+        <span class="s1">&#39;{http://www.w3.org/1999/xlink}href&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/pywps.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">PyWPS 4.0.0-rc1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright Copyright (C) 2014-2016 PyWPS Development Team, represented by Jachym Cepicky.This work is licensed under a Creative Commons Attribution 4.0 International License.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>
