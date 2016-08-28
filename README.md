@@ -1,5 +1,7 @@
 # PyWPS 
 
+[![Join the chat at https://gitter.im/geopython/pywps](https://badges.gitter.im/geopython/pywps.svg)](https://gitter.im/geopython/pywps?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 PyWPS is an implementation of the Web Processing Service standard from
 the Open Geospatial Consortium. PyWPS is written in Python.
 
@@ -27,8 +29,8 @@ pip install -r requirements-dev.txt
 # run unit tests
 python -m unittest tests
 # run code coverage
-coverage run --source=pywps -m unittest tests
-coverage report -m
+python -m coverage run --source=pywps -m unittest tests
+python -m coverage report -m
 ```
 
 # Run web application
