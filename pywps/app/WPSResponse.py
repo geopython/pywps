@@ -155,14 +155,13 @@ class WPSResponse(object):
 
         # Status XML
         # return the correct response depending on the progress of the process
-        if self.status >= STATUS.STORE_AND_UPDATE_STATUS:
+        if self.status == STATUS.STORE_AND_UPDATE_STATUS:
             if self.status_percentage == 0:
                 self.message = 'PyWPS Process %s accepted' % self.process.identifier
                 status_doc = self._process_accepted()
                 doc.append(status_doc)
-                #self.write_response_doc(doc)
                 return doc
-            elif 0 < self.status_percentage < 100:
+            elif self.status_percentage > 0:
                 status_doc = self._process_started()
                 doc.append(status_doc)
                 return doc
@@ -175,20 +174,21 @@ class WPSResponse(object):
 
         # TODO: add paused status
 
-        status_doc = self._process_succeeded()
-        doc.append(status_doc)
+        if self.status == STATUS.DONE_STATUS:
+            status_doc = self._process_succeeded()
+            doc.append(status_doc)
 
-        # DataInputs and DataOutputs definition XML if lineage=true
-        if self.wps_request.lineage == 'true':
-            data_inputs = [self.wps_request.inputs[i][0].execute_xml() for i in self.wps_request.inputs]
-            doc.append(WPS.DataInputs(*data_inputs))
+            # DataInputs and DataOutputs definition XML if lineage=true
+            if self.wps_request.lineage == 'true':
+                data_inputs = [self.wps_request.inputs[i][0].execute_xml() for i in self.wps_request.inputs]
+                doc.append(WPS.DataInputs(*data_inputs))
 
-            output_definitions = [self.outputs[o].execute_xml_lineage() for o in self.outputs]
-            doc.append(WPS.OutputDefinitions(*output_definitions))
+                output_definitions = [self.outputs[o].execute_xml_lineage() for o in self.outputs]
+                doc.append(WPS.OutputDefinitions(*output_definitions))
 
-        # Process outputs XML
-        output_elements = [self.outputs[o].execute_xml() for o in self.outputs]
-        doc.append(WPS.ProcessOutputs(*output_elements))
+            # Process outputs XML
+            output_elements = [self.outputs[o].execute_xml() for o in self.outputs]
+            doc.append(WPS.ProcessOutputs(*output_elements))
         return doc
 
     def call_on_close(self, function):
