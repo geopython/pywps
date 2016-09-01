@@ -39,10 +39,10 @@ class Service(object):
         if cfgfiles:
             config.load_configuration(cfgfiles)
 
-        if config.get_config_value('server', 'file') and config.get_config_value('logging', 'level'):
+        if config.get_config_value('logging', 'file') and config.get_config_value('logging', 'level'):
             LOGGER.setLevel(getattr(logging, config.get_config_value('logging', 'level')))
             msg_fmt = '%(asctime)s] [%(levelname)s] file=%(pathname)s line=%(lineno)s module=%(module)s function=%(funcName)s %(message)s'
-            fh = logging.FileHandler(config.get_config_value('server', 'file'))
+            fh = logging.FileHandler(config.get_config_value('logging', 'file'))
             fh.setFormatter(logging.Formatter(msg_fmt))
             LOGGER.addHandler(fh)
         else:  # NullHandler
