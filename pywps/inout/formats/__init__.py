@@ -19,7 +19,7 @@ _FORMATS = namedtuple('FORMATS', 'GEOJSON, JSON, SHP, GML, GEOTIFF, WCS,'
                                  'WCS100, WCS110, WCS20, WFS, WFS100,'
                                  'WFS110, WFS20, WMS, WMS130, WMS110,'
                                  'WMS100,'
-                                 'TEXT')
+                                 'TEXT, NETCDF')
 FORMATS = _FORMATS(
     _FORMAT('application/vnd.geo+json', '.geojson',  None),
     _FORMAT('application/json', '.json',  None),
@@ -39,6 +39,7 @@ FORMATS = _FORMATS(
     _FORMAT('application/x-ogc-wms; version=1.1.0', '.xml', None),
     _FORMAT('application/x-ogc-wms; version=1.0.0', '.xml', None),
     _FORMAT('text/plain', '.txt',  None),
+    _FORMAT('application/x-netcdf', '.nc',  None),
 )
 
 def _get_mimetypes():
