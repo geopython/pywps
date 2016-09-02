@@ -130,7 +130,15 @@ class Process(object):
             doc.append(OWS.Abstract(self.abstract))
 
         for m in self.metadata:
-            doc.append(OWS.Metadata({'{http://www.w3.org/1999/xlink}title': m}))
+            if isinstance(m, tuple):
+                doc.append(OWS.Metadata({
+                    '{http://www.w3.org/1999/xlink}title': m[0],
+                    '{http://www.w3.org/1999/xlink}href': m[1]
+                }))
+            else:
+                doc.append(OWS.Metadata({
+                    '{http://www.w3.org/1999/xlink}title': m,
+                }))
 
         for p in self.profile:
             doc.append(WPS.Profile(p))
