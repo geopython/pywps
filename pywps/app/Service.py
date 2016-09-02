@@ -331,21 +331,22 @@ class Service(object):
                     raise MissingParameterValue(
                         inpt.identifier, inpt.identifier)
                 else:
-                    inputs = deque(maxlen=inpt.max_occurs)
-                    inputs.append(inpt.clone())
-                    data_inputs[inpt.identifier] = inputs
-
-            # Replace the dicts with the dict of Literal/Complex inputs
-            # set the input to the type defined in the process
-            if isinstance(inpt, ComplexInput):
-                data_inputs[inpt.identifier] = self.create_complex_inputs(
-                    inpt, wps_request.inputs[inpt.identifier])
-            elif isinstance(inpt, LiteralInput):
-                data_inputs[inpt.identifier] = self.create_literal_inputs(
-                    inpt, wps_request.inputs[inpt.identifier])
-            elif isinstance(inpt, BoundingBoxInput):
-                data_inputs[inpt.identifier] = self.create_bbox_inputs(
-                    inpt, wps_request.inputs[inpt.identifier])
+                    #inputs = deque(maxlen=inpt.max_occurs)
+                    #inputs.append(inpt.clone())
+                    #data_inputs[inpt.identifier] = inputs
+                    pass
+            else:
+                # Replace the dicts with the dict of Literal/Complex inputs
+                # set the input to the type defined in the process.
+                if isinstance(inpt, ComplexInput):
+                    data_inputs[inpt.identifier] = self.create_complex_inputs(
+                        inpt, wps_request.inputs[inpt.identifier])
+                elif isinstance(inpt, LiteralInput):
+                    data_inputs[inpt.identifier] = self.create_literal_inputs(
+                        inpt, wps_request.inputs[inpt.identifier])
+                elif isinstance(inpt, BoundingBoxInput):
+                    data_inputs[inpt.identifier] = self.create_bbox_inputs(
+                        inpt, wps_request.inputs[inpt.identifier])
 
         wps_request.inputs = data_inputs
 
