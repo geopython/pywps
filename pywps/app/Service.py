@@ -18,6 +18,7 @@ from collections import deque
 import os
 import sys
 import uuid
+import copy
 
 LOGGER = logging.getLogger("PYWPS")
 
@@ -291,6 +292,11 @@ class Service(object):
         response = None
         try:
             process = self.processes[identifier]
+
+            # make deep copy of the process instace
+            # so that processes are not overriding each other
+            # just for execute
+            process = copy.deepcopy(process)
 
             workdir = os.path.abspath(
                     config.get_config_value('server', 'workdir'))
