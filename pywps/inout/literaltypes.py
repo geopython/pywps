@@ -246,7 +246,7 @@ def convert_time(inpt):
 
     :rtype: time object
     """
-    time_format = '%Y-%m-%dT%H:%M:%S%z'
+    time_format = '%Y-%m-%dT%H:%M:%S%Z'
     inpt = time.strptime(convert_string(inpt), time_format)
     return inpt
 
