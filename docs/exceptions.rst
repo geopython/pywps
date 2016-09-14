@@ -1,12 +1,11 @@
 .. _exceptions:
 
-==========
 Exceptions
 ==========
 
 .. module:: pywps.exceptions
 
-PyWPS-4 will throw exceptions based on the error occurred.
+PyWPS will throw exceptions based on the error occurred.
 The exceptions will point out what is missing or what went wrong
 as accurately as possible.
 

@@ -51,10 +51,30 @@ master_doc = 'index'
 
 pygments_style = 'sphinx'
 
-html_theme = 'default'
-htmlhelp_basename = 'PyWPSdoc'
-html_logo = 'pywps.png'
+html_static_path = ['_static']
 
+htmlhelp_basename = 'PyWPSdoc'
+#html_logo = 'pywps.png'
+
+html_theme = 'alabaster'
+# alabaster settings
+html_sidebars = {
+    '**': [
+        'about.html',
+        'navigation.html',
+        'searchbox.html',
+    ]
+}
+html_theme_options = {
+    'show_related': True,
+    'travis_button': True,
+    'github_banner': True,
+    'github_user': 'geopython',
+    'github_repo': 'pywps',
+    'github_button': True,
+    'logo': 'pywps.png',
+    'logo_name': False
+}
 
 class Mock(object):
     def __init__(self, *args, **kwargs):

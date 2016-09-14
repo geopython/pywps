@@ -1,4 +1,4 @@
-# PyWPS-4 example process to be used for the documenatation and as demonstration
+# PyWPS example process to be used for the documenatation and as demonstration
 # how to create custom process instance
 #
 # The MIT License (MIT)
