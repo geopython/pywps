@@ -1,6 +1,5 @@
 .. _wps:
 
-====================================
 OGC Web Processing Service (OGC WPS)
 ====================================
 
@@ -25,7 +24,7 @@ before, there is no communication history between the server and the client.
 Process
 -------
 
-A process `p` is a function that for each input returns a corresponding output
+A process `p` is a function that for each input returns a corresponding output:
 
 .. math::
 
@@ -43,7 +42,7 @@ two raster maps together) or very complicated (climate change model). It can
 take short time (seconds) or long (days) to be calculated. Process is, what you,
 as PyWPS user, want to expose to other people and let their data processed.
 
-Every process has
+Every process has the following properties:
 
 Identifier
     Unique process identifier
@@ -55,14 +54,15 @@ Abstract
     Longer description of the process, what it does, how is it supposed to be
     used
 
-And list of in- and outputs.
+And a list of inputs and outputs.
 
-Data in- and outputs
---------------------
-OGC WPS defines 3 types of data inputs and data outputs *LiteralData*,
+Data inputs and outputs
+-----------------------
+
+OGC WPS defines 3 types of data inputs and outputs: *LiteralData*,
 *ComplexData* and *BoundingBoxData*.
 
-All data types do need to have following attributes:
+All data types do need to have following properties:
 
 Identifier
     Unique input identifier
@@ -122,7 +122,7 @@ region.
 
 Passing data to process instance
 --------------------------------
-There are 3 typical ways, how to pass the input data from the client to the
+There are typically 3 approaches to pass the input data from the client to the
 server:
 
 **Data are on the server already**
@@ -193,10 +193,10 @@ ProcessFailed
 
 Request encoding, HTTP GET and POST
 -----------------------------------
-The request can be encoded either using Key-value-pairs (KVP) or as the
-XML-formatted document.
 
-Key-value-pair
+The request can be encoded either using key-value pairs (KVP) or an XML payload.
+
+Key-value pairs
     is usually sent via `HTTP GET request method
     <https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Request_methods>`_
     encoded directly in the URL. The keys and values are separated with `=` sign and
@@ -205,14 +205,14 @@ Key-value-pair
 
             http://server.domain/wps?service=WPS&request=GetCapabilities&version=1.0.0
 
-    In this example, there are 3 pairs of input parameter: service, request and
-    version with values `WPS`, `GetCapabilities` and `1.0.0` respectively.
+    In this example, there are 3 pairs of input parameter: `service`, `request` and
+    `version` with values `WPS`, `GetCapabilities` and `1.0.0` respectively.
 
-XML
-    is document sent via `HTTP POST request method
+XML payload
+    is XML data sent via `HTTP POST request method
     <https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Request_methods>`_.
     The XML document can be more rich, having more parameters, better to be
-    parsed in complex structures. Client can also encode whole datasets to the
+    parsed in complex structures. The Client can also encode entire datasets to the
     request, including raster (encoded using base64) or vector data (usually as GML file).::
 
         <?xml version="1.0" encoding="UTF-8"?>

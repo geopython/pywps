@@ -1,15 +1,14 @@
 .. _pywps:
 
-=====
 PyWPS
 =====
 
 .. todo:: 
 
-    * how are thnigs organised
-    * storage
-    * dblog
-    * relationship to grass gis
+  * how are things organised
+  * storage
+  * dblog
+  * relationship to grass gis
 
 PyWPS philosophy
 ----------------

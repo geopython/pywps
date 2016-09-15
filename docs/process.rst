@@ -2,7 +2,6 @@
 
 .. _process:
 
-#########
 Processes
 #########
 
@@ -311,7 +310,7 @@ Returning large data
 WPS allows for a clever method of returning a large data file: instead
 of embedding the data in the response, it can be saved separately, and
 a URL is returned from where the data can be downloaded. In the current
-implementation, PyWPS-4 saves the file in a folder specified
+implementation, PyWPS saves the file in a folder specified
 in the configuration passed by the service (or in a default location).
 The URL returned is embedded in the XML response.
 
@@ -375,17 +374,15 @@ process identifier and their inputs and outputs.
 A host, a port, a config file and the processes can be passed as arguments to the 
 :class:`Server` constructor.
 **host** and **port** will be **prioritised** if passed to the constructor, 
-otherwise the contents of the config file (*pywps.cfg*) are used. 
+otherwise the contents of the config file (`pywps.cfg`) are used. 
 
 
 Use the `run` method to start the server::
 
     ...
-    s = Server(host='0.0.0.0', processes=processes, config_file=config_file)
-
+    s = Server(host='localhost', processes=processes, config_file=config_file)
     s.run()
     ...
-    
 
 To make the server visible from another computer, replace ``localhost`` with ``0.0.0.0``.
     

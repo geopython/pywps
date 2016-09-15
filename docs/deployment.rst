@@ -1,6 +1,5 @@
 .. _deployment:
 
-=================================
 Deployment to a production server
 =================================
 
@@ -101,7 +100,7 @@ First, the WSGI module must be installed and enabled::
 You then can edit your site configuration file
 (`/etc/apache2/sites-enabled/yoursite.conf`) and add the following::
 
-        # PyWPS-4
+        # PyWPS
         WSGIDaemonProcess pywps home=/path/to/pywps user=www-data group=www-data processes=2 threads=5
         WSGIScriptAlias /pywps /path/to/pywps/pywps.wsgi process-group=pywps
 
@@ -152,9 +151,8 @@ The result should be an XML-encoded error message.
 .. code-block:: xml
 
     <?xml version="1.0" encoding="UTF-8"?>
-    <!-- PyWPS 4.0.0-alpha2 -->
     <ows:ExceptionReport xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/ows/1.1 http://schemas.opengis.net/ows/1.1.0/owsExceptionReport.xsd" version="1.0.0">
-        <ows:Exception exceptionCode="MissingParameterValue" locator="service" >
+        <ows:Exception exceptionCode="MissingParameterValue" locator="service">
             <ows:ExceptionText>service</ows:ExceptionText>
         </ows:Exception>
     </ows:ExceptionReport>

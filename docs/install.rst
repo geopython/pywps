@@ -1,11 +1,9 @@
 .. _installation:
 
-============
 Installation
 ============
 
-
-.. note:: PyWPS-4 is not tested on the MS Windows platform. Please join the
+.. note:: PyWPS is not tested on the MS Windows platform. Please join the
     development team if you need this platform to be supported. This is mainly 
     because of the lack of a multiprocessing library.  It is used to process 
     asynchronous execution, i.e., when making requests storing the response 
@@ -16,53 +14,80 @@ Installation
 Dependencies and requirements
 -----------------------------
 
-PyWPS-4 runs on Python 2.7, 3.3 or newer. PyWPS is currently tested and
-developed on Linux (mostly Ubuntu). In the documentation we take this 
+PyWPS runs on Python 2.7, 3.3 or higher. PyWPS is currently tested and
+developed on Linux (mostly Ubuntu).  In the documentation we take this 
 distribution as reference.
 
-Prior to installing PyWPS-4, Git and the Python bindings for GDAL must be
+Prior to installing PyWPS, Git and the Python bindings for GDAL must be
 installed in the system.  In Debian based systems these packages can be
 installed with a tool like *apt*::
 
-    $ sudo apt install git python-gdal
+    $ sudo apt-get install git python-gdal
 
+Alternatively, if GDAL is already installed on your system you can
+install the GDAL Python bindings via pip with::
+
+    $ pip install GDAL==1.10.0 --global-option=build_ext --global-option="-I/usr/include/gdal"
 
 Download and install
 --------------------
 
-Using PIP
-        The easiest way to install PyWPS-4 is using the Python Package Index
+Using pip
+        The easiest way to install PyWPS is using the Python Package Index
         (PIP).  It fetches the source code from the repository and installs it
         automatically in the system.  This might require superuser permissions
         (e.g. *sudo* in Debian based systems)::
 
             $ sudo pip install -e git+https://github.com/geopython/pywps.git@master#egg=pywps-dev
 
+.. todo::
+
+  * document Debian / Ubuntu package support
+
+
 Manual installation
-        In alternative PyWPS-4 can be installed manually.
-        It requires the cloning of the source code from the repository and then the
-        usage of the `setup.py` script.  An example again for Debian based systems (note
+        Manual installation of PyWPS requires `downloading <http://pywps.org/download>`_ the
+        source code followed by usage of the `setup.py` script.  An example again for Debian based systems (note
         the usage of `sudo` for install)::
 
-            $ git clone https://github.com/geopython/pywps.git pywps-4
-
-            $ cd pywps-4/
+            $ tar zxf pywps-x.y.z.tar.gz
+            $ cd pywps-x.y.z/
 
         Then install the package dependencies using pip::
 
             $ pip install -r requirements.txt
+            $ pip install -r requirements-gdal.txt  # for GDAL Python bindings (if python-gdal is not already installed by `apt-get`)
             $ pip install -r requirements-dev.txt  # for developer tasks
 
         To install PyWPS system-wide run::
 
             $ sudo python setup.py install
 
+For Developers
+        Installation of the source code using Git and Python's virtualenv tool::
+
+            $ virtualenv my-pywps-env
+            $ cd my-pywps-env
+            $ source bin/activate
+            $ git clone https://github.com/geopython/pywps.git
+            $ cd pywps
+
+        Then install the package dependencies using pip as described in the Manual installation section. To install
+        PyWPS::
+
+            $ python setup.py install
+
+        Note that installing PyWPS via a virtualenv environment keeps the installation of PyWPS and its
+        dependencies isolated to the virtual environment and does not affect other parts of the system.  This
+        installation option is handy for development and / or users who may not have system-wide administration
+        privileges.
+
 .. _demo:
 
 The demo service and its sample processes
 -----------------------------------------
 
-To use PyWPS-4 the user must code processes and publish them through a service.
+To use PyWPS the user must code processes and publish them through a service.
 A demo service is available that makes up a good starting point for first time
 users. This launches a very simple built-in server (relying on `flask
 <http://flask.pocoo.org/>`_), which is good enough for testing but probably not
