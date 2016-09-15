@@ -37,7 +37,7 @@ with open('../VERSION.txt') as f:
     version = f.read().strip()
 
 release = version
-latex_logo = 'pywps.png'
+latex_logo = '_static/pywps.png'
 
 extensions = ['sphinx.ext.extlinks',
               'sphinx.ext.autodoc',
