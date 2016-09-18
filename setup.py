@@ -1,6 +1,7 @@
 ###############################################################################
 #
-# Copyright (C) 2014-2016 PyWPS Development Team, represented by Jachym Cepicky
+# Copyright (C) 2014-2016 PyWPS Development Team, represented by
+# PyWPS Project Steering Committee
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to
