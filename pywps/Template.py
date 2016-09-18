@@ -8,7 +8,6 @@ PyWPS Templating system
 """
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
-#               jachym at les-ejk dot cz
 # License:
 #
 # Web Processing Service implementation

@@ -4,7 +4,7 @@ This module parses OGC Web Processing Service (WPS) GetCapabilities request.
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
 #               jachym at les-ejk dot cz
-# Lince:
+# License:
 #
 # Web Processing Service implementation
 # Copyright (C) 2006 Jachym Cepicky

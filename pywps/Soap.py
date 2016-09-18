@@ -6,8 +6,7 @@ SOAP wrapper
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
 # Author:  Jorge de Jesus
-#		   http://rsg.pml.ac.uk
-#          jmdj@pml.ac.uk
+#          jorge.jesus@gmail.com
 # License:
 #
 # Web Processing Service implementation

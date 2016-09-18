@@ -7,7 +7,7 @@ Each class in the package is resposible for each type of the request.
 
 # Author:    Jachym Cepicky
 #            http://les-ejk.cz
-# Lince:
+# License::
 #
 # Web Processing Service implementation
 # Copyright (C) 2006 Jachym Cepicky

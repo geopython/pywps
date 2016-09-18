@@ -4,7 +4,7 @@ a look at the ftplib.FTP documentation.
 """
 # Author:    Soeren Gebbert
 #            soerengebbert@googlemail.com
-# Lince:
+# License: GNU/GPL
 #
 # Web Processing Service implementation
 # Copyright (C) 2006 Jachym Cepicky

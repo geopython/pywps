@@ -4,7 +4,9 @@ WPS WSDL request handler
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
 #               jachym at les-ejk dot cz
-# Lince:
+# Author: Jorge de Jesus
+#              jorge.jesus@gmail.com
+# License:
 #
 # Web Processing Service implementation
 # Copyright (C) 2006 Jachym Cepicky

@@ -15,7 +15,7 @@ In the process:
 """
 # Author:	Jachym Cepicky
 #        	http://les-ejk.cz
-# Lince:
+# License:
 #
 # Web Processing Service implementation
 # Copyright (C) 2006 Jachym Cepicky

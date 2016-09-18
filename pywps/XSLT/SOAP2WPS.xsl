@@ -1,8 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-	<!--
-		Author: Author: Jorge de Jesus, http://rsg.pml.ac.uk,jmdj@pml.ac.uk
-	-->
-	<!-- License: GPL -->
+	<!--  License: GNU/GPL  Author: Jorge de Jesus jorge.jesus@gmail.com-->
 	<!--
 		decision tree: if url: reference output else: isComplexData==True
 		-ComplexData else: -LiteralData

@@ -32,7 +32,6 @@ Enjoy and happy GISing!
 """
 __version__ = "3.2.6"
 
-
 # Author:    Jachym Cepicky
 #            http://les-ejk.cz
 # License:
