@@ -1,6 +1,7 @@
 """Unit tests for IOs
 """
 import unittest
+import datetime
 from pywps.inout.literaltypes import *
 
 class ConvertorTest(unittest.TestCase):
@@ -36,6 +37,36 @@ class ConvertorTest(unittest.TestCase):
         self.assertFalse(convert_boolean(False))
         self.assertFalse(convert_boolean(0))
         self.assertTrue(convert_boolean(-1))
+
+    def test_time(self):
+        """Test time convertor"""
+        self.assertEqual(convert_time("12:00:00"),
+                         datetime.time(12, 0, 0))
+        self.assertTrue(isinstance(
+            convert_time(datetime.time(14)),
+            datetime.time))
+
+    def test_date(self):
+        """Test date convertor"""
+        self.assertEqual(convert_date("2011-07-21"),
+                         datetime.date(2011, 7, 21))
+        self.assertTrue(isinstance(
+            convert_date(datetime.date(2012, 12, 31)),
+            datetime.date))
+
+    def test_datetime(self):
+        """Test datetime convertor"""
+        self.assertEqual(convert_datetime("2016-09-22T12:00:00"),
+                         datetime.datetime(2016, 9, 22, 12))
+        self.assertTrue(isinstance(
+            convert_datetime("2016-09-22T12:00:00Z"),
+            datetime.datetime))
+        self.assertTrue(isinstance(
+            convert_datetime("2016-09-22T12:00:00+01:00"),
+            datetime.datetime))
+        self.assertTrue(isinstance(
+            convert_datetime(datetime.datetime(2016, 9, 22, 6)),
+            datetime.datetime))
 
 
 def load_tests(loader=None, tests=None, pattern=None):
