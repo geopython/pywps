@@ -198,3 +198,24 @@ latex_documents = [
 intersphinx_mapping = {'http://docs.python.org/': None}
 
 highlight_language = 'python'
+
+class Mock(object):
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __call__(self, *args, **kwargs):
+        return Mock()
+
+    @classmethod
+    def __getattr__(cls, name):
+        if name in ('__file__', '__path__'):
+            return '/dev/null'
+        elif name[0] == name[0].upper():
+            return Mock
+        else:
+            return Mock()
+
+MOCK_MODULES = ['GDAL', 'lxml', 'lxml.etree', 'lxml.builder']
+
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = Mock()
