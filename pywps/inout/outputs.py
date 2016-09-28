@@ -89,7 +89,9 @@ class BoundingBoxOutput(basic.BBoxInput):
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
 
-        bbox_data_doc = OWS.BoundingBox()
+        data_doc = WPS.Data()
+
+        bbox_data_doc = OWS.BoundingBoxData()
 
         bbox_data_doc.attrib['crs'] = self.crs
         bbox_data_doc.attrib['dimensions'] = str(self.dimensions)
@@ -97,8 +99,8 @@ class BoundingBoxOutput(basic.BBoxInput):
         bbox_data_doc.append(OWS.LowerCorner('{0[0]} {0[1]}'.format(self.data)))
         bbox_data_doc.append(OWS.UpperCorner('{0[2]} {0[3]}'.format(self.data)))
 
-        doc.append(bbox_data_doc)
-
+        data_doc.append(bbox_data_doc)
+        doc.append(data_doc)
         return doc
 
 
