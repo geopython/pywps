@@ -1,3 +1,8 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under GPL 2.0, Please consult LICENSE.txt for details #
+##################################################################
 """
 This package contains classes necessary for input parsing OGC WPS requests,
 working with list of processes, executing them and redirecting OGC WPS

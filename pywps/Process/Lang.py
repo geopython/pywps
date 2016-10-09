@@ -1,3 +1,8 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under GPL 2.0, Please consult LICENSE.txt for details #
+##################################################################
 """ Set and get language codes, initialize translated messages, so that the
 user scan use them directly in processes.
 

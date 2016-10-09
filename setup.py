@@ -1,3 +1,8 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under GPL 2.0, Please consult LICENSE.txt for details #
+##################################################################
 """PyWPS: Implementation of OGC's Web Processing Service in Python
 
 PyWPS is simple cgi set of scripts, which (nearly) fills standard of OGC
@@ -10,27 +15,6 @@ own GRASS-scripts, without taking care on how the data will be imported and
 served back to the client. Providing GRASS funktionality on the Internet
 should be as easy as possible.
 """
-
-# Author:    Jachym Cepicky
-#            http://les-ejk.cz
-# License: 
-#
-# Web Processing Service implementation
-# Copyright (C) 2006 Jachym Cepicky
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import sys
 import os
@@ -58,7 +42,6 @@ def compile_templates(base):
 PYWPS_PATH=get_current_path()
 TEMPLATES_PATH=get_templates_path(PYWPS_PATH)
 compile_templates(TEMPLATES_PATH)
-
 
 name = 'pywps'
 
