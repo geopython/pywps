@@ -1,11 +1,17 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under MIT, Please consult LICENSE.txt for details     #
+##################################################################
+
+
+"""List of know mimetypes"""
+
 # List of known complex data formats
-# you can use any other, but thise are widly known and supported by polular
+# you can use any other, but thise are widly known and supported by popular
 # software packages
 # based on Web Processing Service Best Practices Discussion Paper, OGC 12-029
 # http://opengeospatial.org/standards/wps
-
-"""List of known mimetypes
-"""
 
 from lxml.builder import ElementMaker
 from collections import namedtuple
