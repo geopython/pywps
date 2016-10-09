@@ -1,3 +1,10 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under MIT, Please consult LICENSE.txt for details     #
+##################################################################
+
+
 import logging
 import lxml
 from werkzeug.wrappers import Response

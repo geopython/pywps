@@ -1,3 +1,9 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under MIT, Please consult LICENSE.txt for details     #
+##################################################################
+
 import unittest
 import time
 from pywps import Service, Process, LiteralInput, LiteralOutput

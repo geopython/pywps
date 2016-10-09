@@ -1,5 +1,13 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under MIT, Please consult LICENSE.txt for details     #
+##################################################################
+
 """Validatating functions for various inputs
 """
+
+
 import logging
 from collections import namedtuple
 from pywps.validator.complexvalidator import validategml, validateshapefile, validategeojson, validategeotiff

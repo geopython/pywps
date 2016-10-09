@@ -1,3 +1,10 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under MIT, Please consult LICENSE.txt for details     #
+##################################################################
+
+
 from pywps.validator.mode import MODE
 
 def emptyvalidator(data_input, mode):

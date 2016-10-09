@@ -1,8 +1,12 @@
-'''
-Created on 10 Mar 2015
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under MIT, Please consult LICENSE.txt for details     #
+##################################################################
 
-@author: desousa
-'''
+__author__ = "Luis de Sousa"
+__date__ = "10-03-2015" 
+
 import os
 import tempfile
 import unittest

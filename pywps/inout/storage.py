@@ -1,3 +1,10 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under MIT, Please consult LICENSE.txt for details     #
+##################################################################
+
+
 from abc import ABCMeta, abstractmethod, abstractproperty
 import logging
 import os

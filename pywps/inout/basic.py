@@ -1,3 +1,10 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under MIT, Please consult LICENSE.txt for details     #
+##################################################################
+
+
 from pywps._compat import text_type, StringIO
 import tempfile, os
 from pywps.inout.literaltypes import LITERAL_DATA_TYPES, convert,\

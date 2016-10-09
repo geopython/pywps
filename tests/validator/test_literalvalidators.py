@@ -1,5 +1,12 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under MIT, Please consult LICENSE.txt for details     #
+##################################################################
+
 """Unit tests for literal validator
 """
+
 import unittest
 from pywps.validator.literalvalidator import *
 from pywps.inout.literaltypes import AllowedValue
