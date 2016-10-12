@@ -1,8 +1,14 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under GPL 2.0, Please consult LICENSE.txt for details #
+##################################################################
 """
 DummyProcess to check the WPS structure
 
 Author: Jorge de Jesus (jorge.jesus@gmail.com) as suggested by Kor de Jong
 """
+
 from pywps.Process import WPSProcess
 import types
 class Process(WPSProcess):

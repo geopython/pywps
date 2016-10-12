@@ -1,3 +1,8 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under GPL 2.0, Please consult LICENSE.txt for details #
+##################################################################
 """
 The ultimate process to test the status and update capabilities of the server
 The processes shoul be requested as follows:
@@ -11,7 +16,6 @@ The processes shoul be requested as follows:
 Done by Jorge de Jesus (jorge.mendesdejesus@wur.nl) as suggested by Kor de Jong
 
 """
-
 from pywps.Process.Process import WPSProcess                                
 class Process(WPSProcess):
      def __init__(self):

@@ -1,8 +1,17 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under GPL 2.0, Please consult LICENSE.txt for details #
+##################################################################
 """
 DummyProcess to check the WPS structure
 
-Author: Jorge de Jesus (jorge.de-jesus@jrc.it) as suggested by Kor de Jong
+Author: Jorge de Jesus (jorge.jesus@gmail.com) as suggested by Kor de Jong
 """
+
+__author__ = "Jorge Jesus"
+__email__ = "jorge.jesus@gmail.com"
+
 from pywps.Process import WPSProcess                                
 class Process(WPSProcess):
      def __init__(self):

@@ -1,3 +1,12 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under GPL 2.0, Please consult LICENSE.txt for details #
+##################################################################
+
+__author__ = "Jachym Cepicky"
+__email__ = "jachym.cepicky@gmail.com"
+
 from pywps.Process import WPSProcess
 
 class FirstProcess(WPSProcess):
@@ -12,11 +21,6 @@ class FirstProcess(WPSProcess):
         self.outdata = self.addComplexOutput(identifier="outdata", title="Complex out",formats=[{"mimeType":"text/xml"}])
         self.outdata2 = self.addComplexOutput(identifier="outdata2", title="Complex out",formats=[{"mimeType":"application/xml"}])
     def execute(self):
-        #tmp=self.indata.getValue()
-       # import pydevd;pydevd.settrace()
-        #self.outdata.setValue(tmp)
-       
-        #import pydevd;pydevd.settrace()
         self.outdata.setValue(self.indata.getValue()[0])
         self.outdata2.setValue(self.indata.getValue()[0])
 

@@ -1,3 +1,8 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under GPL 2.0, Please consult LICENSE.txt for details #
+##################################################################
 """PyWPS: Implementation of OGC's Web Processing Service in Python
 
 PyWPS is simple cgi set of scripts, which (nearly) fills standard of OGC
@@ -37,7 +42,6 @@ def compile_templates(base):
 PYWPS_PATH=get_current_path()
 TEMPLATES_PATH=get_templates_path(PYWPS_PATH)
 compile_templates(TEMPLATES_PATH)
-
 
 name = 'pywps'
 

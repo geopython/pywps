@@ -1,3 +1,8 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under GPL 2.0, Please consult LICENSE.txt for details #
+##################################################################
 """
 This package contains classes necessary for input parsing OGC WPS requests,
 working with list of processes, executing them and redirecting OGC WPS
@@ -62,9 +67,6 @@ example how to use this module::
     response for you.
 
 """
-
-__all__ = [ "Parser","processes", "Process", "Exceptions", "Wps", "Templates","Template","XSLT","Ftp"]
-
 # Author:   Jachym Cepicky
 #           http://les-ejk.cz
 # License:
@@ -84,6 +86,11 @@ __all__ = [ "Parser","processes", "Process", "Exceptions", "Wps", "Templates","T
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+
+__all__ = [ "Parser","processes", "Process", "Exceptions", "Wps", "Templates","Template","XSLT","Ftp"]
+
+
 
 import pywps
 import config

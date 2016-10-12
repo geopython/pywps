@@ -1,4 +1,8 @@
 /**
+ *  Copyright 2016 OSGeo Foundation
+ *  represented by PyWPS Project Steering Committee 
+ *  licensed under GPL 2.0, Please consult LICENSE.txt for details
+ * 
  * Author:      Jachym Cepicky <jachym les-ejk cz>
  *              http://les-ejk.cz
  * Purpose:     Generic WPS Client for JavaScript programming language
@@ -7,28 +11,9 @@
  *
  * The Library is designed to work with OpenLayers [http://openlayers.org]
  * 
- * Licence:     
- *  Web Processing Service Client implementation
- *  Copyright (C) 2009 Jachym Cepicky
- * 
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- * 
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- * 
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *
- *  TODO:
+  *  TODO:
  *  - a lot
  */
-
-
 /**
  * Class: OpenLayers.WPS
  * Web Processing Service Client

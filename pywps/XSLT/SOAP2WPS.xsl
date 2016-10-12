@@ -1,8 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-	<!--
-		Author: Author: Jorge de Jesus, http://rsg.pml.ac.uk,jmdj@pml.ac.uk
-	-->
-	<!-- License: GPL -->
+	<!--   Copyright 2016 OSGeo Foundation -->
+	<!--  represented by PyWPS Project Steering Committee -->
+	<!--  licensed under GPL 2.0, Please consult LICENSE.txt for details -->
 	<!--
 		decision tree: if url: reference output else: isComplexData==True
 		-ComplexData else: -LiteralData

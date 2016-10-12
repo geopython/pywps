@@ -1,3 +1,8 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under GPL 2.0, Please consult LICENSE.txt for details #
+##################################################################
 """
 Generic benchmark framework  for pywps.  
 
@@ -14,6 +19,7 @@ __version___ = "0.1"
 __maintainer__ = "Jorge de Jesus"
 __email__ = "jorge.jesus@gmail.com"
 __status__ = "Prototype"
+
 
 import cProfile
 import StringIO
