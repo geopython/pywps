@@ -14,6 +14,7 @@ from pywps.validator.allowed_value import ALLOWEDVALUETYPE, RANGECLOSURETYPE
 
 LOGGER = logging.getLogger('PYWPS')
 
+
 def validate_anyvalue(data_input, mode):
     """Just placeholder, anyvalue is always valid
     """
@@ -73,7 +74,7 @@ def _validate_range(interval, data):
         if interval.spacing:
             spacing = abs(interval.spacing)
             diff = data - interval.minval
-            passed = diff%spacing == 0
+            passed = diff % spacing == 0
         else:
             passed = True
 

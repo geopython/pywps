@@ -7,6 +7,7 @@
 """Validation modes
 """
 
+
 class MODE():
     """Validation mode enumeration
     """

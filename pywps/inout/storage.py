@@ -5,18 +5,21 @@
 ##################################################################
 
 
-from abc import ABCMeta, abstractmethod, abstractproperty
 import logging
 import os
+from abc import ABCMeta, abstractmethod
 from pywps._compat import urljoin
-from pywps.exceptions import NotEnoughStorage, NoApplicableCode
+from pywps.exceptions import NotEnoughStorage
 from pywps import configuration as config
 
 LOGGER = logging.getLogger('PYWPS')
 
+
 class STORE_TYPE:
     PATH = 0
 # TODO: cover with tests
+
+
 class StorageAbstract(object):
     """Data storage abstract class
     """
@@ -33,6 +36,7 @@ class StorageAbstract(object):
             url - url, where the data can be downloaded
         """
         pass
+
 
 class DummyStorage(StorageAbstract):
     """Dummy empty storage implementation, does nothing
@@ -83,7 +87,9 @@ class FileStorage(StorageAbstract):
         self.output_url = config.get_config_value('server', 'outputurl')
 
     def store(self, output):
-        import shutil, tempfile, math
+        import math
+        import shutil
+        import tempfile
 
         file_name = output.file
 
@@ -105,7 +111,7 @@ class FileStorage(StorageAbstract):
         output_name = tempfile.mkstemp(suffix=suffix, prefix=file_name,
                                        dir=self.target)[1]
 
-        full_output_name  = os.path.join(self.target, output_name)
+        full_output_name = os.path.join(self.target, output_name)
         LOGGER.info('Storing file output to %s', full_output_name)
         shutil.copy2(output.file, full_output_name)
 

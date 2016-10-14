@@ -4,11 +4,10 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-
-__author__ = "Alex Morega"
-
 import logging
 import sys
+
+__author__ = "Alex Morega"
 
 LOGGER = logging.getLogger('PYWPS')
 PY2 = sys.version_info[0] == 2

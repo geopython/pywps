@@ -12,19 +12,19 @@ Based on OGC OWS, WPS and
 http://lists.opengeospatial.org/pipermail/wps-dev/2013-October/000335.html
 """
 
-__author__ = "Alex Morega & Calin Ciociu"
 
-from werkzeug.exceptions import HTTPException, BadRequest, MethodNotAllowed
+from werkzeug.exceptions import HTTPException
 from werkzeug._compat import text_type
 from werkzeug.utils import escape
-from werkzeug.http import HTTP_STATUS_CODES
 
 import logging
 
 from pywps import __version__
 
-#logging.basicConfig()
+__author__ = "Alex Morega & Calin Ciociu"
+
 LOGGER = logging.getLogger('PYWPS')
+
 
 class NoApplicableCode(HTTPException):
     """No applicable code exception implementation
@@ -67,17 +67,17 @@ class NoApplicableCode(HTTPException):
         return text_type((
             u'<?xml version="1.0" encoding="UTF-8"?>\n'
             u'<!-- PyWPS %(version)s -->\n'
-            u'<ows:ExceptionReport xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/ows/1.1 http://schemas.opengis.net/ows/1.1.0/owsExceptionReport.xsd" version="1.0.0">\n'
+            u'<ows:ExceptionReport xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/ows/1.1 http://schemas.opengis.net/ows/1.1.0/owsExceptionReport.xsd" version="1.0.0">\n'  # noqa
             u'  <ows:Exception exceptionCode="%(name)s" locator="%(locator)s" >\n'
             u'      %(description)s\n'
             u'  </ows:Exception>\n'
             u'</ows:ExceptionReport>'
         ) % {
             'version': __version__,
-            'code':         self.code,
-            'locator':         escape(self.locator),
-            'name':         escape(self.name),
-            'description':  self.get_description(environ)
+            'code': self.code,
+            'locator': escape(self.locator),
+            'name': escape(self.name),
+            'description': self.get_description(environ)
         })
 
 
@@ -116,10 +116,12 @@ class StorageNotSupported(NoApplicableCode):
     """
     code = 400
 
+
 class NotEnoughStorage(NoApplicableCode):
     """Storage not supported exception implementation
     """
     code = 400
+
 
 class ServerBusy(NoApplicableCode):
     """Max number of operations exceeded
@@ -132,12 +134,13 @@ class ServerBusy(NoApplicableCode):
         """Get the XML body."""
         return text_type((
             u'<?xml version="1.0" encoding="UTF-8"?>\n'
-            u'<ows:ExceptionReport xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/ows/1.1 ../../../ows/1.1.0/owsExceptionReport.xsd" version="1.0.0">'
+            u'<ows:ExceptionReport xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/ows/1.1 ../../../ows/1.1.0/owsExceptionReport.xsd" version="1.0.0">'  # noqa
             u'<ows:Exception exceptionCode="%(name)s">'
             u'%(description)s'
             u'</ows:Exception>'
             u'</ows:ExceptionReport>'
         ) % {
-            'name':         escape(self.name),
-            'description':  self.get_description(environ)
-        })
+            'name': escape(self.name),
+            'description': self.get_description(environ)
+            }
+        )
