@@ -600,7 +600,7 @@ def _get_dataelement_value(value_el):
 
     if isinstance(value_el, lxml.etree._Element):
         if PY2:
-            return lxml.etree.tostring(value_el, encoding=unicode)
+            return lxml.etree.tostring(value_el, encoding=unicode)  # noqa
         else:
             return lxml.etree.tostring(value_el, encoding=str)
     else:
