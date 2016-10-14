@@ -35,6 +35,7 @@ install:
 script:
   - python -m unittest tests
   - coverage run --source=pywps -m unittest tests
+  - flake8 pywps/
 
 after_success:
   - coveralls
