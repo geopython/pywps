@@ -31,9 +31,10 @@ _tableprefix = configuration.get_config_value('logging', 'prefix')
 _schema = configuration.get_config_value('logging', 'schema')
 
 Base = declarative_base()
+
+
 class ProcessInstance(Base):
     __tablename__ = '{}requests'.format(_tableprefix)
-
 
     uuid = Column(VARCHAR(255), primary_key=True, nullable=False)
     pid = Column(Integer, nullable=False)
@@ -46,11 +47,13 @@ class ProcessInstance(Base):
     percent_done = Column(Float, nullable=True)
     status = Column(Integer, nullable=True)
 
+
 class RequestInstance(Base):
     __tablename__ = '{}stored_requests'.format(_tableprefix)
 
     uuid = Column(VARCHAR(255), primary_key=True, nullable=False)
     request = Column(BLOB, nullable=False)
+
 
 def log_request(uuid, request):
     """Write OGC WPS request (only the necessary parts) to database logging
@@ -70,7 +73,7 @@ def log_request(uuid, request):
 
     session.add(request)
     session.commit()
-    #NoApplicableCode("Could commit to database: {}".format(e.message))
+    # NoApplicableCode("Could commit to database: {}".format(e.message))
 
 
 def get_running():
@@ -79,7 +82,7 @@ def get_running():
 
     session = get_session()
     running = session.query(ProcessInstance).filter(
-            ProcessInstance.percent_done < 100).filter(
+        ProcessInstance.percent_done < 100).filter(
             ProcessInstance.percent_done > -1)
 
     return running
@@ -94,6 +97,7 @@ def get_stored():
 
     return stored
 
+
 def get_first_stored():
     """Returns running processes ids
     """
@@ -102,7 +106,6 @@ def get_first_stored():
     request = session.query(RequestInstance).first()
 
     return request
-
 
 
 def update_response(uuid, response, close=False):
@@ -135,6 +138,7 @@ def update_response(uuid, response, close=False):
         request.status = status
         session.commit()
 
+
 def _get_identifier(request):
     """Get operation identifier
     """
@@ -148,6 +152,7 @@ def _get_identifier(request):
             return None
     else:
         return None
+
 
 def get_session():
     """Get Connection for database
@@ -176,6 +181,7 @@ def get_session():
     _SESSION = Session()
 
     return _SESSION
+
 
 def store_process(uuid, request):
     """Save given request under given UUID for later usage

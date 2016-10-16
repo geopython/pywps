@@ -17,6 +17,7 @@ import os
 
 LOGGER = logging.getLogger('PYWPS')
 
+
 def validategml(data_input, mode):
     """GML validation function
 
@@ -42,7 +43,6 @@ def validategml(data_input, mode):
 
     if mode >= MODE.NONE:
         passed = True
-    import sys
 
     if mode >= MODE.SIMPLE:
 
@@ -75,9 +75,11 @@ def validategml(data_input, mode):
             gmlschema = etree.XMLSchema(gmlschema_doc)
             passed = gmlschema.validate(etree.parse(data_input.stream))
         except Exception as e:
+            LOGGER.warning(e)
             passed = False
 
     return passed
+
 
 def validategeojson(data_input, mode):
     """GeoJSON validation example
@@ -85,7 +87,7 @@ def validategeojson(data_input, mode):
     >>> import StringIO
     >>> class FakeInput(object):
     ...     json = open('point.geojson','w')
-    ...     json.write('''{"type":"Feature", "properties":{}, "geometry":{"type":"Point", "coordinates":[8.5781228542328, 22.87500500679]}, "crs":{"type":"name", "properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}}}''')
+    ...     json.write('''{"type":"Feature", "properties":{}, "geometry":{"type":"Point", "coordinates":[8.5781228542328, 22.87500500679]}, "crs":{"type":"name", "properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}}}''')  # noqa
     ...     json.close()
     ...     file = 'point.geojson'
     >>> class fake_data_format(object):
@@ -158,6 +160,7 @@ def validategeojson(data_input, mode):
 
     return passed
 
+
 def validateshapefile(data_input, mode):
     """ESRI Shapefile validation example
 
@@ -197,6 +200,7 @@ def validateshapefile(data_input, mode):
 
     return passed
 
+
 def validategeotiff(data_input, mode):
     """GeoTIFF validation example
     """
@@ -224,6 +228,7 @@ def validategeotiff(data_input, mode):
 
     return passed
 
+
 def _get_schemas_home():
     """Get path to schemas directory
     """
@@ -240,7 +245,6 @@ def _get_schemas_home():
 if __name__ == "__main__":
     import doctest
 
-    import os
     from pywps.wpsserver import temp_dir
 
     with temp_dir() as tmp:

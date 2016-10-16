@@ -4,18 +4,17 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-
-__author__ = "Alex Morega"
-
 import logging
 import sys
+
+__author__ = "Alex Morega"
 
 LOGGER = logging.getLogger('PYWPS')
 PY2 = sys.version_info[0] == 2
 
 if PY2:
     LOGGER.debug('Python 2.x')
-    text_type = unicode
+    text_type = unicode  # noqa
     from StringIO import StringIO
     from flufl.enum import Enum
     from urlparse import urlparse
