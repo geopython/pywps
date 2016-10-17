@@ -37,7 +37,8 @@ class ProcessTestCase(unittest.TestCase):
                               BoundingBoxInput("bbox", title="BBox", crss=[]),
                               ComplexInput("vector", title="Vector")
                           ],
-                          outputs=[]
+                          outputs=[],
+                          metadata=[Metadata('process metadata 1', 'http://example.org/1'), Metadata('process metadata 2', 'http://example.org/2')]) 
         )
         inputs = {
             input.identifier: input.title

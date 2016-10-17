@@ -26,6 +26,7 @@
 __author__ = 'Jachym Cepicky'
 
 from pywps import Process, LiteralInput, ComplexOutput, ComplexInput, Format
+from pywps.app.Common import Metadata
 from pywps.validator.mode import MODE
 from pywps.inout.formats import FORMATS
 
@@ -56,6 +57,7 @@ class DemoBuffer(Process):
             version='1.0.0',
             title='Buffer',
             abstract='This process demonstrates, how to create any process in PyWPS environment',
+            metadata=[Metadata('process metadata 1', 'http://example.org/1'), Metadata('process metadata 2', 'http://example.org/2')])
             inputs=inputs,
             outputs=outputs,
             store_supported=True,

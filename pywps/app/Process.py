@@ -41,6 +41,8 @@ class Process(object):
                    should be :class:`~LiteralOutput` and :class:`~ComplexOutput`
                    and :class:`~BoundingBoxOutput`
                    objects.
+    :param metadata: List of metadata advertised by this process. They
+                     should be :class:`pywps.app.Common.Metadata` objects.
     """
 
     def __init__(self, handler, identifier, title, abstract='', profile=[], metadata=[], inputs=[],
@@ -78,9 +80,8 @@ class Process(object):
         )
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
-        # TODO: See Table 32 Metadata in OGC 06-121r3
-        # for m in self.metadata:
-        #    doc.append(OWS.Metadata(m))
+        for m in self.metadata:
+            doc.append(OWS.Metadata(dict(m)))
         if self.profile:
             doc.append(OWS.Profile(self.profile))
         if self.version != 'None':
@@ -110,7 +111,7 @@ class Process(object):
             doc.append(OWS.Abstract(self.abstract))
 
         for m in self.metadata:
-            doc.append(OWS.Metadata({'{http://www.w3.org/1999/xlink}title': m}))
+            doc.append(OWS.Metadata(dict(m)))
 
         for p in self.profile:
             doc.append(WPS.Profile(p))

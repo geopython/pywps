@@ -11,13 +11,14 @@ from pywps import LiteralOutput, ComplexOutput, BoundingBoxOutput
 from pywps import E, WPS, OWS, OGCTYPE, Format, NAMESPACES, OGCUNIT
 from pywps.inout.literaltypes import LITERAL_DATA_TYPES
 from pywps.app.basic import xpath_ns
+from pywps.app.Common import Metadata
 from pywps.inout.formats import Format
 from pywps.inout.literaltypes import AllowedValue
 from pywps.validator.allowed_value import ALLOWEDVALUETYPE
 
 from tests.common import assert_pywps_version, client_for
 
-ProcessDescription = namedtuple('ProcessDescription', ['identifier', 'inputs'])
+ProcessDescription = namedtuple('ProcessDescription', ['identifier', 'inputs', 'metadata'])
 
 
 def get_data_type(el):
@@ -33,6 +34,9 @@ def get_describe_result(resp):
     for desc_el in resp.xpath('/wps:ProcessDescriptions/ProcessDescription'):
         [identifier_el] = xpath_ns(desc_el, './ows:Identifier')
         inputs = []
+        metadata = []
+        for metadata_el in xpath_ns(desc_el, './ows:Metadata'):
+            metadata.append(metadata_el.attrib['{http://www.w3.org/1999/xlink}title'])
         for input_el in xpath_ns(desc_el, './DataInputs/Input'):
             [input_identifier_el] = xpath_ns(input_el, './ows:Identifier')
             input_identifier = input_identifier_el.text
@@ -53,7 +57,7 @@ def get_describe_result(resp):
                 inputs.append((input_identifier, 'complex', formats))
             else:
                 raise RuntimeError("Can't parse input description")
-        result.append(ProcessDescription(identifier_el.text, inputs))
+        result.append(ProcessDescription(identifier_el.text, inputs, metadata))
     return result
 
 
@@ -131,9 +135,12 @@ class DescribeProcessInputTest(unittest.TestCase):
                 hello,
                 'hello',
                 'Process Hello',
-                inputs=[LiteralInput('the_name', 'Input name')])
+                inputs=[LiteralInput('the_name', 'Input name')],
+                metadata=[Metadata('process metadata 1', 'http://example.org/1'), Metadata('process metadata 2', 'http://example.org/2')]
+        )
         result = self.describe_process(hello_process)
         assert result.inputs == [('the_name', 'literal', 'integer')]
+        assert result.metadata == ['process metadata 1', 'process metadata 2']
 
     def test_one_literal_integer_input(self):
         def hello(request): pass
