@@ -102,8 +102,9 @@ class ComplexOutput(basic.ComplexOutput):
                      should be :class:`pywps.app.Common.Metadata` objects.
     """
 
-    def __init__(self, identifier, title, supported_formats=None,
-                 abstract='', metadata=[], mode=MODE.NONE):
+    def __init__(self, identifier, title,  supported_formats=None,
+                 abstract='', metadata=None,
+                 as_reference=False, mode=MODE.NONE):
         if metadata is None:
             metadata = []
 
@@ -112,7 +113,7 @@ class ComplexOutput(basic.ComplexOutput):
                                      supported_formats=supported_formats,
                                      mode=mode)
         self.metadata = metadata
-        self.as_reference = False
+        self.as_reference = as_reference
 
         self.storage = None
 
@@ -139,6 +140,17 @@ class ComplexOutput(basic.ComplexOutput):
                 E.Supported(*supported_format_elements)
             )
         )
+
+        return doc
+
+    def execute_xml_lineage(self):
+        doc = WPS.Output(
+            OWS.Identifier(self.identifier),
+            OWS.Title(self.title)
+        )
+
+        if self.abstract:
+            doc.append(OWS.Abstract(self.abstract))
 
         return doc
 

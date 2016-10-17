@@ -46,10 +46,10 @@ class Service(object):
         if cfgfiles:
             config.load_configuration(cfgfiles)
 
-        if config.get_config_value('server', 'file') and config.get_config_value('logging', 'level'):
+        if config.get_config_value('logging', 'file') and config.get_config_value('logging', 'level'):
             LOGGER.setLevel(getattr(logging, config.get_config_value('logging', 'level')))
-            msg_fmt = '%(asctime)s] [%(levelname)s] file=%(pathname)s line=%(lineno)s module=%(module)s function=%(funcName)s %(message)s'  # noqa
-            fh = logging.FileHandler(config.get_config_value('server', 'file'))
+            msg_fmt = '%(asctime)s] [%(levelname)s] file=%(pathname)s line=%(lineno)s module=%(module)s function=%(funcName)s %(message)s'
+            fh = logging.FileHandler(config.get_config_value('logging', 'file'))
             fh.setFormatter(logging.Formatter(msg_fmt))
             LOGGER.addHandler(fh)
         else:  # NullHandler
@@ -326,21 +326,22 @@ class Service(object):
                     raise MissingParameterValue(
                         inpt.identifier, inpt.identifier)
                 else:
-                    inputs = deque(maxlen=inpt.max_occurs)
-                    inputs.append(inpt.clone())
-                    data_inputs[inpt.identifier] = inputs
-
-            # Replace the dicts with the dict of Literal/Complex inputs
-            # set the input to the type defined in the process
-            if isinstance(inpt, ComplexInput):
-                data_inputs[inpt.identifier] = self.create_complex_inputs(
-                    inpt, wps_request.inputs[inpt.identifier])
-            elif isinstance(inpt, LiteralInput):
-                data_inputs[inpt.identifier] = self.create_literal_inputs(
-                    inpt, wps_request.inputs[inpt.identifier])
-            elif isinstance(inpt, BoundingBoxInput):
-                data_inputs[inpt.identifier] = self.create_bbox_inputs(
-                    inpt, wps_request.inputs[inpt.identifier])
+                    #inputs = deque(maxlen=inpt.max_occurs)
+                    #inputs.append(inpt.clone())
+                    #data_inputs[inpt.identifier] = inputs
+                    pass
+            else:
+                # Replace the dicts with the dict of Literal/Complex inputs
+                # set the input to the type defined in the process.
+                if isinstance(inpt, ComplexInput):
+                    data_inputs[inpt.identifier] = self.create_complex_inputs(
+                        inpt, wps_request.inputs[inpt.identifier])
+                elif isinstance(inpt, LiteralInput):
+                    data_inputs[inpt.identifier] = self.create_literal_inputs(
+                        inpt, wps_request.inputs[inpt.identifier])
+                elif isinstance(inpt, BoundingBoxInput):
+                    data_inputs[inpt.identifier] = self.create_bbox_inputs(
+                        inpt, wps_request.inputs[inpt.identifier])
 
         wps_request.inputs = data_inputs
 
