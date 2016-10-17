@@ -1,9 +1,15 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under MIT, Please consult LICENSE.txt for details     #
+##################################################################
+
+
 import logging
 import tempfile
-from werkzeug.exceptions import BadRequest, HTTPException
+from werkzeug.exceptions import HTTPException
 from werkzeug.wrappers import Request, Response
 from pywps import WPS, OWS
-from pywps.inout import Format
 from pywps._compat import PY2
 from pywps._compat import urlopen
 from pywps.app.basic import xml_response
@@ -21,6 +27,7 @@ import uuid
 import copy
 
 LOGGER = logging.getLogger("PYWPS")
+
 
 class Service(object):
 
@@ -41,13 +48,12 @@ class Service(object):
 
         if config.get_config_value('server', 'file') and config.get_config_value('logging', 'level'):
             LOGGER.setLevel(getattr(logging, config.get_config_value('logging', 'level')))
-            msg_fmt = '%(asctime)s] [%(levelname)s] file=%(pathname)s line=%(lineno)s module=%(module)s function=%(funcName)s %(message)s'
+            msg_fmt = '%(asctime)s] [%(levelname)s] file=%(pathname)s line=%(lineno)s module=%(module)s function=%(funcName)s %(message)s'  # noqa
             fh = logging.FileHandler(config.get_config_value('server', 'file'))
             fh.setFormatter(logging.Formatter(msg_fmt))
             LOGGER.addHandler(fh)
         else:  # NullHandler
             LOGGER.addHandler(logging.NullHandler())
-
 
     def get_capabilities(self):
         process_elements = [p.capabilities_xml()
@@ -58,8 +64,8 @@ class Service(object):
         doc.attrib['service'] = 'WPS'
         doc.attrib['version'] = '1.0.0'
         doc.attrib['{http://www.w3.org/XML/1998/namespace}lang'] = 'en-US'
-        doc.attrib[
-            '{http://www.w3.org/2001/XMLSchema-instance}schemaLocation'] = 'http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsGetCapabilities_response.xsd'
+        doc.attrib['{http://www.w3.org/2001/XMLSchema-instance}schemaLocation'] = \
+            'http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsGetCapabilities_response.xsd'
         # TODO: check Table 7 in OGC 05-007r7
         doc.attrib['updateSequence'] = '1'
 
@@ -184,17 +190,15 @@ class Service(object):
 
         doc.append(service_prov_doc)
 
+        server_href = {'{http://www.w3.org/1999/xlink}href': config.get_config_value('server', 'url')}
+
         # Operations Metadata
         operations_metadata_doc = OWS.OperationsMetadata(
             OWS.Operation(
                 OWS.DCP(
                     OWS.HTTP(
-                        OWS.Get({'{http://www.w3.org/1999/xlink}href':
-                            config.get_config_value('server', 'url')
-                        }),
-                        OWS.Post({'{http://www.w3.org/1999/xlink}href':
-                            config.get_config_value('server', 'url'),
-                        })
+                        OWS.Get(server_href),
+                        OWS.Post(server_href)
                     )
                 ),
                 name="GetCapabilities"
@@ -202,12 +206,8 @@ class Service(object):
             OWS.Operation(
                 OWS.DCP(
                     OWS.HTTP(
-                        OWS.Get({'{http://www.w3.org/1999/xlink}href':
-                            config.get_config_value('server', 'url'),
-                        }),
-                        OWS.Post({'{http://www.w3.org/1999/xlink}href':
-                            config.get_config_value('server', 'url'),
-                        })
+                        OWS.Get(server_href),
+                        OWS.Post(server_href)
                     )
                 ),
                 name="DescribeProcess"
@@ -215,12 +215,8 @@ class Service(object):
             OWS.Operation(
                 OWS.DCP(
                     OWS.HTTP(
-                        OWS.Get({'{http://www.w3.org/1999/xlink}href':
-                            config.get_config_value('server', 'url'),
-                        }),
-                        OWS.Post({'{http://www.w3.org/1999/xlink}href':
-                            config.get_config_value('server', 'url'),
-                        })
+                        OWS.Get(server_href),
+                        OWS.Post(server_href)
                     )
                 ),
                 name="Execute"
@@ -274,8 +270,8 @@ class Service(object):
         doc = WPS.ProcessDescriptions(
             *identifier_elements
         )
-        doc.attrib[
-            '{http://www.w3.org/2001/XMLSchema-instance}schemaLocation'] = 'http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd'
+        doc.attrib['{http://www.w3.org/2001/XMLSchema-instance}schemaLocation'] = \
+            'http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd'
         doc.attrib['service'] = 'WPS'
         doc.attrib['version'] = '1.0.0'
         doc.attrib['{http://www.w3.org/XML/1998/namespace}lang'] = 'en-US'
@@ -298,8 +294,7 @@ class Service(object):
             # just for execute
             process = copy.deepcopy(process)
 
-            workdir = os.path.abspath(
-                    config.get_config_value('server', 'workdir'))
+            workdir = os.path.abspath(config.get_config_value('server', 'workdir'))
             tempdir = tempfile.mkdtemp(prefix='pywps_process_', dir=workdir)
             process.set_workdir(tempdir)
         except KeyError:
@@ -399,11 +394,8 @@ class Service(object):
 
         def href_handler(complexinput, datain):
             """<wps:Reference /> handler"""
-            tmp_dir = config.get_config_value('server', 'workdir')
-
             # save the reference input in workdir
             tmp_file = tempfile.mkstemp(dir=complexinput.workdir)[1]
-
 
             try:
                 (reference_file, reference_file_data) = _openurl(datain)
@@ -535,10 +527,9 @@ class Service(object):
 
             python_path = os.path.join(gisbase, 'etc', 'python')
             os.environ['PYTHONPATH'] = '{}:{}'.format(os.environ.get('PYTHONPATH'),
-                    python_path)
+                                                      python_path)
             os.putenv('PYTHONPATH', os.environ.get('PYTHONPATH'))
             sys.path.insert(0, python_path)
-
 
     def create_bbox_inputs(self, source, inputs):
         """ Takes the http_request and parses the input to objects
@@ -566,7 +557,7 @@ class Service(object):
         request_uuid = uuid.uuid1()
 
         environ_cfg = http_request.environ.get('PYWPS_CFG')
-        if not 'PYWPS_CFG' in os.environ and environ_cfg:
+        if 'PYWPS_CFG' not in os.environ and environ_cfg:
             LOGGER.debug('Setting PYWPS_CFG to %s', environ_cfg)
             os.environ['PYWPS_CFG'] = environ_cfg
 
@@ -622,15 +613,14 @@ def _openurl(inpt):
 
     LOGGER.debug('Fetching URL %s', href)
     if inpt.get('method') == 'POST':
-        if inpt.has_key('body'):
+        if 'body' in inpt:
             data = inpt.get('body')
-        elif inpt.has_key('bodyreference'):
+        elif 'bodyreference' in inpt:
             data = urlopen(url=inpt.get('bodyreference')).read()
 
         reference_file = urlopen(url=href, data=data)
     else:
         reference_file = urlopen(url=href)
-
 
     if PY2:
         reference_file_data = reference_file.read()

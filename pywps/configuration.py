@@ -1,30 +1,12 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under MIT, Please consult LICENSE.txt for details     #
+##################################################################
+
 """
 Reads the PyWPS configuration file
 """
-# Author:    Calin Ciociu
-#            
-# License:
-#
-# Web Processing Service implementation
-# Copyright (C) 2015 PyWPS Development Team, represented by Jachym Cepicky
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to
-# deal in the Software without restriction, including without limitation the
-# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
-# sell copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-# 
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-# 
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-# IN THE SOFTWARE.
 
 import logging
 import sys
@@ -37,6 +19,8 @@ if PY2:
     import ConfigParser
 else:
     import configparser
+
+__author__ = "Calin Ciociu"
 
 
 CONFIG = None
@@ -100,7 +84,7 @@ def load_configuration(cfgfiles=None):
     outputpath = tempfile.gettempdir()
     CONFIG.set('server', 'outputurl', 'file:///%s' % outputpath)
     CONFIG.set('server', 'outputpath', outputpath)
-    CONFIG.set('server', 'workdir',  tempfile.gettempdir())
+    CONFIG.set('server', 'workdir', tempfile.gettempdir())
     CONFIG.set('server', 'parallelprocesses', '2')
 
     CONFIG.add_section('logging')
@@ -111,7 +95,7 @@ def load_configuration(cfgfiles=None):
 
     CONFIG.add_section('metadata:main')
     CONFIG.set('metadata:main', 'identification_title', 'PyWPS Processing Service')
-    CONFIG.set('metadata:main', 'identification_abstract', 'PyWPS is an implementation of the Web Processing Service standard from the Open Geospatial Consortium. PyWPS is written in Python.')
+    CONFIG.set('metadata:main', 'identification_abstract', 'PyWPS is an implementation of the Web Processing Service standard from the Open Geospatial Consortium. PyWPS is written in Python.')  # noqa
     CONFIG.set('metadata:main', 'identification_keywords', 'PyWPS,WPS,OGC,processing')
     CONFIG.set('metadata:main', 'identification_keywords_type', 'theme')
     CONFIG.set('metadata:main', 'identification_fees', 'NONE')
@@ -150,6 +134,7 @@ def load_configuration(cfgfiles=None):
 
     _check_config()
 
+
 def _check_config():
     """Check some configuration values
     """
@@ -161,17 +146,14 @@ def _check_config():
 
         if not os.path.isdir(confvalue):
             LOGGER.warning('server->%s configuration value %s is not directory'
-                    % (confid, confvalue))
+                           % (confid, confvalue))
 
         if not os.path.isabs(confvalue):
-            LOGGER.warning(
-                    'server->%s configuration value %s is not absolute path, making it absolute to %s' %\
-                        (confid, confvalue, os.path.abspath(confvalue)))
+            LOGGER.warning('server->%s configuration value %s is not absolute path, making it absolute to %s' %
+                           (confid, confvalue, os.path.abspath(confvalue)))
             CONFIG.set('server', confid, os.path.abspath(confvalue))
 
-
-    [checkdir(n) for n in  ['workdir', 'outputpath']]
-
+    [checkdir(n) for n in ['workdir', 'outputpath']]
 
 
 def _get_default_config_files_location():
@@ -213,12 +195,13 @@ def _get_default_config_files_location():
             homePath = os.getenv("HOME")
             if homePath:
                 cfgfiles = (os.path.join(pywps.__path__[0], "etc", "pywps.cfg"), "/etc/pywps.cfg",
-                    os.path.join(os.getenv("HOME"), ".pywps.cfg"))
+                            os.path.join(os.getenv("HOME"), ".pywps.cfg"))
             else:
                 cfgfiles = (os.path.join(pywps.__path__[0], "etc",
                             "pywps.cfg"), "/etc/pywps.cfg")
 
     return cfgfiles
+
 
 def get_size_mb(mbsize):
     """Get real size of given obeject

@@ -1,5 +1,11 @@
 """Unit tests for Formats
 """
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under MIT, Please consult LICENSE.txt for details     #
+##################################################################
+
 import unittest
 
 from pywps.inout.formats import Format, get_format, FORMATS

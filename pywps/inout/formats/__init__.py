@@ -1,11 +1,17 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under MIT, Please consult LICENSE.txt for details     #
+##################################################################
+
+
+"""List of know mimetypes"""
+
 # List of known complex data formats
-# you can use any other, but thise are widly known and supported by polular
+# you can use any other, but thise are widly known and supported by popular
 # software packages
 # based on Web Processing Service Best Practices Discussion Paper, OGC 12-029
 # http://opengeospatial.org/standards/wps
-
-"""List of known mimetypes
-"""
 
 from lxml.builder import ElementMaker
 from collections import namedtuple
@@ -20,9 +26,9 @@ _FORMATS = namedtuple('FORMATS', 'GEOJSON, JSON, SHP, GML, GEOTIFF, WCS,'
                                  'WFS110, WFS20, WMS, WMS130, WMS110,'
                                  'WMS100')
 FORMATS = _FORMATS(
-    _FORMAT('application/vnd.geo+json', '.geojson',  None),
-    _FORMAT('application/json', '.json',  None),
-    _FORMAT('application/x-zipped-shp', '.zip',  None),
+    _FORMAT('application/vnd.geo+json', '.geojson', None),
+    _FORMAT('application/json', '.json', None),
+    _FORMAT('application/x-zipped-shp', '.zip', None),
     _FORMAT('application/gml+xml', '.gml', None),
     _FORMAT('image/tiff; subtype=geotiff', '.tiff', None),
     _FORMAT('application/xogc-wcs', '.xml', None),
@@ -38,6 +44,7 @@ FORMATS = _FORMATS(
     _FORMAT('application/x-ogc-wms; version=1.1.0', '.xml', None),
     _FORMAT('application/x-ogc-wms; version=1.0.0', '.xml', None)
 )
+
 
 def _get_mimetypes():
     """Add FORMATS to system wide mimetypes
@@ -77,7 +84,6 @@ class Format(object):
         self.schema = schema
         self.validate = validate
         self.extension = extension
-
 
     @property
     def mime_type(self):
@@ -133,13 +139,12 @@ class Format(object):
         """
         self._schema = schema
 
-
     def same_as(self, frmt):
         """Check input frmt, if it seems to be the same as self
         """
-        return frmt.mime_type == self.mime_type and\
-               frmt.encoding == self.encoding and\
-               frmt.schema == self.schema
+        return all([frmt.mime_type == self.mime_type,
+                    frmt.encoding == self.encoding,
+                    frmt.schema == self.schema])
 
     def describe_xml(self):
         """Return describe process response element
@@ -149,7 +154,6 @@ class Format(object):
         doc = elmar.Format(
             elmar.MimeType(self.mime_type)
         )
-
 
         if self.encoding:
             doc.append(elmar.Encoding(self.encoding))
@@ -193,7 +197,7 @@ def get_format(frmt, validator=None):
     if frmt in FORMATS._asdict():
         formatdef = FORMATS._asdict()[frmt]
         outfrmt = Format(**formatdef._asdict())
-        outfrmt.validate=validator
+        outfrmt.validate = validator
         return outfrmt
     else:
         return Format('None', validate=validator)
