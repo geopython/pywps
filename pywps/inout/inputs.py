@@ -22,14 +22,14 @@ class BoundingBoxInput(basic.BBoxInput):
     :param int dimensions: 2 or 3
     :param int min_occurs: how many times this input occurs
     :param int max_occurs: how many times this input occurs
+    :param metadata: List of metadata advertised by this process. They
+                     should be :class:`pywps.app.Common.Metadata` objects.
     """
 
     def __init__(self, identifier, title, crss, abstract='',
-                 dimensions=2, metadata=None, min_occurs=1,
+                 dimensions=2, metadata=[], min_occurs=1,
                  max_occurs=1,
                  mode=MODE.NONE):
-        if metadata is None:
-            metadata = []
         basic.BBoxInput.__init__(self, identifier, title=title,
                                  abstract=abstract, crss=crss,
                                  dimensions=dimensions, mode=mode)
@@ -54,8 +54,8 @@ class BoundingBoxInput(basic.BBoxInput):
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
 
-        if self.metadata:
-            doc.append(OWS.Metadata(*self.metadata))
+        for m in self.metadata:
+            doc.append(OWS.Metadata(dict(m)))
 
         bbox_data_doc = E.BoundingBoxData()
         doc.append(bbox_data_doc)
@@ -124,8 +124,6 @@ class ComplexInput(basic.ComplexInput):
                  max_occurs=1, mode=MODE.NONE):
         """constructor"""
 
-        if metadata is None:
-            metadata = []
         basic.ComplexInput.__init__(self, identifier=identifier, title=title,
                                     abstract=abstract,
                                     supported_formats=supported_formats,
@@ -166,8 +164,8 @@ class ComplexInput(basic.ComplexInput):
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
 
-        if self.metadata:
-            doc.append(OWS.Metadata(*self.metadata))
+        for m in self.metadata:
+            doc.append(OWS.Metadata(dict(m)))
 
         doc.append(
             E.ComplexData(
@@ -251,10 +249,12 @@ class LiteralInput(basic.LiteralInput):
     :param int max_occurs: maximum occurence
     :param pywps.validator.mode.MODE mode: validation mode (none to strict)
     :param pywps.inout.literaltypes.AnyValue allowed_values: or :py:class:`pywps.inout.literaltypes.AllowedValue` object
+    :param metadata: List of metadata advertised by this process. They
+                     should be :class:`pywps.app.Common.Metadata` objects.
     """
 
     def __init__(self, identifier, title, data_type='integer', abstract='',
-                 metadata=None, uoms=None, default=None,
+                 metadata=[], uoms=None, default=None,
                  min_occurs=1, max_occurs=1,
                  mode=MODE.SIMPLE, allowed_values=AnyValue):
         """Constructor
@@ -284,8 +284,8 @@ class LiteralInput(basic.LiteralInput):
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
 
-        if self.metadata:
-            doc.append(OWS.Metadata(*self.metadata))
+        for m in self.metadata:
+            doc.append(OWS.Metadata(dict(m)))
 
         literal_data_doc = E.LiteralData()
 
