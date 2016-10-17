@@ -102,7 +102,7 @@ class ComplexOutput(basic.ComplexOutput):
                      should be :class:`pywps.app.Common.Metadata` objects.
     """
 
-    def __init__(self, identifier, title,  supported_formats=None,
+    def __init__(self, identifier, title, supported_formats=None,
                  abstract='', metadata=None,
                  as_reference=False, mode=MODE.NONE):
         if metadata is None:
