@@ -48,7 +48,7 @@ class Service(object):
 
         if config.get_config_value('logging', 'file') and config.get_config_value('logging', 'level'):
             LOGGER.setLevel(getattr(logging, config.get_config_value('logging', 'level')))
-            msg_fmt = '%(asctime)s] [%(levelname)s] file=%(pathname)s line=%(lineno)s module=%(module)s function=%(funcName)s %(message)s'
+            msg_fmt = '%(asctime)s] [%(levelname)s] file=%(pathname)s line=%(lineno)s module=%(module)s function=%(funcName)s %(message)s'  # noqa
             fh = logging.FileHandler(config.get_config_value('logging', 'file'))
             fh.setFormatter(logging.Formatter(msg_fmt))
             LOGGER.addHandler(fh)
@@ -326,9 +326,9 @@ class Service(object):
                     raise MissingParameterValue(
                         inpt.identifier, inpt.identifier)
                 else:
-                    #inputs = deque(maxlen=inpt.max_occurs)
-                    #inputs.append(inpt.clone())
-                    #data_inputs[inpt.identifier] = inputs
+                    # inputs = deque(maxlen=inpt.max_occurs)
+                    # inputs.append(inpt.clone())
+                    # data_inputs[inpt.identifier] = inputs
                     pass
             else:
                 # Replace the dicts with the dict of Literal/Complex inputs
