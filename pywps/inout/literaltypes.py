@@ -1,3 +1,9 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under MIT, Please consult LICENSE.txt for details     #
+##################################################################
+
 """Literaltypes are used for LiteralInputs, to make sure, input data are OK
 """
 
@@ -7,7 +13,7 @@ from pywps.exceptions import InvalidParameterValue
 from pywps.validator.allowed_value import RANGECLOSURETYPE
 from pywps.validator.allowed_value import ALLOWEDVALUETYPE
 from pywps._compat import PY2
-from pywps import OWS, WPS, OGCTYPE, NAMESPACES
+from pywps import OWS, NAMESPACES
 
 LITERAL_DATA_TYPES = ('float', 'boolean', 'integer', 'string',
                       'positiveInteger', 'anyURI', 'time', 'scale', 'angle',
@@ -32,6 +38,7 @@ class AnyValue(object):
     def json(self):
         return {'type': 'anyvalue'}
 
+
 class NoValue(object):
     """No value allowed
     NOTE: not really implemented
@@ -41,6 +48,7 @@ class NoValue(object):
     def json(self):
         return {'type': 'novalue'}
 
+
 class ValuesReference(object):
     """Any value for literal input
     NOTE: not really implemented
@@ -49,6 +57,7 @@ class ValuesReference(object):
     @property
     def json(self):
         return {'type': 'valuesreference'}
+
 
 class AllowedValue(AnyValue):
     """Allowed value parameters
@@ -83,7 +92,7 @@ class AllowedValue(AnyValue):
             doc = OWS.Value(str(self.value))
         else:
             doc = OWS.Range()
-            doc.set('{%s}rangeClosure' % NAMESPACES['ows'],  self.range_closure)
+            doc.set('{%s}rangeClosure' % NAMESPACES['ows'], self.range_closure)
             doc.append(OWS.MinimumValue(str(self.minval)))
             doc.append(OWS.MaximumValue(str(self.maxval)))
             if self.spacing:
@@ -104,6 +113,7 @@ class AllowedValue(AnyValue):
             'spacing': self.spacing,
             'range_closure': self.range_closure
         }
+
 
 def get_converter(convertor):
     """function for decoration of convert
@@ -142,7 +152,6 @@ def get_converter(convertor):
             raise InvalidParameterValue(
                 "Could not convert value '{}' to format '{}'".format(
                     data, data_type))
-
 
     return decorator_selector
 
@@ -184,6 +193,7 @@ def convert_boolean(inpt):
             val = True
     return val
 
+
 def convert_float(inpt):
     """Return float value from inpt
 
@@ -193,6 +203,7 @@ def convert_float(inpt):
 
     return float(inpt)
 
+
 def convert_integer(inpt):
     """Return integer value from input inpt
 
@@ -201,6 +212,7 @@ def convert_integer(inpt):
     """
 
     return int(float(inpt))
+
 
 def convert_string(inpt):
     """Return string value from input lit_input
@@ -214,6 +226,7 @@ def convert_string(inpt):
     else:
         return str(inpt)
 
+
 def convert_positiveInteger(inpt):
     """Return value of input"""
 
@@ -224,10 +237,11 @@ def convert_positiveInteger(inpt):
     else:
         return inpt
 
+
 def convert_anyURI(inpt):
     """Return value of input
-    
-    :rtype: url components 
+
+    :rtype: url components
     """
     inpt = convert_string(inpt)
     components = urlparse.urlparse(inpt)
@@ -237,6 +251,7 @@ def convert_anyURI(inpt):
     else:
         raise InvalidParameterValue(
             'The value "{}" does not seem to be of type anyURI'.format(inpt))
+
 
 def convert_time(inpt):
     """Return value of input
@@ -250,10 +265,12 @@ def convert_time(inpt):
     inpt = time.strptime(convert_string(inpt), time_format)
     return inpt
 
+
 def convert_scale(inpt):
     """Return value of input"""
 
     return convert_float(inpt)
+
 
 def convert_angle(inpt):
     """Return value of input
@@ -262,7 +279,7 @@ def convert_angle(inpt):
     """
 
     inpt = convert_float(inpt)
-    return inpt%360
+    return inpt % 360
 
 
 def make_allowedvalues(allowed_values):
@@ -278,8 +295,7 @@ def make_allowedvalues(allowed_values):
         if isinstance(value, AllowedValue):
             new_allowedvalues.append(value)
 
-        elif type(value) == tuple or\
-           type(value) == list:
+        elif type(value) == tuple or type(value) == list:
             minval = maxval = spacing = None
             if len(value) == 2:
                 minval = value[0]
@@ -308,7 +324,7 @@ def is_anyvalue(value):
 
     if value == AnyValue:
         is_av = True
-    elif value == None:
+    elif value is None:
         is_av = True
     elif isinstance(value, AnyValue):
         is_av = True

@@ -1,27 +1,9 @@
-###############################################################################
-#
-# Copyright (C) 2014-2016 PyWPS Development Team, represented by
-# PyWPS Project Steering Committee
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to
-# deal in the Software without restriction, including without limitation the
-# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
-# sell copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-# IN THE SOFTWARE.
-#
-###############################################################################
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under MIT, Please consult LICENSE.txt for details     #
+##################################################################
+
 
 import logging
 import os
@@ -37,11 +19,12 @@ from pywps.app.WPSResponse import STATUS
 from pywps.app.WPSRequest import WPSRequest
 import pywps.configuration as config
 from pywps._compat import PY2
-from pywps.exceptions import StorageNotSupported, OperationNotSupported, \
-    ServerBusy, NoApplicableCode
+from pywps.exceptions import (StorageNotSupported, OperationNotSupported,
+                              ServerBusy, NoApplicableCode)
 
 
 LOGGER = logging.getLogger("PYWPS")
+
 
 class Process(object):
     """
@@ -78,7 +61,6 @@ class Process(object):
         self._grass_mapset = None
         self.grass_location = grass_location
 
-
         if store_supported:
             self.store_supported = 'true'
         else:
@@ -89,8 +71,6 @@ class Process(object):
         else:
             self.status_supported = 'false'
 
-
-
     def capabilities_xml(self):
         doc = WPS.Process(
             OWS.Identifier(self.identifier),
@@ -99,7 +79,7 @@ class Process(object):
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
         # TODO: See Table 32 Metadata in OGC 06-121r3
-        #for m in self.metadata:
+        # for m in self.metadata:
         #    doc.append(OWS.Metadata(m))
         if self.profile:
             doc.append(OWS.Profile(self.profile))
@@ -151,7 +131,6 @@ class Process(object):
         if wps_request.store_execute == 'true':
             if self.store_supported != 'true':
                 raise StorageNotSupported('Process does not support the storing of the execute response')
-
 
             if wps_request.status == 'true':
                 if self.status_supported != 'true':
@@ -222,7 +201,6 @@ class Process(object):
         )
         process.start()
 
-
     def _store_process(self, stored, wps_request, wps_response):
         """Try to store given requests
         """
@@ -242,11 +220,10 @@ class Process(object):
             wps_response.update_status('PyWPS Process started', 0)
             wps_response = self.handler(wps_request, wps_response)
 
-            #if (not wps_response.status_percentage) or (wps_response.status_percentage != 100):
+            # if (not wps_response.status_percentage) or (wps_response.status_percentage != 100):
             LOGGER.debug('Updating process status to 100% if everything went correctly')
-            wps_response.update_status(
-                    'PyWPS Process {} finished'.format(self.title),
-                    100, STATUS.DONE_STATUS, clean=self.async)
+            wps_response.update_status('PyWPS Process {} finished'.format(self.title),
+                                       100, STATUS.DONE_STATUS, clean=self.async)
         except Exception as e:
             traceback.print_exc()
             LOGGER.debug('Retrieving file and line number where exception occurred')
@@ -288,18 +265,22 @@ class Process(object):
             self._run_async(new_wps_request, new_wps_response)
             dblog.remove_stored(uuid)
 
-
         return wps_response
 
     def clean(self):
         """Clean the process working dir and other temporary files
         """
         LOGGER.info("Removing temporary working directory: %s" % self.workdir)
-        if os.path.isdir(self.workdir):
-            shutil.rmtree(self.workdir)
-        if self._grass_mapset and os.path.isdir(self._grass_mapset):
-            LOGGER.info("Removing temporary GRASS GIS mapset: %s" % self._grass_mapset)
-            shutil.rmtree(self._grass_mapset)
+        try:
+            if os.path.isdir(self.workdir):
+                shutil.rmtree(self.workdir)
+            if self._grass_mapset and os.path.isdir(self._grass_mapset):
+                LOGGER.info("Removing temporary GRASS GIS mapset: %s" % self._grass_mapset)
+                shutil.rmtree(self._grass_mapset)
+        except WindowsError as err:
+                LOGGER.error('Windows Error: %s', err)
+        except Exception as err:
+                LOGGER.error('Unable to remove directory: %s', err)
 
     def set_workdir(self, workdir):
         """Set working dir for all inputs and outputs
@@ -329,20 +310,19 @@ class Process(object):
 
         if not PY2:
             LOGGER.warning('Seems PyWPS is running in Python-3 ' +
-                'environment, but GRASS GIS supports Python-2 only')
+                           'environment, but GRASS GIS supports Python-2 only')
             return
 
         if self.grass_location:
 
             from grass.script import core as grass
-            import grass.script.setup as gsetup
 
             dbase = ''
             location = ''
 
             # HOME needs to be set - and that is usually not the case for httpd
             # server
-            os.environ['HOME'] =  self.workdir
+            os.environ['HOME'] = self.workdir
 
             # GISRC envvariable needs to be set
             gisrc = open(os.path.join(self.workdir, 'GISRC'), 'w')
@@ -355,7 +335,7 @@ class Process(object):
             if self.grass_location.lower().startswith('epsg:'):
                 epsg = self.grass_location.lower().replace('epsg:', '')
                 dbase = self.workdir
-                os.environ['GISDBASE'] =  self.workdir
+                os.environ['GISDBASE'] = self.workdir
                 location = 'pywps_location'
                 grass.run_command('g.gisenv', set="GISDBASE=%s" % dbase)
                 grass.run_command('g.proj', flags="t", location=location, epsg=epsg)
@@ -369,19 +349,19 @@ class Process(object):
                 grass.run_command('g.gisenv', set="GISDBASE=%s" % dbase)
 
             else:
-                raise NoApplicableCode(
-                    'Location does exists or does not seem to be in "EPSG:XXXX" form nor is it existing directory: %s' % location)
+                raise NoApplicableCode('Location does exists or does not seem ' +
+                                       'to be in "EPSG:XXXX" form nor is it existing directory: %s' % location)
 
             # copy projection files from PERMAMENT mapset to temporary mapset
             mapset_name = tempfile.mkdtemp(prefix='pywps_', dir=os.path.join(dbase, location))
             shutil.copy(os.path.join(dbase, location, 'PERMANENT',
-                'DEFAULT_WIND'), os.path.join(mapset_name, 'WIND'))
+                        'DEFAULT_WIND'), os.path.join(mapset_name, 'WIND'))
             shutil.copy(os.path.join(dbase, location, 'PERMANENT',
-                'PROJ_EPSG'), os.path.join(mapset_name, 'PROJ_EPSG'))
+                        'PROJ_EPSG'), os.path.join(mapset_name, 'PROJ_EPSG'))
             shutil.copy(os.path.join(dbase, location, 'PERMANENT',
-                'PROJ_INFO'), os.path.join(mapset_name, 'PROJ_INFO'))
+                        'PROJ_INFO'), os.path.join(mapset_name, 'PROJ_INFO'))
             shutil.copy(os.path.join(dbase, location, 'PERMANENT',
-                'PROJ_UNITS'), os.path.join(mapset_name, 'PROJ_UNITS'))
+                        'PROJ_UNITS'), os.path.join(mapset_name, 'PROJ_UNITS'))
 
             # set _grass_mapset attribute - will be deleted once handler ends
             self._grass_mapset = mapset_name
@@ -391,7 +371,7 @@ class Process(object):
             grass.run_command('g.gisenv', set="LOCATION_NAME=%s" % location)
             grass.run_command('g.gisenv', set="MAPSET=%s" % os.path.basename(mapset_name))
 
-            LOGGER.debug(
-                'GRASS environment initialised with GISRC {}, GISBASE {}, GISDBASE {}, LOCATION {}, MAPSET {}'.format(
-                os.environ.get('GISRC'), os.environ.get('GISBASE'),
-                dbase, location, os.path.basename(mapset_name)))
+            LOGGER.debug('GRASS environment initialised')
+            LOGGER.debug('GISRC {}, GISBASE {}, GISDBASE {}, LOCATION {}, MAPSET {}'.format(
+                         os.environ.get('GISRC'), os.environ.get('GISBASE'),
+                         dbase, location, os.path.basename(mapset_name)))

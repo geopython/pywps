@@ -1,29 +1,12 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under MIT, Please consult LICENSE.txt for details     #
+##################################################################
+
 """Validator classes are used for ComplexInputs, to validate the content
 """
-# Author:    Jachym Cepicky
-#            
-# License:
-#
-# Web Processing Service implementation
-# Copyright (C) 2014-2015 PyWPS Development Team, represented by Jachym Cepicky
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to
-# deal in the Software without restriction, including without limitation the
-# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
-# sell copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-# 
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-# 
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-# IN THE SOFTWARE.
+
 
 import logging
 
@@ -33,6 +16,7 @@ import mimetypes
 import os
 
 LOGGER = logging.getLogger('PYWPS')
+
 
 def validategml(data_input, mode):
     """GML validation function
@@ -59,7 +43,6 @@ def validategml(data_input, mode):
 
     if mode >= MODE.NONE:
         passed = True
-    import sys
 
     if mode >= MODE.SIMPLE:
 
@@ -92,9 +75,11 @@ def validategml(data_input, mode):
             gmlschema = etree.XMLSchema(gmlschema_doc)
             passed = gmlschema.validate(etree.parse(data_input.stream))
         except Exception as e:
+            LOGGER.warning(e)
             passed = False
 
     return passed
+
 
 def validategeojson(data_input, mode):
     """GeoJSON validation example
@@ -102,7 +87,7 @@ def validategeojson(data_input, mode):
     >>> import StringIO
     >>> class FakeInput(object):
     ...     json = open('point.geojson','w')
-    ...     json.write('''{"type":"Feature", "properties":{}, "geometry":{"type":"Point", "coordinates":[8.5781228542328, 22.87500500679]}, "crs":{"type":"name", "properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}}}''')
+    ...     json.write('''{"type":"Feature", "properties":{}, "geometry":{"type":"Point", "coordinates":[8.5781228542328, 22.87500500679]}, "crs":{"type":"name", "properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}}}''')  # noqa
     ...     json.close()
     ...     file = 'point.geojson'
     >>> class fake_data_format(object):
@@ -175,6 +160,7 @@ def validategeojson(data_input, mode):
 
     return passed
 
+
 def validateshapefile(data_input, mode):
     """ESRI Shapefile validation example
 
@@ -214,6 +200,7 @@ def validateshapefile(data_input, mode):
 
     return passed
 
+
 def validategeotiff(data_input, mode):
     """GeoTIFF validation example
     """
@@ -241,6 +228,7 @@ def validategeotiff(data_input, mode):
 
     return passed
 
+
 def _get_schemas_home():
     """Get path to schemas directory
     """
@@ -257,7 +245,6 @@ def _get_schemas_home():
 if __name__ == "__main__":
     import doctest
 
-    import os
     from pywps.wpsserver import temp_dir
 
     with temp_dir() as tmp:

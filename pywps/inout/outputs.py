@@ -1,8 +1,14 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under MIT, Please consult LICENSE.txt for details     #
+##################################################################
+
+
 from pywps._compat import text_type
 from pywps import E, WPS, OWS, OGCTYPE, NAMESPACES
 from pywps.inout import basic
 from pywps.inout.storage import FileStorage
-from pywps.inout.formats import Format
 from pywps.validator.mode import MODE
 import lxml.etree as etree
 
@@ -193,7 +199,6 @@ class ComplexOutput(basic.ComplexOutput):
         """
         doc = WPS.Data()
 
-
         if self.data is None:
             complex_doc = WPS.ComplexData()
         else:
@@ -226,13 +231,13 @@ class LiteralOutput(basic.LiteralOutput):
     """
 
     def __init__(self, identifier, title, data_type='string', abstract='',
-            metadata=[], uoms=[], mode=MODE.SIMPLE):
+                 metadata=[], uoms=[], mode=MODE.SIMPLE):
         if metadata is None:
             metadata = []
         if uoms is None:
             uoms = []
         basic.LiteralOutput.__init__(self, identifier, title=title,
-                data_type=data_type, uoms=uoms, mode=mode)
+                                     data_type=data_type, uoms=uoms, mode=mode)
         self.abstract = abstract
         self.metadata = metadata
 
@@ -280,7 +285,6 @@ class LiteralOutput(basic.LiteralOutput):
             doc.append(OWS.Abstract(self.abstract))
 
         return doc
-
 
     def execute_xml(self):
         doc = WPS.Output(

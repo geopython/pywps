@@ -1,3 +1,10 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under MIT, Please consult LICENSE.txt for details     #
+##################################################################
+
+
 import os
 from lxml import etree
 import time
@@ -11,9 +18,10 @@ from pywps.dblog import update_response
 from collections import namedtuple
 
 _STATUS = namedtuple('Status', 'ERROR_STATUS, NO_STATUS, STORE_STATUS,'
-        'STORE_AND_UPDATE_STATUS, DONE_STATUS')
+                     'STORE_AND_UPDATE_STATUS, DONE_STATUS')
 
 STATUS = _STATUS(0, 10, 20, 30, 40)
+
 
 class WPSResponse(object):
 
@@ -35,7 +43,7 @@ class WPSResponse(object):
         self.uuid = uuid
 
     def update_status(self, message=None, status_percentage=None, status=None,
-            clean=True):
+                      clean=True):
         """
         Update status report of currently running process instance
 
@@ -124,7 +132,8 @@ class WPSResponse(object):
 
     def _construct_doc(self):
         doc = WPS.ExecuteResponse()
-        doc.attrib['{http://www.w3.org/2001/XMLSchema-instance}schemaLocation'] = 'http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsExecute_response.xsd'
+        doc.attrib['{http://www.w3.org/2001/XMLSchema-instance}schemaLocation'] = \
+            'http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsExecute_response.xsd'
         doc.attrib['service'] = 'WPS'
         doc.attrib['version'] = '1.0.0'
         doc.attrib['{http://www.w3.org/XML/1998/namespace}lang'] = 'en-US'
@@ -145,7 +154,7 @@ class WPSResponse(object):
         if self.process.abstract:
             process_doc.append(OWS.Abstract(self.process.abstract))
         # TODO: See Table 32 Metadata in OGC 06-121r3
-        #for m in self.process.metadata:
+        # for m in self.process.metadata:
         #    process_doc.append(OWS.Metadata(m))
         if self.process.profile:
             process_doc.append(OWS.Profile(self.process.profile))

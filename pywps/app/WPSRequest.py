@@ -1,3 +1,11 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under MIT, Please consult LICENSE.txt for details     #
+##################################################################
+
+
+import logging
 import lxml
 import lxml.etree
 from werkzeug.exceptions import MethodNotAllowed
@@ -9,14 +17,14 @@ from pywps.inout.basic import LiteralInput, ComplexInput, BBoxInput
 from pywps.exceptions import NoApplicableCode, OperationNotSupported, MissingParameterValue, VersionNegotiationFailed, \
     InvalidParameterValue, FileSizeExceeded
 from pywps import configuration
-from pywps._compat import PY2
-from pywps.validator.base import emptyvalidator
 from pywps.validator.mode import MODE
 from pywps.inout.literaltypes import AnyValue, NoValue, ValuesReference, AllowedValue
 
 from pywps.inout.formats import Format
 
 import json
+
+LOGGER = logging.getLogger("PYWPS")
 
 
 class WPSRequest(object):
@@ -379,28 +387,28 @@ class WPSRequest(object):
                             ))
 
                     inpt = LiteralInput(
-                        identifier = inpt_def['identifier'],
-                        title = inpt_def.get('title'),
-                        abstract = inpt_def.get('abstract'),
-                        data_type = inpt_def.get('data_type'),
-                        workdir = inpt_def.get('workdir'),
-                        allowed_values = AnyValue,
-                        uoms = inpt_def.get('uoms'),
-                        mode = inpt_def.get('mode')
+                        identifier=inpt_def['identifier'],
+                        title=inpt_def.get('title'),
+                        abstract=inpt_def.get('abstract'),
+                        data_type=inpt_def.get('data_type'),
+                        workdir=inpt_def.get('workdir'),
+                        allowed_values=AnyValue,
+                        uoms=inpt_def.get('uoms'),
+                        mode=inpt_def.get('mode')
                     )
                     inpt.uom = inpt_def.get('uom')
                     inpt.data = inpt_def.get('data')
 
                 elif inpt_def['type'] == 'bbox':
                     inpt = BBoxInput(
-                         identifier = inpt_def['identifier'],
-                         title = inpt_def['title'],
-                         abstract = inpt_def['abstract'],
-                         crss = inpt_def['crs'],
-                         dimensions = inpt_def['dimensions'],
-                         workdir = inpt_def['workdir'],
-                         mode = inpt_def['mode']
-                     )
+                        identifier=inpt_def['identifier'],
+                        title=inpt_def['title'],
+                        abstract=inpt_def['abstract'],
+                        crss=inpt_def['crs'],
+                        dimensions=inpt_def['dimensions'],
+                        workdir=inpt_def['workdir'],
+                        mode=inpt_def['mode']
+                    )
                     inpt.ll = inpt_def['bbox'][0]
                     inpt.ur = inpt_def['bbox'][1]
 
@@ -408,6 +416,7 @@ class WPSRequest(object):
                 self.inputs[identifier].append(inpt)
             else:
                 self.inputs[identifier] = [inpt]
+
 
 def get_inputs_from_xml(doc):
     the_inputs = {}
@@ -548,6 +557,7 @@ def get_data_from_kvp(data, part=None):
             else:
                 the_data[identifier] = io
         except Exception as e:
+            LOGGER.warning(e)
             the_data[d] = {'identifier': d, 'data': ''}
 
     return the_data
@@ -590,7 +600,7 @@ def _get_dataelement_value(value_el):
 
     if isinstance(value_el, lxml.etree._Element):
         if PY2:
-            return lxml.etree.tostring(value_el, encoding=unicode)
+            return lxml.etree.tostring(value_el, encoding=unicode)  # noqa
         else:
             return lxml.etree.tostring(value_el, encoding=str)
     else:

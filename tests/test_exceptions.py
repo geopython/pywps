@@ -1,3 +1,9 @@
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under MIT, Please consult LICENSE.txt for details     #
+##################################################################
+
 import unittest
 from pywps import Process, Service, WPS, OWS
 from pywps.app.basic import xpath_ns
