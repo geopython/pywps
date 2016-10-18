@@ -277,6 +277,7 @@ def convert_time(inpt):
         inpt = convert_datetime(inpt).time()
     return inpt
 
+
 def convert_date(inpt):
     """Return value of input
     date formating assumed according to ISO standard:
@@ -290,6 +291,7 @@ def convert_date(inpt):
     if not isinstance(inpt, datetime.date):
         inpt = convert_datetime(inpt).date()
     return inpt
+
 
 def convert_datetime(inpt):
     """Return value of input
