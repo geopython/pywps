@@ -7,7 +7,7 @@
 import unittest
 from pywps import Process, Service, WPS, OWS
 from pywps.app.basic import xpath_ns
-from tests.common import assert_pywps_version, client_for
+from pywps.tests import assert_pywps_version, client_for
 import lxml.etree
 
 

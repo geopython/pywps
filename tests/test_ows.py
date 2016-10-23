@@ -5,7 +5,7 @@
 ##################################################################
 
 __author__ = "Luis de Sousa"
-__date__ = "10-03-2015" 
+__date__ = "10-03-2015"
 
 import os
 import tempfile
@@ -17,7 +17,7 @@ from pywps.dependencies import ogr
 from pywps.exceptions import NoApplicableCode
 from pywps import WPS, OWS
 from pywps.wpsserver import temp_dir
-from tests.common import client_for, assert_response_success
+from pywps.tests import client_for, assert_response_success
 
 wfsResource = 'http://demo.mapserver.org/cgi-bin/wfs?service=WFS&version=1.1.0&request=GetFeature&typename=continents&maxfeatures=10'
 wcsResource = 'http://demo.mapserver.org/cgi-bin/wcs?service=WCS&version=1.0.0&request=GetCoverage&coverage=ndvi&crs=EPSG:4326&bbox=-92,42,-85,45&format=image/tiff&width=400&height=300'

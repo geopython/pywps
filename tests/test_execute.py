@@ -16,7 +16,7 @@ from pywps import get_inputs_from_xml, get_output_from_xml
 from pywps import E, WPS, OWS
 from pywps.app.basic import xpath_ns
 from pywps._compat import text_type
-from tests.common import client_for, assert_response_success
+from pywps.tests import client_for, assert_response_success
 
 from pywps._compat import PY2
 from pywps._compat import StringIO

@@ -8,7 +8,7 @@ import unittest
 import time
 from pywps import Service, Process, LiteralInput, LiteralOutput
 from pywps import WPS, OWS
-from tests.common import client_for, assert_response_accepted
+from pywps.tests import client_for, assert_response_accepted
 
 
 def create_sleep():
