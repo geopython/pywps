@@ -12,6 +12,7 @@ from pywps.inout.storage import FileStorage
 from pywps.inout.formats import Format
 from pywps.validator.mode import MODE
 import lxml.etree as etree
+import six
 
 
 class BoundingBoxOutput(basic.BBoxInput):
@@ -210,7 +211,11 @@ class ComplexOutput(basic.ComplexOutput):
                 data_doc = etree.parse(self.file)
                 complex_doc.append(data_doc.getroot())
             except:
-                complex_doc.text = etree.CDATA(self.base64)
+
+                if isinstance(self.data, six.string_types):
+                    complex_doc.text = self.data
+                else:
+                    complex_doc.text = etree.CDATA(self.base64)
 
         if self.data_format:
             if self.data_format.mime_type:
