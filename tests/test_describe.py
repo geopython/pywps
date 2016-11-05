@@ -16,7 +16,7 @@ from pywps.inout.formats import Format
 from pywps.inout.literaltypes import AllowedValue
 from pywps.validator.allowed_value import ALLOWEDVALUETYPE
 
-from tests.common import assert_pywps_version, client_for
+from pywps.tests import assert_pywps_version, client_for
 
 ProcessDescription = namedtuple('ProcessDescription', ['identifier', 'inputs', 'metadata'])
 

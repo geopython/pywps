@@ -10,7 +10,7 @@ import lxml.etree
 from pywps.app import Process, Service
 from pywps.app.Common import Metadata
 from pywps import WPS, OWS
-from tests.common import assert_pywps_version, client_for
+from pywps.tests import assert_pywps_version, client_for
 
 class BadRequestTest(unittest.TestCase):
 
