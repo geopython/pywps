@@ -24,7 +24,7 @@ from sqlalchemy import Column, Integer, String, VARCHAR, Float, DateTime, BLOB
 from sqlalchemy.orm import sessionmaker
 
 LOGGER = logging.getLogger('PYWPS')
-_SESSION = None
+_SESSION_MAKER = None
 
 
 _tableprefix = configuration.get_config_value('logging', 'prefix')
@@ -73,6 +73,7 @@ def log_request(uuid, request):
 
     session.add(request)
     session.commit()
+    session.close()
     # NoApplicableCode("Could commit to database: {}".format(e.message))
 
 
@@ -137,6 +138,7 @@ def update_response(uuid, response, close=False):
         request.percent_done = status_percentage
         request.status = status
         session.commit()
+        session.close()
 
 
 def _get_identifier(request):
@@ -159,15 +161,12 @@ def get_session():
     """
 
     LOGGER.debug('Initializing database connection')
-    global _SESSION
-
-    if _SESSION:
-        return _SESSION
+    global _SESSION_MAKER
 
     database = configuration.get_config_value('logging', 'database')
     echo = True
     level = configuration.get_config_value('logging', 'level')
-    if level in ['INFO', 'DEBUG']:
+    if level in ['INFO']:
         echo = False
     try:
         engine = sqlalchemy.create_engine(database, echo=echo)
@@ -178,9 +177,9 @@ def get_session():
     ProcessInstance.metadata.create_all(engine)
     RequestInstance.metadata.create_all(engine)
 
-    _SESSION = Session()
+    _SESSION_MAKER = Session
 
-    return _SESSION
+    return _SESSION_MAKER()
 
 
 def store_process(uuid, request):
@@ -191,6 +190,7 @@ def store_process(uuid, request):
     request = RequestInstance(uuid=str(uuid), request=request.json)
     session.add(request)
     session.commit()
+    session.close()
 
 
 def remove_stored(uuid):
@@ -201,3 +201,4 @@ def remove_stored(uuid):
     request = session.query(RequestInstance).filter_by(name='uuid').first()
     session.delete(request)
     session.commit()
+    session.close()
