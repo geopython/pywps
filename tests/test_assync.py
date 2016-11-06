@@ -59,6 +59,6 @@ class ExecuteTest(unittest.TestCase):
         resp = client.post_xml(doc=request_doc)
         assert_response_accepted(resp)
 
-        # To Do:
+        # TODO:
         # . extract the status URL from the response
         # . send a status request
