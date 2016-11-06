@@ -13,6 +13,7 @@ import logging
 
 logging.disable(logging.CRITICAL)
 
+
 class WpsClient(Client):
 
     def post_xml(self, *args, **kwargs):
@@ -46,8 +47,9 @@ def assert_response_accepted(resp):
     success = resp.xpath_text('/wps:ExecuteResponse'
                               '/wps:Status'
                               '/wps:ProcessAccepted')
-    assert success != None
-    # To Do: assert status URL is present
+    assert success is not None
+    # TODO: assert status URL is present
+
 
 def assert_process_started(resp):
     assert resp.status_code == 200
