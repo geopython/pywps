@@ -1,26 +1,10 @@
 # -*- coding: utf-8 -*-
 
-# Author:    Jachym Cepicky
-#            http://les-ejk.cz
-# License: 
-#
-# Web Processing Service implementation
-# Copyright (C) 2006 Jachym Cepicky
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
+##################################################################
+# Copyright 2016 OSGeo Foundation,                               #
+# represented by PyWPS Project Steering Committee,               #
+# licensed under GPL 2.0, Please consult LICENSE.txt for details #
+##################################################################
 
 #
 # PyWPS documentation build configuration file, created by
@@ -61,14 +45,17 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PyWPS'
-copyright = u'2010, Jachym Cepicky'
+authors = u'Jachym Cepicky'
+license = u'This work is licensed under a Creative Commons Attribution 4.0 International License'
+copyright = u'2010-2015, ' + authors + ' ' + license
+
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-version = '3.2.6'
+version = '3.2.7'
 # The full version, including alpha/beta/rc tags.
 release = version
 
