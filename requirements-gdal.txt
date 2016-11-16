@@ -1,1 +1,3 @@
+# On your system check the GDAL version using gdalinfo --version, and adjust
+# this file to suit. 
 GDAL==1.10.0 --global-option=build_ext --global-option="-I/usr/include/gdal"
