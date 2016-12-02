@@ -55,6 +55,8 @@ def _get_mimetypes():
     mimetypes.init()
     for pywps_format in FORMATS:
         mimetypes.add_type(pywps_format.mime_type, pywps_format.extension, True)
+
+
 _get_mimetypes()
 
 
