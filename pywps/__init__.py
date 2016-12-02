@@ -4,8 +4,6 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-__author__ = "Alex Morega & Calin Ciociu"
-
 import logging
 
 import os
