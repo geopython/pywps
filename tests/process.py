@@ -38,7 +38,7 @@ class ProcessTestCase(unittest.TestCase):
                               ComplexInput("vector", title="Vector")
                           ],
                           outputs=[],
-                          metadata=[Metadata('process metadata 1', 'http://example.org/1'), Metadata('process metadata 2', 'http://example.org/2')]) 
+                          metadata=[Metadata('process metadata 1', 'http://example.org/1'), Metadata('process metadata 2', 'http://example.org/2')]
         )
         inputs = {
             input.identifier: input.title
