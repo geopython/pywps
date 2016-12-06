@@ -121,7 +121,7 @@ class WPSResponse(object):
             WPS.ProcessFailed(
                 WPS.ExceptionReport(
                     OWS.Exception(
-                        OWS.Exception(self.message),
+                        OWS.ExceptionText(self.message),
                         exceptionCode='NoApplicableCode',
                         locater='None'
                     )
