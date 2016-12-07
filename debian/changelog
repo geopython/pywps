@@ -1,3 +1,13 @@
+pywps (4.0.0) trusty; urgency=medium
+
+  * New version of PyWPS
+  * New processes structure
+  * Logging to database, jobs control
+  * Jobs queue 
+  * Saparated processes and PyWPS-Demo project
+
+ -- Jáchym Čepický <jachym.cepicky@opengeolabs.cz>  Wed, 07 Dec 2016 10:54:43 +0100
+
 pywps (4.0.0-alpha2) trusty; urgency=medium
 
   * Re-did debian packaging for v4.0
