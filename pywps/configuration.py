@@ -86,6 +86,9 @@ def load_configuration(cfgfiles=None):
     CONFIG.set('server', 'outputpath', outputpath)
     CONFIG.set('server', 'workdir', tempfile.gettempdir())
     CONFIG.set('server', 'parallelprocesses', '2')
+    # If this flag is enabled it will set the HOME environment
+    # for each process to its current workdir (a temp folder).
+    CONFIG.set('server', 'sethomedir', 'false')
 
     CONFIG.add_section('logging')
     CONFIG.set('logging', 'file', '')

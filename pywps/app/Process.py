@@ -218,6 +218,11 @@ class Process(object):
     def _run_process(self, wps_request, wps_response):
         try:
             self._set_grass()
+            # if required set HOME to the current working directory.
+            if config.get_config_value('server', 'sethomedir') is True:
+                os.environ['HOME'] = self.workdir
+                LOGGER.info('Setting HOME to current working directory: %s', os.environ['HOME'])
+            LOGGER.debug('ProcessID=%s, HOME=%s', self.uuid, os.environ['HOME'])
             wps_response.update_status('PyWPS Process started', 0)
             wps_response = self.handler(wps_request, wps_response)
 
