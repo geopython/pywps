@@ -1,29 +1,36 @@
 # Howto release PyWPS
 
-This document gives you, as PyWPS release master complete tutorial of how to get
-PyWPS release rolled up and deployed to target server, create packages etc.
+This document gives you, as PyWPS release master, a complete tutorial of how to get
+a PyWPS release rolled up and deployed to a target server, create packages etc.
 
 ## PyWPS versioning
 
-PyWPS uses [Debian version naming system](https://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-Version). Every policy should be checked against it.
+PyWPS uses [Debian version naming system](https://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-Version). 
+Every policy should be checked against it.
 
-PyWPS uses 3 numbers release description: MAJOR.MINOR.MAINTENANCE. Within MAJOR
+PyWPS uses a 3 number release description: MAJOR.MINOR.MAINTENANCE. Within MAJOR
 releases, we should aim, not to break backwards compatibility.
 
 Event MINOR version numbers (0, 2, 4, 6, ...) are considered as stable, where as
 odd numbers (1, 3, 5, 7, ...) are current development branches. MINOR releases
 should add new features.
 
-MAINTENANCE number should be used for bugfix releases only. No new features are
-added.
+The MAINTENANCE number should be used for bugfix releases only. No new features 
+are added.
 
-For release candindates `MAJOR.MINOR.MAINTENANCE-rcX` format should be used.
+For release candidates, the `MAJOR.MINOR.MAINTENANCE-rcX` format should be used.
 
-## Go to `master` branch
+## Merge `develop` branch
+
+`develop` is the main development branch, therefore it must be merged to the 
+`master` branch before a new release.
 
 ```
 git checkout master
+
+git merge develop
 ```
+
 ## Fix files, create tags, commit, push
 
 * Fix the [VERSION.txt](https://github.com/geopython/pywps/blob/master/VERSION.txt) file.
@@ -43,10 +50,10 @@ git push --tags
 ```
 
 * Update version in `VERSION.txt` and `pywps/__init__.py` to dev branch, e.g.
-`4.1-dev` and push to master:
+`4.1-dev` and push to `develop`:
 
 ```
-git checkout master
+git checkout develop
 $EDITOR VERSION.txt pywps/__init__.py # add 4.1-dev version
 git commit -m"Updating version to 4.1-dev"
 git push
@@ -100,10 +107,10 @@ NOTE: [IF ANY]
 What is PyWPS:
 --------------
 
-PyWPS (Python Web Processing Service) is implementation of Web
+PyWPS (Python Web Processing Service) is an implementation of the Web
 Processing Service standard from Open Geospatial Consortium (OGC(R)). 
 Processes can be written using GRASS GIS, but usage of other programs, like
-R package, GDAL or PROJ tools, is possible as well.
+R, GDAL or PROJ tools, is possible as well.
 
 Happy GISing!
 

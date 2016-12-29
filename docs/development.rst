@@ -35,7 +35,7 @@ of the changes you expect to achieve. For example:
 2. Fork and clone the PyWPS repository
 --------------------------------------
 
-When you start modifying to the code, there is always the possibility for 
+When you start modifying the code, there is always the possibility for 
 something to go wrong, rendering PyWPS unusable. The first action to avoid such 
 a situation is to create a development sand box. In GitHub this can
 easily be made by creating a fork of the main PyWPS repository. Access the 
@@ -51,7 +51,15 @@ issuing a command like::
 
 Where you should replace *<github-user>* with your GitHub user name.
 
-You can finally start programming your new feature, or fixing that bug you 
+Before you start coding ensure you are working on the `develop` branch:
+
+	git checkout develop
+	
+This is the main development branch in the PyWPS project; the traditional 
+`master` branch is strictly used to keep track of code releases. All your
+modifications to the PyWPS code base must be kept in the `develop` branch. 
+
+You can now start programming your new feature, or fixing that bug you 
 found. Keep in mind that PyWPS depends on a few libraries, refer to the  
 :ref:`installation` section to make sure you have all of them installed.
 
@@ -59,7 +67,7 @@ found. Keep in mind that PyWPS depends on a few libraries, refer to the
 3. Commit and pull request
 --------------------------
 
-If your modification to code is relatively small and can be included in a 
+If your modification to the code is relatively small and can be included in a 
 single *commit* then all you need to is reference the issue in the **commit**
 message, e.g.::
 
@@ -71,9 +79,11 @@ messages
 <https://help.github.com/articles/closing-issues-via-commit-messages/>`_. Then 
 you push the changes to your forked repository, issuing a command like::
 
-	git push origin master
+	git push origin develop
+	
+Once again, make sure your commit(s) are pushed to the `develop` branch.
 
-Finally you an create a pull request. This it is a formal request to merge your 
+Finally you can create a pull request. This is a formal request to merge your 
 contribution with the code base; it is fully managed by GitHub and greatly 
 facilitates the review process. You do so by accessing the repository 
 associated with your user and clicking the *New pull request* button. Make sure 
@@ -87,7 +97,7 @@ you must identify the issue it closes in the pull request itself. Check out
 <https://github.com/blog/1506-closing-issues-via-pull-requests>`_ for 
 the details.
 
-The members of the PyWPS PSC are then notified if your pull request. They 
+The members of the PyWPS PSC are then notified of your pull request. They 
 review your contribution and hopefully accept merging it to the code base.
 
 
@@ -101,14 +111,14 @@ repository::
 
 	git remote add upstream https://github.com/geopython/PyWPS
 	
-Then you can use the *fetch* command to update your local repository metadata:: 
+You can use the *fetch* command to update your local repository metadata:: 
 	
 	git fetch upstream
 	
-Finally you use a *pull* command to merge the latest *commits* into your local 
+Then you use a *pull* command to merge the latest *commits* into your local 
 repository::
 	
-	git pull upstream master
+	git pull upstream develop
 
 
 5. Help and discussion
