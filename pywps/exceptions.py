@@ -34,7 +34,7 @@ class NoApplicableCode(HTTPException):
     Base exception class
     """
 
-    code = 400
+    code = 500
     locator = ""
 
     def __init__(self, description, locator="", code=400):
