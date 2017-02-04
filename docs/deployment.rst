@@ -12,7 +12,7 @@ more advised. PyWPS is runs as a `WSGI
 relies on the `Werkzeug <http://werkzeug.pocoo.org/>`_ library for this purpose.
 
 Deploying an individual PyWPS instance
----------------------------------------
+--------------------------------------
 
 PyWPS should be installed in your computer (as per the :ref:`installation` 
 section). As a following step, you can now create several instances of your WPS 
@@ -122,15 +122,117 @@ And of course restart the server::
     $ sudo service apache2 restart
 
 
-Deployment on nginx
--------------------
+Deployment on Nginx-Gunicorn
+----------------------------
 
-.. note:: We are currently missing documentation about `nginx`.
-        Please help documenting the deployment of PyWPS to nginx.
+.. note:: We will use Greenunicorn  for pyWPS deployment, since it is a very simple to configurate server. 
 
-You should be able to deploy PyWPS on nginx as a standard WSGI application. The
-best documentation is probably to be found at `Readthedocs
-<http://uwsgi-docs.readthedocs.io/en/latest/WSGIquickstart.html>`_.
+   For difference between WSGI server consult:  `WSGI comparison <https://www.digitalocean.com/community/tutorials/a-comparison-of-web-servers-for-python-based-web-applications>`_.
+   
+   uWSGU is more popular than gunicorn, best documentation is probably to be found at `Readthedocs <http://uwsgi-docs.readthedocs.io/en/latest/WSGIquickstart.html>`_.
+
+We need nginx and gunicorn server::
+
+   $ apt install nginx-full
+   $ apt install gunicorn3
+
+It is assumed that PyWPS  is installed in your system (if not see: ref:`installation`) and we will used pywps-demo as installation example.
+
+First, clonning the pywps-demo example to the root / (you need to be sudoer or root to run the examples)::
+   
+   $ cd /
+   $ git clone https://github.com/geopython/pywps-demo.git
+
+Second, preparing the WSGI script for gunicorn. It is necessary that the 
+WSGI script located on the pywps-demo is identified as a python module by gunicorn, 
+this is done by creating a link with .py extention to the wsgi file::  
+   
+   $ cd /pywps-demo/wsgi
+   $ ln -s ./pywps.wsgi ./pywps_app.py 
+   
+Gunicorn can already be tested by setting python path on the command options::
+   
+   $ gunicorn3 -b 127.0.0.1:8081  --workers $((2*`nproc --all`)) --log-syslog  --pythonpath /pywps-demo wsgi.pywps_app:application   
+  
+The command will start a gunicorn instance on the localhost IP and port 8081, logging to systlog 
+(/var/log/syslog), using pywps process folder /pywps-demo/processes and loading module wsgi.pywps_app and object/function application for WSGI.  
+
+.. note::  Gunicorn uses a prefork model where the master process forks processes (workers) 
+   that willl accept incomming connections. The --workers flag sets the number of processes, 
+   the default values is 1 but the recomended value is 2 or 4 times the number of CPU cores.      
+
+Next step is to configure NGINX,  by pointing to the WSGI server by changing the location paths of the  default  
+site file but editing file /etc/nginx/sites-enabled as follows::: 
+   
+   server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+        server_name _;
+
+        #better to redirect / to wps application
+        location / {
+        return 301 /wps;
+        }
+
+        location /wps {
+                # with try_files active there will be problems
+                #try_files $uri $uri/ =404;
+
+                proxy_set_header Host $host;
+                proxy_redirect          off;
+                proxy_set_header        X-NginX-Proxy true;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_pass http://127.0.0.1:8081;
+                }
+   
+   }
+ 
+It is likely that part of the proxy configuration is already set on the file /etc/nginx/proxy.conf.  
+Of course the necessatyrestart of nginx :: 
+   
+   $ service nginx restart
+   
+The service will now be available on the IP of the server or localhost ::
+   
+   http://localhost/wps?request=GetCapabilities&service=wps
+ 
+The current gunicorn instance was launched by the user. In a production server it is necessary to set gunicorn as a service  
+
+On ubuntu 16.04  the systemcltd system requires a service file that will start the gunicorn3 service. The service file (/lib/systemd/system/gunicorn.service)
+has to be configure as follows::
+
+   [Unit]
+   Description=gunicorn3 daemon
+   After=network.target
+
+   [Service]
+   User=www-data
+   Group=www-data
+   PIDFile=/var/run/gunicorn3.pid
+   Environment=WORKERS=3
+   ExecStart=/usr/bin/gunicorn3 -b 127.0.0.1:8081   --preload --workers $WORKERS --log-syslog --pythonpath /pywps-demo wsgi.pywps_app:application
+   ExecReload=/bin/kill -s HUP $MAINPID
+   ExecStop=/bin/kill -s TERM $MAINPID
+   
+   [Install]
+   WantedBy=multi-user.target
+
+And then enable the service and then reload the systemctl daemon::
+   
+   $ systemctl enable gunicorn3.service
+   $ systemctl daemon-reload
+   $ systemctl restart gunicorn3.service
+
+And  to check that everything is ok::
+   
+   $ systemctl status gunicorn3.service
+
+.. note::
+   
+   Todo NGIX + uWSGI
+
+
 
 .. _deployment-testing:
 
