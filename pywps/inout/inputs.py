@@ -18,7 +18,8 @@ class BoundingBoxInput(basic.BBoxInput):
     :param string identifier: The name of this input.
     :param string title: Human readable title
     :param string abstract: Longer text description
-    :param crss: List of supported coordinate reference system (e.g. ['EPSG:4326'])
+    :param crss: List of supported coordinate reference
+                 system (e.g. ['EPSG:4326'])
     :param int dimensions: 2 or 3
     :param int min_occurs: how many times this input occurs
     :param int max_occurs: how many times this input occurs
@@ -29,10 +30,13 @@ class BoundingBoxInput(basic.BBoxInput):
     def __init__(self, identifier, title, crss, abstract='',
                  dimensions=2, metadata=[], min_occurs=1,
                  max_occurs=1,
-                 mode=MODE.NONE):
+                 mode=MODE.NONE,
+                 default=None, default_type=basic.SOURCE_TYPE.DATA):
+
         basic.BBoxInput.__init__(self, identifier, title=title,
                                  abstract=abstract, crss=crss,
-                                 dimensions=dimensions, mode=mode)
+                                 dimensions=dimensions, mode=mode,
+                                 default=default, default_type=default_type)
 
         self.metadata = metadata
         self.min_occurs = int(min_occurs)
@@ -110,7 +114,8 @@ class ComplexInput(basic.ComplexInput):
 
     :param str identifier: The name of this input.
     :param str title: Title of the input
-    :param  pywps.inout.formats.Format supported_formats: List of supported formats
+    :param  pywps.inout.formats.Format supported_formats: List of supported
+                                                          formats
     :param pywps.inout.formats.Format data_format: default data format
     :param str abstract: Input abstract
     :param list metada: TODO
@@ -121,13 +126,16 @@ class ComplexInput(basic.ComplexInput):
 
     def __init__(self, identifier, title, supported_formats=None,
                  data_format=None, abstract='', metadata=[], min_occurs=1,
-                 max_occurs=1, mode=MODE.NONE):
+                 max_occurs=1, mode=MODE.NONE,
+                 default=None, default_type=basic.SOURCE_TYPE.DATA):
         """constructor"""
 
         basic.ComplexInput.__init__(self, identifier=identifier, title=title,
                                     abstract=abstract,
                                     supported_formats=supported_formats,
-                                    mode=mode)
+                                    mode=mode,
+                                    default=default, default_type=default_type)
+
         self.metadata = metadata
         self.min_occurs = int(min_occurs)
         self.max_occurs = int(max_occurs)
@@ -254,18 +262,20 @@ class LiteralInput(basic.LiteralInput):
     """
 
     def __init__(self, identifier, title, data_type='integer', abstract='',
-                 metadata=[], uoms=None, default=None,
+                 metadata=[], uoms=None,
                  min_occurs=1, max_occurs=1,
-                 mode=MODE.SIMPLE, allowed_values=AnyValue):
+                 mode=MODE.SIMPLE, allowed_values=AnyValue,
+                 default=None, default_type=basic.SOURCE_TYPE.DATA):
+
         """Constructor
         """
 
         basic.LiteralInput.__init__(self, identifier=identifier, title=title,
                                     abstract=abstract, data_type=data_type,
                                     uoms=uoms, mode=mode,
-                                    allowed_values=allowed_values)
+                                    allowed_values=allowed_values,
+                                    default=default, default_type=default_type)
         self.metadata = metadata
-        self.default = default
         self.min_occurs = int(min_occurs)
         self.max_occurs = int(max_occurs)
         self.as_reference = False
