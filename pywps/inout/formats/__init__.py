@@ -46,6 +46,8 @@ FORMATS = _FORMATS(
     _FORMAT('application/x-ogc-wms; version=1.0.0', '.xml', None),
     _FORMAT('text/plain', '.txt', None),
     _FORMAT('application/x-netcdf', '.nc', None),
+    _FORMAT('application/octet-stream', '.laz', None),
+    _FORMAT('application/octet-stream',	'.las',	None),
 )
 
 
