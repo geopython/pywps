@@ -117,7 +117,9 @@ class FileStorage(StorageAbstract):
 
         just_file_name = os.path.basename(output_name)
 
-        url = urljoin(self.output_url, just_file_name)
+        # make sure base url ends with '/'
+        baseurl = self.output_url.rstrip('/') + '/'
+        url = urljoin(baseurl, just_file_name)
         LOGGER.info('File output URI: %s', url)
 
         return (STORE_TYPE.PATH, output_name, url)

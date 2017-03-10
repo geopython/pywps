@@ -4,7 +4,7 @@ Contributing to PyWPS
 The PyWPS project openly welcomes contributions (bug reports, bug fixes, code
 enhancements/features, etc.).  This document will outline some guidelines on
 contributing to PyWPS.  As well, the PyWPS `community <http://pywps.org/community>`_ is a
-great place to get an idea of how to connect and participate in PyWPS community
+great place to get an idea of how to connect and participate in the PyWPS community
 and development.
 
 PyWPS has the following modes of contribution:
@@ -15,14 +15,14 @@ PyWPS has the following modes of contribution:
 Code of Conduct
 ---------------
 
-Contributors to this project are expected to act respectfully toward others in
+Contributors to this project are expected to act respectfully towards others in
 accordance with the `OSGeo Code of Conduct
 <http://www.osgeo.org/code_of_conduct>`_.
 
 Contributions and Licensing
 ---------------------------
 
-Contributors are asked to confirm that they comply with project `license
+Contributors are asked to confirm that they comply with the project `license
 <https://github.com/geopython/PyWPS/blob/master/LICENSE.txt>`_ guidelines.
 
 GitHub Commit Access
@@ -85,10 +85,10 @@ Documentation
 Bugs
 ----
 
-PyWPS' `issue tracker <https://github.com/geopython/pywps/issues>`_ is the
+The PyWPS `issue tracker <https://github.com/geopython/pywps/issues>`_ is the
 place to report bugs or request enhancements. To submit a bug be sure to specify
 the PyWPS version you are using, the appropriate component, a description of how
-to reproduce the bug, as well as what version of Python and platform.
+to reproduce the bug, as well as the Python version and the platform.
 
 Forking PyWPS
 -------------
@@ -135,7 +135,9 @@ Submitting a Pull Request
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This section will guide you through steps of working on PyWPS.  This section
-assumes you have forked PyWPS into your own GitHub repository.
+assumes you have forked PyWPS into your own GitHub repository. Note that 
+``develop`` is the main development branch in PyWPS; ``master`` is only used 
+for stable releases and managed exclusively by the PyWPS team.
 
 .. code-block:: bash
 
@@ -148,11 +150,11 @@ assumes you have forked PyWPS into your own GitHub repository.
   cd pywps
   pip install -e . && pip install -r requirements.txt
 
-  # add the main PyWPS master branch to keep up to date with upstream changes
+  # add the main PyWPS development branch to keep up to date with upstream changes
   git remote add upstream https://github.com/geopython/pywps.git
-  git pull upstream master
+  git pull upstream develop
 
-  # create a local branch off master
+  # create a local branch off develop
   # The name of the branch should include the issue number if it exists
   git branch issue-72
   git checkout issue-72
@@ -175,8 +177,8 @@ master:
 
 .. code-block:: bash
 
-  git checkout master
-  git pull upstream master
+  git checkout develop
+  git pull upstream develop
 
 .. _`Corporate`: http://www.osgeo.org/sites/osgeo.org/files/Page/corporate_contributor.txt
 .. _`Individual`: http://www.osgeo.org/sites/osgeo.org/files/Page/individual_contributor.txt

@@ -4,15 +4,13 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-__author__ = "Alex Morega & Calin Ciociu"
-
 import logging
 
 import os
 
 from lxml.builder import ElementMaker
 
-__version__ = '4.0.0rc2'
+__version__ = '4.0.0'
 
 LOGGER = logging.getLogger('PYWPS')
 LOGGER.debug('setting core variables')

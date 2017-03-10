@@ -82,7 +82,7 @@ def load_configuration(cfgfiles=None):
     CONFIG.set('server', 'temp_path', tempfile.gettempdir())
     CONFIG.set('server', 'processes_path', '')
     outputpath = tempfile.gettempdir()
-    CONFIG.set('server', 'outputurl', 'file:///%s' % outputpath)
+    CONFIG.set('server', 'outputurl', 'file://%s' % outputpath)
     CONFIG.set('server', 'outputpath', outputpath)
     CONFIG.set('server', 'workdir', tempfile.gettempdir())
     CONFIG.set('server', 'parallelprocesses', '2')
