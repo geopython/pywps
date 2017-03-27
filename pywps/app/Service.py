@@ -416,7 +416,7 @@ class Service(object):
             if int(data_size) > int(byte_size):
                 raise FileSizeExceeded('File size for input exceeded.'
                                        ' Maximum allowed: %i megabytes' %
-                                       complexinput.max_size, complexinput.get('identifier'))
+                                       complexinput.max_size, complexinput.identifier)
 
             try:
                 with open(tmp_file, 'w') as f:
