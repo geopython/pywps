@@ -258,6 +258,8 @@ class Process(object):
         stored_request = dblog.get_first_stored()
         if stored_request:
             (uuid, request_json) = (stored_request.uuid, stored_request.request)
+            if not PY2:
+                request_json = request_json.decode('utf-8')
             new_wps_request = WPSRequest()
             new_wps_request.json = json.loads(request_json)
             new_wps_response = WPSResponse(self, new_wps_request, uuid)
