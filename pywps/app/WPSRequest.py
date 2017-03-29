@@ -542,7 +542,7 @@ def get_data_from_kvp(data, part=None):
 
             # Get the attributes of the data
             for attr in fields[1:]:
-                (attribute, attr_val) = attr.split('=')
+                (attribute, attr_val) = attr.split('=', 1)
                 if attribute == 'xlink:href':
                     io['href'] = attr_val
                 else:
