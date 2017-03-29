@@ -34,6 +34,8 @@ OGCTYPE = {
     'length': 'urn:ogc:def:dataType:OGC:1.1:length',
     'scale': 'urn:ogc:def:dataType:OGC:1.1:scale',
     'time': 'urn:ogc:def:dataType:OGC:1.1:time',
+    'date': 'urn:ogc:def:dataType:OGC:1.1:date',
+    'dateTime': 'urn:ogc:def:dataType:OGC:1.1:dateTime',
     'gridLength': 'urn:ogc:def:dataType:OGC:1.1:gridLength',
     'angle': 'urn:ogc:def:dataType:OGC:1.1:angle',
     'lengthOrAngle': 'urn:ogc:def:dataType:OGC:1.1:lengthOrAngle',
