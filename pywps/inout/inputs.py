@@ -84,7 +84,7 @@ class BoundingBoxInput(basic.BBoxInput):
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
 
-        bbox_data_doc = OWS.BoundingBox()
+        bbox_data_doc = WPS.BoundingBoxData()
 
         bbox_data_doc.attrib['crs'] = self.crs
         bbox_data_doc.attrib['dimensions'] = str(self.dimensions)
