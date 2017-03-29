@@ -43,7 +43,7 @@ class BoundingBoxOutput(basic.BBoxInput):
         self.as_reference = as_reference
 
     def describe_xml(self):
-        doc = WPS.Output(
+        doc = E.Output(
             OWS.Identifier(self.identifier),
             OWS.Title(self.title)
         )
@@ -90,8 +90,7 @@ class BoundingBoxOutput(basic.BBoxInput):
             doc.append(OWS.Abstract(self.abstract))
 
         data_doc = WPS.Data()
-
-        bbox_data_doc = OWS.BoundingBoxData()
+        bbox_data_doc = OWS.BoundingBox()
 
         bbox_data_doc.attrib['crs'] = self.crs
         bbox_data_doc.attrib['dimensions'] = str(self.dimensions)
