@@ -48,10 +48,11 @@ def create_greeter():
                    inputs=[LiteralInput('name', 'Input name', data_type='string')],
                    outputs=[LiteralOutput('message', 'Output message', data_type='string')])
 
+
 def create_bbox_process():
     def bbox_process(request, response):
         coords = request.inputs['mybbox'][0].data
-        assert type(coords) == type([])
+        assert isinstance(coords, list)
         assert len(coords) == 4
         assert coords[0] == '15'
         response.outputs['outbbox'].data = coords
@@ -62,6 +63,7 @@ def create_bbox_process():
                    title='Bbox process',
                    inputs=[BoundingBoxInput('mybbox', 'Input name', ["EPSG:4326"])],
                    outputs=[BoundingBoxOutput('outbbox', 'Output message', ["EPSG:4326"])])
+
 
 def create_complex_proces():
     def complex_proces(request, response):
@@ -205,7 +207,7 @@ class ExecuteTest(unittest.TestCase):
                     WPS.Data(WPS.BoundingBoxData(
                         OWS.LowerCorner('15 50'),
                         OWS.UpperCorner('16 51'),
-                        ))
+                    ))
                 )
             ),
             version='1.0.0'
@@ -214,11 +216,14 @@ class ExecuteTest(unittest.TestCase):
         assert_response_success(resp)
 
         [output] = xpath_ns(resp.xml, '/wps:ExecuteResponse'
-                                   '/wps:ProcessOutputs/Output')
-        self.assertEqual('outbbox', xpath_ns(output,
+                                      '/wps:ProcessOutputs/wps:Output')
+        self.assertEqual('outbbox', xpath_ns(
+            output,
             './ows:Identifier')[0].text)
-        self.assertEqual('15 50', xpath_ns(output,
-            './ows:BoundingBox/ows:LowerCorner')[0].text)
+        self.assertEqual('15 50', xpath_ns(
+            output,
+            './wps:Data/ows:BoundingBox/ows:LowerCorner')[0].text)
+
 
 class ExecuteXmlParserTest(unittest.TestCase):
     """Tests for Execute request XML Parser

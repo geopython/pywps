@@ -69,8 +69,8 @@ class BoundingBoxOutput(basic.BBoxInput):
 
         return doc
 
-    def execute_xml(self):
-        doc = E.Output(
+    def execute_xml_lineage(self):
+        doc = WPS.Output(
             OWS.Identifier(self.identifier),
             OWS.Title(self.title)
         )
@@ -78,6 +78,18 @@ class BoundingBoxOutput(basic.BBoxInput):
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
 
+        return doc
+
+    def execute_xml(self):
+        doc = WPS.Output(
+            OWS.Identifier(self.identifier),
+            OWS.Title(self.title)
+        )
+
+        if self.abstract:
+            doc.append(OWS.Abstract(self.abstract))
+
+        data_doc = WPS.Data()
         bbox_data_doc = OWS.BoundingBox()
 
         bbox_data_doc.attrib['crs'] = self.crs
@@ -86,8 +98,8 @@ class BoundingBoxOutput(basic.BBoxInput):
         bbox_data_doc.append(OWS.LowerCorner('{0[0]} {0[1]}'.format(self.data)))
         bbox_data_doc.append(OWS.UpperCorner('{0[2]} {0[3]}'.format(self.data)))
 
-        doc.append(bbox_data_doc)
-
+        data_doc.append(bbox_data_doc)
+        doc.append(data_doc)
         return doc
 
 
