@@ -111,7 +111,6 @@ class ComplexInput(basic.ComplexInput):
     :param str identifier: The name of this input.
     :param str title: Title of the input
     :param  pywps.inout.formats.Format supported_formats: List of supported formats
-    :param pywps.inout.formats.Format data_format: default data format
     :param str abstract: Input abstract
     :param list metada: TODO
     :param int min_occurs: minimum occurence
@@ -119,7 +118,7 @@ class ComplexInput(basic.ComplexInput):
     :param pywps.validator.mode.MODE mode: validation mode (none to strict)
     """
 
-    def __init__(self, identifier, title, supported_formats=None,
+    def __init__(self, identifier, title, supported_formats,
                  data_format=None, abstract='', metadata=[], min_occurs=1,
                  max_occurs=1, mode=MODE.NONE):
         """constructor"""

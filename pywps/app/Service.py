@@ -602,7 +602,9 @@ class Service(object):
             except NoApplicableCode as e:
                 return e
             return e
-
+        except Exception as e:
+            e = NoApplicableCode(str(e), code=500)
+            return e
 
 def _openurl(inpt):
     """use urllib to open given href
