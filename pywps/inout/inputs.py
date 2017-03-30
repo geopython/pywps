@@ -76,6 +76,8 @@ class BoundingBoxInput(basic.BBoxInput):
         """
         :return: execute response element
         """
+        node = self._execute_xml_data()
+
         doc = WPS.Input(
             OWS.Identifier(self.identifier),
             OWS.Title(self.title)
@@ -84,18 +86,26 @@ class BoundingBoxInput(basic.BBoxInput):
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
 
+        doc.append(node)
+
+        return doc
+
+    def _execute_xml_data(self):
+        """Return Data node
+        """
+        doc = WPS.Data()
         bbox_data_doc = WPS.BoundingBoxData()
 
-        bbox_data_doc.attrib['crs'] = self.crs
-        bbox_data_doc.attrib['dimensions'] = str(self.dimensions)
+        if self.crs:
+            bbox_data_doc.attrib['crs'] = self.crs
+        if self.dimensions:
+            bbox_data_doc.attrib['dimensions'] = str(self.dimensions)
 
         bbox_data_doc.append(
             OWS.LowerCorner('{0[0]} {0[1]}'.format(self.data)))
         bbox_data_doc.append(
             OWS.UpperCorner('{0[2]} {0[3]}'.format(self.data)))
-
         doc.append(bbox_data_doc)
-
         return doc
 
     def clone(self):
