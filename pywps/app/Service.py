@@ -395,7 +395,8 @@ class Service(object):
         def href_handler(complexinput, datain):
             """<wps:Reference /> handler"""
             # save the reference input in workdir
-            tmp_file = tempfile.mkstemp(dir=complexinput.workdir)[1]
+            tmp_file = _build_input_file_name(
+                datain.get('href'), complexinput.workdir)
 
             try:
                 (reference_file, reference_file_data) = _openurl(datain)
@@ -606,6 +607,7 @@ class Service(object):
             e = NoApplicableCode(str(e), code=500)
             return e
 
+
 def _openurl(inpt):
     """use urllib to open given href
     """
@@ -650,3 +652,21 @@ def _get_datasize(reference_file_data):
     tmp_sio.close()
 
     return data_size
+
+
+def _build_input_file_name(href, workdir):
+    href = href or ''
+    file_name = os.path.basename(href).strip() or 'input'
+    (prefix, suffix) = os.path.splitext(file_name)
+    if not suffix:
+        suffix = ''
+        if hasattr(complexinput, 'data_format') and complexinput.data_format.extension:
+            suffix = complexinput.data_format.extension
+    file_name = prefix + suffix
+    input_file_name = os.path.join(workdir, file_name)
+    # build tempfile in case of duplicates
+    if os.path.exists(input_file_name):
+        input_file_name = tempfile.mkstemp(
+            suffix=suffix, prefix=prefix + '_',
+            dir=workdir)[1]
+    return input_file_name
