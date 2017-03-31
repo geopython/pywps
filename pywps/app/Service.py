@@ -396,10 +396,12 @@ class Service(object):
             """<wps:Reference /> handler"""
             # save the reference input in workdir
             extension = None
-            if hasattr(complexinput, 'data_format') and complexinput.data_format.extension:
+            if complexinput.data_format:
                 extension = complexinput.data_format.extension
             tmp_file = _build_input_file_name(
-                href=datain.get('href'), workdir=complexinput.workdir, extension=extension)
+                href=datain.get('href'),
+                workdir=complexinput.workdir,
+                extension=extension)
 
             try:
                 (reference_file, reference_file_data) = _openurl(datain)
