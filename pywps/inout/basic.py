@@ -17,8 +17,10 @@ from pywps.validator import get_validator
 from pywps.validator.literalvalidator import (validate_anyvalue,
                                               validate_allowed_values)
 from pywps.exceptions import InvalidParameterValue
+from pywps._compat import PY2
 import base64
 from collections import namedtuple
+from io import BytesIO
 
 _SOURCE_TYPE = namedtuple('SOURCE_TYPE', 'MEMORY, FILE, STREAM, DATA')
 SOURCE_TYPE = _SOURCE_TYPE(0, 1, 2, 3)
@@ -147,7 +149,12 @@ class IOHandler(object):
                     suffix = self.data_format.extension
                 (opening, stream_file_name) = tempfile.mkstemp(
                     dir=self.workdir, suffix=suffix)
-                stream_file = open(stream_file_name, 'w')
+                openmode = 'w'
+                if not PY2 and isinstance(self.source, bytes):
+                    # on Python 3 open the file in binary mode if the source is
+                    # bytes, which happens when the data was base64-decoded
+                    openmode += 'b'
+                stream_file = open(stream_file_name, openmode)
 
                 if self.source_type == SOURCE_TYPE.STREAM:
                     stream_file.write(self.source.read())
@@ -179,12 +186,21 @@ class IOHandler(object):
         elif self.source_type == SOURCE_TYPE.STREAM:
             return self.source
         elif self.source_type == SOURCE_TYPE.DATA:
-            return StringIO(text_type(self.source))
+            if not PY2 and isinstance(self.source, bytes):
+                return BytesIO(self.source)
+            else:
+                return StringIO(text_type(self.source))
 
     def get_data(self):
         """Get source as simple data object"""
         if self.source_type == SOURCE_TYPE.FILE:
-            file_handler = open(self.source, mode='r')
+            openmode = 'r'
+            if (not PY2 and hasattr(self, 'data_format') and
+                    self.data_format.encoding == 'base64'):
+                # on Python 3, when the data is to be encoded to base64, we
+                # need to open the file in binary mode
+                openmode += 'b'
+            file_handler = open(self.source, mode=openmode)
             content = file_handler.read()
             file_handler.close()
             return content
