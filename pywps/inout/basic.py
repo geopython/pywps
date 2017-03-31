@@ -142,7 +142,11 @@ class IOHandler(object):
             if self._tempfile:
                 return self._tempfile
             else:
-                (opening, stream_file_name) = tempfile.mkstemp(dir=self.workdir)
+                suffix = ''
+                if hasattr(self, 'data_format') and self.data_format.extension:
+                    suffix = self.data_format.extension
+                (opening, stream_file_name) = tempfile.mkstemp(
+                    dir=self.workdir, suffix=suffix)
                 stream_file = open(stream_file_name, 'w')
 
                 if self.source_type == SOURCE_TYPE.STREAM:
