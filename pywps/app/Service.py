@@ -395,8 +395,11 @@ class Service(object):
         def href_handler(complexinput, datain):
             """<wps:Reference /> handler"""
             # save the reference input in workdir
+            extension = None
+            if hasattr(complexinput, 'data_format') and complexinput.data_format.extension:
+                extension = complexinput.data_format.extension
             tmp_file = _build_input_file_name(
-                datain.get('href'), complexinput.workdir)
+                href=datain.get('href'), workdir=complexinput.workdir, extension=extension)
 
             try:
                 (reference_file, reference_file_data) = _openurl(datain)
@@ -654,14 +657,11 @@ def _get_datasize(reference_file_data):
     return data_size
 
 
-def _build_input_file_name(href, workdir):
+def _build_input_file_name(href, workdir, extension=None):
     href = href or ''
     file_name = os.path.basename(href).strip() or 'input'
     (prefix, suffix) = os.path.splitext(file_name)
-    if not suffix:
-        suffix = ''
-        if hasattr(complexinput, 'data_format') and complexinput.data_format.extension:
-            suffix = complexinput.data_format.extension
+    suffix = suffix or extension
     file_name = prefix + suffix
     input_file_name = os.path.join(workdir, file_name)
     # build tempfile in case of duplicates
