@@ -12,6 +12,7 @@ Implementation of logging for PyWPS-4
 import logging
 from pywps import configuration
 from pywps.exceptions import NoApplicableCode
+from pywps._compat import PY2
 import sqlite3
 import datetime
 import pickle
@@ -200,7 +201,11 @@ def store_process(uuid, request):
     """
 
     session = get_session()
-    request = RequestInstance(uuid=str(uuid), request=request.json)
+    request_json = request.json
+    if not PY2:
+        # the BLOB type requires bytes on Python 3
+        request_json = request_json.encode('utf-8')
+    request = RequestInstance(uuid=str(uuid), request=request_json)
     session.add(request)
     session.commit()
     session.close()
