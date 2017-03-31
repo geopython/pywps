@@ -149,10 +149,15 @@ class Process(object):
         return wps_response
 
     def _set_uuid(self, uuid):
-        """Set uuid and status ocation apth and url
+        """Set uuid and status location path and url
         """
 
         self.uuid = uuid
+        for inpt in self.inputs:
+            inpt.uuid = uuid
+
+        for outpt in self.outputs:
+            outpt.uuid = uuid
 
         file_path = config.get_config_value('server', 'outputpath')
 
