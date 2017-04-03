@@ -21,6 +21,7 @@ from pywps.inout.inputs import ComplexInput, LiteralInput, BoundingBoxInput
 from pywps.dblog import log_request, update_response
 
 from collections import deque
+from collections import OrderedDict
 import os
 import sys
 import uuid
@@ -41,7 +42,8 @@ class Service(object):
     """
 
     def __init__(self, processes=[], cfgfiles=None):
-        self.processes = {p.identifier: p for p in processes}
+        # ordered dict of processes
+        self.processes = OrderedDict([(p.identifier, p) for p in processes])
 
         if cfgfiles:
             config.load_configuration(cfgfiles)
