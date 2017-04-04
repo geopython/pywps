@@ -1,6 +1,6 @@
 def Process(process, wps_request, wps_response):
-    return MultiProcessing(process, wps_request, wps_response)
-    #return Slurm(process, wps_request, wps_response)
+    #return MultiProcessing(process, wps_request, wps_response)
+    return Slurm(process, wps_request, wps_response)
 
 
 class BaseProcessor(object):
@@ -14,10 +14,10 @@ class BaseProcessor(object):
     def start(self):
         raise NotImplementedError("Needs to be implemented in a subclass.")
 
-    def terminate(self):
+    def cancel(self):
         raise NotImplementedError("Needs to be implemented in a subclass.")
 
-    def pause(self):
+    def suspend(self):
         raise NotImplementedError("Needs to be implemented in a subclass.")
 
     def resume(self):
@@ -41,7 +41,7 @@ class Slurm(BaseProcessor):
         getattr(self.process, self.method)(self.wps_request, self.wps_response)
 
     def start(self):
-        import pickle
-        marshalled = pickle.dumps(self)
-        obj = pickle.loads(marshalled)
+        import dill
+        marshalled = dill.dumps(self)
+        obj = dill.loads(marshalled)
         obj.run()
