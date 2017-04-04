@@ -3,7 +3,7 @@ def Process(process, wps_request, wps_response):
     return Slurm(process, wps_request, wps_response)
 
 
-class BaseProcessor(object):
+class Processing(object):
 
     def __init__(self, process, wps_request, wps_response):
         self.process = process
@@ -24,7 +24,7 @@ class BaseProcessor(object):
         raise NotImplementedError("Needs to be implemented in a subclass.")
 
 
-class MultiProcessing(BaseProcessor):
+class MultiProcessing(Processing):
 
     def start(self):
         import multiprocessing
@@ -35,13 +35,24 @@ class MultiProcessing(BaseProcessor):
         process.start()
 
 
-class Slurm(BaseProcessor):
+class Slurm(Processing):
 
     def run(self):
         getattr(self.process, self.method)(self.wps_request, self.wps_response)
 
     def start(self):
         import dill
-        marshalled = dill.dumps(self)
-        obj = dill.loads(marshalled)
-        obj.run()
+        from pathos import SSH_Launcher
+        dill.dump(self, open('/tmp/marshalled', 'w'))
+        launcher = SSH_Launcher("test")
+        command = "source activate emu;"
+        command += """python -c 'from pywps.app.processing import launch_slurm_job\nlaunch_slurm_job()'"""
+        launcher.config(command=command, rhost="localhost", background=True)
+        launcher.launch()
+
+
+def launch_slurm_job(filename=None):
+    import dill
+    filename = filename or '/tmp/marshalled'
+    job = dill.load(open(filename))
+    job.run()
