@@ -35,6 +35,18 @@ class MultiProcessing(Processing):
         process.start()
 
 
+SLURM_TMPL = """\
+#!/bin/bash
+#SBATCH -e emu.err
+#SBATCH -o emu.out
+#SBATCH -J emu
+#SBATCH --time=00:30:00
+set -eo pipefail -o nounset
+source activate emu
+python -c 'from pywps.app.processing import launch_slurm_job\nlaunch_slurm_job()'
+"""
+
+
 class Slurm(Processing):
 
     def run(self):
@@ -43,11 +55,12 @@ class Slurm(Processing):
     def start(self):
         import dill
         from pathos import SSH_Launcher
+        from pathos.secure import Copier
         dill.dump(self, open('/tmp/marshalled', 'w'))
+        copier = Copier("marshalled")
+        copier.config(source='/tmp/marshalled', destination='testuser@localhost:/tmp/marshalled')
         launcher = SSH_Launcher("test")
-        command = "source activate emu;"
-        command += """python -c 'from pywps.app.processing import launch_slurm_job\nlaunch_slurm_job()'"""
-        launcher.config(command=command, rhost="localhost", background=True)
+        launcher.config(command="sbatch", rhost="localhost", background=True)
         launcher.launch()
 
 
