@@ -1,3 +1,7 @@
+import logging
+LOGGER = logging.getLogger("PYWPS")
+
+
 def Process(process, wps_request, wps_response):
     #return MultiProcessing(process, wps_request, wps_response)
     return Slurm(process, wps_request, wps_response)
@@ -37,12 +41,12 @@ class MultiProcessing(Processing):
 
 SLURM_TMPL = """\
 #!/bin/bash
-#SBATCH -e emu.err
-#SBATCH -o emu.out
+#SBATCH -e /tmp/emu.err
+#SBATCH -o /tmp/emu.out
 #SBATCH -J emu
 #SBATCH --time=12:30:00
 #set -eo pipefail -o nounset
-export PATH="/home/testuser/anaconda/bin:$PATH"
+export PATH="/home/pingu/anaconda/bin:$PATH"
 source activate emu;python -c 'from pywps.app.processing import launch_slurm_job\nlaunch_slurm_job()'
 """
 
@@ -60,21 +64,21 @@ class Slurm(Processing):
         dill.dump(self, open('/tmp/marshalled', 'w'))
         # copy marshalled file to remote
         copier = Copier("marshalled")
-        copier.config(source='/tmp/marshalled', destination='testuser@docker.example.com:/tmp/marshalled')
+        copier.config(source='/tmp/marshalled', destination='pingu@docker.example.com:/tmp/marshalled')
         copier.launch()
         # write sbatch script
         with open("/tmp/emu.submit", 'w') as fp:
             fp.write(SLURM_TMPL)
         # copy marshalled file to remote
         copier = Copier("sbatch")
-        copier.config(source='/tmp/emu.submit', destination='testuser@docker.example.com:/tmp/emu.submit')
+        copier.config(source='/tmp/emu.submit', destination='pingu@docker.example.com:/tmp/emu.submit')
         copier.launch()
         # run remote pywps process
         launcher = SSH_Launcher("test")
-        launcher.config(command="sbatch /tmp/emu.submit", host="testuser@docker.example.com", background=False)
+        launcher.config(command="sbatch /tmp/emu.submit", host="pingu@docker.example.com", background=False)
         #launcher.config(command="hostname", host="testuser@docker.example.com", background=False)
         launcher.launch()
-        print launcher.response()
+        LOGGER.info("Starting slurm job: %s", launcher.response())
 
 
 def launch_slurm_job(filename=None):
