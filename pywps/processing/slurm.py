@@ -16,13 +16,13 @@ LOGGER = logging.getLogger("PYWPS")
 
 SLURM_TMPL = """\
 #!/bin/bash
-#SBATCH -e /tmp/emu.err
-#SBATCH -o /tmp/emu.out
-#SBATCH -J emu
+#SBATCH -e /tmp/{pid}.err
+#SBATCH -o /tmp/{pid}.out
+#SBATCH -J {pid}
 #SBATCH --time=00:30:00
 #set -eo pipefail -o nounset
-export PATH="/home/pingu/anaconda/bin:$PATH"
-source activate emu;launch {filename}
+export PATH="{prefix}/bin:$PATH"
+source activate {env};launch "{filename}"
 """
 
 
@@ -50,18 +50,25 @@ def sbatch(filename, host=None):
 
 class Slurm(Processing):
 
-    def start(self):
+    def _build_submit_file(self, dump_file_name):
         workdir = config.get_config_value('server', 'workdir')
+        submit_file_name = tempfile.mkstemp(prefix='slurm_', suffix='.submit', dir=workdir)[1]
+        with open(submit_file_name, 'w') as fp:
+            fp.write(SLURM_TMPL.format(
+                pid=self.job.process.uuid,
+                env='emu',
+                prefix='/home/pingu/anaconda',
+                filename=dump_file_name))
+
+    def start(self):
         host = config.get_config_value('extra', 'host')
         # dump job to file
         dump_file_name = self.job.dump()
         # copy dumped job to remote host
-        secure_copy(source=dump_file_name, target="/tmp/marshalled", host=host)
+        # secure_copy(source=dump_file_name, target="/tmp/marshalled", host=host)
         # write submit script
-        submit_file_name = tempfile.mkstemp(prefix='slurm_', suffix='.submit', dir=workdir)[1]
-        with open(submit_file_name, 'w') as fp:
-            fp.write(SLURM_TMPL.format(filename='/tmp/marshalled'))
+        submit_file_name = self._build_submit_file(dump_file_name)
         # copy submit file to remote
-        secure_copy(source=submit_file_name, target="/tmp/emu.submit", host=host)
+        # secure_copy(source=submit_file_name, target="/tmp/emu.submit", host=host)
         # run remote pywps process
-        sbatch(filename="/tmp/emu.submit", host=host)
+        sbatch(filename=submit_file_name, host=host)
