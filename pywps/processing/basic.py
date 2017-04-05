@@ -15,10 +15,13 @@ class Job(object):
         self.wps_request = wps_request
         self.wps_response = wps_response
 
+    @property
+    def workdir(self):
+        return self.process.workdir
+
     def dump(self):
         import dill
-        workdir = config.get_config_value('server', 'workdir')
-        filename = tempfile.mkstemp(prefix='job_', suffix='.dump', dir=workdir)[1]
+        filename = tempfile.mkstemp(prefix='job_', suffix='.dump', dir=self.workdir)[1]
         with open(filename, 'w') as fp:
             dill.dump(self, fp)
             return filename
