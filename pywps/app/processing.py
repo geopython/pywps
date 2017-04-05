@@ -1,3 +1,6 @@
+import os.path
+import tempfile
+
 import logging
 LOGGER = logging.getLogger("PYWPS")
 
@@ -61,18 +64,22 @@ class Slurm(Processing):
         from pathos import SSH_Launcher
         from pathos.secure import Copier
         # marshall process
-        dill.dump(self, open('/tmp/marshalled', 'w'))
+        dump_file_name = tempfile.mkstemp(prefix='process_', suffix='.dump')[1]
+        dill.dump(self, open(dump_file_name, 'w'))
         # copy marshalled file to remote
-        copier = Copier("marshalled")
-        copier.config(source='/tmp/marshalled', destination='pingu@docker.example.com:/tmp/marshalled')
+        copier = Copier("dump")
+        copier.config(source=dump_file_name, destination='pingu@docker.example.com:/tmp/marshalled')
         copier.launch()
+        LOGGER.debug("dump file=%s", dump_file_name)
         # write sbatch script
-        with open("/tmp/emu.submit", 'w') as fp:
+        submit_file_name = tempfile.mkstemp(prefix='slurm_', suffix='.submit')[1]
+        with open(submit_file_name, 'w') as fp:
             fp.write(SLURM_TMPL)
         # copy marshalled file to remote
-        copier = Copier("sbatch")
-        copier.config(source='/tmp/emu.submit', destination='pingu@docker.example.com:/tmp/emu.submit')
+        copier = Copier("batch")
+        copier.config(source=submit_file_name, destination='pingu@docker.example.com:/tmp/emu.submit')
         copier.launch()
+        LOGGER.debug("batch file=%s", submit_file_name)
         # run remote pywps process
         launcher = SSH_Launcher("test")
         launcher.config(command="sbatch /tmp/emu.submit", host="pingu@docker.example.com", background=False)
