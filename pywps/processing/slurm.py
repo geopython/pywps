@@ -5,6 +5,7 @@
 ##################################################################
 
 import os
+import sys
 import tempfile
 import pywps.configuration as config
 from pywps.processing.basic import Processing
@@ -18,10 +19,10 @@ SLURM_TMPL = """\
 #SBATCH -e /tmp/emu.err
 #SBATCH -o /tmp/emu.out
 #SBATCH -J emu
-#SBATCH --time=12:30:00
+#SBATCH --time=00:30:00
 #set -eo pipefail -o nounset
 export PATH="/home/pingu/anaconda/bin:$PATH"
-source activate emu;python -c 'from pywps.processing import launch_slurm_job\nlaunch_slurm_job()'
+source activate emu;launch /tmp/marshalled
 """
 
 
@@ -69,8 +70,27 @@ class Slurm(Processing):
         launch(filename="/tmp/emu.submit", host=host)
 
 
-def launch_slurm_job(filename=None):
-    import dill
-    filename = filename or '/tmp/marshalled'
-    job = dill.load(open(filename))
-    job.run()
+class JobLauncher(object):
+    def create_parser(self):
+        import argparse
+        parser = argparse.ArgumentParser(prog="launch")
+        parser.add_argument("filename", help="dumped pywps process object.")
+        return parser
+
+    def run(self, args):
+        self._run_job(args.filename)
+
+    def _run_job(self, filename):
+        import dill
+        job = dill.load(open(filename))
+        job.run()
+
+
+def main():
+    launcher = JobLauncher()
+    parser = launcher.create_parser()
+    args = parser.parse_args()
+    launcher.run(args)
+
+if __name__ == '__main__':
+    sys.exit(main())
