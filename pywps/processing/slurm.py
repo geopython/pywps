@@ -50,17 +50,17 @@ def sbatch(filename, host=None):
 class Slurm(Processing):
     @property
     def workdir(self):
-        return self.job.process.workdir
+        return self.job.workdir
 
     @property
-    def name(self):
-        return self.job.process.uuid
+    def uuid(self):
+        return self.job.uuid
 
     def _build_submit_file(self, dump_file_name):
         submit_file_name = tempfile.mkstemp(prefix='slurm_', suffix='.submit', dir=self.workdir)[1]
         with open(submit_file_name, 'w') as fp:
             fp.write(SLURM_TMPL.format(
-                name=self.name,
+                name=self.uuid,
                 workdir=self.workdir,
                 prefix=config.get_config_value('extra', 'prefix'),
                 filename=dump_file_name))
