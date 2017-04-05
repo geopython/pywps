@@ -19,6 +19,10 @@ class Job(object):
     def workdir(self):
         return self.process.workdir
 
+    @property
+    def uuid(self):
+        return self.process.uuid
+
     def dump(self):
         import dill
         filename = tempfile.mkstemp(prefix='job_', suffix='.dump', dir=self.workdir)[1]
