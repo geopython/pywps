@@ -59,6 +59,8 @@ class Slurm(Processing):
                 env='emu',
                 prefix='/home/pingu/anaconda',
                 filename=dump_file_name))
+            return submit_file_name
+        return None
 
     def start(self):
         host = config.get_config_value('extra', 'host')
