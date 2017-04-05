@@ -51,7 +51,7 @@ SLURM_TMPL = """\
 #SBATCH --time=12:30:00
 #set -eo pipefail -o nounset
 export PATH="/home/pingu/anaconda/bin:$PATH"
-source activate emu;python -c 'from pywps.app.processing import launch_slurm_job\nlaunch_slurm_job()'
+source activate emu;python -c 'from pywps.processing import launch_slurm_job\nlaunch_slurm_job()'
 """
 
 
