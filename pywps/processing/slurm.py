@@ -16,8 +16,8 @@ LOGGER = logging.getLogger("PYWPS")
 
 SLURM_TMPL = """\
 #!/bin/bash
-#SBATCH -e /tmp/{pid}.err
-#SBATCH -o /tmp/{pid}.out
+#SBATCH -e {logdir}/slurm_{pid}.error
+#SBATCH -o {logdir}/slurm_{pid}.log
 #SBATCH -J {pid}
 #SBATCH --time=00:30:00
 #set -eo pipefail -o nounset
@@ -56,6 +56,7 @@ class Slurm(Processing):
         with open(submit_file_name, 'w') as fp:
             fp.write(SLURM_TMPL.format(
                 pid=self.job.process.uuid,
+                logdir=workdir,
                 env='emu',
                 prefix='/home/pingu/anaconda',
                 filename=dump_file_name))
