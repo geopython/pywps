@@ -44,7 +44,9 @@ def sbatch(filename, host=None):
     launcher = SSH_Launcher("sbatch")
     launcher.config(command="sbatch {}".format(filename), host=host, background=False)
     launcher.launch()
-    LOGGER.info("Starting slurm job: %s", launcher.response())
+    slurm_response = launcher.response()
+    LOGGER.info("Submitted job to slurm: %s", slurm_response)
+    return slurm_response
 
 
 class Slurm(Processing):
@@ -68,6 +70,7 @@ class Slurm(Processing):
         return None
 
     def start(self):
+        LOGGER.info("Submitting job to slurm ...")
         host = config.get_config_value('extra', 'host')
         # dump job to file
         dump_file_name = self.job.dump()
@@ -78,4 +81,5 @@ class Slurm(Processing):
         # copy submit file to remote
         # secure_copy(source=submit_file_name, target="/tmp/emu.submit", host=host)
         # run remote pywps process
-        sbatch(filename=submit_file_name, host=host)
+        slurm_response = sbatch(filename=submit_file_name, host=host)
+        self.job.wps_response.update_status('PyWPS Process submitted to slurm: %s'.format(slurm_response), 0)
