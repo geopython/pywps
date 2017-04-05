@@ -61,7 +61,7 @@ CONFIG = {
     'scripts': [],
     'entry_points': {
         'console_scripts': [
-            'launch=pywps.processing.slurm:main', ]},
+            'launch=pywps.processing.joblauncher:main', ]},
 }
 
 if sys.version_info.major < 3:
