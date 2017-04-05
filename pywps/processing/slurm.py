@@ -37,6 +37,14 @@ def ssh_copy(source, target, host):
     LOGGER.debug("copied source=%s, destination=%s", source, destination)
 
 
+def launch(filename, host):
+    from pathos import SSH_Launcher
+    launcher = SSH_Launcher("sbatch")
+    launcher.config(command="sbatch {}".format(filename), host=host, background=False)
+    launcher.launch()
+    LOGGER.info("Starting slurm job: %s", launcher.response())
+
+
 class Slurm(Processing):
 
     def run(self):
@@ -44,8 +52,6 @@ class Slurm(Processing):
 
     def start(self):
         import dill
-        from pathos import SSH_Launcher
-        from pathos.secure import Copier
         workdir = config.get_config_value('server', 'workdir')
         host = config.get_config_value('extra', 'host')
         # marshall process
@@ -60,11 +66,7 @@ class Slurm(Processing):
         # copy submit file to remote
         ssh_copy(source=submit_file_name, target="/tmp/emu.submit", host=host)
         # run remote pywps process
-        launcher = SSH_Launcher("test")
-        launcher.config(command="sbatch /tmp/emu.submit", host=host, background=False)
-        #launcher.config(command="hostname", host="testuser@docker.example.com", background=False)
-        launcher.launch()
-        LOGGER.info("Starting slurm job: %s", launcher.response())
+        launch(filename="/tmp/emu.submit", host=host)
 
 
 def launch_slurm_job(filename=None):
