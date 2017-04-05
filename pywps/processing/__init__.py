@@ -5,7 +5,6 @@
 ##################################################################
 
 from pywps.processing.basic import MultiProcessing
-from pywps.processing.slurm import launch_slurm_job
 from pywps.processing.slurm import Slurm
 
 
