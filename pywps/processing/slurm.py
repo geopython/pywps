@@ -25,6 +25,18 @@ source activate emu;python -c 'from pywps.processing import launch_slurm_job\nla
 """
 
 
+def ssh_copy(source, target, host):
+    """
+    Copy source file to remote host.
+    """
+    from pathos.secure import Copier
+    copier = Copier(source)
+    destination = '{}:{}'.format(host, target)
+    copier.config(source=source, destination=destination)
+    copier.launch()
+    LOGGER.debug("copied source=%s, destination=%s", source, destination)
+
+
 class Slurm(Processing):
 
     def run(self):
@@ -39,20 +51,14 @@ class Slurm(Processing):
         # marshall process
         dump_file_name = tempfile.mkstemp(prefix='process_', suffix='.dump', dir=workdir)[1]
         dill.dump(self, open(dump_file_name, 'w'))
-        # copy marshalled file to remote
-        copier = Copier("dump")
-        copier.config(source=dump_file_name, destination='{}:/tmp/marshalled'.format(host))
-        copier.launch()
-        LOGGER.debug("dump file=%s", dump_file_name)
-        # write sbatch script
+        # copy dumped file to remote
+        ssh_copy(source=dump_file_name, target="/tmp/marshalled", host=host)
+        # write submit script
         submit_file_name = tempfile.mkstemp(prefix='slurm_', suffix='.submit', dir=workdir)[1]
         with open(submit_file_name, 'w') as fp:
             fp.write(SLURM_TMPL)
-        # copy marshalled file to remote
-        copier = Copier("batch")
-        copier.config(source=submit_file_name, destination='{}:/tmp/emu.submit'.format(host))
-        copier.launch()
-        LOGGER.debug("batch file=%s", submit_file_name)
+        # copy submit file to remote
+        ssh_copy(source=submit_file_name, target="/tmp/emu.submit", host=host)
         # run remote pywps process
         launcher = SSH_Launcher("test")
         launcher.config(command="sbatch /tmp/emu.submit", host=host, background=False)
