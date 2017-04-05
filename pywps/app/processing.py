@@ -1,5 +1,6 @@
-import os.path
+import os
 import tempfile
+import pywps.configuration as config
 
 import logging
 LOGGER = logging.getLogger("PYWPS")
@@ -63,26 +64,28 @@ class Slurm(Processing):
         import dill
         from pathos import SSH_Launcher
         from pathos.secure import Copier
+        workdir = config.get_config_value('server', 'workdir')
+        host = config.get_config_value('extra', 'host')
         # marshall process
-        dump_file_name = tempfile.mkstemp(prefix='process_', suffix='.dump')[1]
+        dump_file_name = tempfile.mkstemp(prefix='process_', suffix='.dump', dir=workdir)[1]
         dill.dump(self, open(dump_file_name, 'w'))
         # copy marshalled file to remote
         copier = Copier("dump")
-        copier.config(source=dump_file_name, destination='pingu@docker.example.com:/tmp/marshalled')
+        copier.config(source=dump_file_name, destination='{}:/tmp/marshalled'.format(host))
         copier.launch()
         LOGGER.debug("dump file=%s", dump_file_name)
         # write sbatch script
-        submit_file_name = tempfile.mkstemp(prefix='slurm_', suffix='.submit')[1]
+        submit_file_name = tempfile.mkstemp(prefix='slurm_', suffix='.submit', dir=workdir)[1]
         with open(submit_file_name, 'w') as fp:
             fp.write(SLURM_TMPL)
         # copy marshalled file to remote
         copier = Copier("batch")
-        copier.config(source=submit_file_name, destination='pingu@docker.example.com:/tmp/emu.submit')
+        copier.config(source=submit_file_name, destination='{}:/tmp/emu.submit'.format(host))
         copier.launch()
         LOGGER.debug("batch file=%s", submit_file_name)
         # run remote pywps process
         launcher = SSH_Launcher("test")
-        launcher.config(command="sbatch /tmp/emu.submit", host="pingu@docker.example.com", background=False)
+        launcher.config(command="sbatch /tmp/emu.submit", host=host, background=False)
         #launcher.config(command="hostname", host="testuser@docker.example.com", background=False)
         launcher.launch()
         LOGGER.info("Starting slurm job: %s", launcher.response())
