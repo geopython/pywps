@@ -200,8 +200,8 @@ class Process(object):
         return wps_response
 
     def _run_async(self, wps_request, wps_response):
-        import pywps.app.processing
-        process = pywps.app.processing.Process(
+        import pywps.processing
+        process = pywps.processing.Process(
             process=self,
             wps_request=wps_request,
             wps_response=wps_response)
