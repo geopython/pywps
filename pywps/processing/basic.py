@@ -18,7 +18,7 @@ class Job(object):
     def dump(self):
         import dill
         workdir = config.get_config_value('server', 'workdir')
-        filename = tempfile.mkstemp(prefix='process_', suffix='.dump', dir=workdir)[1]
+        filename = tempfile.mkstemp(prefix='job_', suffix='.dump', dir=workdir)[1]
         with open(filename, 'w') as fp:
             dill.dump(self, fp)
         return filename
