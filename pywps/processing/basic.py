@@ -49,16 +49,10 @@ class Processing(object):
         self.job = Job(process, wps_request, wps_response)
 
     def start(self):
-        raise NotImplementedError("Needs to be implemented in a subclass.")
+        raise NotImplementedError("Needs to be implemented in subclass.")
 
     def cancel(self):
-        raise NotImplementedError("Needs to be implemented in a subclass.")
-
-    def suspend(self):
-        raise NotImplementedError("Needs to be implemented in a subclass.")
-
-    def resume(self):
-        raise NotImplementedError("Needs to be implemented in a subclass.")
+        raise NotImplementedError("Needs to be implemented in subclass.")
 
 
 class MultiProcessing(Processing):
