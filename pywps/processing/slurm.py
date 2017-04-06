@@ -43,12 +43,13 @@ def secure_copy(source, target, host=None):
 
 def sbatch(filename, host=None):
     from pathos import SSH_Launcher
+    LOGGER.info("Submitting job to slurm ...")
     host = host or "localhost"
     launcher = SSH_Launcher("sbatch")
     launcher.config(command="sbatch {}".format(filename), host=host, background=False)
     launcher.launch()
     slurm_response = launcher.response()
-    LOGGER.info("Submitted job to slurm: %s", slurm_response)
+    LOGGER.info("Submitted: %s", slurm_response)
     return slurm_response
 
 
@@ -58,20 +59,20 @@ class Slurm(Processing):
         return self.job.workdir
 
     def _build_submit_file(self, dump_file_name):
-        submit_file_name = tempfile.mkstemp(prefix='slurm_', suffix='.submit', dir=self.workdir)[1]
+        submit_file_name = tempfile.mkstemp(prefix='sbatch_', suffix='.submit', dir=self.workdir)[1]
         with open(submit_file_name, 'w') as fp:
             fp.write(SLURM_TMPL.format(
                 name=self.job.name,
                 workdir=self.workdir,
                 pywps_cfg=os.getenv('PYWPS_CFG'),
-                path=os.path.dirname(os.path.realpath(sys.argv[0])),
+                path=config.get_config_value('processing', 'path'),
                 filename=dump_file_name))
             return submit_file_name
         return None
 
     def start(self):
-        LOGGER.info("Submitting job to slurm ...")
-        host = config.get_config_value('extra', 'host')
+        self.job.wps_response.update_status('Submitting job to slurm ...', 0)
+        host = config.get_config_value('processing', 'host')
         # dump job to file
         dump_file_name = self.job.dump()
         # copy dumped job to remote host
@@ -82,4 +83,4 @@ class Slurm(Processing):
         # secure_copy(source=submit_file_name, target="/tmp/emu.submit", host=host)
         # run remote pywps process
         slurm_response = sbatch(filename=submit_file_name, host=host)
-        self.job.wps_response.update_status('PyWPS Process submitted to slurm: %s'.format(slurm_response), 0)
+        self.job.wps_response.update_status('Submitted: %s'.format(slurm_response), 0)
