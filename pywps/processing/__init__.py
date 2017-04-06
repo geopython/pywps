@@ -13,11 +13,12 @@ LOGGER = logging.getLogger("PYWPS")
 
 MULTIPROCESSING = 'multiprocessing'
 SLURM = 'slurm'
+DEFAULT = MULTIPROCESSING
 
 
 def Process(process, wps_request, wps_response):
-    mode = config.get_config_value("extra", "mode")
-    LOGGER.info("Configured processing mode: %s", mode)
+    mode = config.get_config_value("processing", "mode")
+    LOGGER.info("Processing mode: %s", mode)
     if mode == SLURM:
         return Slurm(process, wps_request, wps_response)
     else:
