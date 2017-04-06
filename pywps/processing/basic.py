@@ -16,6 +16,10 @@ class Job(object):
         self.wps_response = wps_response
 
     @property
+    def name(self):
+        return self.process.identifier
+
+    @property
     def workdir(self):
         return self.process.workdir
 
