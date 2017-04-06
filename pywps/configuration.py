@@ -92,6 +92,11 @@ def load_configuration(cfgfiles=None):
     # for each process to its current workdir (a temp folder).
     CONFIG.set('server', 'sethomedir', 'false')
 
+    CONFIG.add_section('processing')
+    CONFIG.set('processing', 'mode', 'default')
+    CONFIG.set('processing', 'host', 'localhost')
+    CONFIG.set('processing', 'path', os.path.dirname(os.path.realpath(sys.argv[0])))
+
     CONFIG.add_section('logging')
     CONFIG.set('logging', 'file', '')
     CONFIG.set('logging', 'level', 'DEBUG')
