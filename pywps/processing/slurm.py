@@ -23,7 +23,8 @@ SLURM_TMPL = """\
 #SBATCH --output={workdir}/slurm_%N_%j.out      # file for batch script's standard output
 #SBATCH --error={workdir}/slurm_%N_%j.err       # file for batch script's standard error
 export PYWPS_CFG="{pywps_cfg}"
-"{bin_path}/joblauncher" "{filename}"
+export PATH="{path}":$PATH
+joblauncher "{filename}"
 """
 
 
@@ -63,7 +64,7 @@ class Slurm(Processing):
                 name=self.job.name,
                 workdir=self.workdir,
                 pywps_cfg=os.getenv('PYWPS_CFG'),
-                bin_path=os.path.dirname(os.path.realpath(sys.argv[0])),
+                path=os.path.dirname(os.path.realpath(sys.argv[0])),
                 filename=dump_file_name))
             return submit_file_name
         return None
