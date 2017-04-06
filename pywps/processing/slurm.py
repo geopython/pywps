@@ -21,6 +21,7 @@ SLURM_TMPL = """\
 #SBATCH -J {name}
 #SBATCH --time=00:30:00
 #set -eo pipefail -o nounset
+export PYWPS_CFG={pywps_cfg}
 "{prefix}/bin/launch" "{filename}"
 """
 
@@ -64,6 +65,7 @@ class Slurm(Processing):
             fp.write(SLURM_TMPL.format(
                 name=self.uuid,
                 workdir=self.workdir,
+                pywps_cfg=os.getenv('PYWPS_CFG'),
                 prefix=config.get_config_value('extra', 'prefix'),
                 filename=dump_file_name))
             return submit_file_name
