@@ -23,7 +23,7 @@ SLURM_TMPL = """\
 #SBATCH --output={workdir}/slurm_%N_%j.out      # file for batch script's standard output
 #SBATCH --error={workdir}/slurm_%N_%j.err       # file for batch script's standard error
 export PYWPS_CFG="{pywps_cfg}"
-"{prefix}/bin/launch" "{filename}"
+"{prefix}/bin/joblauncher" "{filename}"
 """
 
 
