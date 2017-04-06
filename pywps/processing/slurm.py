@@ -16,12 +16,13 @@ LOGGER = logging.getLogger("PYWPS")
 
 SLURM_TMPL = """\
 #!/bin/bash
-#SBATCH -e {workdir}/slurm_{name}.error
-#SBATCH -o {workdir}/slurm_{name}.log
-#SBATCH -J {name}
-#SBATCH --time=00:30:00
-#set -eo pipefail -o nounset
-export PYWPS_CFG={pywps_cfg}
+#SBATCH --job-name={name}                       # name of job
+#SBATCH --nodes=1                               # number of nodes on which to run
+#SBATCH --cpus-per-task=1                       # number of cpus required per task
+#SBATCH --time=00:30:00                         # time limit
+#SBATCH --output={workdir}/slurm_%N_%j.out      # file for batch script's standard output
+#SBATCH --error={workdir}/slurm_%N_%j.err       # file for batch script's standard error
+export PYWPS_CFG="{pywps_cfg}"
 "{prefix}/bin/launch" "{filename}"
 """
 
@@ -55,15 +56,11 @@ class Slurm(Processing):
     def workdir(self):
         return self.job.workdir
 
-    @property
-    def uuid(self):
-        return self.job.uuid
-
     def _build_submit_file(self, dump_file_name):
         submit_file_name = tempfile.mkstemp(prefix='slurm_', suffix='.submit', dir=self.workdir)[1]
         with open(submit_file_name, 'w') as fp:
             fp.write(SLURM_TMPL.format(
-                name=self.uuid,
+                name=self.job.name,
                 workdir=self.workdir,
                 pywps_cfg=os.getenv('PYWPS_CFG'),
                 prefix=config.get_config_value('extra', 'prefix'),
