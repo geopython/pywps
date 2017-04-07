@@ -664,7 +664,8 @@ def _build_input_file_name(href, workdir, extension=None):
     file_name = os.path.basename(href).strip() or 'input'
     (prefix, suffix) = os.path.splitext(file_name)
     suffix = suffix or extension
-    file_name = prefix + suffix
+    if prefix and suffix:
+        file_name = prefix + suffix
     input_file_name = os.path.join(workdir, file_name)
     # build tempfile in case of duplicates
     if os.path.exists(input_file_name):
