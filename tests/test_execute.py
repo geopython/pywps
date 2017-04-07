@@ -381,6 +381,12 @@ class ExecuteXmlParserTest(unittest.TestCase):
         self.assertEqual(
             _build_input_file_name('http://path/to/test', workdir=workdir, extension='.txt'),
             os.path.join(workdir, 'test.txt'))
+        self.assertEqual(
+            _build_input_file_name('http://path/to/test', workdir=workdir),
+            os.path.join(workdir, 'test'))
+        self.assertEqual(
+            _build_input_file_name('file://path/to/.config', workdir=workdir),
+            os.path.join(workdir, '.config'))
         open(os.path.join(workdir, 'duplicate.html'), 'a').close()
         inpt_filename = _build_input_file_name('http://path/to/duplicate.html', workdir=workdir, extension='.txt')
         self.assertTrue(inpt_filename.startswith(os.path.join(workdir, 'duplicate_')))
