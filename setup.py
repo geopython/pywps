@@ -56,7 +56,8 @@ CONFIG = {
         'pywps/inout',
         'pywps/resources',
         'pywps/validator',
-        'pywps/inout/formats'
+        'pywps/inout/formats',
+        'pywps/processing',
     ],
     'scripts': [],
     'entry_points': {
