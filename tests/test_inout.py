@@ -321,7 +321,7 @@ class LiteralInputTest(unittest.TestCase):
             data_type='date')
         inpt.data = "2017-04-20"
         out = inpt.json
-        self.assertEqual(out['data'], datetime.date(2017, 4, 20), 'time set')
+        self.assertEqual(out['data'], datetime.date(2017, 4, 20), 'date set')
 
 
 class LiteralOutputTest(unittest.TestCase):
