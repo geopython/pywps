@@ -8,6 +8,7 @@
 
 import os
 import tempfile
+import datetime
 import unittest
 from pywps import Format
 from pywps.validator import get_validator
@@ -294,6 +295,33 @@ class LiteralInputTest(unittest.TestCase):
         self.assertFalse(out['uom'], 'uom exists')
         self.assertEqual(len(out['allowed_values']), 3, '3 allowed values')
         self.assertEqual(out['allowed_values'][0]['value'], 1, 'allowed value 1')
+
+    def test_json_out_datetime(self):
+        inpt = LiteralInput(
+            identifier="datetime",
+            mode=2,
+            data_type='dateTime')
+        inpt.data = "2017-04-20T12:30:00"
+        out = inpt.json
+        self.assertEqual(out['data'], datetime.datetime(2017, 4, 20, 12, 30, 0), 'datetime set')
+
+    def test_json_out_time(self):
+        inpt = LiteralInput(
+            identifier="time",
+            mode=2,
+            data_type='time')
+        inpt.data = "12:30:00"
+        out = inpt.json
+        self.assertEqual(out['data'], datetime.time(12, 30, 0), 'time set')
+
+    def test_json_out_date(self):
+        inpt = LiteralInput(
+            identifier="date",
+            mode=2,
+            data_type='date')
+        inpt.data = "2017-04-20"
+        out = inpt.json
+        self.assertEqual(out['data'], datetime.date(2017, 4, 20), 'time set')
 
 
 class LiteralOutputTest(unittest.TestCase):
