@@ -8,6 +8,8 @@ import unittest
 import lxml.etree
 from pywps.app import WPSRequest
 import tempfile
+import datetime
+import json
 
 
 class WPSRequestTest(unittest.TestCase):
@@ -20,7 +22,6 @@ class WPSRequestTest(unittest.TestCase):
         x = open(self.tempfile, 'w')
         x.write("ahoj")
         x.close()
-
 
     def test_json_in(self):
 
@@ -46,7 +47,7 @@ class WPSRequestTest(unittest.TestCase):
                     'identifier': 'myliteral',
                     'type': 'literal',
                     'data_type': 'integer',
-                    'allowed_values': [ {'type':'anyvalue'} ],
+                    'allowed_values': [{'type': 'anyvalue'}],
                     'data': 1
                 }]
             },
@@ -61,6 +62,57 @@ class WPSRequestTest(unittest.TestCase):
         self.assertEqual(self.request.inputs['myin'][0].data, 'ahoj', 'Data are in the file')
         self.assertListEqual(self.request.inputs['myliteral'][0].allowed_values, [], 'Any value set')
         self.assertTrue(self.request.inputs['myliteral'][0].any_value, 'Any value set')
+
+    def test_json_inout_datetime(self):
+        obj = {
+            'operation': 'getcapabilities',
+            'version': '1.0.0',
+            'language': 'eng',
+            'identifiers': 'moinmoin',
+            'store_execute': True,
+            'status': True,
+            'lineage': True,
+            'inputs': {
+                'datetime': [{
+                    'identifier': 'datetime',
+                    'type': 'literal',
+                    'data_type': 'dateTime',
+                    'data': '2017-04-20T12:00:00',
+                    'allowed_values': [{'type': 'anyvalue'}],
+                }],
+                'date': [{
+                    'identifier': 'date',
+                    'type': 'literal',
+                    'data_type': 'date',
+                    'data': '2017-04-20',
+                    'allowed_values': [{'type': 'anyvalue'}],
+                }],
+                'time': [{
+                    'identifier': 'time',
+                    'type': 'literal',
+                    'data_type': 'time',
+                    'data': '09:00:00',
+                    'allowed_values': [{'type': 'anyvalue'}],
+                }],
+            },
+            'outputs': {},
+            'raw': False
+        }
+
+        self.request = WPSRequest()
+        self.request.json = obj
+
+        self.assertEqual(self.request.inputs['datetime'][0].data, datetime.datetime(2017, 4, 20, 12), 'Datatime set')
+        self.assertEqual(self.request.inputs['date'][0].data, datetime.date(2017, 4, 20), 'Data set')
+        self.assertEqual(self.request.inputs['time'][0].data, datetime.time(9, 0, 0), 'Time set')
+
+        # dump to json and reload
+        dump = self.request.json
+        self.request.json = json.loads(dump)
+
+        self.assertEqual(self.request.inputs['datetime'][0].data, datetime.datetime(2017, 4, 20, 12), 'Datatime set')
+        self.assertEqual(self.request.inputs['date'][0].data, datetime.date(2017, 4, 20), 'Data set')
+        self.assertEqual(self.request.inputs['time'][0].data, datetime.time(9, 0, 0), 'Time set')
 
 
 def load_tests(loader=None, tests=None, pattern=None):
