@@ -84,6 +84,7 @@ class IOHandler(object):
         self.source = None
         self._tempfile = None
         self.workdir = workdir
+        self.uuid = None  # request identifier
         self._stream = None
 
         self.valid_mode = mode

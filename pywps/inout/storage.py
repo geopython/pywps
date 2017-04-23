@@ -90,8 +90,10 @@ class FileStorage(StorageAbstract):
         import math
         import shutil
         import tempfile
+        import uuid
 
         file_name = output.file
+        request_uuid = output.uuid or uuid.uuid1()
 
         file_block_size = os.stat(file_name).st_blksize
         # get_free_space delivers the numer of free blocks, not the available size!
@@ -102,16 +104,25 @@ class FileStorage(StorageAbstract):
         actual_file_size = math.ceil(file_size / float(file_block_size)) * file_block_size
 
         if avail_size < actual_file_size:
-            raise NotEnoughStorage('Not enough space in %s to store %s' % (self.target, file_name))
+            raise NotEnoughStorage('Not enough space in {} to store {}'.format(self.target, file_name))
 
+        # create a target folder for each request
+        target = os.path.join(self.target, str(request_uuid))
+        if not os.path.exists(target):
+            os.makedirs(target)
+
+        # build output name
         (prefix, suffix) = os.path.splitext(file_name)
         if not suffix:
             suffix = output.output_format.extension
         (file_dir, file_name) = os.path.split(prefix)
-        output_name = tempfile.mkstemp(suffix=suffix, prefix=file_name,
-                                       dir=self.target)[1]
+        output_name = file_name + suffix
+        # build tempfile in case of duplicates
+        if os.path.exists(os.path.join(target, output_name)):
+            output_name = tempfile.mkstemp(suffix=suffix, prefix=file_name + '_',
+                                           dir=target)[1]
 
-        full_output_name = os.path.join(self.target, output_name)
+        full_output_name = os.path.join(target, output_name)
         LOGGER.info('Storing file output to %s', full_output_name)
         shutil.copy2(output.file, full_output_name)
 
@@ -119,6 +130,7 @@ class FileStorage(StorageAbstract):
 
         # make sure base url ends with '/'
         baseurl = self.output_url.rstrip('/') + '/'
+        baseurl += str(request_uuid) + '/'
         url = urljoin(baseurl, just_file_name)
         LOGGER.info('File output URI: %s', url)
 
