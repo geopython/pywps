@@ -12,6 +12,7 @@ from werkzeug.wrappers import Request, Response
 from pywps import WPS, OWS
 from pywps._compat import PY2
 from pywps._compat import urlopen
+from pywps._compat import urlparse
 from pywps.app.basic import xml_response
 from pywps.app.WPSRequest import WPSRequest
 import pywps.configuration as config
@@ -662,7 +663,8 @@ def _get_datasize(reference_file_data):
 
 def _build_input_file_name(href, workdir, extension=None):
     href = href or ''
-    file_name = os.path.basename(href).strip() or 'input'
+    url_path = urlparse(href).path or ''
+    file_name = os.path.basename(url_path).strip() or 'input'
     (prefix, suffix) = os.path.splitext(file_name)
     suffix = suffix or extension
     if prefix and suffix:
