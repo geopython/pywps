@@ -385,6 +385,9 @@ class ExecuteXmlParserTest(unittest.TestCase):
             _build_input_file_name('http://path/to/test', workdir=workdir),
             os.path.join(workdir, 'test'))
         self.assertEqual(
+            _build_input_file_name('https://path/to/test.txt?token=abc&expires_at=1234567', workdir=workdir),
+            os.path.join(workdir, 'test.txt'))
+        self.assertEqual(
             _build_input_file_name('file://path/to/.config', workdir=workdir),
             os.path.join(workdir, '.config'))
         open(os.path.join(workdir, 'duplicate.html'), 'a').close()
