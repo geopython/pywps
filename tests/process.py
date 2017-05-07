@@ -19,6 +19,7 @@ sys.path.append(pywpsPath)
 import unittest
 
 from pywps import Process
+from pywps.app.Common import Metadata
 from pywps.inout import LiteralInput
 from pywps.inout import BoundingBoxInput
 from pywps.inout import ComplexInput

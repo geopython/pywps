@@ -64,21 +64,32 @@ def get_describe_result(resp):
 class DescribeProcessTest(unittest.TestCase):
 
     def setUp(self):
-        def hello(request): pass
-        def ping(request): pass
-        processes = [Process(hello, 'hello', 'Process Hello'), Process(ping, 'ping', 'Process Ping')]
+        def hello(request):
+            pass
+
+        def ping(request):
+            pass
+        processes = [
+            Process(hello, 'hello', 'Process Hello', metadata=[
+                Metadata('hello metadata', 'http://example.org/hello',
+                         role='http://www.opengis.net/spec/wps/2.0/def/process/description/documentation')]),
+            Process(ping, 'ping', 'Process Ping', metadata=[Metadata('ping metadata', 'http://example.org/ping')]),
+        ]
         self.client = client_for(Service(processes=processes))
 
     def test_get_request_all_args(self):
         resp = self.client.get('?Request=DescribeProcess&service=wps&version=1.0.0&identifier=all')
         identifiers = [desc.identifier for desc in get_describe_result(resp)]
+        metadata = [desc.metadata for desc in get_describe_result(resp)]
+
         assert 'ping' in identifiers
         assert 'hello' in identifiers
         assert_pywps_version(resp)
+        assert 'hello metadata' in [item for sublist in metadata for item in sublist]
 
     def test_get_request_zero_args(self):
         resp = self.client.get('?Request=DescribeProcess&version=1.0.0&service=wps')
-        assert resp.status_code == 400 # bad request, identifier is missing
+        assert resp.status_code == 400  # bad request, identifier is missing
 
     def test_get_request_nonexisting_process_args(self):
         resp = self.client.get('?Request=DescribeProcess&version=1.0.0&service=wps&identifier=NONEXISTINGPROCESS')
@@ -130,20 +141,24 @@ class DescribeProcessInputTest(unittest.TestCase):
         return result
 
     def test_one_literal_string_input(self):
-        def hello(request): pass
+        def hello(request):
+            pass
         hello_process = Process(
-                hello,
-                'hello',
-                'Process Hello',
-                inputs=[LiteralInput('the_name', 'Input name')],
-                metadata=[Metadata('process metadata 1', 'http://example.org/1'), Metadata('process metadata 2', 'http://example.org/2')]
+            hello,
+            'hello',
+            'Process Hello',
+            inputs=[LiteralInput('the_name', 'Input name')],
+            metadata=[
+                Metadata('process metadata 1', 'http://example.org/1'),
+                Metadata('process metadata 2', 'http://example.org/2')]
         )
         result = self.describe_process(hello_process)
         assert result.inputs == [('the_name', 'literal', 'integer')]
         assert result.metadata == ['process metadata 1', 'process metadata 2']
 
     def test_one_literal_integer_input(self):
-        def hello(request): pass
+        def hello(request):
+            pass
         hello_process = Process(hello, 'hello',
                                 'Process Hello',
                                 inputs=[LiteralInput('the_number',
@@ -164,7 +179,7 @@ class InputDescriptionTest(unittest.TestCase):
         [type_el] = xpath_ns(doc, './LiteralData/ows:DataType')
         self.assertEqual(type_el.text, 'positiveInteger')
         self.assertEqual(type_el.attrib['{%s}reference' % NAMESPACES['ows']],
-            OGCTYPE['positiveInteger'])
+                         OGCTYPE['positiveInteger'])
         anyvalue = xpath_ns(doc, './LiteralData/ows:AnyValue')
         self.assertEqual(len(anyvalue), 1)
 
@@ -235,6 +250,7 @@ class InputDescriptionTest(unittest.TestCase):
         self.assertEqual(default_crs.text, 'EPSG:4326')
         self.assertEqual(len(supported), 2)
 
+
 class OutputDescriptionTest(unittest.TestCase):
 
     def test_literal_output(self):
@@ -268,7 +284,7 @@ class OutputDescriptionTest(unittest.TestCase):
 
     def test_bbox_output(self):
         bbox = BoundingBoxOutput('bbox', 'BBox foo',
-                crss=["EPSG:4326"])
+                                 crss=["EPSG:4326"])
         doc = bbox.describe_xml()
         [outpt] = xpath_ns(doc, '/Output')
         [default_crs] = xpath_ns(doc, './BoundingBoxOutput/Default/CRS')

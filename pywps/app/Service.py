@@ -20,7 +20,7 @@ from pywps.exceptions import MissingParameterValue, NoApplicableCode, InvalidPar
 from pywps.inout.inputs import ComplexInput, LiteralInput, BoundingBoxInput
 from pywps.dblog import log_request, update_response
 
-from collections import deque
+from collections import deque, OrderedDict
 import os
 import sys
 import uuid
@@ -41,16 +41,16 @@ class Service(object):
     """
 
     def __init__(self, processes=[], cfgfiles=None):
-        self.processes = {p.identifier: p for p in processes}
+        # ordered dict of processes
+        self.processes = OrderedDict((p.identifier, p) for p in processes)
 
         if cfgfiles:
             config.load_configuration(cfgfiles)
 
         if config.get_config_value('logging', 'file') and config.get_config_value('logging', 'level'):
             LOGGER.setLevel(getattr(logging, config.get_config_value('logging', 'level')))
-            msg_fmt = '%(asctime)s] [%(levelname)s] file=%(pathname)s line=%(lineno)s module=%(module)s function=%(funcName)s %(message)s'  # noqa
             fh = logging.FileHandler(config.get_config_value('logging', 'file'))
-            fh.setFormatter(logging.Formatter(msg_fmt))
+            fh.setFormatter(logging.Formatter(config.get_config_value('logging', 'format')))
             LOGGER.addHandler(fh)
         else:  # NullHandler
             LOGGER.addHandler(logging.NullHandler())
@@ -396,7 +396,13 @@ class Service(object):
         def href_handler(complexinput, datain):
             """<wps:Reference /> handler"""
             # save the reference input in workdir
-            tmp_file = tempfile.mkstemp(dir=complexinput.workdir)[1]
+            extension = None
+            if complexinput.data_format:
+                extension = complexinput.data_format.extension
+            tmp_file = _build_input_file_name(
+                href=datain.get('href'),
+                workdir=complexinput.workdir,
+                extension=extension)
 
             try:
                 (reference_file, reference_file_data) = _openurl(datain)
@@ -416,7 +422,7 @@ class Service(object):
             if int(data_size) > int(byte_size):
                 raise FileSizeExceeded('File size for input exceeded.'
                                        ' Maximum allowed: %i megabytes' %
-                                       complexinput.max_size, complexinput.get('identifier'))
+                                       complexinput.max_size, complexinput.identifier)
 
             try:
                 with open(tmp_file, 'w') as f:
@@ -603,6 +609,9 @@ class Service(object):
             except NoApplicableCode as e:
                 return e
             return e
+        except Exception as e:
+            e = NoApplicableCode(str(e), code=500)
+            return e
 
 
 def _openurl(inpt):
@@ -649,3 +658,19 @@ def _get_datasize(reference_file_data):
     tmp_sio.close()
 
     return data_size
+
+
+def _build_input_file_name(href, workdir, extension=None):
+    href = href or ''
+    file_name = os.path.basename(href).strip() or 'input'
+    (prefix, suffix) = os.path.splitext(file_name)
+    suffix = suffix or extension
+    if prefix and suffix:
+        file_name = prefix + suffix
+    input_file_name = os.path.join(workdir, file_name)
+    # build tempfile in case of duplicates
+    if os.path.exists(input_file_name):
+        input_file_name = tempfile.mkstemp(
+            suffix=suffix, prefix=prefix + '_',
+            dir=workdir)[1]
+    return input_file_name

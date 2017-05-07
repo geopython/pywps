@@ -8,6 +8,7 @@
 
 import os
 import tempfile
+import datetime
 import unittest
 from pywps import Format
 from pywps.validator import get_validator
@@ -48,7 +49,7 @@ class IOHandlerTest(unittest.TestCase):
         """
         self.assertEqual(self.iohandler.validator, emptyvalidator)
 
-    def _test_outout(self, source_type):
+    def _test_outout(self, source_type, suffix=''):
         """Test all outputs"""
 
         self.assertEqual(source_type, self.iohandler.source_type,
@@ -60,7 +61,9 @@ class IOHandlerTest(unittest.TestCase):
             source = StringIO(text_type(self._value))
             self.iohandler.stream = source
 
-        file_handler = open(self.iohandler.file)
+        file_path = self.iohandler.file
+        self.assertTrue(file_path.endswith(suffix))
+        file_handler = open(file_path)
         self.assertEqual(self._value, file_handler.read(), 'File obtained')
         file_handler.close()
 
@@ -86,11 +89,11 @@ class IOHandlerTest(unittest.TestCase):
         self.assertEqual(stream_val, self.iohandler.memory_object,
                          'Memory object obtained')
 
-
     def test_data(self):
         """Test data input IOHandler"""
         self.iohandler.data = self._value
-        self._test_outout(SOURCE_TYPE.DATA)
+        self.iohandler.data_format = Format('foo', extension='.foo')
+        self._test_outout(SOURCE_TYPE.DATA, '.foo')
 
     def test_stream(self):
         """Test stream input IOHandler"""
@@ -122,6 +125,26 @@ class IOHandlerTest(unittest.TestCase):
     def test_memory(self):
         """Test data input IOHandler"""
         self.skipTest('Memory object not implemented')
+
+    def test_data_bytes(self):
+        self._value = b'aa'
+
+        self.iohandler.data = self._value
+        self.assertEqual(self.iohandler.source_type, SOURCE_TYPE.DATA,
+                         'Source type properly set')
+
+        # test the data handle
+        self.assertEqual(self._value, self.iohandler.data, 'Data obtained')
+
+        # test the file handle
+        file_handler = open(self.iohandler.file, 'rb')
+        self.assertEqual(self._value, file_handler.read(), 'File obtained')
+        file_handler.close()
+
+        # test the stream handle
+        stream_data = self.iohandler.stream.read()
+        self.iohandler.stream.close()
+        self.assertEqual(self._value, stream_data, 'Stream obtained')
 
 
 class ComplexInputTest(unittest.TestCase):
@@ -272,6 +295,33 @@ class LiteralInputTest(unittest.TestCase):
         self.assertFalse(out['uom'], 'uom exists')
         self.assertEqual(len(out['allowed_values']), 3, '3 allowed values')
         self.assertEqual(out['allowed_values'][0]['value'], 1, 'allowed value 1')
+
+    def test_json_out_datetime(self):
+        inpt = LiteralInput(
+            identifier="datetime",
+            mode=2,
+            data_type='dateTime')
+        inpt.data = "2017-04-20T12:30:00"
+        out = inpt.json
+        self.assertEqual(out['data'], datetime.datetime(2017, 4, 20, 12, 30, 0), 'datetime set')
+
+    def test_json_out_time(self):
+        inpt = LiteralInput(
+            identifier="time",
+            mode=2,
+            data_type='time')
+        inpt.data = "12:30:00"
+        out = inpt.json
+        self.assertEqual(out['data'], datetime.time(12, 30, 0), 'time set')
+
+    def test_json_out_date(self):
+        inpt = LiteralInput(
+            identifier="date",
+            mode=2,
+            data_type='date')
+        inpt.data = "2017-04-20"
+        out = inpt.json
+        self.assertEqual(out['data'], datetime.date(2017, 4, 20), 'date set')
 
 
 class LiteralOutputTest(unittest.TestCase):

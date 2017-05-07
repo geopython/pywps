@@ -15,15 +15,15 @@ The configuration file has 3 sections:
 
     * `metadata:main` for the server metadata inputs
     * `server` for server configuration
-    * `loggging` for logging configuration
+    * `logging` for logging configuration
     * `grass` for *optional* configuration to support `GRASS GIS
       <http://grass.osgeo.org>`_
 
-PyWPS ships with a sample configuration file (``default-sample.cfg``). 
+PyWPS ships with a sample configuration file (``default-sample.cfg``).
 A similar file is also available in the `demo` service as
 described in :ref:`demo` section.
 
-Copy the file to ``default.cfg`` and edit the following: 
+Copy the file to ``default.cfg`` and edit the following:
 
 [metadata:main]
 ---------------
@@ -100,20 +100,20 @@ configuration file <http://docs.pycsw.org/en/latest/configuration.html>`_.
 
 :parallelprocesses:
     maximum number of parallel running processes - set this number carefully.
-    The effective number of parallel running processes is limited by the number 
-    of cores  in the processor of the hosting machine. As well, speed and 
-    response time of hard drives impact ultimate processing performance. A 
-    reasonable number of parallel running processes is not higher than the 
+    The effective number of parallel running processes is limited by the number
+    of cores  in the processor of the hosting machine. As well, speed and
+    response time of hard drives impact ultimate processing performance. A
+    reasonable number of parallel running processes is not higher than the
     number of processor cores.
 
 :maxrequestsize:
-    maximal request size. 0 for no limit 
-    
-:workdir: 
-    a directory to store all temporary files (which should be always deleted, 
+    maximal request size. 0 for no limit
+
+:workdir:
+    a directory to store all temporary files (which should be always deleted,
     once the process is finished).
-    
-:outputpath: 
+
+:outputpath:
     server path where to store output files.
 
 :outputurl:
@@ -121,7 +121,7 @@ configuration file <http://docs.pycsw.org/en/latest/configuration.html>`_.
 
 .. note:: `outputpath` and `outputurl` must corespond. `outputpath` is the name
         of the resulting target directory, where all output data files are
-        stored (with unique names). `outputurl` is the corresponding full URL, 
+        stored (with unique names). `outputurl` is the corresponding full URL,
         which is targeting to `outputpath` directory.
 
         Example: `outputpath=/var/www/wps/outputs` shall correspond with
@@ -133,6 +133,11 @@ configuration file <http://docs.pycsw.org/en/latest/configuration.html>`_.
 :level:
     the logging level (see
     http://docs.python.org/library/logging.html#logging-levels)
+
+:format:
+    the format string used by the logging `:Formatter:` (see
+    https://docs.python.org/3/library/logging.html#logging.Formatter).
+    For example: ``%(asctime)s] [%(levelname)s] %(message)s``.
 
 :file:
     the full file path to the log file for being able to see possible error
@@ -167,11 +172,8 @@ Sample file
   processes_path=
   outputurl=/data/
   outputpath=/tmp/outputs/
-  logfile=
-  loglevel=INFO
-  logdatabase=
   workdir=
-  
+
   [metadata:main]
   identification_title=PyWPS Processing Service
   identification_abstract=PyWPS is an implementation of the Web Processing Service standard from the Open Geospatial Consortium. PyWPS is written in Python.
@@ -195,6 +197,12 @@ Sample file
   contact_hours=Hours of Service
   contact_instructions=During hours of service.  Off on weekends.
   contact_role=pointOfContact
+
+  [logging]
+  level=INFO
+  file=logs/pywps.log
+  database=sqlite:///logs/pywps-logs.sqlite3
+  format=%(asctime)s] [%(levelname)s] file=%(pathname)s line=%(lineno)s module=%(module)s function=%(funcName)s %(message)s
 
   [grass]
   gisbase=/usr/local/grass-7.3.svn/

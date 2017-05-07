@@ -7,6 +7,8 @@
 import unittest
 import lxml.etree
 import json
+import tempfile
+import os.path
 from pywps import Service, Process, LiteralOutput, LiteralInput,\
     BoundingBoxOutput, BoundingBoxInput, Format, ComplexInput, ComplexOutput
 from pywps.validator.base import emptyvalidator
@@ -48,10 +50,11 @@ def create_greeter():
                    inputs=[LiteralInput('name', 'Input name', data_type='string')],
                    outputs=[LiteralOutput('message', 'Output message', data_type='string')])
 
+
 def create_bbox_process():
     def bbox_process(request, response):
         coords = request.inputs['mybbox'][0].data
-        assert type(coords) == type([])
+        assert isinstance(coords, list)
         assert len(coords) == 4
         assert coords[0] == '15'
         response.outputs['outbbox'].data = coords
@@ -62,6 +65,7 @@ def create_bbox_process():
                    title='Bbox process',
                    inputs=[BoundingBoxInput('mybbox', 'Input name', ["EPSG:4326"])],
                    outputs=[BoundingBoxOutput('outbbox', 'Output message', ["EPSG:4326"])])
+
 
 def create_complex_proces():
     def complex_proces(request, response):
@@ -205,7 +209,7 @@ class ExecuteTest(unittest.TestCase):
                     WPS.Data(WPS.BoundingBoxData(
                         OWS.LowerCorner('15 50'),
                         OWS.UpperCorner('16 51'),
-                        ))
+                    ))
                 )
             ),
             version='1.0.0'
@@ -214,11 +218,14 @@ class ExecuteTest(unittest.TestCase):
         assert_response_success(resp)
 
         [output] = xpath_ns(resp.xml, '/wps:ExecuteResponse'
-                                   '/wps:ProcessOutputs/Output')
-        self.assertEqual('outbbox', xpath_ns(output,
+                                      '/wps:ProcessOutputs/wps:Output')
+        self.assertEqual('outbbox', xpath_ns(
+            output,
             './ows:Identifier')[0].text)
-        self.assertEqual('15 50', xpath_ns(output,
-            './ows:BoundingBox/ows:LowerCorner')[0].text)
+        self.assertEqual('15 50', xpath_ns(
+            output,
+            './wps:Data/ows:BoundingBox/ows:LowerCorner')[0].text)
+
 
 class ExecuteXmlParserTest(unittest.TestCase):
     """Tests for Execute request XML Parser
@@ -364,6 +371,26 @@ class ExecuteXmlParserTest(unittest.TestCase):
         rv = get_inputs_from_xml(request_doc)
         self.assertEqual(rv['name'][0]['href'], 'http://foo/bar/service')
         self.assertEqual(rv['name'][0]['bodyreference'], 'http://foo/bar/reference')
+
+    def test_build_input_file_name(self):
+        from pywps.app.Service import _build_input_file_name
+        workdir = tempfile.mkdtemp()
+        self.assertEqual(
+            _build_input_file_name('http://path/to/test.txt', workdir=workdir),
+            os.path.join(workdir, 'test.txt'))
+        self.assertEqual(
+            _build_input_file_name('http://path/to/test', workdir=workdir, extension='.txt'),
+            os.path.join(workdir, 'test.txt'))
+        self.assertEqual(
+            _build_input_file_name('http://path/to/test', workdir=workdir),
+            os.path.join(workdir, 'test'))
+        self.assertEqual(
+            _build_input_file_name('file://path/to/.config', workdir=workdir),
+            os.path.join(workdir, '.config'))
+        open(os.path.join(workdir, 'duplicate.html'), 'a').close()
+        inpt_filename = _build_input_file_name('http://path/to/duplicate.html', workdir=workdir, extension='.txt')
+        self.assertTrue(inpt_filename.startswith(os.path.join(workdir, 'duplicate_')))
+        self.assertTrue(inpt_filename.endswith('.html'))
 
 
 def load_tests(loader=None, tests=None, pattern=None):

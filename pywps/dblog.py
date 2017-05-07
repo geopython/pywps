@@ -12,6 +12,7 @@ Implementation of logging for PyWPS-4
 import logging
 from pywps import configuration
 from pywps.exceptions import NoApplicableCode
+from pywps._compat import PY2
 import sqlite3
 import datetime
 import pickle
@@ -25,6 +26,7 @@ from sqlalchemy.orm import sessionmaker
 
 LOGGER = logging.getLogger('PYWPS')
 _SESSION_MAKER = None
+_LAST_SESSION = None
 
 
 _tableprefix = configuration.get_config_value('logging', 'prefix')
@@ -86,6 +88,7 @@ def get_running():
         ProcessInstance.percent_done < 100).filter(
             ProcessInstance.percent_done > -1)
 
+    session.close()
     return running
 
 
@@ -96,6 +99,7 @@ def get_stored():
     session = get_session()
     stored = session.query(RequestInstance)
 
+    session.close()
     return stored
 
 
@@ -138,7 +142,7 @@ def update_response(uuid, response, close=False):
         request.percent_done = status_percentage
         request.status = status
         session.commit()
-        session.close()
+    session.close()
 
 
 def _get_identifier(request):
@@ -162,6 +166,15 @@ def get_session():
 
     LOGGER.debug('Initializing database connection')
     global _SESSION_MAKER
+    global _LAST_SESSION
+
+    if _LAST_SESSION:
+        _LAST_SESSION.close()
+
+    if _SESSION_MAKER:
+        _SESSION_MAKER.close_all()
+        _LAST_SESSION = _SESSION_MAKER()
+        return _LAST_SESSION
 
     database = configuration.get_config_value('logging', 'database')
     echo = True
@@ -179,7 +192,8 @@ def get_session():
 
     _SESSION_MAKER = Session
 
-    return _SESSION_MAKER()
+    _LAST_SESSION = _SESSION_MAKER()
+    return _LAST_SESSION
 
 
 def store_process(uuid, request):
@@ -187,7 +201,11 @@ def store_process(uuid, request):
     """
 
     session = get_session()
-    request = RequestInstance(uuid=str(uuid), request=request.json)
+    request_json = request.json
+    if not PY2:
+        # the BLOB type requires bytes on Python 3
+        request_json = request_json.encode('utf-8')
+    request = RequestInstance(uuid=str(uuid), request=request_json)
     session.add(request)
     session.commit()
     session.close()

@@ -149,10 +149,15 @@ class Process(object):
         return wps_response
 
     def _set_uuid(self, uuid):
-        """Set uuid and status ocation apth and url
+        """Set uuid and status location path and url
         """
 
         self.uuid = uuid
+        for inpt in self.inputs:
+            inpt.uuid = uuid
+
+        for outpt in self.outputs:
+            outpt.uuid = uuid
 
         file_path = config.get_config_value('server', 'outputpath')
 
@@ -218,6 +223,11 @@ class Process(object):
     def _run_process(self, wps_request, wps_response):
         try:
             self._set_grass()
+            # if required set HOME to the current working directory.
+            if config.get_config_value('server', 'sethomedir') is True:
+                os.environ['HOME'] = self.workdir
+                LOGGER.info('Setting HOME to current working directory: %s', os.environ['HOME'])
+            LOGGER.debug('ProcessID=%s, HOME=%s', self.uuid, os.environ.get('HOME'))
             wps_response.update_status('PyWPS Process started', 0)
             wps_response = self.handler(wps_request, wps_response)
 
@@ -258,6 +268,8 @@ class Process(object):
         stored_request = dblog.get_first_stored()
         if stored_request:
             (uuid, request_json) = (stored_request.uuid, stored_request.request)
+            if not PY2:
+                request_json = request_json.decode('utf-8')
             new_wps_request = WPSRequest()
             new_wps_request.json = json.loads(request_json)
             new_wps_response = WPSResponse(self, new_wps_request, uuid)
@@ -278,10 +290,8 @@ class Process(object):
             if self._grass_mapset and os.path.isdir(self._grass_mapset):
                 LOGGER.info("Removing temporary GRASS GIS mapset: %s" % self._grass_mapset)
                 shutil.rmtree(self._grass_mapset)
-        except WindowsError as err:
-                LOGGER.error('Windows Error: %s', err)
         except Exception as err:
-                LOGGER.error('Unable to remove directory: %s', err)
+            LOGGER.error('Unable to remove directory: %s', err)
 
     def set_workdir(self, workdir):
         """Set working dir for all inputs and outputs
