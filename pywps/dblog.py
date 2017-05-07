@@ -20,7 +20,7 @@ import os
 
 import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, VARCHAR, Float, DateTime, BLOB
+from sqlalchemy import Column, Integer, String, VARCHAR, Float, DateTime, LargeBinary
 from sqlalchemy.orm import sessionmaker
 
 LOGGER = logging.getLogger('PYWPS')
@@ -52,7 +52,7 @@ class RequestInstance(Base):
     __tablename__ = '{}stored_requests'.format(_tableprefix)
 
     uuid = Column(VARCHAR(255), primary_key=True, nullable=False)
-    request = Column(BLOB, nullable=False)
+    request = Column(LargeBinary, nullable=False)
 
 
 def log_request(uuid, request):
