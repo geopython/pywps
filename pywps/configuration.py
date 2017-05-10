@@ -94,7 +94,7 @@ def load_configuration(cfgfiles=None):
 
     CONFIG.add_section('processing')
     CONFIG.set('processing', 'mode', 'default')
-    CONFIG.set('processing', 'host', 'localhost')
+    CONFIG.set('processing', 'remotehost', 'localhost')
     CONFIG.set('processing', 'path', os.path.dirname(os.path.realpath(sys.argv[0])))
 
     CONFIG.add_section('logging')
