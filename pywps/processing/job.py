@@ -9,7 +9,7 @@ import tempfile
 
 class Job(object):
     """
-    Job represents the processing job.
+    :class:`Job` represents a processing job.
     """
     def __init__(self, process, wps_request, wps_response):
         self.process = process
@@ -51,9 +51,9 @@ class Job(object):
 
 class JobLauncher(object):
     """
-    JobLauncher is a script to launch a job from a file with the dumped job state.
+    :class:`JobLauncher` is a command line tool to launch a job from a file with the dumped job state.
 
-    Call it with: joblauncher job-1001.txt
+    Example call: ``joblauncher job-1001.txt``
     """
     def create_parser(self):
         import argparse
@@ -70,6 +70,9 @@ class JobLauncher(object):
 
 
 def launcher():
+    """
+    Run job launcher command line.
+    """
     job_launcher = JobLauncher()
     parser = job_launcher.create_parser()
     args = parser.parse_args()
