@@ -7,6 +7,8 @@
 import unittest
 import lxml.etree
 import json
+import tempfile
+import os.path
 from pywps import Service, Process, LiteralOutput, LiteralInput,\
     BoundingBoxOutput, BoundingBoxInput, Format, ComplexInput, ComplexOutput
 from pywps.validator.base import emptyvalidator
@@ -369,6 +371,26 @@ class ExecuteXmlParserTest(unittest.TestCase):
         rv = get_inputs_from_xml(request_doc)
         self.assertEqual(rv['name'][0]['href'], 'http://foo/bar/service')
         self.assertEqual(rv['name'][0]['bodyreference'], 'http://foo/bar/reference')
+
+    def test_build_input_file_name(self):
+        from pywps.app.Service import _build_input_file_name
+        workdir = tempfile.mkdtemp()
+        self.assertEqual(
+            _build_input_file_name('http://path/to/test.txt', workdir=workdir),
+            os.path.join(workdir, 'test.txt'))
+        self.assertEqual(
+            _build_input_file_name('http://path/to/test', workdir=workdir, extension='.txt'),
+            os.path.join(workdir, 'test.txt'))
+        self.assertEqual(
+            _build_input_file_name('http://path/to/test', workdir=workdir),
+            os.path.join(workdir, 'test'))
+        self.assertEqual(
+            _build_input_file_name('file://path/to/.config', workdir=workdir),
+            os.path.join(workdir, '.config'))
+        open(os.path.join(workdir, 'duplicate.html'), 'a').close()
+        inpt_filename = _build_input_file_name('http://path/to/duplicate.html', workdir=workdir, extension='.txt')
+        self.assertTrue(inpt_filename.startswith(os.path.join(workdir, 'duplicate_')))
+        self.assertTrue(inpt_filename.endswith('.html'))
 
 
 def load_tests(loader=None, tests=None, pattern=None):
