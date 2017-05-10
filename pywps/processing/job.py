@@ -8,6 +8,9 @@ import tempfile
 
 
 class Job(object):
+    """
+    Job represents the processing job.
+    """
     def __init__(self, process, wps_request, wps_response):
         self.process = process
         self.method = '_run_process'
@@ -47,9 +50,14 @@ class Job(object):
 
 
 class JobLauncher(object):
+    """
+    JobLauncher is a script to launch a job from a file with the dumped job state.
+
+    Call it with: joblauncher job-1001.txt
+    """
     def create_parser(self):
         import argparse
-        parser = argparse.ArgumentParser(prog="launch")
+        parser = argparse.ArgumentParser(prog="joblauncher")
         parser.add_argument("filename", help="File with dumped pywps job object.")
         return parser
 

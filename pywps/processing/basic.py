@@ -8,6 +8,9 @@ from pywps.processing.job import Job
 
 
 class Processing(object):
+    """
+    Processing is an interface for running jobs.
+    """
 
     def __init__(self, process, wps_request, wps_response):
         self.job = Job(process, wps_request, wps_response)
@@ -20,6 +23,10 @@ class Processing(object):
 
 
 class MultiProcessing(Processing):
+    """
+    MultiProcessing is the default implementation to run jobs using the
+    multiprocessing module.
+    """
 
     def start(self):
         import multiprocessing
