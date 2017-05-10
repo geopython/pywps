@@ -167,7 +167,7 @@ class Process(object):
         self.status_url = os.path.join(file_url, str(self.uuid)) + '.xml'
 
     def _execute_process(self, async, wps_request, wps_response):
-        """Uses :module:`multiprocessing` module for sending process to
+        """Uses :module:`pywps.processing` module for sending process to
         background BUT first, check for maxprocesses configuration value
 
         :param async: run in asynchronous mode
