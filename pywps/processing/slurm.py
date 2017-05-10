@@ -55,7 +55,7 @@ def sbatch(filename, host=None):
 
 class Slurm(Processing):
     """
-    Slurm is processing implementation to run jobs using the slurm scheduler.
+    :class:`Slurm` is processing implementation to run jobs using the slurm scheduler.
     """
     @property
     def workdir(self):
