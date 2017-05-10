@@ -9,6 +9,7 @@ import sys
 import tempfile
 import pywps.configuration as config
 from pywps.processing.basic import Processing
+from pywps.exceptions import SchedulerNotAvailable
 
 import logging
 LOGGER = logging.getLogger("PYWPS")
@@ -49,6 +50,8 @@ def sbatch(filename, host=None):
     launcher.config(command="sbatch {}".format(filename), host=host, background=False)
     launcher.launch()
     slurm_response = launcher.response()
+    if not 'Submitted' in slurm_response:
+        raise SchedulerNotAvailable("Could not submit slurm job.")
     LOGGER.info("Submitted: %s", slurm_response)
     return slurm_response
 
