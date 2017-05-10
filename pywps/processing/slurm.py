@@ -75,7 +75,7 @@ class Slurm(Processing):
 
     def start(self):
         self.job.wps_response.update_status('Submitting job to slurm ...', 0)
-        host = config.get_config_value('processing', 'host')
+        host = config.get_config_value('processing', 'remotehost')
         # dump job to file
         dump_file_name = self.job.dump()
         # copy dumped job to remote host
