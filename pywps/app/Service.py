@@ -434,13 +434,38 @@ class Service(object):
             complexinput.url = datain.get('href')
             complexinput.as_reference = True
 
+        def file_handler(complexinput, datain):
+            """<wps:Reference /> handler.
+            Used when href is a file url."""
+            # save the file reference input in workdir
+            extension = None
+            if complexinput.data_format:
+                extension = complexinput.data_format.extension
+            tmp_file = _build_input_file_name(
+                href=datain.get('href'),
+                workdir=complexinput.workdir,
+                extension=extension)
+            try:
+                inpt_file = urlparse(datain.get('href')).path
+                os.symlink(inpt_file, tmp_file)
+                LOGGER.debug("Linked input file %s to %s.", inpt_file, tmp_file)
+            except Exception as e:
+                raise NoApplicableCode("Could not link file reference: %s" % e)
+
+            complexinput.file = tmp_file
+            complexinput.url = datain.get('href')
+            complexinput.as_reference = True
+
         def data_handler(complexinput, datain):
             """<wps:Data> ... </wps:Data> handler"""
 
             complexinput.data = datain.get('data')
 
         if href:
-            return href_handler
+            if urlparse(href).scheme == 'file':
+                return file_handler
+            else:
+                return href_handler
         else:
             return data_handler
 
