@@ -396,13 +396,10 @@ class Service(object):
         def href_handler(complexinput, datain):
             """<wps:Reference /> handler"""
             # save the reference input in workdir
-            extension = None
-            if complexinput.data_format:
-                extension = complexinput.data_format.extension
             tmp_file = _build_input_file_name(
                 href=datain.get('href'),
                 workdir=complexinput.workdir,
-                extension=extension)
+                extension=_extension(complexinput))
 
             try:
                 (reference_file, reference_file_data) = _openurl(datain)
@@ -438,13 +435,10 @@ class Service(object):
             """<wps:Reference /> handler.
             Used when href is a file url."""
             # save the file reference input in workdir
-            extension = None
-            if complexinput.data_format:
-                extension = complexinput.data_format.extension
             tmp_file = _build_input_file_name(
                 href=datain.get('href'),
                 workdir=complexinput.workdir,
-                extension=extension)
+                extension=_extension(complexinput))
             try:
                 inpt_file = urlparse(datain.get('href')).path
                 os.symlink(inpt_file, tmp_file)
@@ -699,3 +693,10 @@ def _build_input_file_name(href, workdir, extension=None):
             suffix=suffix, prefix=prefix + '_',
             dir=workdir)[1]
     return input_file_name
+
+
+def _extension(complexinput):
+    extension = None
+    if complexinput.data_format:
+        extension = complexinput.data_format.extension
+    return extension
