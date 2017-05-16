@@ -214,7 +214,9 @@ class Process(object):
         maxprocesses = int(config.get_config_value('server', 'maxprocesses'))
 
         if stored < maxprocesses:
+            LOGGER.debug("Store process in job queue, uuid=%s", self.uuid)
             dblog.store_process(self.uuid, wps_request)
+            wps_response.update_status('PyWPS Process stored in job queue', 0)
         else:
             raise ServerBusy('Maximum number of parallel running processes reached. Please try later.')
 
