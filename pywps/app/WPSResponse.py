@@ -193,6 +193,8 @@ class WPSResponse(object):
             # DataInputs and DataOutputs definition XML if lineage=true
             if self.wps_request.lineage == 'true':
                 try:
+                    # TODO: stored process has ``pywps.inout.basic.LiteralInput``
+                    # instead of a ``pywps.inout.inputs.LiteralInput``.
                     data_inputs = [self.wps_request.inputs[i][0].execute_xml() for i in self.wps_request.inputs]
                     doc.append(WPS.DataInputs(*data_inputs))
                 except Exception as e:
