@@ -7,12 +7,14 @@
 import pywps.configuration as config
 from pywps.processing.basic import MultiProcessing
 from pywps.processing.slurm import Slurm
+from pywps.processing.scheduler import Scheduler
 
 import logging
 LOGGER = logging.getLogger("PYWPS")
 
 MULTIPROCESSING = 'multiprocessing'
 SLURM = 'slurm'
+SCHEDULER = 'scheduler'
 DEFAULT = MULTIPROCESSING
 
 
@@ -27,6 +29,8 @@ def Process(process, wps_request, wps_response):
     LOGGER.info("Processing mode: %s", mode)
     if mode == SLURM:
         process = Slurm(process, wps_request, wps_response)
+    elif mode == SCHEDULER:
+        process = Scheduler(process, wps_request, wps_response)
     else:
         process = MultiProcessing(process, wps_request, wps_response)
     return process
