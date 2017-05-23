@@ -5,22 +5,12 @@
 ##################################################################
 
 import os
-import sys
-import tempfile
 import pywps.configuration as config
 from pywps.processing.basic import Processing
 from pywps.exceptions import SchedulerNotAvailable
 
 import logging
 LOGGER = logging.getLogger("PYWPS")
-
-
-BATCH_JOB_TMPL = """\
-#!/bin/bash
-export PYWPS_CFG="{pywps_cfg}"
-export PATH="{path}":$PATH
-joblauncher "{filename}"
-"""
 
 
 def run_batch(filename):
@@ -31,10 +21,15 @@ def run_batch(filename):
         # init session
         session.initialize()
         jt = session.createJobTemplate()
-        jt.remoteCommand = filename
-        # jt.args = ['42', 'Simon says:']
+        jt.remoteCommand = os.path.join(
+            config.get_config_value('processing', 'path'),
+            'joblauncher')
+        if os.getenv("PYWPS_CFG"):
+            jt.args = ['-c', os.getenv('PYWPS_CFG'), filename]
+        else:
+            jt.args = [filename]
         jt.joinFiles = True
-        jt.outputPath = "{0}:output".format(config.get_config_value('processing', 'remotehost'))
+        jt.outputPath = "{0}:job.out".format(config.get_config_value('processing', 'remotehost'))
         jobid = session.runJob(jt)
         LOGGER.info('Your job has been submitted with ID %s', jobid)
         # Cleaning up
@@ -56,23 +51,10 @@ class Scheduler(Processing):
     def workdir(self):
         return self.job.workdir
 
-    def _build_submit_file(self, dump_file_name):
-        submit_file_name = tempfile.mkstemp(prefix='batch_', suffix='.sh', dir=self.workdir)[1]
-        with open(submit_file_name, 'w') as fp:
-            fp.write(BATCH_JOB_TMPL.format(
-                workdir=self.workdir,
-                pywps_cfg=os.getenv('PYWPS_CFG'),
-                path=config.get_config_value('processing', 'path'),
-                filename=dump_file_name))
-            return submit_file_name
-        return None
-
     def start(self):
         self.job.wps_response.update_status('Submitting job ...', 0)
         # dump job to file
         dump_file_name = self.job.dump()
-        # write submit script
-        submit_file_name = self._build_submit_file(dump_file_name)
         # run remote pywps process
-        response = run_batch(filename=submit_file_name)
+        response = run_batch(filename=dump_file_name)
         self.job.wps_response.update_status('Submitted: %s'.format(response), 0)
