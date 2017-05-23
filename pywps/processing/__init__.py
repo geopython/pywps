@@ -6,7 +6,6 @@
 
 import pywps.configuration as config
 from pywps.processing.basic import MultiProcessing
-from pywps.processing.slurm import Slurm
 from pywps.processing.scheduler import Scheduler
 
 import logging
