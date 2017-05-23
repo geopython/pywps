@@ -4,6 +4,7 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
+import os
 import tempfile
 
 import logging
