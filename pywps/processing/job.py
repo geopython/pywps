@@ -6,6 +6,9 @@
 
 import tempfile
 
+import logging
+LOGGER = logging.getLogger("PYWPS")
+
 
 class Job(object):
     """
@@ -58,10 +61,14 @@ class JobLauncher(object):
     def create_parser(self):
         import argparse
         parser = argparse.ArgumentParser(prog="joblauncher")
+        parser.add_argument("-c", "--config", help="Path to pywps configuration.")
         parser.add_argument("filename", help="File with dumped pywps job object.")
         return parser
 
     def run(self, args):
+        if args.config:
+            LOGGER.debug("using pywps_cfg=%s", args.config)
+            os.environ['PYWPS_CFG'] = args.config
         self._run_job(args.filename)
 
     def _run_job(self, filename):
