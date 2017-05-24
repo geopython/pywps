@@ -47,7 +47,7 @@ class Scheduler(Processing):
             if os.getenv("PYWPS_CFG"):
                 jt.args = ['-c', os.getenv('PYWPS_CFG'), dump_filename]
             else:
-                jt.args = [filename]
+                jt.args = [dump_filename]
             jt.joinFiles = True
             jt.outputPath = "{0}:job.out".format(config.get_config_value('processing', 'remotehost'))
             # run job
