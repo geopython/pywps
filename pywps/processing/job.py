@@ -34,6 +34,7 @@ class Job(object):
         return self.process.uuid
 
     def dump(self):
+        LOGGER.debug('dump job ...')
         import dill
         filename = tempfile.mkstemp(prefix='job_', suffix='.dump', dir=self.workdir)[1]
         with open(filename, 'w') as fp:
@@ -43,6 +44,7 @@ class Job(object):
 
     @classmethod
     def load(cls, filename):
+        LOGGER.debug('load job ...')
         import dill
         with open(filename) as fp:
             job = dill.load(fp)
