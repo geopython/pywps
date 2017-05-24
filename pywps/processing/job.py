@@ -39,6 +39,7 @@ class Job(object):
         filename = tempfile.mkstemp(prefix='job_', suffix='.dump', dir=self.workdir)[1]
         with open(filename, 'w') as fp:
             dill.dump(self, fp)
+            LOGGER.debug("dumped job status to %s", filename)
             return filename
         return None
 
@@ -57,9 +58,10 @@ class Job(object):
 
 class JobLauncher(object):
     """
-    :class:`JobLauncher` is a command line tool to launch a job from a file with the dumped job state.
+    :class:`JobLauncher` is a command line tool to launch a job from a file
+    with a dumped job state.
 
-    Example call: ``joblauncher job-1001.txt``
+    Example call: ``joblauncher -c /etc/pywps.cfg job-1001.dump``
     """
     def create_parser(self):
         import argparse
