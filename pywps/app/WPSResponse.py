@@ -5,6 +5,7 @@
 ##################################################################
 
 
+import logging
 import os
 from lxml import etree
 import time
@@ -21,6 +22,8 @@ _STATUS = namedtuple('Status', 'ERROR_STATUS, NO_STATUS, STORE_STATUS,'
                      'STORE_AND_UPDATE_STATUS, DONE_STATUS')
 
 STATUS = _STATUS(0, 10, 20, 30, 40)
+
+LOGGER = logging.getLogger("PYWPS")
 
 
 class WPSResponse(object):
@@ -189,8 +192,13 @@ class WPSResponse(object):
 
             # DataInputs and DataOutputs definition XML if lineage=true
             if self.wps_request.lineage == 'true':
-                data_inputs = [self.wps_request.inputs[i][0].execute_xml() for i in self.wps_request.inputs]
-                doc.append(WPS.DataInputs(*data_inputs))
+                try:
+                    # TODO: stored process has ``pywps.inout.basic.LiteralInput``
+                    # instead of a ``pywps.inout.inputs.LiteralInput``.
+                    data_inputs = [self.wps_request.inputs[i][0].execute_xml() for i in self.wps_request.inputs]
+                    doc.append(WPS.DataInputs(*data_inputs))
+                except Exception as e:
+                    LOGGER.error("Failed to update lineage for input parameter. %s", e)
 
                 output_definitions = [self.outputs[o].execute_xml_lineage() for o in self.outputs]
                 doc.append(WPS.OutputDefinitions(*output_definitions))

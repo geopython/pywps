@@ -216,7 +216,7 @@ def remove_stored(uuid):
     """
 
     session = get_session()
-    request = session.query(RequestInstance).filter_by(name='uuid').first()
+    request = session.query(RequestInstance).filter_by(uuid=str(uuid)).first()
     session.delete(request)
     session.commit()
     session.close()

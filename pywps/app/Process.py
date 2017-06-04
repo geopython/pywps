@@ -214,7 +214,9 @@ class Process(object):
         maxprocesses = int(config.get_config_value('server', 'maxprocesses'))
 
         if stored < maxprocesses:
+            LOGGER.debug("Store process in job queue, uuid=%s", self.uuid)
             dblog.store_process(self.uuid, wps_request)
+            wps_response.update_status('PyWPS Process stored in job queue', 0)
         else:
             raise ServerBusy('Maximum number of parallel running processes reached. Please try later.')
 
@@ -267,16 +269,19 @@ class Process(object):
         # tr
         stored_request = dblog.get_first_stored()
         if stored_request:
-            (uuid, request_json) = (stored_request.uuid, stored_request.request)
-            if not PY2:
-                request_json = request_json.decode('utf-8')
-            new_wps_request = WPSRequest()
-            new_wps_request.json = json.loads(request_json)
-            new_wps_response = WPSResponse(self, new_wps_request, uuid)
-            new_wps_response.status = STATUS.STORE_AND_UPDATE_STATUS
-            self._set_uuid(uuid)
-            self._run_async(new_wps_request, new_wps_response)
-            dblog.remove_stored(uuid)
+            try:
+                (uuid, request_json) = (stored_request.uuid, stored_request.request)
+                if not PY2:
+                    request_json = request_json.decode('utf-8')
+                new_wps_request = WPSRequest()
+                new_wps_request.json = json.loads(request_json)
+                new_wps_response = WPSResponse(self, new_wps_request, uuid)
+                new_wps_response.status = STATUS.STORE_AND_UPDATE_STATUS
+                self._set_uuid(uuid)
+                self._run_async(new_wps_request, new_wps_response)
+                dblog.remove_stored(uuid)
+            except Exception as e:
+                LOGGER.error("Could not run stored process. %s", e)
 
         return wps_response
 
