@@ -66,7 +66,7 @@ cd /tmp
 git clone git@github.com:geopython/pywps.git pywps-4
 cd pywps-4
 git checkout X.Y.Z
-python setup.py bdist_egg upload
+python setup.py bdist_wheel upload
 ```
 
 ## Fix pywps-demo project (only for stable releases)

@@ -12,6 +12,7 @@ from werkzeug.wrappers import Request, Response
 from pywps import WPS, OWS
 from pywps._compat import PY2
 from pywps._compat import urlopen
+from pywps._compat import urlparse
 from pywps.app.basic import xml_response
 from pywps.app.WPSRequest import WPSRequest
 import pywps.configuration as config
@@ -396,13 +397,10 @@ class Service(object):
         def href_handler(complexinput, datain):
             """<wps:Reference /> handler"""
             # save the reference input in workdir
-            extension = None
-            if complexinput.data_format:
-                extension = complexinput.data_format.extension
             tmp_file = _build_input_file_name(
                 href=datain.get('href'),
                 workdir=complexinput.workdir,
-                extension=extension)
+                extension=_extension(complexinput))
 
             try:
                 (reference_file, reference_file_data) = _openurl(datain)
@@ -434,13 +432,35 @@ class Service(object):
             complexinput.url = datain.get('href')
             complexinput.as_reference = True
 
+        def file_handler(complexinput, datain):
+            """<wps:Reference /> handler.
+            Used when href is a file url."""
+            # save the file reference input in workdir
+            tmp_file = _build_input_file_name(
+                href=datain.get('href'),
+                workdir=complexinput.workdir,
+                extension=_extension(complexinput))
+            try:
+                inpt_file = urlparse(datain.get('href')).path
+                os.symlink(inpt_file, tmp_file)
+                LOGGER.debug("Linked input file %s to %s.", inpt_file, tmp_file)
+            except Exception as e:
+                raise NoApplicableCode("Could not link file reference: %s" % e)
+
+            complexinput.file = tmp_file
+            complexinput.url = datain.get('href')
+            complexinput.as_reference = True
+
         def data_handler(complexinput, datain):
             """<wps:Data> ... </wps:Data> handler"""
 
             complexinput.data = datain.get('data')
 
         if href:
-            return href_handler
+            if urlparse(href).scheme == 'file':
+                return file_handler
+            else:
+                return href_handler
         else:
             return data_handler
 
@@ -662,7 +682,8 @@ def _get_datasize(reference_file_data):
 
 def _build_input_file_name(href, workdir, extension=None):
     href = href or ''
-    file_name = os.path.basename(href).strip() or 'input'
+    url_path = urlparse(href).path or ''
+    file_name = os.path.basename(url_path).strip() or 'input'
     (prefix, suffix) = os.path.splitext(file_name)
     suffix = suffix or extension
     if prefix and suffix:
@@ -674,3 +695,10 @@ def _build_input_file_name(href, workdir, extension=None):
             suffix=suffix, prefix=prefix + '_',
             dir=workdir)[1]
     return input_file_name
+
+
+def _extension(complexinput):
+    extension = None
+    if complexinput.data_format:
+        extension = complexinput.data_format.extension
+    return extension
