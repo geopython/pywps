@@ -12,15 +12,15 @@ is running on. Using the PyWPS scheduler extension it becomes possible to
 delegate the execution of asynchronous processes to a scheduler system like
 `Slurm <https://slurm.schedmd.com/>`_,
 `Grid Engine <https://en.wikipedia.org/wiki/Univa_Grid_Engine>`_ and
-`TORQUE <https://en.wikipedia.org/wiki/TORQUE>`_. By this one can handle
-the processing workload using an existing scheduler system commonly found at
-High Performance Compute (HPC) centers.
+`TORQUE <https://en.wikipedia.org/wiki/TORQUE>`_. By enabling this extension one
+can handle the processing workload using an existing scheduler system commonly
+found at High Performance Compute (HPC) centers.
 
 .. note:: The PyWPS process implementations are not changed by using the
   scheduler extension.
 
 
-To activate this extension you need to edit the ``pywps.cfg`` configurtion file
+To activate this extension you need to edit the ``pywps.cfg`` configuration file
 and make the following changes::
 
   [processing]
