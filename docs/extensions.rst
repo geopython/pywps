@@ -5,8 +5,8 @@ Extensions
 
 PyWPS has extensions to enhance its usability in special uses cases, for example
 to run Web Processing Services at High Performance Compute (HPC) centers. These
-extension are disabled by default. They need a modified configuration and have
-additional software packages. Some extensions are:
+extensions are disabled by default. They need a modified configuration and have
+additional software packages. The extensions are:
 
 * Using batch job schedulers (distributed resource management) at HPC compute
   centers.
@@ -55,7 +55,12 @@ of the Python pickle module for serializing and de-serializing Python objects.
   instructions given in the `DRMAA`_ documentation and by your scheduler system
   installation guide.
 
-.. _DRMAA: https://github.com/pygridtools/drmaa-python
+.. note:: See an **example** on how to use this extension with a
+  Slurm batch system in a
+  `docker demo <https://github.com/bird-house/birdhouse-playground/tree/master/docker/pywps-scheduler-demo>`_.
+
+
+.. _DRMAA: https://pypi.python.org/pypi/drmaa
 
 Docker Container Extension
 ---------------------------
