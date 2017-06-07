@@ -49,7 +49,7 @@ class Scheduler(Processing):
             else:
                 jt.args = [dump_filename]
             jt.joinFiles = True
-            jt.outputPath = "{0}:job.out".format(config.get_config_value('processing', 'remotehost'))
+            jt.outputPath = ":job.out"
             # run job
             jobid = session.runJob(jt)
             LOGGER.info('Your job has been submitted with ID %s', jobid)
