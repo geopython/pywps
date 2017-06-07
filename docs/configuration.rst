@@ -140,6 +140,11 @@ configuration file <http://docs.pycsw.org/en/latest/configuration.html>`_.
     process execution is delegated to a configured scheduler system like Slurm
     and Grid Engine.
 
+:path:
+    path to the PyWPS `joblauncher` executable. This option is only used for
+    the `scheduler` backend and is by default set automatically:
+    `os.path.dirname(os.path.realpath(sys.argv[0]))`
+
 [logging]
 ---------
 
