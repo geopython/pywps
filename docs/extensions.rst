@@ -14,8 +14,8 @@ additional software packages. Some extensions are:
   computing infrastructure.
 
 
-PyWPS Scheduler Extension
--------------------------
+Job Scheduler Extension
+-----------------------
 
 By default PyWPS executes all processes on the same machine as the PyWPS service
 is running on. Using the PyWPS scheduler extension it becomes possible to
@@ -56,3 +56,11 @@ of the Python pickle module for serializing and de-serializing Python objects.
   installation guide.
 
 .. _DRMAA: https://github.com/pygridtools/drmaa-python
+
+Docker Container Extension
+---------------------------
+
+
+.. todo:: This extension is on our wish list. In can be used to encapsulate
+  and control the execution of a process. It enhances also the use case of
+  Web Processing Services in a cloud computing infrastructure.
