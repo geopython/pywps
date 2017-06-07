@@ -211,6 +211,9 @@ Sample file
   contact_instructions=During hours of service.  Off on weekends.
   contact_role=pointOfContact
 
+  [processing]
+  mode=default
+
   [logging]
   level=INFO
   file=logs/pywps.log
