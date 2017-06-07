@@ -3,6 +3,16 @@
 Extensions
 ==========
 
+PyWPS has extensions to enhance its usability in special uses cases, for example
+to run Web Processing Services at High Performance Compute (HPC) centers. These
+extension are disabled by default. They need a modified configuration and have
+additional software packages. Some extensions are:
+
+* Using batch job schedulers (distributed resource management) at HPC compute
+  centers.
+* Using container solutions like `Docker <https://www.docker.com/>`_ in a cloud
+  computing infrastructure.
+
 
 PyWPS Scheduler Extension
 -------------------------
