@@ -59,6 +59,8 @@ of the Python pickle module for serializing and de-serializing Python objects.
   Slurm batch system in a
   `docker demo <https://github.com/bird-house/birdhouse-playground/tree/master/docker/pywps-scheduler-demo>`_.
 
+.. note:: `COWS WPS <http://cows.ceda.ac.uk/cows_wps/install.html#installing-the-sun-grid-engine-scheduler>`_
+  has a scheduler extension for Sun Grid Engine (SGE).
 
 .. _DRMAA: https://pypi.python.org/pypi/drmaa
 
