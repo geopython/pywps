@@ -42,10 +42,13 @@ Python dependencies using pip::
 
   $ pip install -r requirements-processing.txt  # drmaa
 
-If you are using the `conda package manager <https://conda.io/docs/>`_ you can
+If you are using the `conda <https://conda.io/docs/>`_ package manager you can
 install the dependencies with::
 
   $ conda install drmaa dill
+
+The package `dill <https://pypi.python.org/pypi/dill>`_ is an enchanced version
+of the Python pickle module for serializing and de-serializing Python objects.
 
 .. warning:: In addition you need to install and configure the drmaa modules for
   your scheduler system on the machine PyWPS is running on. Follow the
