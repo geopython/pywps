@@ -69,7 +69,12 @@ of the Python pickle module for serializing and de-serializing Python objects.
   filesystem. Both the PyWPS service and the ``joblauncher`` script use the same
   PyWPS configuration. The scheduler assumes that the PyWPS server has a shared
   filesystem with the Scheduler system so that XML status documents and WPS
-  outputs can be found at the same file location.
+  outputs can be found at the same file location. See the interaction diagram
+  how the communication between PyWPS and the scheduler works.
+
+.. figure:: _images/pywps-scheduler-extension_interactions.png
+
+    Interaction diagram for PyWPS scheduler extension.
 
 .. _DRMAA: https://pypi.python.org/pypi/drmaa
 .. _dill: https://pypi.python.org/pypi/dill
