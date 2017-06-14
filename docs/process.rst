@@ -20,7 +20,7 @@ PyWPS to set up the processes of your choice. PyWPS is here to help you
 publishing your awesome geospatial operation on the web - it takes care of
 communication and security, you then have to add the content.
 
-.. note:: There are some example processes in the `PyWPS-Demo`_ project.
+.. note:: There are some example processes in the `PyWPS-Flask`_ project.
 
 Writing a Process
 =================
@@ -39,7 +39,7 @@ Writing a Process
         variable, and can be imported in the final server instance.
 
 A processes is coded as a class inheriting from :class:`Process`.
-In the `PyWPS-Demo`_ server they are
+In the `PyWPS-Flask`_ server they are
 kept inside the *processes* folder, usually in separated files.
 
 The instance of a *Process* needs following attributes to be configured:
@@ -343,7 +343,7 @@ In order for clients to invoke processes, a PyWPS
 An instance of this class must created, receiving instances of
 all the desired processes classes.
 
-In the *demo* service the :class:`Service` class instance is created in the
+In the *flask* example service the :class:`Service` class instance is created in the
 :class:`Server` class. :class:`Server` is a development server that relies 
 on `Flask`_. The publication of processes is encapsulated in *demo.py*, where 
 a main method passes a list of processes instances to the 
@@ -363,7 +363,7 @@ a main method passes a list of processes instances to the
 Running the dev server
 ======================
 
-The :ref:`demo` server is a `WSGI application`_ that accepts incoming `Execute`
+The :ref:`flask` server is a `WSGI application`_ that accepts incoming `Execute`
 requests and calls the appropriate process to handle them. It also
 answers `GetCapabilities` and `DescribeProcess` requests based on the
 process identifier and their inputs and outputs.
@@ -387,6 +387,6 @@ Use the `run` method to start the server::
 To make the server visible from another computer, replace ``localhost`` with ``0.0.0.0``.
     
 .. _Flask: http://flask.pocoo.org
-.. _PyWPS-Demo: http://github.com/geopython/pywps-demo
+.. _PyWPS-Flask: http://github.com/geopython/pywps-flask
 
 

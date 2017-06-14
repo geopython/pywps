@@ -69,12 +69,12 @@ git checkout X.Y.Z
 python setup.py bdist_wheel upload
 ```
 
-## Fix pywps-demo project (only for stable releases)
+## Fix the pywps-flask project (only for stable releases)
 
 ```
 git checkout master
 ```
-* Fix the [VERSION.txt](https://github.com/geopython/pywps-demo/blob/master/VERSION.txt) file.
+* Fix the [VERSION.txt](https://github.com/geopython/pywps-flask/blob/master/VERSION.txt) file.
 
 ```
 $EDITOR VERSION.txt

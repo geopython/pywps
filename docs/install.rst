@@ -82,24 +82,24 @@ For Developers
         installation option is handy for development and / or users who may not have system-wide administration
         privileges.
 
-.. _demo:
+.. _flask:
 
-The demo service and its sample processes
+The example service and its sample processes
 -----------------------------------------
 
 To use PyWPS the user must code processes and publish them through a service.
-A demo service is available that makes up a good starting point for first time
+An example service is available that makes up a good starting point for first time
 users. This launches a very simple built-in server (relying on `flask
 <http://flask.pocoo.org/>`_), which is good enough for testing but probably not
 appropriate for production.  It can be cloned directly into the user
 area::
 
-    $ git clone https://github.com/geopython/pywps-demo.git
+    $ git clone https://github.com/geopython/pywps-flask.git
 
 It may be run right away through the `demo.py` script.  First time users should
-start by studying the demo project structure and then code their own processes.
+start by studying the structure of this project and then code their own processes.
 
-Full more details please consult the :ref:`process` section. The `demo` service 
+Full more details please consult the :ref:`process` section. The example service 
 contains some basic processes too, so you could get started with some examples 
 (like `area`, `buffer`, `feature_count` and `grassbuffer`). These processes are 
 to be taken just as inspiration and code documentation - most of them do not
