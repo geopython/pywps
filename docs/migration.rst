@@ -66,8 +66,8 @@ Deployment
 ==========
 While PyWPS 3.x was usually deployed as CGI application, PyWPS 4.x is configured
 as `WSGI` application. PyWPS 4.x is distributed without any processes or sample
-deploy script. We provide such example in our `pywps-demo
-<http://github.com/geopython/pywps-demo>`_ project.
+deploy script. We provide such example in our `pywps-flask
+<http://github.com/geopython/pywps-flask>`_ project.
 
 .. note:: PYWPS_PROCESSES environment variable is gone, you have to assing
         processes to deploy script manually (or semi-automatically).
@@ -89,8 +89,8 @@ config values to each process class instance during it's definition.
 
 Sample processes
 ================
-For sample processes, please refer to `pywps-demo
-<http://github.com/geopython/pywps-demo>`_ project on GITHub.
+For sample processes, please refer to `pywps-flask
+<http://github.com/geopython/pywps-flask>`_ project on GITHub.
 
 Needed steps summarization
 ==========================

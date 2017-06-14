@@ -66,15 +66,15 @@ cd /tmp
 git clone git@github.com:geopython/pywps.git pywps-4
 cd pywps-4
 git checkout X.Y.Z
-python setup.py bdist_egg upload
+python setup.py bdist_wheel upload
 ```
 
-## Fix pywps-demo project (only for stable releases)
+## Fix pywps-flask project (only for stable releases)
 
 ```
 git checkout master
 ```
-* Fix the [VERSION.txt](https://github.com/geopython/pywps-demo/blob/master/VERSION.txt) file.
+* Fix the [VERSION.txt](https://github.com/geopython/pywps-flask/blob/master/VERSION.txt) file.
 
 ```
 $EDITOR VERSION.txt

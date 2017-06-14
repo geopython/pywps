@@ -40,7 +40,7 @@ which:
 Creating a PyWPS `WSGI` instance
 --------------------------------
 
-An example WSGI script is distributed along with PyWPS-Demo service, as 
+An example WSGI script is distributed along with PyWPS-Flask service, as 
 described in the :ref:`installation` section. The script is actually 
 straightforward - in fact, it's a just wrapper around the PyWPS server with a 
 list of processes and configuration files passed as arguments. Here is an 
@@ -136,26 +136,26 @@ We need nginx and gunicorn server::
    $ apt install nginx-full
    $ apt install gunicorn3
 
-It is assumed that PyWPS  is installed in your system (if not see: ref:`installation`) and we will used pywps-demo as installation example.
+It is assumed that PyWPS  is installed in your system (if not see: ref:`installation`) and we will use pywps-flask as installation example.
 
-First, clonning the pywps-demo example to the root / (you need to be sudoer or root to run the examples)::
+First, clonning the pywps-flask example to the root / (you need to be sudoer or root to run the examples)::
    
    $ cd /
-   $ git clone https://github.com/geopython/pywps-demo.git
+   $ git clone https://github.com/geopython/pywps-flask.git
 
 Second, preparing the WSGI script for gunicorn. It is necessary that the 
-WSGI script located on the pywps-demo is identified as a python module by gunicorn, 
+WSGI script located on the pywps-flask is identified as a python module by gunicorn, 
 this is done by creating a link with .py extention to the wsgi file::  
    
-   $ cd /pywps-demo/wsgi
+   $ cd /pywps-flask/wsgi
    $ ln -s ./pywps.wsgi ./pywps_app.py 
    
 Gunicorn can already be tested by setting python path on the command options::
    
-   $ gunicorn3 -b 127.0.0.1:8081  --workers $((2*`nproc --all`)) --log-syslog  --pythonpath /pywps-demo wsgi.pywps_app:application   
+   $ gunicorn3 -b 127.0.0.1:8081  --workers $((2*`nproc --all`)) --log-syslog  --pythonpath /pywps-flask wsgi.pywps_app:application   
   
 The command will start a gunicorn instance on the localhost IP and port 8081, logging to systlog 
-(/var/log/syslog), using pywps process folder /pywps-demo/processes and loading module wsgi.pywps_app and object/function application for WSGI.  
+(/var/log/syslog), using pywps process folder /pywps-flask/processes and loading module wsgi.pywps_app and object/function application for WSGI.  
 
 .. note::  Gunicorn uses a prefork model where the master process forks processes (workers) 
    that willl accept incomming connections. The --workers flag sets the number of processes, 
@@ -211,7 +211,7 @@ has to be configure as follows::
    Group=www-data
    PIDFile=/var/run/gunicorn3.pid
    Environment=WORKERS=3
-   ExecStart=/usr/bin/gunicorn3 -b 127.0.0.1:8081   --preload --workers $WORKERS --log-syslog --pythonpath /pywps-demo wsgi.pywps_app:application
+   ExecStart=/usr/bin/gunicorn3 -b 127.0.0.1:8081   --preload --workers $WORKERS --log-syslog --pythonpath /pywps-flask wsgi.pywps_app:application
    ExecReload=/bin/kill -s HUP $MAINPID
    ExecStop=/bin/kill -s TERM $MAINPID
    
