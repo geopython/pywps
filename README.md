@@ -34,13 +34,13 @@ python -m coverage report -m
 
 # Run web application
 
-## Demo application
+## Example service
 
-Clone demo app after having installed PyWPS:
+Clone the example service after having installed PyWPS:
 
 ```bash
-git clone git://github.com/PyWPS/pywps-4-demo.git
-cd demo/
+git clone git://github.com/geopython/pywps-flask.git pywps-flask
+cd pywps-flask
 python demo.py
 ```
  

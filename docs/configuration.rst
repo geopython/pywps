@@ -21,8 +21,8 @@ The configuration file has several sections:
       <http://grass.osgeo.org>`_
 
 PyWPS ships with a sample configuration file (``default-sample.cfg``).
-A similar file is also available in the `demo` service as
-described in :ref:`demo` section.
+A similar file is also available in the `flask` service as
+described in :ref:`flask` section.
 
 Copy the file to ``default.cfg`` and edit the following:
 
