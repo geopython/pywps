@@ -21,6 +21,7 @@ from tests import test_wpsrequest
 from tests.validator import test_complexvalidators
 from tests.validator import test_literalvalidators
 
+
 def load_tests(loader=None, tests=None, pattern=None):
     """Load tests
     """
