@@ -17,7 +17,7 @@ from pywps.app.basic import xml_response
 from pywps.app.WPSRequest import WPSRequest
 import pywps.configuration as config
 from pywps.exceptions import MissingParameterValue, NoApplicableCode, InvalidParameterValue, FileSizeExceeded, \
-    StorageNotSupported
+    StorageNotSupported, FileURLNotSupported
 from pywps.inout.inputs import ComplexInput, LiteralInput, BoundingBoxInput
 from pywps.dblog import log_request, update_response
 
@@ -435,6 +435,8 @@ class Service(object):
         def file_handler(complexinput, datain):
             """<wps:Reference /> handler.
             Used when href is a file url."""
+            # check if file url is allowed
+            _validate_file_input(href=datain.get('href'))
             # save the file reference input in workdir
             tmp_file = _build_input_file_name(
                 href=datain.get('href'),
@@ -442,6 +444,7 @@ class Service(object):
                 extension=_extension(complexinput))
             try:
                 inpt_file = urlparse(datain.get('href')).path
+                inpt_file = os.path.abspath(inpt_file)
                 os.symlink(inpt_file, tmp_file)
                 LOGGER.debug("Linked input file %s to %s.", inpt_file, tmp_file)
             except Exception as e:
@@ -695,6 +698,25 @@ def _build_input_file_name(href, workdir, extension=None):
             suffix=suffix, prefix=prefix + '_',
             dir=workdir)[1]
     return input_file_name
+
+
+def _validate_file_input(href):
+    href = href or ''
+    parsed_url = urlparse(href)
+    if parsed_url.scheme != 'file':
+        raise FileURLNotSupported('Invalid URL scheme')
+    file_path = parsed_url.path
+    if not file_path:
+        raise FileURLNotSupported('Invalid URL path')
+    file_path = os.path.abspath(file_path)
+    # build allowed paths list
+    inputpaths = config.get_config_value('server', 'allowedinputpaths')
+    allowed_paths = [os.path.abspath(p.strip()) for p in inputpaths.split(':') if p.strip()]
+    for allowed_path in allowed_paths:
+        if file_path.startswith(allowed_path):
+            LOGGER.debug("Accepted file url as input.")
+            return
+    raise FileURLNotSupported()
 
 
 def _extension(complexinput):
