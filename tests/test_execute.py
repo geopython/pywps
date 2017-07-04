@@ -72,7 +72,7 @@ def create_complex_proces():
         response.outputs['complex'].data = request.inputs['complex'][0].data
         return response
 
-    frmt = Format(mime_type='application/gml') # this is unknown mimetype
+    frmt = Format(mime_type='application/gml', extension=".gml") # this is unknown mimetype
 
     return Process(handler=complex_proces,
             identifier='my_complex_process',
@@ -81,6 +81,7 @@ def create_complex_proces():
                 ComplexInput(
                     'complex',
                     'Complex input',
+                    default="DEFAULT COMPLEX DATA",
                     supported_formats=[frmt])
             ],
             outputs=[
@@ -158,6 +159,27 @@ class ExecuteTest(unittest.TestCase):
 
         self.assertEqual(parsed_inputs[0].data_format.validate, validategml)
 
+    def test_input_default(self):
+        """Test input parsing
+        """
+        my_process = create_complex_proces()
+        service = Service(processes=[my_process])
+        self.assertEqual(len(service.processes.keys()), 1)
+        self.assertTrue(service.processes['my_complex_process'])
+
+        class FakeRequest():
+            identifier = 'complex_process'
+            service = 'wps'
+            version = '1.0.0'
+            inputs = {}
+            raw = False
+            outputs = {}
+            store_execute = False
+            lineage = False
+
+        request = FakeRequest()
+        response = service.execute('my_complex_process', request, 'fakeuuid')
+        self.assertEqual(response.outputs['complex'].data, 'DEFAULT COMPLEX DATA')
 
     def test_missing_process_error(self):
         client = client_for(Service(processes=[create_ultimate_question()]))

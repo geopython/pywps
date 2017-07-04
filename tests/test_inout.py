@@ -14,7 +14,7 @@ from pywps import Format
 from pywps.validator import get_validator
 from pywps import NAMESPACES
 from pywps.inout.basic import IOHandler, SOURCE_TYPE, SimpleHandler, BBoxInput, BBoxOutput, \
-    ComplexInput, ComplexOutput, LiteralInput, LiteralOutput
+    ComplexInput, ComplexOutput, LiteralOutput, LiteralInput
 from pywps.inout import BoundingBoxInput as BoundingBoxInputXML
 from pywps.inout.literaltypes import convert, AllowedValue
 from pywps._compat import StringIO, text_type
@@ -244,7 +244,8 @@ class LiteralInputTest(unittest.TestCase):
         self.literal_input = LiteralInput(
                 identifier="literalinput",
                 mode=2,
-                allowed_values=(1, 2, (3, 3, 12)))
+                allowed_values=(1, 2, (3, 3, 12)),
+                default=6)
 
 
     def test_contruct(self):
@@ -254,27 +255,21 @@ class LiteralInputTest(unittest.TestCase):
         self.assertIsInstance(self.literal_input.allowed_values[2], AllowedValue)
         self.assertEqual(self.literal_input.allowed_values[2].spacing, 3)
         self.assertEqual(self.literal_input.allowed_values[2].minval, 3)
+        self.assertEqual(self.literal_input.data, 6, "Default value set to 6")
 
     def test_valid(self):
+        self.assertEqual(self.literal_input.data, 6)
         self.literal_input.data = 1
         self.assertEqual(self.literal_input.data, 1)
-        try:
+
+        with self.assertRaises(InvalidParameterValue):
             self.literal_input.data = 5
-            self.assertTrue(False, '5 does not work for spacing')
-        except InvalidParameterValue:
-            self.assertTrue(True)
 
-        try:
+        with self.assertRaises(InvalidParameterValue):
             self.literal_input.data = "a"
-            self.assertTrue(False, '"a" should not be allowed to be set')
-        except InvalidParameterValue:
-            self.assertTrue(True)
 
-        try:
+        with self.assertRaises(InvalidParameterValue):
             self.literal_input.data = 15
-            self.assertTrue(False, '11 should not be allowed to be set')
-        except InvalidParameterValue:
-            self.assertTrue(True)
 
         self.literal_input.data = 6
         self.assertEqual(self.literal_input.data, 6)
@@ -322,6 +317,7 @@ class LiteralInputTest(unittest.TestCase):
         inpt.data = "2017-04-20"
         out = inpt.json
         self.assertEqual(out['data'], datetime.date(2017, 4, 20), 'date set')
+
 
 
 class LiteralOutputTest(unittest.TestCase):

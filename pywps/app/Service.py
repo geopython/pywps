@@ -313,36 +313,39 @@ class Service(object):
     def _parse_and_execute(self, process, wps_request, uuid):
         """Parse and execute request
         """
-        LOGGER.debug('Checking if datainputs is required and has been passed')
-        if process.inputs:
-            if wps_request.inputs is None:
-                raise MissingParameterValue('Missing "datainputs" parameter', 'datainputs')
 
         LOGGER.debug('Checking if all mandatory inputs have been passed')
         data_inputs = {}
         for inpt in process.inputs:
-            if inpt.identifier not in wps_request.inputs:
+            # Replace the dicts with the dict of Literal/Complex inputs
+            # set the input to the type defined in the process.
+
+            request_inputs = None
+            if inpt.identifier in wps_request.inputs:
+                request_inputs = wps_request.inputs[inpt.identifier]
+
+            if not request_inputs:
+                if inpt.data_set:
+                    data_inputs[inpt.identifier] = [inpt.clone()]
+            else:
+
+                if isinstance(inpt, ComplexInput):
+                    data_inputs[inpt.identifier] = self.create_complex_inputs(
+                        inpt, request_inputs)
+                elif isinstance(inpt, LiteralInput):
+                    data_inputs[inpt.identifier] = self.create_literal_inputs(
+                        inpt, request_inputs)
+                elif isinstance(inpt, BoundingBoxInput):
+                    data_inputs[inpt.identifier] = self.create_bbox_inputs(
+                        inpt, request_inputs)
+
+        for inpt in process.inputs:
+
+            if inpt.identifier not in data_inputs:
                 if inpt.min_occurs > 0:
                     LOGGER.error('Missing parameter value: %s', inpt.identifier)
                     raise MissingParameterValue(
                         inpt.identifier, inpt.identifier)
-                else:
-                    # inputs = deque(maxlen=inpt.max_occurs)
-                    # inputs.append(inpt.clone())
-                    # data_inputs[inpt.identifier] = inputs
-                    pass
-            else:
-                # Replace the dicts with the dict of Literal/Complex inputs
-                # set the input to the type defined in the process.
-                if isinstance(inpt, ComplexInput):
-                    data_inputs[inpt.identifier] = self.create_complex_inputs(
-                        inpt, wps_request.inputs[inpt.identifier])
-                elif isinstance(inpt, LiteralInput):
-                    data_inputs[inpt.identifier] = self.create_literal_inputs(
-                        inpt, wps_request.inputs[inpt.identifier])
-                elif isinstance(inpt, BoundingBoxInput):
-                    data_inputs[inpt.identifier] = self.create_bbox_inputs(
-                        inpt, wps_request.inputs[inpt.identifier])
 
         wps_request.inputs = data_inputs
 

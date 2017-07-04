@@ -30,6 +30,10 @@ class IOHandler(object):
     """Basic IO class. Provides functions, to accept input data in file,
     memory object and stream object and give them out in all three types
 
+    :param workdir: working directory, to save temporal file objects in
+    :param mode: :var:`MODE` validation mode
+
+
     >>> # setting up
     >>> import os
     >>> from io import RawIOBase
@@ -64,19 +68,6 @@ class IOHandler(object):
     >>>
     >>> assert open(file).read() == ioh_file.stream.read()
     >>> assert isinstance(stream, RawIOBase)
-    >>> # skipped assert isinstance(ioh_stream.memory_object, POSH)
-    >>>
-    >>> # testing in memory object object on input
-    >>> # skipped ioh_mo = IOHandler(workdir=tmp)
-    >>> # skipped ioh_mo.memory_object = POSH
-    >>> # skipped assert ioh_mo.source_type == SOURCE_TYPE.MEMORY
-    >>> # skipped file = ioh_mo.file
-    >>> # skipped stream = ioh_mo.stream
-    >>> # skipped posh = ioh_mo.memory_object
-    >>> #
-    >>> # skipped assert open(file).read() == ioh_file.stream.read()
-    >>> # skipped assert isinstance(ioh_mo.stream, RawIOBase)
-    >>> # skipped assert isinstance(ioh_mo.memory_object, POSH)
     """
 
     def __init__(self, workdir=None, mode=MODE.NONE):
@@ -86,6 +77,7 @@ class IOHandler(object):
         self.workdir = workdir
         self.uuid = None  # request identifier
         self._stream = None
+        self.data_set = False
 
         self.valid_mode = mode
 
@@ -96,8 +88,10 @@ class IOHandler(object):
         validate = self.validator
         _valid = validate(self, self.valid_mode)
         if not _valid:
+            self.data_set = False
             raise InvalidParameterValue('Input data not valid using '
                                         'mode %s' % (self.valid_mode))
+        self.data_set = True
 
     def set_file(self, filename):
         """Set source as file name"""
@@ -231,6 +225,20 @@ class IOHandler(object):
     base64 = property(fget=get_base64, fset=set_base64)
     workdir = property(fget=get_workdir, fset=set_workdir)
 
+    def _set_default_value(self, value, value_type):
+        """Set default value based on input data type
+        """
+
+        if value:
+            if value_type == SOURCE_TYPE.DATA:
+                self.data = value
+            elif value_type == SOURCE_TYPE.MEMORY:
+                self.memory_object = value
+            elif value_type == SOURCE_TYPE.FILE:
+                self.file = value
+            elif value_type == SOURCE_TYPE.STREAM:
+                self.stream = value
+
 
 class SimpleHandler(IOHandler):
     """Data handler for Literal In- and Outputs
@@ -269,6 +277,8 @@ class SimpleHandler(IOHandler):
             data = convert(self.data_type, data)
 
         IOHandler.set_data(self, data)
+
+
 
     data = property(fget=get_data, fset=set_data)
 
@@ -413,7 +423,8 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
 
     def __init__(self, identifier, title=None, abstract=None,
                  data_type="integer", workdir=None, allowed_values=None,
-                 uoms=None, mode=MODE.NONE):
+                 uoms=None, mode=MODE.NONE,
+                 default=None, default_type=SOURCE_TYPE.DATA):
         BasicIO.__init__(self, identifier, title, abstract)
         BasicLiteral.__init__(self, data_type, uoms)
         SimpleHandler.__init__(self, workdir, data_type, mode=mode)
@@ -422,6 +433,8 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
         self.allowed_values = []
         if not self.any_value:
             self.allowed_values = make_allowedvalues(allowed_values)
+
+        self._set_default_value(default, default_type)
 
     @property
     def validator(self):
@@ -488,10 +501,14 @@ class BBoxInput(BasicIO, BasicBoundingBox, IOHandler):
     """
 
     def __init__(self, identifier, title=None, abstract=None, crss=None,
-                 dimensions=None, workdir=None, mode=MODE.NONE):
+                 dimensions=None, workdir=None,
+                 mode=MODE.SIMPLE,
+                 default=None, default_type=SOURCE_TYPE.DATA):
         BasicIO.__init__(self, identifier, title, abstract)
         BasicBoundingBox.__init__(self, crss, dimensions)
         IOHandler.__init__(self, workdir=None, mode=mode)
+
+        self._set_default_value(default, default_type)
 
     @property
     def json(self):
@@ -552,10 +569,14 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
 
     def __init__(self, identifier, title=None, abstract=None,
                  workdir=None, data_format=None, supported_formats=None,
-                 mode=MODE.NONE):
+                 mode=MODE.NONE,
+                 default=None, default_type=SOURCE_TYPE.DATA):
+
         BasicIO.__init__(self, identifier, title, abstract)
         IOHandler.__init__(self, workdir=workdir, mode=mode)
         BasicComplex.__init__(self, data_format, supported_formats)
+
+        self._set_default_value(default, default_type)
 
     @property
     def json(self):

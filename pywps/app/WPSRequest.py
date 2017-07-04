@@ -40,8 +40,8 @@ class WPSRequest(object):
         self.store_execute = None
         self.status = None
         self.lineage = None
-        self.inputs = None
-        self.outputs = None
+        self.inputs = {}
+        self.outputs = {}
         self.raw = None
 
         if self.http_request:
