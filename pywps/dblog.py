@@ -12,6 +12,7 @@ Implementation of logging for PyWPS-4
 import logging
 from pywps import configuration
 from pywps.exceptions import NoApplicableCode
+from pywps._compat import PY2
 import sqlite3
 import datetime
 import pickle
@@ -20,7 +21,7 @@ import os
 
 import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, VARCHAR, Float, DateTime, BLOB
+from sqlalchemy import Column, Integer, String, VARCHAR, Float, DateTime, LargeBinary
 from sqlalchemy.orm import sessionmaker
 
 LOGGER = logging.getLogger('PYWPS')
@@ -53,7 +54,7 @@ class RequestInstance(Base):
     __tablename__ = '{}stored_requests'.format(_tableprefix)
 
     uuid = Column(VARCHAR(255), primary_key=True, nullable=False)
-    request = Column(BLOB, nullable=False)
+    request = Column(LargeBinary, nullable=False)
 
 
 def log_request(uuid, request):
@@ -200,7 +201,11 @@ def store_process(uuid, request):
     """
 
     session = get_session()
-    request = RequestInstance(uuid=str(uuid), request=request.json)
+    request_json = request.json
+    if not PY2:
+        # the BLOB type requires bytes on Python 3
+        request_json = request_json.encode('utf-8')
+    request = RequestInstance(uuid=str(uuid), request=request_json)
     session.add(request)
     session.commit()
     session.close()
@@ -211,7 +216,7 @@ def remove_stored(uuid):
     """
 
     session = get_session()
-    request = session.query(RequestInstance).filter_by(name='uuid').first()
+    request = session.query(RequestInstance).filter_by(uuid=str(uuid)).first()
     session.delete(request)
     session.commit()
     session.close()

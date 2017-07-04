@@ -20,7 +20,7 @@ PyWPS to set up the processes of your choice. PyWPS is here to help you
 publishing your awesome geospatial operation on the web - it takes care of
 communication and security, you then have to add the content.
 
-.. note:: There are some example processes in the `PyWPS-Demo`_ project.
+.. note:: There are some example processes in the `PyWPS-Flask`_ project.
 
 Writing a Process
 =================
@@ -39,7 +39,7 @@ Writing a Process
         variable, and can be imported in the final server instance.
 
 A processes is coded as a class inheriting from :class:`Process`.
-In the `PyWPS-Demo`_ server they are
+In the `PyWPS-Flask`_ server they are
 kept inside the *processes* folder, usually in separated files.
 
 The instance of a *Process* needs following attributes to be configured:
@@ -82,9 +82,9 @@ Here is a very basic example:
 
 .. literalinclude:: demobuffer.py
    :language: python
-   :lines: 10-12
+   :lines: 28-31
    :linenos:
-   :lineno-start: 10
+   :lineno-start: 28
 
 As the next step, we define a list of inputs. The first input is
 :class:`pywps.ComplexInput` with the identifier `vector`, title `Vector map`
@@ -95,26 +95,26 @@ the data type set to `float`:
 
 .. literalinclude:: demobuffer.py
    :language: python
-   :lines: 14-21
+   :lines: 33-40
    :linenos:
-   :lineno-start: 14
+   :lineno-start: 33
 
 Next we define the output `output` as :class:`pywps.ComplexOutput`. This
 output supports GML format only.
 
 .. literalinclude:: demobuffer.py
    :language: python
-   :lines: 23-27
+   :lines: 42-46
    :linenos:
-   :lineno-start: 23
+   :lineno-start: 42
 
 Next we create a new list variables for inputs and outputs.
 
 .. literalinclude:: demobuffer.py
    :language: python
-   :lines: 29-30
+   :lines: 48-49
    :linenos:
-   :lineno-start: 29
+   :lineno-start: 48
 
 Next we define the *handler* method. In it, *geospatial analysis
 may happen*. The method gets a :class:`pywps.app.WPSRequest` and a
@@ -130,7 +130,7 @@ what you should note is how to get input data from the
    :pyobject: _handler
    :emphasize-lines: 8-12, 50-54
    :linenos:
-   :lineno-start: 45
+   :lineno-start: 68
 
 At the end, we put everything together and create new a `DemoBuffer` class with
 handler, inputs and outputs. It's based on :class:`pywps.Process`:
@@ -139,7 +139,7 @@ handler, inputs and outputs. It's based on :class:`pywps.Process`:
    :pyobject: DemoBuffer
    :language: python
    :linenos:
-   :lineno-start: 32
+   :lineno-start: 51
 
 
 Declaring inputs and outputs
@@ -343,7 +343,7 @@ In order for clients to invoke processes, a PyWPS
 An instance of this class must created, receiving instances of
 all the desired processes classes.
 
-In the *demo* service the :class:`Service` class instance is created in the
+In the *flask* service the :class:`Service` class instance is created in the
 :class:`Server` class. :class:`Server` is a development server that relies 
 on `Flask`_. The publication of processes is encapsulated in *demo.py*, where 
 a main method passes a list of processes instances to the 
@@ -363,7 +363,7 @@ a main method passes a list of processes instances to the
 Running the dev server
 ======================
 
-The :ref:`demo` server is a `WSGI application`_ that accepts incoming `Execute`
+The :ref:`flask` server is a `WSGI application`_ that accepts incoming `Execute`
 requests and calls the appropriate process to handle them. It also
 answers `GetCapabilities` and `DescribeProcess` requests based on the
 process identifier and their inputs and outputs.
@@ -387,6 +387,6 @@ Use the `run` method to start the server::
 To make the server visible from another computer, replace ``localhost`` with ``0.0.0.0``.
     
 .. _Flask: http://flask.pocoo.org
-.. _PyWPS-Demo: http://github.com/geopython/pywps-demo
+.. _PyWPS-Flask: http://github.com/geopython/pywps-flask
 
 

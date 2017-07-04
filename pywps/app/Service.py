@@ -12,6 +12,7 @@ from werkzeug.wrappers import Request, Response
 from pywps import WPS, OWS
 from pywps._compat import PY2
 from pywps._compat import urlopen
+from pywps._compat import urlparse
 from pywps.app.basic import xml_response
 from pywps.app.WPSRequest import WPSRequest
 import pywps.configuration as config
@@ -20,7 +21,7 @@ from pywps.exceptions import MissingParameterValue, NoApplicableCode, InvalidPar
 from pywps.inout.inputs import ComplexInput, LiteralInput, BoundingBoxInput
 from pywps.dblog import log_request, update_response
 
-from collections import deque
+from collections import deque, OrderedDict
 import os
 import sys
 import uuid
@@ -41,16 +42,16 @@ class Service(object):
     """
 
     def __init__(self, processes=[], cfgfiles=None):
-        self.processes = {p.identifier: p for p in processes}
+        # ordered dict of processes
+        self.processes = OrderedDict((p.identifier, p) for p in processes)
 
         if cfgfiles:
             config.load_configuration(cfgfiles)
 
         if config.get_config_value('logging', 'file') and config.get_config_value('logging', 'level'):
             LOGGER.setLevel(getattr(logging, config.get_config_value('logging', 'level')))
-            msg_fmt = '%(asctime)s] [%(levelname)s] file=%(pathname)s line=%(lineno)s module=%(module)s function=%(funcName)s %(message)s'  # noqa
             fh = logging.FileHandler(config.get_config_value('logging', 'file'))
-            fh.setFormatter(logging.Formatter(msg_fmt))
+            fh.setFormatter(logging.Formatter(config.get_config_value('logging', 'format')))
             LOGGER.addHandler(fh)
         else:  # NullHandler
             LOGGER.addHandler(logging.NullHandler())
@@ -399,7 +400,10 @@ class Service(object):
         def href_handler(complexinput, datain):
             """<wps:Reference /> handler"""
             # save the reference input in workdir
-            tmp_file = tempfile.mkstemp(dir=complexinput.workdir)[1]
+            tmp_file = _build_input_file_name(
+                href=datain.get('href'),
+                workdir=complexinput.workdir,
+                extension=_extension(complexinput))
 
             try:
                 (reference_file, reference_file_data) = _openurl(datain)
@@ -419,7 +423,7 @@ class Service(object):
             if int(data_size) > int(byte_size):
                 raise FileSizeExceeded('File size for input exceeded.'
                                        ' Maximum allowed: %i megabytes' %
-                                       complexinput.max_size, complexinput.get('identifier'))
+                                       complexinput.max_size, complexinput.identifier)
 
             try:
                 with open(tmp_file, 'w') as f:
@@ -431,13 +435,35 @@ class Service(object):
             complexinput.url = datain.get('href')
             complexinput.as_reference = True
 
+        def file_handler(complexinput, datain):
+            """<wps:Reference /> handler.
+            Used when href is a file url."""
+            # save the file reference input in workdir
+            tmp_file = _build_input_file_name(
+                href=datain.get('href'),
+                workdir=complexinput.workdir,
+                extension=_extension(complexinput))
+            try:
+                inpt_file = urlparse(datain.get('href')).path
+                os.symlink(inpt_file, tmp_file)
+                LOGGER.debug("Linked input file %s to %s.", inpt_file, tmp_file)
+            except Exception as e:
+                raise NoApplicableCode("Could not link file reference: %s" % e)
+
+            complexinput.file = tmp_file
+            complexinput.url = datain.get('href')
+            complexinput.as_reference = True
+
         def data_handler(complexinput, datain):
             """<wps:Data> ... </wps:Data> handler"""
 
             complexinput.data = datain.get('data')
 
         if href:
-            return href_handler
+            if urlparse(href).scheme == 'file':
+                return file_handler
+            else:
+                return href_handler
         else:
             return data_handler
 
@@ -606,6 +632,9 @@ class Service(object):
             except NoApplicableCode as e:
                 return e
             return e
+        except Exception as e:
+            e = NoApplicableCode(str(e), code=500)
+            return e
 
 
 def _openurl(inpt):
@@ -652,3 +681,27 @@ def _get_datasize(reference_file_data):
     tmp_sio.close()
 
     return data_size
+
+
+def _build_input_file_name(href, workdir, extension=None):
+    href = href or ''
+    url_path = urlparse(href).path or ''
+    file_name = os.path.basename(url_path).strip() or 'input'
+    (prefix, suffix) = os.path.splitext(file_name)
+    suffix = suffix or extension
+    if prefix and suffix:
+        file_name = prefix + suffix
+    input_file_name = os.path.join(workdir, file_name)
+    # build tempfile in case of duplicates
+    if os.path.exists(input_file_name):
+        input_file_name = tempfile.mkstemp(
+            suffix=suffix, prefix=prefix + '_',
+            dir=workdir)[1]
+    return input_file_name
+
+
+def _extension(complexinput):
+    extension = None
+    if complexinput.data_format:
+        extension = complexinput.data_format.extension
+    return extension

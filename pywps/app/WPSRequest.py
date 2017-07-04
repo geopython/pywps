@@ -10,6 +10,7 @@ import lxml
 import lxml.etree
 from werkzeug.exceptions import MethodNotAllowed
 import base64
+import datetime
 from pywps import WPS
 from pywps._compat import text_type, PY2
 from pywps.app.basic import xpath_ns
@@ -303,6 +304,13 @@ class WPSRequest(object):
     def json(self):
         """Return JSON encoded representation of the request
         """
+        class ExtendedJSONEncoder(json.JSONEncoder):
+            def default(self, obj):
+                if isinstance(obj, datetime.date) or isinstance(obj, datetime.time):
+                    encoded_object = obj.isoformat()
+                else:
+                    encoded_object = json.JSONEncoder.default(self, obj)
+                return encoded_object
 
         obj = {
             'operation': self.operation,
@@ -317,7 +325,7 @@ class WPSRequest(object):
             'raw': self.raw
         }
 
-        return json.dumps(obj, allow_nan=False)
+        return json.dumps(obj, allow_nan=False, cls=ExtendedJSONEncoder)
 
     @json.setter
     def json(self, value):
@@ -542,7 +550,7 @@ def get_data_from_kvp(data, part=None):
 
             # Get the attributes of the data
             for attr in fields[1:]:
-                (attribute, attr_val) = attr.split('=')
+                (attribute, attr_val) = attr.split('=', 1)
                 if attribute == 'xlink:href':
                     io['href'] = attr_val
                 else:

@@ -22,6 +22,7 @@ else:
 
 __author__ = "Calin Ciociu"
 
+RAW_OPTIONS = [('logging', 'format'), ]
 
 CONFIG = None
 LOGGER = logging.getLogger("PYWPS")
@@ -44,7 +45,8 @@ def get_config_value(section, option):
 
     if CONFIG.has_section(section):
         if CONFIG.has_option(section, option):
-            value = CONFIG.get(section, option)
+            raw = (section, option) in RAW_OPTIONS
+            value = CONFIG.get(section, option, raw=raw)
 
             # Convert Boolean string to real Boolean values
             if value.lower() == "false":
@@ -95,6 +97,7 @@ def load_configuration(cfgfiles=None):
     CONFIG.set('logging', 'level', 'DEBUG')
     CONFIG.set('logging', 'database', 'sqlite:///:memory:')
     CONFIG.set('logging', 'prefix', 'pywps_')
+    CONFIG.set('logging', 'format', '%(asctime)s] [%(levelname)s] file=%(pathname)s line=%(lineno)s module=%(module)s function=%(funcName)s %(message)s')  # noqa
 
     CONFIG.add_section('metadata:main')
     CONFIG.set('metadata:main', 'identification_title', 'PyWPS Processing Service')

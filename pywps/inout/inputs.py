@@ -80,6 +80,8 @@ class BoundingBoxInput(basic.BBoxInput):
         """
         :return: execute response element
         """
+        node = self._execute_xml_data()
+
         doc = WPS.Input(
             OWS.Identifier(self.identifier),
             OWS.Title(self.title)
@@ -88,18 +90,26 @@ class BoundingBoxInput(basic.BBoxInput):
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
 
-        bbox_data_doc = OWS.BoundingBox()
+        doc.append(node)
 
-        bbox_data_doc.attrib['crs'] = self.crs
-        bbox_data_doc.attrib['dimensions'] = str(self.dimensions)
+        return doc
+
+    def _execute_xml_data(self):
+        """Return Data node
+        """
+        doc = WPS.Data()
+        bbox_data_doc = WPS.BoundingBoxData()
+
+        if self.crs:
+            bbox_data_doc.attrib['crs'] = self.crs
+        if self.dimensions:
+            bbox_data_doc.attrib['dimensions'] = str(self.dimensions)
 
         bbox_data_doc.append(
             OWS.LowerCorner('{0[0]} {0[1]}'.format(self.data)))
         bbox_data_doc.append(
             OWS.UpperCorner('{0[2]} {0[3]}'.format(self.data)))
-
         doc.append(bbox_data_doc)
-
         return doc
 
     def clone(self):
@@ -114,7 +124,7 @@ class ComplexInput(basic.ComplexInput):
 
     :param str identifier: The name of this input.
     :param str title: Title of the input
-    :param  pywps.inout.formats.Format supported_formats: List of supported
+    :param pywps.inout.formats.Format supported_formats: List of supported
                                                           formats
     :param pywps.inout.formats.Format data_format: default data format
     :param str abstract: Input abstract
@@ -124,7 +134,7 @@ class ComplexInput(basic.ComplexInput):
     :param pywps.validator.mode.MODE mode: validation mode (none to strict)
     """
 
-    def __init__(self, identifier, title, supported_formats=None,
+    def __init__(self, identifier, title, supported_formats,
                  data_format=None, abstract='', metadata=[], min_occurs=1,
                  max_occurs=1, mode=MODE.NONE,
                  default=None, default_type=basic.SOURCE_TYPE.DATA):
