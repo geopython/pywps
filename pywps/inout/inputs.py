@@ -334,8 +334,9 @@ class LiteralInput(basic.LiteralInput):
         else:
             literal_data_doc.append(self._describe_xml_allowedvalues())
 
-        if self.default:
-            literal_data_doc.append(E.DefaultValue(self.default))
+        # TODO: is default value handled correctly here?
+        if self.data:
+            literal_data_doc.append(E.DefaultValue(str(self.data)))
 
         return doc
 
