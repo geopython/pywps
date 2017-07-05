@@ -18,8 +18,10 @@ from tests import test_ows
 from tests import test_formats
 from tests import test_dblog
 from tests import test_wpsrequest
+from tests import test_service
 from tests.validator import test_complexvalidators
 from tests.validator import test_literalvalidators
+
 
 def load_tests(loader=None, tests=None, pattern=None):
     """Load tests
@@ -36,7 +38,8 @@ def load_tests(loader=None, tests=None, pattern=None):
         test_literalvalidators.load_tests(),
         test_formats.load_tests(),
         test_dblog.load_tests(),
-        test_wpsrequest.load_tests()
+        test_wpsrequest.load_tests(),
+        test_service.load_tests(),
     ])
 
 if __name__ == "__main__":

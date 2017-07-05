@@ -144,3 +144,14 @@ class ServerBusy(NoApplicableCode):
             'description': self.get_description(environ)
             }
         )
+
+
+class FileURLNotSupported(NoApplicableCode):
+    """File URL not supported exception implementation
+    """
+    code = 400
+    description = 'File URL not supported as input.'
+
+    def __init__(self, description="", locator="", code=400):
+        description = description or self.description
+        NoApplicableCode.__init__(self, description=description, locator=locator, code=code)
