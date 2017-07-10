@@ -11,10 +11,11 @@ PyWPS is configured using a configuration file. The file uses the
   to the config file in order to allow for shared configurations with `PyCSW
   <http://pycsw.org/>`_ and other projects.
 
-The configuration file has 3 sections:
+The configuration file has several sections:
 
     * `metadata:main` for the server metadata inputs
     * `server` for server configuration
+    * `processing` for processing backend configuration
     * `logging` for logging configuration
     * `grass` for *optional* configuration to support `GRASS GIS
       <http://grass.osgeo.org>`_
@@ -127,6 +128,23 @@ configuration file <http://docs.pycsw.org/en/latest/configuration.html>`_.
         Example: `outputpath=/var/www/wps/outputs` shall correspond with
         `outputurl=http://foo.bar/wps/outputs`
 
+[processing]
+------------
+
+:mode:
+    the mode/backend used for processing. Possible values are:
+    `default`, `multiprocessing` and `scheduler`. `default` is the same as
+    `multiprocessing` and is the default value ... all processes are executed
+    using the Python multiprocessing module on the same machine as the PyWPS
+    service. `scheduler` is used to enable the job scheduler extension and
+    process execution is delegated to a configured scheduler system like Slurm
+    and Grid Engine.
+
+:path:
+    path to the PyWPS `joblauncher` executable. This option is only used for
+    the `scheduler` backend and is by default set automatically:
+    `os.path.dirname(os.path.realpath(sys.argv[0]))`
+
 [logging]
 ---------
 
@@ -197,6 +215,9 @@ Sample file
   contact_hours=Hours of Service
   contact_instructions=During hours of service.  Off on weekends.
   contact_role=pointOfContact
+
+  [processing]
+  mode=default
 
   [logging]
   level=INFO
