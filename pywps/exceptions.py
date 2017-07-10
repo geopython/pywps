@@ -144,3 +144,9 @@ class ServerBusy(NoApplicableCode):
             'description': self.get_description(environ)
             }
         )
+
+
+class SchedulerNotAvailable(NoApplicableCode):
+    """Job scheduler not available exception implementation
+    """
+    code = 400
