@@ -119,13 +119,21 @@ configuration file <http://docs.pycsw.org/en/latest/configuration.html>`_.
 :outputurl:
     corresponding URL
 
-.. note:: `outputpath` and `outputurl` must corespond. `outputpath` is the name
+.. note:: `outputpath` and `outputurl` must correspond. `outputpath` is the name
         of the resulting target directory, where all output data files are
         stored (with unique names). `outputurl` is the corresponding full URL,
         which is targeting to `outputpath` directory.
 
         Example: `outputpath=/var/www/wps/outputs` shall correspond with
         `outputurl=http://foo.bar/wps/outputs`
+
+:allowedinputpaths:
+     server paths which are allowed to be used by file URLs. A list of paths
+     must be seperated by `:`.
+
+     Example: `/var/lib/pywps/downloads:/var/lib/pywps/public`
+
+     By default no input paths are allowed.
 
 [logging]
 ---------
