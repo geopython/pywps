@@ -53,11 +53,9 @@ GitHub Pull Requests
   https://github.com/geopython/pywps/graphs/contributors
 - unclaimed copyright, by default, is assigned to the main copyright holders as
   specified in https://github.com/geopython/pywps/blob/master/LICENSE.txt
-- make sure, the tests are passing on [travis-ci](https://travis-ci.org/geopython/pywps) sevice, as well as on your local machine `tox`:
+- make sure, the tests are passing on [travis-ci](https://travis-ci.org/geopython/pywps) sevice, as well as on your local machine `tox`::
 
-```
-tox
-```
+    tox
 
 Contributions and Licensing Agreement Template
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
