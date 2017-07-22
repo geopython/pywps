@@ -147,6 +147,21 @@ class Process(object):
         wps_response = self._execute_process(self.async, wps_request, wps_response)
 
         return wps_response
+    
+        
+    def build_request_response(self):
+        """Creates dummy Request and Response objects for process debug purposes
+        """
+        import uuid
+        new_uuid = uuid.uuid4()
+        wps_request = WPSRequest()
+        wps_request.inputs = dict()
+        for i in self.inputs:
+            wps_request.inputs[i.identifier] = []
+        wps_response = WPSResponse(self, wps_request, new_uuid)
+        
+        return(wps_request, wps_response)
+    
 
     def _set_uuid(self, uuid):
         """Set uuid and status location path and url
