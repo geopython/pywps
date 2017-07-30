@@ -182,7 +182,7 @@ def get_session():
     if level in ['INFO']:
         echo = False
     try:
-        engine = sqlalchemy.create_engine(database, echo=echo)
+        engine = sqlalchemy.create_engine(database, connect_args={'check_same_thread': False}, echo=echo)
     except sqlalchemy.exc.SQLAlchemyError as e:
         raise NoApplicableCode("Could not connect to database: {}".format(e.message))
 
