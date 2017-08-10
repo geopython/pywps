@@ -31,7 +31,7 @@ class IOHandler(object):
     memory object and stream object and give them out in all three types
 
     :param workdir: working directory, to save temporal file objects in
-    :param mode: :var:`MODE` validation mode
+    :param mode: ``MODE`` validation mode
 
 
     >>> # setting up

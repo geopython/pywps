@@ -109,6 +109,10 @@ configuration file <http://docs.pycsw.org/en/latest/configuration.html>`_.
 :maxrequestsize:
     maximal request size. 0 for no limit
 
+:maxprocesses:
+    maximal number of requests being stored in queue, waiting till they can be
+    processed (see ``parallelprocesses`` configuration option).
+
 :workdir:
     a directory to store all temporary files (which should be always deleted,
     once the process is finished).

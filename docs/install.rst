@@ -85,12 +85,12 @@ For Developers
 .. _flask:
 
 The Flask service and its sample processes
------------------------------------------
+------------------------------------------
 
 To use PyWPS the user must code processes and publish them through a service.
 An example service is available that makes up a good starting point for first time
-users. This launches a very simple built-in server (relying on `Flask
-<http://flask.pocoo.org/>`_), which is good enough for testing but probably not
+users. This launches a very simple built-in server (relying on `Flask Python
+Microframework <http://flask.pocoo.org/>`_), which is good enough for testing but probably not
 appropriate for production.  It can be cloned directly into the user
 area::
 
