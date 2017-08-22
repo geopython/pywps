@@ -44,10 +44,10 @@ ComplexData
 .. autoclass:: ComplexOutput
 
 .. autoclass:: Format
-    
+
 .. autodata:: pywps.inout.formats.FORMATS
     :annotation:
-    
+
     List of out of the box supported formats. User can add custom formats to the
     array.
 
@@ -96,6 +96,17 @@ Request and response objects
 
         Information about currently running process status
         :class:`pywps.app.WPSResponse.STATUS`
+
+Processing
+----------
+
+.. autofunction:: pywps.processing.Process
+
+.. autoclass:: pywps.processing.Processing
+   :members:
+
+.. autoclass:: pywps.processing.Job
+   :members:
 
 
 Refer :ref:`exceptions` for their description.
