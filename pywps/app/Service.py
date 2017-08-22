@@ -688,7 +688,7 @@ def _build_input_file_name(href, workdir, extension=None):
     url_path = urlparse(href).path or ''
     file_name = os.path.basename(url_path).strip() or 'input'
     (prefix, suffix) = os.path.splitext(file_name)
-    suffix = suffix or extension
+    suffix = suffix or extension or ''
     if prefix and suffix:
         file_name = prefix + suffix
     input_file_name = os.path.join(workdir, file_name)
