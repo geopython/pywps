@@ -28,17 +28,17 @@ Or in alternative install it manually:
     $ sudo python setup.py install
 
 Install example service
---------------------
+-----------------------
 
     $ git clone https://github.com/geopython/pywps-flask.git pywps-flask
     
 
 Run example service
---------
+-------------------
 
     $ python demo.py
     
 Access example service
------------
+----------------------
 
     http://localhost:5000

@@ -343,7 +343,7 @@ In order for clients to invoke processes, a PyWPS
 An instance of this class must created, receiving instances of
 all the desired processes classes.
 
-In the *flask* service the :class:`Service` class instance is created in the
+In the *flask* example service the :class:`Service` class instance is created in the
 :class:`Server` class. :class:`Server` is a development server that relies 
 on `Flask`_. The publication of processes is encapsulated in *demo.py*, where 
 a main method passes a list of processes instances to the 

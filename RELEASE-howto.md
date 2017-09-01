@@ -72,7 +72,7 @@ git checkout X.Y.Z
 python setup.py bdist_wheel upload
 ```
 
-## Fix pywps-flask project (only for stable releases)
+## Fix the pywps-flask project (only for stable releases)
 
 ```
 git checkout master
