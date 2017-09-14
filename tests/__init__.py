@@ -14,7 +14,7 @@ from tests import test_exceptions
 from tests import test_inout
 from tests import test_literaltypes
 from tests import validator
-#from tests import test_ows
+from tests import test_ows
 from tests import test_formats
 from tests import test_dblog
 from tests import test_wpsrequest
@@ -31,9 +31,9 @@ def load_tests(loader=None, tests=None, pattern=None):
         test_describe.load_tests(),
         test_inout.load_tests(),
         test_exceptions.load_tests(),
-        # test_ows.load_tests(),
+        test_ows.load_tests(),
         test_literaltypes.load_tests(),
-        #test_complexvalidators.load_tests(),
+        test_complexvalidators.load_tests(),
         test_literalvalidators.load_tests(),
         test_formats.load_tests(),
         test_dblog.load_tests(),
