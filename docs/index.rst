@@ -3,10 +3,10 @@
 Welcome to the PyWPS |release| documentation!
 =============================================
 
-PyWPS is a server side implementation of the `OGC Web Processing Service 
-(OGC WPS) standard <http://opengeospatial.org/standards/wps>`_, using the 
-`Python <http://python.org>`_ programming language. PyWPS is currently 
-supporting WPS 1.0.0. Support for the version 2.0.0. of OGC WPS standard is 
+PyWPS is a server side implementation of the `OGC Web Processing Service
+(OGC WPS) standard <http://opengeospatial.org/standards/wps>`_, using the
+`Python <http://python.org>`_ programming language. PyWPS is currently
+supporting WPS 1.0.0. Support for the version 2.0.0. of OGC WPS standard is
 presently being planned.
 
 Like the bicycle in the logo, PyWPS is:
@@ -36,6 +36,7 @@ Contents:
    deployment
    migration
    external-tools
+   extensions
    api
    development
    exceptions
