@@ -26,6 +26,8 @@ import os
 import sys
 import uuid
 import copy
+import requests
+import shutil
 
 LOGGER = logging.getLogger("PYWPS")
 
@@ -406,7 +408,7 @@ class Service(object):
                 extension=_extension(complexinput))
 
             try:
-                (reference_file, reference_file_data) = _openurl(datain)
+                reference_file = _openurl(datain)
                 data_size = reference_file.headers.get('Content-Length', 0)
             except Exception as e:
                 raise NoApplicableCode('File reference error: %s' % e)
@@ -415,19 +417,25 @@ class Service(object):
             # calculate the size
             if data_size == 0:
                 LOGGER.debug('no Content-Length, calculating size')
-                data_size = _get_datasize(reference_file_data)
 
             # check if input file size was not exceeded
             complexinput.calculate_max_input_size()
-            byte_size = complexinput.max_size * 1024 * 1024
-            if int(data_size) > int(byte_size):
+            max_byte_size = complexinput.max_size * 1024 * 1024
+            if int(data_size) > int(max_byte_size):
                 raise FileSizeExceeded('File size for input exceeded.'
                                        ' Maximum allowed: %i megabytes' %
                                        complexinput.max_size, complexinput.identifier)
 
             try:
-                with open(tmp_file, 'w') as f:
-                    f.write(reference_file_data)
+                with open(tmp_file, 'wb') as f:
+                    data_size = 0
+                    for chunk in reference_file.iter_content(chunk_size=1024):
+                        data_size += len(chunk)
+                        if int(data_size) > int(max_byte_size):
+                            raise FileSizeExceeded('File size for input exceeded.'
+                                                   ' Maximum allowed: %i megabytes' %
+                                                   complexinput.max_size, complexinput.identifier)
+                        f.write(chunk)
             except Exception as e:
                 raise NoApplicableCode(e)
 
@@ -448,7 +456,10 @@ class Service(object):
                 os.symlink(inpt_file, tmp_file)
                 LOGGER.debug("Linked input file %s to %s.", inpt_file, tmp_file)
             except Exception as e:
-                raise NoApplicableCode("Could not link file reference: %s" % e)
+                # TODO: handle os.symlink on windows
+                # raise NoApplicableCode("Could not link file reference: %s" % e)
+                LOGGER.warn("Could not link file reference")
+                shutil.copy2(inpt_file, tmp_file)
 
             complexinput.file = tmp_file
             complexinput.url = datain.get('href')
@@ -638,7 +649,7 @@ class Service(object):
 
 
 def _openurl(inpt):
-    """use urllib to open given href
+    """use requests to open given href
     """
     data = None
     reference_file = None
@@ -649,38 +660,13 @@ def _openurl(inpt):
         if 'body' in inpt:
             data = inpt.get('body')
         elif 'bodyreference' in inpt:
-            data = urlopen(url=inpt.get('bodyreference')).read()
+            data = requests.get(url=inpt.get('bodyreference')).text
 
-        reference_file = urlopen(url=href, data=data)
+        reference_file = requests.post(url=href, data=data, stream=True)
     else:
-        reference_file = urlopen(url=href)
+        reference_file = requests.get(url=href, stream=True)
 
-    if PY2:
-        reference_file_data = reference_file.read()
-    else:
-        reference_file_data = reference_file.read().decode('utf-8')
-
-    return (reference_file, reference_file_data)
-
-
-def _get_datasize(reference_file_data):
-
-    tmp_sio = None
-    data_size = 0
-
-    if PY2:
-        from StringIO import StringIO
-
-        tmp_sio = StringIO(reference_file_data)
-        data_size = tmp_sio.len
-    else:
-        from io import StringIO
-
-        tmp_sio = StringIO()
-        data_size = tmp_sio.write(reference_file_data)
-    tmp_sio.close()
-
-    return data_size
+    return reference_file
 
 
 def _build_input_file_name(href, workdir, extension=None):
