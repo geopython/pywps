@@ -14,8 +14,8 @@ import shutil
 import tempfile
 
 from pywps import WPS, OWS, E, dblog
-from pywps.app.WPSResponse import WPSResponse
-from pywps.app.WPSResponse import STATUS
+from pywps.response import get_response
+from pywps.response.status import STATUS
 from pywps.app.WPSRequest import WPSRequest
 import pywps.configuration as config
 from pywps._compat import PY2
@@ -126,7 +126,8 @@ class Process(object):
     def execute(self, wps_request, uuid):
         self._set_uuid(uuid)
         self.async = False
-        wps_response = WPSResponse(self, wps_request, self.uuid)
+        response_cls = get_response("execute")
+        wps_response = response_cls(wps_request, process=self, uuid=self.uuid)
 
         LOGGER.debug('Check if status storage and updating are supported by this process')
         if wps_request.store_execute == 'true':
@@ -149,20 +150,6 @@ class Process(object):
         return wps_response
     
         
-    def build_request_response(self):
-        """Creates dummy Request and Response objects for process debug purposes
-        """
-        import uuid
-        new_uuid = uuid.uuid4()
-        wps_request = WPSRequest()
-        wps_request.inputs = dict()
-        for i in self.inputs:
-            wps_request.inputs[i.identifier] = []
-        wps_response = WPSResponse(self, wps_request, new_uuid)
-        
-        return(wps_request, wps_response)
-    
-
     def _set_uuid(self, uuid):
         """Set uuid and status location path and url
         """
@@ -290,7 +277,9 @@ class Process(object):
                     request_json = request_json.decode('utf-8')
                 new_wps_request = WPSRequest()
                 new_wps_request.json = json.loads(request_json)
-                new_wps_response = WPSResponse(self, new_wps_request, uuid)
+                response_cls = get_response("execute")
+
+                new_wps_response = response_cls(new_wps_request, process=self, uuid=uuid)
                 new_wps_response.status = STATUS.STORE_AND_UPDATE_STATUS
                 self._set_uuid(uuid)
                 self._run_async(new_wps_request, new_wps_response)

@@ -55,6 +55,7 @@ CONFIG = {
         'pywps/app',
         'pywps/inout',
         'pywps/resources',
+        'pywps/response',
         'pywps/validator',
         'pywps/inout/formats',
         'pywps/processing',

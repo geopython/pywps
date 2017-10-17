@@ -14,7 +14,7 @@ import pywps.processing
 from pywps.processing.basic import MultiProcessing
 from pywps import Process
 from pywps.app import WPSRequest
-from pywps.app import WPSResponse
+from pywps.response.execute import ExecuteResponse
 from pywps import LiteralOutput
 
 
@@ -33,7 +33,8 @@ class ProcessingTest(unittest.TestCase):
             title='Dummy Process',
             outputs=[LiteralOutput('output', 'Output', data_type='string')])
         self.wps_request = WPSRequest()
-        self.wps_response = WPSResponse(self.dummy_process, self.wps_request, self.uuid)
+        self.wps_response = ExecuteResponse(self.wps_request, self.uuid,
+                process=self.dummy_process)
 
     def test_default_mode(self):
         """Test pywps.formats.Format class

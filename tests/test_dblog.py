@@ -41,6 +41,10 @@ class DBLogTest(unittest.TestCase):
         self.assertEqual(null_percent.count(), 0,
                          'There are no processes without percent loged')
 
+        null_percent = session.query(ProcessInstance).filter(ProcessInstance.percent_done < 100)
+        self.assertEqual(null_percent.count(), 0,
+                         'There are no unfinished processes')
+
 def load_tests(loader=None, tests=None, pattern=None):
     """Load local tests
     """

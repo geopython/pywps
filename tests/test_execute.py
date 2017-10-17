@@ -116,6 +116,7 @@ class ExecuteTest(unittest.TestCase):
         class FakeRequest():
             identifier = 'complex_process'
             service='wps'
+            operation='execute'
             version='1.0.0'
             inputs = {'complex': [{
                     'identifier': 'complex',
@@ -170,6 +171,7 @@ class ExecuteTest(unittest.TestCase):
         class FakeRequest():
             identifier = 'complex_process'
             service = 'wps'
+            operation='execute'
             version = '1.0.0'
             inputs = {}
             raw = False
