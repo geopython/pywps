@@ -125,7 +125,8 @@ class Process(object):
 
     def execute(self, wps_request, uuid):
         self._set_uuid(uuid)
-        self.async = False
+        # TODO just for testing purpose
+        self.async = True
         response_cls = get_response("execute")
         wps_response = response_cls(wps_request, process=self, uuid=self.uuid)
 
