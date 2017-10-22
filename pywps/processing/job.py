@@ -38,7 +38,7 @@ class Job(object):
         LOGGER.debug('dump job ...')
         import dill
         filename = tempfile.mkstemp(prefix='job_', suffix='.dump', dir=self.workdir)[1]
-        with open(filename, 'w') as fp:
+        with open(filename, 'wb') as fp:
             dill.dump(self, fp)
             LOGGER.debug("dumped job status to %s", filename)
             return filename
