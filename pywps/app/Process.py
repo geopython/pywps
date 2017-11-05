@@ -137,7 +137,7 @@ class Process(object):
 
     def execute(self, wps_request, uuid):
         self._set_uuid(uuid)
-        # TODO just for testing purpose
+        # TODO just for testing purpose - changed to True
         self.async = True
         response_cls = get_response("execute")
         wps_response = response_cls(wps_request, process=self, uuid=self.uuid)
@@ -194,6 +194,9 @@ class Process(object):
         stored = dblog.get_stored().count()
 
         # async
+        # TODO testing purpose var
+        docker = True
+
         if async:
 
             # run immedietly
@@ -221,6 +224,18 @@ class Process(object):
             wps_request=wps_request,
             wps_response=wps_response)
         process.start()
+    #
+    # def _run_docker(self, wps_request, wps_response):
+    #     import pywps.processing
+    #     process = pywps.processing.Process(
+    #         process=self,
+    #         wps_request=wps_request,
+    #         wps_response=wps_response)
+    #     xml = process.start()
+    #     wps_response.update_status("Saving response")
+    #     wps_response.outputs = xml
+    #     return wps_response
+
 
     def _store_process(self, stored, wps_request, wps_response):
         """Try to store given requests

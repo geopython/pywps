@@ -87,6 +87,7 @@ class WPSRequest(object):
                                    ' Maximum request size allowed: %i megabytes' % maxsize / 1024 / 1024)
 
         try:
+            # if text/xlm or text/json
             doc = lxml.etree.fromstring(self.http_request.get_data())
         except Exception as e:
             if PY2:
@@ -300,6 +301,18 @@ class WPSRequest(object):
                 'The requested language "%s" is not supported by this server' % language, 'language')
         else:
             self.language = language
+
+    def get_inputs_in_tuples(self):
+        """
+        Return all inputs in [(input_name1, input_value1), (input_name2, input_value2)]
+        Return value can be used for WPS.execute method.
+        :return: input values
+        :rtype:list of tuples
+        """
+        the_inputs = list((i, [inpt.json["data"] for inpt in self.inputs[i]][0]) for i in self.inputs)
+
+        return the_inputs
+
 
     @property
     def json(self):
