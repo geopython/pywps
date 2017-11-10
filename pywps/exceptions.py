@@ -150,3 +150,13 @@ class SchedulerNotAvailable(NoApplicableCode):
     """Job scheduler not available exception implementation
     """
     code = 400
+
+
+class NoAvailablePortException(NoApplicableCode):
+    """
+    No port available for new docker.
+    """
+    # def __init__(self, port_min, port_max):
+    #     self.port_min = port_min
+    #     self.port_max = port_max
+    code = 400
