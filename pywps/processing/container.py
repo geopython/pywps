@@ -8,7 +8,7 @@ import os
 import pywps.configuration as config
 from pywps.processing.basic import Processing
 
-from owslib.wps import WebProcessingService as WPS
+from OWSLib.owslib.wps import WebProcessingService as WPS
 from pywps.response.status import STATUS
 from pywps.exceptions import NoAvailablePortException
 import docker
@@ -21,6 +21,10 @@ import logging
 LOGGER = logging.getLogger("PYWPS")
 
 
+class ClientError:
+    pass
+
+
 class Container(Processing):
     def __init__(self, process, wps_request, wps_response):
         super().__init__(process, wps_request, wps_response)
@@ -28,11 +32,19 @@ class Container(Processing):
         self.port = self._assign_port()
         self.client = docker.from_env()
         self.cntnr = self._create()
-        # self.json = self.job.wps_request.json
         self.job.wps_response.update_status('Created container {}'.format(self.cntnr.id))
 
     def _create(self):
-        container = self.client.containers.create("pywps4-demo", ports={"5000/tcp": self.port}, detach=True)
+        cntnr_img = config.get_config_value("processing", "docker_img")
+        prcs_dir = self.job.wps_response.process.workdir
+        prcs_out_dir = os.path.abspath(config.get_config_value("server", "outputpath"))
+        dckr_inp_dir = config.get_config_value("processing", "dckr_inp_dir")
+        dckr_out_dir = config.get_config_value("processing", "dckr_out_dir")
+        container = self.client.containers.create(cntnr_img, ports={"5000/tcp": self.port}, detach=True,
+                                                  volumes={
+                                                  prcs_out_dir: {'bind': dckr_out_dir, 'mode': 'rw'},
+                                                  prcs_dir: {'bind': dckr_inp_dir, 'mode': 'ro'}
+                                                  })
         return container
 
     def _assign_port(self):
@@ -59,7 +71,7 @@ class Container(Processing):
         self.job.wps_response.update_status('Stopping process ...')
         self.cntnr.stop()
 
-    def kill(self):
+    def cancel(self):
         self.job.wps_response.update_status('Killing process ...')
         self.cntnr.kill()
 
@@ -71,40 +83,13 @@ class Container(Processing):
         self.job.wps_response.update_status('Unpausing process ...')
         self.cntnr.unpause()
 
-
     def _execute(self):
         url_execute = "http://localhost:{}/wps".format(self.port)
-        # TODO proc balit data do jsonu?
-        # WPSRequest funkce json, zabalit data
-        # Pro WPSExecution potrebuju tuples
         inputs = self.job.wps_request.get_inputs_in_tuples()
-
-        # TODO ziskam objekt WPSExecution, co s nim?
-        # Jak naparsovat do WPSResponse
         wps = WPS(url=url_execute, skip_caps=True)
         self.execution = wps.execute(self.job.wps_request.identifier, inputs)
-
-    # def _get_outputs_old(self):
-    #     self.job.wps_response.outputs['response'].data = self.execution.processOutputs[0].data[0]
-    #     # TODO UOM??
-    #     # self.job.wps_response.outputs['response'].uom = UOM('unity')
-    #     self.job.wps_response.update_status('Job finished', status_percentage=100, status=STATUS.DONE_STATUS)
 
     def _parse_outputs(self):
         for output in self.execution.processOutputs:
             self.job.wps_response.outputs[output.identifier].data = output.data[0]
         self.job.wps_response.update_status('PyWPS process {} finished'.format(self.job.process.identifier), status_percentage=100, status=STATUS.DONE_STATUS)
-
-    # def _execute_na_prase(self):
-    #     Stary zpusob rovnou pres request
-    #     post_resp = requests.post(url=url_execute,
-    #                               data=self.job.wps_request.http_request.data.decode("utf-8"),
-    #                               headers={'Content-Type': 'application/octet-stream'})
-    #
-    #     String s odpovedi
-    #     exec = WPSExecution()
-    #     exec_req = exec.buildRequest(self.job.process.identifier, inputs)
-    #     exec_reader = WPSExecuteReader()
-    #     data = etree.tostring(exec_req)
-    #     response = exec_reader.readFromUrl(url=url_execute, data=data, method='Post')
-    #     string = etree.tostring(response)
