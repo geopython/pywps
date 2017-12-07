@@ -23,10 +23,6 @@ from pywps.inout.literaltypes import AnyValue, NoValue, ValuesReference, Allowed
 
 from pywps.inout.formats import Format
 
-import os
-import pywps.configuration as config
-from OWSLib import owslib
-
 import json
 
 LOGGER = logging.getLogger("PYWPS")
@@ -305,32 +301,6 @@ class WPSRequest(object):
                 'The requested language "%s" is not supported by this server' % language, 'language')
         else:
             self.language = language
-
-    def get_inputs_in_tuples(self):
-        """
-        Return all inputs in [(input_name1, input_value1), (input_name2, input_value2)]
-        Return value can be used for WPS.execute method.
-        :return: input values
-        :rtype:list of tuples
-        """
-        the_inputs = []
-        for key in self.inputs.keys():
-            inp = self.inputs[key][0]
-            if isinstance(inp, LiteralInput):
-                ows_inp = str(self.inputs[key][0].source)
-            elif isinstance(inp, ComplexInput):
-                fp = self.inputs[key][0].file.split("/")[-1]
-                dckr_inp_dir = config.get_config_value('processing', 'dckr_inp_dir')
-                ows_inp = owslib.wps.ComplexDataInput("file://" + os.path.join(dckr_inp_dir, fp))
-            elif isinstance(inp, BBoxInput):
-                ows_inp = owslib.wps.BoundingBoxDataInput(self.inputs[key][0].source)
-            else:
-                raise Exception
-            the_inputs.append((key, ows_inp))
-
-
-        return the_inputs
-
 
     @property
     def json(self):

@@ -27,11 +27,11 @@ git:
     submodules: false
 
 install:
-  - pip install pip --upgrade
-  - pip install .
-  - pip install -r requirements-gdal.txt
-  - pip install -r requirements-dev.txt
-  - pip install coveralls
+  - izolation install izolation --upgrade
+  - izolation install .
+  - izolation install -r requirements-gdal.txt
+  - izolation install -r requirements-dev.txt
+  - izolation install coveralls
 
 script:
   - python -m unittest tests

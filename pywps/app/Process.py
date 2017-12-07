@@ -326,10 +326,12 @@ class Process(object):
 
         self.workdir = workdir
         for inpt in self.inputs:
-            inpt.workdir = workdir
+            inpt_subdir = config.get_config_value('server', 'wd_inp_subdir')
+            inpt.workdir = os.path.join(workdir, inpt_subdir)
 
         for outpt in self.outputs:
-            outpt.workdir = workdir
+            outpt_subdir = config.get_config_value('server', 'wd_out_subdir')
+            outpt.workdir = os.path.join(workdir, outpt_subdir)
 
     def _set_grass(self):
         """Handle given grass_location parameter of the constructor
