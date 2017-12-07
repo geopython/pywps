@@ -8,17 +8,15 @@ import os
 import pywps.configuration as config
 from pywps.processing.basic import Processing
 
-from OWSLib.owslib.wps import WebProcessingService as WPS
+from owslib.wps import WebProcessingService as WPS
 from pywps.response.status import STATUS
 from pywps.exceptions import NoAvailablePortException
 import docker
 import socket
 import time
-from lxml import etree
 
 from pywps.inout.basic import LiteralInput, ComplexInput, BBoxInput
-from OWSLib import owslib
-from pywps import FORMATS
+import owslib
 
 import logging
 LOGGER = logging.getLogger("PYWPS")
