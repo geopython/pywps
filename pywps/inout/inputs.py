@@ -18,23 +18,29 @@ class BoundingBoxInput(basic.BBoxInput):
     :param string identifier: The name of this input.
     :param string title: Human readable title
     :param string abstract: Longer text description
+<<<<<<< HEAD
     :param crss: List of supported coordinate reference
                  system (e.g. ['EPSG:4326'])
+=======
+    :param list keywords: Keywords that characterize this input.
+    :param crss: List of supported coordinate reference system (e.g. ['EPSG:4326'])
+>>>>>>> 1f1da73... added keyword support to inputs and outputs
     :param int dimensions: 2 or 3
+    :param list metadata: TODO
     :param int min_occurs: how many times this input occurs
     :param int max_occurs: how many times this input occurs
     :param metadata: List of metadata advertised by this process. They
                      should be :class:`pywps.app.Common.Metadata` objects.
     """
 
-    def __init__(self, identifier, title, crss, abstract='',
+    def __init__(self, identifier, title, crss, abstract='', keywords=[],
                  dimensions=2, metadata=[], min_occurs=1,
                  max_occurs=1,
                  mode=MODE.NONE,
                  default=None, default_type=basic.SOURCE_TYPE.DATA):
 
         basic.BBoxInput.__init__(self, identifier, title=title,
-                                 abstract=abstract, crss=crss,
+                                 abstract=abstract, keywords=keywords, crss=crss,
                                  dimensions=dimensions, mode=mode,
                                  default=default, default_type=default_type)
 
@@ -57,6 +63,10 @@ class BoundingBoxInput(basic.BBoxInput):
 
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
+
+        if self.keywords:
+            kws = map(OWS.Keyword, self.keywords)
+            doc.append(OWS.Keywords(*kws))
 
         for m in self.metadata:
             doc.append(OWS.Metadata(dict(m)))
@@ -89,6 +99,10 @@ class BoundingBoxInput(basic.BBoxInput):
 
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
+
+        if self.keywords:
+            kws = map(OWS.Keyword, self.keywords)
+            doc.append(OWS.Keywords(*kws))
 
         doc.append(node)
 
@@ -124,24 +138,29 @@ class ComplexInput(basic.ComplexInput):
 
     :param str identifier: The name of this input.
     :param str title: Title of the input
+<<<<<<< HEAD
     :param pywps.inout.formats.Format supported_formats: List of supported
                                                           formats
     :param pywps.inout.formats.Format data_format: default data format
+=======
+    :param pywps.inout.formats.Format supported_formats: List of supported formats
+>>>>>>> 1f1da73... added keyword support to inputs and outputs
     :param str abstract: Input abstract
-    :param list metada: TODO
-    :param int min_occurs: minimum occurence
-    :param int max_occurs: maximum occurence
+    :param list keywords: Keywords that characterize this input.
+    :param list metadata: TODO
+    :param int min_occurs: minimum occurrence
+    :param int max_occurs: maximum occurrence
     :param pywps.validator.mode.MODE mode: validation mode (none to strict)
     """
 
     def __init__(self, identifier, title, supported_formats,
-                 data_format=None, abstract='', metadata=[], min_occurs=1,
+                 data_format=None, abstract='', keywords=[], metadata=[], min_occurs=1,
                  max_occurs=1, mode=MODE.NONE,
                  default=None, default_type=basic.SOURCE_TYPE.DATA):
         """constructor"""
 
         basic.ComplexInput.__init__(self, identifier=identifier, title=title,
-                                    abstract=abstract,
+                                    abstract=abstract, keywords=keywords,
                                     supported_formats=supported_formats,
                                     mode=mode,
                                     default=default, default_type=default_type)
@@ -182,6 +201,10 @@ class ComplexInput(basic.ComplexInput):
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
 
+        if self.keywords:
+            kws = map(OWS.Keyword, self.keywords)
+            doc.append(OWS.Keywords(*kws))
+
         for m in self.metadata:
             doc.append(OWS.Metadata(dict(m)))
 
@@ -211,8 +234,14 @@ class ComplexInput(basic.ComplexInput):
             OWS.Identifier(self.identifier),
             OWS.Title(self.title)
         )
+
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
+
+        if self.keywords:
+            kws = map(OWS.Keyword, self.keywords)
+            doc.append(OWS.Keywords(*kws))
+
         doc.append(node)
 
         return doc
@@ -261,6 +290,7 @@ class LiteralInput(basic.LiteralInput):
     :param str title: Title of the input
     :param pywps.inout.literaltypes.LITERAL_DATA_TYPES data_type: data type
     :param str abstract: Input abstract
+    :param list keywords: Keywords that characterize this input.
     :param list metadata: TODO
     :param str uoms: units
     :param int min_occurs: minimum occurence
@@ -271,7 +301,8 @@ class LiteralInput(basic.LiteralInput):
                      should be :class:`pywps.app.Common.Metadata` objects.
     """
 
-    def __init__(self, identifier, title, data_type='integer', abstract='',
+
+    def __init__(self, identifier, title, data_type='integer', abstract='', keywords=[],
                  metadata=[], uoms=None,
                  min_occurs=1, max_occurs=1,
                  mode=MODE.SIMPLE, allowed_values=AnyValue,
@@ -281,7 +312,7 @@ class LiteralInput(basic.LiteralInput):
         """
 
         basic.LiteralInput.__init__(self, identifier=identifier, title=title,
-                                    abstract=abstract, data_type=data_type,
+                                    abstract=abstract, keywords=keywords, data_type=data_type,
                                     uoms=uoms, mode=mode,
                                     allowed_values=allowed_values,
                                     default=default, default_type=default_type)
@@ -303,6 +334,10 @@ class LiteralInput(basic.LiteralInput):
 
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
+
+        if self.keywords:
+            kws = map(OWS.Keyword, self.keywords)
+            doc.append(OWS.Keywords(*kws))
 
         for m in self.metadata:
             doc.append(OWS.Metadata(dict(m)))
@@ -356,8 +391,14 @@ class LiteralInput(basic.LiteralInput):
             OWS.Identifier(self.identifier),
             OWS.Title(self.title)
         )
+
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
+
+        if self.keywords:
+            kws = map(OWS.Keyword, self.keywords)
+            doc.append(OWS.Keywords(*kws))
+
         doc.append(node)
 
         return doc
