@@ -18,13 +18,9 @@ class BoundingBoxInput(basic.BBoxInput):
     :param string identifier: The name of this input.
     :param string title: Human readable title
     :param string abstract: Longer text description
-<<<<<<< HEAD
     :param crss: List of supported coordinate reference
                  system (e.g. ['EPSG:4326'])
-=======
     :param list keywords: Keywords that characterize this input.
-    :param crss: List of supported coordinate reference system (e.g. ['EPSG:4326'])
->>>>>>> 1f1da73... added keyword support to inputs and outputs
     :param int dimensions: 2 or 3
     :param list metadata: TODO
     :param int min_occurs: how many times this input occurs
@@ -138,13 +134,9 @@ class ComplexInput(basic.ComplexInput):
 
     :param str identifier: The name of this input.
     :param str title: Title of the input
-<<<<<<< HEAD
     :param pywps.inout.formats.Format supported_formats: List of supported
                                                           formats
     :param pywps.inout.formats.Format data_format: default data format
-=======
-    :param pywps.inout.formats.Format supported_formats: List of supported formats
->>>>>>> 1f1da73... added keyword support to inputs and outputs
     :param str abstract: Input abstract
     :param list keywords: Keywords that characterize this input.
     :param list metadata: TODO
