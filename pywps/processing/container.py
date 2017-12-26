@@ -89,7 +89,6 @@ class Container(Processing):
         url_execute = "http://localhost:{}/wps".format(self.port)
         inputs = get_inputs(self.job.wps_request.inputs)
         output = get_output(self.job.wps_request.outputs)
-        # request = self._prepare_request()
         wps = WPS(url=url_execute, skip_caps=True)
         self.execution = wps.execute(self.job.wps_request.identifier, inputs=inputs, output=output)
 
@@ -103,21 +102,6 @@ class Container(Processing):
                 self.job.wps_response.outputs[output.identifier].file = rp
 
         self.job.wps_response.update_status('PyWPS process {} finished'.format(self.job.process.identifier), status_percentage=100, status=STATUS.DONE_STATUS)
-
-    # TODO way how to force sync request
-    # def _prepare_request(self):
-    #     request_xml = etree.fromstring(self.job.wps_request.http_request.data)
-    #     requestElement = owslib.wps.WPSExecution().buildRequest(self.job.wps_request.identifier, self.inputs, self.output)
-    #     for child in request_xml:
-    #         if "ResponseForm" in child.tag:
-    #             child[0].set('status', 'false')
-    #             responseFormElement = child
-    #             requestElement.append(responseFormElement)
-    #             break
-    #
-    #     request = etree.tostring(requestElement)
-    #
-    #     return request
 
 
 def get_inputs(job_inputs):
