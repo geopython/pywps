@@ -5,6 +5,7 @@
 ##################################################################
 
 import os
+import shutil
 import pywps.configuration as config
 from pywps.processing.basic import Processing
 
@@ -37,9 +38,9 @@ class Container(Processing):
 
     def _create(self):
         cntnr_img = config.get_config_value("processing", "docker_img")
-        workdir = self.job.wps_response.process.workdir
-        prcs_inp_dir = os.path.join(workdir, 'inputs')
-        prcs_out_dir = os.path.join(workdir, 'outputs')
+        # workdir = self.job.wps_response.process.workdir
+        prcs_inp_dir = self.job.wps_response.process.workdir
+        prcs_out_dir = config.get_config_value("server", "outputpath")
         dckr_inp_dir = config.get_config_value("processing", "dckr_inp_dir")
         dckr_out_dir = config.get_config_value("processing", "dckr_out_dir")
         container = self.client.containers.create(cntnr_img, ports={"5000/tcp": self.port}, detach=True,
@@ -66,23 +67,19 @@ class Container(Processing):
         # TODO dat dockeru chvili cas nez nastartuje
         time.sleep(0.5)
         self._execute()
-        self._parse_outputs()
-        # TODO stopnout a smaznout docker instanci
+        self._parse_status()
+        self._dirty_clean()
 
     def stop(self):
-        self.job.wps_response.update_status('Stopping process ...')
         self.cntnr.stop()
 
     def cancel(self):
-        self.job.wps_response.update_status('Killing process ...')
         self.cntnr.kill()
 
     def pause(self):
-        self.job.wps_response.update_status('Pausing process ...')
         self.cntnr.pause()
 
     def unpause(self):
-        self.job.wps_response.update_status('Unpausing process ...')
         self.cntnr.unpause()
 
     def _execute(self):
@@ -92,17 +89,29 @@ class Container(Processing):
         wps = WPS(url=url_execute, skip_caps=True)
         self.execution = wps.execute(self.job.wps_request.identifier, inputs=inputs, output=output)
 
-    def _parse_outputs(self):
-        for output in self.execution.processOutputs:
-            # TODO what if len(data) > 1 ??
-            if output.data:
-                self.job.wps_response.outputs[output.identifier].data = output.data[0]
-            if output.reference:
-                rp = output.reference[output.reference.index('outputs/'):]
-                self.job.wps_response.outputs[output.identifier].file = rp
+    # Obsolete function when docker was called in syncro mode
+    # def _parse_outputs(self):
+    #     for output in self.execution.processOutputs:
+    #         # TODO what if len(data) > 1 ??
+    #         if output.data:
+    #             self.job.wps_response.outputs[output.identifier].data = output.data[0]
+    #         if output.reference:
+    #             rp = output.reference[output.reference.index('outputs/'):]
+    #             self.job.wps_response.outputs[output.identifier].file = rp
+    #
+    #     self.job.wps_response.update_status('PyWPS process {} finished'.format(self.job.process.identifier), status_percentage=100, status=STATUS.DONE_STATUS)
 
-        self.job.wps_response.update_status('PyWPS process {} finished'.format(self.job.process.identifier), status_percentage=100, status=STATUS.DONE_STATUS)
+    def _parse_status(self):
+        self.job.process.status_url = self.execution.statusLocation
+        self.job.wps_response.update_status(message=self.execution.statusMessage)
 
+    def _dirty_clean(self):
+        # TODO pockat chvili a pak smaznout instanci
+        time.sleep(1)
+        self.cntnr.stop()
+        self.cntnr.remove()
+        self.job.process.clean()
+        os.remove(self.job.process.status_location)
 
 def get_inputs(job_inputs):
     """
