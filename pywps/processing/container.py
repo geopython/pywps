@@ -30,15 +30,12 @@ class ClientError:
 class Container(Processing):
     def __init__(self, process, wps_request, wps_response):
         super().__init__(process, wps_request, wps_response)
-        self.job.wps_response.update_status('Creating container...', 0)
         self.port = self._assign_port()
         self.client = docker.from_env()
         self.cntnr = self._create()
-        self.job.wps_response.update_status('Created container {}'.format(self.cntnr.id))
 
     def _create(self):
         cntnr_img = config.get_config_value("processing", "docker_img")
-        # workdir = self.job.wps_response.process.workdir
         prcs_inp_dir = self.job.wps_response.process.workdir
         prcs_out_dir = config.get_config_value("server", "outputpath")
         dckr_inp_dir = config.get_config_value("processing", "dckr_inp_dir")
@@ -56,15 +53,14 @@ class Container(Processing):
         for port in range(port_min, port_max):
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             res = sock.connect_ex(('127.0.0.1', port))
-            # TODO poresit errno
+            # TODO find better solution for errno
             if res != 0:
                 return port
         raise NoAvailablePortException("No port from range {}-{} available.".format(port_min, port_max))
 
     def start(self):
-        self.job.wps_response.update_status('Starting process ...', 0)
         self.cntnr.start()
-        # TODO dat dockeru chvili cas nez nastartuje
+        # TODO it takes some time to start the container
         time.sleep(0.5)
         self._execute()
         self._parse_status()
@@ -90,28 +86,30 @@ class Container(Processing):
         self.execution = wps.execute(self.job.wps_request.identifier, inputs=inputs, output=output)
 
     # Obsolete function when docker was called in syncro mode
-    # def _parse_outputs(self):
-    #     for output in self.execution.processOutputs:
-    #         # TODO what if len(data) > 1 ??
-    #         if output.data:
-    #             self.job.wps_response.outputs[output.identifier].data = output.data[0]
-    #         if output.reference:
-    #             rp = output.reference[output.reference.index('outputs/'):]
-    #             self.job.wps_response.outputs[output.identifier].file = rp
-    #
-    #     self.job.wps_response.update_status('PyWPS process {} finished'.format(self.job.process.identifier), status_percentage=100, status=STATUS.DONE_STATUS)
+    def _parse_outputs(self):
+        for output in self.execution.processOutputs:
+            # TODO what if len(data) > 1 ??
+            if output.data:
+                self.job.wps_response.outputs[output.identifier].data = output.data[0]
+            if output.reference:
+                rp = output.reference[output.reference.index('outputs/'):]
+                self.job.wps_response.outputs[output.identifier].file = rp
+
+        self.job.wps_response.update_status('PyWPS process {} finished'.format(self.job.process.identifier),
+                                            status_percentage=100, status=STATUS.DONE_STATUS)
 
     def _parse_status(self):
         self.job.process.status_url = self.execution.statusLocation
         self.job.wps_response.update_status(message=self.execution.statusMessage)
 
     def _dirty_clean(self):
-        # TODO pockat chvili a pak smaznout instanci
+        # TODO wait then stop&remove container
         time.sleep(1)
         self.cntnr.stop()
         self.cntnr.remove()
         self.job.process.clean()
         os.remove(self.job.process.status_location)
+
 
 def get_inputs(job_inputs):
     """
