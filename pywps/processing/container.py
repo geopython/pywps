@@ -108,7 +108,7 @@ class Container(Processing):
         self.cntnr.stop()
         self.cntnr.remove()
         self.job.process.clean()
-git s        os.remove(self.job.process.status_location)
+        os.remove(self.job.process.status_location)
         self.job.wps_response.update_status('PyWPS Process {} finished'.format(self.job.process.title), 100,
                                             STATUS.DONE_STATUS, clean=self.job.process.async)
 
