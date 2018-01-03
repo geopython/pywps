@@ -18,6 +18,8 @@ import time
 
 from pywps.inout.basic import LiteralInput, ComplexInput, BBoxInput
 import owslib
+from pywps.dblog import update_response
+
 
 import logging
 LOGGER = logging.getLogger("PYWPS")
@@ -109,8 +111,9 @@ class Container(Processing):
         self.cntnr.remove()
         self.job.process.clean()
         os.remove(self.job.process.status_location)
-        self.job.wps_response.update_status('PyWPS Process {} finished'.format(self.job.process.title), 100,
-                                            STATUS.DONE_STATUS, clean=self.job.process.async)
+        update_response(self.job.wps_response.uuid, self.job.wps_response)
+        # self.job.wps_response.update_status('PyWPS Process {} finished'.format(self.job.process.title), 100,
+        #                                     STATUS.DONE_STATUS, clean=self.job.process.async)
 
 
 def get_inputs(job_inputs):
