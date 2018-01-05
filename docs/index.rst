@@ -37,6 +37,7 @@ Contents:
    migration
    external-tools
    extensions
+   docker
    api
    development
    exceptions
