@@ -125,7 +125,6 @@ class Process(object):
 
     def execute(self, wps_request, uuid):
         self._set_uuid(uuid)
-
         self.async = False
         response_cls = get_response("execute")
         wps_response = response_cls(wps_request, process=self, uuid=self.uuid)
@@ -149,7 +148,6 @@ class Process(object):
         wps_response = self._execute_process(self.async, wps_request, wps_response)
 
         return wps_response
-
 
     def _set_uuid(self, uuid):
         """Set uuid and status location path and url
@@ -187,6 +185,7 @@ class Process(object):
             # run immedietly
             if running < maxparallel or maxparallel == -1:
                 self._run_async(wps_request, wps_response)
+
             # try to store for later usage
             else:
                 wps_response = self._store_process(stored,

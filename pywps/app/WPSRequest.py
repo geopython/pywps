@@ -86,7 +86,6 @@ class WPSRequest(object):
                                    ' Maximum request size allowed: %i megabytes' % maxsize / 1024 / 1024)
 
         try:
-            # if text/xlm or text/json
             doc = lxml.etree.fromstring(self.http_request.get_data())
         except Exception as e:
             if PY2:
