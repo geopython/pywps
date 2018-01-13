@@ -174,7 +174,7 @@ class Service(object):
             for outpt in wps_request.outputs:
                 for proc_outpt in process.outputs:
                     if outpt == proc_outpt.identifier:
-                        resp = Response(proc_outpt.data)
+                        resp = Response(proc_outpt.data, mimetype=proc_outpt.data_format.mime_type)
                         resp.call_on_close(process.clean)
                         return resp
 
