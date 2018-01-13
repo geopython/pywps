@@ -165,9 +165,15 @@ class Service(object):
         try:
             wps_response = process.execute(wps_request, uuid)
         except Exception as e:
+            e_follow = e
             if not isinstance(e, NoApplicableCode):
-                raise NoApplicableCode('Service error: %s' % e)
-            raise e
+                e_follow = NoApplicableCode('Service error: %s' % e)
+            if wps_request.raw:
+                resp = Response(e_follow.get_body(), mimetype='application/xml')
+                resp.call_on_close(process.clean)
+                return resp
+            else:
+                raise e_follow
 
         # get the specified output as raw
         if wps_request.raw:

@@ -265,6 +265,8 @@ class Process(object):
 
             if not wps_response:
                 raise NoApplicableCode('Response is empty. Make sure the _handler method is returning a valid object.')
+            elif wps_request.raw:
+                raise
             else:
                 wps_response.update_status(msg, -1)
 
