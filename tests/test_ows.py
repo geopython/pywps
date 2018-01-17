@@ -19,8 +19,8 @@ from pywps import WPS, OWS
 from pywps.wpsserver import temp_dir
 from pywps.tests import client_for, assert_response_success
 
-wfsResource = 'http://demo.mapserver.org/cgi-bin/wfs?service=WFS&version=1.1.0&request=GetFeature&typename=continents&maxfeatures=10'
-wcsResource = 'http://demo.mapserver.org/cgi-bin/wcs?service=WCS&version=1.0.0&request=GetCoverage&coverage=ndvi&crs=EPSG:4326&bbox=-92,42,-85,45&format=image/tiff&width=400&height=300'
+wfsResource = 'http://demo.mapserver.org/cgi-bin/wfs?service=WFS&version=1.1.0&request=GetFeature&typename=continents&maxfeatures=10'  # noqa
+wcsResource = 'http://demo.mapserver.org/cgi-bin/wcs?service=WCS&version=1.0.0&request=GetCoverage&coverage=ndvi&crs=EPSG:4326&bbox=-92,42,-85,45&format=image/tiff&width=400&height=300'  # noqa
 
 
 def create_feature():
@@ -28,7 +28,7 @@ def create_feature():
     def feature(request, response):
         input = request.inputs['input'][0].file
         # What do we need to assert a Complex input?
-        #assert type(input) is text_type
+        # assert type(input) is text_type
 
         # open the input file
         try:
@@ -58,7 +58,7 @@ def create_feature():
         outLayer.CreateFeature(outFeature)
         outFeature.Destroy()
 
-        response.outputs['output'].output_format = Format(**FORMATS.GML._asdict())
+        response.outputs['output'].data_format = FORMATS.GML
         response.outputs['output'].file = outPath
         return response
 
@@ -67,14 +67,14 @@ def create_feature():
                    title='Process Feature',
                    inputs=[ComplexInput('input', 'Input', supported_formats=[get_format('GML')])],
                    outputs=[ComplexOutput('output', 'Output', supported_formats=[get_format('GML')])])
-    
-    
+
+
 def create_sum_one():
-    
+
     def sum_one(request, response):
         input = request.inputs['input']
         # What do we need to assert a Complex input?
-        #assert type(input) is text_type
+        # assert type(input) is text_type
 
         sys.path.append("/usr/lib/grass64/etc/python/")
         import grass.script as grass
@@ -135,7 +135,7 @@ class ExecuteTests(unittest.TestCase):
         try:
             sys.path.append("/usr/lib/grass64/etc/python/")
             import grass.script as grass
-        except:
+        except Exception:
             self.skipTest('GRASS lib not found')
         client = client_for(Service(processes=[create_sum_one()]))
         request_doc = WPS.Execute(
