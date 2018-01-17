@@ -166,9 +166,7 @@ class Service(object):
             for outpt in wps_request.outputs:
                 for proc_outpt in process.outputs:
                     if outpt == proc_outpt.identifier:
-                        resp = Response(proc_outpt.data)
-                        resp.call_on_close(process.clean)
-                        return resp
+                        return Response(proc_outpt.data)
 
             # if the specified identifier was not found raise error
             raise InvalidParameterValue('')
