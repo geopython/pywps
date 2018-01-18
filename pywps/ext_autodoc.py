@@ -140,7 +140,8 @@ class ProcessDocumenter(ClassDocumenter):
         pdocstrings = self.make_numpy_doc()
 
         # Add the sections from the class itself.
-        pdocstrings.extend(docstring)
+        if docstring is not None:
+            pdocstrings.extend(docstring)
 
         # Parse using the Numpy docstring format.
         docstrings = NumpyDocstring(pdocstrings, self.env.config, self.env.app, what='class', obj=self.object,
