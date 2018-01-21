@@ -15,6 +15,7 @@ from pywps.exceptions import NoAvailablePortException
 import docker
 import socket
 import time
+import multiprocessing
 
 from pywps.inout.basic import LiteralInput, ComplexInput, BBoxInput
 import owslib
@@ -62,11 +63,18 @@ class Container(Processing):
 
     def start(self):
         self.cntnr.start()
-        # TODO it takes some time to start the container
-        time.sleep(0.5)
+        # it takes some time to start the container
+        time.sleep(1)
         self._execute()
-        self._parse_status()
-        self._dirty_clean()
+
+        if self.job.process.async:
+            self._parse_status()
+            pingatko = multiprocessing.Process(target=check_status, args=(self,))
+            pingatko.start()
+        else:
+            self._parse_outputs()
+            pingatko = multiprocessing.Process(target=self.dirty_clean, args=(self,))
+            pingatko.start()
 
     def stop(self):
         self.cntnr.stop()
@@ -85,7 +93,9 @@ class Container(Processing):
         inputs = get_inputs(self.job.wps_request.inputs)
         output = get_output(self.job.wps_request.outputs)
         wps = WPS(url=url_execute, skip_caps=True)
-        self.execution = wps.execute(self.job.wps_request.identifier, inputs=inputs, output=output)
+        self.execution = wps.execute(self.job.wps_request.identifier, inputs=inputs, output=output,
+                                     status=self.job.wps_request.status,
+                                     store_execute=self.job.wps_request.store_execute)
 
     # Obsolete function when docker was called in syncro mode
     def _parse_outputs(self):
@@ -97,23 +107,23 @@ class Container(Processing):
                 rp = output.reference[output.reference.index('outputs/'):]
                 self.job.wps_response.outputs[output.identifier].file = rp
 
-        self.job.wps_response.update_status('PyWPS process {} finished'.format(self.job.process.identifier),
-                                            status_percentage=100, status=STATUS.DONE_STATUS)
+        update_response(self.job.wps_response.uuid, self.job.wps_response)
+        self.job.wps_response.update_status('PyWPS Process {} finished'.format(self.job.process.title), 100,
+                                            STATUS.DONE_STATUS, clean=self.job.process.async)
 
     def _parse_status(self):
         self.job.process.status_url = self.execution.statusLocation
         self.job.wps_response.update_status(message=self.execution.statusMessage)
 
-    def _dirty_clean(self):
-        # TODO wait then stop&remove container
-        time.sleep(1)
+    def dirty_clean(self):
         self.cntnr.stop()
         self.cntnr.remove()
         self.job.process.clean()
-        os.remove(self.job.process.status_location)
-        # update_response(self.job.wps_response.uuid, self.job.wps_response)
-        # self.job.wps_response.update_status('PyWPS Process {} finished'.format(self.job.process.title), 100,
-        #                                     STATUS.DONE_STATUS, clean=self.job.process.async)
+        if self.job.process.async:
+            os.remove(self.job.process.status_location)
+        update_response(self.job.wps_response.uuid, self.job.wps_response)
+        self.job.wps_response.update_status('PyWPS Process {} finished'.format(self.job.process.title), 100,
+                                            STATUS.DONE_STATUS, clean=self.job.process.async)
 
 
 def get_inputs(job_inputs):
@@ -153,3 +163,11 @@ def get_output(job_output):
     for key in job_output.keys():
         the_output.append((key, job_output[key]['asReference']))
     return the_output
+
+
+def check_status(container):
+    while True:
+        container.execution.checkStatus(sleepSecs=5)
+        if container.execution.isComplete():
+            container.dirty_clean()
+            break

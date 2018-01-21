@@ -17,6 +17,7 @@ from pywps import WPS, OWS, E, dblog
 from pywps.response import get_response
 from pywps.response.status import STATUS
 from pywps.app.WPSRequest import WPSRequest
+import pywps.processing
 import pywps.configuration as config
 from pywps._compat import PY2
 from pywps.exceptions import (StorageNotSupported, OperationNotSupported,
@@ -194,19 +195,31 @@ class Process(object):
         # not async
         else:
             if running < maxparallel or maxparallel == -1:
-                wps_response = self._run_process(wps_request, wps_response)
+                self._run_sync(wps_request, wps_response)
             else:
                 raise ServerBusy('Maximum number of parallel running processes reached. Please try later.')
 
         return wps_response
 
     def _run_async(self, wps_request, wps_response):
-        import pywps.processing
         process = pywps.processing.Process(
             process=self,
             wps_request=wps_request,
             wps_response=wps_response)
         process.start()
+
+    def _run_sync(self, wps_request, wps_response):
+        mode = config.get_config_value('processing', 'mode')
+        if mode=='docker':
+            process = pywps.processing.Container(
+                process=self,
+                wps_request=wps_request,
+                wps_response=wps_response)
+            process.start()
+        else:
+            wps_response = self._run_process(wps_request, wps_response)
+
+        return wps_response
 
     def _store_process(self, stored, wps_request, wps_response):
         """Try to store given requests
