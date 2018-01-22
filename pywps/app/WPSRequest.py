@@ -510,6 +510,10 @@ def get_output_from_xml(doc):
             [identifier_el] = xpath_ns(output_el, './ows:Identifier')
             outpt = {}
             outpt[identifier_el.text] = ''
+            outpt['mimetype'] = output_el.attrib.get('mimeType', '')
+            outpt['encoding'] = output_el.attrib.get('encoding', '')
+            outpt['schema'] = output_el.attrib.get('schema', '')
+            outpt['uom'] = output_el.attrib.get('uom', '')
             outpt['asReference'] = output_el.attrib.get('asReference', 'false')
             the_output[identifier_el.text] = outpt
 
