@@ -69,12 +69,12 @@ class Container(Processing):
 
         if self.job.process.async:
             self._parse_status()
-            pingatko = multiprocessing.Process(target=check_status, args=(self,))
-            pingatko.start()
+            daemon = multiprocessing.Process(target=check_status, args=(self,))
+            daemon.start()
         else:
             self._parse_outputs()
-            pingatko = multiprocessing.Process(target=self.dirty_clean, args=(self,))
-            pingatko.start()
+            daemon = multiprocessing.Process(target=self.dirty_clean, args=(self,))
+            daemon.start()
 
     def stop(self):
         self.cntnr.stop()
