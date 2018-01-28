@@ -94,8 +94,7 @@ class Container(Processing):
         output = get_output(self.job.wps_request.outputs)
         wps = WPS(url=url_execute, skip_caps=True)
         self.execution = wps.execute(self.job.wps_request.identifier, inputs=inputs, output=output,
-                                     status=self.job.wps_request.status,
-                                     store_execute=self.job.wps_request.store_execute)
+                                     async=self.job.process.async)
 
     # Obsolete function when docker was called in syncro mode
     def _parse_outputs(self):
