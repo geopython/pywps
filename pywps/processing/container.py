@@ -73,7 +73,7 @@ class Container(Processing):
             daemon.start()
         else:
             self._parse_outputs()
-            daemon = multiprocessing.Process(target=self.dirty_clean, args=(self,))
+            daemon = multiprocessing.Process(target=self.dirty_clean)
             daemon.start()
 
     def stop(self):
@@ -96,7 +96,6 @@ class Container(Processing):
         self.execution = wps.execute(self.job.wps_request.identifier, inputs=inputs, output=output,
                                      async=self.job.process.async)
 
-    # Obsolete function when docker was called in syncro mode
     def _parse_outputs(self):
         for output in self.execution.processOutputs:
             # TODO what if len(data) > 1 ??
@@ -165,8 +164,9 @@ def get_output(job_output):
 
 
 def check_status(container):
+    sleep_secs = int(config.get_config_value('processing', 'sleep_secs'))
     while True:
-        container.execution.checkStatus(sleepSecs=5)
+        container.execution.checkStatus(sleepSecs=sleep_secs)
         if container.execution.isComplete():
             container.dirty_clean()
             break
