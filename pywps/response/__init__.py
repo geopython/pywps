@@ -42,10 +42,10 @@ class WPSResponse(object):
         if message:
             self.message = message
 
-        if status:
+        if status is not None:
             self.status = status
 
-        if status_percentage:
+        if status_percentage is not None:
             self.status_percentage = status_percentage
 
         update_response(self.uuid, self)
