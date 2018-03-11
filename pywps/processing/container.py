@@ -5,17 +5,18 @@
 ##################################################################
 
 import os
-import shutil
 import pywps.configuration as config
 from pywps.processing.basic import Processing
 
 from owslib.wps import WebProcessingService as WPS
 from pywps.response.status import STATUS
 from pywps.exceptions import NoAvailablePortException
+from pywps.dblog import update_response
+
 import docker
 import socket
 import time
-import multiprocessing
+import threading
 
 from pywps.inout.basic import LiteralInput, ComplexInput, BBoxInput
 import owslib
@@ -44,10 +45,10 @@ class Container(Processing):
         dckr_inp_dir = config.get_config_value("processing", "dckr_inp_dir")
         dckr_out_dir = config.get_config_value("processing", "dckr_out_dir")
         container = self.client.containers.create(cntnr_img, ports={"5000/tcp": self.port}, detach=True,
-                                                  volumes={
-                                                  prcs_out_dir: {'bind': dckr_out_dir, 'mode': 'rw'},
-                                                  prcs_inp_dir: {'bind': dckr_inp_dir, 'mode': 'ro'}
-                                                  })
+                                              volumes={
+                                              prcs_out_dir: {'bind': dckr_out_dir, 'mode': 'rw'},
+                                              prcs_inp_dir: {'bind': dckr_inp_dir, 'mode': 'ro'}
+                                              })
         return container
 
     def _assign_port(self):
@@ -69,11 +70,11 @@ class Container(Processing):
 
         if self.job.process.async:
             self._parse_status()
-            daemon = multiprocessing.Process(target=check_status, args=(self,))
+            daemon = threading.Thread(target=check_status, args=(self,))
             daemon.start()
         else:
             self._parse_outputs()
-            daemon = multiprocessing.Process(target=self.dirty_clean)
+            daemon = threading.Thread(target=self.dirty_clean)
             daemon.start()
 
     def stop(self):
@@ -117,11 +118,13 @@ class Container(Processing):
         self.cntnr.stop()
         self.cntnr.remove()
         self.job.process.clean()
-        if self.job.process.async:
-            os.remove(self.job.process.status_location)
+        self.update_status()
+
+    def update_status(self):
+        self.job.wps_response.message = 'PyWPS Process {} finished'.format(self.job.process.title)
+        self.job.wps_response.percentage = 100
+        self.job.wps_response.status = STATUS.DONE_STATUS
         update_response(self.job.wps_response.uuid, self.job.wps_response)
-        self.job.wps_response.update_status('PyWPS Process {} finished'.format(self.job.process.title), 100,
-                                            STATUS.DONE_STATUS, clean=self.job.process.async)
 
 
 def get_inputs(job_inputs):
