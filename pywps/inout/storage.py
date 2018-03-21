@@ -114,7 +114,7 @@ class FileStorage(StorageAbstract):
         # build output name
         (prefix, suffix) = os.path.splitext(file_name)
         if not suffix:
-            suffix = output.output_format.extension
+            suffix = output.data_format.extension
         (file_dir, file_name) = os.path.split(prefix)
         output_name = file_name + suffix
         # build tempfile in case of duplicates
