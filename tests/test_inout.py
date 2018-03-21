@@ -14,7 +14,7 @@ from pywps import Format
 from pywps.validator import get_validator
 from pywps import NAMESPACES
 from pywps.inout.basic import IOHandler, SOURCE_TYPE, SimpleHandler, BBoxInput, BBoxOutput, \
-    ComplexInput, ComplexOutput, LiteralOutput, LiteralInput
+    ComplexInput, ComplexOutput, LiteralOutput, LiteralInput, _is_textfile
 from pywps.inout import BoundingBoxInput as BoundingBoxInputXML
 from pywps.inout.literaltypes import convert, AllowedValue
 from pywps._compat import StringIO, text_type
@@ -23,6 +23,8 @@ from pywps.exceptions import InvalidParameterValue
 from pywps.validator.mode import MODE
 
 from lxml import etree
+
+DATA_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'data')
 
 
 def get_data_format(mime_type):
@@ -145,6 +147,14 @@ class IOHandlerTest(unittest.TestCase):
         stream_data = self.iohandler.stream.read()
         self.iohandler.stream.close()
         self.assertEqual(self._value, stream_data, 'Stream obtained')
+
+    def test_is_textfile(self):
+        geotiff = os.path.join(DATA_DIR, 'geotiff', 'dem.tiff')
+        self.assertFalse(_is_textfile(geotiff))
+        gml = os.path.join(DATA_DIR, 'gml', 'point.gml')
+        self.assertTrue(_is_textfile(gml))
+        geojson = os.path.join(DATA_DIR, 'json', 'point.geojson')
+        self.assertTrue(_is_textfile(geojson))
 
 
 class ComplexInputTest(unittest.TestCase):
