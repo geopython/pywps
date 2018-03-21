@@ -159,8 +159,8 @@ class Process(object):
         wps_response = self._execute_process(self.async, wps_request, wps_response)
 
         return wps_response
-    
-        
+
+
     def _set_uuid(self, uuid):
         """Set uuid and status location path and url
         """
