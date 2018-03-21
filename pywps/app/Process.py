@@ -31,7 +31,7 @@ class Process(object):
     :param handler: A callable that gets invoked for each incoming
                     request. It should accept a single
                     :class:`pywps.app.WPSRequest` argument and return a
-                    :class:`pywps.app.WPSResponse` object.
+                    :class:`pywps.response.WPSResponse` object.
     :param identifier: Name of this process.
     :param inputs: List of inputs accepted by this process. They
                    should be :class:`~LiteralInput` and :class:`~ComplexInput`
@@ -148,8 +148,8 @@ class Process(object):
         wps_response = self._execute_process(self.async, wps_request, wps_response)
 
         return wps_response
-    
-        
+
+
     def _set_uuid(self, uuid):
         """Set uuid and status location path and url
         """
