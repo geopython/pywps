@@ -277,7 +277,7 @@ class Process(object):
             if not wps_response:
                 raise NoApplicableCode('Response is empty. Make sure the _handler method is returning a valid object.')
             else:
-                wps_response.update_status(msg, -1)
+                wps_response.update_status(msg, -1, status=STATUS.ERROR_STATUS)
 
         # tr
         stored_request = dblog.get_first_stored()
