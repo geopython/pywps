@@ -77,7 +77,6 @@ class Service(object):
         :param uuid: string identifier of the request
         """
         self._set_grass()
-        response = None
         try:
             process = self.processes[identifier]
 
@@ -92,14 +91,7 @@ class Service(object):
         except KeyError:
             raise InvalidParameterValue("Unknown process '%r'" % identifier, 'Identifier')
 
-        olddir = os.path.abspath(os.curdir)
-        try:
-            os.chdir(process.workdir)
-            response = self._parse_and_execute(process, wps_request, uuid)
-        finally:
-            os.chdir(olddir)
-
-        return response
+        return self._parse_and_execute(process, wps_request, uuid)
 
     def _parse_and_execute(self, process, wps_request, uuid):
         """Parse and execute request
@@ -180,9 +172,7 @@ class Service(object):
             for outpt in wps_request.outputs:
                 for proc_outpt in process.outputs:
                     if outpt == proc_outpt.identifier:
-                        resp = Response(proc_outpt.data, mimetype=proc_outpt.data_format.mime_type)
-                        resp.call_on_close(process.clean)
-                        return resp
+                        return Response(proc_outpt.data)
 
             # if the specified identifier was not found raise error
             raise InvalidParameterValue('')

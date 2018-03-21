@@ -156,6 +156,7 @@ class ComplexInputTest(unittest.TestCase):
         self.complex_in = ComplexInput(identifier="complexinput",
                                        title='MyComplex',
                                        abstract='My complex input',
+                                       keywords=['kw1', 'kw2'],
                                        workdir=self.tmp_dir,
                                        supported_formats=[data_format])
 
@@ -187,6 +188,7 @@ class ComplexInputTest(unittest.TestCase):
         self.assertEqual(len(out['supported_formats']), 1, 'There is one formats')
         self.assertEqual(out['title'], 'MyComplex', 'Title not set but existing')
         self.assertEqual(out['abstract'], 'My complex input', 'Abstract not set but existing')
+        self.assertEqual(out['keywords'], ['kw1', 'kw2'], 'Keywords not set but existing')
         self.assertEqual(out['identifier'], 'complexinput', 'identifier set')
         self.assertEqual(out['type'], 'complex', 'it is complex input')
         self.assertTrue(out['data_format'], 'data_format set')
@@ -282,6 +284,7 @@ class LiteralInputTest(unittest.TestCase):
         self.assertFalse(out['workdir'], 'Workdir exist')
         self.assertEqual(out['data_type'], 'integer', 'Data type is integer')
         self.assertFalse(out['abstract'], 'abstract exist')
+        self.assertFalse(out['keywords'], 'keywords exist')
         self.assertFalse(out['title'], 'title exist')
         self.assertEqual(out['data'], 9, 'data set')
         self.assertEqual(out['mode'], MODE.STRICT, 'Mode set')

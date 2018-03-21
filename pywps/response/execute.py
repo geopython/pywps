@@ -15,7 +15,7 @@ from pywps import WPS, OWS
 from pywps.app.basic import xml_response
 from pywps.exceptions import NoApplicableCode
 import pywps.configuration as config
-import pywps.dblog
+from pywps.dblog import update_response
 
 from pywps.response.status import STATUS
 from pywps.response import WPSResponse
@@ -38,6 +38,33 @@ class ExecuteResponse(WPSResponse):
         self.process = kwargs["process"]
         self.outputs = {o.identifier: o for o in self.process.outputs}
 
+    def update_status(self, message=None, status_percentage=None, status=None,
+                      clean=True):
+        """
+        Update status report of currently running process instance
+
+        :param str message: Message you need to share with the client
+        :param int status_percentage: Percent done (number betwen <0-100>)
+        :param pywps.app.WPSResponse.STATUS status: process status - user should usually
+            ommit this parameter
+        """
+
+        if message:
+            self.message = message
+
+        if status:
+            self.status = status
+
+        if status_percentage:
+            self.status_percentage = status_percentage
+
+        # check if storing of the status is requested
+        if self.status >= STATUS.STORE_AND_UPDATE_STATUS:
+            # rebuild the doc and update the status xml file
+            self.doc = self._construct_doc()
+            self.write_response_doc(clean)
+
+        update_response(self.uuid, self)
 
     def write_response_doc(self, clean=True):
         # TODO: check if file/directory is still present, maybe deleted in mean time
@@ -178,12 +205,6 @@ class ExecuteResponse(WPSResponse):
             output_elements = [self.outputs[o].execute_xml() for o in self.outputs]
             doc.append(WPS.ProcessOutputs(*output_elements))
         return doc
-
-    def call_on_close(self, function):
-        """Custom implementation of call_on_close of werkzeug
-        TODO: rewrite this using werkzeug's tools
-        """
-        self._close_functions.push(function)
 
     @Request.application
     def __call__(self, request):

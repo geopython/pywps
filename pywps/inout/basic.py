@@ -284,16 +284,17 @@ class SimpleHandler(IOHandler):
 
 
 class BasicIO:
-    """Basic Input or Ouput class
+    """Basic Input/Output class
     """
-    def __init__(self, identifier, title=None, abstract=None):
+    def __init__(self, identifier, title=None, abstract=None, keywords=None):
         self.identifier = identifier
         self.title = title
         self.abstract = abstract
+        self.keywords = keywords
 
 
 class BasicLiteral:
-    """Basic literal input/output class
+    """Basic literal Input/Output class
     """
 
     def __init__(self, data_type="integer", uoms=None):
@@ -421,11 +422,11 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
     """LiteralInput input abstract class
     """
 
-    def __init__(self, identifier, title=None, abstract=None,
+    def __init__(self, identifier, title=None, abstract=None, keywords=None,
                  data_type="integer", workdir=None, allowed_values=None,
                  uoms=None, mode=MODE.NONE,
                  default=None, default_type=SOURCE_TYPE.DATA):
-        BasicIO.__init__(self, identifier, title, abstract)
+        BasicIO.__init__(self, identifier, title, abstract, keywords)
         BasicLiteral.__init__(self, data_type, uoms)
         SimpleHandler.__init__(self, workdir, data_type, mode=mode)
 
@@ -455,6 +456,7 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
             'identifier': self.identifier,
             'title': self.title,
             'abstract': self.abstract,
+            'keywords': self.keywords,
             'type': 'literal',
             'data_type': self.data_type,
             'workdir': self.workdir,
@@ -470,10 +472,10 @@ class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
     """Basic LiteralOutput class
     """
 
-    def __init__(self, identifier, title=None, abstract=None,
+    def __init__(self, identifier, title=None, abstract=None, keywords=None,
                  data_type=None, workdir=None, uoms=None, validate=None,
                  mode=MODE.NONE):
-        BasicIO.__init__(self, identifier, title, abstract)
+        BasicIO.__init__(self, identifier, title, abstract, keywords)
         BasicLiteral.__init__(self, data_type, uoms)
         SimpleHandler.__init__(self, workdir=None, data_type=data_type,
                                mode=mode)
@@ -500,11 +502,11 @@ class BBoxInput(BasicIO, BasicBoundingBox, IOHandler):
     """Basic Bounding box input abstract class
     """
 
-    def __init__(self, identifier, title=None, abstract=None, crss=None,
+    def __init__(self, identifier, title=None, abstract=None, keywords=[], crss=None,
                  dimensions=None, workdir=None,
                  mode=MODE.SIMPLE,
                  default=None, default_type=SOURCE_TYPE.DATA):
-        BasicIO.__init__(self, identifier, title, abstract)
+        BasicIO.__init__(self, identifier, title, abstract, keywords)
         BasicBoundingBox.__init__(self, crss, dimensions)
         IOHandler.__init__(self, workdir=None, mode=mode)
 
@@ -529,6 +531,7 @@ class BBoxInput(BasicIO, BasicBoundingBox, IOHandler):
             'identifier': self.identifier,
             'title': self.title,
             'abstract': self.abstract,
+            'keywords': self.keywords,
             'type': 'bbox',
             'crs': self.crss,
             'bbox': (self.ll, self.ur),
@@ -542,9 +545,9 @@ class BBoxOutput(BasicIO, BasicBoundingBox, SimpleHandler):
     """Basic BoundingBox output class
     """
 
-    def __init__(self, identifier, title=None, abstract=None, crss=None,
+    def __init__(self, identifier, title=None, abstract=None, keywords=None, crss=None,
                  dimensions=None, workdir=None, mode=MODE.NONE):
-        BasicIO.__init__(self, identifier, title, abstract)
+        BasicIO.__init__(self, identifier, title, abstract, keywords)
         BasicBoundingBox.__init__(self, crss, dimensions)
         SimpleHandler.__init__(self, workdir=None, mode=mode)
         self._storage = None
@@ -567,12 +570,12 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
     1
     """
 
-    def __init__(self, identifier, title=None, abstract=None,
+    def __init__(self, identifier, title=None, abstract=None, keywords=None,
                  workdir=None, data_format=None, supported_formats=None,
                  mode=MODE.NONE,
                  default=None, default_type=SOURCE_TYPE.DATA):
 
-        BasicIO.__init__(self, identifier, title, abstract)
+        BasicIO.__init__(self, identifier, title, abstract, keywords)
         IOHandler.__init__(self, workdir=workdir, mode=mode)
         BasicComplex.__init__(self, data_format, supported_formats)
 
@@ -586,6 +589,7 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
             'identifier': self.identifier,
             'title': self.title,
             'abstract': self.abstract,
+            'keywords': self.keywords,
             'type': 'complex',
             'data_format': self.data_format.json,
             'supported_formats': [frmt.json for frmt in self.supported_formats],
@@ -623,10 +627,10 @@ class ComplexOutput(BasicIO, BasicComplex, IOHandler):
     'AA'
     """
 
-    def __init__(self, identifier, title=None, abstract=None,
+    def __init__(self, identifier, title=None, abstract=None, keywords=None,
                  workdir=None, data_format=None, supported_formats=None,
                  mode=MODE.NONE):
-        BasicIO.__init__(self, identifier, title, abstract)
+        BasicIO.__init__(self, identifier, title, abstract, keywords)
         IOHandler.__init__(self, workdir=workdir, mode=mode)
         BasicComplex.__init__(self, data_format, supported_formats)
 

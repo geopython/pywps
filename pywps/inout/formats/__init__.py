@@ -19,46 +19,11 @@ import mimetypes
 from pywps.validator.mode import MODE
 from pywps.validator.base import emptyvalidator
 
-_FORMAT = namedtuple('FormatDefintion', 'mime_type, extension, schema')
 
 _FORMATS = namedtuple('FORMATS', 'GEOJSON, JSON, SHP, GML, GEOTIFF, WCS,'
                                  'WCS100, WCS110, WCS20, WFS, WFS100,'
                                  'WFS110, WFS20, WMS, WMS130, WMS110,'
                                  'WMS100, TEXT, NETCDF, LAZ, LAS')
-FORMATS = _FORMATS(
-    _FORMAT('application/vnd.geo+json', '.geojson', None),
-    _FORMAT('application/json', '.json', None),
-    _FORMAT('application/x-zipped-shp', '.zip', None),
-    _FORMAT('application/gml+xml', '.gml', None),
-    _FORMAT('image/tiff; subtype=geotiff', '.tiff', None),
-    _FORMAT('application/xogc-wcs', '.xml', None),
-    _FORMAT('application/x-ogc-wcs; version=1.0.0', '.xml', None),
-    _FORMAT('application/x-ogc-wcs; version=1.1.0', '.xml', None),
-    _FORMAT('application/x-ogc-wcs; version=2.0', '.xml', None),
-    _FORMAT('application/x-ogc-wfs', '.xml', None),
-    _FORMAT('application/x-ogc-wfs; version=1.0.0', '.xml', None),
-    _FORMAT('application/x-ogc-wfs; version=1.1.0', '.xml', None),
-    _FORMAT('application/x-ogc-wfs; version=2.0', '.xml', None),
-    _FORMAT('application/x-ogc-wms', '.xml', None),
-    _FORMAT('application/x-ogc-wms; version=1.3.0', '.xml', None),
-    _FORMAT('application/x-ogc-wms; version=1.1.0', '.xml', None),
-    _FORMAT('application/x-ogc-wms; version=1.0.0', '.xml', None),
-    _FORMAT('text/plain', '.txt', None),
-    _FORMAT('application/x-netcdf', '.nc', None),
-    _FORMAT('application/octet-stream', '.laz', None),
-    _FORMAT('application/octet-stream',	'.las',	None),
-)
-
-
-def _get_mimetypes():
-    """Add FORMATS to system wide mimetypes
-    """
-    mimetypes.init()
-    for pywps_format in FORMATS:
-        mimetypes.add_type(pywps_format.mime_type, pywps_format.extension, True)
-
-
-_get_mimetypes()
 
 
 class Format(object):
@@ -84,6 +49,7 @@ class Format(object):
         self._mime_type = None
         self._encoding = None
         self._schema = None
+        self._extension = None
 
         self.mime_type = mime_type
         self.encoding = encoding
@@ -105,10 +71,13 @@ class Format(object):
         """
         try:
             # support Format('GML')
-            formatdef = getattr(FORMATS, mime_type)
-            self._mime_type = formatdef.mime_type
+            frmt = getattr(FORMATS, mime_type)
+            self._mime_type = frmt.mime_type
         except AttributeError:
             # if we don't have this as a shortcut, assume it's a real mime type
+            self._mime_type = mime_type
+        except NameError:
+            # TODO: on init of FORMATS, FORMATS is not available. Clean up code!
             self._mime_type = mime_type
 
     @property
@@ -144,6 +113,22 @@ class Format(object):
         """Set format schema
         """
         self._schema = schema
+
+    @property
+    def extension(self):
+        """Get format extension
+        :rtype: String
+        """
+        if self._extension:
+            return self._extension
+        else:
+            return ''
+
+    @extension.setter
+    def extension(self, extension):
+        """Set format extension
+        """
+        self._extension = extension
 
     def same_as(self, frmt):
         """Check input frmt, if it seems to be the same as self
@@ -193,6 +178,42 @@ class Format(object):
         self.extension = jsonin['extension']
 
 
+FORMATS = _FORMATS(
+    Format('application/vnd.geo+json', extension='.geojson'),
+    Format('application/json', extension='.json'),
+    Format('application/x-zipped-shp', extension='.zip'),
+    Format('application/gml+xml', extension='.gml'),
+    Format('image/tiff; subtype=geotiff', extension='.tiff'),
+    Format('application/xogc-wcs', extension='.xml'),
+    Format('application/x-ogc-wcs; version=1.0.0', extension='.xml'),
+    Format('application/x-ogc-wcs; version=1.1.0', extension='.xml'),
+    Format('application/x-ogc-wcs; version=2.0', extension='.xml'),
+    Format('application/x-ogc-wfs', extension='.xml'),
+    Format('application/x-ogc-wfs; version=1.0.0', extension='.xml'),
+    Format('application/x-ogc-wfs; version=1.1.0', extension='.xml'),
+    Format('application/x-ogc-wfs; version=2.0', extension='.xml'),
+    Format('application/x-ogc-wms', extension='.xml'),
+    Format('application/x-ogc-wms; version=1.3.0', extension='.xml'),
+    Format('application/x-ogc-wms; version=1.1.0', extension='.xml'),
+    Format('application/x-ogc-wms; version=1.0.0', extension='.xml'),
+    Format('text/plain', extension='.txt'),
+    Format('application/x-netcdf', extension='.nc'),
+    Format('application/octet-stream', extension='.laz'),
+    Format('application/octet-stream', extension='.las'),
+)
+
+
+def _get_mimetypes():
+    """Add FORMATS to system wide mimetypes
+    """
+    mimetypes.init()
+    for pywps_format in FORMATS:
+        mimetypes.add_type(pywps_format.mime_type, pywps_format.extension, True)
+
+
+_get_mimetypes()
+
+
 def get_format(frmt, validator=None):
     """Return Format instance based on given pywps.inout.FORMATS keyword
     """
@@ -201,8 +222,7 @@ def get_format(frmt, validator=None):
     outfrmt = None
 
     if frmt in FORMATS._asdict():
-        formatdef = FORMATS._asdict()[frmt]
-        outfrmt = Format(**formatdef._asdict())
+        outfrmt = FORMATS._asdict()[frmt]
         outfrmt.validate = validator
         return outfrmt
     else:
