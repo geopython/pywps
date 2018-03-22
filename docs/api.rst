@@ -44,10 +44,10 @@ ComplexData
 .. autoclass:: ComplexOutput
 
 .. autoclass:: Format
-    
+
 .. autodata:: pywps.inout.formats.FORMATS
     :annotation:
-    
+
     List of out of the box supported formats. User can add custom formats to the
     array.
 
@@ -63,7 +63,7 @@ BoundingBoxData
 Request and response objects
 ----------------------------
 
-.. autodata:: pywps.app.WPSResponse.STATUS
+.. autodata:: pywps.response.status.STATUS
     :annotation:
 
     Process status information
@@ -89,13 +89,24 @@ Request and response objects
       A MultiDict object containing input values sent by the client.
 
 
-.. autoclass:: pywps.app.WPSResponse
+.. autoclass:: pywps.response.WPSResponse
     :members:
 
     .. attribute:: status
 
         Information about currently running process status
-        :class:`pywps.app.WPSResponse.STATUS`
+        :class:`pywps.response.status.STATUS`
+
+Processing
+----------
+
+.. autofunction:: pywps.processing.Process
+
+.. autoclass:: pywps.processing.Processing
+   :members:
+
+.. autoclass:: pywps.processing.Job
+   :members:
 
 
 Refer :ref:`exceptions` for their description.

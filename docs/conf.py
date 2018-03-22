@@ -25,7 +25,9 @@ extensions = ['sphinx.ext.extlinks',
               'sphinx.ext.autodoc',
               'sphinx.ext.todo',
               'sphinx.ext.mathjax',
-              'sphinx.ext.viewcode'
+              'sphinx.ext.viewcode',
+              'sphinx.ext.napoleon',
+              'pywps.ext_autodoc',
             ]
 exclude_patterns = ['_build']
 source_suffix = '.rst'

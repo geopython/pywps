@@ -14,8 +14,8 @@ import shutil
 import tempfile
 
 from pywps import WPS, OWS, E, dblog
-from pywps.app.WPSResponse import WPSResponse
-from pywps.app.WPSResponse import STATUS
+from pywps.response import get_response
+from pywps.response.status import STATUS
 from pywps.app.WPSRequest import WPSRequest
 import pywps.configuration as config
 from pywps._compat import PY2
@@ -32,7 +32,10 @@ class Process(object):
                     request. It should accept a single
                     :class:`pywps.app.WPSRequest` argument and return a
                     :class:`pywps.app.WPSResponse` object.
-    :param identifier: Name of this process.
+    :param string identifier: Name of this process.
+    :param string title: Human readable title of process.
+    :param string abstract: Brief narrative description of the process.
+    :param list keywords: Keywords that characterize a process.
     :param inputs: List of inputs accepted by this process. They
                    should be :class:`~LiteralInput` and :class:`~ComplexInput`
                    and :class:`~BoundingBoxInput`
@@ -45,12 +48,13 @@ class Process(object):
                      should be :class:`pywps.app.Common.Metadata` objects.
     """
 
-    def __init__(self, handler, identifier, title, abstract='', profile=[], metadata=[], inputs=[],
+    def __init__(self, handler, identifier, title, abstract='', keywords=[], profile=[], metadata=[], inputs=[],
                  outputs=[], version='None', store_supported=False, status_supported=False, grass_location=None):
         self.identifier = identifier
         self.handler = handler
         self.title = title
         self.abstract = abstract
+        self.keywords = keywords
         self.metadata = metadata
         self.profile = profile
         self.version = version
@@ -80,6 +84,9 @@ class Process(object):
         )
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
+        if self.keywords:
+            kws = map(OWS.Keyword, self.keywords)
+            doc.append(OWS.Keywords(*kws))
         for m in self.metadata:
             doc.append(OWS.Metadata(dict(m)))
         if self.profile:
@@ -110,6 +117,10 @@ class Process(object):
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
 
+        if self.keywords:
+            kws = map(OWS.Keyword, self.keywords)
+            doc.append(OWS.Keywords(*kws))
+
         for m in self.metadata:
             doc.append(OWS.Metadata(dict(m)))
 
@@ -126,7 +137,8 @@ class Process(object):
     def execute(self, wps_request, uuid):
         self._set_uuid(uuid)
         self.async = False
-        wps_response = WPSResponse(self, wps_request, self.uuid)
+        response_cls = get_response("execute")
+        wps_response = response_cls(wps_request, process=self, uuid=self.uuid)
 
         LOGGER.debug('Check if status storage and updating are supported by this process')
         if wps_request.store_execute == 'true':
@@ -148,6 +160,7 @@ class Process(object):
 
         return wps_response
 
+
     def _set_uuid(self, uuid):
         """Set uuid and status location path and url
         """
@@ -167,7 +180,7 @@ class Process(object):
         self.status_url = os.path.join(file_url, str(self.uuid)) + '.xml'
 
     def _execute_process(self, async, wps_request, wps_response):
-        """Uses :module:`multiprocessing` module for sending process to
+        """Uses :module:`pywps.processing` module for sending process to
         background BUT first, check for maxprocesses configuration value
 
         :param async: run in asynchronous mode
@@ -200,11 +213,11 @@ class Process(object):
         return wps_response
 
     def _run_async(self, wps_request, wps_response):
-        import multiprocessing
-        process = multiprocessing.Process(
-            target=self._run_process,
-            args=(wps_request, wps_response)
-        )
+        import pywps.processing
+        process = pywps.processing.Process(
+            process=self,
+            wps_request=wps_request,
+            wps_response=wps_response)
         process.start()
 
     def _store_process(self, stored, wps_request, wps_response):
@@ -263,8 +276,10 @@ class Process(object):
 
             if not wps_response:
                 raise NoApplicableCode('Response is empty. Make sure the _handler method is returning a valid object.')
+            elif wps_request.raw:
+                raise
             else:
-                wps_response.update_status(msg, -1)
+                wps_response.update_status(msg, -1, status=STATUS.ERROR_STATUS)
 
         # tr
         stored_request = dblog.get_first_stored()
@@ -275,7 +290,9 @@ class Process(object):
                     request_json = request_json.decode('utf-8')
                 new_wps_request = WPSRequest()
                 new_wps_request.json = json.loads(request_json)
-                new_wps_response = WPSResponse(self, new_wps_request, uuid)
+                response_cls = get_response("execute")
+
+                new_wps_response = response_cls(new_wps_request, process=self, uuid=uuid)
                 new_wps_response.status = STATUS.STORE_AND_UPDATE_STATUS
                 self._set_uuid(uuid)
                 self._run_async(new_wps_request, new_wps_response)

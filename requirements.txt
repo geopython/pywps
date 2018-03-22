@@ -4,3 +4,4 @@ lxml
 werkzeug
 SQLAlchemy
 python-dateutil
+requests

@@ -11,12 +11,12 @@ Processes
     * Input validation
     * IOHandler
 
-PyWPS works with processes and services. A process is a Python `Class` 
-containing an `handler` method and a list of inputs and outputs. A PyWPS 
-service instance is then a collection of selected processes. 
+PyWPS works with processes and services. A process is a Python `Class`
+containing an `handler` method and a list of inputs and outputs. A PyWPS
+service instance is then a collection of selected processes.
 
 PyWPS does not ship with any processes predefined - it's on you, as user of
-PyWPS to set up the processes of your choice. PyWPS is here to help you 
+PyWPS to set up the processes of your choice. PyWPS is here to help you
 publishing your awesome geospatial operation on the web - it takes care of
 communication and security, you then have to add the content.
 
@@ -34,8 +34,8 @@ Writing a Process
         In this directory, we will create single python scripts containing
         processes.
 
-        Processes can be located *anywhere in the system* as long as their 
-        location is identified in the :envvar:`PYTHONPATH` environment 
+        Processes can be located *anywhere in the system* as long as their
+        location is identified in the :envvar:`PYTHONPATH` environment
         variable, and can be imported in the final server instance.
 
 A processes is coded as a class inheriting from :class:`Process`.
@@ -53,7 +53,7 @@ The instance of a *Process* needs following attributes to be configured:
 :outputs:
     list of process outputs
 :handler:
-    method which recieves :class:`pywps.app.WPSRequest` and :class:`pywps.app.WPSResponse` as inputs.
+    method which recieves :class:`pywps.app.WPSRequest` and :class:`pywps.response.WPSResponse` as inputs.
 
 Example vector buffer process
 =============================
@@ -62,7 +62,7 @@ As an example, we will create a *buffer* process - which will take a vector
 file as the input, create specified the buffer around the data (using `Shapely
 <http://toblerity.org/shapely/>`_),  and return back the result.
 
-Therefore, the process will have two inputs: 
+Therefore, the process will have two inputs:
 
 * `ComplexData` input - the vector file
 * `LiteralData` input - the buffer size
@@ -77,7 +77,7 @@ The process can be called `demobuffer` and we can now start coding it::
     $ $EDITOR demobuffer.py
 
 At the beginning, we have to import the required classes and modules
-    
+
 Here is a very basic example:
 
 .. literalinclude:: demobuffer.py
@@ -118,12 +118,12 @@ Next we create a new list variables for inputs and outputs.
 
 Next we define the *handler* method. In it, *geospatial analysis
 may happen*. The method gets a :class:`pywps.app.WPSRequest` and a
-:class:`pywps.app.WPSResponse` object as parameters. In our case, we
-calculate the buffer around each vector feature using 
-`GDAL/OGR library <http://gdal.org>`_. We will not got much into the details, 
-what you should note is how to get input data from the 
-:class:`pywps.app.WPSRequest` object and how to set data as outputs in the 
-:class:`pywps.app.WPSResponse` object.
+:class:`pywps.response.WPSResponse` object as parameters. In our case, we
+calculate the buffer around each vector feature using
+`GDAL/OGR library <http://gdal.org>`_. We will not got much into the details,
+what you should note is how to get input data from the
+:class:`pywps.app.WPSRequest` object and how to set data as outputs in the
+:class:`pywps.response.WPSResponse` object.
 
 .. literalinclude:: demobuffer.py
    :language: python
@@ -175,7 +175,7 @@ as :class:`pywps.Input` objects in the :class:`Process` class declaration:
 LiteralData
 -----------
 
-* :class:`LiteralInput` 
+* :class:`LiteralInput`
 * :class:`LiteralOutput`
 
 A simple value embedded in the request. The first argument is a
@@ -188,18 +188,18 @@ ComplexData
 * :class:`ComplexInput`
 * :class:`ComplexOutput`
 
-A large data object, for example a layer. ComplexData do have a `format` 
-attribute as one of their key properties. It's either a list of supported 
+A large data object, for example a layer. ComplexData do have a `format`
+attribute as one of their key properties. It's either a list of supported
 formats or a single (already selected) format. It shall be an instance of
-the :class:`pywps.inout.formats.Format` class. 
+the :class:`pywps.inout.formats.Format` class.
 
 ComplexData :class:`Format` and input validation
 ------------------------------------------------
-The ComplexData needs as one of its parameters a list of supported data 
-formats. They are derived from the :class:`Format` class. A :class:`Format` 
+The ComplexData needs as one of its parameters a list of supported data
+formats. They are derived from the :class:`Format` class. A :class:`Format`
 instance needs, among others, a `mime_type` parameter, a `validate`
-method -- which is used for input data validation -- and also a `mode` 
-parameter -- defining how strict the validation should be (see 
+method -- which is used for input data validation -- and also a `mode`
+parameter -- defining how strict the validation should be (see
 :class:`pywps.validator.mode.MODE`).
 
 The `Validate` method is up to you, the user, to code. It requires two input
@@ -209,9 +209,9 @@ considered valid or not for given `mode`. You can draw inspiration from the
 :py:func:`pywps.validator.complexvalidator.validategml` method.
 
 The good news is: there are already predefined validation methods for the ESRI
-Shapefile, GML and GeoJSON formats, using GDAL/OGR. There is also an XML Schema 
-validaton and a JSON schema validator - you just have to pick the propper 
-supported formats from the :class:`pywps.inout.formats.FORMATS` list and set 
+Shapefile, GML and GeoJSON formats, using GDAL/OGR. There is also an XML Schema
+validaton and a JSON schema validator - you just have to pick the propper
+supported formats from the :class:`pywps.inout.formats.FORMATS` list and set
 the validation mode to your :class:`ComplexInput` object.
 
 Even better news is: you can define custom validation functions and validate
@@ -250,7 +250,7 @@ values are found in the `inputs` dictionary::
         return response
 
 `inputs` is a plain Python dictionary.
-Most of the inputs and outputs are derived from the :class:`IOHandler` class. 
+Most of the inputs and outputs are derived from the :class:`IOHandler` class.
 This enables the user to access the data in 3 different ways:
 
 `input.file`
@@ -264,8 +264,8 @@ This enables the user to access the data in 3 different ways:
     Provides the IOStream of the data. No need for opening the file, you just
     have to `read()` the data.
 
-PyWPS will persistently transform the input (and output) data to the desired 
-form. You can also set the data for your `Output` object like `output.data = 1` 
+PyWPS will persistently transform the input (and output) data to the desired
+form. You can also set the data for your `Output` object like `output.data = 1`
 or `output.file = "myfile.json"` - it works the same way.
 
 Example::
@@ -339,14 +339,14 @@ as needed, but only *one* may be requested in RAW format.
 Process deployment
 ==================
 In order for clients to invoke processes, a PyWPS
-:class:`Service` class must be present with the ability to listen for requests. 
+:class:`Service` class must be present with the ability to listen for requests.
 An instance of this class must created, receiving instances of
 all the desired processes classes.
 
-In the *flask* service the :class:`Service` class instance is created in the
-:class:`Server` class. :class:`Server` is a development server that relies 
-on `Flask`_. The publication of processes is encapsulated in *demo.py*, where 
-a main method passes a list of processes instances to the 
+In the *flask* example service the :class:`Service` class instance is created in the
+:class:`Server` class. :class:`Server` is a development server that relies
+on `Flask`_. The publication of processes is encapsulated in *demo.py*, where
+a main method passes a list of processes instances to the
 :class:`Server` class::
 
     from pywps import Service
@@ -371,10 +371,10 @@ process identifier and their inputs and outputs.
 .. _WSGI application: http://werkzeug.pocoo.org/docs/terms/#wsgi
 
 
-A host, a port, a config file and the processes can be passed as arguments to the 
+A host, a port, a config file and the processes can be passed as arguments to the
 :class:`Server` constructor.
-**host** and **port** will be **prioritised** if passed to the constructor, 
-otherwise the contents of the config file (`pywps.cfg`) are used. 
+**host** and **port** will be **prioritised** if passed to the constructor,
+otherwise the contents of the config file (`pywps.cfg`) are used.
 
 
 Use the `run` method to start the server::
@@ -385,8 +385,32 @@ Use the `run` method to start the server::
     ...
 
 To make the server visible from another computer, replace ``localhost`` with ``0.0.0.0``.
-    
+
+Automated process documentation
+===============================
+
+WPS :class:`Processes` can be automatically documented with `Sphinx`_ using the
+`autoprocess` directive. The :class:`Process` object is instantiated and its
+content examined to create, behind the scenes, a docstring in the Numpy format. This
+lets developers embed the documentation directly in the code instead of having to
+describe each process in a separate file. For example::
+
+  .. autoprocess:: pywps.tests.DocExampleProcess
+
+would yield
+
+.. autoprocess:: pywps.tests.DocExampleProcess
+
+To use the `autoprocess` directive, first add `'sphinx.ext.napoleon'` and
+`'pywps.ext_autodoc'` to the list of extensions in the Sphinx configuration file
+:file:`conf.py`. Then, insert `autoprocess` directives in your documentation
+source files, just as you would use an `autoclass` directive, and build the
+documentation.
+
+Note that for input and output parameters, the `title` is displayed only if no `abstract`
+is defined. In other words, if both `title` and `abstract` are given, only the `abstract`
+will be included in the documentation to avoid redundancy.
+
 .. _Flask: http://flask.pocoo.org
 .. _PyWPS-Flask: http://github.com/geopython/pywps-flask
-
-
+.. _Sphinx: http://sphinx-doc.org

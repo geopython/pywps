@@ -15,6 +15,8 @@ from pywps.app.Common import Metadata
 from pywps.inout.formats import Format
 from pywps.inout.literaltypes import AllowedValue
 from pywps.validator.allowed_value import ALLOWEDVALUETYPE
+from pywps.exceptions import InvalidParameterValue
+from pywps.exceptions import MissingParameterValue
 
 from pywps.tests import assert_pywps_version, client_for
 
@@ -88,12 +90,14 @@ class DescribeProcessTest(unittest.TestCase):
         assert 'hello metadata' in [item for sublist in metadata for item in sublist]
 
     def test_get_request_zero_args(self):
-        resp = self.client.get('?Request=DescribeProcess&version=1.0.0&service=wps')
-        assert resp.status_code == 400  # bad request, identifier is missing
+        with self.assertRaises(MissingParameterValue) as e:
+            resp = self.client.get('?Request=DescribeProcess&version=1.0.0&service=wps')
+            assert resp.status_code == 400  # bad request, identifier is missing
 
     def test_get_request_nonexisting_process_args(self):
-        resp = self.client.get('?Request=DescribeProcess&version=1.0.0&service=wps&identifier=NONEXISTINGPROCESS')
-        assert resp.status_code == 400
+        with self.assertRaises(InvalidParameterValue) as e:
+            resp = self.client.get('?Request=DescribeProcess&version=1.0.0&service=wps&identifier=NONEXISTINGPROCESS')
+            assert resp.status_code == 400
 
     def test_post_request_zero_args(self):
         request_doc = WPS.DescribeProcess()
@@ -171,11 +175,13 @@ class DescribeProcessInputTest(unittest.TestCase):
 class InputDescriptionTest(unittest.TestCase):
 
     def test_literal_integer_input(self):
-        literal = LiteralInput('foo', 'Literal foo', data_type='positiveInteger', uoms=['metre'])
+        literal = LiteralInput('foo', 'Literal foo', data_type='positiveInteger', keywords=['kw1', 'kw2'], uoms=['metre'])
         doc = literal.describe_xml()
         self.assertEqual(doc.tag, E.Input().tag)
         [identifier_el] = xpath_ns(doc, './ows:Identifier')
         self.assertEqual(identifier_el.text, 'foo')
+        kws = xpath_ns(doc, './ows:Keywords/ows:Keyword')
+        self.assertEqual(len(kws), 2)
         [type_el] = xpath_ns(doc, './LiteralData/ows:DataType')
         self.assertEqual(type_el.text, 'positiveInteger')
         self.assertEqual(type_el.attrib['{%s}reference' % NAMESPACES['ows']],
@@ -214,11 +220,13 @@ class InputDescriptionTest(unittest.TestCase):
         self.assertEqual(len(ranges), 3)
 
     def test_complex_input_identifier(self):
-        complex_in = ComplexInput('foo', 'Complex foo', supported_formats=[Format('bar/baz')])
+        complex_in = ComplexInput('foo', 'Complex foo', keywords=['kw1', 'kw2'], supported_formats=[Format('bar/baz')])
         doc = complex_in.describe_xml()
         self.assertEqual(doc.tag, E.Input().tag)
         [identifier_el] = xpath_ns(doc, './ows:Identifier')
         self.assertEqual(identifier_el.text, 'foo')
+        kws = xpath_ns(doc, './ows:Keywords/ows:Keyword')
+        self.assertEqual(len(kws), 2)
 
     def test_complex_input_default_and_supported(self):
         complex_in = ComplexInput(
@@ -240,7 +248,7 @@ class InputDescriptionTest(unittest.TestCase):
         self.assertEqual(supported_mime_types, ['a/b', 'c/d'])
 
     def test_bbox_input(self):
-        bbox = BoundingBoxInput('bbox', 'BBox foo',
+        bbox = BoundingBoxInput('bbox', 'BBox foo', keywords=['kw1', 'kw2'],
                                 crss=["EPSG:4326", "EPSG:3035"])
         doc = bbox.describe_xml()
         [inpt] = xpath_ns(doc, '/Input')
@@ -249,15 +257,19 @@ class InputDescriptionTest(unittest.TestCase):
         self.assertEqual(inpt.attrib['minOccurs'], '1')
         self.assertEqual(default_crs.text, 'EPSG:4326')
         self.assertEqual(len(supported), 2)
-
+        kws = xpath_ns(doc, './ows:Keywords/ows:Keyword')
+        self.assertEqual(len(kws), 2)
 
 class OutputDescriptionTest(unittest.TestCase):
 
     def test_literal_output(self):
-        literal = LiteralOutput('literal', 'Literal foo', uoms=['metre'])
+        literal = LiteralOutput('literal', 'Literal foo', abstract='Description', keywords=['kw1', 'kw2'], uoms=['metre'])
         doc = literal.describe_xml()
         [output] = xpath_ns(doc, '/Output')
         [identifier] = xpath_ns(doc, '/Output/ows:Identifier')
+        [abstract] = xpath_ns(doc, '/Output/ows:Abstract')
+        [keywords] = xpath_ns(doc, '/Output/ows:Keywords')
+        kws = xpath_ns(keywords, './ows:Keyword')
         [data_type] = xpath_ns(doc, '/Output/LiteralOutput/ows:DataType')
         [uoms] = xpath_ns(doc, '/Output/LiteralOutput/UOMs')
         [default_uom] = xpath_ns(uoms, './Default/ows:UOM')
@@ -265,6 +277,9 @@ class OutputDescriptionTest(unittest.TestCase):
 
         assert output is not None
         assert identifier.text == 'literal'
+        assert abstract.text == 'Description'
+        assert keywords is not None
+        assert len(kws) == 2
         assert data_type.attrib['{%s}reference' % NAMESPACES['ows']] == OGCTYPE['string']
         assert uoms is not None
         assert default_uom.text == 'metre'
@@ -272,7 +287,7 @@ class OutputDescriptionTest(unittest.TestCase):
         assert len(supported_uoms) == 1
 
     def test_complex_output(self):
-        complexo = ComplexOutput('complex', 'Complex foo', [Format('GML')])
+        complexo = ComplexOutput('complex', 'Complex foo', [Format('GML')], keywords=['kw1', 'kw2'])
         doc = complexo.describe_xml()
         [outpt] = xpath_ns(doc, '/Output')
         [default] = xpath_ns(doc, '/Output/ComplexOutput/Default/Format/MimeType')
@@ -281,9 +296,13 @@ class OutputDescriptionTest(unittest.TestCase):
 
         assert default.text == 'application/gml+xml'
         assert len(supported) == 1
+        [keywords] = xpath_ns(doc, '/Output/ows:Keywords')
+        kws = xpath_ns(keywords, './ows:Keyword')
+        assert keywords is not None
+        assert len(kws) == 2
 
     def test_bbox_output(self):
-        bbox = BoundingBoxOutput('bbox', 'BBox foo',
+        bbox = BoundingBoxOutput('bbox', 'BBox foo', keywords=['kw1', 'kw2'],
                                  crss=["EPSG:4326"])
         doc = bbox.describe_xml()
         [outpt] = xpath_ns(doc, '/Output')
@@ -291,6 +310,10 @@ class OutputDescriptionTest(unittest.TestCase):
         supported = xpath_ns(doc, './BoundingBoxOutput/Supported/CRS')
         assert default_crs.text == 'EPSG:4326'
         assert len(supported) == 1
+        [keywords] = xpath_ns(doc, '/Output/ows:Keywords')
+        kws = xpath_ns(keywords, './ows:Keyword')
+        assert keywords is not None
+        assert len(kws) == 2
 
 
 def load_tests(loader=None, tests=None, pattern=None):

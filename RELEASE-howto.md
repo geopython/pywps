@@ -23,13 +23,16 @@ For release candidates, the `MAJOR.MINOR.MAINTENANCE-rcX` format should be used.
 ## Merge `develop` branch
 
 `develop` is the main development branch, therefore it must be merged to the 
-`master` branch before a new release.
+`master` branch before a new release. Before merging, make sure, that [Travis CI](https://travis-ci.org/geopython/pywps) is indicating full successful test suite check.
+
+To merge `develop` into `master` user following commands:
 
 ```
 git checkout master
 
 git merge develop
 ```
+
 
 ## Fix files, create tags, commit, push
 
@@ -69,7 +72,7 @@ git checkout X.Y.Z
 python setup.py bdist_wheel upload
 ```
 
-## Fix pywps-flask project (only for stable releases)
+## Fix the pywps-flask project (only for stable releases)
 
 ```
 git checkout master

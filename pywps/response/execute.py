@@ -16,34 +16,27 @@ from pywps.app.basic import xml_response
 from pywps.exceptions import NoApplicableCode
 import pywps.configuration as config
 from pywps.dblog import update_response
-from collections import namedtuple
 
-_STATUS = namedtuple('Status', 'ERROR_STATUS, NO_STATUS, STORE_STATUS,'
-                     'STORE_AND_UPDATE_STATUS, DONE_STATUS')
-
-STATUS = _STATUS(0, 10, 20, 30, 40)
+from pywps.response.status import STATUS
+from pywps.response import WPSResponse
 
 LOGGER = logging.getLogger("PYWPS")
 
 
-class WPSResponse(object):
+class ExecuteResponse(WPSResponse):
 
-    def __init__(self, process, wps_request, uuid):
+    def __init__(self, wps_request, uuid, **kwargs):
         """constructor
 
-        :param pywps.app.Process.Process process:
         :param pywps.app.WPSRequest.WPSRequest wps_request:
+        :param pywps.app.Process.Process process:
         :param uuid: string this request uuid
         """
 
-        self.process = process
-        self.wps_request = wps_request
-        self.outputs = {o.identifier: o for o in process.outputs}
-        self.message = ''
-        self.status = STATUS.NO_STATUS
-        self.status_percentage = 0
-        self.doc = None
-        self.uuid = uuid
+        super(self.__class__, self).__init__(wps_request, uuid)
+
+        self.process = kwargs["process"]
+        self.outputs = {o.identifier: o for o in self.process.outputs}
 
     def update_status(self, message=None, status_percentage=None, status=None,
                       clean=True):
@@ -59,35 +52,40 @@ class WPSResponse(object):
         if message:
             self.message = message
 
-        if status:
+        if status is not None:
             self.status = status
 
-        if status_percentage:
+        if status_percentage is not None:
             self.status_percentage = status_percentage
+
+        # check if storing of the status is requested
+        if self.status >= STATUS.STORE_AND_UPDATE_STATUS:
+            # rebuild the doc and update the status xml file
+            self.doc = self._construct_doc()
+            self.write_response_doc(clean)
+
+        update_response(self.uuid, self)
+
+    def write_response_doc(self, clean=True):
+        # TODO: check if file/directory is still present, maybe deleted in mean time
 
         # check if storing of the status is requested
         if self.status >= STATUS.STORE_AND_UPDATE_STATUS:
 
             # rebuild the doc and update the status xml file
             self.doc = self._construct_doc()
-            self.write_response_doc(self.doc, clean)
 
-        update_response(self.uuid, self)
+            try:
+                with open(self.process.status_location, 'w') as f:
+                    f.write(etree.tostring(self.doc, pretty_print=True, encoding='utf-8').decode('utf-8'))
+                    f.flush()
+                    os.fsync(f.fileno())
 
-    def write_response_doc(self, doc, clean=True):
-        # TODO: check if file/directory is still present, maybe deleted in mean time
+                if self.status >= STATUS.DONE_STATUS and clean:
+                    self.process.clean()
 
-        try:
-            with open(self.process.status_location, 'w') as f:
-                f.write(etree.tostring(doc, pretty_print=True, encoding='utf-8').decode('utf-8'))
-                f.flush()
-                os.fsync(f.fileno())
-
-            if self.status >= STATUS.DONE_STATUS and clean:
-                self.process.clean()
-
-        except IOError as e:
-            raise NoApplicableCode('Writing Response Document failed with : %s' % e)
+            except IOError as e:
+                raise NoApplicableCode('Writing Response Document failed with : %s' % e)
 
     def _process_accepted(self):
         return WPS.Status(
@@ -207,12 +205,6 @@ class WPSResponse(object):
             output_elements = [self.outputs[o].execute_xml() for o in self.outputs]
             doc.append(WPS.ProcessOutputs(*output_elements))
         return doc
-
-    def call_on_close(self, function):
-        """Custom implementation of call_on_close of werkzeug
-        TODO: rewrite this using werkzeug's tools
-        """
-        self._close_functions.push(function)
 
     @Request.application
     def __call__(self, request):

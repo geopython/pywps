@@ -55,10 +55,15 @@ CONFIG = {
         'pywps/app',
         'pywps/inout',
         'pywps/resources',
+        'pywps/response',
         'pywps/validator',
-        'pywps/inout/formats'
+        'pywps/inout/formats',
+        'pywps/processing',
     ],
     'scripts': [],
+    'entry_points': {
+        'console_scripts': [
+            'joblauncher=pywps.processing.job:launcher', ]},
 }
 
 if sys.version_info.major < 3:

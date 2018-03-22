@@ -46,7 +46,7 @@ class CapabilitiesTest(unittest.TestCase):
     def setUp(self):
         def pr1(): pass
         def pr2(): pass
-        self.client = client_for(Service(processes=[Process(pr1, 'pr1', 'Process 1', metadata=[Metadata('pr1 metadata')]), Process(pr2, 'pr2', 'Process 2', metadata=[Metadata('pr2 metadata')])]))
+        self.client = client_for(Service(processes=[Process(pr1, 'pr1', 'Process 1', abstract='Process 1', keywords=['kw1a','kw1b'], metadata=[Metadata('pr1 metadata')]), Process(pr2, 'pr2', 'Process 2', keywords=['kw2a'], metadata=[Metadata('pr2 metadata')])]))
 
     def check_capabilities_response(self, resp):
         assert resp.status_code == 200
@@ -61,6 +61,13 @@ class CapabilitiesTest(unittest.TestCase):
                                 '/ows:Identifier')
         assert sorted(names.split()) == ['pr1', 'pr2']
 
+        keywords = resp.xpath('/wps:Capabilities'
+                                  '/wps:ProcessOfferings'
+                                  '/wps:Process'
+                                  '/ows:Keywords'
+                                  '/ows:Keyword')
+        assert len(keywords) == 3
+        
         metadatas = resp.xpath('/wps:Capabilities'
                                '/wps:ProcessOfferings'
                                '/wps:Process'

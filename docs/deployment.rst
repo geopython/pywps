@@ -5,7 +5,7 @@ Deployment to a production server
 
 As already described in the :ref:`installation` section, no specific deployment
 procedures are for PyWPS when using flask-based server. But this formula is not 
-intended to be used in a production environment. For production, `Apache httpd
+intended to be used in a production environment. For production, `sudo service apache2 restartApache httpd
 <https://httpd.apache.org/>`_ or `nginx <https://nginx.org/>`_ servers are
 more advised. PyWPS is runs as a `WSGI
 <https://wsgi.readthedocs.io/en/latest/>`_ application on those servers. PyWPS
@@ -40,7 +40,7 @@ which:
 Creating a PyWPS `WSGI` instance
 --------------------------------
 
-An example WSGI script is distributed along with PyWPS-Flask service, as 
+An example WSGI script is distributed along with the pywps-flask service, as 
 described in the :ref:`installation` section. The script is actually 
 straightforward - in fact, it's a just wrapper around the PyWPS server with a 
 list of processes and configuration files passed as arguments. Here is an 
@@ -138,13 +138,13 @@ We need nginx and gunicorn server::
 
 It is assumed that PyWPS  is installed in your system (if not see: ref:`installation`) and we will use pywps-flask as installation example.
 
-First, clonning the pywps-flask example to the root / (you need to be sudoer or root to run the examples)::
+First, cloning the pywps-flask example to the root / (you need to be sudoer or root to run the examples)::
    
    $ cd /
    $ git clone https://github.com/geopython/pywps-flask.git
 
 Second, preparing the WSGI script for gunicorn. It is necessary that the 
-WSGI script located on the pywps-flask is identified as a python module by gunicorn, 
+WSGI script located in the pywps-flask service is identified as a python module by gunicorn, 
 this is done by creating a link with .py extention to the wsgi file::  
    
    $ cd /pywps-flask/wsgi
@@ -231,7 +231,6 @@ And  to check that everything is ok::
 .. note::
    
    Todo NGIX + uWSGI
-
 
 
 .. _deployment-testing:
