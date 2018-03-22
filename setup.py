@@ -23,9 +23,6 @@ KEYWORDS = 'PyWPS WPS OGC processing'
 with open('requirements.txt') as f:
     INSTALL_REQUIRES = f.read().splitlines()
 
-with open('requirements-py2.txt') as f:
-    INSTALL_REQUIRES_PY2 = f.read().splitlines()
-
 CONFIG = {
     'name': 'pywps',
     'version': VERSION,
@@ -65,8 +62,5 @@ CONFIG = {
         'console_scripts': [
             'joblauncher=pywps.processing.job:launcher', ]},
 }
-
-if sys.version_info.major < 3:
-    CONFIG['install_requires'] += INSTALL_REQUIRES_PY2
 
 setup(**CONFIG)
