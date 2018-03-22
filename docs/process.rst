@@ -386,5 +386,31 @@ Use the `run` method to start the server::
 
 To make the server visible from another computer, replace ``localhost`` with ``0.0.0.0``.
 
+Automated process documentation
+===============================
+
+WPS :class:`Processes` can be automatically documented with `Sphinx`_ using the
+`autoprocess` directive. The :class:`Process` object is instantiated and its
+content examined to create, behind the scenes, a docstring in the Numpy format. This
+lets developers embed the documentation directly in the code instead of having to
+describe each process in a separate file. For example::
+
+  .. autoprocess:: pywps.tests.DocExampleProcess
+
+would yield
+
+.. autoprocess:: pywps.tests.DocExampleProcess
+
+To use the `autoprocess` directive, first add `'sphinx.ext.napoleon'` and
+`'pywps.ext_autodoc'` to the list of extensions in the Sphinx configuration file
+:file:`conf.py`. Then, insert `autoprocess` directives in your documentation
+source files, just as you would use an `autoclass` directive, and build the
+documentation.
+
+Note that for input and output parameters, the `title` is displayed only if no `abstract`
+is defined. In other words, if both `title` and `abstract` are given, only the `abstract`
+will be included in the documentation to avoid redundancy.
+
 .. _Flask: http://flask.pocoo.org
 .. _PyWPS-Flask: http://github.com/geopython/pywps-flask
+.. _Sphinx: http://sphinx-doc.org
