@@ -123,6 +123,14 @@ configuration file <http://docs.pycsw.org/en/latest/configuration.html>`_.
 
 :outputurl:
     corresponding URL
+    
+:allowedinputpaths:
+     server paths which are allowed to be used by file URLs. A list of paths
+     must be seperated by `:`.
+
+     Example: `/var/lib/pywps/downloads:/var/lib/pywps/public`
+
+     By default no input paths are allowed.
 
 .. note:: `outputpath` and `outputurl` must correspond. `outputpath` is the name
         of the resulting target directory, where all output data files are
@@ -132,13 +140,7 @@ configuration file <http://docs.pycsw.org/en/latest/configuration.html>`_.
         Example: `outputpath=/var/www/wps/outputs` shall correspond with
         `outputurl=http://foo.bar/wps/outputs`
 
-:allowedinputpaths:
-     server paths which are allowed to be used by file URLs. A list of paths
-     must be seperated by `:`.
 
-     Example: `/var/lib/pywps/downloads:/var/lib/pywps/public`
-
-     By default no input paths are allowed.
 
 [processing]
 ------------
@@ -203,6 +205,7 @@ Sample file
   outputurl=/data/
   outputpath=/tmp/outputs/
   workdir=
+  allowedinputpaths=/tmp
 
   [metadata:main]
   identification_title=PyWPS Processing Service
