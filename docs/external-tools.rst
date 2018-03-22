@@ -36,3 +36,18 @@ work.
             grass.run_command('v.out.ogr', input="myvector", ...)
 
 Also do not forget to set ``gisbase`` :ref:`configuration` option.
+
+OpenLayers WPS client
+---------------------
+
+ZOO-Project
+-----------
+
+`ZOO-Project <http://www.zoo-project.org>`_ provides both a server (C) and
+client (JavaScript) framework.
+
+QGIS WPS Client
+--------------
+
+The `QGIS WPS <https://plugins.qgis.org/plugins/wps/>`_ client provides a
+plugin with WPS support for the QGIS Desktop GIS.
