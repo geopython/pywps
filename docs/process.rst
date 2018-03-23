@@ -405,7 +405,7 @@ would yield
    :docstring:
    :skiplines: 1
 
-The :option:`docstring` fetches the :class:`Process` docstring and appends it after the
+The :option:`docstring` option fetches the :class:`Process` docstring and appends it after the
 Reference section. The first lines of this docstring can be skipped using the
 :option:`skiplines` option.
 
