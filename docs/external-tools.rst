@@ -47,7 +47,7 @@ ZOO-Project
 client (JavaScript) framework.
 
 QGIS WPS Client
---------------
+---------------
 
 The `QGIS WPS <https://plugins.qgis.org/plugins/wps/>`_ client provides a
 plugin with WPS support for the QGIS Desktop GIS.
