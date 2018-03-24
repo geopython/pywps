@@ -59,7 +59,7 @@ class DemoBuffer(Process):
             title='Buffer',
             abstract='This process demonstrates, how to create any process in PyWPS environment',
             metadata=[Metadata('process metadata 1', 'http://example.org/1'),
-                      Metadata('process metadata 2', 'http://example.org/2')]
+                      Metadata('process metadata 2', 'http://example.org/2')],
             inputs=inputs,
             outputs=outputs,
             store_supported=True,

@@ -19,11 +19,12 @@ import logging
 logging.disable(logging.CRITICAL)
 
 class DocExampleProcess(Process):
-    """
+    """This first line is going to be skipped by the :skiplines:1 option.
+
     Notes
     -----
 
-    This is additional documentation that can be added following the numpy docstring convention.
+    This is additional documentation that can be added following the Numpy docstring convention.
     """
 
     def __init__(self):
