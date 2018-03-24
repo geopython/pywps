@@ -389,17 +389,25 @@ To make the server visible from another computer, replace ``localhost`` with ``0
 Automated process documentation
 ===============================
 
-WPS :class:`Processes` can be automatically documented with `Sphinx`_ using the
+A :class:`Process` can be automatically documented with `Sphinx`_ using the
 `autoprocess` directive. The :class:`Process` object is instantiated and its
 content examined to create, behind the scenes, a docstring in the Numpy format. This
 lets developers embed the documentation directly in the code instead of having to
-describe each process in a separate file. For example::
+describe each process manually. For example::
 
   .. autoprocess:: pywps.tests.DocExampleProcess
+     :docstring:
+     :skiplines: 1
 
 would yield
 
 .. autoprocess:: pywps.tests.DocExampleProcess
+   :docstring:
+   :skiplines: 1
+
+The :option:`docstring` option fetches the :class:`Process` docstring and appends it after the
+Reference section. The first lines of this docstring can be skipped using the
+:option:`skiplines` option.
 
 To use the `autoprocess` directive, first add `'sphinx.ext.napoleon'` and
 `'pywps.ext_autodoc'` to the list of extensions in the Sphinx configuration file

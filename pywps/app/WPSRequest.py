@@ -36,6 +36,7 @@ class WPSRequest(object):
         self.operation = None
         self.version = None
         self.language = None
+        self.identifier = None
         self.identifiers = None
         self.store_execute = None
         self.status = None
@@ -316,6 +317,7 @@ class WPSRequest(object):
             'operation': self.operation,
             'version': self.version,
             'language': self.language,
+            'identifier': self.identifier,
             'identifiers': self.identifiers,
             'store_execute': self.store_execute,
             'status': self.status,
@@ -337,6 +339,7 @@ class WPSRequest(object):
         self.operation = value['operation']
         self.version = value['version']
         self.language = value['language']
+        self.identifier = value['identifier']
         self.identifiers = value['identifiers']
         self.store_execute = value['store_execute']
         self.status = value['status']

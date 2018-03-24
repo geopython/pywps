@@ -66,6 +66,7 @@ class Process(object):
         self.workdir = None
         self._grass_mapset = None
         self.grass_location = grass_location
+        self.service = None
 
         if store_supported:
             self.store_supported = 'true'
@@ -290,12 +291,14 @@ class Process(object):
                     request_json = request_json.decode('utf-8')
                 new_wps_request = WPSRequest()
                 new_wps_request.json = json.loads(request_json)
+                process_identifier = new_wps_request.identifier
+                process = self.service.prepare_process_for_execution(process_identifier)
+                process._set_uuid(uuid)
+                process.async = True
                 response_cls = get_response("execute")
-
-                new_wps_response = response_cls(new_wps_request, process=self, uuid=uuid)
+                new_wps_response = response_cls(new_wps_request, process=process, uuid=uuid)
                 new_wps_response.status = STATUS.STORE_AND_UPDATE_STATUS
-                self._set_uuid(uuid)
-                self._run_async(new_wps_request, new_wps_response)
+                process._run_async(new_wps_request, new_wps_response)
                 dblog.remove_stored(uuid)
             except Exception as e:
                 LOGGER.error("Could not run stored process. %s", e)

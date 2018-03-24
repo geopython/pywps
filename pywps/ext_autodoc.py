@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-from sphinx.ext.autodoc import ClassDocumenter
+from sphinx.ext.autodoc import ClassDocumenter, bool_option
 from sphinx.ext.napoleon.docstring import NumpyDocstring
 from sphinx.util.docstrings import prepare_docstring
 from sphinx.util import force_decode
+from docutils.parsers.rst import directives
 from pywps import Process
 from pywps.app.Common import Metadata
 
@@ -12,12 +13,26 @@ class ProcessDocumenter(ClassDocumenter):
     pywps.Process class.
 
     The Process description, its inputs and docputs are converted to a
-    numpy style docstring. Additional sections (Notes, References,
-    Examples, etc.) can be added in the Process subclass docstring.
+    numpy style docstring.
+
+    Additional sections (Notes, References, Examples, etc.) can be added
+    in the Process subclass docstring using the `docstring` option.
+    Additionally, docstring lines can be skipped using the `skiplines` option.
+
+    For, example, the following would append the SimpleProcess class docstring
+    to the published docs, skipping the first line.
+
+    .. autoprocess:: pywps.SimpleProcess
+       :docstring:
+       :skiplines: 1
+
     """
     directivetype = 'class'
     objtype = 'process'
     priority = ClassDocumenter.priority + 1
+    option_spec = {'skiplines':directives.nonnegative_int,
+                   'docstring':bool_option}
+    option_spec.update(ClassDocumenter.option_spec)
 
     @classmethod
     def can_document_member(cls, member, membername, isattr, parent):
@@ -96,7 +111,7 @@ class ProcessDocumenter(ClassDocumenter):
         for i in obj.outputs:
             doc.append("{} : {}".format(i.identifier, self.fmt_type(i)))
             doc.append("    {}".format(i.abstract or i.title))
-        doc.append('')
+        doc.extend(['',''])
 
         # Metadata
         hasref = False
@@ -129,6 +144,7 @@ class ProcessDocumenter(ClassDocumenter):
         from six import text_type
         # Get the class docstring. This is a copy of the ClassDocumenter.get_doc method. Using "super" does weird stuff.
         docstring = self.get_attr(self.object, '__doc__', None)
+
         # make sure we have Unicode docstrings, then sanitize and split
         # into lines
         if isinstance(docstring, text_type):
@@ -139,9 +155,9 @@ class ProcessDocumenter(ClassDocumenter):
         # Create the docstring by scraping info from the Process instance.
         pdocstrings = self.make_numpy_doc()
 
-        # Add the sections from the class itself.
-        if docstring is not None:
-            pdocstrings.extend(docstring)
+        if self.options.docstring and docstring is not None:
+            # Add the sections from the class docstring itself.
+            pdocstrings.extend(docstring[self.options.skiplines:])
 
         # Parse using the Numpy docstring format.
         docstrings = NumpyDocstring(pdocstrings, self.env.config, self.env.app, what='class', obj=self.object,
