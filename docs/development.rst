@@ -51,13 +51,11 @@ issuing a command like::
 
 Where you should replace *<github-user>* with your GitHub user name.
 
-Before you start coding ensure you are working on the `develop` branch:
+Before you start coding ensure you are working on the `master` branch:
 
-	git checkout develop
+	git checkout master
 	
-This is the main development branch in the PyWPS project; the traditional 
-`master` branch is strictly used to keep track of code releases. All your
-modifications to the PyWPS code base must be kept in the `develop` branch. 
+For the moment, this is the main development branch in the PyWPS project. 
 
 You can now start programming your new feature, or fixing that bug you 
 found. Keep in mind that PyWPS depends on a few libraries, refer to the  
@@ -79,9 +77,9 @@ messages
 <https://help.github.com/articles/closing-issues-via-commit-messages/>`_. Then 
 you push the changes to your forked repository, issuing a command like::
 
-	git push origin develop
+	git push origin master
 	
-Once again, make sure your commit(s) are pushed to the `develop` branch.
+Once again, make sure your commit(s) are pushed to the `master` branch.
 
 Finally you can create a pull request. This is a formal request to merge your 
 contribution with the code base; it is fully managed by GitHub and greatly 
@@ -118,7 +116,7 @@ You can use the *fetch* command to update your local repository metadata::
 Then you use a *pull* command to merge the latest *commits* into your local 
 repository::
 	
-	git pull upstream develop
+	git pull upstream master
 
 
 5. Help and discussion
