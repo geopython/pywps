@@ -161,7 +161,6 @@ class Process(object):
 
         return wps_response
 
-
     def _set_uuid(self, uuid):
         """Set uuid and status location path and url
         """

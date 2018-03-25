@@ -30,8 +30,8 @@ class ProcessDocumenter(ClassDocumenter):
     directivetype = 'class'
     objtype = 'process'
     priority = ClassDocumenter.priority + 1
-    option_spec = {'skiplines':directives.nonnegative_int,
-                   'docstring':bool_option}
+    option_spec = {'skiplines': directives.nonnegative_int,
+                   'docstring': bool_option}
     option_spec.update(ClassDocumenter.option_spec)
 
     @classmethod
@@ -111,7 +111,7 @@ class ProcessDocumenter(ClassDocumenter):
         for i in obj.outputs:
             doc.append("{} : {}".format(i.identifier, self.fmt_type(i)))
             doc.append("    {}".format(i.abstract or i.title))
-        doc.extend(['',''])
+        doc.extend(['', ''])
 
         # Metadata
         hasref = False

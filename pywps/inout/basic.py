@@ -306,8 +306,6 @@ class SimpleHandler(IOHandler):
 
         IOHandler.set_data(self, data)
 
-
-
     data = property(fget=get_data, fset=set_data)
 
 

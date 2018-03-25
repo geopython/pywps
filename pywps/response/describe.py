@@ -8,17 +8,17 @@ from pywps.exceptions import InvalidParameterValue
 from pywps.response import WPSResponse
 from pywps.response.status import STATUS
 
+
 class DescribeResponse(WPSResponse):
 
     def __init__(self, wps_request, uuid, **kwargs):
- 
+
         super(DescribeResponse, self).__init__(wps_request, uuid)
 
         self.identifiers = None
         if "identifiers" in kwargs:
             self.identifiers = kwargs["identifiers"]
         self.processes = kwargs["processes"]
-
 
     def _construct_doc(self):
 

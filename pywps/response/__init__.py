@@ -1,6 +1,7 @@
 from pywps.dblog import update_response
 from pywps.response.status import STATUS
 
+
 def get_response(operation):
 
     from .capabilities import CapabilitiesResponse
@@ -14,6 +15,7 @@ def get_response(operation):
     elif operation == "execute":
         return ExecuteResponse
 
+
 class WPSResponse(object):
 
     def __init__(self, wps_request, uuid=None):
@@ -25,11 +27,9 @@ class WPSResponse(object):
         self.status_percentage = 0
         self.doc = None
 
-        self.update_status(message="Request accepted", status_percentage=0,
-                status=self.status)
+        self.update_status(message="Request accepted", status_percentage=0, status=self.status)
 
-    def update_status(self, message=None, status_percentage=None, status=None,
-                      clean=True):
+    def update_status(self, message=None, status_percentage=None, status=None, clean=True):
         """
         Update status report of currently running process instance
 
@@ -58,14 +58,10 @@ class WPSResponse(object):
                 msg = e.description
             else:
                 msg = e
-            self.update_status(message=msg,
-                    status_percentage=100,
-                    status=STATUS.ERROR_STATUS)
+            self.update_status(message=msg, status_percentage=100, status=STATUS.ERROR_STATUS)
             raise e
 
         else:
-            self.update_status(message="Response generated",
-                    status_percentage=100,
-                    status=STATUS.DONE_STATUS)
+            self.update_status(message="Response generated", status_percentage=100, status=STATUS.DONE_STATUS)
 
             return self.doc

@@ -293,7 +293,6 @@ class LiteralInput(basic.LiteralInput):
                      should be :class:`pywps.app.Common.Metadata` objects.
     """
 
-
     def __init__(self, identifier, title, data_type='integer', abstract='', keywords=[],
                  metadata=[], uoms=None,
                  min_occurs=1, max_occurs=1,

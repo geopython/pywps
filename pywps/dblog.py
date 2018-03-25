@@ -122,7 +122,6 @@ def update_response(uuid, response, close=False):
     status_percentage = None
     status = None
 
-
     if hasattr(response, 'message'):
         message = response.message
     if hasattr(response, 'status_percentage'):

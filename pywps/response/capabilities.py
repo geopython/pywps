@@ -5,6 +5,7 @@ from pywps.app.basic import xml_response
 from pywps.response import WPSResponse
 from pywps.response.status import STATUS
 
+
 class CapabilitiesResponse(WPSResponse):
 
     def __init__(self, wps_request, uuid, **kwargs):

@@ -156,9 +156,8 @@ class FileURLNotSupported(NoApplicableCode):
         description = description or self.description
         NoApplicableCode.__init__(self, description=description, locator=locator, code=code)
 
-        
+
 class SchedulerNotAvailable(NoApplicableCode):
     """Job scheduler not available exception implementation
     """
     code = 400
-

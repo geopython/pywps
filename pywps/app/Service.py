@@ -249,7 +249,7 @@ class Service(object):
                 inpt_file = os.path.abspath(inpt_file)
                 os.symlink(inpt_file, tmp_file)
                 LOGGER.debug("Linked input file %s to %s.", inpt_file, tmp_file)
-            except Exception as e:
+            except Exception:
                 # TODO: handle os.symlink on windows
                 # raise NoApplicableCode("Could not link file reference: %s" % e)
                 LOGGER.warn("Could not link file reference")
