@@ -29,6 +29,7 @@ git:
 install:
   - pip install pip --upgrade
   - pip install .
+  - pip install -r requirements-gdal.txt
   - pip install -r requirements-dev.txt
   - pip install coveralls
 
