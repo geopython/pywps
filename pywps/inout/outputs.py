@@ -238,7 +238,7 @@ class ComplexOutput(basic.ComplexOutput):
             try:
                 data_doc = etree.parse(self.file)
                 complex_doc.append(data_doc.getroot())
-            except:
+            except Exception:
 
                 if isinstance(self.data, six.string_types):
                     complex_doc.text = self.data

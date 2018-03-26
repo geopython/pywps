@@ -631,7 +631,7 @@ def _get_rawvalue_value(data, encoding=None):
         elif encoding == 'base64':
             return base64.b64decode(data)
         return base64.b64decode(data)
-    except:
+    except Exception:
         return data
 
 

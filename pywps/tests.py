@@ -114,6 +114,14 @@ def assert_response_success(resp):
     assert len(success) == 1
 
 
+def assert_process_exception(resp, code=None):
+    assert resp.status_code == 400
+    assert resp.headers['Content-Type'] == 'text/xml'
+    elem = resp.xpath('/ows:ExceptionReport'
+                      '/ows:Exception')
+    assert elem[0].attrib['exceptionCode'] == code
+
+
 def assert_pywps_version(resp):
     # get first child of root element
     root_firstchild = resp.xpath('/*')[0].getprevious()

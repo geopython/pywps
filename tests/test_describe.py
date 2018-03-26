@@ -19,6 +19,7 @@ from pywps.exceptions import InvalidParameterValue
 from pywps.exceptions import MissingParameterValue
 
 from pywps.tests import assert_pywps_version, client_for
+from pywps.tests import assert_process_exception
 
 ProcessDescription = namedtuple('ProcessDescription', ['identifier', 'inputs', 'metadata'])
 
@@ -90,14 +91,15 @@ class DescribeProcessTest(unittest.TestCase):
         assert 'hello metadata' in [item for sublist in metadata for item in sublist]
 
     def test_get_request_zero_args(self):
-        with self.assertRaises(MissingParameterValue) as e:
-            resp = self.client.get('?Request=DescribeProcess&version=1.0.0&service=wps')
-            assert resp.status_code == 400  # bad request, identifier is missing
+        # with self.assertRaises(MissingParameterValue) as e:
+        resp = self.client.get('?Request=DescribeProcess&version=1.0.0&service=wps')
+        # bad request, identifier is missing
+        assert_process_exception(resp, code='MissingParameterValue')
 
     def test_get_request_nonexisting_process_args(self):
-        with self.assertRaises(InvalidParameterValue) as e:
-            resp = self.client.get('?Request=DescribeProcess&version=1.0.0&service=wps&identifier=NONEXISTINGPROCESS')
-            assert resp.status_code == 400
+        resp = self.client.get('?Request=DescribeProcess&version=1.0.0&service=wps&identifier=NONEXISTINGPROCESS')
+        # bad request, identifier does not exist
+        assert_process_exception(resp, code='InvalidParameterValue')
 
     def test_post_request_zero_args(self):
         request_doc = WPS.DescribeProcess()

@@ -199,7 +199,7 @@ def convert_boolean(inpt):
                 val = False
             else:
                 val = True
-        except:
+        except Exception:
             val = True
     return val
 
