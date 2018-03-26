@@ -5,22 +5,18 @@ dist: trusty
 
 python:
   - "2.7"
-  - "3.5"
+  - "3.6"
 
 git:
   submodules: false
 
 addons:
   apt:
+    sources:
+      - sourceline: 'ppa:ubuntugis/ppa'
     packages:
       - gdal-bin
       - libgdal-dev
-      - libgdal1h
-      - libgdal1-dev
-      - libgeos-dev
-      - devscripts
-      - debhelper
-      - python-setuptools
 
 # Handle Git submodules yourself
 git:
@@ -28,7 +24,7 @@ git:
 
 install:
   - pip install pip --upgrade
-  - pip install .
+  - pip install -r requirements.txt
   - pip install -r requirements-gdal.txt
   - pip install -r requirements-dev.txt
   - pip install coveralls
@@ -43,11 +39,11 @@ after_success:
   - debuild -b -uc -us
 
 # whitelist
-branches:
-  only:
-    - master
+# branches:
+#   only:
+#     - master
 
-notifications:
-  irc:
-    channels:
-      - "irc.freenode.org#geopython"
+# notifications:
+#  irc:
+#    channels:
+#      - "irc.freenode.org#geopython"
