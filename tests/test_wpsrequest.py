@@ -29,7 +29,8 @@ class WPSRequestTest(unittest.TestCase):
             'operation': 'getcapabilities',
             'version': '1.0.0',
             'language': 'eng',
-            'identifiers': 'ahoj',
+            'identifier': 'ahoj',
+            'identifiers': 'ahoj',  # TODO: why identifierS?
             'store_execute': True,
             'status': True,
             'lineage': True,
@@ -68,7 +69,8 @@ class WPSRequestTest(unittest.TestCase):
             'operation': 'getcapabilities',
             'version': '1.0.0',
             'language': 'eng',
-            'identifiers': 'moinmoin',
+            'identifier': 'moinmoin',
+            'identifiers': 'moinmoin',  # TODO: why identifierS?
             'store_execute': True,
             'status': True,
             'lineage': True,
