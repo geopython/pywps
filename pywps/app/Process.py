@@ -237,7 +237,7 @@ class Process(object):
 
     def _run_process(self, wps_request, wps_response):
         try:
-            self._set_grass()
+            self._set_grass(wps_request)
             # if required set HOME to the current working directory.
             if config.get_config_value('server', 'sethomedir') is True:
                 os.environ['HOME'] = self.workdir
@@ -330,10 +330,11 @@ class Process(object):
         for outpt in self.outputs:
             outpt.workdir = workdir
 
-    def _set_grass(self):
+    def _set_grass(self, wps_request):
         """Handle given grass_location parameter of the constructor
 
-        location is either directory name or 'epsg:1234' form
+        location is either directory name, 'epsg:1234' form or a georeferenced
+        file
 
         in the first case, new temporary mapset within the location will be
         created
@@ -351,9 +352,7 @@ class Process(object):
         if self.grass_location:
 
             from grass.script import core as grass
-
-            dbase = ''
-            location = ''
+            from grass.script import setup as gsetup
 
             # HOME needs to be set - and that is usually not the case for httpd
             # server
@@ -366,15 +365,27 @@ class Process(object):
             gisrc.close()
             os.environ['GISRC'] = gisrc.name
 
-            # create new location from epsg code
-            if self.grass_location.lower().startswith('epsg:'):
+            new_loc_args = dict()
+
+            if self.grass_location.startswith('complexinput:'):
+                # create new location from a georeferenced file
+                ref_file_parameter = self.grass_location.split(':')[1]
+                ref_file = wps_request.inputs[ref_file_parameter][0].file
+                new_loc_args.update({'filename': ref_file})
+            elif self.grass_location.lower().startswith('epsg:'):
+                # create new location from epsg code
                 epsg = self.grass_location.lower().replace('epsg:', '')
+                new_loc_args.update({'epsg': epsg})
+
+            if new_loc_args:
                 dbase = self.workdir
-                os.environ['GISDBASE'] = self.workdir
                 location = 'pywps_location'
-                grass.run_command('g.gisenv', set="GISDBASE=%s" % dbase)
-                grass.run_command('g.proj', flags="t", location=location, epsg=epsg)
-                LOGGER.debug('GRASS location based on EPSG code created')
+                gsetup.init(self.workdir, dbase, location, 'PERMANENT')
+                grass.create_location(dbase=dbase,
+                                      location=location,
+                                      **new_loc_args)
+                LOGGER.debug('GRASS location based on {} created'.format(
+                    list(new_loc_args.keys())[0]))
 
             # create temporary mapset within existing location
             elif os.path.isdir(self.grass_location):
@@ -388,23 +399,18 @@ class Process(object):
                                        'to be in "EPSG:XXXX" form nor is it existing directory: %s' % location)
 
             # copy projection files from PERMAMENT mapset to temporary mapset
-            mapset_name = tempfile.mkdtemp(prefix='pywps_', dir=os.path.join(dbase, location))
-            shutil.copy(os.path.join(dbase, location, 'PERMANENT',
-                        'DEFAULT_WIND'), os.path.join(mapset_name, 'WIND'))
-            shutil.copy(os.path.join(dbase, location, 'PERMANENT',
-                        'PROJ_EPSG'), os.path.join(mapset_name, 'PROJ_EPSG'))
-            shutil.copy(os.path.join(dbase, location, 'PERMANENT',
-                        'PROJ_INFO'), os.path.join(mapset_name, 'PROJ_INFO'))
-            shutil.copy(os.path.join(dbase, location, 'PERMANENT',
-                        'PROJ_UNITS'), os.path.join(mapset_name, 'PROJ_UNITS'))
+            mapset_name = 'pywps_mapset'
+            grass.run_command('g.mapset',
+                              mapset=mapset_name,
+                              flags='c',
+                              dbase=dbase,
+                              location=location)
 
             # set _grass_mapset attribute - will be deleted once handler ends
             self._grass_mapset = mapset_name
 
             # final initialization
             LOGGER.debug('GRASS Mapset set to %s' % mapset_name)
-            grass.run_command('g.gisenv', set="LOCATION_NAME=%s" % location)
-            grass.run_command('g.gisenv', set="MAPSET=%s" % os.path.basename(mapset_name))
 
             LOGGER.debug('GRASS environment initialised')
             LOGGER.debug('GISRC {}, GISBASE {}, GISDBASE {}, LOCATION {}, MAPSET {}'.format(
