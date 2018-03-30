@@ -1,9 +1,7 @@
 ##################################################################
-# Copyright 2016 OSGeo Foundation,                               #
-# represented by PyWPS Project Steering Committee,               #
+# Copyright 2018 Open Source Geospatial Foundation and others    #
 # licensed under GPL 2.0, Please consult LICENSE.txt for details #
 ##################################################################
-
 from pywps.Wps import Request
 from pywps import config
 from pywps.Template import TemplateError

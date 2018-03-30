@@ -1,8 +1,8 @@
 ##################################################################
-# Copyright 2016 OSGeo Foundation,                               #
-# represented by PyWPS Project Steering Committee,               #
+# Copyright 2018 Open Source Geospatial Foundation and others    #
 # licensed under GPL 2.0, Please consult LICENSE.txt for details #
 ##################################################################
+
 """
 The ultimate process to test the status and update capabilities of the server
 The processes shoul be requested as follows:

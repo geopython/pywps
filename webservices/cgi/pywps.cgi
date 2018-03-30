@@ -2,7 +2,7 @@
 
 # Author: Jachym Cepicky
 # Purpose: CGI script for wrapping PyWPS script
-# Licence: Copyright 2016 OSGeo Foundation,represented by PyWPS Project Steering Committee, licensed under GPL 2.0, Please consult LICENSE.txt for details
+# Copyright 2018 Open Source Geospatial Foundation and others, licensed under GPL 2.0, Please consult LICENSE.txt for details
 # Usage: Put this script to your web server cgi-bin directory, e.g.
 # /usr/lib/cgi-bin/ and make it executable (chmod 755 pywps.cgi)
 

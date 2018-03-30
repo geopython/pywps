@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-	<!--   Copyright 2016 OSGeo Foundation -->
-	<!--  represented by PyWPS Project Steering Committee -->
-	<!--  licensed under GPL 2.0, Please consult LICENSE.txt for details -->
+<!-- Copyright 2018 Open Source Geospatial Foundation and others -->
+<!-- licensed under GPL 2.0, Please consult LICENSE.txt for details -->
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:fn="http://pywps.wald.intevation.org/functions" version="1.0">
 	<xsl:template match="/">
