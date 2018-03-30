@@ -1,9 +1,7 @@
 ##################################################################
-# Copyright 2016 OSGeo Foundation,                               #
-# represented by PyWPS Project Steering Committee,               #
+# Copyright 2018 Open Source Geospatial Foundation and others    #
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
-
 
 from pywps.app.Process import Process  # noqa: F401
 from pywps.app.Service import Service  # noqa: F401
