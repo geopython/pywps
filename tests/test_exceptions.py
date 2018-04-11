@@ -4,11 +4,14 @@
 ##################################################################
 
 import unittest
-from pywps import Process, Service, WPS, OWS
-from pywps.app.basic import xpath_ns
+from pywps import Process, Service, get_ElementMakerForVersion
+from pywps.app.basic import get_xpath_ns
 from pywps.tests import assert_pywps_version, client_for
 import lxml.etree
 
+VERSION="1.0.0"
+WPS, OWS = get_ElementMakerForVersion(VERSION)
+xpath_ns = get_xpath_ns(VERSION)
 
 class ExceptionsTest(unittest.TestCase):
 

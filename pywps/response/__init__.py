@@ -1,5 +1,13 @@
 from pywps.dblog import update_response
 from pywps.response.status import STATUS
+from jinja2 import Environment, PackageLoader
+import os
+
+
+class RelEnvironment(Environment):
+    """Override join_path() to enable relative template paths."""
+    def join_path(self, template, parent):
+        return os.path.join(os.path.dirname(parent), template)
 
 
 def get_response(operation):
@@ -18,7 +26,7 @@ def get_response(operation):
 
 class WPSResponse(object):
 
-    def __init__(self, wps_request, uuid=None):
+    def __init__(self, wps_request, uuid=None, version="1.0.0"):
 
         self.wps_request = wps_request
         self.uuid = uuid
@@ -26,6 +34,11 @@ class WPSResponse(object):
         self.status = STATUS.NO_STATUS
         self.status_percentage = 0
         self.doc = None
+        self.version = version
+        self.template_env = RelEnvironment(
+            loader=PackageLoader('pywps', 'templates'),
+            trim_blocks=True, lstrip_blocks=True
+        )
 
         self.update_status(message="Request accepted", status_percentage=0, status=self.status)
 

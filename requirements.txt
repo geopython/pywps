@@ -5,3 +5,4 @@ werkzeug
 SQLAlchemy
 python-dateutil
 requests
+jinja2

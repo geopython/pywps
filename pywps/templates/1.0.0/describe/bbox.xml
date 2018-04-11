@@ -1,0 +1,9 @@
+                    <Default>
+                        <CRS>{{ put.crs }}</CRS>
+                    </Default>
+                    <Supported>
+                        {% for c in put.crss %}
+                        <CRS>{{ c }}</CRS>
+                        {% endfor %}
+                    </Supported>
+

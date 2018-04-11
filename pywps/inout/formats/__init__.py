@@ -11,7 +11,6 @@
 # based on Web Processing Service Best Practices Discussion Paper, OGC 12-029
 # http://opengeospatial.org/standards/wps
 
-from lxml.builder import ElementMaker
 from collections import namedtuple
 import mimetypes
 from pywps.validator.mode import MODE
@@ -134,23 +133,6 @@ class Format(object):
         return all([frmt.mime_type == self.mime_type,
                     frmt.encoding == self.encoding,
                     frmt.schema == self.schema])
-
-    def describe_xml(self):
-        """Return describe process response element
-        """
-
-        elmar = ElementMaker()
-        doc = elmar.Format(
-            elmar.MimeType(self.mime_type)
-        )
-
-        if self.encoding:
-            doc.append(elmar.Encoding(self.encoding))
-
-        if self.schema:
-            doc.append(elmar.Schema(self.schema))
-
-        return doc
 
     @property
     def json(self):

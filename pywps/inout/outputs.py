@@ -2,15 +2,15 @@
 # Copyright 2018 Open Source Geospatial Foundation and others    #
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
+"""
+WPS Output classes
+"""
 
-from pywps._compat import text_type
-from pywps import E, WPS, OWS, OGCTYPE, NAMESPACES
-from pywps.inout import basic
-from pywps.inout.storage import FileStorage
-from pywps.inout.formats import Format
-from pywps.validator.mode import MODE
 import lxml.etree as etree
 import six
+from pywps.inout import basic
+from pywps.inout.storage import FileStorage
+from pywps.validator.mode import MODE
 
 
 class BoundingBoxOutput(basic.BBoxInput):
@@ -40,78 +40,6 @@ class BoundingBoxOutput(basic.BBoxInput):
         self.max_occurs = max_occurs
         self.as_reference = as_reference
 
-    def describe_xml(self):
-        doc = E.Output(
-            OWS.Identifier(self.identifier),
-            OWS.Title(self.title)
-        )
-
-        if self.abstract:
-            doc.append(OWS.Abstract(self.abstract))
-
-        if self.keywords:
-            kws = map(OWS.Keyword, self.keywords)
-            doc.append(OWS.Keywords(*kws))
-
-        for m in self.metadata:
-            doc.append(OWS.Metadata(dict(m)))
-
-        bbox_data_doc = E.BoundingBoxOutput()
-        doc.append(bbox_data_doc)
-
-        default_doc = E.Default()
-        default_doc.append(E.CRS(self.crss[0]))
-
-        supported_doc = E.Supported()
-        for c in self.crss:
-            supported_doc.append(E.CRS(c))
-
-        bbox_data_doc.append(default_doc)
-        bbox_data_doc.append(supported_doc)
-
-        return doc
-
-    def execute_xml_lineage(self):
-        doc = WPS.Output(
-            OWS.Identifier(self.identifier),
-            OWS.Title(self.title)
-        )
-
-        if self.abstract:
-            doc.append(OWS.Abstract(self.abstract))
-
-        if self.keywords:
-            kws = map(OWS.Keyword, self.keywords)
-            doc.append(OWS.Keywords(*kws))
-
-        return doc
-
-    def execute_xml(self):
-        doc = WPS.Output(
-            OWS.Identifier(self.identifier),
-            OWS.Title(self.title)
-        )
-
-        if self.abstract:
-            doc.append(OWS.Abstract(self.abstract))
-
-        if self.keywords:
-            kws = map(OWS.Keyword, self.keywords)
-            doc.append(OWS.Keywords(*kws))
-
-        data_doc = WPS.Data()
-        bbox_data_doc = OWS.BoundingBox()
-
-        bbox_data_doc.attrib['crs'] = self.crs
-        bbox_data_doc.attrib['dimensions'] = str(self.dimensions)
-
-        bbox_data_doc.append(OWS.LowerCorner('{0[0]} {0[1]}'.format(self.data)))
-        bbox_data_doc.append(OWS.UpperCorner('{0[2]} {0[3]}'.format(self.data)))
-
-        data_doc.append(bbox_data_doc)
-        doc.append(data_doc)
-        return doc
-
 
 class ComplexOutput(basic.ComplexOutput):
     """
@@ -140,118 +68,79 @@ class ComplexOutput(basic.ComplexOutput):
 
         self.storage = None
 
-    def describe_xml(self):
-        """Generate DescribeProcess element
-        """
-        default_format_el = self.supported_formats[0].describe_xml()
-        supported_format_elements = [f.describe_xml() for f in self.supported_formats]
+    @property
+    def json(self):
+        data = {
+            "identifier": self.identifier,
+            "title": self.title,
+            "abstract": self.abstract,
+            'keywords': self.keywords,
+            'supported_formats': [frmt.json for frmt in self.supported_formats],
+            'data_format': self.data_format.json,
+            'file': self.file,
+            'workdir': self.workdir,
+            'mode': self.valid_mode,
+            'min_occurs': self.min_occurs,
+            'max_occurs': self.max_occurs
+        }
 
-        doc = E.Output(
-            OWS.Identifier(self.identifier),
-            OWS.Title(self.title)
-        )
+        if self.file:
 
-        if self.abstract:
-            doc.append(OWS.Abstract(self.abstract))
+            if self.as_reference:
+                data = self._json_reference(data)
+            else:
+                data = self._json_data(data)
 
-        if self.keywords:
-            kws = map(OWS.Keyword, self.keywords)
-            doc.append(OWS.Keywords(*kws))
+        return data
 
-        for m in self.metadata:
-            doc.append(OWS.Metadata(dict(m)))
-
-        doc.append(
-            E.ComplexOutput(
-                E.Default(default_format_el),
-                E.Supported(*supported_format_elements)
-            )
-        )
-
-        return doc
-
-    def execute_xml_lineage(self):
-        doc = WPS.Output(
-            OWS.Identifier(self.identifier),
-            OWS.Title(self.title)
-        )
-
-        if self.abstract:
-            doc.append(OWS.Abstract(self.abstract))
-
-        return doc
-
-    def execute_xml(self):
-        """Render Execute response XML node
-
-        :return: node
-        :rtype: ElementMaker
-        """
-
-        self.identifier
-
-        node = None
-        if self.as_reference:
-            node = self._execute_xml_reference()
-        else:
-            node = self._execute_xml_data()
-
-        doc = WPS.Output(
-            OWS.Identifier(self.identifier),
-            OWS.Title(self.title)
-        )
-        if self.abstract:
-            doc.append(OWS.Abstract(self.abstract))
-        doc.append(node)
-
-        return doc
-
-    def _execute_xml_reference(self):
+    def _json_reference(self, data):
         """Return Reference node
         """
-        doc = WPS.Reference()
+        data["type"] = "reference"
 
         # get_url will create the file and return the url for it
         self.storage = FileStorage()
-        doc.attrib['{http://www.w3.org/1999/xlink}href'] = self.get_url()
+        data["href"] = self.get_url()
 
         if self.data_format:
             if self.data_format.mime_type:
-                doc.attrib['mimeType'] = self.data_format.mime_type
+                data['mimetype'] = self.data_format.mime_type
             if self.data_format.encoding:
-                doc.attrib['encoding'] = self.data_format.encoding
+                data['encoding'] = self.data_format.encoding
             if self.data_format.schema:
-                doc.attrib['schema'] = self.data_format.schema
-        return doc
+                data['schema'] = self.data_format.schema
 
-    def _execute_xml_data(self):
+        return data
+
+    def _json_data(self, data):
         """Return Data node
         """
-        doc = WPS.Data()
 
-        if self.data is None:
-            complex_doc = WPS.ComplexData()
-        else:
-            complex_doc = WPS.ComplexData()
-            try:
-                data_doc = etree.parse(self.file)
-                complex_doc.append(data_doc.getroot())
-            except Exception:
+        data["type"] = "complex"
 
+        try:
+            data_doc = etree.parse(self.file)
+            data["data"] = etree.tostring(data_doc, pretty_print=True).decode("utf-8")
+        except Exception:
+
+            if self.data:
                 if isinstance(self.data, six.string_types):
-                    complex_doc.text = self.data
+                    if isinstance(self.data, bytes):
+                        data["data"] = self.data.decode("utf-8")
+                    else:
+                        data["data"] = self.data
+
                 else:
-                    complex_doc.text = etree.CDATA(self.base64)
+                    data["data"] = etree.tostring(etree.CDATA(self.base64))
 
         if self.data_format:
             if self.data_format.mime_type:
-                complex_doc.attrib['mimeType'] = self.data_format.mime_type
+                data['mimetype'] = self.data_format.mime_type
             if self.data_format.encoding:
-                complex_doc.attrib['encoding'] = self.data_format.encoding
+                data['encoding'] = self.data_format.encoding
             if self.data_format.schema:
-                complex_doc.attrib['schema'] = self.data_format.schema
-        doc.append(complex_doc)
-        return doc
+                data['schema'] = self.data_format.schema
+        return data
 
 
 class LiteralOutput(basic.LiteralOutput):
@@ -267,87 +156,27 @@ class LiteralOutput(basic.LiteralOutput):
     """
 
     def __init__(self, identifier, title, data_type='string', abstract='', keywords=[],
-                 metadata=[], uoms=[], mode=MODE.SIMPLE):
+                 metadata=[], uoms=None, mode=MODE.SIMPLE):
         if uoms is None:
             uoms = []
         basic.LiteralOutput.__init__(self, identifier, title=title, abstract=abstract, keywords=keywords,
                                      data_type=data_type, uoms=uoms, mode=mode)
         self.metadata = metadata
 
-    def describe_xml(self):
-        doc = E.Output(
-            OWS.Identifier(self.identifier),
-            OWS.Title(self.title)
-        )
+    @property
+    def json(self):
+        data = {
+            "identifier": self.identifier,
+            "title": self.title,
+            "abstract": self.abstract,
+            "keywords": self.keywords,
+            "data": self.data,
+            "data_type": self.data_type,
+            "type": "literal",
+            "uoms": [u.json for u in self.uoms]
+        }
 
-        if self.abstract:
-            doc.append(OWS.Abstract(self.abstract))
-
-        if self.keywords:
-            kws = map(OWS.Keyword, self.keywords)
-            doc.append(OWS.Keywords(*kws))
-
-        for m in self.metadata:
-            doc.append(OWS.Metadata(dict(m)))
-
-        literal_data_doc = E.LiteralOutput()
-
-        if self.data_type:
-            data_type = OWS.DataType(self.data_type)
-            data_type.attrib['{%s}reference' % NAMESPACES['ows']] = OGCTYPE[self.data_type]
-            literal_data_doc.append(data_type)
-
-        if self.uoms:
-            default_uom_element = self.uom.describe_xml()
-            supported_uom_elements = [u.describe_xml() for u in self.uoms]
-
-            literal_data_doc.append(
-                E.UOMs(
-                    E.Default(default_uom_element),
-                    E.Supported(*supported_uom_elements)
-                )
-            )
-
-        doc.append(literal_data_doc)
-
-        return doc
-
-    def execute_xml_lineage(self):
-        doc = WPS.Output(
-            OWS.Identifier(self.identifier),
-            OWS.Title(self.title)
-        )
-
-        if self.abstract:
-            doc.append(OWS.Abstract(self.abstract))
-
-        if self.keywords:
-            kws = map(OWS.Keyword, self.keywords)
-            doc.append(OWS.Keywords(*kws))
-
-        return doc
-
-    def execute_xml(self):
-        doc = WPS.Output(
-            OWS.Identifier(self.identifier),
-            OWS.Title(self.title)
-        )
-
-        if self.abstract:
-            doc.append(OWS.Abstract(self.abstract))
-
-        if self.keywords:
-            kws = map(OWS.Keyword, self.keywords)
-            doc.append(OWS.Keywords(*kws))
-
-        data_doc = WPS.Data()
-
-        literal_data_doc = WPS.LiteralData(text_type(self.data))
-        literal_data_doc.attrib['dataType'] = OGCTYPE[self.data_type]
         if self.uom:
-            literal_data_doc.attrib['uom'] = self.uom.execute_attribute()
-        data_doc.append(literal_data_doc)
+            data["uom"] = self.uom.json
 
-        doc.append(data_doc)
-
-        return doc
+        return data
