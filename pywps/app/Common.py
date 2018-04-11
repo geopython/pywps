@@ -25,9 +25,11 @@ class Metadata(object):
         self.type = type_
 
     def __iter__(self):
-        yield '{http://www.w3.org/1999/xlink}title', self.title
+        metadata = {"title": self.title}
+
         if self.href is not None:
-            yield '{http://www.w3.org/1999/xlink}href', self.href
+            metadata['href'] = self.href
         if self.role is not None:
-            yield '{http://www.w3.org/1999/xlink}role', self.role
-        yield '{http://www.w3.org/1999/xlink}type', self.type
+            metadata['role'] = self.role
+        metadata['type'] = self.type
+        yield metadata

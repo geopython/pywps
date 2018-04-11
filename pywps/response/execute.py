@@ -9,7 +9,7 @@ from lxml import etree
 import time
 from werkzeug.wrappers import Request
 from werkzeug.exceptions import HTTPException
-from pywps import WPS, OWS
+from pywps import get_ElementMakerForVersion
 from pywps.app.basic import xml_response
 from pywps.exceptions import NoApplicableCode
 import pywps.configuration as config
@@ -18,7 +18,18 @@ from pywps.dblog import update_response
 from pywps.response.status import STATUS
 from pywps.response import WPSResponse
 
+from pywps._compat import PY2
+
+if PY2:
+    import urlparse
+    from urllib import urlencode
+else:
+    import urllib.parse as urlparse
+    from urllib.parse import urlencode
+
 LOGGER = logging.getLogger("PYWPS")
+
+WPS, OWS = get_ElementMakerForVersion("1.0.0")
 
 
 class ExecuteResponse(WPSResponse):
@@ -75,7 +86,7 @@ class ExecuteResponse(WPSResponse):
 
             try:
                 with open(self.process.status_location, 'w') as f:
-                    f.write(etree.tostring(self.doc, pretty_print=True, encoding='utf-8').decode('utf-8'))
+                    f.write(self.doc)
                     f.flush()
                     os.fsync(f.fileno())
 
@@ -86,122 +97,113 @@ class ExecuteResponse(WPSResponse):
                 raise NoApplicableCode('Writing Response Document failed with : %s' % e)
 
     def _process_accepted(self):
-        return WPS.Status(
-            WPS.ProcessAccepted(self.message),
-            creationTime=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime())
-        )
+        return {
+            "status": "accepted",
+            "time": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime()),
+            "message": self.message
+        }
 
     def _process_started(self):
-        return WPS.Status(
-            WPS.ProcessStarted(
-                self.message,
-                percentCompleted=str(self.status_percentage)
-            ),
-            creationTime=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime())
-        )
+        percent = int(self.status_percentage)
+        if percent > 99:
+            percent = 99
+        return {
+            "status": "started",
+            "message": self.message,
+            "percent_done": str(percent),
+            "time": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime())
+        }
 
     def _process_paused(self):
-        return WPS.Status(
-            WPS.ProcessPaused(
-                self.message,
-                percentCompleted=str(self.status_percentage)
-            ),
-            creationTime=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime())
-        )
+        return {
+            "status": "paused",
+            "message": self.message,
+            "percent_done": str(self.status_percentage),
+            "time": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime())
+        }
 
     def _process_succeeded(self):
-        return WPS.Status(
-            WPS.ProcessSucceeded(self.message),
-            creationTime=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime())
-        )
+        return {
+            "status": "succeeded",
+            "time": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime()),
+            "percent_done": str(self.status_percentage),
+            "message": self.message
+        }
 
     def _process_failed(self):
-        return WPS.Status(
-            WPS.ProcessFailed(
-                WPS.ExceptionReport(
-                    OWS.Exception(
-                        OWS.ExceptionText(self.message),
-                        exceptionCode='NoApplicableCode',
-                        locater='None'
-                    )
-                )
-            ),
-            creationTime=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime())
-        )
+        return {
+            "status": "failed",
+            "code": "NoApplicableCode",
+            "locator": "None",
+            "message": self.message,
+            "time": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime())
+        }
 
-    def _construct_doc(self):
-        doc = WPS.ExecuteResponse()
-        doc.attrib['{http://www.w3.org/2001/XMLSchema-instance}schemaLocation'] = \
-            'http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsExecute_response.xsd'
-        doc.attrib['service'] = 'WPS'
-        doc.attrib['version'] = '1.0.0'
-        doc.attrib['{http://www.w3.org/XML/1998/namespace}lang'] = 'en-US'
-        doc.attrib['serviceInstance'] = '%s%s' % (
-            config.get_config_value('server', 'url'),
-            '?service=WPS&request=GetCapabilities'
-        )
+    def _get_serviceinstance(self):
+
+        url = config.get_config_value("server", "url")
+        params = {'request': 'GetCapabilities', 'service': 'WPS'}
+
+        url_parts = list(urlparse.urlparse(url))
+        query = dict(urlparse.parse_qsl(url_parts[4]))
+        query.update(params)
+
+        url_parts[4] = urlencode(query)
+        return urlparse.urlunparse(url_parts).replace("&", "&amp;")
+
+    @property
+    def json(self):
+        data = {}
+        data["lang"] = "en-US"
+        data["service_instance"] = self._get_serviceinstance()
+        data["process"] = self.process.json
 
         if self.status >= STATUS.STORE_STATUS:
             if self.process.status_location:
-                doc.attrib['statusLocation'] = self.process.status_url
+                data["status_location"] = self.process.status_url
 
-        # Process XML
-        process_doc = WPS.Process(
-            OWS.Identifier(self.process.identifier),
-            OWS.Title(self.process.title)
-        )
-        if self.process.abstract:
-            process_doc.append(OWS.Abstract(self.process.abstract))
-        # TODO: See Table 32 Metadata in OGC 06-121r3
-        # for m in self.process.metadata:
-        #    process_doc.append(OWS.Metadata(m))
-        if self.process.profile:
-            process_doc.append(OWS.Profile(self.process.profile))
-        process_doc.attrib['{http://www.opengis.net/wps/1.0.0}processVersion'] = self.process.version
-
-        doc.append(process_doc)
-
-        # Status XML
-        # return the correct response depending on the progress of the process
         if self.status == STATUS.STORE_AND_UPDATE_STATUS:
             if self.status_percentage == 0:
                 self.message = 'PyWPS Process %s accepted' % self.process.identifier
-                status_doc = self._process_accepted()
-                doc.append(status_doc)
-                return doc
+                data["status"] = self._process_accepted()
+                return data
             elif self.status_percentage > 0:
-                status_doc = self._process_started()
-                doc.append(status_doc)
-                return doc
+                data["percent_done"] = self.status_percentage
+                data["status"] = self._process_started()
+                return data
 
         # check if process failed and display fail message
         if self.status_percentage == -1:
-            status_doc = self._process_failed()
-            doc.append(status_doc)
-            return doc
+            data["status"] = self._process_failed()
+            return data
 
         # TODO: add paused status
 
         if self.status == STATUS.DONE_STATUS:
-            status_doc = self._process_succeeded()
-            doc.append(status_doc)
+            data["status"] = self._process_succeeded()
 
             # DataInputs and DataOutputs definition XML if lineage=true
             if self.wps_request.lineage == 'true':
+                data["lineage"] = True
                 try:
                     # TODO: stored process has ``pywps.inout.basic.LiteralInput``
                     # instead of a ``pywps.inout.inputs.LiteralInput``.
-                    data_inputs = [self.wps_request.inputs[i][0].execute_xml() for i in self.wps_request.inputs]
-                    doc.append(WPS.DataInputs(*data_inputs))
+                    data["input_definitions"] = [self.wps_request.inputs[i][0].json for i in self.wps_request.inputs]
                 except Exception as e:
                     LOGGER.error("Failed to update lineage for input parameter. %s", e)
 
-                output_definitions = [self.outputs[o].execute_xml_lineage() for o in self.outputs]
-                doc.append(WPS.OutputDefinitions(*output_definitions))
+                data["output_definitions"] = [self.outputs[o].json for o in self.outputs]
 
             # Process outputs XML
-            output_elements = [self.outputs[o].execute_xml() for o in self.outputs]
-            doc.append(WPS.ProcessOutputs(*output_elements))
+            data["outputs"] = [self.outputs[o].json for o in self.outputs]
+        return data
+
+    def _construct_doc(self):
+
+        template = self.template_env.get_template(os.path.join(self.version, 'execute', 'main.xml'))
+
+        doc = template.render(**self.json)
+
         return doc
 
     @Request.application

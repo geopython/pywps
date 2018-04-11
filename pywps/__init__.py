@@ -18,15 +18,37 @@ PYWPS_INSTALL_DIR = os.path.dirname(os.path.abspath(__file__))
 
 NAMESPACES = {
     'xlink': "http://www.w3.org/1999/xlink",
-    'wps': "http://www.opengis.net/wps/1.0.0",
-    'ows': "http://www.opengis.net/ows/1.1",
+    'wps': "http://www.opengis.net/wps/{wps_version}",
+    'ows': "http://www.opengis.net/ows/{ows_version}",
     'gml': "http://www.opengis.net/gml",
     'xsi': "http://www.w3.org/2001/XMLSchema-instance"
 }
 
 E = ElementMaker()
-WPS = ElementMaker(namespace=NAMESPACES['wps'], nsmap=NAMESPACES)
-OWS = ElementMaker(namespace=NAMESPACES['ows'], nsmap=NAMESPACES)
+namespaces100 = {k: NAMESPACES[k].format(wps_version="1.0.0", ows_version="1.1") for k in NAMESPACES}
+namespaces200 = {k: NAMESPACES[k].format(wps_version="2.0", ows_version="2.0") for k in NAMESPACES}
+
+
+def get_ElementMakerForVersion(version):
+    WPS = OWS = None
+    if version == "1.0.0":
+        WPS = ElementMaker(namespace=namespaces100['wps'], nsmap=namespaces100)
+        OWS = ElementMaker(namespace=namespaces100['ows'], nsmap=namespaces100)
+    elif version == "2.0.0":
+        WPS = ElementMaker(namespace=namespaces200['wps'], nsmap=namespaces200)
+        OWS = ElementMaker(namespace=namespaces200['ows'], nsmap=namespaces200)
+
+    return WPS, OWS
+
+
+def get_version_from_ns(ns):
+    if ns == "http://www.opengis.net/wps/1.0.0":
+        return "1.0.0"
+    elif ns == "http://www.opengis.net/wps/2.0":
+        return "2.0.0"
+    else:
+        return None
+
 
 OGCTYPE = {
     'measure': 'urn:ogc:def:dataType:OGC:1.1:measure',

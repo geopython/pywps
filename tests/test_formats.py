@@ -9,8 +9,10 @@ import unittest
 
 from pywps.inout.formats import Format, get_format, FORMATS
 from lxml import etree
-from pywps.app.basic import xpath_ns
+from pywps.app.basic import get_xpath_ns
 from pywps.validator.base import emptyvalidator
+
+xpath_ns = get_xpath_ns("1.0.0")
 
 
 class FormatsTest(unittest.TestCase):
@@ -39,19 +41,11 @@ class FormatsTest(unittest.TestCase):
         self.assertEqual(frmt.encoding, 'asdf')
         self.assertTrue(frmt.validate('the input', 1))
 
-        describeel = frmt.describe_xml()
-        self.assertEqual('Format', describeel.tag)
-        mimetype = xpath_ns(describeel, '/Format/MimeType')
-        encoding = xpath_ns(describeel, '/Format/Encoding')
-        schema = xpath_ns(describeel, '/Format/Schema')
+        describeel = frmt.json
 
-        self.assertTrue(mimetype)
-        self.assertTrue(encoding)
-        self.assertTrue(schema)
-
-        self.assertEqual(mimetype[0].text, 'mimetype')
-        self.assertEqual(encoding[0].text, 'asdf')
-        self.assertEqual(schema[0].text, 'halloworld')
+        self.assertEqual(describeel["mime_type"], 'mimetype')
+        self.assertEqual(describeel["encoding"], 'asdf')
+        self.assertEqual(describeel["schema"], 'halloworld')
 
         frmt2 = get_format('GML')
 

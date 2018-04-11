@@ -7,7 +7,7 @@ import logging
 import tempfile
 from werkzeug.exceptions import HTTPException
 from werkzeug.wrappers import Request, Response
-from pywps import WPS, OWS
+from pywps import get_ElementMakerForVersion
 from pywps._compat import PY2
 from pywps._compat import urlopen
 from pywps._compat import urlparse
@@ -61,7 +61,7 @@ class Service(object):
     def get_capabilities(self, wps_request, uuid):
 
         response_cls = response.get_response("capabilities")
-        return response_cls(wps_request, uuid, processes=self.processes)
+        return response_cls(wps_request, uuid, version=wps_request.version, processes=self.processes)
 
     def describe(self, wps_request, uuid, identifiers):
 
@@ -384,8 +384,7 @@ class Service(object):
 
         return outinputs
 
-    @Request.application
-    def __call__(self, http_request):
+    def call(self, http_request):
 
         request_uuid = uuid.uuid1()
 
@@ -403,7 +402,6 @@ class Service(object):
                 log_request(request_uuid, wps_request)
                 response = None
                 if wps_request.operation == 'getcapabilities':
-
                     response = self.get_capabilities(wps_request, request_uuid)
 
                 elif wps_request.operation == 'describeprocess':
@@ -439,6 +437,10 @@ class Service(object):
         except Exception as e:
             e = NoApplicableCode("No applicable error code, please check error log", code=500)
             return e
+
+    @Request.application
+    def __call__(self, http_request):
+        return self.call(http_request)
 
 
 def _openurl(inpt):

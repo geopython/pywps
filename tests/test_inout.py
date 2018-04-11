@@ -20,6 +20,7 @@ from pywps._compat import StringIO, text_type
 from pywps.validator.base import emptyvalidator
 from pywps.exceptions import InvalidParameterValue
 from pywps.validator.mode import MODE
+from pywps.inout.basic import UOM
 
 from lxml import etree
 
@@ -256,7 +257,8 @@ class LiteralInputTest(unittest.TestCase):
                 identifier="literalinput",
                 mode=2,
                 allowed_values=(1, 2, (3, 3, 12)),
-                default=6)
+                default=6,
+                uoms=(UOM("metre"),))
 
 
     def test_contruct(self):
@@ -289,7 +291,8 @@ class LiteralInputTest(unittest.TestCase):
         self.literal_input.data = 9
         out = self.literal_input.json
 
-        self.assertFalse(out['uoms'], 'UOMs exist')
+        self.assertTrue('uoms' in out, 'UOMs does not exist')
+        self.assertTrue('uom' in out, 'uom exists')
         self.assertFalse(out['workdir'], 'Workdir exist')
         self.assertEqual(out['data_type'], 'integer', 'Data type is integer')
         self.assertFalse(out['abstract'], 'abstract exist')
@@ -299,7 +302,6 @@ class LiteralInputTest(unittest.TestCase):
         self.assertEqual(out['mode'], MODE.STRICT, 'Mode set')
         self.assertEqual(out['identifier'], 'literalinput', 'identifier set')
         self.assertEqual(out['type'], 'literal', 'it\'s literal input')
-        self.assertFalse(out['uom'], 'uom exists')
         self.assertEqual(len(out['allowed_values']), 3, '3 allowed values')
         self.assertEqual(out['allowed_values'][0]['value'], 1, 'allowed value 1')
 

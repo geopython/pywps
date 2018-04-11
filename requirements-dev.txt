@@ -4,3 +4,4 @@ flufl.enum
 pylint
 Sphinx
 six
+jinja2

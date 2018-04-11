@@ -8,7 +8,7 @@ import os
 import tempfile
 from pywps.inout.literaltypes import (LITERAL_DATA_TYPES, convert,
                                       make_allowedvalues, is_anyvalue)
-from pywps import OWS, OGCUNIT, NAMESPACES
+from pywps import get_ElementMakerForVersion, OGCUNIT, NAMESPACES
 from pywps.validator.mode import MODE
 from pywps.validator.base import emptyvalidator
 from pywps.validator import get_validator
@@ -37,6 +37,20 @@ def _is_textfile(filename):
         is_text = b'\x00' not in fh.read(blocksize)
         fh.close()
     return is_text
+
+
+class UOM(object):
+    """
+    :param uom: unit of measure
+    """
+
+    def __init__(self, uom=''):
+        self.uom = uom
+
+    @property
+    def json(self):
+        return {"reference": OGCUNIT[self.uom],
+                "uom": self.uom}
 
 
 class IOHandler(object):
@@ -220,6 +234,7 @@ class IOHandler(object):
 
     def get_data(self):
         """Get source as simple data object"""
+
         if self.source_type == SOURCE_TYPE.FILE:
             file_handler = open(self.source, mode=self._openmode())
             content = file_handler.read()
@@ -310,11 +325,15 @@ class SimpleHandler(IOHandler):
 class BasicIO:
     """Basic Input/Output class
     """
-    def __init__(self, identifier, title=None, abstract=None, keywords=None):
+    def __init__(self, identifier, title=None, abstract=None, keywords=None,
+                 min_occurs=1, max_occurs=1, metadata=[]):
         self.identifier = identifier
         self.title = title
         self.abstract = abstract
         self.keywords = keywords
+        self.min_occurs = int(min_occurs)
+        self.max_occurs = int(max_occurs)
+        self.metadata = metadata
 
 
 class BasicLiteral:
@@ -346,7 +365,8 @@ class BasicLiteral:
 
     @uom.setter
     def uom(self, uom):
-        self._uom = uom
+        if uom is not None:
+            self._uom = uom
 
 
 class BasicComplex(object):
@@ -449,8 +469,10 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
     def __init__(self, identifier, title=None, abstract=None, keywords=None,
                  data_type="integer", workdir=None, allowed_values=None,
                  uoms=None, mode=MODE.NONE,
+                 min_occurs=1, max_occurs=1, metadata=[],
                  default=None, default_type=SOURCE_TYPE.DATA):
-        BasicIO.__init__(self, identifier, title, abstract, keywords)
+        BasicIO.__init__(self, identifier, title, abstract, keywords,
+                         min_occurs=1, max_occurs=1, metadata=[])
         BasicLiteral.__init__(self, data_type, uoms)
         SimpleHandler.__init__(self, workdir, data_type, mode=mode)
 
@@ -476,7 +498,7 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
     def json(self):
         """Get JSON representation of the input
         """
-        return {
+        data = {
             'identifier': self.identifier,
             'title': self.title,
             'abstract': self.abstract,
@@ -484,12 +506,18 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
             'type': 'literal',
             'data_type': self.data_type,
             'workdir': self.workdir,
+            'any_value': self.any_value,
             'allowed_values': [value.json for value in self.allowed_values],
-            'uoms': self.uoms,
-            'uom': self.uom,
             'mode': self.valid_mode,
-            'data': self.data
+            'data': self.data,
+            'min_occurs': self.min_occurs,
+            'max_occurs': self.max_occurs
         }
+        if self.uoms:
+            data["uoms"] = [uom.json for uom in self.uoms],
+        if self.uom:
+            data["uom"] = self.uom.json
+        return data
 
 
 class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
@@ -529,8 +557,10 @@ class BBoxInput(BasicIO, BasicBoundingBox, IOHandler):
     def __init__(self, identifier, title=None, abstract=None, keywords=[], crss=None,
                  dimensions=None, workdir=None,
                  mode=MODE.SIMPLE,
+                 min_occurs=1, max_occurs=1, metadata=[],
                  default=None, default_type=SOURCE_TYPE.DATA):
-        BasicIO.__init__(self, identifier, title, abstract, keywords)
+        BasicIO.__init__(self, identifier, title, abstract, keywords,
+                         min_occurs, max_occurs, metadata)
         BasicBoundingBox.__init__(self, crss, dimensions)
         IOHandler.__init__(self, workdir=None, mode=mode)
 
@@ -557,11 +587,14 @@ class BBoxInput(BasicIO, BasicBoundingBox, IOHandler):
             'abstract': self.abstract,
             'keywords': self.keywords,
             'type': 'bbox',
-            'crs': self.crss,
+            'crs': self.crs,
+            'crss': self.crss,
             'bbox': (self.ll, self.ur),
             'dimensions': self.dimensions,
             'workdir': self.workdir,
-            'mode': self.valid_mode
+            'mode': self.valid_mode,
+            'min_occurs': self.min_occurs,
+            'max_occurs': self.max_occurs
         }
 
 
@@ -597,9 +630,11 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
     def __init__(self, identifier, title=None, abstract=None, keywords=None,
                  workdir=None, data_format=None, supported_formats=None,
                  mode=MODE.NONE,
+                 min_occurs=1, max_occurs=1, metadata=[],
                  default=None, default_type=SOURCE_TYPE.DATA):
 
-        BasicIO.__init__(self, identifier, title, abstract, keywords)
+        BasicIO.__init__(self, identifier, title, abstract, keywords,
+                         min_occurs, max_occurs, metadata)
         IOHandler.__init__(self, workdir=workdir, mode=mode)
         BasicComplex.__init__(self, data_format, supported_formats)
 
@@ -619,7 +654,9 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
             'supported_formats': [frmt.json for frmt in self.supported_formats],
             'file': self.file,
             'workdir': self.workdir,
-            'mode': self.valid_mode
+            'mode': self.valid_mode,
+            'min_occurs': self.min_occurs,
+            'max_occurs': self.max_occurs
         }
 
 
@@ -673,27 +710,6 @@ class ComplexOutput(BasicIO, BasicComplex, IOHandler):
         """
         (outtype, storage, url) = self.storage.store(self)
         return url
-
-
-class UOM(object):
-    """
-    :param uom: unit of measure
-    """
-
-    def __init__(self, uom=''):
-        self.uom = uom
-
-    def describe_xml(self):
-        elem = OWS.UOM(
-            self.uom
-        )
-
-        elem.attrib['{%s}reference' % NAMESPACES['ows']] = OGCUNIT[self.uom]
-
-        return elem
-
-    def execute_attribute(self):
-        return OGCUNIT[self.uom]
 
 
 if __name__ == "__main__":

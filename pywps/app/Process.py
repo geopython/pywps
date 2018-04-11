@@ -11,7 +11,7 @@ import json
 import shutil
 import tempfile
 
-from pywps import WPS, OWS, E, dblog
+from pywps import get_ElementMakerForVersion, E, dblog
 from pywps.response import get_response
 from pywps.response.status import STATUS
 from pywps.app.WPSRequest import WPSRequest
@@ -76,62 +76,22 @@ class Process(object):
         else:
             self.status_supported = 'false'
 
-    def capabilities_xml(self):
-        doc = WPS.Process(
-            OWS.Identifier(self.identifier),
-            OWS.Title(self.title)
-        )
-        if self.abstract:
-            doc.append(OWS.Abstract(self.abstract))
-        if self.keywords:
-            kws = map(OWS.Keyword, self.keywords)
-            doc.append(OWS.Keywords(*kws))
-        for m in self.metadata:
-            doc.append(OWS.Metadata(dict(m)))
-        if self.profile:
-            doc.append(OWS.Profile(self.profile))
-        if self.version != 'None':
-            doc.attrib['{http://www.opengis.net/wps/1.0.0}processVersion'] = self.version
-        else:
-            doc.attrib['{http://www.opengis.net/wps/1.0.0}processVersion'] = 'undefined'
+    @property
+    def json(self):
 
-        return doc
-
-    def describe_xml(self):
-        input_elements = [i.describe_xml() for i in self.inputs]
-        output_elements = [i.describe_xml() for i in self.outputs]
-
-        doc = E.ProcessDescription(
-            OWS.Identifier(self.identifier),
-            OWS.Title(self.title)
-        )
-        doc.attrib['{http://www.opengis.net/wps/1.0.0}processVersion'] = self.version
-
-        if self.store_supported == 'true':
-            doc.attrib['storeSupported'] = self.store_supported
-
-        if self.status_supported == 'true':
-            doc.attrib['statusSupported'] = self.status_supported
-
-        if self.abstract:
-            doc.append(OWS.Abstract(self.abstract))
-
-        if self.keywords:
-            kws = map(OWS.Keyword, self.keywords)
-            doc.append(OWS.Keywords(*kws))
-
-        for m in self.metadata:
-            doc.append(OWS.Metadata(dict(m)))
-
-        for p in self.profile:
-            doc.append(WPS.Profile(p))
-
-        if input_elements:
-            doc.append(E.DataInputs(*input_elements))
-
-        doc.append(E.ProcessOutputs(*output_elements))
-
-        return doc
+        return {
+            'version': self.version,
+            'identifier': self.identifier,
+            'title': self.title,
+            'abstract': self.abstract,
+            'keywords': self.keywords,
+            'metadata': [m for m in self.metadata],
+            'inputs': [i.json for i in self.inputs],
+            'outputs': [o.json for o in self.outputs],
+            'store_supported': self.store_supported,
+            'status_supported': self.status_supported,
+            'profile': [p for p in self.profile],
+        }
 
     def execute(self, wps_request, uuid):
         self._set_uuid(uuid)

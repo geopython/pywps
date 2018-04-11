@@ -8,8 +8,10 @@ import lxml
 import lxml.etree
 from pywps.app import Process, Service
 from pywps.app.Common import Metadata
-from pywps import WPS, OWS
-from pywps.tests import assert_pywps_version, client_for
+from pywps import get_ElementMakerForVersion
+from pywps.tests import assert_pywps_version, client_for, assert_wps_version
+
+WPS, OWS  = get_ElementMakerForVersion("1.0.0")
 
 class BadRequestTest(unittest.TestCase):
 
@@ -48,6 +50,7 @@ class CapabilitiesTest(unittest.TestCase):
         self.client = client_for(Service(processes=[Process(pr1, 'pr1', 'Process 1', abstract='Process 1', keywords=['kw1a','kw1b'], metadata=[Metadata('pr1 metadata')]), Process(pr2, 'pr2', 'Process 2', keywords=['kw2a'], metadata=[Metadata('pr2 metadata')])]))
 
     def check_capabilities_response(self, resp):
+
         assert resp.status_code == 200
         assert resp.headers['Content-Type'] == 'text/xml'
         title = resp.xpath_text('/wps:Capabilities'
@@ -66,7 +69,7 @@ class CapabilitiesTest(unittest.TestCase):
                                   '/ows:Keywords'
                                   '/ows:Keyword')
         assert len(keywords) == 3
-        
+
         metadatas = resp.xpath('/wps:Capabilities'
                                '/wps:ProcessOfferings'
                                '/wps:Process'
@@ -94,8 +97,7 @@ class CapabilitiesTest(unittest.TestCase):
         assert exception[0].attrib['exceptionCode'] == 'VersionNegotiationFailed'
 
     def test_post_bad_version(self):
-        acceptedVersions_doc = OWS.AcceptVersions(
-                OWS.Version('2001-123'))
+        acceptedVersions_doc = OWS.AcceptVersions(OWS.Version('2001-123'))
         request_doc = WPS.GetCapabilities(acceptedVersions_doc)
         resp = self.client.post_xml(doc=request_doc)
         exception = resp.xpath('/ows:ExceptionReport'
@@ -104,9 +106,13 @@ class CapabilitiesTest(unittest.TestCase):
         assert resp.status_code == 400
         assert exception[0].attrib['exceptionCode'] == 'VersionNegotiationFailed'
 
-    def test_pywps_version(self):
-        resp = self.client.get('?service=WPS&request=GetCapabilities')
-        assert_pywps_version(resp)
+    def test_version(self):
+        resp = self.client.get('?service=WPS&request=GetCapabilities&version=1.0.0')
+        assert_wps_version(resp)
+
+    def test_version2(self):
+        resp = self.client.get('?service=WPS&request=GetCapabilities&acceptversions=2.0.0')
+        assert_wps_version(resp, version="2.0.0")
 
 
 def load_tests(loader=None, tests=None, pattern=None):

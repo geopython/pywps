@@ -6,7 +6,7 @@
 import lxml.etree
 from werkzeug.test import Client
 from werkzeug.wrappers import BaseResponse
-from pywps import __version__, NAMESPACES
+from pywps import __version__
 from pywps import Process
 from pywps.inout import LiteralInput, LiteralOutput, ComplexInput, ComplexOutput, BoundingBoxInput, BoundingBoxOutput
 from pywps.inout import Format
@@ -76,7 +76,14 @@ class WpsTestResponse(BaseResponse):
             self.xml = lxml.etree.fromstring(self.get_data())
 
     def xpath(self, path):
-        return self.xml.xpath(path, namespaces=NAMESPACES)
+        version = self.xml.attrib["version"]
+        if version == "2.0.0":
+            from pywps import namespaces200
+            namespaces = namespaces200
+        else:
+            from pywps import namespaces100
+            namespaces = namespaces100
+        return self.xml.xpath(path, namespaces=namespaces)
 
     def xpath_text(self, path):
         return ' '.join(e.text for e in self.xpath(path))
@@ -129,3 +136,13 @@ def assert_pywps_version(resp):
     assert len(tokens) == 2
     assert tokens[0] == 'PyWPS'
     assert tokens[1] == __version__
+
+
+def assert_wps_version(response, version="1.0.0"):
+    elem = response.xpath('/wps:Capabilities'
+                          '/ows:ServiceIdentification'
+                          '/ows:ServiceTypeVersion')
+    found_version = elem[0].text
+    assert version == found_version
+    with open("/tmp/out.xml", "wb") as out:
+        out.writelines(response.response)

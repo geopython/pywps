@@ -91,6 +91,7 @@ class FileStorage(StorageAbstract):
         import uuid
 
         file_name = output.file
+
         request_uuid = output.uuid or uuid.uuid1()
 
         file_block_size = os.stat(file_name).st_blksize

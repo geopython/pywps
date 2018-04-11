@@ -137,7 +137,7 @@ def update_response(uuid, response, close=False):
     if requests.count():
         request = requests.one()
         request.time_end = datetime.datetime.now()
-        request.message = message
+        request.message = str(message)
         request.percent_done = status_percentage
         request.status = status
         session.commit()
