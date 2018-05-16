@@ -21,6 +21,7 @@ import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, VARCHAR, Float, DateTime, LargeBinary
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import NullPool
 
 LOGGER = logging.getLogger('PYWPS')
 _SESSION_MAKER = None
@@ -183,7 +184,7 @@ def get_session():
         if database.startswith("sqlite") or database.startswith("memory"):
             engine = sqlalchemy.create_engine(database, connect_args={'check_same_thread': False}, echo=echo)
         else:
-            engine = sqlalchemy.create_engine(database, echo=echo)
+            engine = sqlalchemy.create_engine(database, echo=echo, poolclass=NullPool)
     except sqlalchemy.exc.SQLAlchemyError as e:
         raise NoApplicableCode("Could not connect to database: {}".format(e.message))
 
