@@ -94,8 +94,12 @@ class Container(Processing):
         inputs = get_inputs(self.job.wps_request.inputs)
         output = get_output(self.job.wps_request.outputs)
         wps = WPS(url=url_execute, skip_caps=True)
+        if self.job.process.async:
+            mode = "ASYNC"
+        else:
+            mode = "SYNC"
         self.execution = wps.execute(self.job.wps_request.identifier, inputs=inputs, output=output,
-                                     async=self.job.process.async)
+                                     mode=mode)
 
     def _parse_outputs(self):
         for output in self.execution.processOutputs:
