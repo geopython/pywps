@@ -17,7 +17,7 @@ from pywps.app.basic import xml_response
 from pywps.app.WPSRequest import WPSRequest
 import pywps.configuration as config
 from pywps.exceptions import MissingParameterValue, NoApplicableCode, InvalidParameterValue, FileSizeExceeded, \
-    StorageNotSupported
+    StorageNotSupported, FileURLNotSupported
 from pywps.inout.inputs import ComplexInput, LiteralInput, BoundingBoxInput
 from pywps.dblog import log_request, update_response
 from pywps import response
@@ -27,6 +27,8 @@ import os
 import sys
 import uuid
 import copy
+import requests
+import shutil
 
 
 LOGGER = logging.getLogger("PYWPS")
@@ -77,29 +79,25 @@ class Service(object):
         :param uuid: string identifier of the request
         """
         self._set_grass()
-        response = None
+        process = self.prepare_process_for_execution(identifier)
+        return self._parse_and_execute(process, wps_request, uuid)
+
+    def prepare_process_for_execution(self, identifier):
+        """Prepare the process identified by ``identifier`` for execution.
+        """
         try:
             process = self.processes[identifier]
-
-            # make deep copy of the process instace
-            # so that processes are not overriding each other
-            # just for execute
-            process = copy.deepcopy(process)
-
-            workdir = os.path.abspath(config.get_config_value('server', 'workdir'))
-            tempdir = tempfile.mkdtemp(prefix='pywps_process_', dir=workdir)
-            process.set_workdir(tempdir)
         except KeyError:
             raise InvalidParameterValue("Unknown process '%r'" % identifier, 'Identifier')
-
-        olddir = os.path.abspath(os.curdir)
-        try:
-            os.chdir(process.workdir)
-            response = self._parse_and_execute(process, wps_request, uuid)
-        finally:
-            os.chdir(olddir)
-
-        return response
+        # make deep copy of the process instace
+        # so that processes are not overriding each other
+        # just for execute
+        process = copy.deepcopy(process)
+        process.service = self
+        workdir = os.path.abspath(config.get_config_value('server', 'workdir'))
+        tempdir = tempfile.mkdtemp(prefix='pywps_process_', dir=workdir)
+        process.set_workdir(tempdir)
+        return process
 
     def _parse_and_execute(self, process, wps_request, uuid):
         """Parse and execute request
@@ -165,18 +163,22 @@ class Service(object):
         try:
             wps_response = process.execute(wps_request, uuid)
         except Exception as e:
+            e_follow = e
             if not isinstance(e, NoApplicableCode):
-                raise NoApplicableCode('Service error: %s' % e)
-            raise e
+                e_follow = NoApplicableCode('Service error: %s' % e)
+            if wps_request.raw:
+                resp = Response(e_follow.get_body(), mimetype='application/xml')
+                resp.call_on_close(process.clean)
+                return resp
+            else:
+                raise e_follow
 
         # get the specified output as raw
         if wps_request.raw:
             for outpt in wps_request.outputs:
                 for proc_outpt in process.outputs:
                     if outpt == proc_outpt.identifier:
-                        resp = Response(proc_outpt.data)
-                        resp.call_on_close(process.clean)
-                        return resp
+                        return Response(proc_outpt.data)
 
             # if the specified identifier was not found raise error
             raise InvalidParameterValue('')
@@ -197,7 +199,7 @@ class Service(object):
                 extension=_extension(complexinput))
 
             try:
-                (reference_file, reference_file_data) = _openurl(datain)
+                reference_file = _openurl(datain)
                 data_size = reference_file.headers.get('Content-Length', 0)
             except Exception as e:
                 raise NoApplicableCode('File reference error: %s' % e)
@@ -206,19 +208,25 @@ class Service(object):
             # calculate the size
             if data_size == 0:
                 LOGGER.debug('no Content-Length, calculating size')
-                data_size = _get_datasize(reference_file_data)
 
             # check if input file size was not exceeded
             complexinput.calculate_max_input_size()
-            byte_size = complexinput.max_size * 1024 * 1024
-            if int(data_size) > int(byte_size):
+            max_byte_size = complexinput.max_size * 1024 * 1024
+            if int(data_size) > int(max_byte_size):
                 raise FileSizeExceeded('File size for input exceeded.'
                                        ' Maximum allowed: %i megabytes' %
                                        complexinput.max_size, complexinput.identifier)
 
             try:
-                with open(tmp_file, 'w') as f:
-                    f.write(reference_file_data)
+                with open(tmp_file, 'wb') as f:
+                    data_size = 0
+                    for chunk in reference_file.iter_content(chunk_size=1024):
+                        data_size += len(chunk)
+                        if int(data_size) > int(max_byte_size):
+                            raise FileSizeExceeded('File size for input exceeded.'
+                                                   ' Maximum allowed: %i megabytes' %
+                                                   complexinput.max_size, complexinput.identifier)
+                        f.write(chunk)
             except Exception as e:
                 raise NoApplicableCode(e)
 
@@ -229,6 +237,8 @@ class Service(object):
         def file_handler(complexinput, datain):
             """<wps:Reference /> handler.
             Used when href is a file url."""
+            # check if file url is allowed
+            _validate_file_input(href=datain.get('href'))
             # save the file reference input in workdir
             tmp_file = _build_input_file_name(
                 href=datain.get('href'),
@@ -236,10 +246,14 @@ class Service(object):
                 extension=_extension(complexinput))
             try:
                 inpt_file = urlparse(datain.get('href')).path
+                inpt_file = os.path.abspath(inpt_file)
                 os.symlink(inpt_file, tmp_file)
                 LOGGER.debug("Linked input file %s to %s.", inpt_file, tmp_file)
             except Exception as e:
-                raise NoApplicableCode("Could not link file reference: %s" % e)
+                # TODO: handle os.symlink on windows
+                # raise NoApplicableCode("Could not link file reference: %s" % e)
+                LOGGER.warn("Could not link file reference")
+                shutil.copy2(inpt_file, tmp_file)
 
             complexinput.file = tmp_file
             complexinput.url = datain.get('href')
@@ -430,7 +444,7 @@ class Service(object):
 
 
 def _openurl(inpt):
-    """use urllib to open given href
+    """use requests to open given href
     """
     data = None
     reference_file = None
@@ -441,38 +455,13 @@ def _openurl(inpt):
         if 'body' in inpt:
             data = inpt.get('body')
         elif 'bodyreference' in inpt:
-            data = urlopen(url=inpt.get('bodyreference')).read()
+            data = requests.get(url=inpt.get('bodyreference')).text
 
-        reference_file = urlopen(url=href, data=data)
+        reference_file = requests.post(url=href, data=data, stream=True)
     else:
-        reference_file = urlopen(url=href)
+        reference_file = requests.get(url=href, stream=True)
 
-    if PY2:
-        reference_file_data = reference_file.read()
-    else:
-        reference_file_data = reference_file.read().decode('utf-8')
-
-    return (reference_file, reference_file_data)
-
-
-def _get_datasize(reference_file_data):
-
-    tmp_sio = None
-    data_size = 0
-
-    if PY2:
-        from StringIO import StringIO
-
-        tmp_sio = StringIO(reference_file_data)
-        data_size = tmp_sio.len
-    else:
-        from io import StringIO
-
-        tmp_sio = StringIO()
-        data_size = tmp_sio.write(reference_file_data)
-    tmp_sio.close()
-
-    return data_size
+    return reference_file
 
 
 def _build_input_file_name(href, workdir, extension=None):
@@ -490,6 +479,25 @@ def _build_input_file_name(href, workdir, extension=None):
             suffix=suffix, prefix=prefix + '_',
             dir=workdir)[1]
     return input_file_name
+
+
+def _validate_file_input(href):
+    href = href or ''
+    parsed_url = urlparse(href)
+    if parsed_url.scheme != 'file':
+        raise FileURLNotSupported('Invalid URL scheme')
+    file_path = parsed_url.path
+    if not file_path:
+        raise FileURLNotSupported('Invalid URL path')
+    file_path = os.path.abspath(file_path)
+    # build allowed paths list
+    inputpaths = config.get_config_value('server', 'allowedinputpaths')
+    allowed_paths = [os.path.abspath(p.strip()) for p in inputpaths.split(':') if p.strip()]
+    for allowed_path in allowed_paths:
+        if file_path.startswith(allowed_path):
+            LOGGER.debug("Accepted file url as input.")
+            return
+    raise FileURLNotSupported()
 
 
 def _extension(complexinput):

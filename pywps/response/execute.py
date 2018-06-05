@@ -52,10 +52,10 @@ class ExecuteResponse(WPSResponse):
         if message:
             self.message = message
 
-        if status:
+        if status is not None:
             self.status = status
 
-        if status_percentage:
+        if status_percentage is not None:
             self.status_percentage = status_percentage
 
         # check if storing of the status is requested
@@ -205,12 +205,6 @@ class ExecuteResponse(WPSResponse):
             output_elements = [self.outputs[o].execute_xml() for o in self.outputs]
             doc.append(WPS.ProcessOutputs(*output_elements))
         return doc
-
-    def call_on_close(self, function):
-        """Custom implementation of call_on_close of werkzeug
-        TODO: rewrite this using werkzeug's tools
-        """
-        self._close_functions.push(function)
 
     @Request.application
     def __call__(self, request):

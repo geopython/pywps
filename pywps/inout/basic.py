@@ -26,6 +26,21 @@ _SOURCE_TYPE = namedtuple('SOURCE_TYPE', 'MEMORY, FILE, STREAM, DATA')
 SOURCE_TYPE = _SOURCE_TYPE(0, 1, 2, 3)
 
 
+def _is_textfile(filename):
+    try:
+        # use python-magic if available
+        import magic
+        is_text = 'text/' in magic.from_file(filename, mime=True)
+    except ImportError:
+        # read the first part of the file to check for a binary indicator.
+        # This method won't detect all binary files.
+        blocksize = 512
+        fh = open(filename, 'rb')
+        is_text = b'\x00' not in fh.read(blocksize)
+        fh.close()
+    return is_text
+
+
 class IOHandler(object):
     """Basic IO class. Provides functions, to accept input data in file,
     memory object and stream object and give them out in all three types
@@ -186,16 +201,29 @@ class IOHandler(object):
             else:
                 return StringIO(text_type(self.source))
 
+    def _openmode(self):
+        openmode = 'r'
+        if not PY2:
+            # in Python 3 we need to open binary files in binary mode.
+            checked = False
+            if hasattr(self, 'data_format'):
+                if self.data_format.encoding == 'base64':
+                    # binary, when the data is to be encoded to base64
+                    openmode += 'b'
+                    checked = True
+                elif 'text/' in self.data_format.mime_type:
+                    # not binary, when mime_type is 'text/'
+                    checked = True
+            # when we can't guess it from the mime_type, we need to check the file.
+            # mimetypes like application/xml and application/json are text files too.
+            if not checked and not _is_textfile(self.source):
+                openmode += 'b'
+        return openmode
+
     def get_data(self):
         """Get source as simple data object"""
         if self.source_type == SOURCE_TYPE.FILE:
-            openmode = 'r'
-            if (not PY2 and hasattr(self, 'data_format') and
-                    self.data_format.encoding == 'base64'):
-                # on Python 3, when the data is to be encoded to base64, we
-                # need to open the file in binary mode
-                openmode += 'b'
-            file_handler = open(self.source, mode=openmode)
+            file_handler = open(self.source, mode=self._openmode())
             content = file_handler.read()
             file_handler.close()
             return content
@@ -284,16 +312,17 @@ class SimpleHandler(IOHandler):
 
 
 class BasicIO:
-    """Basic Input or Ouput class
+    """Basic Input/Output class
     """
-    def __init__(self, identifier, title=None, abstract=None):
+    def __init__(self, identifier, title=None, abstract=None, keywords=None):
         self.identifier = identifier
         self.title = title
         self.abstract = abstract
+        self.keywords = keywords
 
 
 class BasicLiteral:
-    """Basic literal input/output class
+    """Basic literal Input/Output class
     """
 
     def __init__(self, data_type="integer", uoms=None):
@@ -421,11 +450,11 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
     """LiteralInput input abstract class
     """
 
-    def __init__(self, identifier, title=None, abstract=None,
+    def __init__(self, identifier, title=None, abstract=None, keywords=None,
                  data_type="integer", workdir=None, allowed_values=None,
                  uoms=None, mode=MODE.NONE,
                  default=None, default_type=SOURCE_TYPE.DATA):
-        BasicIO.__init__(self, identifier, title, abstract)
+        BasicIO.__init__(self, identifier, title, abstract, keywords)
         BasicLiteral.__init__(self, data_type, uoms)
         SimpleHandler.__init__(self, workdir, data_type, mode=mode)
 
@@ -455,6 +484,7 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
             'identifier': self.identifier,
             'title': self.title,
             'abstract': self.abstract,
+            'keywords': self.keywords,
             'type': 'literal',
             'data_type': self.data_type,
             'workdir': self.workdir,
@@ -470,10 +500,10 @@ class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
     """Basic LiteralOutput class
     """
 
-    def __init__(self, identifier, title=None, abstract=None,
+    def __init__(self, identifier, title=None, abstract=None, keywords=None,
                  data_type=None, workdir=None, uoms=None, validate=None,
                  mode=MODE.NONE):
-        BasicIO.__init__(self, identifier, title, abstract)
+        BasicIO.__init__(self, identifier, title, abstract, keywords)
         BasicLiteral.__init__(self, data_type, uoms)
         SimpleHandler.__init__(self, workdir=None, data_type=data_type,
                                mode=mode)
@@ -500,11 +530,11 @@ class BBoxInput(BasicIO, BasicBoundingBox, IOHandler):
     """Basic Bounding box input abstract class
     """
 
-    def __init__(self, identifier, title=None, abstract=None, crss=None,
+    def __init__(self, identifier, title=None, abstract=None, keywords=[], crss=None,
                  dimensions=None, workdir=None,
                  mode=MODE.SIMPLE,
                  default=None, default_type=SOURCE_TYPE.DATA):
-        BasicIO.__init__(self, identifier, title, abstract)
+        BasicIO.__init__(self, identifier, title, abstract, keywords)
         BasicBoundingBox.__init__(self, crss, dimensions)
         IOHandler.__init__(self, workdir=None, mode=mode)
 
@@ -529,6 +559,7 @@ class BBoxInput(BasicIO, BasicBoundingBox, IOHandler):
             'identifier': self.identifier,
             'title': self.title,
             'abstract': self.abstract,
+            'keywords': self.keywords,
             'type': 'bbox',
             'crs': self.crss,
             'bbox': (self.ll, self.ur),
@@ -542,9 +573,9 @@ class BBoxOutput(BasicIO, BasicBoundingBox, SimpleHandler):
     """Basic BoundingBox output class
     """
 
-    def __init__(self, identifier, title=None, abstract=None, crss=None,
+    def __init__(self, identifier, title=None, abstract=None, keywords=None, crss=None,
                  dimensions=None, workdir=None, mode=MODE.NONE):
-        BasicIO.__init__(self, identifier, title, abstract)
+        BasicIO.__init__(self, identifier, title, abstract, keywords)
         BasicBoundingBox.__init__(self, crss, dimensions)
         SimpleHandler.__init__(self, workdir=None, mode=mode)
         self._storage = None
@@ -567,12 +598,12 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
     1
     """
 
-    def __init__(self, identifier, title=None, abstract=None,
+    def __init__(self, identifier, title=None, abstract=None, keywords=None,
                  workdir=None, data_format=None, supported_formats=None,
                  mode=MODE.NONE,
                  default=None, default_type=SOURCE_TYPE.DATA):
 
-        BasicIO.__init__(self, identifier, title, abstract)
+        BasicIO.__init__(self, identifier, title, abstract, keywords)
         IOHandler.__init__(self, workdir=workdir, mode=mode)
         BasicComplex.__init__(self, data_format, supported_formats)
 
@@ -586,6 +617,7 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
             'identifier': self.identifier,
             'title': self.title,
             'abstract': self.abstract,
+            'keywords': self.keywords,
             'type': 'complex',
             'data_format': self.data_format.json,
             'supported_formats': [frmt.json for frmt in self.supported_formats],
@@ -623,10 +655,10 @@ class ComplexOutput(BasicIO, BasicComplex, IOHandler):
     'AA'
     """
 
-    def __init__(self, identifier, title=None, abstract=None,
+    def __init__(self, identifier, title=None, abstract=None, keywords=None,
                  workdir=None, data_format=None, supported_formats=None,
                  mode=MODE.NONE):
-        BasicIO.__init__(self, identifier, title, abstract)
+        BasicIO.__init__(self, identifier, title, abstract, keywords)
         IOHandler.__init__(self, workdir=workdir, mode=mode)
         BasicComplex.__init__(self, data_format, supported_formats)
 

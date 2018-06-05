@@ -8,10 +8,54 @@ import lxml.etree
 from werkzeug.test import Client
 from werkzeug.wrappers import BaseResponse
 from pywps import __version__, NAMESPACES
+from pywps import Process
+from pywps.inout import LiteralInput, LiteralOutput, ComplexInput, ComplexOutput, BoundingBoxInput, BoundingBoxOutput
+from pywps.inout import Format
+from pywps.app.Common import Metadata
+
 
 import logging
 
 logging.disable(logging.CRITICAL)
+
+class DocExampleProcess(Process):
+    """This first line is going to be skipped by the :skiplines:1 option.
+
+    Notes
+    -----
+
+    This is additional documentation that can be added following the Numpy docstring convention.
+    """
+
+    def __init__(self):
+        inputs = [LiteralInput('literal_input', "Literal input title", 'integer', "Literal input value abstract.",
+                                    min_occurs=0, max_occurs=1, uoms=['meters', 'feet'], default=1),
+                  LiteralInput('date_input', 'The title is shown when no abstract is provided.', 'date',
+                               allowed_values=['2000-01-01', '2018-01-01']),
+                  ComplexInput('complex_input', 'Complex input title', [Format('application/json'),Format('application/x-netcdf')],
+                               abstract="Complex input abstract.",),
+                  BoundingBoxInput('bb_input', 'BoundingBox input title', ['EPSG:4326',],
+                                   metadata=[Metadata('EPSG.io', 'http://epsg.io/'),]),
+                  ]
+        outputs = [LiteralOutput('literal_output', 'Literal output title', 'boolean', 'Boolean output abstract.',),
+                   ComplexOutput('complex_output', 'Complex output', [Format('text/plain'),], ),
+                   BoundingBoxOutput('bb_output', 'BoundingBox output title', ['EPSG:4326',])]
+
+        super(DocExampleProcess, self).__init__(
+            self._handler,
+            identifier='doc_example_process_identifier',
+            title="Process title",
+            abstract="Multiline process abstract.",
+            version="4.0",
+            metadata=[Metadata('PyWPS docs', 'http://pywps.org'),
+                      Metadata('NumPy docstring conventions', 'https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt')],
+            inputs=inputs,
+            outputs=outputs,
+        )
+
+    def _handler(self, request, response):
+        pass
+
 
 
 class WpsClient(Client):

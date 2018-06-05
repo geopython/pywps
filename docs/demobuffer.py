@@ -48,6 +48,7 @@ out_output = ComplexOutput(
 inputs = [inpt_vector, inpt_size]
 outputs = [out_output]
 
+
 class DemoBuffer(Process):
     def __init__(self):
 
@@ -57,12 +58,14 @@ class DemoBuffer(Process):
             version='1.0.0',
             title='Buffer',
             abstract='This process demonstrates, how to create any process in PyWPS environment',
-            metadata=[Metadata('process metadata 1', 'http://example.org/1'), Metadata('process metadata 2', 'http://example.org/2')]
+            metadata=[Metadata('process metadata 1', 'http://example.org/1'),
+                      Metadata('process metadata 2', 'http://example.org/2')],
             inputs=inputs,
             outputs=outputs,
             store_supported=True,
             status_supported=True
         )
+
 
 @staticmethod
 def _handler(request, response):
@@ -85,7 +88,8 @@ def _handler(request, response):
 
     # create output file
     driver = ogr.GetDriverByName('GML')
-    output_source = driver.CreateDataSource(layer_name,
+    output_source = driver.CreateDataSource(
+        layer_name,
         ["XSISCHEMAURI=http://schemas.opengis.net/gml/2.1.2/feature.xsd"])
     output_layer = output_source.CreateLayer(layer_name, None, ogr.wkbUnknown)
 
@@ -96,16 +100,14 @@ def _handler(request, response):
     # make buffer for each feature
     while index < count:
 
-        response.update_status('Buffering feature %s' % index, float(index)/count)
+        response.update_status('Buffering feature %s' % index, float(index) / count)
 
         # get the geometry
         input_feature = input_layer.GetNextFeature()
         input_geometry = input_feature.GetGeometryRef()
 
         # make the buffer
-        buffer_geometry = input_geometry.Buffer(
-                float(size)
-        )
+        buffer_geometry = input_geometry.Buffer(float(size))
 
         # create output feature to the file
         output_feature = ogr.Feature(feature_def=output_layer.GetLayerDefn())
@@ -115,7 +117,7 @@ def _handler(request, response):
         index += 1
 
     # set output format
-    response.outputs['output'].output_format = FORMATS.GML
+    response.outputs['output'].data_format = FORMATS.GML
 
     # set output data as file name
     response.outputs['output'].file = layer_name

@@ -33,7 +33,10 @@ class Process(object):
                     request. It should accept a single
                     :class:`pywps.app.WPSRequest` argument and return a
                     :class:`pywps.app.WPSResponse` object.
-    :param identifier: Name of this process.
+    :param string identifier: Name of this process.
+    :param string title: Human readable title of process.
+    :param string abstract: Brief narrative description of the process.
+    :param list keywords: Keywords that characterize a process.
     :param inputs: List of inputs accepted by this process. They
                    should be :class:`~LiteralInput` and :class:`~ComplexInput`
                    and :class:`~BoundingBoxInput`
@@ -46,12 +49,13 @@ class Process(object):
                      should be :class:`pywps.app.Common.Metadata` objects.
     """
 
-    def __init__(self, handler, identifier, title, abstract='', profile=[], metadata=[], inputs=[],
+    def __init__(self, handler, identifier, title, abstract='', keywords=[], profile=[], metadata=[], inputs=[],
                  outputs=[], version='None', store_supported=False, status_supported=False, grass_location=None):
         self.identifier = identifier
         self.handler = handler
         self.title = title
         self.abstract = abstract
+        self.keywords = keywords
         self.metadata = metadata
         self.profile = profile
         self.version = version
@@ -63,6 +67,7 @@ class Process(object):
         self.workdir = None
         self._grass_mapset = None
         self.grass_location = grass_location
+        self.service = None
 
         if store_supported:
             self.store_supported = 'true'
@@ -81,6 +86,9 @@ class Process(object):
         )
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
+        if self.keywords:
+            kws = map(OWS.Keyword, self.keywords)
+            doc.append(OWS.Keywords(*kws))
         for m in self.metadata:
             doc.append(OWS.Metadata(dict(m)))
         if self.profile:
@@ -110,6 +118,10 @@ class Process(object):
 
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
+
+        if self.keywords:
+            kws = map(OWS.Keyword, self.keywords)
+            doc.append(OWS.Keywords(*kws))
 
         for m in self.metadata:
             doc.append(OWS.Metadata(dict(m)))
@@ -277,8 +289,10 @@ class Process(object):
 
             if not wps_response:
                 raise NoApplicableCode('Response is empty. Make sure the _handler method is returning a valid object.')
+            elif wps_request.raw:
+                raise
             else:
-                wps_response.update_status(msg, -1)
+                wps_response.update_status(msg, -1, status=STATUS.ERROR_STATUS)
 
         # tr
         stored_request = dblog.get_first_stored()
@@ -289,12 +303,14 @@ class Process(object):
                     request_json = request_json.decode('utf-8')
                 new_wps_request = WPSRequest()
                 new_wps_request.json = json.loads(request_json)
+                process_identifier = new_wps_request.identifier
+                process = self.service.prepare_process_for_execution(process_identifier)
+                process._set_uuid(uuid)
+                process.async = True
                 response_cls = get_response("execute")
-
-                new_wps_response = response_cls(new_wps_request, process=self, uuid=uuid)
+                new_wps_response = response_cls(new_wps_request, process=process, uuid=uuid)
                 new_wps_response.status = STATUS.STORE_AND_UPDATE_STATUS
-                self._set_uuid(uuid)
-                self._run_async(new_wps_request, new_wps_response)
+                process._run_async(new_wps_request, new_wps_response)
                 dblog.remove_stored(uuid)
             except Exception as e:
                 LOGGER.error("Could not run stored process. %s", e)

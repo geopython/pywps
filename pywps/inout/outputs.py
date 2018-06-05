@@ -29,12 +29,12 @@ class BoundingBoxOutput(basic.BBoxInput):
                      should be :class:`pywps.app.Common.Metadata` objects.
     """
 
-    def __init__(self, identifier, title, crss, abstract='',
+    def __init__(self, identifier, title, crss, abstract='', keywords=[],
                  dimensions=2, metadata=[], min_occurs='1',
                  max_occurs='1', as_reference=False,
                  mode=MODE.NONE):
         basic.BBoxInput.__init__(self, identifier, title=title,
-                                 abstract=abstract, crss=crss,
+                                 abstract=abstract, keywords=keywords, crss=crss,
                                  dimensions=dimensions, mode=mode)
 
         self.metadata = metadata
@@ -50,6 +50,10 @@ class BoundingBoxOutput(basic.BBoxInput):
 
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
+
+        if self.keywords:
+            kws = map(OWS.Keyword, self.keywords)
+            doc.append(OWS.Keywords(*kws))
 
         for m in self.metadata:
             doc.append(OWS.Metadata(dict(m)))
@@ -78,6 +82,10 @@ class BoundingBoxOutput(basic.BBoxInput):
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
 
+        if self.keywords:
+            kws = map(OWS.Keyword, self.keywords)
+            doc.append(OWS.Keywords(*kws))
+
         return doc
 
     def execute_xml(self):
@@ -88,6 +96,10 @@ class BoundingBoxOutput(basic.BBoxInput):
 
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
+
+        if self.keywords:
+            kws = map(OWS.Keyword, self.keywords)
+            doc.append(OWS.Keywords(*kws))
 
         data_doc = WPS.Data()
         bbox_data_doc = OWS.BoundingBox()
@@ -116,13 +128,13 @@ class ComplexOutput(basic.ComplexOutput):
     """
 
     def __init__(self, identifier, title, supported_formats=None,
-                 abstract='', metadata=None,
+                 abstract='', keywords=[], metadata=None,
                  as_reference=False, mode=MODE.NONE):
         if metadata is None:
             metadata = []
 
         basic.ComplexOutput.__init__(self, identifier, title=title,
-                                     abstract=abstract,
+                                     abstract=abstract, keywords=keywords,
                                      supported_formats=supported_formats,
                                      mode=mode)
         self.metadata = metadata
@@ -143,6 +155,10 @@ class ComplexOutput(basic.ComplexOutput):
 
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
+
+        if self.keywords:
+            kws = map(OWS.Keyword, self.keywords)
+            doc.append(OWS.Keywords(*kws))
 
         for m in self.metadata:
             doc.append(OWS.Metadata(dict(m)))
@@ -252,13 +268,12 @@ class LiteralOutput(basic.LiteralOutput):
                      should be :class:`pywps.app.Common.Metadata` objects.
     """
 
-    def __init__(self, identifier, title, data_type='string', abstract='',
+    def __init__(self, identifier, title, data_type='string', abstract='', keywords=[],
                  metadata=[], uoms=[], mode=MODE.SIMPLE):
         if uoms is None:
             uoms = []
-        basic.LiteralOutput.__init__(self, identifier, title=title,
+        basic.LiteralOutput.__init__(self, identifier, title=title, abstract=abstract, keywords=keywords,
                                      data_type=data_type, uoms=uoms, mode=mode)
-        self.abstract = abstract
         self.metadata = metadata
 
     def describe_xml(self):
@@ -269,6 +284,10 @@ class LiteralOutput(basic.LiteralOutput):
 
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
+
+        if self.keywords:
+            kws = map(OWS.Keyword, self.keywords)
+            doc.append(OWS.Keywords(*kws))
 
         for m in self.metadata:
             doc.append(OWS.Metadata(dict(m)))
@@ -304,6 +323,10 @@ class LiteralOutput(basic.LiteralOutput):
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
 
+        if self.keywords:
+            kws = map(OWS.Keyword, self.keywords)
+            doc.append(OWS.Keywords(*kws))
+
         return doc
 
     def execute_xml(self):
@@ -314,6 +337,10 @@ class LiteralOutput(basic.LiteralOutput):
 
         if self.abstract:
             doc.append(OWS.Abstract(self.abstract))
+
+        if self.keywords:
+            kws = map(OWS.Keyword, self.keywords)
+            doc.append(OWS.Keywords(*kws))
 
         data_doc = WPS.Data()
 

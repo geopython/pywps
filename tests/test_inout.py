@@ -14,7 +14,7 @@ from pywps import Format
 from pywps.validator import get_validator
 from pywps import NAMESPACES
 from pywps.inout.basic import IOHandler, SOURCE_TYPE, SimpleHandler, BBoxInput, BBoxOutput, \
-    ComplexInput, ComplexOutput, LiteralOutput, LiteralInput
+    ComplexInput, ComplexOutput, LiteralOutput, LiteralInput, _is_textfile
 from pywps.inout import BoundingBoxInput as BoundingBoxInputXML
 from pywps.inout.literaltypes import convert, AllowedValue
 from pywps._compat import StringIO, text_type
@@ -23,6 +23,8 @@ from pywps.exceptions import InvalidParameterValue
 from pywps.validator.mode import MODE
 
 from lxml import etree
+
+DATA_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'data')
 
 
 def get_data_format(mime_type):
@@ -146,6 +148,14 @@ class IOHandlerTest(unittest.TestCase):
         self.iohandler.stream.close()
         self.assertEqual(self._value, stream_data, 'Stream obtained')
 
+    def test_is_textfile(self):
+        geotiff = os.path.join(DATA_DIR, 'geotiff', 'dem.tiff')
+        self.assertFalse(_is_textfile(geotiff))
+        gml = os.path.join(DATA_DIR, 'gml', 'point.gml')
+        self.assertTrue(_is_textfile(gml))
+        geojson = os.path.join(DATA_DIR, 'json', 'point.geojson')
+        self.assertTrue(_is_textfile(geojson))
+
 
 class ComplexInputTest(unittest.TestCase):
     """ComplexInput test cases"""
@@ -156,6 +166,7 @@ class ComplexInputTest(unittest.TestCase):
         self.complex_in = ComplexInput(identifier="complexinput",
                                        title='MyComplex',
                                        abstract='My complex input',
+                                       keywords=['kw1', 'kw2'],
                                        workdir=self.tmp_dir,
                                        supported_formats=[data_format])
 
@@ -187,6 +198,7 @@ class ComplexInputTest(unittest.TestCase):
         self.assertEqual(len(out['supported_formats']), 1, 'There is one formats')
         self.assertEqual(out['title'], 'MyComplex', 'Title not set but existing')
         self.assertEqual(out['abstract'], 'My complex input', 'Abstract not set but existing')
+        self.assertEqual(out['keywords'], ['kw1', 'kw2'], 'Keywords not set but existing')
         self.assertEqual(out['identifier'], 'complexinput', 'identifier set')
         self.assertEqual(out['type'], 'complex', 'it is complex input')
         self.assertTrue(out['data_format'], 'data_format set')
@@ -282,6 +294,7 @@ class LiteralInputTest(unittest.TestCase):
         self.assertFalse(out['workdir'], 'Workdir exist')
         self.assertEqual(out['data_type'], 'integer', 'Data type is integer')
         self.assertFalse(out['abstract'], 'abstract exist')
+        self.assertFalse(out['keywords'], 'keywords exist')
         self.assertFalse(out['title'], 'title exist')
         self.assertEqual(out['data'], 9, 'data set')
         self.assertEqual(out['mode'], MODE.STRICT, 'Mode set')
