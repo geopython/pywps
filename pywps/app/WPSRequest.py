@@ -82,7 +82,7 @@ class WPSRequest(object):
         maxsize = configuration.get_size_mb(maxsize) * 1024 * 1024
         if self.http_request.content_length > maxsize:
             raise FileSizeExceeded('File size for input exceeded.'
-                                   ' Maximum request size allowed: %i megabytes' % maxsize / 1024 / 1024)
+                                   ' Maximum request size allowed: %i megabytes' % (maxsize / 1024 / 1024) )
 
         try:
             doc = lxml.etree.fromstring(self.http_request.get_data())
