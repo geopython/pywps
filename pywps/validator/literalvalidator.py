@@ -6,6 +6,7 @@
 """ Validator classes used for LiteralInputs
 """
 import logging
+from decimal import Decimal
 
 from pywps.validator.mode import MODE
 from pywps.validator.allowed_value import ALLOWEDVALUETYPE, RANGECLOSURETYPE
@@ -73,7 +74,7 @@ def _validate_range(interval, data):
         if interval.spacing:
             spacing = abs(interval.spacing)
             diff = data - interval.minval
-            passed = diff % spacing == 0
+            passed = Decimal(str(diff)) % Decimal(str(spacing)) == 0
         else:
             passed = True
 
