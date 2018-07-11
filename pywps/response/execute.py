@@ -68,9 +68,8 @@ class ExecuteResponse(WPSResponse):
             self.status_percentage = status_percentage
 
         # check if storing of the status is requested
-        if self.status >= STATUS.STORE_AND_UPDATE_STATUS:
+        if self.status >= STATUS.STORE_AND_UPDATE_STATUS or self.status == STATUS.ERROR_STATUS:
             # rebuild the doc and update the status xml file
-            self.doc = self._construct_doc()
             self.write_response_doc(clean)
 
         update_response(self.uuid, self)
@@ -79,7 +78,8 @@ class ExecuteResponse(WPSResponse):
         # TODO: check if file/directory is still present, maybe deleted in mean time
 
         # check if storing of the status is requested
-        if self.status >= STATUS.STORE_AND_UPDATE_STATUS:
+        if self.status >= STATUS.STORE_AND_UPDATE_STATUS or \
+           self.status == STATUS.ERROR_STATUS:
 
             # rebuild the doc and update the status xml file
             self.doc = self._construct_doc()
@@ -173,7 +173,7 @@ class ExecuteResponse(WPSResponse):
                 return data
 
         # check if process failed and display fail message
-        if self.status_percentage == -1:
+        if self.status_percentage == -1 or self.status == STATUS.ERROR_STATUS:
             data["status"] = self._process_failed()
             return data
 
