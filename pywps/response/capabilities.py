@@ -2,7 +2,6 @@ from werkzeug.wrappers import Request
 import pywps.configuration as config
 from pywps.app.basic import xml_response
 from pywps.response import WPSResponse
-from pywps.response.status import STATUS
 from pywps import __version__
 import os
 

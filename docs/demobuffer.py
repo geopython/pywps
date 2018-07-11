@@ -29,6 +29,7 @@ from pywps import Process, LiteralInput, ComplexOutput, ComplexInput, Format
 from pywps.app.Common import Metadata
 from pywps.validator.mode import MODE
 from pywps.inout.formats import FORMATS
+from pywps.response.status import WPS_STATUS
 
 inpt_vector = ComplexInput(
     'vector',
@@ -100,7 +101,7 @@ def _handler(request, response):
     # make buffer for each feature
     while index < count:
 
-        response.update_status('Buffering feature %s' % index, float(index) / count)
+        response._update_status(WPS_STATUS.STARTED, 'Buffering feature %s' % index, float(index) / count)
 
         # get the geometry
         input_feature = input_layer.GetNextFeature()

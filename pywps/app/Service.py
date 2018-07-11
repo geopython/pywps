@@ -17,8 +17,9 @@ import pywps.configuration as config
 from pywps.exceptions import MissingParameterValue, NoApplicableCode, InvalidParameterValue, FileSizeExceeded, \
     StorageNotSupported, FileURLNotSupported
 from pywps.inout.inputs import ComplexInput, LiteralInput, BoundingBoxInput
-from pywps.dblog import log_request, update_response
+from pywps.dblog import log_request, store_status
 from pywps import response
+from pywps.response.status import WPS_STATUS
 
 from collections import deque, OrderedDict
 import os
@@ -403,9 +404,11 @@ class Service(object):
                 response = None
                 if wps_request.operation == 'getcapabilities':
                     response = self.get_capabilities(wps_request, request_uuid)
+                    response._update_status(WPS_STATUS.SUCCEEDED, u'', 100)
 
                 elif wps_request.operation == 'describeprocess':
                     response = self.describe(wps_request, request_uuid, wps_request.identifiers)
+                    response._update_status(WPS_STATUS.SUCCEEDED, u'', 100)
 
                 elif wps_request.operation == 'execute':
                     response = self.execute(
@@ -413,10 +416,8 @@ class Service(object):
                         wps_request,
                         request_uuid
                     )
-                update_response(request_uuid, response, close=True)
                 return response
             else:
-                update_response(request_uuid, response, close=True)
                 raise RuntimeError("Unknown operation %r"
                                    % wps_request.operation)
 
@@ -425,12 +426,8 @@ class Service(object):
             if not isinstance(e, NoApplicableCode):
                 e = NoApplicableCode(e.description, code=e.code)
 
-            class FakeResponse:
-                message = e.locator
-                status = e.code
-                status_percentage = 100
             try:
-                update_response(request_uuid, FakeResponse, close=True)
+                store_status(request_uuid, WPS_STATUS.FAILED, e.locator, 100)
             except NoApplicableCode as e:
                 return e
             return e

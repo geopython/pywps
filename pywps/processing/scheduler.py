@@ -7,6 +7,7 @@ import os
 import pywps.configuration as config
 from pywps.processing.basic import Processing
 from pywps.exceptions import SchedulerNotAvailable
+from pywps.response.status import WPS_STATUS
 
 import logging
 LOGGER = logging.getLogger("PYWPS")
@@ -22,10 +23,11 @@ class Scheduler(Processing):
     """
 
     def start(self):
-        self.job.wps_response.update_status('Submitting job ...', 0)
+        self.job.wps_response._update_status(WPS_STATUS.ACCEPTED, 'Submitting job ...', 0)
         # run remote pywps process
         jobid = self.run_job()
-        self.job.wps_response.update_status('Your job has been submitted with ID %s'.format(jobid), 0)
+        self.job.wps_response._update_status(WPS_STATUS.ACCEPTED,
+                                             'Your job has been submitted with ID %s'.format(jobid), 0)
 
     def run_job(self):
         LOGGER.info("Submitting job ...")
