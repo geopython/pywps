@@ -229,8 +229,12 @@ class Process(object):
             method_name = exc_tb.tb_frame.f_code.co_name
 
             # update the process status to display process failed
+
             msg = 'Process error: %s.%s Line %i %s' % (fname, method_name, exc_tb.tb_lineno, e)
             LOGGER.error(msg)
+
+            if config.get_config_value("logging", "level") != "DEBUG":
+                msg = 'Process failed, please check server error log'
 
             if not wps_response:
                 raise NoApplicableCode('Response is empty. Make sure the _handler method is returning a valid object.')
