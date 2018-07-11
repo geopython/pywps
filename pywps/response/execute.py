@@ -13,9 +13,8 @@ from pywps import get_ElementMakerForVersion
 from pywps.app.basic import xml_response
 from pywps.exceptions import NoApplicableCode
 import pywps.configuration as config
-from pywps.dblog import update_response
 
-from pywps.response.status import STATUS
+from pywps.response.status import WPS_STATUS
 from pywps.response import WPSResponse
 
 from pywps._compat import PY2
@@ -46,55 +45,41 @@ class ExecuteResponse(WPSResponse):
 
         self.process = kwargs["process"]
         self.outputs = {o.identifier: o for o in self.process.outputs}
+        self.store_status_file = False
 
-    def update_status(self, message=None, status_percentage=None, status=None,
-                      clean=True):
+    # override WPSResponse._update_status
+    def _update_status(self, status, message, status_percentage, clean=True):
+        super(ExecuteResponse, self)._update_status(status, message, status_percentage)
+        if self.store_status_file:
+            self.update_status_file(clean)
+
+    def update_status(self, message, status_percentage=None):
         """
         Update status report of currently running process instance
 
         :param str message: Message you need to share with the client
         :param int status_percentage: Percent done (number betwen <0-100>)
-        :param pywps.app.WPSResponse.STATUS status: process status - user should usually
-            ommit this parameter
         """
+        if status_percentage is None:
+            status_percentage = self.status_percentage
+        self._update_status(WPS_STATUS.ACCEPTED, message, status_percentage)
 
-        if message:
-            self.message = message
-
-        if status is not None:
-            self.status = status
-
-        if status_percentage is not None:
-            self.status_percentage = status_percentage
-
-        # check if storing of the status is requested
-        if self.status >= STATUS.STORE_AND_UPDATE_STATUS or self.status == STATUS.ERROR_STATUS:
-            # rebuild the doc and update the status xml file
-            self.write_response_doc(clean)
-
-        update_response(self.uuid, self)
-
-    def write_response_doc(self, clean=True):
+    def update_status_file(self, clean):
         # TODO: check if file/directory is still present, maybe deleted in mean time
-
-        # check if storing of the status is requested
-        if self.status >= STATUS.STORE_AND_UPDATE_STATUS or \
-           self.status == STATUS.ERROR_STATUS:
-
+        try:
             # rebuild the doc and update the status xml file
             self.doc = self._construct_doc()
 
-            try:
-                with open(self.process.status_location, 'w') as f:
-                    f.write(self.doc)
-                    f.flush()
-                    os.fsync(f.fileno())
+            with open(self.process.status_location, 'w') as f:
+                f.write(self.doc)
+                f.flush()
+                os.fsync(f.fileno())
 
-                if self.status >= STATUS.DONE_STATUS and clean:
-                    self.process.clean()
+            if (self.status == WPS_STATUS.SUCCEEDED or self.status == WPS_STATUS.FAILED) and clean:
+                self.process.clean()
 
-            except IOError as e:
-                raise NoApplicableCode('Writing Response Document failed with : %s' % e)
+        except Exception as e:
+            raise NoApplicableCode('Writing Response Document failed with : %s' % e)
 
     def _process_accepted(self):
         return {
@@ -158,28 +143,28 @@ class ExecuteResponse(WPSResponse):
         data["service_instance"] = self._get_serviceinstance()
         data["process"] = self.process.json
 
-        if self.status >= STATUS.STORE_STATUS:
+        if self.store_status_file:
             if self.process.status_location:
                 data["status_location"] = self.process.status_url
 
-        if self.status == STATUS.STORE_AND_UPDATE_STATUS:
-            if self.status_percentage == 0:
-                self.message = 'PyWPS Process %s accepted' % self.process.identifier
-                data["status"] = self._process_accepted()
-                return data
-            elif self.status_percentage > 0:
-                data["percent_done"] = self.status_percentage
-                data["status"] = self._process_started()
-                return data
+        if self.status == WPS_STATUS.ACCEPTED:
+            self.message = 'PyWPS Process %s accepted' % self.process.identifier
+            data["status"] = self._process_accepted()
+            return data
+
+        if self.status == WPS_STATUS.STARTED:
+            data["percent_done"] = self.status_percentage
+            data["status"] = self._process_started()
+            return data
 
         # check if process failed and display fail message
-        if self.status_percentage == -1 or self.status == STATUS.ERROR_STATUS:
+        if self.status == WPS_STATUS.FAILED:
             data["status"] = self._process_failed()
             return data
 
         # TODO: add paused status
 
-        if self.status == STATUS.DONE_STATUS:
+        if self.status == WPS_STATUS.SUCCEEDED:
             data["status"] = self._process_succeeded()
 
             # DataInputs and DataOutputs definition XML if lineage=true
@@ -216,7 +201,7 @@ class ExecuteResponse(WPSResponse):
         except Exception as exp:
             raise NoApplicableCode(exp)
 
-        if self.status >= STATUS.DONE_STATUS:
+        if self.store_status_file:
             self.process.clean()
 
         return xml_response(doc)

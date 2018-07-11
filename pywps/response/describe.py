@@ -5,7 +5,6 @@ from pywps.exceptions import NoApplicableCode
 from pywps.exceptions import MissingParameterValue
 from pywps.exceptions import InvalidParameterValue
 from pywps.response import WPSResponse
-from pywps.response.status import STATUS
 from pywps import __version__
 import os
 
