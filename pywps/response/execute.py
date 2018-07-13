@@ -13,6 +13,7 @@ from pywps import get_ElementMakerForVersion
 from pywps.app.basic import xml_response
 from pywps.exceptions import NoApplicableCode
 import pywps.configuration as config
+from werkzeug.wrappers import Response
 
 from pywps.response.status import WPS_STATUS
 from pywps.response import WPSResponse
@@ -184,24 +185,32 @@ class ExecuteResponse(WPSResponse):
         return data
 
     def _construct_doc(self):
-
         template = self.template_env.get_template(os.path.join(self.version, 'execute', 'main.xml'))
-
         doc = template.render(**self.json)
-
         return doc
 
     @Request.application
     def __call__(self, request):
-        doc = None
-        try:
-            doc = self._construct_doc()
-        except HTTPException as httpexp:
-            raise httpexp
-        except Exception as exp:
-            raise NoApplicableCode(exp)
+        if self.wps_request.raw:
+            if self.status == WPS_STATUS.FAILED:
+                return NoApplicableCode(self.message)
+            else:
+                wps_output_identifier = next(iter(self.wps_request.outputs))  # get the first key only
+                wps_output_value = self.outputs[wps_output_identifier]
+                if wps_output_value.source_type is None:
+                    return NoApplicableCode("Expected output was not generated")
+                return Response(wps_output_value.data,
+                                mimetype=self.wps_request.outputs[wps_output_identifier]['mimetype'])
+        else:
+            doc = None
+            try:
+                doc = self._construct_doc()
+                if self.store_status_file:
+                    self.process.clean()
+            # TODO: If an exception occur here we must generate a valid status file
+            except HTTPException as httpexp:
+                return httpexp
+            except Exception as exp:
+                return NoApplicableCode(exp)
 
-        if self.store_status_file:
-            self.process.clean()
-
-        return xml_response(doc)
+            return Response(doc, mimetype='text/xml')

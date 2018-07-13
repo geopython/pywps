@@ -14,6 +14,7 @@ import tempfile
 from pywps import get_ElementMakerForVersion, E, dblog
 from pywps.response import get_response
 from pywps.response.status import WPS_STATUS
+from pywps.response.execute import ExecuteResponse
 from pywps.app.WPSRequest import WPSRequest
 import pywps.configuration as config
 from pywps._compat import PY2
@@ -154,48 +155,39 @@ class Process(object):
 
             # run immedietly
             if running < maxparallel or maxparallel == -1:
+                wps_response._update_status(WPS_STATUS.ACCEPTED, u"PyWPS Request accepted", 0)
                 self._run_async(wps_request, wps_response)
 
             # try to store for later usage
             else:
-                wps_response = self._store_process(stored,
-                                                   wps_request, wps_response)
+                maxprocesses = int(config.get_config_value('server', 'maxprocesses'))
+                if stored >= maxprocesses:
+                    raise ServerBusy('Maximum number of parallel running processes reached. Please try later.')
+                LOGGER.debug("Store process in job queue, uuid=%s", self.uuid)
+                dblog.store_process(self.uuid, wps_request)
+                wps_response._update_status(WPS_STATUS.ACCEPTED, u'PyWPS Process stored in job queue', 0)
 
         # not async
         else:
-            if running < maxparallel or maxparallel == -1:
-                wps_response = self._run_process(wps_request, wps_response)
-            else:
+            if running >= maxparallel and maxparallel != -1:
                 raise ServerBusy('Maximum number of parallel running processes reached. Please try later.')
+            wps_response._update_status(WPS_STATUS.ACCEPTED, u"PyWPS Request accepted", 0)
+            wps_response = self._run_process(wps_request, wps_response)
 
         return wps_response
 
+    # This function may not raise exception and must return a valid wps_response
+    # Failure must be reported as wps_response.status = WPS_STATUS.FAILED
     def _run_async(self, wps_request, wps_response):
         import pywps.processing
-        # required to return correct status in the main process, otherwise the status file may be invalid until the
-        # fork is perfomed.
-        wps_response._update_status(WPS_STATUS.ACCEPTED, u"PyWPS Request accepted", 0)
         process = pywps.processing.Process(
             process=self,
             wps_request=wps_request,
             wps_response=wps_response)
         process.start()
 
-    def _store_process(self, stored, wps_request, wps_response):
-        """Try to store given requests
-        """
-
-        maxprocesses = int(config.get_config_value('server', 'maxprocesses'))
-
-        if stored < maxprocesses:
-            LOGGER.debug("Store process in job queue, uuid=%s", self.uuid)
-            dblog.store_process(self.uuid, wps_request)
-            wps_response._update_status(WPS_STATUS.ACCEPTED, u'PyWPS Process stored in job queue', 0)
-        else:
-            raise ServerBusy('Maximum number of parallel running processes reached. Please try later.')
-
-        return wps_response
-
+    # This function may not raise exception and must return a valid wps_response
+    # Failure must be reported as wps_response.status = WPS_STATUS.FAILED
     def _run_process(self, wps_request, wps_response):
         try:
             self._set_grass(wps_request)
@@ -205,11 +197,12 @@ class Process(object):
                 LOGGER.info('Setting HOME to current working directory: %s', os.environ['HOME'])
             LOGGER.debug('ProcessID=%s, HOME=%s', self.uuid, os.environ.get('HOME'))
             wps_response._update_status(WPS_STATUS.STARTED, u'PyWPS Process started', 0)
-            wps_response = self.handler(wps_request, wps_response)
-
-            # if (not wps_response.status_percentage) or (wps_response.status_percentage != 100):
-            LOGGER.debug('Updating process status to 100% if everything went correctly')
-            wps_response._update_status(WPS_STATUS.SUCCEEDED, 'PyWPS Process {} finished'.format(self.title), 100)
+            self.handler(wps_request, wps_response)  # the user must update the wps_response.
+            # Ensure process termination
+            if wps_response.status != WPS_STATUS.SUCCEEDED and wps_response.status != WPS_STATUS.FAILED:
+                # if (not wps_response.status_percentage) or (wps_response.status_percentage != 100):
+                LOGGER.debug('Updating process status to 100% if everything went correctly')
+                wps_response._update_status(WPS_STATUS.SUCCEEDED, 'PyWPS Process {} finished'.format(self.title), 100)
         except Exception as e:
             traceback.print_exc()
             LOGGER.debug('Retrieving file and line number where exception occurred')
@@ -234,38 +227,42 @@ class Process(object):
 
             msg = 'Process error: %s.%s Line %i %s' % (fname, method_name, exc_tb.tb_lineno, e)
             LOGGER.error(msg)
-
             if config.get_config_value("logging", "level") != "DEBUG":
                 msg = 'Process failed, please check server error log'
+            wps_response._update_status(WPS_STATUS.FAILED, msg, 100)
 
-            if not wps_response:
-                raise NoApplicableCode('Response is empty. Make sure the _handler method is returning a valid object.')
-            elif wps_request.raw:
-                raise
-            else:
-                wps_response._update_status(WPS_STATUS.FAILLED, msg, -1)
-
-        # tr
-        stored_request = dblog.get_first_stored()
-        if stored_request:
-            try:
-                (uuid, request_json) = (stored_request.uuid, stored_request.request)
-                if not PY2:
-                    request_json = request_json.decode('utf-8')
-                new_wps_request = WPSRequest()
-                new_wps_request.json = json.loads(request_json)
-                process_identifier = new_wps_request.identifier
-                process = self.service.prepare_process_for_execution(process_identifier)
-                process._set_uuid(uuid)
-                process.async = True
-                response_cls = get_response("execute")
-                new_wps_response = response_cls(new_wps_request, process=process, uuid=uuid)
-                process._run_async(new_wps_request, new_wps_response)
-                dblog.remove_stored(uuid)
-            except Exception as e:
-                LOGGER.error("Could not run stored process. %s", e)
+        finally:
+            # The run of the next pending request if finished here, weather or not it successfull
+            self.launch_next_process()
 
         return wps_response
+
+    def launch_next_process(self):
+        """Look at the queue of async process, if the queue is not empty launch the next pending request.
+        """
+        try:
+            LOGGER.debug("Checking for stored requests")
+
+            stored_request = dblog.get_first_stored()
+            if not stored_request:
+                LOGGER.debug("No stored request found")
+                return
+
+            (uuid, request_json) = (stored_request.uuid, stored_request.request)
+            if not PY2:
+                request_json = request_json.decode('utf-8')
+            LOGGER.debug("Launching the stored request %s", str(uuid))
+            new_wps_request = WPSRequest()
+            new_wps_request.json = json.loads(request_json)
+            process_identifier = new_wps_request.identifier
+            process = self.service.prepare_process_for_execution(process_identifier)
+            process._set_uuid(uuid)
+            process.async = True
+            new_wps_response = ExecuteResponse(new_wps_request, process=process, uuid=uuid)
+            process._run_async(new_wps_request, new_wps_response)
+            dblog.remove_stored(uuid)
+        except Exception as e:
+            LOGGER.error("Could not run stored process. %s", e)
 
     def clean(self):
         """Clean the process working dir and other temporary files
