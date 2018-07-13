@@ -54,5 +54,11 @@ class DescribeResponse(WPSResponse):
 
     @Request.application
     def __call__(self, request):
-        doc = self.get_response_doc()
-        return xml_response(doc)
+        # This function must return a valid response.
+        try:
+            doc = self.get_response_doc()
+            return xml_response(doc)
+        except NoApplicableCode as e:
+            return e
+        except Exception as e:
+            return NoApplicableCode(str(e))
