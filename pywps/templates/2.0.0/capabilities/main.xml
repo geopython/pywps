@@ -85,11 +85,19 @@
 	</ows:OperationsMetadata>
     <wps:Contents>{% for process in processes %}
             <wps:ProcessSummary jobControlOptions="{% for option in process.control_options %}{{ option }} {% endfor %}" wps:processVersion="{{ process.version }}">
-                
+
 			<ows:Title>process.title</ows:Title>
 			<ows:Identifier>process.identifier</ows:Identifier>
             <ows:Abstract>{{ process.abstract }}</ows:Abstract>{% for metadata in process.metadata %}
-            <ows:Metadata xlink:title="{{ metadata.title }}" xlink:type="{{ metadata.type }}" />{% endfor %}
+            <ows:Metadata xlink:title="{{ metadata.title }}" xlink:type="{{ metadata.type }}"
+						{% if metadata.href != None %}
+							xlink:href="{{ metadata.href }}"
+						{% endif %}
+						{% if metadata.role != None %}
+							xlink:role="{{ metadata.role }}"
+						{% endif %}
+						/>
+						{% endfor %}
             <ows:Keywords>{% for keyword in process.keywords %}
                 <ows:Keyword>{{ keyword }}</ows:Keyword>{% endfor %}
             </ows:Keywords>

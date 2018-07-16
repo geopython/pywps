@@ -37,7 +37,8 @@ class WPSResponse(object):
         self.version = version
         self.template_env = RelEnvironment(
             loader=PackageLoader('pywps', 'templates'),
-            trim_blocks=True, lstrip_blocks=True
+            trim_blocks=True, lstrip_blocks=True,
+            autoescape=True,
         )
 
         self.update_status(message="Request accepted", status_percentage=0, status=self.status)
