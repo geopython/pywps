@@ -143,6 +143,9 @@ class WPSRequest(object):
                 http_request, 'lineage', 'false')
             wpsrequest.inputs = get_data_from_kvp(
                 _get_get_param(http_request, 'DataInputs'), 'DataInputs')
+            if self.inputs is None:
+                self.inputs = {}
+
             wpsrequest.outputs = {}
 
             # take responseDocument preferably
