@@ -83,7 +83,14 @@
             </ows:Keywords>
             {% endif %}
             {% for metadata in process.metadata %}
-            <ows:Metadata xlink:title="{{ metadata.title }}" xlink:type="{{ metadata.type }}" />
+            <ows:Metadata xlink:title="{{ metadata.title }}" xlink:type="{{ metadata.type }}"
+            {% if metadata.href != None %}
+              xlink:href="{{ metadata.href }}"
+            {% endif %}
+            {% if metadata.role != None %}
+              xlink:role="{{ metadata.role }}"
+            {% endif %}
+            />
             {% endfor %}
         </wps:Process>
     {% endfor %}
@@ -97,6 +104,6 @@
             <ows:Language>lang</ows:Language>
             {% endfor %}
         </wps:Supported>
-    </wps:Languages> 
+    </wps:Languages>
     {# <wps:WSDL xlink:href="{{ wsdl }}"/> #}
 </wps:Capabilities>

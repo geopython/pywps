@@ -7,7 +7,14 @@
         <ows:Title>{{ process.title }}</ows:Title>
         <ows:Abstract>{{ process.abstract }}</ows:Abstract>
         {% for metadata in process.metadata %}
-        <ows:Metadata xlink:title="{{ metadata.title }}" xlink:type="{{ metadata.type }}" />
+        <ows:Metadata xlink:title="{{ metadata.title }}" xlink:type="{{ metadata.type }}"
+          {% if metadata.href != None %}
+            xlink:href="{{ metadata.href }}"
+          {% endif %}
+          {% if metadata.role != None %}
+            xlink:role="{{ metadata.role }}"
+          {% endif %}
+        />
         {% endfor %}
         {% for profile in profiles %}
         <wps:Profile>{{ profile }}</wps:Profile>
