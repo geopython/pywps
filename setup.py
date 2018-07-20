@@ -48,7 +48,7 @@ CONFIG = {
         'Topic :: Scientific/Engineering :: GIS'
     ],
     'install_requires': INSTALL_REQUIRES,
-    'packages': find_packages(exclude=["docs", "tests"]),
+    'packages': find_packages(exclude=["docs", "tests.*", "tests"]),
     'include_package_data': True,
     'scripts': [],
     'entry_points': {
