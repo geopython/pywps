@@ -68,9 +68,9 @@ def load_configuration(cfgfiles=None):
 
     LOGGER.info('loading configuration')
     if PY2:
-        CONFIG = ConfigParser.SafeConfigParser()
+        CONFIG = ConfigParser.SafeConfigParser(os.environ)
     else:
-        CONFIG = configparser.ConfigParser()
+        CONFIG = configparser.ConfigParser(os.environ)
 
     LOGGER.debug('setting default values')
     CONFIG.add_section('server')
