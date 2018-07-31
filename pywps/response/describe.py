@@ -46,7 +46,7 @@ class DescribeResponse(WPSResponse):
         if not self.identifiers:
             raise MissingParameterValue('Missing parameter value "identifier"', 'identifier')
 
-        template = self.template_env.get_template(os.path.join(self.version, 'describe', 'main.xml'))
+        template = self.template_env.get_template(self.version + '/describe/main.xml')
         max_size = int(config.get_size_mb(config.get_config_value('server', 'maxsingleinputsize')))
         doc = template.render(max_size=max_size, **self.json)
 

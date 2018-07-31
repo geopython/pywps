@@ -61,7 +61,7 @@ class CapabilitiesResponse(WPSResponse):
 
     def _construct_doc(self):
 
-        template = self.template_env.get_template(os.path.join(self.version, 'capabilities', 'main.xml'))
+        template = self.template_env.get_template(self.version + '/capabilities/main.xml')
 
         doc = template.render(**self.json)
 
