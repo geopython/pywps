@@ -185,7 +185,7 @@ class ExecuteResponse(WPSResponse):
         return data
 
     def _construct_doc(self):
-        template = self.template_env.get_template(os.path.join(self.version, 'execute', 'main.xml'))
+        template = self.template_env.get_template(self.version + '/execute/main.xml')
         doc = template.render(**self.json)
         return doc
 
