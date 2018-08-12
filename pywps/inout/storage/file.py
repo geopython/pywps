@@ -5,52 +5,13 @@
 
 import logging
 import os
-from abc import ABCMeta, abstractmethod
 from pywps._compat import urljoin
 from pywps.exceptions import NotEnoughStorage
 from pywps import configuration as config
+from . import StorageAbstract, STORE_TYPE
 
 LOGGER = logging.getLogger('PYWPS')
 
-
-class STORE_TYPE:
-    PATH = 0
-# TODO: cover with tests
-
-
-class StorageAbstract(object):
-    """Data storage abstract class
-    """
-
-    __metaclass__ = ABCMeta
-
-    @abstractmethod
-    def store(self, output):
-        """
-        :param output: of type IOHandler
-        :returns: (type, store, url) where
-            type - is type of STORE_TYPE - number
-            store - string describing storage - file name, database connection
-            url - url, where the data can be downloaded
-        """
-        pass
-
-
-class DummyStorage(StorageAbstract):
-    """Dummy empty storage implementation, does nothing
-
-    Default instance, for non-reference output request
-
-    >>> store = DummyStorage()
-    >>> assert store.store
-    """
-
-    def __init__(self):
-        """
-        """
-
-    def store(self, ouput):
-        pass
 
 
 class FileStorage(StorageAbstract):
@@ -88,7 +49,7 @@ class FileStorage(StorageAbstract):
         import math
         import shutil
         import tempfile
-        import uuid
+        import uuid 
 
         file_name = output.file
 

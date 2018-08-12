@@ -16,3 +16,5 @@ docs/_build
 
 *.orig
 .coverage
+example.db
+*.cfg

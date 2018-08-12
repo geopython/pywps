@@ -83,6 +83,7 @@ class FormatsTest(unittest.TestCase):
         injson['extension'] = '.gml'
         injson['mime_type'] = 'application/gml+xml'
         injson['encoding'] = 'utf-8'
+        injson['data_type'] = 'VECTOR'
 
         frmt = Format(injson['mime_type'])
         frmt.json = injson
