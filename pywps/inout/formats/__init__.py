@@ -21,6 +21,7 @@ _FORMATS = namedtuple('FORMATS', 'GEOJSON, JSON, SHP, GML, GEOTIFF, WCS,'
                                  'WFS110, WFS20, WMS, WMS130, WMS110,'
                                  'WMS100, TEXT, CSV, NETCDF, LAZ, LAS')
 
+
 # this should be Enum type (only compatible with Python 3)
 class DATA_TYPE(object):
     VECTOR = 0
@@ -75,7 +76,6 @@ class Format(object):
 
         return self._mime_type
 
-
     @property
     def data_type(self):
         """Get format data type
@@ -83,14 +83,12 @@ class Format(object):
 
         return self._data_type
 
-
     @data_type.setter
     def data_type(self, data_type):
         """Set format encoding
         """
 
         self._data_type = data_type
-
 
     @mime_type.setter
     def mime_type(self, mime_type):
@@ -212,7 +210,7 @@ FORMATS = _FORMATS(
     Format('text/csv', extension='.csv', data_type=DATA_TYPE.OTHER),
     Format('application/x-netcdf', extension='.nc', data_type=DATA_TYPE.VECTOR),
     Format('application/octet-stream', extension='.laz', data_type=DATA_TYPE.VECTOR),
-    Format('application/octet-stream', extension='.las', data_type=DATA_TYPE.VECTOR), 
+    Format('application/octet-stream', extension='.las', data_type=DATA_TYPE.VECTOR),
 )
 
 

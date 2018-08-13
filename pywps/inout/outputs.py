@@ -111,7 +111,6 @@ class ComplexOutput(basic.ComplexOutput):
         else:
             self.storage = FileStorage()
 
-
         """
         to be implemented:
         elif store_type == 's3' and \

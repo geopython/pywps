@@ -7,6 +7,7 @@ import logging
 from abc import ABCMeta, abstractmethod
 from pywps import configuration as config
 from pywps.inout.formats import DATA_TYPE
+from pywps.exceptions import NoApplicableCode
 from .. import STORE_TYPE
 from .. import StorageAbstract
 import sqlalchemy
@@ -18,13 +19,11 @@ LOGGER = logging.getLogger('PYWPS')
 class DbStorage(StorageAbstract):
 
     def __init__(self):
-        # get db_type from configuration 
+        # get db_type from configuration
         try:
             self.db_type = config.get_config_value('db', 'db_type').lower()
         except KeyError:
-            raise exception("Database type has not been specified")
-
-
+            raise Exception("Database type has not been specified")
 
     @staticmethod
     def get_db_type():
@@ -37,13 +36,12 @@ class DbStorage(StorageAbstract):
         elif db_type == "sqlite":
             storage = sqlite.SQLiteStorage()
         else:
-            raise Exception("Unknown database type: '{}'".format(self.db_type))
+            raise Exception("Unknown database type: '{}'".format(config.get_config_value('db', 'db_type').lower()))
 
         return storage
 
     def initdb(self):
         pass
-
 
     def store(self, output):
         """ Creates reference that is returned to the client
@@ -66,7 +64,7 @@ class DbStorage(StorageAbstract):
         elif isinstance(self, pg.PgStorage):
             url = '{}.{}.{}'.format(self.dbname, self.schema_name, output.identifier)
 
-        # returns value for database storage defined in the STORE_TYPE class,        
+        # returns value for database storage defined in the STORE_TYPE class,
         # name of the output file and a reference
         return (STORE_TYPE.DB, output.file, url)
 
@@ -80,7 +78,7 @@ class DbStorage(StorageAbstract):
             drv = ogr.GetDriverByName("SQLite")
             dsc_out = drv.CreateDataSource(self.target)
         elif isinstance(self, pg.PgStorage):
-           dsc_out = ogr.Open("PG:" + self.target)
+            dsc_out = ogr.Open("PG:" + self.target)
 
         # connect to a database and copy output there
         LOGGER.debug("Database: {}".format(self.target))
@@ -94,17 +92,15 @@ class DbStorage(StorageAbstract):
 
         if layer is None:
             raise Exception("Writing output data to the database failed.")
-        
+
         dsc_out.Destroy()
         dsc_in.Destroy()
 
         # returns process identifier (defined within the process)
         return identifier
 
-
     def store_raster_output(self, file_name, identifier):
         pass
-
 
     def store_other_output(self, file_name, identifier, uuid):
 
@@ -119,12 +115,16 @@ class DbStorage(StorageAbstract):
             engine = sqlalchemy.create_engine("sqlite:///{}".format(self.target))
         elif isinstance(self, pg.PgStorage):
             engine = sqlalchemy.create_engine('postgresql://{}:{}@{}:{}/{}'.format(
-            self.dbname,self.password,self.host,self.port,self.user
-                )
-            )   
+                self.dbname,
+                self.password,
+                self.host,
+                self.port,
+                self.user
+            )
+            )
 
         # Create table
-        class Other_output(base):  
+        class Other_output(base):
             __tablename__ = identifier
             if isinstance(self, pg.PgStorage):
                 __table_args__ = {'schema' : self.schema_name}
@@ -135,7 +135,7 @@ class DbStorage(StorageAbstract):
             data = Column(LargeBinary)
             timestamp = Column(DateTime(timezone=True), server_default=func.now())
 
-        Session = sessionmaker(engine)  
+        Session = sessionmaker(engine)
         session = Session()
 
         base.metadata.create_all(engine)
@@ -145,9 +145,8 @@ class DbStorage(StorageAbstract):
             out = data.read()
 
             # Add data to table
-            output = Other_output(uuid=uuid, data=out)  
-            session.add(output)  
+            output = Other_output(uuid=uuid, data=out)
+            session.add(output)
             session.commit()
-
 
         return identifier

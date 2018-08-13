@@ -10,7 +10,6 @@ from pywps.inout.formats import DATA_TYPE
 from pywps.exceptions import NoApplicableCode
 from . import DbStorage
 
-
 LOGGER = logging.getLogger('PYWPS')
 
 
@@ -19,7 +18,6 @@ class SQLiteStorage(DbStorage):
     def __init__(self):
 
         self.target = config.get_config_value("db", "dblocation")
-
 
     def store_raster_output(self, file_name, identifier):
 

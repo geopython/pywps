@@ -130,9 +130,8 @@ def load_configuration(cfgfiles=None):
 
     CONFIG.add_section('grass')
     CONFIG.set('grass', 'gisbase', '')
-    
-    CONFIG.add_section('db')
 
+    CONFIG.add_section('db')
 
     if not cfgfiles:
         cfgfiles = _get_default_config_files_location()

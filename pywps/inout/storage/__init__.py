@@ -5,12 +5,9 @@
 
 from abc import ABCMeta, abstractmethod
 
-
-
 class STORE_TYPE:
     PATH = 0
     DB = 1
-
 
 class StorageAbstract(object):
     """Data storage abstract class
@@ -29,8 +26,6 @@ class StorageAbstract(object):
         """
         pass
 
-
-
 class DummyStorage(StorageAbstract):
     """Dummy empty storage implementation, does nothing
 
@@ -46,4 +41,3 @@ class DummyStorage(StorageAbstract):
 
     def store(self, ouput):
         pass
-
