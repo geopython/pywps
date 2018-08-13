@@ -190,6 +190,7 @@ class ComplexInputTest(unittest.TestCase):
         self.assertIsInstance(self.complex_in.supported_formats[0], Format)
 
     def test_json_out(self):
+        self.skipTest('json property now in pywps.inout.inputs.ComplexInput')
         out = self.complex_in.json
 
         self.assertEqual(out['workdir'], self.tmp_dir, 'Workdir defined')

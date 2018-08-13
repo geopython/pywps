@@ -3,6 +3,8 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
+import lxml.etree as etree
+import six
 from pywps import configuration
 from pywps.inout import basic
 from copy import deepcopy
@@ -83,6 +85,73 @@ class ComplexInput(basic.ComplexInput):
         self.url = ''
         self.method = ''
         self.max_size = int(0)
+
+    @property
+    def json(self):
+        """Get JSON representation of the input
+        """
+        data = {
+            'identifier': self.identifier,
+            'title': self.title,
+            'abstract': self.abstract,
+            'keywords': self.keywords,
+            'type': 'complex',
+            'data_format': self.data_format.json,
+            'asreference': self.as_reference,
+            'supported_formats': [frmt.json for frmt in self.supported_formats],
+            'file': self.file,
+            'workdir': self.workdir,
+            'mode': self.valid_mode,
+            'min_occurs': self.min_occurs,
+            'max_occurs': self.max_occurs
+        }
+
+        if self.file:
+
+            if self.as_reference:
+                data = self._json_reference(data)
+            else:
+                data = self._json_data(data)
+
+        if self.data_format:
+            if self.data_format.mime_type:
+                data['mimetype'] = self.data_format.mime_type
+            if self.data_format.encoding:
+                data['encoding'] = self.data_format.encoding
+            if self.data_format.schema:
+                data['schema'] = self.data_format.schema
+
+        return data
+
+    def _json_reference(self, data):
+        """Return Reference node
+        """
+        data["type"] = "reference"
+        data["href"] = self.url
+        return data
+
+    def _json_data(self, data):
+        """Return Data node
+        """
+
+        data["type"] = "complex"
+
+        try:
+            data_doc = etree.parse(self.file)
+            data["data"] = etree.tostring(data_doc, pretty_print=True).decode("utf-8")
+        except Exception:
+
+            if self.data:
+                if isinstance(self.data, six.string_types):
+                    if isinstance(self.data, bytes):
+                        data["data"] = self.data.decode("utf-8")
+                    else:
+                        data["data"] = self.data
+
+                else:
+                    data["data"] = etree.tostring(etree.CDATA(self.base64))
+
+        return data
 
     def calculate_max_input_size(self):
         """Calculates maximal size for input file based on configuration
