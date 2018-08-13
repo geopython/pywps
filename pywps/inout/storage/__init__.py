@@ -5,9 +5,11 @@
 
 from abc import ABCMeta, abstractmethod
 
+
 class STORE_TYPE:
     PATH = 0
     DB = 1
+
 
 class StorageAbstract(object):
     """Data storage abstract class
@@ -25,6 +27,7 @@ class StorageAbstract(object):
             url - url, where the data can be downloaded
         """
         pass
+
 
 class DummyStorage(StorageAbstract):
     """Dummy empty storage implementation, does nothing

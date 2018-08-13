@@ -12,6 +12,7 @@ from . import StorageAbstract, STORE_TYPE
 
 LOGGER = logging.getLogger('PYWPS')
 
+
 class FileStorage(StorageAbstract):
     """File storage implementation, stores data to file system
 

@@ -68,10 +68,9 @@ class DbStorage(StorageAbstract):
         # name of the output file and a reference
         return (STORE_TYPE.DB, output.file, url)
 
-
     def store_vector_output(self, file_name, identifier):
         """ Open output file, connect to SQLite database and copiy data there
-        """ 
+        """
         from osgeo import ogr
 
         if isinstance(self, sqlite.SQLiteStorage):
@@ -104,9 +103,9 @@ class DbStorage(StorageAbstract):
 
     def store_other_output(self, file_name, identifier, uuid):
 
-        from pywps import configuration as config  
+        from pywps import configuration as config
         from sqlalchemy import Column, Integer, String, LargeBinary, DateTime, func, create_engine
-        from sqlalchemy.ext.declarative import declarative_base  
+        from sqlalchemy.ext.declarative import declarative_base
         from sqlalchemy.orm import sessionmaker
 
         base = declarative_base()
@@ -127,8 +126,7 @@ class DbStorage(StorageAbstract):
         class Other_output(base):
             __tablename__ = identifier
             if isinstance(self, pg.PgStorage):
-                __table_args__ = {'schema' : self.schema_name}
-
+                __table_args__ = {'schema': self.schema_name}
 
             primary_key = Column(Integer, primary_key=True)
             uuid = Column(String(64))
