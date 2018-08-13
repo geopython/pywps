@@ -49,7 +49,7 @@ class FileStorage(StorageAbstract):
         import math
         import shutil
         import tempfile
-        import uuid 
+        import uuid
 
         file_name = output.file
 
