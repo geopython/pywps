@@ -44,7 +44,7 @@ class SQLiteStorage(DbStorage):
         dsc_in.Destroy()
 
         # returns process identifier (defined within the process)
-        return identifier        
+        return identifier
 
     def store_raster_output(self, file_name, identifier):
 
@@ -58,6 +58,7 @@ class SQLiteStorage(DbStorage):
     def store_other_output(self, file_name, identifier, uuid):
 
         from pywps import configuration as config
+        import sqlalchemy
         from sqlalchemy import Column, Integer, String, LargeBinary, DateTime, func, create_engine
         from sqlalchemy.ext.declarative import declarative_base
         from sqlalchemy.orm import sessionmaker
@@ -69,8 +70,6 @@ class SQLiteStorage(DbStorage):
         # Create table
         class Other_output(base):
             __tablename__ = identifier
-            if isinstance(self, pg.PgStorage):
-                __table_args__ = {'schema': self.schema_name}
 
             primary_key = Column(Integer, primary_key=True)
             uuid = Column(String(64))
@@ -110,7 +109,6 @@ class SQLiteStorage(DbStorage):
             raise Exception("Unknown data type")
 
         url = '{}.{}'.format(self.target, output.identifier)
-
 
         # returns value for database storage defined in the STORE_TYPE class,
         # name of the output file and a reference

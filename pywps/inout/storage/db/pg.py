@@ -81,7 +81,7 @@ class PgStorage(DbStorage):
         dsc_in.Destroy()
 
         # returns process identifier (defined within the process)
-        return identifier        
+        return identifier
 
     def store_raster_output(self, file_name, identifier):
 
@@ -105,20 +105,20 @@ class PgStorage(DbStorage):
 
         base = declarative_base()
 
-        engine = sqlalchemy.create_engine('postgresql://{}:{}@{}:{}/{}'.format(
+        engine = sqlalchemy.create_engine(
+            'postgresql://{}:{}@{}:{}/{}'.format(
                 self.dbname,
                 self.password,
                 self.host,
                 self.port,
                 self.user
-        )
+            )
         )
 
         # Create table
         class Other_output(base):
             __tablename__ = identifier
-            if isinstance(self, pg.PgStorage):
-                __table_args__ = {'schema': self.schema_name}
+            __table_args__ = {'schema': self.schema_name}
 
             primary_key = Column(Integer, primary_key=True)
             uuid = Column(String(64))
@@ -156,7 +156,6 @@ class PgStorage(DbStorage):
         else:
             # This should never happen
             raise Exception("Unknown data type")
-
 
         url = '{}.{}.{}'.format(self.dbname, self.schema_name, output.identifier)
 
