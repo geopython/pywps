@@ -11,7 +11,7 @@ from pywps.exceptions import NoApplicableCode
 from .. import STORE_TYPE
 from .. import StorageAbstract
 import sqlalchemy
-
+from . import sqlite,pg
 
 LOGGER = logging.getLogger('PYWPS')
 
@@ -27,8 +27,6 @@ class DbStorage(StorageAbstract):
 
     @staticmethod
     def get_db_type():
-        from . import sqlite
-        from . import pg
         # create an instance of the appropriate class
         db_type = config.get_config_value('db', 'db_type').lower()
         if db_type == "pg":
