@@ -47,10 +47,10 @@ class Format(object):
     :param str extension: file extension
     """
 
-    def __init__(self, mime_type, data_type=None,
+    def __init__(self, mime_type,
                  schema=None, encoding=None,
                  validate=emptyvalidator, mode=MODE.SIMPLE,
-                 extension=None):
+                 extension=None, data_type=None):
         """Constructor
         """
 
