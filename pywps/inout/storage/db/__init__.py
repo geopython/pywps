@@ -6,7 +6,6 @@
 import logging
 from abc import ABCMeta, abstractmethod
 from pywps import configuration as config
-from pywps.inout.storage import db
 from pywps.inout.formats import DATA_TYPE
 from .. import STORE_TYPE
 from .. import StorageAbstract
