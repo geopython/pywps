@@ -204,8 +204,7 @@ class Service(object):
                 raise NoApplicableCode(e)
 
             complexinput.file = tmp_file
-            complexinput.url = datain.get('href')
-            complexinput.as_reference = True
+            assert complexinput.url == datain.get('href')
 
         def file_handler(complexinput, datain):
             """<wps:Reference /> handler.
@@ -229,8 +228,7 @@ class Service(object):
                 shutil.copy2(inpt_file, tmp_file)
 
             complexinput.file = tmp_file
-            complexinput.url = datain.get('href')
-            complexinput.as_reference = True
+            assert complexinput.url == datain.get('href')
 
         def data_handler(complexinput, datain):
             """<wps:Data> ... </wps:Data> handler"""
