@@ -204,7 +204,6 @@ class Service(object):
                 raise NoApplicableCode(e)
 
             complexinput.file = tmp_file
-            assert complexinput.url == datain.get('href')
 
         def file_handler(complexinput, datain):
             """<wps:Reference /> handler.
@@ -228,7 +227,6 @@ class Service(object):
                 shutil.copy2(inpt_file, tmp_file)
 
             complexinput.file = tmp_file
-            assert complexinput.url == datain.get('href')
 
         def data_handler(complexinput, datain):
             """<wps:Data> ... </wps:Data> handler"""
@@ -414,7 +412,7 @@ class Service(object):
         except HTTPException as e:
             return NoApplicableCode(e.description, code=e.code)
         except Exception as e:
-            return NoApplicableCode("No applicable error code, please check error log", code=500)
+            return NoApplicableCode("No applicable error code, please check error log.", code=500)
 
     @Request.application
     def __call__(self, http_request):
