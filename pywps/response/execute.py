@@ -206,7 +206,9 @@ class ExecuteResponse(WPSResponse):
             try:
                 doc = self._construct_doc()
                 if self.store_status_file:
-                    self.process.clean()
+                    # TODO: disabled this clean as workaround for #370
+                    # self.process.clean()
+                    pass
             # TODO: If an exception occur here we must generate a valid status file
             except HTTPException as httpexp:
                 return httpexp
