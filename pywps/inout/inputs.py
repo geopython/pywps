@@ -80,7 +80,6 @@ class ComplexInput(basic.ComplexInput):
                                     default=default, default_type=default_type)
 
         self.as_reference = False
-        self.url = ''
         self.method = ''
         self.max_size = int(0)
 
