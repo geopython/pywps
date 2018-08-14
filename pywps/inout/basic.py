@@ -109,7 +109,7 @@ class IOHandler(object):
         self.valid_mode = mode
 
     def _check_valid(self):
-        """Validate this input usig given validator
+        """Validate this input using given validator
         """
 
         validate = self.validator
@@ -117,7 +117,7 @@ class IOHandler(object):
         if not _valid:
             self.data_set = False
             raise InvalidParameterValue('Input data not valid using '
-                                        'mode %s' % (self.valid_mode))
+                                        'mode {}'.format(self.valid_mode))
         self.data_set = True
 
     def set_file(self, filename):
@@ -375,7 +375,7 @@ class BasicComplex(object):
     """
 
     def __init__(self, data_format=None, supported_formats=None):
-        self._data_format = None
+        self._data_format = data_format
         self._supported_formats = None
         if supported_formats:
             self.supported_formats = supported_formats

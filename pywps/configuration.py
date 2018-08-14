@@ -215,7 +215,7 @@ def _get_default_config_files_location():
 
 
 def get_size_mb(mbsize):
-    """Get real size of given obeject
+    """Get real size of given object in Mb.
 
     """
 

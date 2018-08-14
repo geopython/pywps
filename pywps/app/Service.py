@@ -7,11 +7,8 @@ import logging
 import tempfile
 from werkzeug.exceptions import HTTPException
 from werkzeug.wrappers import Request, Response
-from pywps import get_ElementMakerForVersion
 from pywps._compat import PY2
-from pywps._compat import urlopen
 from pywps._compat import urlparse
-from pywps.app.basic import xml_response
 from pywps.app.WPSRequest import WPSRequest
 import pywps.configuration as config
 from pywps.exceptions import MissingParameterValue, NoApplicableCode, InvalidParameterValue, FileSizeExceeded, \
@@ -430,7 +427,6 @@ def _openurl(inpt):
     """use requests to open given href
     """
     data = None
-    reference_file = None
     href = inpt.get('href')
 
     LOGGER.debug('Fetching URL %s', href)
