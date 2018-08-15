@@ -38,11 +38,13 @@ def _is_textfile(filename):
         fh.close()
     return is_text
 
+
 def extend_instance(obj, cls):
     """Apply mixins to a class instance after creation"""
     base_cls = obj.__class__
     base_cls_name = obj.__class__.__name__
     obj.__class__ = type(base_cls_name, (cls, base_cls), {})
+
 
 class UOM(object):
     """
@@ -56,6 +58,7 @@ class UOM(object):
     def json(self):
         return {"reference": OGCUNIT[self.uom],
                 "uom": self.uom}
+
 
 class IOHandler(object):
     """Base IO handling class subclassed by specialized versions: FileHandler, UrlHandler, DataHandler, etc.
@@ -148,7 +151,6 @@ class IOHandler(object):
             raise InvalidParameterValue('Input data not valid using '
                                         'mode {}'.format(self.valid_mode))
         self.data_set = True
-
 
     @property
     def workdir(self):
@@ -376,6 +378,7 @@ class StreamHandler(DataHandler):
 # Placeholder
 class UrlHandler(FileHandler):
     pass
+
 
 class SimpleHandler(DataHandler):
     """Data handler for Literal In- and Outputs
