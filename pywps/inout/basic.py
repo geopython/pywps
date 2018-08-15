@@ -40,7 +40,7 @@ def _is_textfile(filename):
 
 
 def extend_instance(obj, cls):
-    """Apply mixins to a class instance after creation"""
+    """Apply mixins to a class instance after creation."""
     base_cls = obj.__class__
     base_cls_name = obj.__class__.__name__
     obj.__class__ = type(base_cls_name, (cls, base_cls), {})
@@ -63,7 +63,7 @@ class UOM(object):
 class IOHandler(object):
     """Base IO handling class subclassed by specialized versions: FileHandler, UrlHandler, DataHandler, etc.
 
-    If the specialized handling class is not know when the object is created, instantiate the object with IOHandler.
+    If the specialized handling class is not known when the object is created, instantiate the object with IOHandler.
     The first time the `file`, `url` or `data` attribute is set, the associated subclass will be automatically
     registered. Once set, the specialized subclass cannot be switched.
 
@@ -202,7 +202,8 @@ class IOHandler(object):
         else:
             return ''
 
-    def _create_fset_properties(self):
+    @staticmethod
+    def _create_fset_properties():
         """Create properties that when set for the first time, will determine
         the instance's handler class.
 
@@ -282,7 +283,7 @@ class FileHandler(IOHandler):
         import pathlib
         return pathlib.PurePosixPath(self.file).as_uri()
 
-    def _openmode(self):
+    def _openmode(self, data):
         openmode = 'r'
         if not PY2:
             # in Python 3 we need to open binary files in binary mode.
@@ -308,11 +309,9 @@ class DataHandler(FileHandler):
     def _mkstemp(self):
         """Return temporary file name."""
         suffix = self.extension
-        (opening, fn) = tempfile.mkstemp(dir=self.workdir, suffix=suffix)
-        return fn
+        return tempfile.mkstemp(dir=self.workdir, suffix=suffix)[1]
 
-    @staticmethod
-    def _openmode(data):
+    def _openmode(self, data):
         openmode = 'w'
         if not PY2 and isinstance(data, bytes):
             # on Python 3 open the file in binary mode if the source is
