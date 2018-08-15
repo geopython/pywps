@@ -283,7 +283,7 @@ class FileHandler(IOHandler):
         import pathlib
         return pathlib.PurePosixPath(self.file).as_uri()
 
-    def _openmode(self, data):
+    def _openmode(self, data=None):
         openmode = 'r'
         if not PY2:
             # in Python 3 we need to open binary files in binary mode.
@@ -311,7 +311,7 @@ class DataHandler(FileHandler):
         suffix = self.extension
         return tempfile.mkstemp(dir=self.workdir, suffix=suffix)[1]
 
-    def _openmode(self, data):
+    def _openmode(self, data=None):
         openmode = 'w'
         if not PY2 and isinstance(data, bytes):
             # on Python 3 open the file in binary mode if the source is
