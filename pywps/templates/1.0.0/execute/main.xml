@@ -13,13 +13,13 @@
 	</wps:Process>
     <wps:Status creationTime="{{ status.time }}">
         {% if status.status == "accepted" %}
-        <wps:ProcessAccepted />
+        <wps:ProcessAccepted percentCompleted="{{ status.percent_done }}">{{ status.message }}</wps:ProcessAccepted>
         {% elif status.status == "started" %}
-        <wps:ProcessStarted percentCompleted="{{ status.percent_done }}">{{ message }}</wps:ProcessStarted>
+        <wps:ProcessStarted percentCompleted="{{ status.percent_done }}">{{ status.message }}</wps:ProcessStarted>
         {% elif status.status == "paused" %}
-        <wps:ProcessPaused percentCompleted="{{ status.percent_done }}">{{ message }}</wps:ProcessPaused>
+        <wps:ProcessPaused percentCompleted="{{ status.percent_done }}">{{ status.message }}</wps:ProcessPaused>
         {% elif status.status == "succeeded" %}
-        <wps:ProcessSucceeded />
+        <wps:ProcessSucceeded>{{ status.message }}</wps:ProcessSucceeded>
         {% elif status.status == "failed" %}
         <wps:ProcessFailed>
             <wps:ExceptionReport>
