@@ -119,10 +119,7 @@ class IOHandler(object):
     def __init__(self, workdir=None, mode=MODE.NONE):
         # Internal defaults for class and subclass properties.
         self._workdir = None
-        self._file = None
-        self._data = None
-        self._stream = None
-        self._url = None
+        self._reset_cache()
 
         # Set public defaults
         self.workdir = workdir
@@ -139,6 +136,13 @@ class IOHandler(object):
         #  2. replace the property setter by the subclass property setter
         #  3. set the property
         self._create_fset_properties()
+
+    def _reset_cache(self):
+        """Sets all internal objects to None."""
+        self._file = None
+        self._data = None
+        self._stream = None
+        self._url = None
 
     def _check_valid(self):
         """Validate this input using given validator
@@ -245,9 +249,11 @@ class FileHandler(IOHandler):
     @file.setter
     def file(self, value):
         """Set file name"""
+        self._reset_cache()
         self._file = os.path.abspath(value)
         self.as_reference = True
         self._check_valid()
+
 
     @property
     def data(self):
@@ -326,6 +332,7 @@ class DataHandler(FileHandler):
 
     @data.setter
     def data(self, value):
+        self._reset_cache()
         self._data = value
         self._check_valid()
 
@@ -362,7 +369,7 @@ class StreamHandler(DataHandler):
     @stream.setter
     def stream(self, value):
         """Set the stream."""
-        self._data = None
+        self._reset_cache()
         self._stream = value
         self._check_valid()
 
