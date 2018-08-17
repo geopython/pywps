@@ -1,10 +1,11 @@
-# PyWPS 
+# PyWPS
 
 PyWPS is an implementation of the Web Processing Service standard from
 the Open Geospatial Consortium. PyWPS is written in Python.
 
 [![Documentation Status](https://img.shields.io/badge/docs-latest-brightgreen.svg)](http://pywps.readthedocs.org/en/latest/?badge=latest)
 [![Build Status](https://travis-ci.org/geopython/pywps.png)](https://travis-ci.org/geopython/pywps)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/19d53c45a3854e37b89523cf9bb1d262)](https://www.codacy.com/project/cehbrecht/pywps/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=geopython/pywps&amp;utm_campaign=Badge_Grade_Dashboard)
 [![Coverage Status](https://coveralls.io/repos/github/geopython/pywps/badge.svg?branch=master)](https://coveralls.io/github/geopython/pywps?branch=master)
 [![PyPI](https://img.shields.io/pypi/dm/pywps.svg)]()
 [![GitHub license](https://img.shields.io/github/license/geopython/pywps.svg)]()
@@ -43,7 +44,7 @@ git clone git://github.com/geopython/pywps-flask.git pywps-flask
 cd pywps-flask
 python demo.py
 ```
- 
+
 ## Apache configuration
 
 1. Enable WSGI extension
@@ -68,16 +69,16 @@ python demo.py
     #!/usr/bin/env python3
     import sys
     sys.path.append('/path/to/src/pywps/')
-    
+
     import pywps
     from pywps.app import Service, WPS, Process
-    
+
     def pr1():
         """This is the execute method of the process
         """
         pass
-    
-    
+
+
     application = Service(processes=[Process(pr1)])
     ```
 
@@ -86,7 +87,7 @@ python demo.py
     `http://localhost/pywps/?service=WPS&request=GetCapabilities&version=1.0.0`
 
 5. Run in command line:
-  
+
     ```bash
     curl 'http://localhost/pywps/?service=WPS&request=GetCapabilities&version=1.0.0'
     ```
