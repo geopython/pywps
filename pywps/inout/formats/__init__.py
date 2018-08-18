@@ -16,11 +16,23 @@ import mimetypes
 from pywps.validator.mode import MODE
 from pywps.validator.base import emptyvalidator
 
-
 _FORMATS = namedtuple('FORMATS', 'GEOJSON, JSON, SHP, GML, GEOTIFF, WCS,'
                                  'WCS100, WCS110, WCS20, WFS, WFS100,'
                                  'WFS110, WFS20, WMS, WMS130, WMS110,'
-                                 'WMS100, TEXT, NETCDF, LAZ, LAS')
+                                 'WMS100, TEXT, CSV, NETCDF, LAZ, LAS')
+
+
+# this should be Enum type (only compatible with Python 3)
+class DATA_TYPE(object):
+    VECTOR = 0
+    RASTER = 1
+    OTHER = 2
+
+    def is_valid_datatype(data_type):
+
+        known_values = [datatype for datatype in DATA_TYPE]
+        if data_type not in known_values:
+            raise Exception("Unknown data type")
 
 
 class Format(object):
@@ -39,7 +51,7 @@ class Format(object):
     def __init__(self, mime_type,
                  schema=None, encoding=None,
                  validate=emptyvalidator, mode=MODE.SIMPLE,
-                 extension=None):
+                 extension=None, data_type=None):
         """Constructor
         """
 
@@ -47,12 +59,14 @@ class Format(object):
         self._encoding = None
         self._schema = None
         self._extension = None
+        self._data_type = None
 
         self.mime_type = mime_type
         self.encoding = encoding
         self.schema = schema
         self.validate = validate
         self.extension = extension
+        self.data_type = data_type
 
     @property
     def mime_type(self):
@@ -61,6 +75,20 @@ class Format(object):
         """
 
         return self._mime_type
+
+    @property
+    def data_type(self):
+        """Get format data type
+        """
+
+        return self._data_type
+
+    @data_type.setter
+    def data_type(self, data_type):
+        """Set format encoding
+        """
+
+        self._data_type = data_type
 
     @mime_type.setter
     def mime_type(self, mime_type):
@@ -143,7 +171,8 @@ class Format(object):
             'mime_type': self.mime_type,
             'encoding': self.encoding,
             'schema': self.schema,
-            'extension': self.extension
+            'extension': self.extension,
+            'data_type': self.data_type
         }
 
     @json.setter
@@ -156,30 +185,32 @@ class Format(object):
         self.encoding = jsonin['encoding']
         self.schema = jsonin['schema']
         self.extension = jsonin['extension']
+        self.data_type = jsonin['data_type']
 
 
 FORMATS = _FORMATS(
-    Format('application/vnd.geo+json', extension='.geojson'),
-    Format('application/json', extension='.json'),
-    Format('application/x-zipped-shp', extension='.zip'),
-    Format('application/gml+xml', extension='.gml'),
-    Format('image/tiff; subtype=geotiff', extension='.tiff'),
-    Format('application/xogc-wcs', extension='.xml'),
-    Format('application/x-ogc-wcs; version=1.0.0', extension='.xml'),
-    Format('application/x-ogc-wcs; version=1.1.0', extension='.xml'),
-    Format('application/x-ogc-wcs; version=2.0', extension='.xml'),
-    Format('application/x-ogc-wfs', extension='.xml'),
-    Format('application/x-ogc-wfs; version=1.0.0', extension='.xml'),
-    Format('application/x-ogc-wfs; version=1.1.0', extension='.xml'),
-    Format('application/x-ogc-wfs; version=2.0', extension='.xml'),
-    Format('application/x-ogc-wms', extension='.xml'),
-    Format('application/x-ogc-wms; version=1.3.0', extension='.xml'),
-    Format('application/x-ogc-wms; version=1.1.0', extension='.xml'),
-    Format('application/x-ogc-wms; version=1.0.0', extension='.xml'),
-    Format('text/plain', extension='.txt'),
-    Format('application/x-netcdf', extension='.nc'),
-    Format('application/octet-stream', extension='.laz'),
-    Format('application/octet-stream', extension='.las'),
+    Format('application/vnd.geo+json', extension='.geojson', data_type=DATA_TYPE.VECTOR),
+    Format('application/json', extension='.json', data_type=DATA_TYPE.VECTOR),
+    Format('application/x-zipped-shp', extension='.zip', data_type=DATA_TYPE.VECTOR),
+    Format('application/gml+xml', extension='.gml', data_type=DATA_TYPE.VECTOR),
+    Format('image/tiff; subtype=geotiff', extension='.tiff', data_type=DATA_TYPE.RASTER),
+    Format('application/xogc-wcs', extension='.xml', data_type=DATA_TYPE.VECTOR),
+    Format('application/x-ogc-wcs; version=1.0.0', extension='.xml', data_type=DATA_TYPE.VECTOR),
+    Format('application/x-ogc-wcs; version=1.1.0', extension='.xml', data_type=DATA_TYPE.VECTOR),
+    Format('application/x-ogc-wcs; version=2.0', extension='.xml', data_type=DATA_TYPE.VECTOR),
+    Format('application/x-ogc-wfs', extension='.xml', data_type=DATA_TYPE.VECTOR),
+    Format('application/x-ogc-wfs; version=1.0.0', extension='.xml', data_type=DATA_TYPE.VECTOR),
+    Format('application/x-ogc-wfs; version=1.1.0', extension='.xml', data_type=DATA_TYPE.VECTOR),
+    Format('application/x-ogc-wfs; version=2.0', extension='.xml', data_type=DATA_TYPE.VECTOR),
+    Format('application/x-ogc-wms', extension='.xml', data_type=DATA_TYPE.VECTOR),
+    Format('application/x-ogc-wms; version=1.3.0', extension='.xml', data_type=DATA_TYPE.VECTOR),
+    Format('application/x-ogc-wms; version=1.1.0', extension='.xml', data_type=DATA_TYPE.VECTOR),
+    Format('application/x-ogc-wms; version=1.0.0', extension='.xml', data_type=DATA_TYPE.VECTOR),
+    Format('text/plain', extension='.txt', data_type=DATA_TYPE.OTHER),
+    Format('text/csv', extension='.csv', data_type=DATA_TYPE.OTHER),
+    Format('application/x-netcdf', extension='.nc', data_type=DATA_TYPE.VECTOR),
+    Format('application/octet-stream', extension='.laz', data_type=DATA_TYPE.VECTOR),
+    Format('application/octet-stream', extension='.las', data_type=DATA_TYPE.VECTOR),
 )
 
 

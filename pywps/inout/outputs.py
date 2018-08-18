@@ -9,7 +9,9 @@ WPS Output classes
 import lxml.etree as etree
 import six
 from pywps.inout import basic
-from pywps.inout.storage import FileStorage
+from pywps.inout.storage.file import FileStorage
+from pywps.inout.storage.db import DbStorage
+from pywps import configuration as config
 from pywps.validator.mode import MODE
 
 
@@ -99,8 +101,22 @@ class ComplexOutput(basic.ComplexOutput):
         data["type"] = "reference"
 
         # get_url will create the file and return the url for it
-        self.storage = FileStorage()
         data["href"] = self.get_url()
+
+        store_type = config.get_config_value('server', 'store_type')
+        self.storage = None
+        if store_type == 'db':
+            db_storage_instance = DbStorage()
+            self.storage = db_storage_instance.get_db_type()
+        else:
+            self.storage = FileStorage()
+
+        """
+        to be implemented:
+        elif store_type == 's3' and \
+           config.get_config_value('s3', 'bucket_name'):
+            self.storage = S3Storage()
+        """
 
         if self.data_format:
             if self.data_format.mime_type:
