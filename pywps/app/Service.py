@@ -155,12 +155,12 @@ class Service(object):
                 for outpt in process.outputs:
                     if outpt.identifier == wps_outpt:
                         outpt.as_reference = is_reference
-                        if type(outpt) is ComplexOutput and mimetype != '':
-                            format = [f for f in outpt.supported_formats if f.mime_type == mimetype]
-                            if len(format) == 0:
+                        if isinstance(outpt, ComplexOutput) and mimetype != '':
+                            data_format = [f for f in outpt.supported_formats if f.mime_type == mimetype]
+                            if len(data_format) == 0:
                                 raise InvalidParameterValue(
                                     'MimeType ' + mimetype + ' not valid')
-                            outpt.data_format = format[0]
+                            outpt.data_format = data_format[0]
 
         wps_response = process.execute(wps_request, uuid)
         return wps_response
