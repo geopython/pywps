@@ -162,9 +162,6 @@ class Service(object):
                                     'MimeType ' + mimetype + ' not valid')
                             outpt.data_format = format[0]
 
-
-                    
-
         wps_response = process.execute(wps_request, uuid)
         return wps_response
 
