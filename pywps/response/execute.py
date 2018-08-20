@@ -63,7 +63,7 @@ class ExecuteResponse(WPSResponse):
         """
         if status_percentage is None:
             status_percentage = self.status_percentage
-        self._update_status(WPS_STATUS.ACCEPTED, message, status_percentage)
+        self._update_status(self.status, message, status_percentage)
 
     def update_status_file(self, clean):
         # TODO: check if file/directory is still present, maybe deleted in mean time
@@ -83,47 +83,46 @@ class ExecuteResponse(WPSResponse):
             raise NoApplicableCode('Writing Response Document failed with : %s' % e)
 
     def _process_accepted(self):
-        return {
-            "status": "accepted",
-            "time": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime()),
-            "message": self.message
-        }
-
-    def _process_started(self):
         percent = int(self.status_percentage)
         if percent > 99:
             percent = 99
         return {
-            "status": "started",
-            "message": self.message,
-            "percent_done": str(percent),
-            "time": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime())
-        }
-
-    def _process_paused(self):
-        return {
-            "status": "paused",
-            "message": self.message,
-            "percent_done": str(self.status_percentage),
-            "time": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime())
-        }
-
-    def _process_succeeded(self):
-        return {
-            "status": "succeeded",
+            "status": "accepted",
             "time": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime()),
-            "percent_done": str(self.status_percentage),
+            "percent_done": str(percent),
             "message": self.message
         }
 
+    def _process_started(self):
+        data = self._process_accepted()
+        data.update({
+            "status": "started",
+        })
+        return data
+
+    def _process_paused(self):
+        data = self._process_accepted()
+        data.update({
+            "status": "paused",
+        })
+        return data
+
+    def _process_succeeded(self):
+        data = self._process_accepted()
+        data.update({
+            "status": "succeeded",
+            "percent_done": "100"
+        })
+        return data
+
     def _process_failed(self):
-        return {
+        data = self._process_accepted()
+        data.update({
             "status": "failed",
             "code": "NoApplicableCode",
             "locator": "None",
-            "message": self.message,
-            "time": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime())
-        }
+        })
+        return data
 
     def _get_serviceinstance(self):
 
@@ -151,21 +150,15 @@ class ExecuteResponse(WPSResponse):
         if self.status == WPS_STATUS.ACCEPTED:
             self.message = 'PyWPS Process %s accepted' % self.process.identifier
             data["status"] = self._process_accepted()
-            return data
-
-        if self.status == WPS_STATUS.STARTED:
-            data["percent_done"] = self.status_percentage
+        elif self.status == WPS_STATUS.STARTED:
             data["status"] = self._process_started()
-            return data
-
-        # check if process failed and display fail message
-        if self.status == WPS_STATUS.FAILED:
+        elif self.status == WPS_STATUS.FAILED:
+            # check if process failed and display fail message
             data["status"] = self._process_failed()
-            return data
-
-        # TODO: add paused status
-
-        if self.status == WPS_STATUS.SUCCEEDED:
+        elif self.status == WPS_STATUS.PAUSED:
+            # TODO: handle paused status
+            data["status"] = self._process_paused()
+        elif self.status == WPS_STATUS.SUCCEEDED:
             data["status"] = self._process_succeeded()
 
             # DataInputs and DataOutputs definition XML if lineage=true
