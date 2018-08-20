@@ -43,7 +43,7 @@
 			</wps:Data>
             {% elif input.type == "literal" %}
 			<wps:Data>
-                <wps:LiteralData {% if input.uom %}uom="{{ input.uom.reference }}"{% endif %}>{{ input.value }}</wps:LiteralData>
+                <wps:LiteralData {% if input.uom %}uom="{{ input.uom.reference }}"{% endif %}>{{ input.data }}</wps:LiteralData>
 			</wps:Data>
             {% elif input.type == "bbox" %}
 			<wps:Data>
@@ -69,7 +69,7 @@
     {% if output_definitions %}
 	<wps:OutputDefinitions>
         {% for output in output_definitions %}
-        {% if output.type == "complex" %}
+        {% if output.type in ["complex", "reference"] %}
         <wps:Output mimeType="{{ output.mimetype }}" encoding="{{ output.encoding }}" schema="{{ output.schema }}" asReference="{{ output.asreference }}">
         {% else %}
         <wps:Output>

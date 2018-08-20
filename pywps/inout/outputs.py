@@ -75,7 +75,9 @@ class ComplexOutput(basic.ComplexOutput):
             "title": self.title,
             "abstract": self.abstract,
             'keywords': self.keywords,
+            'type': 'complex',
             'supported_formats': [frmt.json for frmt in self.supported_formats],
+            'asreference': self.as_reference,
             'data_format': self.data_format.json,
             'file': self.file,
             'workdir': self.workdir,
@@ -91,6 +93,14 @@ class ComplexOutput(basic.ComplexOutput):
             else:
                 data = self._json_data(data)
 
+        if self.data_format:
+            if self.data_format.mime_type:
+                data['mimetype'] = self.data_format.mime_type
+            if self.data_format.encoding:
+                data['encoding'] = self.data_format.encoding
+            if self.data_format.schema:
+                data['schema'] = self.data_format.schema
+
         return data
 
     def _json_reference(self, data):
@@ -101,14 +111,6 @@ class ComplexOutput(basic.ComplexOutput):
         # get_url will create the file and return the url for it
         self.storage = FileStorage()
         data["href"] = self.get_url()
-
-        if self.data_format:
-            if self.data_format.mime_type:
-                data['mimetype'] = self.data_format.mime_type
-            if self.data_format.encoding:
-                data['encoding'] = self.data_format.encoding
-            if self.data_format.schema:
-                data['schema'] = self.data_format.schema
 
         return data
 
@@ -133,13 +135,6 @@ class ComplexOutput(basic.ComplexOutput):
                 else:
                     data["data"] = etree.tostring(etree.CDATA(self.base64))
 
-        if self.data_format:
-            if self.data_format.mime_type:
-                data['mimetype'] = self.data_format.mime_type
-            if self.data_format.encoding:
-                data['encoding'] = self.data_format.encoding
-            if self.data_format.schema:
-                data['schema'] = self.data_format.schema
         return data
 
 

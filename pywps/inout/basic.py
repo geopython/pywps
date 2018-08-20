@@ -640,25 +640,6 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
 
         self._set_default_value(default, default_type)
 
-    @property
-    def json(self):
-        """Get JSON representation of the input
-        """
-        return {
-            'identifier': self.identifier,
-            'title': self.title,
-            'abstract': self.abstract,
-            'keywords': self.keywords,
-            'type': 'complex',
-            'data_format': self.data_format.json,
-            'supported_formats': [frmt.json for frmt in self.supported_formats],
-            'file': self.file,
-            'workdir': self.workdir,
-            'mode': self.valid_mode,
-            'min_occurs': self.min_occurs,
-            'max_occurs': self.max_occurs
-        }
-
 
 class ComplexOutput(BasicIO, BasicComplex, IOHandler):
     """Complex output abstract class
