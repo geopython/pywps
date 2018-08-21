@@ -254,7 +254,6 @@ class FileHandler(IOHandler):
         self.as_reference = True
         self._check_valid()
 
-
     @property
     def data(self):
         """Read file and return content."""
