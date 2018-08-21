@@ -21,6 +21,7 @@ from pywps.response.status import WPS_STATUS
 from collections import deque, OrderedDict
 import os
 import sys
+import traceback
 import uuid
 import copy
 import requests
@@ -401,6 +402,7 @@ class Service(object):
                 except Exception as e:
                     # This ensure that logged request get terminated in case of exception while the request is not
                     # accepted
+                    exc_info = sys.exc_info()
                     store_status(request_uuid, WPS_STATUS.FAILED, u'Request rejected due to exception', 100)
                     raise e
             else:
@@ -412,7 +414,7 @@ class Service(object):
         except HTTPException as e:
             return NoApplicableCode(e.description, code=e.code)
         except Exception as e:
-            return NoApplicableCode("No applicable error code, please check error log.", code=500)
+            return NoApplicableCode("No applicable error code, please check error log.\n{0}".format(traceback.print_exception(*exc_info)), code=500)
 
     @Request.application
     def __call__(self, http_request):
