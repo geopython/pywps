@@ -320,7 +320,6 @@ class Service(object):
                 raise RuntimeError("Unknown operation %r"
                                    % wps_request.operation)
 
-
         except NoApplicableCode as e:
             return e
         except HTTPException as e:

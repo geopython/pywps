@@ -31,6 +31,7 @@ SOURCE_TYPE = _SOURCE_TYPE(0, 1, 2, 3, 4)
 
 LOGGER = logging.getLogger("PYWPS")
 
+
 def _is_textfile(filename):
     try:
         # use python-magic if available
@@ -483,7 +484,6 @@ class UrlHandler(FileHandler):
         """
         ms = config.get_config_value('server', 'maxsingleinputsize')
         return config.get_size_mb(ms) * 1024**2
-
 
 
 class SimpleHandler(DataHandler):

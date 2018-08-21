@@ -31,8 +31,8 @@ DATA_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'data')
 
 
 def get_data_format(mime_type):
-    return Format(mime_type=mime_type,
-    validate=get_validator(mime_type))
+    return Format(mime_type=mime_type, validate=get_validator(mime_type))
+
 
 class IOHandlerTest(unittest.TestCase):
     """IOHandler test cases"""
@@ -58,7 +58,7 @@ class IOHandlerTest(unittest.TestCase):
         """Test all outputs"""
 
         self.assertEqual(source_type, self.iohandler.source_type,
-                          'Source type properly set')
+                         'Source type properly set')
 
         self.assertEqual(self._value, self.iohandler.data, 'Data obtained')
 
@@ -93,7 +93,7 @@ class IOHandlerTest(unittest.TestCase):
             source = StringIO(text_type(self._value))
             self.iohandler.stream = source
 
-        #self.assertEqual(stream_val, self.iohandler.memory_object,
+        # self.assertEqual(stream_val, self.iohandler.memory_object,
         #                 'Memory object obtained')
 
     def test_data(self):
@@ -120,7 +120,10 @@ class IOHandlerTest(unittest.TestCase):
 
     def test_url(self):
 
-        wfsResource = 'http://demo.mapserver.org/cgi-bin/wfs?service=WFS&version=1.1.0&request=GetFeature&typename=continents&maxfeatures=2'
+        wfsResource = 'http://demo.mapserver.org/cgi-bin/wfs?' \
+                      'service=WFS&version=1.1.0&' \
+                      'request=GetFeature&' \
+                      'typename=continents&maxfeatures=2'
         self._value = requests.get(wfsResource).text
         self.iohandler.url = wfsResource
         self._test_outout(SOURCE_TYPE.URL)
@@ -186,12 +189,14 @@ class ComplexInputTest(unittest.TestCase):
 
     def test_validator(self):
         self.assertEqual(self.complex_in.data_format.validate,
-                       get_validator('application/json'))
+                         get_validator('application/json'))
         self.assertEqual(self.complex_in.validator,
                          get_validator('application/json'))
         frmt = get_data_format('application/json')
+
         def my_validate():
             return True
+
         frmt.validate = my_validate
         self.assertNotEqual(self.complex_in.validator, frmt.validate)
 
@@ -216,6 +221,7 @@ class ComplexInputTest(unittest.TestCase):
         self.assertEqual(out['type'], 'complex', 'it is complex input')
         self.assertTrue(out['data_format'], 'data_format set')
         self.assertEqual(out['data_format']['mime_type'], 'application/json', 'data_format set')
+
 
 class ComplexOutputTest(unittest.TestCase):
     """ComplexOutput test cases"""
@@ -245,7 +251,6 @@ class ComplexOutputTest(unittest.TestCase):
                          get_validator('application/json'))
 
 
-
 class SimpleHandlerTest(unittest.TestCase):
     """SimpleHandler test cases"""
 
@@ -261,18 +266,18 @@ class SimpleHandlerTest(unittest.TestCase):
     def test_data_type(self):
         self.assertEqual(convert(self.simple_handler.data_type, '1'), 1)
 
+
 class LiteralInputTest(unittest.TestCase):
     """LiteralInput test cases"""
 
     def setUp(self):
 
         self.literal_input = LiteralInput(
-                identifier="literalinput",
-                mode=2,
-                allowed_values=(1, 2, (3, 3, 12)),
-                default=6,
-                uoms=(UOM("metre"),))
-
+            identifier="literalinput",
+            mode=2,
+            allowed_values=(1, 2, (3, 3, 12)),
+            default=6,
+            uoms=(UOM("metre"),))
 
     def test_contruct(self):
         self.assertIsInstance(self.literal_input, LiteralInput)
@@ -346,7 +351,6 @@ class LiteralInputTest(unittest.TestCase):
         self.assertEqual(out['data'], datetime.date(2017, 4, 20), 'date set')
 
 
-
 class LiteralOutputTest(unittest.TestCase):
     """LiteralOutput test cases"""
 
@@ -363,6 +367,7 @@ class LiteralOutputTest(unittest.TestCase):
         storage = Storage()
         self.literal_output.store = storage
         self.assertEqual(self.literal_output.store, storage)
+
 
 class BoxInputTest(unittest.TestCase):
     """BBoxInput test cases"""
@@ -404,6 +409,7 @@ class BoxOutputTest(unittest.TestCase):
         self.bbox_out.store = storage
         self.assertEqual(self.bbox_out.store, storage)
 
+
 def load_tests(loader=None, tests=None, pattern=None):
     if not loader:
         loader = unittest.TestLoader()
@@ -418,4 +424,3 @@ def load_tests(loader=None, tests=None, pattern=None):
         loader.loadTestsFromTestCase(BoxOutputTest)
     ]
     return unittest.TestSuite(suite_list)
-
