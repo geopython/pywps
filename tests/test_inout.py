@@ -5,6 +5,8 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
+from __future__ import absolute_import
+import requests
 import os
 import tempfile
 import datetime
@@ -21,6 +23,7 @@ from pywps.validator.base import emptyvalidator
 from pywps.exceptions import InvalidParameterValue
 from pywps.validator.mode import MODE
 from pywps.inout.basic import UOM
+from pywps._compat import PY2
 
 from lxml import etree
 
@@ -76,8 +79,11 @@ class IOHandlerTest(unittest.TestCase):
         stream_val = self.iohandler.stream.read()
         self.iohandler.stream.close()
 
-        if type(stream_val) == type(b''):
-            self.assertEqual(str.encode(self._value), stream_val,
+        if PY2 and isinstance(stream_val, str):
+            self.assertEqual(self._value, stream_val.decode('utf-8'),
+                             'Stream obtained')
+        elif not PY2 and isinstance(stream_val, bytes):
+            self.assertEqual(self._value, stream_val.decode('utf-8'),
                              'Stream obtained')
         else:
             self.assertEqual(self._value, stream_val,
@@ -111,6 +117,13 @@ class IOHandlerTest(unittest.TestCase):
         file_handler.close()
         self.iohandler.file = source
         self._test_outout(SOURCE_TYPE.FILE)
+
+    def test_url(self):
+
+        wfsResource = 'http://demo.mapserver.org/cgi-bin/wfs?service=WFS&version=1.1.0&request=GetFeature&typename=continents&maxfeatures=2'
+        self._value = requests.get(wfsResource).text
+        self.iohandler.url = wfsResource
+        self._test_outout(SOURCE_TYPE.URL)
 
     def test_workdir(self):
         """Test workdir"""
@@ -405,3 +418,4 @@ def load_tests(loader=None, tests=None, pattern=None):
         loader.loadTestsFromTestCase(BoxOutputTest)
     ]
     return unittest.TestSuite(suite_list)
+

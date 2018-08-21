@@ -158,89 +158,6 @@ class Service(object):
         wps_response = process.execute(wps_request, uuid)
         return wps_response
 
-    def _get_complex_input_handler(self, href):
-        """Return function for parsing and storing complexdata
-        :param href: href object yes or not
-        """
-
-        def href_handler(complexinput, datain):
-            """<wps:Reference /> handler"""
-            # save the reference input in workdir
-            tmp_file = _build_input_file_name(
-                href=datain.get('href'),
-                workdir=complexinput.workdir,
-                extension=_extension(complexinput))
-
-            try:
-                reference_file = _openurl(datain)
-                data_size = reference_file.headers.get('Content-Length', 0)
-            except Exception as e:
-                raise NoApplicableCode('File reference error: %s' % e)
-
-            # if the response did not return a 'Content-Length' header then
-            # calculate the size
-            if data_size == 0:
-                LOGGER.debug('no Content-Length, calculating size')
-
-            # check if input file size was not exceeded
-            complexinput.calculate_max_input_size()
-            max_byte_size = complexinput.max_size * 1024 * 1024
-            if int(data_size) > int(max_byte_size):
-                raise FileSizeExceeded('File size for input exceeded.'
-                                       ' Maximum allowed: %i megabytes' %
-                                       complexinput.max_size, complexinput.identifier)
-
-            try:
-                with open(tmp_file, 'wb') as f:
-                    data_size = 0
-                    for chunk in reference_file.iter_content(chunk_size=1024):
-                        data_size += len(chunk)
-                        if int(data_size) > int(max_byte_size):
-                            raise FileSizeExceeded('File size for input exceeded.'
-                                                   ' Maximum allowed: %i megabytes' %
-                                                   complexinput.max_size, complexinput.identifier)
-                        f.write(chunk)
-            except Exception as e:
-                raise NoApplicableCode(e)
-
-            complexinput.file = tmp_file
-
-        def file_handler(complexinput, datain):
-            """<wps:Reference /> handler.
-            Used when href is a file url."""
-            # check if file url is allowed
-            _validate_file_input(href=datain.get('href'))
-            # save the file reference input in workdir
-            tmp_file = _build_input_file_name(
-                href=datain.get('href'),
-                workdir=complexinput.workdir,
-                extension=_extension(complexinput))
-            try:
-                inpt_file = urlparse(datain.get('href')).path
-                inpt_file = os.path.abspath(inpt_file)
-                os.symlink(inpt_file, tmp_file)
-                LOGGER.debug("Linked input file %s to %s.", inpt_file, tmp_file)
-            except Exception:
-                # TODO: handle os.symlink on windows
-                # raise NoApplicableCode("Could not link file reference: %s" % e)
-                LOGGER.warn("Could not link file reference")
-                shutil.copy2(inpt_file, tmp_file)
-
-            complexinput.file = tmp_file
-
-        def data_handler(complexinput, datain):
-            """<wps:Data> ... </wps:Data> handler"""
-
-            complexinput.data = datain.get('data')
-
-        if href:
-            if urlparse(href).scheme == 'file':
-                return file_handler
-            else:
-                return href_handler
-        else:
-            return data_handler
-
     def create_complex_inputs(self, source, inputs):
         """Create new ComplexInput as clone of original ComplexInput
         because of inputs can be more then one, take it just as Prototype
@@ -267,14 +184,9 @@ class Service(object):
                     'mimeType')
 
             data_input.method = inpt.get('method', 'GET')
-
-            # get the referenced input otherwise get the value of the field
-            href = inpt.get('href', None)
-
-            complex_data_handler = self._get_complex_input_handler(href)
-            complex_data_handler(data_input, inpt)
-
+            data_input.process(inpt)
             outinputs.append(data_input)
+
         if len(outinputs) < source.min_occurs:
             raise MissingParameterValue(description="Given data input is missing", locator=source.identifier)
         return outinputs
@@ -357,6 +269,7 @@ class Service(object):
 
     # May not raise exceptions, this function must return a valid werkzeug.wrappers.Response.
     def call(self, http_request):
+
         try:
             # This try block handle Exception generated before the request is accepted. Once the request is accepted
             # a valid wps_reponse must exist. To report error use the wps_response using
@@ -406,6 +319,7 @@ class Service(object):
             else:
                 raise RuntimeError("Unknown operation %r"
                                    % wps_request.operation)
+
 
         except NoApplicableCode as e:
             return e
