@@ -96,6 +96,26 @@ def create_complex_proces():
              ])
 
 
+def create_mimetype_process():
+    def _handler(request, response):
+        response.outputs['mimetype'].data = response.outputs['mimetype'].data_format.mime_type
+        return response
+
+    frmt_txt = Format(mime_type='text/plain')
+    frmt_txt2 = Format(mime_type='text/plain+test')
+
+    return Process(handler=_handler,
+            identifier='get_mimetype_process',
+            title='Get mimeType process',
+            inputs=[],
+            outputs=[
+                ComplexOutput(
+                    'mimetype',
+                    'mimetype of requested output',
+                    supported_formats=[frmt_txt,frmt_txt2])
+             ])
+
+
 def get_output(doc):
     output = {}
     for output_el in xpath_ns(doc, '/wps:ExecuteResponse'
@@ -186,6 +206,41 @@ class ExecuteTest(unittest.TestCase):
         request = FakeRequest()
         response = service.execute('my_complex_process', request, 'fakeuuid')
         self.assertEqual(response.outputs['complex'].data, 'DEFAULT COMPLEX DATA')
+
+    def test_output_mimetype(self):
+        """Test input parsing
+        """
+        my_process = create_mimetype_process()
+        service = Service(processes=[my_process])
+        self.assertEqual(len(service.processes.keys()), 1)
+        self.assertTrue(service.processes['get_mimetype_process'])
+
+        class FakeRequest():
+            def __init__(self, mimetype):
+                self.outputs = {'mimetype': {
+                        'identifier': 'mimetype',
+                        'mimetype': mimetype,
+                        'data': 'the data'
+                }}
+
+            identifier = 'get_mimetype_process'
+            service = 'wps'
+            operation='execute'
+            version = '1.0.0'
+            inputs = {}
+            raw = False
+            store_execute = False
+            lineage = False
+
+        # valid mimetype
+        request = FakeRequest('text/plain+test')
+        response = service.execute('get_mimetype_process', request, 'fakeuuid')
+        self.assertEqual(response.outputs['mimetype'].data, 'text/plain+test')
+
+        # non valid mimetype
+        request = FakeRequest('text/xml')
+        with self.assertRaises(InvalidParameterValue):
+            response = service.execute('get_mimetype_process', request, 'fakeuuid')
 
     def test_missing_process_error(self):
         client = client_for(Service(processes=[create_ultimate_question()]))
