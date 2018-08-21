@@ -18,8 +18,8 @@ from pywps.validator.base import emptyvalidator
 from pywps.validator import get_validator
 from pywps.validator.literalvalidator import (validate_anyvalue,
                                               validate_allowed_values)
-from pywps.exceptions import MissingParameterValue, NoApplicableCode, InvalidParameterValue, FileSizeExceeded, \
-    StorageNotSupported, FileURLNotSupported
+from pywps.exceptions import NoApplicableCode, InvalidParameterValue, FileSizeExceeded, \
+    FileURLNotSupported
 from pywps._compat import PY2, urlparse
 import base64
 from collections import namedtuple
