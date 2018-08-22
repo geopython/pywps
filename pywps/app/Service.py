@@ -414,7 +414,9 @@ class Service(object):
         except HTTPException as e:
             return NoApplicableCode(e.description, code=e.code)
         except Exception as e:
-            return NoApplicableCode("No applicable error code, please check error log.\n{0}".format(traceback.print_exception(*exc_info)), code=500)
+            msg = "No applicable error code, please check error log."
+            #logging.debug(msg + traceback.print_exception(*exc_info))
+            return NoApplicableCode(msg, code=500)
 
     @Request.application
     def __call__(self, http_request):
