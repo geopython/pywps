@@ -19,6 +19,7 @@ from tests import test_dblog
 from tests import test_wpsrequest
 from tests import test_service
 from tests import test_processing
+from tests import test_assync
 from tests.validator import test_complexvalidators
 from tests.validator import test_literalvalidators
 
@@ -41,7 +42,9 @@ def load_tests(loader=None, tests=None, pattern=None):
         test_wpsrequest.load_tests(),
         test_service.load_tests(),
         test_processing.load_tests(),
+        test_assync.load_tests(),
     ])
+
 
 if __name__ == "__main__":
     result = unittest.TextTestRunner(verbosity=2).run(load_tests())
