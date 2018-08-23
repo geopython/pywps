@@ -11,6 +11,8 @@ import os
 import tempfile
 import datetime
 import unittest
+import json
+from urlparse import urlparse
 from pywps import Format
 from pywps.validator import get_validator
 from pywps import NAMESPACES
@@ -23,6 +25,7 @@ from pywps.validator.base import emptyvalidator
 from pywps.exceptions import InvalidParameterValue
 from pywps.validator.mode import MODE
 from pywps.inout.basic import UOM
+from pywps.inout.storage import FileStorage
 from pywps._compat import PY2
 
 from lxml import etree
@@ -62,6 +65,11 @@ class IOHandlerTest(unittest.TestCase):
 
         self.assertEqual(self._value, self.iohandler.data, 'Data obtained')
 
+        if self.iohandler.source_type == SOURCE_TYPE.URL:
+            self.assertEqual('http', urlparse(self.iohandler.url).scheme)
+        else:
+            self.assertEqual('file', urlparse(self.iohandler.url).scheme)
+
         if self.iohandler.source_type == SOURCE_TYPE.STREAM:
             source = StringIO(text_type(self._value))
             self.iohandler.stream = source
@@ -92,6 +100,8 @@ class IOHandlerTest(unittest.TestCase):
         if self.iohandler.source_type == SOURCE_TYPE.STREAM:
             source = StringIO(text_type(self._value))
             self.iohandler.stream = source
+
+
 
         # self.assertEqual(stream_val, self.iohandler.memory_object,
         #                 'Memory object obtained')
@@ -231,7 +241,13 @@ class ComplexOutputTest(unittest.TestCase):
         data_format = get_data_format('application/json')
         self.complex_out = ComplexOutput(identifier="complexinput", workdir=tmp_dir,
                                          data_format=data_format,
-                                         supported_formats=[data_format])
+                                         supported_formats=[data_format],
+                                         mode=MODE.NONE)
+        self.data = json.dumps({'a': 1})
+
+        self.test_fn = os.path.join(self.complex_out.workdir, 'test.json')
+        with open(self.test_fn, 'w') as f:
+            f.write(self.data)
 
     def test_contruct(self):
         self.assertIsInstance(self.complex_out, ComplexOutput)
@@ -249,6 +265,28 @@ class ComplexOutputTest(unittest.TestCase):
     def test_validator(self):
         self.assertEqual(self.complex_out.validator,
                          get_validator('application/json'))
+
+    def test_file_handler(self):
+        self.complex_out.file = self.test_fn
+        self.assertEqual(self.complex_out.data, self.data)
+        self.assertEqual(self.complex_out.stream.read(), self.data)
+        self.assertEqual(open(urlparse(self.complex_out.url).path).read(), self.data)
+
+    def test_data_handler(self):
+        self.complex_out.data = self.data
+        self.assertEqual(open(self.complex_out.file).read(), self.data)
+
+    def test_url_handler(self):
+        wfsResource = 'http://demo.mapserver.org/cgi-bin/wfs?' \
+                      'service=WFS&version=1.1.0&' \
+                      'request=GetFeature&' \
+                      'typename=continents&maxfeatures=2'
+        self.complex_out.url = wfsResource
+        storage = FileStorage()
+        self.complex_out.storage = storage
+        url = self.complex_out.get_url()
+        self.assertEqual('file', urlparse(url).scheme)
+
 
 
 class SimpleHandlerTest(unittest.TestCase):
