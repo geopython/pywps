@@ -12,7 +12,6 @@ import tempfile
 import datetime
 import unittest
 import json
-from urlparse import urlparse
 from pywps import Format
 from pywps.validator import get_validator
 from pywps import NAMESPACES
@@ -20,7 +19,7 @@ from pywps.inout.basic import IOHandler, SOURCE_TYPE, SimpleHandler, BBoxInput, 
     ComplexInput, ComplexOutput, LiteralOutput, LiteralInput, _is_textfile
 from pywps.inout import BoundingBoxInput as BoundingBoxInputXML
 from pywps.inout.literaltypes import convert, AllowedValue
-from pywps._compat import StringIO, text_type
+from pywps._compat import StringIO, text_type, urlparse
 from pywps.validator.base import emptyvalidator
 from pywps.exceptions import InvalidParameterValue
 from pywps.validator.mode import MODE
