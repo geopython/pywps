@@ -6,3 +6,4 @@ SQLAlchemy
 python-dateutil
 requests
 jinja2
+pathlib
