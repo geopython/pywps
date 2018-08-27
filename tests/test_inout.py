@@ -268,7 +268,10 @@ class ComplexOutputTest(unittest.TestCase):
     def test_file_handler(self):
         self.complex_out.file = self.test_fn
         self.assertEqual(self.complex_out.data, self.data)
-        self.assertEqual(self.complex_out.stream.read(), self.data)
+        if PY2:
+            self.assertEqual(self.complex_out.stream.read(), self.data)
+        else:
+            self.assertEqual(self.complex_out.stream.read(), bytes(self.data, encoding='utf8'))
         self.assertEqual(open(urlparse(self.complex_out.url).path).read(), self.data)
 
     def test_data_handler(self):
