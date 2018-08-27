@@ -78,8 +78,7 @@ class IOHandler(object):
     :param workdir: working directory, to save temporal file objects in.
     :param mode: ``MODE`` validation mode.
 
-    Properties
-    ----------
+
     `file` : str
       Filename on the local disk.
     `url` : str
@@ -91,9 +90,6 @@ class IOHandler(object):
     `base64` : str
       A base 64 encoding of the data.
 
-
-    Example
-    -------
     >>> # setting up
     >>> import os
     >>> from io import RawIOBase

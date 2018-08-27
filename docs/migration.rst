@@ -54,7 +54,7 @@ you shall use first index of an input list::
 
 Inputs and outputs data manipulation
 ------------------------------------
-Btw, PyWPS Inputs do now have `file`, `data` and `stream` attributes. They are
+Btw, PyWPS Inputs do now have `file`, `data`, `url` and `stream` attributes. They are
 transparently converting one data-representation-type to another. You can read
 input data from file-like object using `stream` or get directly the data into
 variable with `input.data`. You can also save output data directly using
