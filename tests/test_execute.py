@@ -25,6 +25,13 @@ from pywps._compat import StringIO
 if PY2:
     from owslib.ows import BoundingBox
 
+try:
+    import netCDF4
+except ImportError:
+    WITH_NC4 = False
+else:
+    WITH_NC4 = True
+
 VERSION = "1.0.0"
 
 WPS, OWS = get_ElementMakerForVersion(VERSION)
@@ -162,6 +169,7 @@ def get_output(doc):
 class ExecuteTest(unittest.TestCase):
     """Test for Exeucte request KVP request"""
 
+    @unittest.skipIf(not WITH_NC4, 'netCDF4 not installed')
     def test_dods(self):
         my_process = create_complex_nc_process()
         service = Service(processes=[my_process])

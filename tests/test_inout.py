@@ -302,12 +302,16 @@ class ComplexOutputTest(unittest.TestCase):
         if PY2:
             self.assertEqual(self.complex_out.stream.read(), self.data)
         else:
-            self.assertEqual(self.complex_out.stream.read(), bytes(self.data, encoding='utf8'))
-        self.assertEqual(open(urlparse(self.complex_out.url).path).read(), self.data)
+            with self.complex_out.stream as s:
+                self.assertEqual(s.read(), bytes(self.data, encoding='utf8'))
+
+        with open(urlparse(self.complex_out.url).path) as f:
+            self.assertEqual(f.read(), self.data)
 
     def test_data_handler(self):
         self.complex_out.data = self.data
-        self.assertEqual(open(self.complex_out.file).read(), self.data)
+        with open(self.complex_out.file) as f:
+            self.assertEqual(f.read(), self.data)
 
     def test_url_handler(self):
         wfsResource = 'http://demo.mapserver.org/cgi-bin/wfs?' \

@@ -122,11 +122,12 @@ class ValidateTest(unittest.TestCase):
         netcdf_input = get_input('netcdf/time.nc', None, FORMATS.NETCDF.mime_type)
         self.assertTrue(validatenetcdf(netcdf_input, MODE.NONE), 'NONE validation')
         self.assertTrue(validatenetcdf(netcdf_input, MODE.SIMPLE), 'SIMPLE validation')
+        netcdf_input.stream.close()
         if not WITH_NC4:
             self.skipTest('netCDF4 not Installed')
 
         self.assertTrue(validatenetcdf(netcdf_input, MODE.STRICT), 'STRICT validation')
-        netcdf_input.stream.close()
+
 
     def test_dods_validator(self):
         opendap_input = ComplexInput('dods', 'opendap test', [FORMATS.DODS,])
