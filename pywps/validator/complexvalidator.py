@@ -255,6 +255,7 @@ def validatenetcdf(data_input, mode):
 
     return passed
 
+
 def validatedods(data_input, mode):
     """OPeNDAP validation.
         """
