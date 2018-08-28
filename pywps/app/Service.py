@@ -167,7 +167,7 @@ class Service(object):
 
     def create_complex_inputs(self, source, inputs):
         """Create new ComplexInput as clone of original ComplexInput
-        because of inputs can be more then one, take it just as Prototype.
+        because of inputs can be more than one, take it just as Prototype.
 
         :param source: The process's input definition.
         :param inputs: The request input data.
@@ -324,7 +324,6 @@ class Service(object):
                 except Exception as e:
                     # This ensure that logged request get terminated in case of exception while the request is not
                     # accepted
-                    exc_info = sys.exc_info()
                     store_status(request_uuid, WPS_STATUS.FAILED, u'Request rejected due to exception', 100)
                     raise e
             else:
