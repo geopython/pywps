@@ -10,6 +10,7 @@ import unittest
 import sys
 from pywps.validator.complexvalidator import *
 from pywps.inout.formats import FORMATS
+from pywps import ComplexInput
 import tempfile
 import os
 
@@ -19,6 +20,13 @@ except ImportError:
     WITH_GDAL = False
 else:
     WITH_GDAL = True
+
+try:
+    import netCDF4
+except ImportError:
+    WITH_NC4 = False
+else:
+    WITH_NC4 = True
 
 def get_input(name, schema, mime_type):
 
@@ -104,9 +112,31 @@ class ValidateTest(unittest.TestCase):
         self.assertTrue(validategeotiff(geotiff_input, MODE.NONE), 'NONE validation')
         self.assertTrue(validategeotiff(geotiff_input, MODE.SIMPLE), 'SIMPLE validation')
         if not WITH_GDAL:
-            self.testSkipp('GDAL Not Installed')
+            self.skipTest('GDAL not Installed')
         self.assertTrue(validategeotiff(geotiff_input, MODE.STRICT), 'STRICT validation')
         geotiff_input.stream.close()
+
+    def test_netcdf_validator(self):
+        """Test netCDF validator
+        """
+        netcdf_input = get_input('netcdf/time.nc', None, FORMATS.NETCDF.mime_type)
+        self.assertTrue(validatenetcdf(netcdf_input, MODE.NONE), 'NONE validation')
+        self.assertTrue(validatenetcdf(netcdf_input, MODE.SIMPLE), 'SIMPLE validation')
+        if not WITH_NC4:
+            self.skipTest('netCDF4 not Installed')
+
+        self.assertTrue(validatenetcdf(netcdf_input, MODE.STRICT), 'STRICT validation')
+        netcdf_input.stream.close()
+
+    def test_dods_validator(self):
+        opendap_input = ComplexInput('dods', 'opendap test', [FORMATS.DODS,])
+        opendap_input.url = "http://test.opendap.org:80/opendap/netcdf/examples/sresa1b_ncar_ccsm3_0_run1_200001.nc"
+        self.assertTrue(validatedods(opendap_input, MODE.NONE), 'NONE validation')
+        self.assertTrue(validatedods(opendap_input, MODE.SIMPLE), 'SIMPLE validation')
+        if not WITH_NC4:
+            self.skipTest('netCDF4 not Installed')
+
+        self.assertTrue(validatedods(opendap_input, MODE.STRICT), 'STRICT validation')
 
     def test_fail_validator(self):
         fake_input = get_input('point.xsd', 'point.xsd', FORMATS.SHP.mime_type)

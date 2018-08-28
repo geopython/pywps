@@ -577,7 +577,10 @@ class BasicComplex(object):
         self._supported_formats = None
         if supported_formats:
             self.supported_formats = supported_formats
-        if self.supported_formats:
+
+        if data_format:
+            self.data_format = data_format
+        elif self.supported_formats:
             # not an empty list, set the default/current format to the first
             self.data_format = supported_formats[0]
 
@@ -597,7 +600,6 @@ class BasicComplex(object):
     def validator(self):
         """Return the proper validator for given data_format
         """
-
         return self.data_format.validate
 
     @property

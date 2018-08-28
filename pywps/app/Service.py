@@ -167,7 +167,10 @@ class Service(object):
 
     def create_complex_inputs(self, source, inputs):
         """Create new ComplexInput as clone of original ComplexInput
-        because of inputs can be more then one, take it just as Prototype
+        because of inputs can be more then one, take it just as Prototype.
+
+        :param source: The process's input definition.
+        :param inputs: The request input data.
         :return collections.deque:
         """
 
@@ -321,6 +324,7 @@ class Service(object):
                 except Exception as e:
                     # This ensure that logged request get terminated in case of exception while the request is not
                     # accepted
+                    exc_info = sys.exc_info()
                     store_status(request_uuid, WPS_STATUS.FAILED, u'Request rejected due to exception', 100)
                     raise e
             else:
@@ -332,7 +336,8 @@ class Service(object):
         except HTTPException as e:
             return NoApplicableCode(e.description, code=e.code)
         except Exception as e:
-            return NoApplicableCode("No applicable error code, please check error log.", code=500)
+            msg = "No applicable error code, please check error log."
+            return NoApplicableCode(msg, code=500)
 
     @Request.application
     def __call__(self, http_request):
