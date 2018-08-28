@@ -86,12 +86,10 @@ class ComplexOutput(basic.ComplexOutput):
             'max_occurs': self.max_occurs
         }
 
-        if self.file:
-
-            if self.as_reference:
-                data = self._json_reference(data)
-            else:
-                data = self._json_data(data)
+        if self.as_reference:
+            data = self._json_reference(data)
+        else:
+            data = self._json_data(data)
 
         if self.data_format:
             if self.data_format.mime_type:
@@ -109,8 +107,11 @@ class ComplexOutput(basic.ComplexOutput):
         data["type"] = "reference"
 
         # get_url will create the file and return the url for it
-        self.storage = FileStorage()
-        data["href"] = self.get_url()
+        if self.prop == 'url':
+            data["href"] = self.url
+        elif self.prop is not None:
+            self.storage = FileStorage()
+            data["href"] = self.get_url()
 
         return data
 

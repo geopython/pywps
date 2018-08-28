@@ -5,10 +5,13 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
+from __future__ import absolute_import
+import requests
 import os
 import tempfile
 import datetime
 import unittest
+import json
 from pywps import Format
 from pywps.validator import get_validator
 from pywps import NAMESPACES
@@ -16,11 +19,13 @@ from pywps.inout.basic import IOHandler, SOURCE_TYPE, SimpleHandler, BBoxInput, 
     ComplexInput, ComplexOutput, LiteralOutput, LiteralInput, _is_textfile
 from pywps.inout import BoundingBoxInput as BoundingBoxInputXML
 from pywps.inout.literaltypes import convert, AllowedValue
-from pywps._compat import StringIO, text_type
+from pywps._compat import StringIO, text_type, urlparse
 from pywps.validator.base import emptyvalidator
 from pywps.exceptions import InvalidParameterValue
 from pywps.validator.mode import MODE
 from pywps.inout.basic import UOM
+from pywps.inout.storage import FileStorage
+from pywps._compat import PY2
 
 from lxml import etree
 
@@ -28,8 +33,8 @@ DATA_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'data')
 
 
 def get_data_format(mime_type):
-    return Format(mime_type=mime_type,
-    validate=get_validator(mime_type))
+    return Format(mime_type=mime_type, validate=get_validator(mime_type))
+
 
 class IOHandlerTest(unittest.TestCase):
     """IOHandler test cases"""
@@ -55,9 +60,14 @@ class IOHandlerTest(unittest.TestCase):
         """Test all outputs"""
 
         self.assertEqual(source_type, self.iohandler.source_type,
-                          'Source type properly set')
+                         'Source type properly set')
 
         self.assertEqual(self._value, self.iohandler.data, 'Data obtained')
+
+        if self.iohandler.source_type == SOURCE_TYPE.URL:
+            self.assertEqual('http', urlparse(self.iohandler.url).scheme)
+        else:
+            self.assertEqual('file', urlparse(self.iohandler.url).scheme)
 
         if self.iohandler.source_type == SOURCE_TYPE.STREAM:
             source = StringIO(text_type(self._value))
@@ -76,8 +86,11 @@ class IOHandlerTest(unittest.TestCase):
         stream_val = self.iohandler.stream.read()
         self.iohandler.stream.close()
 
-        if type(stream_val) == type(b''):
-            self.assertEqual(str.encode(self._value), stream_val,
+        if PY2 and isinstance(stream_val, str):
+            self.assertEqual(self._value, stream_val.decode('utf-8'),
+                             'Stream obtained')
+        elif not PY2 and isinstance(stream_val, bytes):
+            self.assertEqual(self._value, stream_val.decode('utf-8'),
                              'Stream obtained')
         else:
             self.assertEqual(self._value, stream_val,
@@ -87,7 +100,9 @@ class IOHandlerTest(unittest.TestCase):
             source = StringIO(text_type(self._value))
             self.iohandler.stream = source
 
-        #self.assertEqual(stream_val, self.iohandler.memory_object,
+
+
+        # self.assertEqual(stream_val, self.iohandler.memory_object,
         #                 'Memory object obtained')
 
     def test_data(self):
@@ -111,6 +126,16 @@ class IOHandlerTest(unittest.TestCase):
         file_handler.close()
         self.iohandler.file = source
         self._test_outout(SOURCE_TYPE.FILE)
+
+    def test_url(self):
+
+        wfsResource = 'http://demo.mapserver.org/cgi-bin/wfs?' \
+                      'service=WFS&version=1.1.0&' \
+                      'request=GetFeature&' \
+                      'typename=continents&maxfeatures=2'
+        self._value = requests.get(wfsResource).text
+        self.iohandler.url = wfsResource
+        self._test_outout(SOURCE_TYPE.URL)
 
     def test_workdir(self):
         """Test workdir"""
@@ -173,12 +198,14 @@ class ComplexInputTest(unittest.TestCase):
 
     def test_validator(self):
         self.assertEqual(self.complex_in.data_format.validate,
-                       get_validator('application/json'))
+                         get_validator('application/json'))
         self.assertEqual(self.complex_in.validator,
                          get_validator('application/json'))
         frmt = get_data_format('application/json')
+
         def my_validate():
             return True
+
         frmt.validate = my_validate
         self.assertNotEqual(self.complex_in.validator, frmt.validate)
 
@@ -204,6 +231,7 @@ class ComplexInputTest(unittest.TestCase):
         self.assertTrue(out['data_format'], 'data_format set')
         self.assertEqual(out['data_format']['mime_type'], 'application/json', 'data_format set')
 
+
 class ComplexOutputTest(unittest.TestCase):
     """ComplexOutput test cases"""
 
@@ -212,7 +240,13 @@ class ComplexOutputTest(unittest.TestCase):
         data_format = get_data_format('application/json')
         self.complex_out = ComplexOutput(identifier="complexinput", workdir=tmp_dir,
                                          data_format=data_format,
-                                         supported_formats=[data_format])
+                                         supported_formats=[data_format],
+                                         mode=MODE.NONE)
+        self.data = json.dumps({'a': 1})
+
+        self.test_fn = os.path.join(self.complex_out.workdir, 'test.json')
+        with open(self.test_fn, 'w') as f:
+            f.write(self.data)
 
     def test_contruct(self):
         self.assertIsInstance(self.complex_out, ComplexOutput)
@@ -231,6 +265,30 @@ class ComplexOutputTest(unittest.TestCase):
         self.assertEqual(self.complex_out.validator,
                          get_validator('application/json'))
 
+    def test_file_handler(self):
+        self.complex_out.file = self.test_fn
+        self.assertEqual(self.complex_out.data, self.data)
+        if PY2:
+            self.assertEqual(self.complex_out.stream.read(), self.data)
+        else:
+            self.assertEqual(self.complex_out.stream.read(), bytes(self.data, encoding='utf8'))
+        self.assertEqual(open(urlparse(self.complex_out.url).path).read(), self.data)
+
+    def test_data_handler(self):
+        self.complex_out.data = self.data
+        self.assertEqual(open(self.complex_out.file).read(), self.data)
+
+    def test_url_handler(self):
+        wfsResource = 'http://demo.mapserver.org/cgi-bin/wfs?' \
+                      'service=WFS&version=1.1.0&' \
+                      'request=GetFeature&' \
+                      'typename=continents&maxfeatures=2'
+        self.complex_out.url = wfsResource
+        storage = FileStorage()
+        self.complex_out.storage = storage
+        url = self.complex_out.get_url()
+        self.assertEqual('file', urlparse(url).scheme)
+
 
 
 class SimpleHandlerTest(unittest.TestCase):
@@ -248,18 +306,18 @@ class SimpleHandlerTest(unittest.TestCase):
     def test_data_type(self):
         self.assertEqual(convert(self.simple_handler.data_type, '1'), 1)
 
+
 class LiteralInputTest(unittest.TestCase):
     """LiteralInput test cases"""
 
     def setUp(self):
 
         self.literal_input = LiteralInput(
-                identifier="literalinput",
-                mode=2,
-                allowed_values=(1, 2, (3, 3, 12)),
-                default=6,
-                uoms=(UOM("metre"),))
-
+            identifier="literalinput",
+            mode=2,
+            allowed_values=(1, 2, (3, 3, 12)),
+            default=6,
+            uoms=(UOM("metre"),))
 
     def test_contruct(self):
         self.assertIsInstance(self.literal_input, LiteralInput)
@@ -333,7 +391,6 @@ class LiteralInputTest(unittest.TestCase):
         self.assertEqual(out['data'], datetime.date(2017, 4, 20), 'date set')
 
 
-
 class LiteralOutputTest(unittest.TestCase):
     """LiteralOutput test cases"""
 
@@ -350,6 +407,7 @@ class LiteralOutputTest(unittest.TestCase):
         storage = Storage()
         self.literal_output.store = storage
         self.assertEqual(self.literal_output.store, storage)
+
 
 class BoxInputTest(unittest.TestCase):
     """BBoxInput test cases"""
@@ -390,6 +448,7 @@ class BoxOutputTest(unittest.TestCase):
         storage = Storage()
         self.bbox_out.store = storage
         self.assertEqual(self.bbox_out.store, storage)
+
 
 def load_tests(loader=None, tests=None, pattern=None):
     if not loader:
