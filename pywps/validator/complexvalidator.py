@@ -250,8 +250,12 @@ def validatenetcdf(data_input, mode):
             from pywps.dependencies import netCDF4 as nc
             nc.Dataset(data_input.file)
             passed = True
-        except ImportError:
+        except ImportError as e:
             passed = False
+            LOGGER.exception("ImportError while validating netCDF4 file {}:\n {}".format(data_input.file, e))
+        except IOError as e:
+            passed = False
+            LOGGER.exception("IOError while validating netCDF4 file {}:\n {}".format(data_input.file, e))
 
     return passed
 
@@ -277,8 +281,12 @@ def validatedods(data_input, mode):
             from pywps.dependencies import netCDF4 as nc
             nc.Dataset(data_input.url)
             passed = True
-        except ImportError:
+        except ImportError as e:
             passed = False
+            LOGGER.exception("ImportError while validating OPeNDAP link {}:\n {}".format(data_input.url, e))
+        except IOError as e:
+            passed = False
+            LOGGER.exception("IOError while validating OPeNDAP link {}:\n {}".format(data_input.url, e))
 
     return passed
 
