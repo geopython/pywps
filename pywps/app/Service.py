@@ -112,8 +112,8 @@ class Service(object):
 
             if not request_inputs:
                 if inpt._default is not None:
-                    if not inpt.data_set:
-                        inpt._set_default_value()
+                    if not inpt.data_set and isinstance(inpt, ComplexInput):
+                            inpt._set_default_value()
 
                     data_inputs[inpt.identifier] = [inpt.clone()]
             else:
