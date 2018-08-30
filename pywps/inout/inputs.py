@@ -89,8 +89,6 @@ class ComplexInput(basic.ComplexInput):
     def json(self):
         """Get JSON representation of the input
         """
-        if not self.data_set and self._default is not None:
-                self._set_default_value()
 
         data = {
             'identifier': self.identifier,

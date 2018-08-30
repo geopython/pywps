@@ -114,7 +114,7 @@ class DescribeProcessTest(unittest.TestCase):
             version='1.0.0'
         )
         resp = self.client.post_xml(doc=request_doc)
-        assert resp.status_code == 400
+        assert resp.status_code == 200
 
     def test_post_two_args(self):
         request_doc = WPS.DescribeProcess(
@@ -216,7 +216,6 @@ class InputDescriptionTest(unittest.TestCase):
         data = complex_in.json
         assert len(data["supported_formats"]) == 2
         assert data["data_format"]["mime_type"] == "a/b"
-        assert data["data"] == "default"
 
     def test_bbox_input(self):
         bbox = BoundingBoxInput('bbox', 'BBox foo', keywords=['kw1', 'kw2'],
