@@ -1,0 +1,25 @@
+                    <Default>
+                        <Format>
+                            <MimeType>{{ put.data_format.mime_type }}</MimeType>
+                            {% if put.data_format.encoding %}
+                            <Encoding>{{ put.data_format.encoding }}</Encoding>
+                            {% endif %}
+                            {% if put.data_format.schema %}
+                            <Schema>{{ put.data_format.schema }}</Schema>
+                            {% endif %}
+                        </Format>
+                    </Default>
+                    <Supported>
+                        {% for format in put.supported_formats %}
+                        <Format>
+                            <MimeType>{{ format.mime_type }}</MimeType>
+                            {% if put.data_format.encoding %}
+                            <Encoding>{{ format.encoding }}</Encoding>
+                            {% endif %}
+                            {% if put.data_format.schema %}
+                            <Schema>{{ format.schema }}</Schema>
+                            {% endif %}
+                        </Format>
+                        {% endfor %}
+                    </Supported>
+

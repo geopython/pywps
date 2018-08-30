@@ -251,11 +251,13 @@ values are found in the `inputs` dictionary::
 
 `inputs` is a plain Python dictionary.
 Most of the inputs and outputs are derived from the :class:`IOHandler` class.
-This enables the user to access the data in 3 different ways:
+This enables the user to access the data in four different ways:
 
 `input.file`
     Returns a file name - you can access the data using the name of the file
     stored on the hard drive.
+`input.url`
+    Return a link to the resource using either the ``file://`` or ``http://`` scheme. The target of the url is not downloaded to the PyWPS server until its content is explicitly accessed through either one of the ``file``, ``data`` or ``stream`` attributes.
 `input.data`
     Is the direct link to the data themselves. No need to create a file object
     on the hard drive or opening the file and closing it - PyWPS will do
@@ -264,30 +266,29 @@ This enables the user to access the data in 3 different ways:
     Provides the IOStream of the data. No need for opening the file, you just
     have to `read()` the data.
 
-PyWPS will persistently transform the input (and output) data to the desired
-form. You can also set the data for your `Output` object like `output.data = 1`
-or `output.file = "myfile.json"` - it works the same way.
-
-Example::
+Because there could be multiple input values with the same identifier, the
+inputs are accessed with an index. For example::
 
     request.inputs['file_input'][0].file
     request.inputs['data_input'][0].data
     request.inputs['stream_input'][0].stream
+    url_input = request.inputs['url_input'][0]
 
-Because there could be multiple input values with the same identifier, the
-inputs are accessed with an index.  For `LiteralInput`, the value is a string.
-For `ComplexInput`, the value is an open file object, with a `mime_type`
-attribute::
+As mentioned, if an input is a link to a remote file (an ``http`` address), accessing the ``url`` attribute simply returns the url's string, but accessing any other attribute triggers the file's download::
 
-    @staticmethod
-    def handler(request, response):
-        layer_file = request.inputs['layer'][0].file
-        mime_type = layer_file.mime_type
-        bytes = layer_file.read()
-        msg = ("You gave me a file of type %s and size %d"
-               % (mime_type, len(bytes)))
-        response.outputs['output'].data = msg
-        return response
+    url_input.url # returns the link as a string (no download)
+    url_input.file # downloads target and returns the local path
+    url_input.data # returns the content of the local copy
+
+
+PyWPS will persistently transform the input (and output) data to the desired
+form. You can also set the data for your `Output` object like `output.data = 1`
+or `output.file = "myfile.json"` - it works the same way. However, once the source
+type is set, it cannot be changed. That is, a `ComplexOutput` whose ``data``
+attribute has been set once has read-only access to the three other attributes
+(``file``, ``stream`` and ``url``), while the ``data`` attribute can be freely
+modified.
+
 
 Progress and status report
 ==========================

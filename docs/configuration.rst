@@ -4,7 +4,8 @@ Configuration
 =============
 
 PyWPS is configured using a configuration file. The file uses the
-`ConfigParser <https://wiki.python.org/moin/ConfigParserExamples>`_ format.
+`ConfigParser <https://wiki.python.org/moin/ConfigParserExamples>`_ format, with
+interpolation initialised using `os.environ`.
 
 .. versionadded:: 4.0.0
 .. warning:: Compatibility with PyWPS 3.x: major changes have been made

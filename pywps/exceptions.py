@@ -12,6 +12,7 @@ http://lists.opengeospatial.org/pipermail/wps-dev/2013-October/000335.html
 """
 
 
+from werkzeug.wrappers import Response
 from werkzeug.exceptions import HTTPException
 from werkzeug._compat import text_type
 from werkzeug.utils import escape
@@ -50,10 +51,6 @@ class NoApplicableCode(HTTPException):
         """The status name."""
         return self.__class__.__name__
 
-    def get_headers(self, environ=None):
-        """Get a list of headers."""
-        return [('Content-Type', 'text/xml')]
-
     def get_description(self, environ=None):
         """Get the description."""
         if self.description:
@@ -61,9 +58,8 @@ class NoApplicableCode(HTTPException):
         else:
             return ''
 
-    def get_body(self, environ=None):
-        """Get the XML body."""
-        return text_type((
+    def get_response(self, environ=None):
+        doc = text_type((
             u'<?xml version="1.0" encoding="UTF-8"?>\n'
             u'<!-- PyWPS %(version)s -->\n'
             u'<ows:ExceptionReport xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/ows/1.1 http://schemas.opengis.net/ows/1.1.0/owsExceptionReport.xsd" version="1.0.0">\n'  # noqa
@@ -78,6 +74,7 @@ class NoApplicableCode(HTTPException):
             'name': escape(self.name),
             'description': self.get_description(environ)
         })
+        return Response(doc, self.code, mimetype='text/xml')
 
 
 class InvalidParameterValue(NoApplicableCode):

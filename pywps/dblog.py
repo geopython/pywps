@@ -112,34 +112,18 @@ def get_first_stored():
     return request
 
 
-def update_response(uuid, response, close=False):
+def store_status(uuid, wps_status, message=None, status_percentage=None):
     """Writes response to database
     """
-
     session = get_session()
-    message = None
-    status_percentage = None
-    status = None
-
-    if hasattr(response, 'message'):
-        message = response.message
-    if hasattr(response, 'status_percentage'):
-        status_percentage = response.status_percentage
-    if hasattr(response, 'status'):
-        status = response.status
-
-        if status == '200 OK':
-            status = 3
-        elif status == 400:
-            status = 0
 
     requests = session.query(ProcessInstance).filter_by(uuid=str(uuid))
     if requests.count():
         request = requests.one()
         request.time_end = datetime.datetime.now()
-        request.message = message
+        request.message = str(message)
         request.percent_done = status_percentage
-        request.status = status
+        request.status = wps_status
         session.commit()
     session.close()
 

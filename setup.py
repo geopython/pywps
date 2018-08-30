@@ -10,6 +10,8 @@ try:
 except ImportError:
     from distutils.core import setup
 
+from setuptools import find_packages
+
 with open('VERSION.txt') as ff:
     VERSION = ff.read().strip()
 
@@ -46,16 +48,8 @@ CONFIG = {
         'Topic :: Scientific/Engineering :: GIS'
     ],
     'install_requires': INSTALL_REQUIRES,
-    'packages': [
-        'pywps',
-        'pywps/app',
-        'pywps/inout',
-        'pywps/resources',
-        'pywps/response',
-        'pywps/validator',
-        'pywps/inout/formats',
-        'pywps/processing',
-    ],
+    'packages': find_packages(exclude=["docs", "tests.*", "tests"]),
+    'include_package_data': True,
     'scripts': [],
     'entry_points': {
         'console_scripts': [

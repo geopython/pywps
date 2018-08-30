@@ -5,23 +5,31 @@
 
 from pywps._compat import text_type, StringIO
 import os
+import shutil
+import requests
 import tempfile
+import logging
+import pywps.configuration as config
 from pywps.inout.literaltypes import (LITERAL_DATA_TYPES, convert,
                                       make_allowedvalues, is_anyvalue)
-from pywps import OWS, OGCUNIT, NAMESPACES
+from pywps import get_ElementMakerForVersion, OGCUNIT, NAMESPACES
 from pywps.validator.mode import MODE
 from pywps.validator.base import emptyvalidator
 from pywps.validator import get_validator
 from pywps.validator.literalvalidator import (validate_anyvalue,
                                               validate_allowed_values)
-from pywps.exceptions import InvalidParameterValue
-from pywps._compat import PY2
+from pywps.exceptions import NoApplicableCode, InvalidParameterValue, FileSizeExceeded, \
+    FileURLNotSupported
+from pywps._compat import PY2, urlparse
 import base64
 from collections import namedtuple
 from io import BytesIO
 
-_SOURCE_TYPE = namedtuple('SOURCE_TYPE', 'MEMORY, FILE, STREAM, DATA')
-SOURCE_TYPE = _SOURCE_TYPE(0, 1, 2, 3)
+
+_SOURCE_TYPE = namedtuple('SOURCE_TYPE', 'MEMORY, FILE, STREAM, DATA, URL')
+SOURCE_TYPE = _SOURCE_TYPE(0, 1, 2, 3, 4)
+
+LOGGER = logging.getLogger("PYWPS")
 
 
 def _is_textfile(filename):
@@ -39,19 +47,53 @@ def _is_textfile(filename):
     return is_text
 
 
+def extend_instance(obj, cls):
+    """Apply mixins to a class instance after creation."""
+    base_cls = obj.__class__
+    base_cls_name = obj.__class__.__name__
+    obj.__class__ = type(base_cls_name, (cls, base_cls), {})
+
+
+class UOM(object):
+    """
+    :param uom: unit of measure
+    """
+
+    def __init__(self, uom=''):
+        self.uom = uom
+
+    @property
+    def json(self):
+        return {"reference": OGCUNIT[self.uom],
+                "uom": self.uom}
+
+
 class IOHandler(object):
-    """Basic IO class. Provides functions, to accept input data in file,
-    memory object and stream object and give them out in all three types
+    """Base IO handling class subclassed by specialized versions: FileHandler, UrlHandler, DataHandler, etc.
 
-    :param workdir: working directory, to save temporal file objects in
-    :param mode: ``MODE`` validation mode
+    If the specialized handling class is not known when the object is created, instantiate the object with IOHandler.
+    The first time the `file`, `url` or `data` attribute is set, the associated subclass will be automatically
+    registered. Once set, the specialized subclass cannot be switched.
 
+    :param workdir: working directory, to save temporal file objects in.
+    :param mode: ``MODE`` validation mode.
+
+
+    `file` : str
+      Filename on the local disk.
+    `url` : str
+      Link to an online resource.
+    `stream` : FileIO
+      A readable object.
+    `data` : object
+      A native python object (integer, string, float, etc)
+    `base64` : str
+      A base 64 encoding of the data.
 
     >>> # setting up
     >>> import os
     >>> from io import RawIOBase
     >>> from io import FileIO
-    >>> import types
     >>>
     >>> ioh_file = IOHandler(workdir=tmp)
     >>> assert isinstance(ioh_file, IOHandler)
@@ -63,39 +105,52 @@ class IOHandler(object):
     >>>
     >>> # testing file object on input
     >>> ioh_file.file = fileobj.name
-    >>> assert ioh_file.source_type == SOURCE_TYPE.FILE
-    >>> file = ioh_file.file
-    >>> stream = ioh_file.stream
-    >>>
-    >>> assert file == fileobj.name
-    >>> assert isinstance(stream, RawIOBase)
+    >>> assert isinstance(ioh_file, FileHandler
+    >>> assert ioh_file.file == fileobj.name
+    >>> assert isinstance(ioh_file.stream, RawIOBase)
     >>> # skipped assert isinstance(ioh_file.memory_object, POSH)
     >>>
     >>> # testing stream object on input
     >>> ioh_stream = IOHandler(workdir=tmp)
     >>> assert ioh_stream.workdir == tmp
     >>> ioh_stream.stream = FileIO(fileobj.name,'r')
-    >>> assert ioh_stream.source_type == SOURCE_TYPE.STREAM
-    >>> file = ioh_stream.file
-    >>> stream = ioh_stream.stream
-    >>>
-    >>> assert open(file).read() == ioh_file.stream.read()
-    >>> assert isinstance(stream, RawIOBase)
+    >>> assert isinstance(ioh_stream, StreamHandler)
+    >>> assert open(ioh_stream.file).read() == ioh_file.stream.read()
+    >>> assert isinstance(ioh_stream.stream, RawIOBase)
     """
+    prop = None
 
     def __init__(self, workdir=None, mode=MODE.NONE):
-        self.source_type = None
-        self.source = None
-        self._tempfile = None
-        self.workdir = workdir
-        self.uuid = None  # request identifier
-        self._stream = None
-        self.data_set = False
+        # Internal defaults for class and subclass properties.
+        self._workdir = None
+        self._reset_cache()
 
+        # Set public defaults
+        self.workdir = workdir
         self.valid_mode = mode
 
+        # TODO: Clarify intent
+        self.as_reference = False
+        self.inpt = {}
+        self.uuid = None  # request identifier
+        self.data_set = False
+
+        # This creates dummy property setters and getters for `file`, `data`, `url`, `stream` that
+        #  1. register the subclass methods according to the given property
+        #  2. replace the property setter by the subclass property setter
+        #  3. set the property
+        self._create_fset_properties()
+
+    def _reset_cache(self):
+        """Sets all internal objects to None."""
+        self._file = None
+        self._data = None
+        self._post_data = None
+        self._stream = None
+        self._url = None
+
     def _check_valid(self):
-        """Validate this input usig given validator
+        """Validate this input using given validator
         """
 
         validate = self.validator
@@ -103,103 +158,160 @@ class IOHandler(object):
         if not _valid:
             self.data_set = False
             raise InvalidParameterValue('Input data not valid using '
-                                        'mode %s' % (self.valid_mode))
+                                        'mode {}'.format(self.valid_mode))
         self.data_set = True
 
-    def set_file(self, filename):
-        """Set source as file name"""
-        self.source_type = SOURCE_TYPE.FILE
-        self.source = os.path.abspath(filename)
-        self._check_valid()
-
-    def set_workdir(self, workdirpath):
-        """Set working temporary directory for files to be stored in"""
-
-        if workdirpath is not None and not os.path.exists(workdirpath):
-            os.makedirs(workdirpath)
-
-        self._workdir = workdirpath
-
-    def set_memory_object(self, memory_object):
-        """Set source as in memory object"""
-        self.source_type = SOURCE_TYPE.MEMORY
-        self._check_valid()
-
-    def set_stream(self, stream):
-        """Set source as stream object"""
-        self.source_type = SOURCE_TYPE.STREAM
-        self.source = stream
-        self._check_valid()
-
-    def set_data(self, data):
-        """Set source as simple datatype e.g. string, number"""
-        self.source_type = SOURCE_TYPE.DATA
-        self.source = data
-        self._check_valid()
-
-    def set_base64(self, data):
-        """Set data encoded in base64"""
-
-        self.data = base64.b64decode(data)
-        self._check_valid()
-
-    def get_file(self):
-        """Get source as file name"""
-        if self.source_type == SOURCE_TYPE.FILE:
-            return self.source
-
-        elif self.source_type == SOURCE_TYPE.STREAM or self.source_type == SOURCE_TYPE.DATA:
-            if self._tempfile:
-                return self._tempfile
-            else:
-                suffix = ''
-                if hasattr(self, 'data_format') and self.data_format.extension:
-                    suffix = self.data_format.extension
-                (opening, stream_file_name) = tempfile.mkstemp(
-                    dir=self.workdir, suffix=suffix)
-                openmode = 'w'
-                if not PY2 and isinstance(self.source, bytes):
-                    # on Python 3 open the file in binary mode if the source is
-                    # bytes, which happens when the data was base64-decoded
-                    openmode += 'b'
-                stream_file = open(stream_file_name, openmode)
-
-                if self.source_type == SOURCE_TYPE.STREAM:
-                    stream_file.write(self.source.read())
-                else:
-                    stream_file.write(self.source)
-
-                stream_file.close()
-                self._tempfile = str(stream_file_name)
-                return self._tempfile
-
-    def get_workdir(self):
-        """Return working directory name
-        """
+    @property
+    def workdir(self):
         return self._workdir
 
-    def get_memory_object(self):
-        """Get source as memory object"""
-        # TODO: Soeren promissed to implement at WPS Workshop on 23rd of January 2014
-        raise NotImplementedError("setmemory_object not implemented")
+    @workdir.setter
+    def workdir(self, path):
+        """Set working temporary directory for files to be stored in."""
+        if path is not None:
+            if not os.path.exists(path):
+                os.makedirs(path)
 
-    def get_stream(self):
-        """Get source as stream object"""
-        if self.source_type == SOURCE_TYPE.FILE:
-            if self._stream and not self._stream.closed:
-                self._stream.close()
-            from io import FileIO
-            self._stream = FileIO(self.source, mode='r', closefd=True)
-            return self._stream
-        elif self.source_type == SOURCE_TYPE.STREAM:
-            return self.source
-        elif self.source_type == SOURCE_TYPE.DATA:
-            if not PY2 and isinstance(self.source, bytes):
-                return BytesIO(self.source)
-            else:
-                return StringIO(text_type(self.source))
+        self._workdir = path
 
-    def _openmode(self):
+    @property
+    def validator(self):
+        """Return the function suitable for validation
+        This method should be overridden by class children
+
+        :return: validating function
+        """
+
+        return emptyvalidator
+
+    @property
+    def source_type(self):
+        """Return the source type."""
+        # For backward compatibility only. source_type checks could be replaced by `isinstance`.
+        return getattr(SOURCE_TYPE, self.prop.upper())
+
+    def _set_default_value(self, value, value_type):
+        """Set default value based on input data type."""
+
+        if value:
+            if value_type == SOURCE_TYPE.DATA:
+                self.data = value
+            elif value_type == SOURCE_TYPE.MEMORY:
+                raise NotImplementedError
+            elif value_type == SOURCE_TYPE.FILE:
+                self.file = value
+            elif value_type == SOURCE_TYPE.STREAM:
+                self.stream = value
+
+    def _build_file_name(self, href=''):
+        """Return a file name for the local system."""
+        url_path = urlparse(href).path or ''
+        file_name = os.path.basename(url_path).strip() or 'input'
+        (prefix, suffix) = os.path.splitext(file_name)
+        suffix = suffix or self.extension
+        if prefix and suffix:
+            file_name = prefix + suffix
+        input_file_name = os.path.join(self.workdir, file_name)
+
+        # build tempfile in case of duplicates
+        if os.path.exists(input_file_name):
+            input_file_name = tempfile.mkstemp(
+                suffix=suffix, prefix=prefix + '_',
+                dir=self.workdir)[1]
+
+        return input_file_name
+
+    @property
+    def extension(self):
+        """Return the file extension for the data format, if set."""
+        if getattr(self, 'data_format', None):
+            return self.data_format.extension
+        else:
+            return ''
+
+    @staticmethod
+    def _create_fset_properties():
+        """Create properties that when set for the first time, will determine
+        the instance's handler class.
+
+        Example
+        -------
+        >>> h = IOHandler()
+        >>> isinstance(h, DataHandler)
+        False
+        >>> h.data = 1 # Mixes the DataHandler class to IOHandler. h inherits DataHandler methods.
+        >>> isinstance(h, DataHandler)
+        True
+
+        Note that trying to set another attribute (e.g. `h.file = 'a.txt'`) will raise an AttributeError.
+        """
+        for cls in (FileHandler, DataHandler, StreamHandler, UrlHandler):
+            def fset(s, value, kls=cls):
+                """Assign the handler class and set the value to the attribute.
+
+                This function will only be called once. The next `fset` will
+                use the subclass' property.
+                """
+                # Add cls methods to this instance.
+                extend_instance(s, kls)
+
+                # Set the attribute value through the associated cls property.
+                setattr(s, kls.prop, value)
+
+            setattr(IOHandler, cls.prop, property(fget=lambda x: None, fset=fset))
+
+
+class FileHandler(IOHandler):
+    prop = 'file'
+
+    @property
+    def file(self):
+        """Return filename."""
+        return self._file
+
+    @file.setter
+    def file(self, value):
+        """Set file name"""
+        self._reset_cache()
+        self._file = os.path.abspath(value)
+        self.as_reference = True
+        self._check_valid()
+
+    @property
+    def data(self):
+        """Read file and return content."""
+        if self._data is None:
+            with open(self.file, mode=self._openmode()) as fh:
+                self._data = fh.read()
+        return self._data
+
+    @property
+    def base64(self):
+        """Return base64 encoding of data."""
+        return base64.b64encode(self.data)
+
+    @property
+    def stream(self):
+        """Return stream object."""
+        from io import FileIO
+        if getattr(self, '_stream', None) and not self._stream.closed:
+            self._stream.close()
+
+        self._stream = FileIO(self.file, mode='r', closefd=True)
+        return self._stream
+
+    @property
+    def mem(self):
+        """Return memory object."""
+        raise NotImplementedError
+
+    @property
+    def url(self):
+        """Return url to file."""
+        import pathlib
+        return pathlib.PurePosixPath(self.file).as_uri()
+
+    def _openmode(self, data=None):
         openmode = 'r'
         if not PY2:
             # in Python 3 we need to open binary files in binary mode.
@@ -214,59 +326,163 @@ class IOHandler(object):
                     checked = True
             # when we can't guess it from the mime_type, we need to check the file.
             # mimetypes like application/xml and application/json are text files too.
-            if not checked and not _is_textfile(self.source):
+            if not checked and not _is_textfile(self.file):
                 openmode += 'b'
         return openmode
 
-    def get_data(self):
-        """Get source as simple data object"""
-        if self.source_type == SOURCE_TYPE.FILE:
-            file_handler = open(self.source, mode=self._openmode())
-            content = file_handler.read()
-            file_handler.close()
-            return content
-        elif self.source_type == SOURCE_TYPE.STREAM:
-            return self.source.read()
-        elif self.source_type == SOURCE_TYPE.DATA:
-            return self.source
+
+class DataHandler(FileHandler):
+    prop = 'data'
+
+    def _openmode(self, data=None):
+        openmode = 'w'
+        if not PY2 and isinstance(data, bytes):
+            # on Python 3 open the file in binary mode if the source is
+            # bytes, which happens when the data was base64-decoded
+            openmode += 'b'
+        return openmode
 
     @property
-    def validator(self):
-        """Return the function suitable for validation
-        This method should be overridden by class children
+    def data(self):
+        """Return data."""
+        return getattr(self, '_data', None)
 
-        :return: validating function
+    @data.setter
+    def data(self, value):
+        self._reset_cache()
+        self._data = value
+        self._check_valid()
+
+    @property
+    def file(self):
+        """Return file name storing the data.
+
+        Requesting the file attributes writes the data to a temporary file on disk.
         """
+        if self._file is None:
+            self._file = self._build_file_name()
+            with open(self._file, self._openmode(self.data)) as fh:
+                fh.write(self.data)
 
-        return emptyvalidator
+        return self._file
 
-    def get_base64(self):
-        return base64.b64encode(self.data)
+    @property
+    def stream(self):
+        """Return a stream representation of the data."""
+        if not PY2 and isinstance(self.data, bytes):
+            return BytesIO(self.data)
+        else:
+            return StringIO(text_type(self.data))
 
-    # Properties
-    file = property(fget=get_file, fset=set_file)
-    memory_object = property(fget=get_memory_object, fset=set_memory_object)
-    stream = property(fget=get_stream, fset=set_stream)
-    data = property(fget=get_data, fset=set_data)
-    base64 = property(fget=get_base64, fset=set_base64)
-    workdir = property(fget=get_workdir, fset=set_workdir)
 
-    def _set_default_value(self, value, value_type):
-        """Set default value based on input data type
+class StreamHandler(DataHandler):
+    prop = 'stream'
+
+    @property
+    def stream(self):
+        """Return the stream."""
+        return self._stream
+
+    @stream.setter
+    def stream(self, value):
+        """Set the stream."""
+        self._reset_cache()
+        self._stream = value
+        self._check_valid()
+
+    @property
+    def data(self):
+        """Return the data from the stream."""
+        if self._data is None:
+            self._data = self.stream.read()
+        return self._data
+
+
+class UrlHandler(FileHandler):
+    prop = 'url'
+
+    @property
+    def url(self):
+        """Return the URL."""
+        return self._url
+
+    @url.setter
+    def url(self, value):
+        """Set the URL value."""
+        self._reset_cache()
+        self._url = value
+        self._check_valid()
+        self.as_reference = True
+
+    @property
+    def file(self):
+        if self._file is not None:
+            return self._file
+
+        self._file = self._build_file_name(href=self.url)
+
+        max_byte_size = self.max_input_size()
+
+        # Create request
+        try:
+            reference_file = self._openurl(self.url, self.post_data)
+            data_size = reference_file.headers.get('Content-Length', 0)
+        except Exception as e:
+            raise NoApplicableCode('File reference error: %s' % e)
+
+        FSEE = FileSizeExceeded(
+            'File size for input {} exceeded. Maximum allowed: {} megabytes'.
+            format(getattr(self.inpt, 'identifier', '?'), max_byte_size))
+
+        if int(data_size) > int(max_byte_size):
+            raise FSEE
+
+        try:
+            with open(self._file, 'wb') as f:
+                data_size = 0
+                for chunk in reference_file.iter_content(chunk_size=1024):
+                    data_size += len(chunk)
+                    if int(data_size) > int(max_byte_size):
+                        raise FSEE
+                    f.write(chunk)
+
+        except Exception as e:
+            raise NoApplicableCode(e)
+
+        return self._file
+
+    @property
+    def post_data(self):
+        return self._post_data
+
+    @post_data.setter
+    def post_data(self, value):
+        self._post_data = value
+
+    @staticmethod
+    def _openurl(href, data=None):
+        """Open given href.
         """
+        LOGGER.debug('Fetching URL %s', href)
+        if data is not None:
+            req = requests.post(url=href, data=data, stream=True)
+        else:
+            req = requests.get(url=href, stream=True)
 
-        if value:
-            if value_type == SOURCE_TYPE.DATA:
-                self.data = value
-            elif value_type == SOURCE_TYPE.MEMORY:
-                self.memory_object = value
-            elif value_type == SOURCE_TYPE.FILE:
-                self.file = value
-            elif value_type == SOURCE_TYPE.STREAM:
-                self.stream = value
+        return req
+
+    @staticmethod
+    def max_input_size():
+        """Calculates maximal size for input file based on configuration
+        and units.
+
+        :return: maximum file size in bytes
+        """
+        ms = config.get_config_value('server', 'maxsingleinputsize')
+        return config.get_size_mb(ms) * 1024**2
 
 
-class SimpleHandler(IOHandler):
+class SimpleHandler(DataHandler):
     """Data handler for Literal In- and Outputs
 
     >>> class Int_type(object):
@@ -289,32 +505,33 @@ class SimpleHandler(IOHandler):
     """
 
     def __init__(self, workdir=None, data_type=None, mode=MODE.NONE):
-        IOHandler.__init__(self, workdir=workdir, mode=mode)
+        DataHandler.__init__(self, workdir=workdir, mode=mode)
+        if data_type not in LITERAL_DATA_TYPES:
+            raise ValueError('data_type {} not in {}'.format(data_type, LITERAL_DATA_TYPES))
         self.data_type = data_type
 
-    def get_data(self):
-        return IOHandler.get_data(self)
-
-    def set_data(self, data):
-        """Set data value. input data are converted into target format
+    @DataHandler.data.setter
+    def data(self, value):
+        """Set data value. Inputs are converted into target format.
         """
+        if self.data_type and value is not None:
+            value = convert(self.data_type, value)
 
-        if self.data_type:
-            data = convert(self.data_type, data)
-
-        IOHandler.set_data(self, data)
-
-    data = property(fget=get_data, fset=set_data)
+        DataHandler.data.fset(self, value)
 
 
 class BasicIO:
     """Basic Input/Output class
     """
-    def __init__(self, identifier, title=None, abstract=None, keywords=None):
+    def __init__(self, identifier, title=None, abstract=None, keywords=None,
+                 min_occurs=1, max_occurs=1, metadata=[]):
         self.identifier = identifier
         self.title = title
         self.abstract = abstract
         self.keywords = keywords
+        self.min_occurs = int(min_occurs)
+        self.max_occurs = int(max_occurs)
+        self.metadata = metadata
 
 
 class BasicLiteral:
@@ -346,7 +563,8 @@ class BasicLiteral:
 
     @uom.setter
     def uom(self, uom):
-        self._uom = uom
+        if uom is not None:
+            self._uom = uom
 
 
 class BasicComplex(object):
@@ -355,7 +573,7 @@ class BasicComplex(object):
     """
 
     def __init__(self, data_format=None, supported_formats=None):
-        self._data_format = None
+        self._data_format = data_format
         self._supported_formats = None
         if supported_formats:
             self.supported_formats = supported_formats
@@ -449,17 +667,23 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
     def __init__(self, identifier, title=None, abstract=None, keywords=None,
                  data_type="integer", workdir=None, allowed_values=None,
                  uoms=None, mode=MODE.NONE,
+                 min_occurs=1, max_occurs=1, metadata=[],
                  default=None, default_type=SOURCE_TYPE.DATA):
-        BasicIO.__init__(self, identifier, title, abstract, keywords)
+        BasicIO.__init__(self, identifier, title, abstract, keywords,
+                         min_occurs=1, max_occurs=1, metadata=[])
         BasicLiteral.__init__(self, data_type, uoms)
         SimpleHandler.__init__(self, workdir, data_type, mode=mode)
+
+        if default_type != SOURCE_TYPE.DATA:
+            raise InvalidParameterValue("Source types other than data are not supported.")
 
         self.any_value = is_anyvalue(allowed_values)
         self.allowed_values = []
         if not self.any_value:
             self.allowed_values = make_allowedvalues(allowed_values)
 
-        self._set_default_value(default, default_type)
+        if default is not None:
+            self.data = default
 
     @property
     def validator(self):
@@ -476,7 +700,7 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
     def json(self):
         """Get JSON representation of the input
         """
-        return {
+        data = {
             'identifier': self.identifier,
             'title': self.title,
             'abstract': self.abstract,
@@ -484,12 +708,18 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
             'type': 'literal',
             'data_type': self.data_type,
             'workdir': self.workdir,
+            'any_value': self.any_value,
             'allowed_values': [value.json for value in self.allowed_values],
-            'uoms': self.uoms,
-            'uom': self.uom,
             'mode': self.valid_mode,
-            'data': self.data
+            'data': self.data,
+            'min_occurs': self.min_occurs,
+            'max_occurs': self.max_occurs
         }
+        if self.uoms:
+            data["uoms"] = [uom.json for uom in self.uoms],
+        if self.uom:
+            data["uom"] = self.uom.json
+        return data
 
 
 class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
@@ -522,17 +752,22 @@ class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
         return validate_anyvalue
 
 
-class BBoxInput(BasicIO, BasicBoundingBox, IOHandler):
+class BBoxInput(BasicIO, BasicBoundingBox, DataHandler):
     """Basic Bounding box input abstract class
     """
 
     def __init__(self, identifier, title=None, abstract=None, keywords=[], crss=None,
                  dimensions=None, workdir=None,
                  mode=MODE.SIMPLE,
+                 min_occurs=1, max_occurs=1, metadata=[],
                  default=None, default_type=SOURCE_TYPE.DATA):
-        BasicIO.__init__(self, identifier, title, abstract, keywords)
+        BasicIO.__init__(self, identifier, title, abstract, keywords,
+                         min_occurs, max_occurs, metadata)
         BasicBoundingBox.__init__(self, crss, dimensions)
-        IOHandler.__init__(self, workdir=None, mode=mode)
+        DataHandler.__init__(self, workdir=workdir, mode=mode)
+
+        if default_type != SOURCE_TYPE.DATA:
+            raise InvalidParameterValue("Source types other than data are not supported.")
 
         self._set_default_value(default, default_type)
 
@@ -557,15 +792,18 @@ class BBoxInput(BasicIO, BasicBoundingBox, IOHandler):
             'abstract': self.abstract,
             'keywords': self.keywords,
             'type': 'bbox',
-            'crs': self.crss,
+            'crs': self.crs,
+            'crss': self.crss,
             'bbox': (self.ll, self.ur),
             'dimensions': self.dimensions,
             'workdir': self.workdir,
-            'mode': self.valid_mode
+            'mode': self.valid_mode,
+            'min_occurs': self.min_occurs,
+            'max_occurs': self.max_occurs
         }
 
 
-class BBoxOutput(BasicIO, BasicBoundingBox, SimpleHandler):
+class BBoxOutput(BasicIO, BasicBoundingBox, DataHandler):
     """Basic BoundingBox output class
     """
 
@@ -573,7 +811,7 @@ class BBoxOutput(BasicIO, BasicBoundingBox, SimpleHandler):
                  dimensions=None, workdir=None, mode=MODE.NONE):
         BasicIO.__init__(self, identifier, title, abstract, keywords)
         BasicBoundingBox.__init__(self, crss, dimensions)
-        SimpleHandler.__init__(self, workdir=None, mode=mode)
+        DataHandler.__init__(self, workdir=None, mode=mode)
         self._storage = None
 
     @property
@@ -597,30 +835,87 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
     def __init__(self, identifier, title=None, abstract=None, keywords=None,
                  workdir=None, data_format=None, supported_formats=None,
                  mode=MODE.NONE,
+                 min_occurs=1, max_occurs=1, metadata=[],
                  default=None, default_type=SOURCE_TYPE.DATA):
 
-        BasicIO.__init__(self, identifier, title, abstract, keywords)
+        BasicIO.__init__(self, identifier, title, abstract, keywords,
+                         min_occurs, max_occurs, metadata)
         IOHandler.__init__(self, workdir=workdir, mode=mode)
         BasicComplex.__init__(self, data_format, supported_formats)
 
-        self._set_default_value(default, default_type)
+        if default is not None:
+            self._set_default_value(default, default_type)
 
-    @property
-    def json(self):
-        """Get JSON representation of the input
-        """
-        return {
-            'identifier': self.identifier,
-            'title': self.title,
-            'abstract': self.abstract,
-            'keywords': self.keywords,
-            'type': 'complex',
-            'data_format': self.data_format.json,
-            'supported_formats': [frmt.json for frmt in self.supported_formats],
-            'file': self.file,
-            'workdir': self.workdir,
-            'mode': self.valid_mode
-        }
+    def file_handler(self, inpt):
+        """<wps:Reference /> handler.
+        Used when href is a file url."""
+        extend_instance(self, FileHandler)
+
+        # check if file url is allowed
+        self._validate_file_input(href=inpt.get('href'))
+        # save the file reference input in workdir
+        tmp_file = self._build_file_name(href=inpt.get('href'))
+
+        try:
+            inpt_file = urlparse(inpt.get('href')).path
+            inpt_file = os.path.abspath(inpt_file)
+            os.symlink(inpt_file, tmp_file)
+            LOGGER.debug("Linked input file %s to %s.", inpt_file, tmp_file)
+        except Exception:
+            # TODO: handle os.symlink on windows
+            # raise NoApplicableCode("Could not link file reference: %s" % e)
+            LOGGER.warn("Could not link file reference")
+            shutil.copy2(inpt_file, tmp_file)
+
+        return tmp_file
+
+    def url_handler(self, inpt):
+        # That could possibly go into the data property...
+        if inpt.get('method') == 'POST':
+            if 'body' in inpt:
+                self.post_data = inpt.get('body')
+            elif 'bodyreference' in inpt:
+                self.post_data = requests.get(url=inpt.get('bodyreference')).text
+            else:
+                raise AttributeError("Missing post data content.")
+
+        return inpt.get('href')
+
+    def process(self, inpt):
+        """Subclass with the appropriate handler given the data input."""
+        href = inpt.get('href', None)
+        self.inpt = inpt
+
+        if href:
+            if urlparse(href).scheme == 'file':
+                self.file = self.file_handler(inpt)
+
+            else:
+                # No file download occurs here. The file content will
+                # only be retrieved when the file property is accessed.
+                self.url = self.url_handler(inpt)
+
+        else:
+            self.data = inpt.get('data')
+
+    @staticmethod
+    def _validate_file_input(href):
+        href = href or ''
+        parsed_url = urlparse(href)
+        if parsed_url.scheme != 'file':
+            raise FileURLNotSupported('Invalid URL scheme')
+        file_path = parsed_url.path
+        if not file_path:
+            raise FileURLNotSupported('Invalid URL path')
+        file_path = os.path.abspath(file_path)
+        # build allowed paths list
+        inputpaths = config.get_config_value('server', 'allowedinputpaths')
+        allowed_paths = [os.path.abspath(p.strip()) for p in inputpaths.split(':') if p.strip()]
+        for allowed_path in allowed_paths:
+            if file_path.startswith(allowed_path):
+                LOGGER.debug("Accepted file url as input.")
+                return
+        raise FileURLNotSupported()
 
 
 class ComplexOutput(BasicIO, BasicComplex, IOHandler):
@@ -641,13 +936,13 @@ class ComplexOutput(BasicIO, BasicComplex, IOHandler):
     >>> tiff_file.close()
     >>>
     >>> co = ComplexOutput()
-    >>> co.set_file('file.tiff')
+    >>> co.file ='file.tiff'
     >>> fs = FileStorage(config)
     >>> co.storage = fs
     >>>
-    >>> url = co.get_url() # get url, data are stored
+    >>> url = co.url # get url, data are stored
     >>>
-    >>> co.get_stream().read() # get data - nothing is stored
+    >>> co.stream.read() # get data - nothing is stored
     'AA'
     """
 
@@ -668,32 +963,12 @@ class ComplexOutput(BasicIO, BasicComplex, IOHandler):
     def storage(self, storage):
         self._storage = storage
 
+    # TODO: refactor ?
     def get_url(self):
         """Return URL pointing to data
         """
         (outtype, storage, url) = self.storage.store(self)
         return url
-
-
-class UOM(object):
-    """
-    :param uom: unit of measure
-    """
-
-    def __init__(self, uom=''):
-        self.uom = uom
-
-    def describe_xml(self):
-        elem = OWS.UOM(
-            self.uom
-        )
-
-        elem.attrib['{%s}reference' % NAMESPACES['ows']] = OGCUNIT[self.uom]
-
-        return elem
-
-    def execute_attribute(self):
-        return OGCUNIT[self.uom]
 
 
 if __name__ == "__main__":

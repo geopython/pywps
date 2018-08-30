@@ -1,0 +1,35 @@
+                <ows:DataType ows:reference="http://www.w3.org/TR/xmlschema-2/#{{ put.data_type }}">{{ put.data_type }}</ows:DataType>
+                {% if put.uom %}
+                <UOMs>
+                    <Default>
+                        <ows:UOM {%if put.uom %}ows:reference="{{ put.uom.reference }}"{% endif %}>{{ put.uom.uom }}</ows:UOM>
+                    </Default>
+                    <Supported>
+                        {% for uom in put.uoms %}
+                        <ows:UOM ows:reference="{{ put.uom.reference }}">{{ put.uom.uom }}</ows:UOM>
+                        {% endfor %}
+                    </Supported>
+                </UOMs>
+                {% endif %}
+                {% if put.allowed_values %}
+                <ows:AllowedValues>
+                {% for value in put.allowed_values %}
+                {% if value.allowed_type == "value" %}
+                    <ows:Value>{{ value.value }}</ows:Value>
+                {% else %}
+                    <ows:Range ows:rangeClosure="{{ value.range_closure }}">
+                        <ows:MinimumValue>{{ value.minval }}</ows:MinimumValue>
+                        <ows:MaximumValue>{{ value.maxval }}</ows:MaximumValue>
+                        {% if value.spacing %}
+                        <ows:Spacing>{{ value.spacing }}</ows:Spacing>
+                        {% endif %}
+                    </ows:Range>
+                {% endif %}
+                {% endfor %}
+                </ows:AllowedValues>
+                {% elif put.any_value %}
+                <ows:AnyValue />
+                {% endif %}
+                {% if put.data %}
+                <DefaultValue>{{ put.data }}</DefaultValue>
+                {% endif %}

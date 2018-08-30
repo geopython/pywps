@@ -7,19 +7,19 @@ import logging
 import lxml
 import lxml.etree
 from werkzeug.exceptions import MethodNotAllowed
+from pywps import get_ElementMakerForVersion
 import base64
 import datetime
-from pywps import WPS
 from pywps._compat import text_type, PY2
-from pywps.app.basic import xpath_ns
+from pywps.app.basic import get_xpath_ns
 from pywps.inout.basic import LiteralInput, ComplexInput, BBoxInput
 from pywps.exceptions import NoApplicableCode, OperationNotSupported, MissingParameterValue, VersionNegotiationFailed, \
     InvalidParameterValue, FileSizeExceeded
 from pywps import configuration
 from pywps.validator.mode import MODE
 from pywps.inout.literaltypes import AnyValue, NoValue, ValuesReference, AllowedValue
-
 from pywps.inout.formats import Format
+from pywps import get_version_from_ns
 
 import json
 
@@ -42,6 +42,9 @@ class WPSRequest(object):
         self.inputs = {}
         self.outputs = {}
         self.raw = None
+        self.WPS = None
+        self.OWS = None
+        self.xpath_ns = None
 
         if self.http_request:
             request_parser = self._get_request_parser_method(http_request.method)
@@ -82,7 +85,7 @@ class WPSRequest(object):
         maxsize = configuration.get_size_mb(maxsize) * 1024 * 1024
         if self.http_request.content_length > maxsize:
             raise FileSizeExceeded('File size for input exceeded.'
-                                   ' Maximum request size allowed: %i megabytes' % maxsize / 1024 / 1024)
+                                   ' Maximum request size allowed: %i megabytes' % (maxsize / 1024 / 1024))
 
         try:
             doc = lxml.etree.fromstring(self.http_request.get_data())
@@ -93,6 +96,8 @@ class WPSRequest(object):
                 raise NoApplicableCode(e.msg)
 
         operation = doc.tag
+        version = get_version_from_ns(doc.nsmap[doc.prefix])
+        self.set_version(version)
         request_parser = self._post_request_parser(operation)
         request_parser(doc)
 
@@ -138,6 +143,9 @@ class WPSRequest(object):
                 http_request, 'lineage', 'false')
             wpsrequest.inputs = get_data_from_kvp(
                 _get_get_param(http_request, 'DataInputs'), 'DataInputs')
+            if self.inputs is None:
+                self.inputs = {}
+
             wpsrequest.outputs = {}
 
             # take responseDocument preferably
@@ -180,7 +188,7 @@ class WPSRequest(object):
         def parse_post_getcapabilities(doc):
             """Parse POST GetCapabilities request
             """
-            acceptedversions = xpath_ns(
+            acceptedversions = self.xpath_ns(
                 doc, '/wps:GetCapabilities/ows:AcceptVersions/ows:Version')
             acceptedversions = ','.join(
                 map(lambda v: v.text, acceptedversions))
@@ -198,7 +206,7 @@ class WPSRequest(object):
 
             wpsrequest.operation = 'describeprocess'
             wpsrequest.identifiers = [identifier_el.text for identifier_el in
-                                      xpath_ns(doc, './ows:Identifier')]
+                                      self.xpath_ns(doc, './ows:Identifier')]
 
         def parse_post_execute(doc):
             """Parse POST Execute request
@@ -212,7 +220,7 @@ class WPSRequest(object):
 
             wpsrequest.operation = 'execute'
 
-            identifier = xpath_ns(doc, './ows:Identifier')
+            identifier = self.xpath_ns(doc, './ows:Identifier')
 
             if not identifier:
                 raise MissingParameterValue(
@@ -225,13 +233,13 @@ class WPSRequest(object):
             wpsrequest.inputs = get_inputs_from_xml(doc)
             wpsrequest.outputs = get_output_from_xml(doc)
             wpsrequest.raw = False
-            if xpath_ns(doc, '/wps:Execute/wps:ResponseForm/wps:RawDataOutput'):
+            if self.xpath_ns(doc, '/wps:Execute/wps:ResponseForm/wps:RawDataOutput'):
                 wpsrequest.raw = True
                 # executeResponse XML will not be stored
                 wpsrequest.store_execute = 'false'
 
             # check if response document tag has been set then retrieve
-            response_document = xpath_ns(
+            response_document = self.xpath_ns(
                 doc, './wps:ResponseForm/wps:ResponseDocument')
             if len(response_document) > 0:
                 wpsrequest.lineage = response_document[
@@ -241,18 +249,23 @@ class WPSRequest(object):
                 wpsrequest.status = response_document[
                     0].attrib.get('status', 'false')
 
-        if tagname == WPS.GetCapabilities().tag:
+        if tagname == self.WPS.GetCapabilities().tag:
             self.operation = 'getcapabilities'
             return parse_post_getcapabilities
-        elif tagname == WPS.DescribeProcess().tag:
+        elif tagname == self.WPS.DescribeProcess().tag:
             self.operation = 'describeprocess'
             return parse_post_describeprocess
-        elif tagname == WPS.Execute().tag:
+        elif tagname == self.WPS.Execute().tag:
             self.operation = 'execute'
             return parse_post_execute
         else:
             raise InvalidParameterValue(
                 'Unknown request %r' % tagname, 'request')
+
+    def set_version(self, version):
+        self.version = version
+        self.xpath_ns = get_xpath_ns(version)
+        self.WPS, self.OWS = get_ElementMakerForVersion(self.version)
 
     def check_accepted_versions(self, acceptedversions):
         """
@@ -285,7 +298,7 @@ class WPSRequest(object):
             raise VersionNegotiationFailed(
                 'The requested version "%s" is not supported by this server' % version, 'version')
         else:
-            self.version = version
+            self.set_version(version)
 
     def check_and_set_language(self, language):
         """set this.language
@@ -429,6 +442,8 @@ class WPSRequest(object):
 
 def get_inputs_from_xml(doc):
     the_inputs = {}
+    version = get_version_from_ns(doc.nsmap[doc.prefix])
+    xpath_ns = get_xpath_ns(version)
     for input_el in xpath_ns(doc, '/wps:Execute/wps:DataInputs/wps:Input'):
         [identifier_el] = xpath_ns(input_el, './ows:Identifier')
         identifier = identifier_el.text
@@ -506,6 +521,9 @@ def get_inputs_from_xml(doc):
 def get_output_from_xml(doc):
     the_output = {}
 
+    version = get_version_from_ns(doc.nsmap[doc.prefix])
+    xpath_ns = get_xpath_ns(version)
+
     if xpath_ns(doc, '/wps:Execute/wps:ResponseForm/wps:ResponseDocument'):
         for output_el in xpath_ns(doc, '/wps:Execute/wps:ResponseForm/wps:ResponseDocument/wps:Output'):
             [identifier_el] = xpath_ns(output_el, './ows:Identifier')
@@ -579,7 +597,7 @@ def get_data_from_kvp(data, part=None):
 def _check_version(version):
     """ check given version
     """
-    if version != '1.0.0':
+    if version not in ['1.0.0', '2.0.0']:
         return False
     else:
         return True

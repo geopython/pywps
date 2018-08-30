@@ -1,2 +1,6 @@
+prune docs/
+prune tests/
 include *.txt
-recursive-include pywps/schemas *
+include *.rst
+recursive-include pywps *
+global-exclude *.py[co]

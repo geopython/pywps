@@ -6,12 +6,13 @@
 import lxml.etree
 from werkzeug.test import Client
 from werkzeug.wrappers import BaseResponse
-from pywps import __version__, NAMESPACES
+from pywps import __version__
 from pywps import Process
 from pywps.inout import LiteralInput, LiteralOutput, ComplexInput, ComplexOutput, BoundingBoxInput, BoundingBoxOutput
 from pywps.inout import Format
 from pywps.app.Common import Metadata
 
+import re
 
 import logging
 
@@ -72,11 +73,18 @@ class WpsTestResponse(BaseResponse):
 
     def __init__(self, *args):
         super(WpsTestResponse, self).__init__(*args)
-        if self.headers.get('Content-Type') == 'text/xml':
+        if re.match('text/xml(;\s*charset=.*)?', self.headers.get('Content-Type')):
             self.xml = lxml.etree.fromstring(self.get_data())
 
     def xpath(self, path):
-        return self.xml.xpath(path, namespaces=NAMESPACES)
+        version = self.xml.attrib["version"]
+        if version == "2.0.0":
+            from pywps import namespaces200
+            namespaces = namespaces200
+        else:
+            from pywps import namespaces100
+            namespaces = namespaces100
+        return self.xml.xpath(path, namespaces=namespaces)
 
     def xpath_text(self, path):
         return ' '.join(e.text for e in self.xpath(path))
@@ -88,7 +96,7 @@ def client_for(service):
 
 def assert_response_accepted(resp):
     assert resp.status_code == 200
-    assert resp.headers['Content-Type'] == 'text/xml'
+    assert re.match('text/xml(;\s*charset=.*)?', resp.headers['Content-Type'])
     success = resp.xpath_text('/wps:ExecuteResponse'
                               '/wps:Status'
                               '/wps:ProcessAccepted')
@@ -98,7 +106,7 @@ def assert_response_accepted(resp):
 
 def assert_process_started(resp):
     assert resp.status_code == 200
-    assert resp.headers['Content-Type'] == 'text/xml'
+    assert re.match('text/xml(;\s*charset=.*)?', resp.headers['Content-Type'])
     success = resp.xpath_text('/wps:ExecuteResponse'
                               '/wps:Status'
                               'ProcessStarted')
@@ -108,14 +116,14 @@ def assert_process_started(resp):
 
 def assert_response_success(resp):
     assert resp.status_code == 200
-    assert resp.headers['Content-Type'] == 'text/xml'
+    assert re.match('text/xml(;\s*charset=.*)?', resp.headers['Content-Type'])
     success = resp.xpath('/wps:ExecuteResponse/wps:Status/wps:ProcessSucceeded')
     assert len(success) == 1
 
 
 def assert_process_exception(resp, code=None):
     assert resp.status_code == 400
-    assert resp.headers['Content-Type'] == 'text/xml'
+    assert re.match('text/xml(;\s*charset=.*)?', resp.headers['Content-Type'])
     elem = resp.xpath('/ows:ExceptionReport'
                       '/ows:Exception')
     assert elem[0].attrib['exceptionCode'] == code
@@ -129,3 +137,13 @@ def assert_pywps_version(resp):
     assert len(tokens) == 2
     assert tokens[0] == 'PyWPS'
     assert tokens[1] == __version__
+
+
+def assert_wps_version(response, version="1.0.0"):
+    elem = response.xpath('/wps:Capabilities'
+                          '/ows:ServiceIdentification'
+                          '/ows:ServiceTypeVersion')
+    found_version = elem[0].text
+    assert version == found_version
+    with open("/tmp/out.xml", "wb") as out:
+        out.writelines(response.response)

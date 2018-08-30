@@ -1,5 +1,13 @@
-from pywps.dblog import update_response
-from pywps.response.status import STATUS
+from pywps.dblog import store_status
+from pywps.response.status import WPS_STATUS
+from jinja2 import Environment, PackageLoader
+import os
+
+
+class RelEnvironment(Environment):
+    """Override join_path() to enable relative template paths."""
+    def join_path(self, template, parent):
+        return os.path.dirname(parent) + '/' + template
 
 
 def get_response(operation):
@@ -18,37 +26,34 @@ def get_response(operation):
 
 class WPSResponse(object):
 
-    def __init__(self, wps_request, uuid=None):
+    def __init__(self, wps_request, uuid=None, version="1.0.0"):
 
         self.wps_request = wps_request
         self.uuid = uuid
         self.message = ''
-        self.status = STATUS.NO_STATUS
+        self.status = WPS_STATUS.ACCEPTED
         self.status_percentage = 0
         self.doc = None
+        self.version = version
+        self.template_env = RelEnvironment(
+            loader=PackageLoader('pywps', 'templates'),
+            trim_blocks=True, lstrip_blocks=True,
+            autoescape=True,
+        )
 
-        self.update_status(message="Request accepted", status_percentage=0, status=self.status)
-
-    def update_status(self, message=None, status_percentage=None, status=None, clean=True):
+    def _update_status(self, status, message, status_percentage):
         """
         Update status report of currently running process instance
 
         :param str message: Message you need to share with the client
         :param int status_percentage: Percent done (number betwen <0-100>)
-        :param pywps.response.status.STATUS status: process status - user should usually
+        :param pywps.response.status.WPS_STATUS status: process status - user should usually
             ommit this parameter
         """
-
-        if message:
-            self.message = message
-
-        if status is not None:
-            self.status = status
-
-        if status_percentage is not None:
-            self.status_percentage = status_percentage
-
-        update_response(self.uuid, self)
+        self.message = message
+        self.status = status
+        self.status_percentage = status_percentage
+        store_status(self.uuid, self.status, self.message, self.status_percentage)
 
     def get_response_doc(self):
         try:
@@ -58,10 +63,10 @@ class WPSResponse(object):
                 msg = e.description
             else:
                 msg = e
-            self.update_status(message=msg, status_percentage=100, status=STATUS.ERROR_STATUS)
+            self._update_status(WPS_STATUS.FAILED, msg, 100)
             raise e
 
         else:
-            self.update_status(message="Response generated", status_percentage=100, status=STATUS.DONE_STATUS)
+            self._update_status(WPS_STATUS.SUCCEEDED, u"Response generated", 100)
 
             return self.doc

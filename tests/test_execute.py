@@ -14,8 +14,8 @@ from pywps.validator.base import emptyvalidator
 from pywps.validator.complexvalidator import validategml
 from pywps.exceptions import InvalidParameterValue
 from pywps import get_inputs_from_xml, get_output_from_xml
-from pywps import E, WPS, OWS
-from pywps.app.basic import xpath_ns
+from pywps import E, get_ElementMakerForVersion
+from pywps.app.basic import get_xpath_ns
 from pywps._compat import text_type
 from pywps.tests import client_for, assert_response_success
 
@@ -24,6 +24,11 @@ from pywps._compat import StringIO
 if PY2:
     from owslib.ows import BoundingBox
 
+VERSION = "1.0.0"
+
+WPS, OWS = get_ElementMakerForVersion(VERSION)
+
+xpath_ns = get_xpath_ns(VERSION)
 
 def create_ultimate_question():
     def handler(request, response):
@@ -88,6 +93,26 @@ def create_complex_proces():
                     'complex',
                     'Complex output',
                     supported_formats=[frmt])
+             ])
+
+
+def create_mimetype_process():
+    def _handler(request, response):
+        response.outputs['mimetype'].data = response.outputs['mimetype'].data_format.mime_type
+        return response
+
+    frmt_txt = Format(mime_type='text/plain')
+    frmt_txt2 = Format(mime_type='text/plain+test')
+
+    return Process(handler=_handler,
+            identifier='get_mimetype_process',
+            title='Get mimeType process',
+            inputs=[],
+            outputs=[
+                ComplexOutput(
+                    'mimetype',
+                    'mimetype of requested output',
+                    supported_formats=[frmt_txt,frmt_txt2])
              ])
 
 
@@ -182,6 +207,41 @@ class ExecuteTest(unittest.TestCase):
         response = service.execute('my_complex_process', request, 'fakeuuid')
         self.assertEqual(response.outputs['complex'].data, 'DEFAULT COMPLEX DATA')
 
+    def test_output_mimetype(self):
+        """Test input parsing
+        """
+        my_process = create_mimetype_process()
+        service = Service(processes=[my_process])
+        self.assertEqual(len(service.processes.keys()), 1)
+        self.assertTrue(service.processes['get_mimetype_process'])
+
+        class FakeRequest():
+            def __init__(self, mimetype):
+                self.outputs = {'mimetype': {
+                        'identifier': 'mimetype',
+                        'mimetype': mimetype,
+                        'data': 'the data'
+                }}
+
+            identifier = 'get_mimetype_process'
+            service = 'wps'
+            operation='execute'
+            version = '1.0.0'
+            inputs = {}
+            raw = False
+            store_execute = False
+            lineage = False
+
+        # valid mimetype
+        request = FakeRequest('text/plain+test')
+        response = service.execute('get_mimetype_process', request, 'fakeuuid')
+        self.assertEqual(response.outputs['mimetype'].data, 'text/plain+test')
+
+        # non valid mimetype
+        request = FakeRequest('text/xml')
+        with self.assertRaises(InvalidParameterValue):
+            response = service.execute('get_mimetype_process', request, 'fakeuuid')
+
     def test_missing_process_error(self):
         client = client_for(Service(processes=[create_ultimate_question()]))
         resp = client.get('?Request=Execute&identifier=foo')
@@ -200,6 +260,7 @@ class ExecuteTest(unittest.TestCase):
             OWS.Identifier('ultimate_question'),
             version='1.0.0'
         )
+
         resp = client.post_xml(doc=request_doc)
         assert_response_success(resp)
         assert get_output(resp.xml) == {'outvalue': '42'}
@@ -221,8 +282,7 @@ class ExecuteTest(unittest.TestCase):
         assert get_output(resp.xml) == {'message': "Hello foo!"}
 
     def test_bbox(self):
-        if not PY2:
-            self.skipTest('OWSlib not python 3 compatible')
+        self.skipTest('OWSlib not python 3 compatible')
         client = client_for(Service(processes=[create_bbox_process()]))
         request_doc = WPS.Execute(
             OWS.Identifier('my_bbox_process'),
@@ -245,7 +305,12 @@ class ExecuteTest(unittest.TestCase):
         self.assertEqual('outbbox', xpath_ns(
             output,
             './ows:Identifier')[0].text)
+
         self.assertEqual('15 50', xpath_ns(
+            output,
+            './wps:Data/ows:BoundingBox/ows:LowerCorner')[0].text)
+
+        self.assertEqual('16 50', xpath_ns(
             output,
             './wps:Data/ows:BoundingBox/ows:LowerCorner')[0].text)
 

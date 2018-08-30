@@ -6,23 +6,27 @@
 import unittest
 import time
 from pywps import Service, Process, LiteralInput, LiteralOutput
-from pywps import WPS, OWS
+from pywps import get_ElementMakerForVersion
 from pywps.tests import client_for, assert_response_accepted
+
+VERSION = "1.0.0"
+
+WPS, OWS = get_ElementMakerForVersion(VERSION)
 
 
 def create_sleep():
 
     def sleep(request, response):
-        seconds = request.inputs['seconds']
-        assert type(seconds) is type(1.0)
+        seconds = request.inputs['seconds'][0].data
+        assert isinstance(seconds, float)
 
-        step = seconds / 10
-        for i in range(10):
+        step = seconds / 3
+        for i in range(3):
             # How is status working in version 4 ?
             #self.status.set("Waiting...", i * 10)
             time.sleep(step)
 
-        response.outputs['finished'] = "True"
+        response.outputs['finished'].data = "True"
         return response
 
     return Process(handler=sleep,
@@ -48,7 +52,7 @@ class ExecuteTest(unittest.TestCase):
                     OWS.Identifier('seconds'),
                     WPS.Data(
                         WPS.LiteralData(
-                            "120"
+                            "0.3"
                         )
                     )
                 )
@@ -61,3 +65,12 @@ class ExecuteTest(unittest.TestCase):
         # TODO:
         # . extract the status URL from the response
         # . send a status request
+
+
+def load_tests(loader=None, tests=None, pattern=None):
+    if not loader:
+        loader = unittest.TestLoader()
+    suite_list = [
+        loader.loadTestsFromTestCase(ExecuteTest),
+    ]
+    return unittest.TestSuite(suite_list)

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- PyWPS {{ pywps_version }} -->
+<wps:Capabilities service="WPS" version="1.0.0" xml:lang="en-CA" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 ../wpsGetCapabilities_response.xsd" updateSequence="1">
+    <ows:ServiceIdentification>
+        <ows:Title>{{ title }}</ows:Title>
+        <ows:Abstract>{{ abstract }}</ows:Abstract>
+        <ows:Keywords>
+        {% for keyword in keywords %}
+        <ows:Keyword>{{ keyword }}</ows:Keyword>
+        {% endfor %}
+        {% for keyword in keywords_type %}
+            <ows:Type codeSpace="ISOTC211/19115">{{ keyword }}</ows:Type>
+        {% endfor %}
+        </ows:Keywords>
+        <ows:ServiceType>WPS</ows:ServiceType>
+        <ows:ServiceTypeVersion>1.0.0</ows:ServiceTypeVersion>
+        <ows:ServiceTypeVersion>2.0.0</ows:ServiceTypeVersion>
+        <ows:Fees>{{ fees }}</ows:Fees>
+        <ows:AccessConstraints>
+        {% for ac in accessconstraints %}
+        {{ ac }}
+        {% endfor %}
+        </ows:AccessConstraints>
+    </ows:ServiceIdentification>
+    <ows:ServiceProvider>
+        <ows:ProviderName>{{ provider.name }}</ows:ProviderName>
+        <ows:ProviderSite xlink:href="{{ provider.site }}"/>
+        <ows:ServiceContact>
+            <ows:IndividualName>{{ provider.individual }}</ows:IndividualName>
+            <ows:PositionName>{{ provider.position }}</ows:PositionName>
+            <ows:ContactInfo>
+                <ows:Phone>
+                    <ows:Voice>{{ provider.voice }}</ows:Voice>
+                    <ows:Facsimile>{{ provider.fascimile }}</ows:Facsimile>
+                </ows:Phone>
+                <ows:Address>
+                    <ows:DeliveryPoint>{{ provider.address.delivery }}</ows:DeliveryPoint>
+                    <ows:City>{{ provider.address.city }}</ows:City>
+                    <ows:AdministrativeArea>{{ provider.address.administrativearea }}</ows:AdministrativeArea>
+                    <ows:PostalCode>{{ provider.address.postalcode }}</ows:PostalCode>
+                    <ows:Country>{{ provider.address.country }}</ows:Country>
+                    <ows:ElectronicMailAddress>{{ provider.address.email }}</ows:ElectronicMailAddress>
+                </ows:Address>
+            </ows:ContactInfo>
+        </ows:ServiceContact>
+    </ows:ServiceProvider>
+    <ows:OperationsMetadata>
+        <ows:Operation name="GetCapabilities">
+            <ows:DCP>
+                <ows:HTTP>
+                    <ows:Get xlink:href="{{ serviceurl }}"/>
+                </ows:HTTP>
+            </ows:DCP>
+        </ows:Operation>
+        <ows:Operation name="DescribeProcess">
+            <ows:DCP>
+                <ows:HTTP>
+                    <ows:Get xlink:href="{{ serviceurl }}"/>
+                    <ows:Post xlink:href="{{ serviceurl }}"/>
+                </ows:HTTP>
+            </ows:DCP>
+        </ows:Operation>
+        <ows:Operation name="Execute">
+            <ows:DCP>
+                <ows:HTTP>
+                    <ows:Get xlink:href="{{ serviceurl }}"/>
+                    <ows:Post xlink:href="{{ serviceurl }}"/>
+                </ows:HTTP>
+            </ows:DCP>
+        </ows:Operation>
+    </ows:OperationsMetadata>
+    <wps:ProcessOfferings>
+        {% for process in processes %}
+        <wps:Process wps:processVersion="{{ process.version }}">
+            <ows:Identifier>{{ process.identifier }}</ows:Identifier>
+            <ows:Title>{{ process.title }}</ows:Title>
+            <ows:Abstract>{{ process.abstract }}</ows:Abstract>
+            {% if process.keywords %}
+            <ows:Keywords>
+            {% for keyword in process.keywords %}
+                <ows:Keyword>{{ keyword }}</ows:Keyword>
+            {% endfor %}
+            </ows:Keywords>
+            {% endif %}
+            {% for metadata in process.metadata %}
+            <ows:Metadata xlink:title="{{ metadata.title }}" xlink:type="{{ metadata.type }}"
+            {% if metadata.href != None %}
+              xlink:href="{{ metadata.href }}"
+            {% endif %}
+            {% if metadata.role != None %}
+              xlink:role="{{ metadata.role }}"
+            {% endif %}
+            />
+            {% endfor %}
+        </wps:Process>
+    {% endfor %}
+    </wps:ProcessOfferings>
+    <wps:Languages>
+        <wps:Default>
+            <ows:Language>{{ languages[0] }}</ows:Language>
+        </wps:Default>
+        <wps:Supported>
+            {% for lang in languages %}
+            <ows:Language>lang</ows:Language>
+            {% endfor %}
+        </wps:Supported>
+    </wps:Languages>
+    {# <wps:WSDL xlink:href="{{ wsdl }}"/> #}
+</wps:Capabilities>

@@ -14,7 +14,7 @@ from pywps.exceptions import InvalidParameterValue
 from pywps.validator.allowed_value import RANGECLOSURETYPE
 from pywps.validator.allowed_value import ALLOWEDVALUETYPE
 from pywps._compat import PY2
-from pywps import OWS, NAMESPACES
+from pywps import get_ElementMakerForVersion
 
 import logging
 LOGGER = logging.getLogger('PYWPS')
@@ -88,21 +88,6 @@ class AllowedValue(AnyValue):
         self.maxval = maxval
         self.spacing = spacing
         self.range_closure = range_closure
-
-    def describe_xml(self):
-        """Return back Element for DescribeProcess response
-        """
-        doc = None
-        if self.allowed_type == ALLOWEDVALUETYPE.VALUE:
-            doc = OWS.Value(str(self.value))
-        else:
-            doc = OWS.Range()
-            doc.set('{%s}rangeClosure' % NAMESPACES['ows'], self.range_closure)
-            doc.append(OWS.MinimumValue(str(self.minval)))
-            doc.append(OWS.MaximumValue(str(self.maxval)))
-            if self.spacing:
-                doc.append(OWS.Spacing(str(self.spacing)))
-        return doc
 
     @property
     def json(self):

@@ -9,16 +9,27 @@ from lxml import etree
 import time
 from werkzeug.wrappers import Request
 from werkzeug.exceptions import HTTPException
-from pywps import WPS, OWS
+from pywps import get_ElementMakerForVersion
 from pywps.app.basic import xml_response
 from pywps.exceptions import NoApplicableCode
 import pywps.configuration as config
-from pywps.dblog import update_response
+from werkzeug.wrappers import Response
 
-from pywps.response.status import STATUS
+from pywps.response.status import WPS_STATUS
 from pywps.response import WPSResponse
 
+from pywps._compat import PY2
+
+if PY2:
+    import urlparse
+    from urllib import urlencode
+else:
+    import urllib.parse as urlparse
+    from urllib.parse import urlencode
+
 LOGGER = logging.getLogger("PYWPS")
+
+WPS, OWS = get_ElementMakerForVersion("1.0.0")
 
 
 class ExecuteResponse(WPSResponse):
@@ -35,186 +46,166 @@ class ExecuteResponse(WPSResponse):
 
         self.process = kwargs["process"]
         self.outputs = {o.identifier: o for o in self.process.outputs}
+        self.store_status_file = False
 
-    def update_status(self, message=None, status_percentage=None, status=None,
-                      clean=True):
+    # override WPSResponse._update_status
+    def _update_status(self, status, message, status_percentage, clean=True):
+        super(ExecuteResponse, self)._update_status(status, message, status_percentage)
+        if self.store_status_file:
+            self.update_status_file(clean)
+
+    def update_status(self, message, status_percentage=None):
         """
         Update status report of currently running process instance
 
         :param str message: Message you need to share with the client
         :param int status_percentage: Percent done (number betwen <0-100>)
-        :param pywps.app.WPSResponse.STATUS status: process status - user should usually
-            ommit this parameter
         """
+        if status_percentage is None:
+            status_percentage = self.status_percentage
+        self._update_status(self.status, message, status_percentage)
 
-        if message:
-            self.message = message
-
-        if status is not None:
-            self.status = status
-
-        if status_percentage is not None:
-            self.status_percentage = status_percentage
-
-        # check if storing of the status is requested
-        if self.status >= STATUS.STORE_AND_UPDATE_STATUS:
-            # rebuild the doc and update the status xml file
-            self.doc = self._construct_doc()
-            self.write_response_doc(clean)
-
-        update_response(self.uuid, self)
-
-    def write_response_doc(self, clean=True):
+    def update_status_file(self, clean):
         # TODO: check if file/directory is still present, maybe deleted in mean time
-
-        # check if storing of the status is requested
-        if self.status >= STATUS.STORE_AND_UPDATE_STATUS:
-
+        try:
             # rebuild the doc and update the status xml file
             self.doc = self._construct_doc()
 
-            try:
-                with open(self.process.status_location, 'w') as f:
-                    f.write(etree.tostring(self.doc, pretty_print=True, encoding='utf-8').decode('utf-8'))
-                    f.flush()
-                    os.fsync(f.fileno())
+            with open(self.process.status_location, 'w') as f:
+                f.write(self.doc)
+                f.flush()
+                os.fsync(f.fileno())
 
-                if self.status >= STATUS.DONE_STATUS and clean:
-                    self.process.clean()
+            if (self.status == WPS_STATUS.SUCCEEDED or self.status == WPS_STATUS.FAILED) and clean:
+                self.process.clean()
 
-            except IOError as e:
-                raise NoApplicableCode('Writing Response Document failed with : %s' % e)
+        except Exception as e:
+            raise NoApplicableCode('Writing Response Document failed with : %s' % e)
 
     def _process_accepted(self):
-        return WPS.Status(
-            WPS.ProcessAccepted(self.message),
-            creationTime=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime())
-        )
+        percent = int(self.status_percentage)
+        if percent > 99:
+            percent = 99
+        return {
+            "status": "accepted",
+            "time": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime()),
+            "percent_done": str(percent),
+            "message": self.message
+        }
 
     def _process_started(self):
-        return WPS.Status(
-            WPS.ProcessStarted(
-                self.message,
-                percentCompleted=str(self.status_percentage)
-            ),
-            creationTime=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime())
-        )
+        data = self._process_accepted()
+        data.update({
+            "status": "started",
+        })
+        return data
 
     def _process_paused(self):
-        return WPS.Status(
-            WPS.ProcessPaused(
-                self.message,
-                percentCompleted=str(self.status_percentage)
-            ),
-            creationTime=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime())
-        )
+        data = self._process_accepted()
+        data.update({
+            "status": "paused",
+        })
+        return data
 
     def _process_succeeded(self):
-        return WPS.Status(
-            WPS.ProcessSucceeded(self.message),
-            creationTime=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime())
-        )
+        data = self._process_accepted()
+        data.update({
+            "status": "succeeded",
+            "percent_done": "100"
+        })
+        return data
 
     def _process_failed(self):
-        return WPS.Status(
-            WPS.ProcessFailed(
-                WPS.ExceptionReport(
-                    OWS.Exception(
-                        OWS.ExceptionText(self.message),
-                        exceptionCode='NoApplicableCode',
-                        locater='None'
-                    )
-                )
-            ),
-            creationTime=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime())
-        )
+        data = self._process_accepted()
+        data.update({
+            "status": "failed",
+            "code": "NoApplicableCode",
+            "locator": "None",
+        })
+        return data
 
-    def _construct_doc(self):
-        doc = WPS.ExecuteResponse()
-        doc.attrib['{http://www.w3.org/2001/XMLSchema-instance}schemaLocation'] = \
-            'http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsExecute_response.xsd'
-        doc.attrib['service'] = 'WPS'
-        doc.attrib['version'] = '1.0.0'
-        doc.attrib['{http://www.w3.org/XML/1998/namespace}lang'] = 'en-US'
-        doc.attrib['serviceInstance'] = '%s%s' % (
-            config.get_config_value('server', 'url'),
-            '?service=WPS&request=GetCapabilities'
-        )
+    def _get_serviceinstance(self):
 
-        if self.status >= STATUS.STORE_STATUS:
+        url = config.get_config_value("server", "url")
+        params = {'request': 'GetCapabilities', 'service': 'WPS'}
+
+        url_parts = list(urlparse.urlparse(url))
+        query = dict(urlparse.parse_qsl(url_parts[4]))
+        query.update(params)
+
+        url_parts[4] = urlencode(query)
+        return urlparse.urlunparse(url_parts).replace("&", "&amp;")
+
+    @property
+    def json(self):
+        data = {}
+        data["lang"] = "en-US"
+        data["service_instance"] = self._get_serviceinstance()
+        data["process"] = self.process.json
+
+        if self.store_status_file:
             if self.process.status_location:
-                doc.attrib['statusLocation'] = self.process.status_url
+                data["status_location"] = self.process.status_url
 
-        # Process XML
-        process_doc = WPS.Process(
-            OWS.Identifier(self.process.identifier),
-            OWS.Title(self.process.title)
-        )
-        if self.process.abstract:
-            process_doc.append(OWS.Abstract(self.process.abstract))
-        # TODO: See Table 32 Metadata in OGC 06-121r3
-        # for m in self.process.metadata:
-        #    process_doc.append(OWS.Metadata(m))
-        if self.process.profile:
-            process_doc.append(OWS.Profile(self.process.profile))
-        process_doc.attrib['{http://www.opengis.net/wps/1.0.0}processVersion'] = self.process.version
-
-        doc.append(process_doc)
-
-        # Status XML
-        # return the correct response depending on the progress of the process
-        if self.status == STATUS.STORE_AND_UPDATE_STATUS:
-            if self.status_percentage == 0:
-                self.message = 'PyWPS Process %s accepted' % self.process.identifier
-                status_doc = self._process_accepted()
-                doc.append(status_doc)
-                return doc
-            elif self.status_percentage > 0:
-                status_doc = self._process_started()
-                doc.append(status_doc)
-                return doc
-
-        # check if process failed and display fail message
-        if self.status_percentage == -1:
-            status_doc = self._process_failed()
-            doc.append(status_doc)
-            return doc
-
-        # TODO: add paused status
-
-        if self.status == STATUS.DONE_STATUS:
-            status_doc = self._process_succeeded()
-            doc.append(status_doc)
+        if self.status == WPS_STATUS.ACCEPTED:
+            self.message = 'PyWPS Process %s accepted' % self.process.identifier
+            data["status"] = self._process_accepted()
+        elif self.status == WPS_STATUS.STARTED:
+            data["status"] = self._process_started()
+        elif self.status == WPS_STATUS.FAILED:
+            # check if process failed and display fail message
+            data["status"] = self._process_failed()
+        elif self.status == WPS_STATUS.PAUSED:
+            # TODO: handle paused status
+            data["status"] = self._process_paused()
+        elif self.status == WPS_STATUS.SUCCEEDED:
+            data["status"] = self._process_succeeded()
 
             # DataInputs and DataOutputs definition XML if lineage=true
             if self.wps_request.lineage == 'true':
+                data["lineage"] = True
                 try:
                     # TODO: stored process has ``pywps.inout.basic.LiteralInput``
                     # instead of a ``pywps.inout.inputs.LiteralInput``.
-                    data_inputs = [self.wps_request.inputs[i][0].execute_xml() for i in self.wps_request.inputs]
-                    doc.append(WPS.DataInputs(*data_inputs))
+                    data["input_definitions"] = [self.wps_request.inputs[i][0].json for i in self.wps_request.inputs]
                 except Exception as e:
                     LOGGER.error("Failed to update lineage for input parameter. %s", e)
 
-                output_definitions = [self.outputs[o].execute_xml_lineage() for o in self.outputs]
-                doc.append(WPS.OutputDefinitions(*output_definitions))
+                data["output_definitions"] = [self.outputs[o].json for o in self.outputs]
 
             # Process outputs XML
-            output_elements = [self.outputs[o].execute_xml() for o in self.outputs]
-            doc.append(WPS.ProcessOutputs(*output_elements))
+            data["outputs"] = [self.outputs[o].json for o in self.outputs]
+        return data
+
+    def _construct_doc(self):
+        template = self.template_env.get_template(self.version + '/execute/main.xml')
+        doc = template.render(**self.json)
         return doc
 
     @Request.application
     def __call__(self, request):
-        doc = None
-        try:
-            doc = self._construct_doc()
-        except HTTPException as httpexp:
-            raise httpexp
-        except Exception as exp:
-            raise NoApplicableCode(exp)
+        if self.wps_request.raw:
+            if self.status == WPS_STATUS.FAILED:
+                return NoApplicableCode(self.message)
+            else:
+                wps_output_identifier = next(iter(self.wps_request.outputs))  # get the first key only
+                wps_output_value = self.outputs[wps_output_identifier]
+                if wps_output_value.source_type is None:
+                    return NoApplicableCode("Expected output was not generated")
+                return Response(wps_output_value.data,
+                                mimetype=self.wps_request.outputs[wps_output_identifier]['mimetype'])
+        else:
+            doc = None
+            try:
+                doc = self._construct_doc()
+                if self.store_status_file:
+                    # TODO: disabled this clean as workaround for #370
+                    # self.process.clean()
+                    pass
+            # TODO: If an exception occur here we must generate a valid status file
+            except HTTPException as httpexp:
+                return httpexp
+            except Exception as exp:
+                return NoApplicableCode(exp)
 
-        if self.status >= STATUS.DONE_STATUS:
-            self.process.clean()
-
-        return xml_response(doc)
+            return Response(doc, mimetype='text/xml')

@@ -1,12 +1,12 @@
 from werkzeug.wrappers import Request
-from pywps import WPS, OWS
 import pywps.configuration as config
 from pywps.app.basic import xml_response
 from pywps.exceptions import NoApplicableCode
 from pywps.exceptions import MissingParameterValue
 from pywps.exceptions import InvalidParameterValue
 from pywps.response import WPSResponse
-from pywps.response.status import STATUS
+from pywps import __version__
+import os
 
 
 class DescribeResponse(WPSResponse):
@@ -20,44 +20,45 @@ class DescribeResponse(WPSResponse):
             self.identifiers = kwargs["identifiers"]
         self.processes = kwargs["processes"]
 
-    def _construct_doc(self):
+    @property
+    def json(self):
 
-        if not self.identifiers:
-            raise MissingParameterValue('Missing parameter value "identifier"', 'identifier')
+        processes = []
 
-        identifier_elements = []
-        # 'all' keyword means all processes
         if 'all' in (ident.lower() for ident in self.identifiers):
-            for process in self.processes:
-                try:
-                    identifier_elements.append(
-                        self.processes[process].describe_xml())
-                except Exception as e:
-                    raise NoApplicableCode(e)
+            processes = (self.processes[p].json for p in self.processes)
         else:
             for identifier in self.identifiers:
                 if identifier not in self.processes:
                     msg = "Unknown process %r" % identifier
                     raise InvalidParameterValue(msg, "identifier")
                 else:
-                    try:
-                        process = self.processes[identifier]
-                        identifier_elements.append(process.describe_xml())
-                    except Exception as e:
-                        raise NoApplicableCode(e)
+                    processes.append(self.processes[identifier].json)
 
-        doc = WPS.ProcessDescriptions(
-            *identifier_elements
-        )
-        doc.attrib['{http://www.w3.org/2001/XMLSchema-instance}schemaLocation'] = \
-            'http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd'
-        doc.attrib['service'] = 'WPS'
-        doc.attrib['version'] = '1.0.0'
-        doc.attrib['{http://www.w3.org/XML/1998/namespace}lang'] = 'en-US'
+        return {
+            'pywps_version': __version__,
+            'processes': processes,
+            'lang': 'en-US'
+        }
+
+    def _construct_doc(self):
+
+        if not self.identifiers:
+            raise MissingParameterValue('Missing parameter value "identifier"', 'identifier')
+
+        template = self.template_env.get_template(self.version + '/describe/main.xml')
+        max_size = int(config.get_size_mb(config.get_config_value('server', 'maxsingleinputsize')))
+        doc = template.render(max_size=max_size, **self.json)
 
         return doc
 
     @Request.application
     def __call__(self, request):
-        doc = self.get_response_doc()
-        return xml_response(doc)
+        # This function must return a valid response.
+        try:
+            doc = self.get_response_doc()
+            return xml_response(doc)
+        except NoApplicableCode as e:
+            return e
+        except Exception as e:
+            return NoApplicableCode(str(e))
