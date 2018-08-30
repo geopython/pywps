@@ -7,18 +7,15 @@ import unittest
 from collections import namedtuple
 from pywps import Process, Service, LiteralInput, ComplexInput, BoundingBoxInput
 from pywps import LiteralOutput, ComplexOutput, BoundingBoxOutput
-from pywps import E, get_ElementMakerForVersion, OGCTYPE, Format, NAMESPACES, OGCUNIT
+from pywps import get_ElementMakerForVersion, OGCTYPE, Format, NAMESPACES, OGCUNIT
 from pywps.inout.literaltypes import LITERAL_DATA_TYPES
 from pywps.app.basic import get_xpath_ns
 from pywps.app.Common import Metadata
-from pywps.inout.formats import Format
 from pywps.inout.literaltypes import AllowedValue
 from pywps.validator.allowed_value import ALLOWEDVALUETYPE
-from pywps.exceptions import InvalidParameterValue
-from pywps.exceptions import MissingParameterValue
 
 from pywps.tests import assert_pywps_version, client_for
-from pywps.tests import assert_process_exception
+
 
 ProcessDescription = namedtuple('ProcessDescription', ['identifier', 'inputs', 'metadata'])
 
@@ -29,6 +26,7 @@ def get_data_type(el):
     if el.text in LITERAL_DATA_TYPES:
         return el.text
     raise RuntimeError("Can't parse data type")
+
 
 xpath_ns = get_xpath_ns("1.0.0")
 
@@ -116,6 +114,7 @@ class DescribeProcessTest(unittest.TestCase):
             version='1.0.0'
         )
         resp = self.client.post_xml(doc=request_doc)
+        assert resp.status_code == 400
 
     def test_post_two_args(self):
         request_doc = WPS.DescribeProcess(
@@ -125,7 +124,7 @@ class DescribeProcessTest(unittest.TestCase):
         )
         resp = self.client.post_xml(doc=request_doc)
         result = get_describe_result(resp)
-        #print(b"\n".join(resp.response).decode("utf-8"))
+        # print(b"\n".join(resp.response).decode("utf-8"))
         assert [pr.identifier for pr in result] == ['hello', 'ping']
 
 
@@ -169,7 +168,8 @@ class DescribeProcessInputTest(unittest.TestCase):
 class InputDescriptionTest(unittest.TestCase):
 
     def test_literal_integer_input(self):
-        literal = LiteralInput('foo', 'Literal foo', data_type='positiveInteger', keywords=['kw1', 'kw2'], uoms=['metre'])
+        literal = LiteralInput('foo', 'Literal foo', data_type='positiveInteger',
+                               keywords=['kw1', 'kw2'], uoms=['metre'])
         data = literal.json
         assert data["identifier"] == "foo"
         assert data["data_type"] == "positiveInteger"
@@ -206,14 +206,17 @@ class InputDescriptionTest(unittest.TestCase):
         complex_in = ComplexInput(
             'foo',
             'Complex foo',
+            default='default',
             supported_formats=[
                 Format('a/b'),
                 Format('c/d')
-            ]
+            ],
         )
+
         data = complex_in.json
         assert len(data["supported_formats"]) == 2
         assert data["data_format"]["mime_type"] == "a/b"
+        assert data["data"] == "default"
 
     def test_bbox_input(self):
         bbox = BoundingBoxInput('bbox', 'BBox foo', keywords=['kw1', 'kw2'],
@@ -225,10 +228,12 @@ class InputDescriptionTest(unittest.TestCase):
         assert data["crss"][0] == "EPSG:4326"
         assert data["dimensions"] == 2
 
+
 class OutputDescriptionTest(unittest.TestCase):
 
     def test_literal_output(self):
-        literal = LiteralOutput('literal', 'Literal foo', abstract='Description', keywords=['kw1', 'kw2'], uoms=['metre'])
+        literal = LiteralOutput('literal', 'Literal foo', abstract='Description',
+                                keywords=['kw1', 'kw2'], uoms=['metre'])
         doc = literal.describe_xml()
         [output] = xpath_ns(doc, '/Output')
         [identifier] = xpath_ns(doc, '/Output/ows:Identifier')
