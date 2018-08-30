@@ -346,26 +346,6 @@ class Service(object):
         return self.call(http_request)
 
 
-def _openurl(inpt):
-    """use requests to open given href
-    """
-    data = None
-    href = inpt.get('href')
-
-    LOGGER.debug('Fetching URL %s', href)
-    if inpt.get('method') == 'POST':
-        if 'body' in inpt:
-            data = inpt.get('body')
-        elif 'bodyreference' in inpt:
-            data = requests.get(url=inpt.get('bodyreference')).text
-
-        reference_file = requests.post(url=href, data=data, stream=True)
-    else:
-        reference_file = requests.get(url=href, stream=True)
-
-    return reference_file
-
-
 def _build_input_file_name(href, workdir, extension=None):
     href = href or ''
     url_path = urlparse(href).path or ''

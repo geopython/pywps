@@ -9,7 +9,7 @@ import json
 import tempfile
 import os.path
 from pywps import Service, Process, LiteralOutput, LiteralInput,\
-    BoundingBoxOutput, BoundingBoxInput, Format, ComplexInput, ComplexOutput
+    BoundingBoxOutput, BoundingBoxInput, Format, ComplexInput, ComplexOutput, FORMATS
 from pywps.validator.base import emptyvalidator
 from pywps.validator.complexvalidator import validategml
 from pywps.validator.mode import MODE
@@ -528,25 +528,32 @@ class ExecuteXmlParserTest(unittest.TestCase):
         self.assertEqual(rv['name'][0]['bodyreference'], 'http://foo/bar/reference')
 
     def test_build_input_file_name(self):
-        from pywps.app.Service import _build_input_file_name
-        workdir = tempfile.mkdtemp()
+        from pywps.inout.basic import ComplexInput
+
+        h = ComplexInput('ci')
+        h.workdir = workdir = tempfile.mkdtemp()
+
         self.assertEqual(
-            _build_input_file_name('http://path/to/test.txt', workdir=workdir),
+            h._build_file_name('http://path/to/test.txt'),
             os.path.join(workdir, 'test.txt'))
         self.assertEqual(
-            _build_input_file_name('http://path/to/test', workdir=workdir, extension='.txt'),
-            os.path.join(workdir, 'test.txt'))
-        self.assertEqual(
-            _build_input_file_name('http://path/to/test', workdir=workdir),
+            h._build_file_name('http://path/to/test'),
             os.path.join(workdir, 'test'))
         self.assertEqual(
-            _build_input_file_name('https://path/to/test.txt?token=abc&expires_at=1234567', workdir=workdir),
-            os.path.join(workdir, 'test.txt'))
-        self.assertEqual(
-            _build_input_file_name('file://path/to/.config', workdir=workdir),
+            h._build_file_name('file://path/to/.config'),
             os.path.join(workdir, '.config'))
+        self.assertEqual(
+            h._build_file_name('https://path/to/test.txt?token=abc&expires_at=1234567'),
+            os.path.join(workdir, 'test.txt'))
+
+        h.supported_formats = [FORMATS.TEXT,]
+        h.data_format = FORMATS.TEXT
+        self.assertEqual(
+            h._build_file_name('http://path/to/test'),
+            os.path.join(workdir, 'test.txt'))
+
         open(os.path.join(workdir, 'duplicate.html'), 'a').close()
-        inpt_filename = _build_input_file_name('http://path/to/duplicate.html', workdir=workdir, extension='.txt')
+        inpt_filename = h._build_file_name('http://path/to/duplicate.html')
         self.assertTrue(inpt_filename.startswith(os.path.join(workdir, 'duplicate_')))
         self.assertTrue(inpt_filename.endswith('.html'))
 
