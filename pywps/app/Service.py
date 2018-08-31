@@ -24,7 +24,6 @@ import os
 import sys
 import uuid
 import copy
-import requests
 import shutil
 
 
