@@ -50,11 +50,13 @@ class Service(object):
 
         if config.get_config_value('logging', 'file') and config.get_config_value('logging', 'level'):
             LOGGER.setLevel(getattr(logging, config.get_config_value('logging', 'level')))
-            fh = logging.FileHandler(config.get_config_value('logging', 'file'))
-            fh.setFormatter(logging.Formatter(config.get_config_value('logging', 'format')))
-            LOGGER.addHandler(fh)
+            if not LOGGER.hasHandlers():
+                fh = logging.FileHandler(config.get_config_value('logging', 'file'))
+                fh.setFormatter(logging.Formatter(config.get_config_value('logging', 'format')))
+                LOGGER.addHandler(fh)
         else:  # NullHandler | StreamHandler
-            LOGGER.addHandler(logging.NullHandler())
+            if not LOGGER.hasHandlers():
+                LOGGER.addHandler(logging.NullHandler())
 
     def get_capabilities(self, wps_request, uuid):
 
