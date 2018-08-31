@@ -148,6 +148,7 @@ class IOHandler(object):
         self._post_data = None
         self._stream = None
         self._url = None
+        self.data_set = False
 
     def _check_valid(self):
         """Validate this input using given validator
@@ -190,8 +191,10 @@ class IOHandler(object):
         # For backward compatibility only. source_type checks could be replaced by `isinstance`.
         return getattr(SOURCE_TYPE, self.prop.upper())
 
-    def _set_default_value(self, value, value_type):
+    def _set_default_value(self, value=None, value_type=None):
         """Set default value based on input data type."""
+        value = value or getattr(self, '_default')
+        value_type = value_type or getattr(self, '_default_type')
 
         if value:
             if value_type == SOURCE_TYPE.DATA:
@@ -202,6 +205,8 @@ class IOHandler(object):
                 self.file = value
             elif value_type == SOURCE_TYPE.STREAM:
                 self.stream = value
+            elif value_type == SOURCE_TYPE.URL:
+                self.url = value
 
     def _build_file_name(self, href=''):
         """Return a file name for the local system."""
@@ -577,7 +582,10 @@ class BasicComplex(object):
         self._supported_formats = None
         if supported_formats:
             self.supported_formats = supported_formats
-        if self.supported_formats:
+
+        if data_format:
+            self.data_format = data_format
+        elif self.supported_formats:
             # not an empty list, set the default/current format to the first
             self.data_format = supported_formats[0]
 
@@ -597,7 +605,6 @@ class BasicComplex(object):
     def validator(self):
         """Return the proper validator for given data_format
         """
-
         return self.data_format.validate
 
     @property
@@ -681,6 +688,9 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
         self.allowed_values = []
         if not self.any_value:
             self.allowed_values = make_allowedvalues(allowed_values)
+
+        self._default = default
+        self._default_type = default_type
 
         if default is not None:
             self.data = default
@@ -769,6 +779,9 @@ class BBoxInput(BasicIO, BasicBoundingBox, DataHandler):
         if default_type != SOURCE_TYPE.DATA:
             raise InvalidParameterValue("Source types other than data are not supported.")
 
+        self._default = default
+        self._default_type = default_type
+
         self._set_default_value(default, default_type)
 
     @property
@@ -843,8 +856,8 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
         IOHandler.__init__(self, workdir=workdir, mode=mode)
         BasicComplex.__init__(self, data_format, supported_formats)
 
-        if default is not None:
-            self._set_default_value(default, default_type)
+        self._default = default
+        self._default_type = default_type
 
     def file_handler(self, inpt):
         """<wps:Reference /> handler.

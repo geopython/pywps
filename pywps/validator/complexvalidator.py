@@ -31,7 +31,7 @@ def validategml(data_input, mode):
     `MODE.SIMPLE`
         the mimetype will be checked
     `MODE.STRICT`
-        `GDAL/OGR <http://gdal.org/>`_ is used for getting the propper format.
+        `GDAL/OGR <http://gdal.org/>`_ is used for getting the proper format.
     `MODE.VERYSTRICT`
         the :class:`lxml.etree` is used along with given input `schema` and the
         GML file is properly validated against given schema.
@@ -218,12 +218,75 @@ def validategeotiff(data_input, mode):
 
     if mode >= MODE.STRICT:
 
-        from pywps.dependencies import gdal
-        data_source = gdal.Open(data_input.file)
-        if data_source:
+        try:
+            from pywps.dependencies import gdal
+            data_source = gdal.Open(data_input.file)
             passed = (data_source.GetDriver().ShortName == "GTiff")
-        else:
+        except ImportError:
             passed = False
+
+    return passed
+
+
+def validatenetcdf(data_input, mode):
+    """netCDF validation.
+    """
+
+    LOGGER.info('Validating netCDF; Mode: %s', mode)
+    passed = False
+
+    if mode >= MODE.NONE:
+        passed = True
+
+    if mode >= MODE.SIMPLE:
+
+        name = data_input.file
+        (mtype, encoding) = mimetypes.guess_type(name, strict=False)
+        passed = data_input.data_format.mime_type in {mtype, FORMATS.NETCDF.mime_type}
+
+    if mode >= MODE.STRICT:
+
+        try:
+            from pywps.dependencies import netCDF4 as nc
+            nc.Dataset(data_input.file)
+            passed = True
+        except ImportError as e:
+            passed = False
+            LOGGER.exception("ImportError while validating netCDF4 file {}:\n {}".format(data_input.file, e))
+        except IOError as e:
+            passed = False
+            LOGGER.exception("IOError while validating netCDF4 file {}:\n {}".format(data_input.file, e))
+
+    return passed
+
+
+def validatedods(data_input, mode):
+    """OPeNDAP validation.
+        """
+
+    LOGGER.info('Validating OPeNDAP; Mode: %s', mode)
+    passed = False
+
+    if mode >= MODE.NONE:
+        passed = True
+
+    if mode >= MODE.SIMPLE:
+        name = data_input.url
+        (mtype, encoding) = mimetypes.guess_type(name, strict=False)
+        passed = data_input.data_format.mime_type in {mtype, FORMATS.DODS.mime_type}
+
+    if mode >= MODE.STRICT:
+
+        try:
+            from pywps.dependencies import netCDF4 as nc
+            nc.Dataset(data_input.url)
+            passed = True
+        except ImportError as e:
+            passed = False
+            LOGGER.exception("ImportError while validating OPeNDAP link {}:\n {}".format(data_input.url, e))
+        except IOError as e:
+            passed = False
+            LOGGER.exception("IOError while validating OPeNDAP link {}:\n {}".format(data_input.url, e))
 
     return passed
 

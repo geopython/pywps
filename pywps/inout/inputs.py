@@ -89,6 +89,7 @@ class ComplexInput(basic.ComplexInput):
     def json(self):
         """Get JSON representation of the input
         """
+
         data = {
             'identifier': self.identifier,
             'title': self.title,
@@ -98,19 +99,17 @@ class ComplexInput(basic.ComplexInput):
             'data_format': self.data_format.json,
             'asreference': self.as_reference,
             'supported_formats': [frmt.json for frmt in self.supported_formats],
-            'file': self.file,
+            'file': self.file if self.prop == 'file' else None,
             'workdir': self.workdir,
             'mode': self.valid_mode,
             'min_occurs': self.min_occurs,
             'max_occurs': self.max_occurs
         }
 
-        if self.file:
-
-            if self.as_reference:
-                data = self._json_reference(data)
-            else:
-                data = self._json_data(data)
+        if self.as_reference:
+            data = self._json_reference(data)
+        else:
+            data = self._json_data(data)
 
         if self.data_format:
             if self.data_format.mime_type:

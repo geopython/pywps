@@ -20,7 +20,7 @@ from pywps.validator.base import emptyvalidator
 _FORMATS = namedtuple('FORMATS', 'GEOJSON, JSON, SHP, GML, GEOTIFF, WCS,'
                                  'WCS100, WCS110, WCS20, WFS, WFS100,'
                                  'WFS110, WFS20, WMS, WMS130, WMS110,'
-                                 'WMS100, TEXT, NETCDF, LAZ, LAS')
+                                 'WMS100, TEXT, DODS, NETCDF, LAZ, LAS')
 
 
 class Format(object):
@@ -164,7 +164,7 @@ FORMATS = _FORMATS(
     Format('application/x-zipped-shp', extension='.zip'),
     Format('application/gml+xml', extension='.gml'),
     Format('image/tiff; subtype=geotiff', extension='.tiff'),
-    Format('application/xogc-wcs', extension='.xml'),
+    Format('application/x-ogc-wcs', extension='.xml'),
     Format('application/x-ogc-wcs; version=1.0.0', extension='.xml'),
     Format('application/x-ogc-wcs; version=1.1.0', extension='.xml'),
     Format('application/x-ogc-wcs; version=2.0', extension='.xml'),
@@ -177,6 +177,7 @@ FORMATS = _FORMATS(
     Format('application/x-ogc-wms; version=1.1.0', extension='.xml'),
     Format('application/x-ogc-wms; version=1.0.0', extension='.xml'),
     Format('text/plain', extension='.txt'),
+    Format('application/x-ogc-dods', extension='.nc'),
     Format('application/x-netcdf', extension='.nc'),
     Format('application/octet-stream', extension='.laz'),
     Format('application/octet-stream', extension='.las'),
