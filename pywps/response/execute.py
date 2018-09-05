@@ -50,35 +50,54 @@ class ExecuteResponse(WPSResponse):
 
     # override WPSResponse._update_status
     def _update_status(self, status, message, status_percentage, clean=True):
+        """
+        Updates status report of currently running process instance:
+
+        * Updates the status document.
+        * Updates the status file (if requested).
+        * Cleans the working directory when process has finished.
+
+        This method is *only* called by pywps internally.
+        """
         super(ExecuteResponse, self)._update_status(status, message, status_percentage)
+        LOGGER.debug("_update_status: status={}, clean={}".format(status, clean))
+        self._update_status_doc()
         if self.store_status_file:
-            self.update_status_file(clean)
+            self._update_status_file()
+        if clean:
+            if self.status == WPS_STATUS.SUCCEEDED or self.status == WPS_STATUS.FAILED:
+                LOGGER.debug("clean workdir: status={}".format(status))
+                self.process.clean()
 
     def update_status(self, message, status_percentage=None):
         """
-        Update status report of currently running process instance
+        Update status report of currently running process instance.
+
+        This method is *only* called by the user provided process.
+        The status is handled internally in pywps.
 
         :param str message: Message you need to share with the client
         :param int status_percentage: Percent done (number betwen <0-100>)
         """
         if status_percentage is None:
             status_percentage = self.status_percentage
-        self._update_status(self.status, message, status_percentage)
+        self._update_status(self.status, message, status_percentage, False)
 
-    def update_status_file(self, clean):
+    def _update_status_doc(self):
+        try:
+            # rebuild the doc
+            self.doc = self._construct_doc()
+        except Exception as e:
+            raise NoApplicableCode('Building Response Document failed with : %s' % e)
+
+    def _update_status_file(self):
         # TODO: check if file/directory is still present, maybe deleted in mean time
         try:
-            # rebuild the doc and update the status xml file
-            self.doc = self._construct_doc()
-
+            # update the status xml file
             with open(self.process.status_location, 'w') as f:
                 f.write(self.doc)
                 f.flush()
                 os.fsync(f.fileno())
-
-            if (self.status == WPS_STATUS.SUCCEEDED or self.status == WPS_STATUS.FAILED) and clean:
-                self.process.clean()
-
         except Exception as e:
             raise NoApplicableCode('Writing Response Document failed with : %s' % e)
 
@@ -195,17 +214,6 @@ class ExecuteResponse(WPSResponse):
                 return Response(wps_output_value.data,
                                 mimetype=self.wps_request.outputs[wps_output_identifier]['mimetype'])
         else:
-            doc = None
-            try:
-                doc = self._construct_doc()
-                if self.store_status_file:
-                    # TODO: disabled this clean as workaround for #370
-                    # self.process.clean()
-                    pass
-            # TODO: If an exception occur here we must generate a valid status file
-            except HTTPException as httpexp:
-                return httpexp
-            except Exception as exp:
-                return NoApplicableCode(exp)
-
-            return Response(doc, mimetype='text/xml')
+            if not self.doc:
+                return NoApplicableCode("Output was not generated")
+            return Response(self.doc, mimetype='text/xml')
