@@ -974,7 +974,9 @@ class ComplexOutput(BasicIO, BasicComplex, IOHandler):
 
     @storage.setter
     def storage(self, storage):
-        self._storage = storage
+        # don't set storage twice
+        if self._storage is None:
+            self._storage = storage
 
     # TODO: refactor ?
     def get_url(self):
