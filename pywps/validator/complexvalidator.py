@@ -80,6 +80,49 @@ def validategml(data_input, mode):
     return passed
 
 
+def validatejson(data_input, mode):
+    """JSON validation function
+
+    :param data_input: :class:`ComplexInput`
+    :param pywps.validator.mode.MODE mode:
+
+    This function validates JSON input based on given validation mode. Following
+    happens, if `mode` parameter is given:
+
+    `MODE.NONE`
+        No validation, returns `True`.
+    `MODE.SIMPLE`
+        Returns `True` if the mime type is correct.
+    `MODE.STRICT`
+        Returns `True` if the content can be interpreted as a json object.
+    """
+
+    LOGGER.info('validating JSON; Mode: %s', mode)
+    passed = False
+
+    if mode >= MODE.NONE:
+        passed = True
+
+    if mode >= MODE.SIMPLE:
+
+        name = data_input.file
+        (mtype, encoding) = mimetypes.guess_type(name, strict=False)
+        passed = data_input.data_format.mime_type in {mtype, FORMATS.JSON.mime_type}
+
+    if mode >= MODE.STRICT:
+
+        import json
+        try:
+            with open(data_input.file) as f:
+                json.load(f)
+            passed = True
+
+        except ValueError:
+            passed = False
+
+    return passed
+
+
 def validategeojson(data_input, mode):
     """GeoJSON validation example
 
