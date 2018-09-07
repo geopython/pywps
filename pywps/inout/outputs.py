@@ -79,7 +79,7 @@ class ComplexOutput(basic.ComplexOutput):
             'supported_formats': [frmt.json for frmt in self.supported_formats],
             'asreference': self.as_reference,
             'data_format': self.data_format.json,
-            'file': self.file,
+            'file': self.file if self.prop == 'file' else None,
             'workdir': self.workdir,
             'mode': self.valid_mode,
             'min_occurs': self.min_occurs,
