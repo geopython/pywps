@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """Unit tests for IOs
 """
 ##################################################################
@@ -273,7 +275,7 @@ class ComplexOutputTest(unittest.TestCase):
                                          data_format=data_format,
                                          supported_formats=[data_format],
                                          mode=MODE.NONE)
-        self.data = json.dumps({'a': 1})
+        self.data = json.dumps({'a': 1, 'unicodé': u'éîïç', })
 
         self.test_fn = os.path.join(self.complex_out.workdir, 'test.json')
         with open(self.test_fn, 'w') as f:
