@@ -173,20 +173,42 @@ class ExecuteTest(unittest.TestCase):
     def test_dods(self):
         my_process = create_complex_nc_process()
         service = Service(processes=[my_process])
+        client = client_for(service)
+
         href = "http://test.opendap.org:80/opendap/netcdf/examples/sresa1b_ncar_ccsm3_0_run1_200001.nc"
+
+        """ # Is this how the request should be written ?
+        request_doc = WPS.Execute(
+            OWS.Identifier('my_opendap_process'),
+            WPS.DataInputs(
+                WPS.Input(
+                    OWS.Identifier('dods'),
+                    WPS.Reference(
+                        WPS.Body('request body'),
+                        {'{http://www.w3.org/1999/xlink}href': href},
+                        method='POST'
+                    )
+                    #WPS.Data(WPS.ComplexData(href=href, mime_type='application/x-ogc-dods')) this form is not supported yet. Should it be ?
+                )
+            ),
+            version='1.0.0'
+        )
+        resp = client.post_xml(doc=request_doc)
+        assert_response_success(resp)
+        """
 
         class FakeRequest():
             identifier = 'my_opendap_process'
-            service='wps'
-            operation='execute'
-            version='1.0.0'
-            raw=True
+            service = 'wps'
+            operation = 'execute'
+            version = '1.0.0'
+            raw = True,
             inputs = {'dods': [{
                     'identifier': 'dods',
                     'href': href,
                 }]}
             store_execute = False
-            lineage=False
+            lineage = False
             outputs = ['conventions']
 
         request = FakeRequest()
