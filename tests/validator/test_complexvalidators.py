@@ -82,6 +82,15 @@ class ValidateTest(unittest.TestCase):
             self.assertTrue(validategml(gml_input, MODE.VERYSTRICT), 'VERYSTRICT validation')
         gml_input.stream.close()
 
+    def test_json_validator(self):
+        """Test GeoJSON validator
+        """
+        json_input = get_input('json/point.geojson', None, FORMATS.JSON.mime_type)
+        self.assertTrue(validatejson(json_input, MODE.NONE), 'NONE validation')
+        self.assertTrue(validatejson(json_input, MODE.SIMPLE), 'SIMPLE validation')
+        self.assertTrue(validatejson(json_input, MODE.STRICT), 'STRICT validation')
+        json_input.stream.close()
+
     def test_geojson_validator(self):
         """Test GeoJSON validator
         """
