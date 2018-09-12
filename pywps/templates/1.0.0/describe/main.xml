@@ -50,7 +50,8 @@
                 <ows:Identifier>{{ put.identifier }}</ows:Identifier>
                 <ows:Title>{{ put.title }}</ows:Title>
                 <ows:Abstract>{{ put.abstract }}</ows:Abstract>
-                {% if put.type == "complex" %}
+                <ows:asReference>{{ put.asreference }} </ows:asReference>
+                {% if put.type in ["complex", "reference"] %}
                 <ComplexOutput>
                     {% include 'complex.xml' %}
                 </ComplexOutput>
