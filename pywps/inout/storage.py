@@ -33,7 +33,20 @@ class StorageAbstract(object):
             store - string describing storage - file name, database connection
             url - url, where the data can be downloaded
         """
-        pass
+        raise NotImplementedError
+
+
+class CachedStorage(StorageAbstract):
+    def __init__(self):
+        self._cache = {}
+
+    def store(self, output):
+        if output.identifier not in self._cache:
+            self._cache[output.identifier] = self._do_store(output)
+        return self._cache[output.identifier]
+
+    def _do_store(self, output):
+        raise NotImplementedError
 
 
 class DummyStorage(StorageAbstract):
@@ -49,11 +62,11 @@ class DummyStorage(StorageAbstract):
         """
         """
 
-    def store(self, ouput):
+    def store(self, output):
         pass
 
 
-class FileStorage(StorageAbstract):
+class FileStorage(CachedStorage):
     """File storage implementation, stores data to file system
 
     >>> import ConfigParser
@@ -81,10 +94,11 @@ class FileStorage(StorageAbstract):
     def __init__(self):
         """
         """
+        CachedStorage.__init__(self)
         self.target = config.get_config_value('server', 'outputpath')
         self.output_url = config.get_config_value('server', 'outputurl')
 
-    def store(self, output):
+    def _do_store(self, output):
         import math
         import shutil
         import tempfile

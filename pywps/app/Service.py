@@ -24,7 +24,6 @@ import os
 import sys
 import uuid
 import copy
-import requests
 import shutil
 
 
@@ -51,11 +50,13 @@ class Service(object):
 
         if config.get_config_value('logging', 'file') and config.get_config_value('logging', 'level'):
             LOGGER.setLevel(getattr(logging, config.get_config_value('logging', 'level')))
-            fh = logging.FileHandler(config.get_config_value('logging', 'file'))
-            fh.setFormatter(logging.Formatter(config.get_config_value('logging', 'format')))
-            LOGGER.addHandler(fh)
+            if not LOGGER.handlers:  # hasHandlers in Python 3.x
+                fh = logging.FileHandler(config.get_config_value('logging', 'file'))
+                fh.setFormatter(logging.Formatter(config.get_config_value('logging', 'format')))
+                LOGGER.addHandler(fh)
         else:  # NullHandler | StreamHandler
-            LOGGER.addHandler(logging.NullHandler())
+            if not LOGGER.handlers:
+                LOGGER.addHandler(logging.NullHandler())
 
     def get_capabilities(self, wps_request, uuid):
 
@@ -111,7 +112,10 @@ class Service(object):
                 request_inputs = wps_request.inputs[inpt.identifier]
 
             if not request_inputs:
-                if inpt.data_set:
+                if inpt._default is not None:
+                    if not inpt.data_set and isinstance(inpt, ComplexInput):
+                            inpt._set_default_value()
+
                     data_inputs[inpt.identifier] = [inpt.clone()]
             else:
 
@@ -167,7 +171,10 @@ class Service(object):
 
     def create_complex_inputs(self, source, inputs):
         """Create new ComplexInput as clone of original ComplexInput
-        because of inputs can be more then one, take it just as Prototype
+        because of inputs can be more than one, take it just as Prototype.
+
+        :param source: The process's input definition.
+        :param inputs: The request input data.
         :return collections.deque:
         """
 
@@ -332,31 +339,12 @@ class Service(object):
         except HTTPException as e:
             return NoApplicableCode(e.description, code=e.code)
         except Exception as e:
-            return NoApplicableCode("No applicable error code, please check error log.", code=500)
+            msg = "No applicable error code, please check error log."
+            return NoApplicableCode(msg, code=500)
 
     @Request.application
     def __call__(self, http_request):
         return self.call(http_request)
-
-
-def _openurl(inpt):
-    """use requests to open given href
-    """
-    data = None
-    href = inpt.get('href')
-
-    LOGGER.debug('Fetching URL %s', href)
-    if inpt.get('method') == 'POST':
-        if 'body' in inpt:
-            data = inpt.get('body')
-        elif 'bodyreference' in inpt:
-            data = requests.get(url=inpt.get('bodyreference')).text
-
-        reference_file = requests.post(url=href, data=data, stream=True)
-    else:
-        reference_file = requests.get(url=href, stream=True)
-
-    return reference_file
 
 
 def _build_input_file_name(href, workdir, extension=None):

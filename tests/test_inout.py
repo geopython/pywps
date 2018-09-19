@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """Unit tests for IOs
 """
 ##################################################################
@@ -99,8 +101,6 @@ class IOHandlerTest(unittest.TestCase):
         if self.iohandler.source_type == SOURCE_TYPE.STREAM:
             source = StringIO(text_type(self._value))
             self.iohandler.stream = source
-
-
 
         # self.assertEqual(stream_val, self.iohandler.memory_object,
         #                 'Memory object obtained')
@@ -232,6 +232,39 @@ class ComplexInputTest(unittest.TestCase):
         self.assertEqual(out['data_format']['mime_type'], 'application/json', 'data_format set')
 
 
+class DodsComplexInputTest(unittest.TestCase):
+    """ComplexInput test cases"""
+
+    def setUp(self):
+        self.tmp_dir = tempfile.mkdtemp()
+        data_format = get_data_format('application/x-ogc-dods')
+        self.complex_in = ComplexInput(identifier="complexinput",
+                                       title='MyComplex',
+                                       abstract='My complex input',
+                                       keywords=['kw1', 'kw2'],
+                                       workdir=self.tmp_dir,
+                                       data_format=data_format,
+                                       supported_formats=[data_format, get_data_format('application/x-netcdf')])
+
+        self.complex_in.href = "http://test.opendap.org:80/opendap/netcdf/examples/sresa1b_ncar_ccsm3_0_run1_200001.nc"
+
+    def test_validator(self):
+        self.assertEqual(self.complex_in.data_format.validate,
+                       get_validator('application/x-ogc-dods'))
+        self.assertEqual(self.complex_in.validator,
+                         get_validator('application/x-ogc-dods'))
+        frmt = get_data_format('application/x-ogc-dods')
+
+        def my_validate():
+            return True
+
+        frmt.validate = my_validate
+        self.assertNotEqual(self.complex_in.validator, frmt.validate)
+
+    def test_contruct(self):
+        self.assertIsInstance(self.complex_in, ComplexInput)
+
+
 class ComplexOutputTest(unittest.TestCase):
     """ComplexOutput test cases"""
 
@@ -242,7 +275,7 @@ class ComplexOutputTest(unittest.TestCase):
                                          data_format=data_format,
                                          supported_formats=[data_format],
                                          mode=MODE.NONE)
-        self.data = json.dumps({'a': 1})
+        self.data = json.dumps({'a': 1, 'unicodé': u'éîïç', })
 
         self.test_fn = os.path.join(self.complex_out.workdir, 'test.json')
         with open(self.test_fn, 'w') as f:
@@ -271,12 +304,16 @@ class ComplexOutputTest(unittest.TestCase):
         if PY2:
             self.assertEqual(self.complex_out.stream.read(), self.data)
         else:
-            self.assertEqual(self.complex_out.stream.read(), bytes(self.data, encoding='utf8'))
-        self.assertEqual(open(urlparse(self.complex_out.url).path).read(), self.data)
+            with self.complex_out.stream as s:
+                self.assertEqual(s.read(), bytes(self.data, encoding='utf8'))
+
+        with open(urlparse(self.complex_out.url).path) as f:
+            self.assertEqual(f.read(), self.data)
 
     def test_data_handler(self):
         self.complex_out.data = self.data
-        self.assertEqual(open(self.complex_out.file).read(), self.data)
+        with open(self.complex_out.file) as f:
+            self.assertEqual(f.read(), self.data)
 
     def test_url_handler(self):
         wfsResource = 'http://demo.mapserver.org/cgi-bin/wfs?' \
@@ -288,7 +325,6 @@ class ComplexOutputTest(unittest.TestCase):
         self.complex_out.storage = storage
         url = self.complex_out.get_url()
         self.assertEqual('file', urlparse(url).scheme)
-
 
 
 class SimpleHandlerTest(unittest.TestCase):
@@ -456,6 +492,7 @@ def load_tests(loader=None, tests=None, pattern=None):
     suite_list = [
         loader.loadTestsFromTestCase(IOHandlerTest),
         loader.loadTestsFromTestCase(ComplexInputTest),
+        loader.loadTestsFromTestCase(DodsComplexInputTest),
         loader.loadTestsFromTestCase(ComplexOutputTest),
         loader.loadTestsFromTestCase(SimpleHandlerTest),
         loader.loadTestsFromTestCase(LiteralInputTest),

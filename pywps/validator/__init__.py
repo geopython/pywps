@@ -3,22 +3,25 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-"""Validatating functions for various inputs
+"""Validating functions for various inputs
 """
 
 
 import logging
-from pywps.validator.complexvalidator import validategml, validateshapefile, validategeojson, validategeotiff
+from pywps.validator.complexvalidator import validategml, validateshapefile, validatejson, validategeojson, \
+    validategeotiff, validatenetcdf, validatedods
 from pywps.validator.base import emptyvalidator
 
 LOGGER = logging.getLogger('PYWPS')
 
 _VALIDATORS = {
     'application/vnd.geo+json': validategeojson,
-    'application/json': validategeojson,
+    'application/json': validatejson,
     'application/x-zipped-shp': validateshapefile,
     'application/gml+xml': validategml,
     'image/tiff; subtype=geotiff': validategeotiff,
+    'application/x-netcdf': validatenetcdf,
+    'application/x-ogc-dods': validatedods,
     'application/xogc-wcs': emptyvalidator,
     'application/x-ogc-wcs; version=1.0.0': emptyvalidator,
     'application/x-ogc-wcs; version=1.1.0': emptyvalidator,
