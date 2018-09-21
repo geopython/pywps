@@ -326,6 +326,7 @@ class Process(object):
             os.environ['GISRC'] = gisrc.name
 
             new_loc_args = dict()
+            mapset_name = 'pywps_mapset'
 
             if self.grass_location.startswith('complexinput:'):
                 # create new location from a georeferenced file
@@ -340,12 +341,18 @@ class Process(object):
             if new_loc_args:
                 dbase = self.workdir
                 location = 'pywps_location'
+
                 gsetup.init(self.workdir, dbase, location, 'PERMANENT')
                 grass.create_location(dbase=dbase,
                                       location=location,
                                       **new_loc_args)
                 LOGGER.debug('GRASS location based on {} created'.format(
                     list(new_loc_args.keys())[0]))
+                grass.run_command('g.mapset',
+                                  mapset=mapset_name,
+                                  flags='c',
+                                  dbase=dbase,
+                                  location=location)
 
             # create temporary mapset within existing location
             elif os.path.isdir(self.grass_location):
@@ -353,18 +360,12 @@ class Process(object):
                 dbase = os.path.dirname(self.grass_location)
                 location = os.path.basename(self.grass_location)
                 grass.run_command('g.gisenv', set="GISDBASE=%s" % dbase)
+                grass.run_command('g.gisenv', set="LOCATION_NAME=%s" % location)
+                grass.run_command('g.gisenv', set="MAPSET=%s" % mapset_name)
 
             else:
                 raise NoApplicableCode('Location does exists or does not seem ' +
                                        'to be in "EPSG:XXXX" form nor is it existing directory: %s' % location)
-
-            # copy projection files from PERMAMENT mapset to temporary mapset
-            mapset_name = 'pywps_mapset'
-            grass.run_command('g.mapset',
-                              mapset=mapset_name,
-                              flags='c',
-                              dbase=dbase,
-                              location=location)
 
             # set _grass_mapset attribute - will be deleted once handler ends
             self._grass_mapset = mapset_name
