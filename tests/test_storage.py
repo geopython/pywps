@@ -2,14 +2,12 @@ import unittest
 import atexit
 import shutil
 import tempfile
-import sqlalchemy
 from sqlalchemy import create_engine, inspect
 from pywps import FORMATS
 from pywps.inout.storage import DummyStorage, STORE_TYPE
 from pywps.inout.storage.file import FileStorage
 from pywps.inout.storage.db.pg import PgStorage
 from pywps.inout.storage.db.sqlite import SQLiteStorage
-from pywps.inout.storage.db import DbStorage
 from pywps import ComplexOutput
 import os
 from pywps import configuration
@@ -131,7 +129,7 @@ class PgStorageTestCase(unittest.TestCase):
         self.password = configuration.get_config_value(dbsettings, "password")
         self.host = configuration.get_config_value(dbsettings, "host")
         self.port = configuration.get_config_value(dbsettings, "port")
-        
+
         self.storage.target = "dbname={} user={} password={} host={} port={}".format(
             self.dbname, self.user, self.password, self.host, self.port
         )
