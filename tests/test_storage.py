@@ -107,7 +107,7 @@ class FileStorageTestCase(unittest.TestCase):
                              supported_formats=[FORMATS.GML])
         vector_output.file = get_vector_file()
 
-        store_file = self.storage.store(vector_output)        
+        store_file = self.storage.store(vector_output)
         assert len(store_file) == 3
         assert store_file[0] == STORE_TYPE.PATH
         assert isinstance(store_file[1], str)
@@ -125,21 +125,16 @@ class PgStorageTestCase(unittest.TestCase):
         set_test_configuration()
         self.storage = PgStorage()
 
-
-
         dbsettings = "db"
         self.dbname = configuration.get_config_value(dbsettings, "dbname")
         self.user = configuration.get_config_value(dbsettings, "user")
         self.password = configuration.get_config_value(dbsettings, "password")
         self.host = configuration.get_config_value(dbsettings, "host")
         self.port = configuration.get_config_value(dbsettings, "port")
-
-
         
         self.storage.target = "dbname={} user={} password={} host={} port={}".format(
             self.dbname, self.user, self.password, self.host, self.port
         )
-
 
         self.storage.schema_name = configuration.get_config_value("db", "schema_name")
         self.storage.dbname = configuration.get_config_value("db", "dbname")
