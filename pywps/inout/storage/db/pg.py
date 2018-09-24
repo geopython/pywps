@@ -86,7 +86,7 @@ class PgStorage(DbStorage):
 
     def store_raster_output(self, file_name, identifier):
 
-        from subprocess import call, run, Popen, PIPE
+        from subprocess import run, Popen, PIPE
 
         # Convert raster to an SQL query
         command1 = ["raster2pgsql", "-a", file_name, self.schema_name + "." + identifier]
@@ -105,7 +105,7 @@ class PgStorage(DbStorage):
 
         base = declarative_base()
 
-        engine = sqlalchemy.create_engine(
+        engine = create_engine(
             'postgresql://{}:{}@{}:{}/{}'.format(
                 self.dbname,
                 self.password,

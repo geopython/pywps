@@ -64,7 +64,7 @@ class SQLiteStorage(DbStorage):
 
         base = declarative_base()
 
-        engine = sqlalchemy.create_engine("sqlite:///{}".format(self.target))
+        engine = create_engine("sqlite:///{}".format(self.target))
 
         # Create table
         class Other_output(base):
