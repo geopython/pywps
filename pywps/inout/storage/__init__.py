@@ -42,5 +42,5 @@ class DummyStorage(StorageAbstract):
         """
         """
 
-    def store(self, ouput):
+    def store(self, output):
         pass
