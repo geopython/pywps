@@ -11,6 +11,7 @@
 # based on Web Processing Service Best Practices Discussion Paper, OGC 12-029
 # http://opengeospatial.org/standards/wps
 
+from enum import Enum
 from collections import namedtuple
 import mimetypes
 from pywps.validator.mode import MODE
@@ -23,7 +24,7 @@ _FORMATS = namedtuple('FORMATS', 'GEOJSON, JSON, SHP, GML, GEOTIFF, WCS,'
 
 
 # this should be Enum type (only compatible with Python 3)
-class DATA_TYPE(object):
+class DATA_TYPE(Enum):
     VECTOR = 0
     RASTER = 1
     OTHER = 2
