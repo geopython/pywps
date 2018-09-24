@@ -58,7 +58,7 @@ class PgStorage(DbStorage):
             pass
 
     def store_vector_output(self, file_name, identifier):
-        """ Open output file, connect to SQLite database and copiy data there
+        """ Open output file, connect to PG database and copy data there
         """
         from osgeo import ogr
 
