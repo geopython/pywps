@@ -62,6 +62,7 @@ class PgStorage(DbStorage):
         """
         from osgeo import ogr
 
+        db_location = self.schema_name + "." + identifier
         dsc_out = ogr.Open("PG:" + self.target)
 
         # connect to a database and copy output there
@@ -71,7 +72,7 @@ class PgStorage(DbStorage):
             raise Exception("Reading data failed.")
         if dsc_out is None:
             raise NoApplicableCode("Could not connect to the database.")
-        layer = dsc_out.CopyLayer(dsc_in.GetLayer(), identifier,
+        layer = dsc_out.CopyLayer(dsc_in.GetLayer(), db_location,
                                   ['OVERWRITE=YES'])
 
         if layer is None:
