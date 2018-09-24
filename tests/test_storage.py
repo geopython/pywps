@@ -262,7 +262,7 @@ class SQLiteStorageTestCase(unittest.TestCase):
             os.remove(self.storage.target)
         except:
             pass
-    
+
     def test_sqlite_storage(self):
         assert isinstance(self.storage, SQLiteStorage)
 
@@ -313,7 +313,6 @@ class SQLiteStorageTestCase(unittest.TestCase):
         assert (reference[1] + "_rasters") in ins.get_table_names()
 
 
-
     def test_store_other(self):
 
         # Test text output
@@ -337,7 +336,6 @@ class SQLiteStorageTestCase(unittest.TestCase):
         # check if table exists
         ins = inspect(engine)
         assert (reference[1] in ins.get_table_names())
-
 
         # Test CSV output
         csv_output = ComplexOutput('csv', 'CSV output',
