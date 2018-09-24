@@ -111,10 +111,10 @@ class ComplexOutput(basic.ComplexOutput):
         else:
             self.storage = FileStorage()
 
-        """to be implemented:
-        elif store_type == 's3' and \
-           config.get_config_value('s3', 'bucket_name'):
-            self.storage = S3Storage()"""
+        #to be implemented:
+        #elif store_type == 's3' and \
+        #   config.get_config_value('s3', 'bucket_name'):
+        #   self.storage = S3Storage()
 
         if self.data_format:
             if self.data_format.mime_type:
