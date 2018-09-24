@@ -156,7 +156,7 @@ class PgStorageTestCase(unittest.TestCase):
         assert store_vector[0] == STORE_TYPE.DB
         assert isinstance(store_vector[1], str)
         assert isinstance(store_vector[2], str)
-        
+
         # Parse reference into dbname, schema and table
         reference = store_vector[2].split(".")
 

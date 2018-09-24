@@ -57,7 +57,6 @@ class SQLiteStorage(DbStorage):
 
     def store_other_output(self, file_name, identifier, uuid):
 
-        import sqlalchemy
         from sqlalchemy import Column, Integer, String, LargeBinary, DateTime, func, create_engine
         from sqlalchemy.ext.declarative import declarative_base
         from sqlalchemy.orm import sessionmaker
