@@ -343,6 +343,7 @@ class ExecuteTest(unittest.TestCase):
 
         assert get_output(resp.xml) == {'outvalue': '42'}
 
+
     def test_post_with_no_inputs(self):
         client = client_for(Service(processes=[create_ultimate_question()]))
         request_doc = WPS.Execute(

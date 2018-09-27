@@ -99,7 +99,7 @@
 			</wps:Data>
             {% elif output.type == "literal" %}
 			<wps:Data>
-                <wps:LiteralData {% if output.uom %}uom="{{ output.uom.reference }}"{% endif %}>{{ output.data }}</wps:LiteralData>
+                <wps:LiteralData {% if output.uom %}uom="{{ output.uom.reference }}"{% endif %} dataType="{{ output.data_type }}">{{ output.data }}</wps:LiteralData>
 			</wps:Data>
             {% elif output.type == "bbox" %}
 			<wps:Data>
