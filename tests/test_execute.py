@@ -405,6 +405,23 @@ class ExecuteTest(unittest.TestCase):
             './wps:Data/ows:BoundingBox/ows:LowerCorner')[0].text)
 
 
+    def test_output_response_dataType(self):
+        client = client_for(Service(processes=[create_greeter()]))
+        request_doc = WPS.Execute(
+            OWS.Identifier('greeter'),
+            WPS.DataInputs(
+                WPS.Input(
+                    OWS.Identifier('name'),
+                    WPS.Data(WPS.LiteralData('foo'))
+                )
+            ),
+            version='1.0.0'
+        )
+        resp = client.post_xml(doc=request_doc)
+        el = next(resp.xml.iter('{http://www.opengis.net/wps/1.0.0}LiteralData'))
+        assert el.attrib['dataType'] == 'string'
+
+
 class ExecuteXmlParserTest(unittest.TestCase):
     """Tests for Execute request XML Parser
     """
