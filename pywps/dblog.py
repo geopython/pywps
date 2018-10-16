@@ -162,7 +162,8 @@ def get_session():
     database = configuration.get_config_value('logging', 'database')
     echo = True
     level = configuration.get_config_value('logging', 'level')
-    if level in ['INFO']:
+    level_name = logging.getLevelName(level)
+    if isinstance(level_name, int) and level_name >= logging.INFO:
         echo = False
     try:
         if database.startswith("sqlite") or database.startswith("memory"):
