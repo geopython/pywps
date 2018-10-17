@@ -21,7 +21,7 @@ import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, VARCHAR, Float, DateTime, LargeBinary
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import NullPool
+from sqlalchemy.pool import NullPool, StaticPool
 
 LOGGER = logging.getLogger('PYWPS')
 _SESSION_MAKER = None
@@ -162,11 +162,15 @@ def get_session():
     database = configuration.get_config_value('logging', 'database')
     echo = True
     level = configuration.get_config_value('logging', 'level')
-    if level in ['INFO']:
+    level_name = logging.getLevelName(level)
+    if isinstance(level_name, int) and level_name >= logging.INFO:
         echo = False
     try:
         if database.startswith("sqlite") or database.startswith("memory"):
-            engine = sqlalchemy.create_engine(database, connect_args={'check_same_thread': False}, echo=echo)
+            engine = sqlalchemy.create_engine(database,
+                                              connect_args={'check_same_thread': False},
+                                              poolclass=StaticPool,
+                                              echo=echo)
         else:
             engine = sqlalchemy.create_engine(database, echo=echo, poolclass=NullPool)
     except sqlalchemy.exc.SQLAlchemyError as e:
