@@ -677,7 +677,7 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
                  min_occurs=1, max_occurs=1, metadata=[],
                  default=None, default_type=SOURCE_TYPE.DATA):
         BasicIO.__init__(self, identifier, title, abstract, keywords,
-                         min_occurs=1, max_occurs=1, metadata=[])
+                         min_occurs, max_occurs, metadata)
         BasicLiteral.__init__(self, data_type, uoms)
         SimpleHandler.__init__(self, workdir, data_type, mode=mode)
 
