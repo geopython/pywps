@@ -338,7 +338,7 @@ class Service(object):
             return e
         except HTTPException as e:
             return NoApplicableCode(e.description, code=e.code)
-        except Exception as e:
+        except Exception:
             msg = "No applicable error code, please check error log."
             return NoApplicableCode(msg, code=500)
 

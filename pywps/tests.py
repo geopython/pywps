@@ -73,7 +73,7 @@ class WpsTestResponse(BaseResponse):
 
     def __init__(self, *args):
         super(WpsTestResponse, self).__init__(*args)
-        if re.match('text/xml(;\s*charset=.*)?', self.headers.get('Content-Type')):
+        if re.match(r'text/xml(;\s*charset=.*)?', self.headers.get('Content-Type')):
             self.xml = lxml.etree.fromstring(self.get_data())
 
     def xpath(self, path):
@@ -96,7 +96,7 @@ def client_for(service):
 
 def assert_response_accepted(resp):
     assert resp.status_code == 200
-    assert re.match('text/xml(;\s*charset=.*)?', resp.headers['Content-Type'])
+    assert re.match(r'text/xml(;\s*charset=.*)?', resp.headers['Content-Type'])
     success = resp.xpath_text('/wps:ExecuteResponse'
                               '/wps:Status'
                               '/wps:ProcessAccepted')
@@ -106,7 +106,7 @@ def assert_response_accepted(resp):
 
 def assert_process_started(resp):
     assert resp.status_code == 200
-    assert re.match('text/xml(;\s*charset=.*)?', resp.headers['Content-Type'])
+    assert re.match(r'text/xml(;\s*charset=.*)?', resp.headers['Content-Type'])
     success = resp.xpath_text('/wps:ExecuteResponse'
                               '/wps:Status'
                               'ProcessStarted')
@@ -116,14 +116,14 @@ def assert_process_started(resp):
 
 def assert_response_success(resp):
     assert resp.status_code == 200
-    assert re.match('text/xml(;\s*charset=.*)?', resp.headers['Content-Type'])
+    assert re.match(r'text/xml(;\s*charset=.*)?', resp.headers['Content-Type'])
     success = resp.xpath('/wps:ExecuteResponse/wps:Status/wps:ProcessSucceeded')
     assert len(success) == 1
 
 
 def assert_process_exception(resp, code=None):
     assert resp.status_code == 400
-    assert re.match('text/xml(;\s*charset=.*)?', resp.headers['Content-Type'])
+    assert re.match(r'text/xml(;\s*charset=.*)?', resp.headers['Content-Type'])
     elem = resp.xpath('/ows:ExceptionReport'
                       '/ows:Exception')
     assert elem[0].attrib['exceptionCode'] == code
