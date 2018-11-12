@@ -7,10 +7,10 @@ import warnings
 
 try:
     from osgeo import gdal, ogr
-except ImportError as err:
+except ImportError:
     warnings.warn('Complex validation requires GDAL/OGR support.')
 
 try:
     import netCDF4
-except ImportError as err:
+except ImportError:
     warnings.warn('Complex validation requires netCDF4 support.')

@@ -305,7 +305,7 @@ class Process(object):
         """
 
         if not PY2:
-            LOGGER.warning('Seems PyWPS is running in Python-3 ' +
+            LOGGER.warning('Seems PyWPS is running in Python-3 '
                            'environment, but GRASS GIS supports Python-2 only')
             return
 
@@ -355,7 +355,7 @@ class Process(object):
                 grass.run_command('g.gisenv', set="GISDBASE=%s" % dbase)
 
             else:
-                raise NoApplicableCode('Location does exists or does not seem ' +
+                raise NoApplicableCode('Location does exists or does not seem '
                                        'to be in "EPSG:XXXX" form nor is it existing directory: %s' % location)
 
             # copy projection files from PERMAMENT mapset to temporary mapset
