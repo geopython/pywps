@@ -168,4 +168,3 @@ class NoAvailablePortException(NoApplicableCode):
     No port available for new docker.
     """
     code = 400
-
