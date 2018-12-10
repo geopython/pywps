@@ -6,7 +6,7 @@
 """List of know mimetypes"""
 
 # List of known complex data formats
-# you can use any other, but thise are widly known and supported by popular
+# you can use any other, but these are widely known and supported by popular
 # software packages
 # based on Web Processing Service Best Practices Discussion Paper, OGC 12-029
 # http://opengeospatial.org/standards/wps
@@ -17,8 +17,8 @@ from pywps.validator.mode import MODE
 from pywps.validator.base import emptyvalidator
 
 
-_FORMATS = namedtuple('FORMATS', 'GEOJSON, JSON, SHP, GML, GEOTIFF, WCS,'
-                                 'WCS100, WCS110, WCS20, WFS, WFS100,'
+_FORMATS = namedtuple('FORMATS', 'GEOJSON, JSON, SHP, GML, KML, KMZ, GEOTIFF,'
+                                 'WCS, WCS100, WCS110, WCS20, WFS, WFS100,'
                                  'WFS110, WFS20, WMS, WMS130, WMS110,'
                                  'WMS100, TEXT, DODS, NETCDF, LAZ, LAS')
 
@@ -163,6 +163,8 @@ FORMATS = _FORMATS(
     Format('application/json', extension='.json'),
     Format('application/x-zipped-shp', extension='.zip'),
     Format('application/gml+xml', extension='.gml'),
+    Format('application/vnd.google-earth.kml+xml', extension='.kml'),
+    Format('application/vnd.google-earth.kmz', extension='.kmz'),
     Format('image/tiff; subtype=geotiff', extension='.tiff'),
     Format('application/x-ogc-wcs', extension='.xml'),
     Format('application/x-ogc-wcs; version=1.0.0', extension='.xml'),
