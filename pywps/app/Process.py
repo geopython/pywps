@@ -268,9 +268,8 @@ class Process(object):
         """Clean the process working dir and other temporary files
         """
         testmode = config.get_config_value('server', 'testmode')
-        if testmode is True:
-            LOGGER.warning('PyWPS is running in testing mode. Workdir is not removed: {}'.format(
-                self.workdir))
+        if testmode:
+            LOGGER.warning('Temporary working directory is not removed in test mode: %s' % self.workdir)
         else:
             LOGGER.info("Removing temporary working directory: %s" % self.workdir)
             try:
