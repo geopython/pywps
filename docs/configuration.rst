@@ -124,7 +124,7 @@ configuration file <http://docs.pycsw.org/en/latest/configuration.html>`_.
 
 :outputurl:
     corresponding URL
-    
+
 :allowedinputpaths:
      server paths which are allowed to be used by file URLs. A list of paths
      must be seperated by `:`.
@@ -132,6 +132,11 @@ configuration file <http://docs.pycsw.org/en/latest/configuration.html>`_.
      Example: `/var/lib/pywps/downloads:/var/lib/pywps/public`
 
      By default no input paths are allowed.
+
+:testmode:
+    flag to enable PyWPS testing mode. Default = `false`.
+
+    In testing mode temporary `workdir` folders are not removed.
 
 .. note:: `outputpath` and `outputurl` must correspond. `outputpath` is the name
         of the resulting target directory, where all output data files are
