@@ -127,14 +127,19 @@ class ComplexOutput(basic.ComplexOutput):
         except Exception:
 
             if self.data:
-                if isinstance(self.data, six.string_types):
+
+                if self.data_format.encoding == 'base64':
+                    data["data"] = etree.CDATA(self.base64)
+
+                elif isinstance(self.data, six.string_types):
                     if isinstance(self.data, bytes):
                         data["data"] = self.data.decode("utf-8")
                     else:
                         data["data"] = self.data
 
                 else:
-                    data["data"] = etree.tostring(etree.CDATA(self.base64))
+                    raise NotImplementedError
+
 
         return data
 
