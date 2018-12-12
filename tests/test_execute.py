@@ -40,6 +40,7 @@ WPS, OWS = get_ElementMakerForVersion(VERSION)
 
 xpath_ns = get_xpath_ns(VERSION)
 
+
 def create_ultimate_question():
     def handler(request, response):
         response.outputs['outvalue'].data = '42'
@@ -86,7 +87,7 @@ def create_complex_proces():
         response.outputs['complex'].data = request.inputs['complex'][0].data
         return response
 
-    frmt = Format(mime_type='application/gml', extension=".gml") #  this is unknown mimetype
+    frmt = Format(mime_type='application/gml', extension=".gml")  # this is unknown mimetype
 
     return Process(handler=complex_proces,
                    identifier='my_complex_process',
@@ -115,7 +116,7 @@ def create_complex_nc_process():
 
         response.outputs['outdods'].url = url
         response.outputs['ncraw'].file = os.path.join(DATA_DIR, 'netcdf', 'time.nc')
-        response.outputs['ncraw'].data_format=FORMATS.NETCDF
+        response.outputs['ncraw'].data_format = FORMATS.NETCDF
         return response
 
     return Process(handler=complex_proces,
@@ -125,7 +126,7 @@ def create_complex_nc_process():
                        ComplexInput(
                            'dods',
                            'Opendap input',
-                           supported_formats=[Format('DODS'), Format('NETCDF'),],
+                           supported_formats=[Format('DODS'), Format('NETCDF')],
                            #   mode=MODE.STRICT
                        )
                    ],
@@ -152,15 +153,15 @@ def create_mimetype_process():
     frmt_txt2 = Format(mime_type='text/plain+test')
 
     return Process(handler=_handler,
-            identifier='get_mimetype_process',
-            title='Get mimeType process',
-            inputs=[],
-            outputs=[
-                ComplexOutput(
-                    'mimetype',
-                    'mimetype of requested output',
-                    supported_formats=[frmt_txt,frmt_txt2])
-             ])
+                   identifier='get_mimetype_process',
+                   title='Get mimeType process',
+                   inputs=[],
+                   outputs=[
+                       ComplexOutput(
+                           'mimetype',
+                           'mimetype of requested output',
+                           supported_formats=[frmt_txt, frmt_txt2])
+                   ])
 
 
 def get_output(doc):
@@ -179,7 +180,6 @@ class ExecuteTest(unittest.TestCase):
     def test_dods(self):
         my_process = create_complex_nc_process()
         service = Service(processes=[my_process])
-        client = client_for(service)
 
         href = "http://test.opendap.org:80/opendap/netcdf/examples/sresa1b_ncar_ccsm3_0_run1_200001.nc"
 
@@ -194,7 +194,8 @@ class ExecuteTest(unittest.TestCase):
                         {'{http://www.w3.org/1999/xlink}href': href},
                         method='POST'
                     )
-                    #WPS.Data(WPS.ComplexData(href=href, mime_type='application/x-ogc-dods')) this form is not supported yet. Should it be ?
+                    #WPS.Data(WPS.ComplexData(href=href, mime_type='application/x-ogc-dods'))
+                    # This form is not supported yet. Should it be ?
                 )
             ),
             version='1.0.0'
@@ -210,9 +211,9 @@ class ExecuteTest(unittest.TestCase):
             version = '1.0.0'
             raw = True,
             inputs = {'dods': [{
-                    'identifier': 'dods',
-                    'href': href,
-                }]}
+                'identifier': 'dods',
+                'href': href,
+            }]}
             store_execute = False
             lineage = False
             outputs = ['conventions']
@@ -228,7 +229,6 @@ class ExecuteTest(unittest.TestCase):
             data = f.read()
         self.assertEqual(resp.outputs['ncraw'].data, data)
 
-
     def test_input_parser(self):
         """Test input parsing
         """
@@ -239,15 +239,15 @@ class ExecuteTest(unittest.TestCase):
 
         class FakeRequest():
             identifier = 'complex_process'
-            service='wps'
-            operation='execute'
-            version='1.0.0'
+            service = 'wps'
+            operation = 'execute'
+            version = '1.0.0'
             inputs = {'complex': [{
-                    'identifier': 'complex',
-                    'mimeType': 'text/gml',
-                    'data': 'the data'
-                }]}
-        request = FakeRequest();
+                'identifier': 'complex',
+                'mimeType': 'text/gml',
+                'data': 'the data'
+            }]}
+        request = FakeRequest()
 
         try:
             service.execute('my_complex_process', request, 'fakeuuid')
@@ -265,7 +265,7 @@ class ExecuteTest(unittest.TestCase):
         request.inputs['complex'][0]['mimeType'] = 'application/xml+gml'
         try:
             parsed_inputs = service.create_complex_inputs(my_process.inputs[0],
-                                                      request.inputs['complex'])
+                                                          request.inputs['complex'])
         except InvalidParameterValue as e:
             self.assertEqual(e.locator, 'mimeType')
 
@@ -280,7 +280,7 @@ class ExecuteTest(unittest.TestCase):
         my_process.inputs[0].supported_formats = [frmt]
         my_process.inputs[0].data_format = Format(mime_type='application/xml+gml')
         parsed_inputs = service.create_complex_inputs(my_process.inputs[0],
-                                              request.inputs['complex'])
+                                                      request.inputs['complex'])
 
         self.assertEqual(parsed_inputs[0].data_format.validate, validategml)
 
@@ -295,7 +295,7 @@ class ExecuteTest(unittest.TestCase):
         class FakeRequest():
             identifier = 'complex_process'
             service = 'wps'
-            operation='execute'
+            operation = 'execute'
             version = '1.0.0'
             inputs = {}
             raw = False
@@ -318,14 +318,14 @@ class ExecuteTest(unittest.TestCase):
         class FakeRequest():
             def __init__(self, mimetype):
                 self.outputs = {'mimetype': {
-                        'identifier': 'mimetype',
-                        'mimetype': mimetype,
-                        'data': 'the data'
+                    'identifier': 'mimetype',
+                    'mimetype': mimetype,
+                    'data': 'the data'
                 }}
 
             identifier = 'get_mimetype_process'
             service = 'wps'
-            operation='execute'
+            operation = 'execute'
             version = '1.0.0'
             inputs = {}
             raw = False
@@ -353,7 +353,6 @@ class ExecuteTest(unittest.TestCase):
         assert_response_success(resp)
 
         assert get_output(resp.xml) == {'outvalue': '42'}
-
 
     def test_post_with_no_inputs(self):
         client = client_for(Service(processes=[create_ultimate_question()]))
@@ -415,7 +414,6 @@ class ExecuteTest(unittest.TestCase):
             output,
             './wps:Data/ows:BoundingBox/ows:LowerCorner')[0].text)
 
-
     def test_output_response_dataType(self):
         client = client_for(Service(processes=[create_greeter()]))
         request_doc = WPS.Execute(
@@ -451,7 +449,7 @@ class ExecuteXmlParserTest(unittest.TestCase):
                 WPS.Input(
                     OWS.Identifier('name'),
                     WPS.Data(WPS.LiteralData('bar')))
-                ))
+            ))
         rv = get_inputs_from_xml(request_doc)
         self.assertTrue('name' in rv)
         self.assertEqual(len(rv['name']), 2)
@@ -512,13 +510,12 @@ class ExecuteXmlParserTest(unittest.TestCase):
                     OWS.Identifier('json'),
                     WPS.Data(
                         WPS.ComplexData(the_data,
-                            encoding='base64',
-                            mimeType='application/json')))))
+                                        encoding='base64',
+                                        mimeType='application/json')))))
         rv = get_inputs_from_xml(request_doc)
         self.assertEqual(rv['json'][0]['mimeType'], 'application/json')
         json_data = json.loads(rv['json'][0]['data'].decode())
         self.assertEqual(json_data['plot']['Version'], '0.1')
-
 
     def test_bbox_input(self):
         if not PY2:
@@ -567,7 +564,7 @@ class ExecuteXmlParserTest(unittest.TestCase):
                     OWS.Identifier('name'),
                     WPS.Reference(
                         WPS.BodyReference(
-                        {'{http://www.w3.org/1999/xlink}href': 'http://foo/bar/reference'}),
+                            {'{http://www.w3.org/1999/xlink}href': 'http://foo/bar/reference'}),
                         {'{http://www.w3.org/1999/xlink}href': 'http://foo/bar/service'},
                         method='POST'
                     )
@@ -597,7 +594,7 @@ class ExecuteXmlParserTest(unittest.TestCase):
             h._build_file_name('https://path/to/test.txt?token=abc&expires_at=1234567'),
             os.path.join(workdir, 'test.txt'))
 
-        h.supported_formats = [FORMATS.TEXT,]
+        h.supported_formats = [FORMATS.TEXT, ]
         h.data_format = FORMATS.TEXT
         self.assertEqual(
             h._build_file_name('http://path/to/test'),
