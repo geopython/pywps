@@ -279,7 +279,6 @@ class FileHandler(IOHandler):
         """Set file name"""
         self._reset_cache()
         self._file = os.path.abspath(value)
-        self.as_reference = True
         self._check_valid()
 
     @property
