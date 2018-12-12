@@ -86,24 +86,24 @@ def create_complex_proces():
         response.outputs['complex'].data = request.inputs['complex'][0].data
         return response
 
-    frmt = Format(mime_type='application/gml', extension=".gml") # this is unknown mimetype
+    frmt = Format(mime_type='application/gml', extension=".gml") #  this is unknown mimetype
 
     return Process(handler=complex_proces,
-            identifier='my_complex_process',
-            title='Complex process',
-            inputs=[
-                ComplexInput(
-                    'complex',
-                    'Complex input',
-                    default="DEFAULT COMPLEX DATA",
-                    supported_formats=[frmt])
-            ],
-            outputs=[
-                ComplexOutput(
-                    'complex',
-                    'Complex output',
-                    supported_formats=[frmt])
-             ])
+                   identifier='my_complex_process',
+                   title='Complex process',
+                   inputs=[
+                       ComplexInput(
+                           'complex',
+                           'Complex input',
+                           default="DEFAULT COMPLEX DATA",
+                           supported_formats=[frmt])
+                   ],
+                   outputs=[
+                       ComplexOutput(
+                           'complex',
+                           'Complex output',
+                           supported_formats=[frmt])
+                   ])
 
 
 def create_complex_nc_process():
@@ -119,28 +119,29 @@ def create_complex_nc_process():
         return response
 
     return Process(handler=complex_proces,
-            identifier='my_opendap_process',
-            title='Opendap process',
-            inputs=[
-                ComplexInput(
-                    'dods',
-                    'Opendap input',
-                    supported_formats=[Format('DODS'), Format('NETCDF'),],
-                 #   mode=MODE.STRICT
-                )
-            ],
-            outputs=[
-                LiteralOutput(
-                    'conventions',
-                    'NetCDF convention',
-                    ),
-                ComplexOutput('outdods', 'Opendap output',
-                              supported_formats=[FORMATS.DODS, ],
-                              as_reference=True),
-                ComplexOutput('ncraw', 'NetCDF raw data output',
-                              supported_formats=[FORMATS.NETCDF, ],
-                              as_reference=False)
-             ])
+                   identifier='my_opendap_process',
+                   title='Opendap process',
+                   inputs=[
+                       ComplexInput(
+                           'dods',
+                           'Opendap input',
+                           supported_formats=[Format('DODS'), Format('NETCDF'),],
+                           #   mode=MODE.STRICT
+                       )
+                   ],
+                   outputs=[
+                       LiteralOutput(
+                           'conventions',
+                           'NetCDF convention',
+                       ),
+                       ComplexOutput('outdods', 'Opendap output',
+                                     supported_formats=[FORMATS.DODS, ],
+                                     as_reference=True),
+                       ComplexOutput('ncraw', 'NetCDF raw data output',
+                                     supported_formats=[FORMATS.NETCDF, ],
+                                     as_reference=False)
+                   ])
+
 
 def create_mimetype_process():
     def _handler(request, response):
