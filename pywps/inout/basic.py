@@ -416,7 +416,6 @@ class UrlHandler(FileHandler):
         self._reset_cache()
         self._url = value
         self._check_valid()
-        self.as_reference = True
 
     @property
     def file(self):

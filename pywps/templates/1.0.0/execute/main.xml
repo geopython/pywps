@@ -93,9 +93,7 @@
             <wps:Reference href="{{ output.href }}" mimeType="{{ output.mimetype }}" encoding="{{ output.encoding }}" schema="{{ output.schema }}"/>
             {% elif output.type == "complex" %}
 			<wps:Data>
-                    <wps:ComplexData mimeType="{{ output.mimetype }}" encoding="{{ output.encoding }}" schema="{{ output.schema }}">
-                            {{ output.data |safe }}
-                    </wps:ComplexData>
+                    <wps:ComplexData mimeType="{{ output.mimetype }}" encoding="{{ output.encoding }}" schema="{{ output.schema }}"><![CDATA[{{ output.data | safe }}]]></wps:ComplexData>
 			</wps:Data>
             {% elif output.type == "literal" %}
 			<wps:Data>

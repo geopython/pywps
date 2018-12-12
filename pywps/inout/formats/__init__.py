@@ -180,7 +180,7 @@ FORMATS = _FORMATS(
     Format('application/x-ogc-wms; version=1.0.0', extension='.xml'),
     Format('text/plain', extension='.txt'),
     Format('application/x-ogc-dods', extension='.nc'),
-    Format('application/x-netcdf', extension='.nc'),
+    Format('application/x-netcdf', extension='.nc', encoding='base64'),
     Format('application/octet-stream', extension='.laz'),
     Format('application/octet-stream', extension='.las'),
 )

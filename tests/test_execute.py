@@ -32,6 +32,8 @@ except ImportError:
 else:
     WITH_NC4 = True
 
+DATA_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'data')
+
 VERSION = "1.0.0"
 
 WPS, OWS = get_ElementMakerForVersion(VERSION)
@@ -112,6 +114,8 @@ def create_complex_nc_process():
             response.outputs['conventions'].data = D.Conventions
 
         response.outputs['outdods'].url = url
+        response.outputs['ncraw'].file = os.path.join(DATA_DIR, 'netcdf', 'time.nc')
+        response.outputs['ncraw'].data_format=FORMATS.NETCDF
         return response
 
     return Process(handler=complex_proces,
@@ -131,10 +135,12 @@ def create_complex_nc_process():
                     'NetCDF convention',
                     ),
                 ComplexOutput('outdods', 'Opendap output',
-                              supported_formats=[Format('DODS'), Format('NETCDF'), ],
-                              as_reference=True)
+                              supported_formats=[FORMATS.DODS, ],
+                              as_reference=True),
+                ComplexOutput('ncraw', 'NetCDF raw data output',
+                              supported_formats=[FORMATS.NETCDF, ],
+                              as_reference=False)
              ])
-
 
 def create_mimetype_process():
     def _handler(request, response):
@@ -169,7 +175,6 @@ def get_output(doc):
 class ExecuteTest(unittest.TestCase):
     """Test for Exeucte request KVP request"""
 
-    @unittest.skipIf(not WITH_NC4, 'netCDF4 not installed')
     def test_dods(self):
         my_process = create_complex_nc_process()
         service = Service(processes=[my_process])
@@ -216,6 +221,11 @@ class ExecuteTest(unittest.TestCase):
         resp = service.execute('my_opendap_process', request, 'fakeuuid')
         self.assertEqual(resp.outputs['conventions'].data, u'CF-1.0')
         self.assertEqual(resp.outputs['outdods'].url, href)
+        self.assertTrue(resp.outputs['outdods'].as_reference)
+        self.assertFalse(resp.outputs['ncraw'].as_reference)
+        with open(os.path.join(DATA_DIR, 'netcdf', 'time.nc'), 'rb') as f:
+            data = f.read()
+        self.assertEqual(resp.outputs['ncraw'].data, data)
 
 
     def test_input_parser(self):
