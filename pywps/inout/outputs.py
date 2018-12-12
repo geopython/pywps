@@ -140,7 +140,6 @@ class ComplexOutput(basic.ComplexOutput):
                 else:
                     raise NotImplementedError
 
-
         return data
 
 
