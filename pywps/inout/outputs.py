@@ -53,7 +53,7 @@ class ComplexOutput(basic.ComplexOutput):
                      should be :class:`pywps.app.Common.Metadata` objects.
     """
 
-    def __init__(self, identifier, title, supported_formats=None,
+    def __init__(self, identifier, title, supported_formats=(),
                  abstract='', keywords=[], metadata=None,
                  as_reference=False, mode=MODE.NONE):
         if metadata is None:
@@ -70,6 +70,7 @@ class ComplexOutput(basic.ComplexOutput):
 
     @property
     def json(self):
+        
         data = {
             "identifier": self.identifier,
             "title": self.title,
@@ -78,7 +79,7 @@ class ComplexOutput(basic.ComplexOutput):
             'type': 'complex',
             'supported_formats': [frmt.json for frmt in self.supported_formats],
             'asreference': self.as_reference,
-            'data_format': self.data_format.json,
+            'data_format': self.data_format.json if self.data_format else None,
             'file': self.file if self.prop == 'file' else None,
             'workdir': self.workdir,
             'mode': self.valid_mode,

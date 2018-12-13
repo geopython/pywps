@@ -577,9 +577,9 @@ class BasicComplex(object):
 
     """
 
-    def __init__(self, data_format=None, supported_formats=None):
+    def __init__(self, data_format=None, supported_formats=()):
         self._data_format = data_format
-        self._supported_formats = None
+        self._supported_formats = ()
         if supported_formats:
             self.supported_formats = supported_formats
 
