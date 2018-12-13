@@ -4,7 +4,9 @@ pywps (4.2.0) trusty; urgency=medium
   * Support for HPC cluster (Slurm, GridEngine)
   * Support for streamed URL-based data input (OpenDAP, download on demand)
   * Sphinx directive to automatically document processes.
-  * Numerous bug-fixes
+  * Refactoring of IO handler classes
+  * Added validators for JSON, DODS links and netCDF formats
+  * Numerous bug-fixes, additional tests and documentation improvements
 
  -- Tom Kralidis <tomkralidis@gmail.com>  Fri, 14 Dec 2018 12:00:00 +0000
 
