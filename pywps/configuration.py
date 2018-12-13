@@ -92,9 +92,9 @@ def load_configuration(cfgfiles=None):
     # If this flag is enabled it will set the HOME environment
     # for each process to its current workdir (a temp folder).
     CONFIG.set('server', 'sethomedir', 'false')
-    # If this flag is enabled PyWPS will be in testing mode.
-    # For example workdir (a temp folder) won't be cleaned after process has finished.
-    CONFIG.set('server', 'testmode', 'false')
+    # If this flag is enabled PyWPS will remove the process temporary workdir
+    # after process has finished.
+    CONFIG.set('server', 'cleantempdir', 'true')
 
     CONFIG.add_section('processing')
     CONFIG.set('processing', 'mode', 'default')

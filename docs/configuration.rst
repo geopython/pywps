@@ -133,10 +133,10 @@ configuration file <http://docs.pycsw.org/en/latest/configuration.html>`_.
 
      By default no input paths are allowed.
 
-:testmode:
-    flag to enable PyWPS testing mode. Default = `false`.
+:cleantempdir:
+    flag to enable removal of process temporary workdir after process has finished.
 
-    In testing mode temporary `workdir` folders are not removed.
+    Default = `true`.
 
 .. note:: `outputpath` and `outputurl` must correspond. `outputpath` is the name
         of the resulting target directory, where all output data files are
