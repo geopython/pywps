@@ -1,10 +1,20 @@
+pywps (4.2.0) trusty; urgency=medium
+
+  * Jinja2 templates for output generation
+  * Support for HPC cluster (Slurm, GridEngine)
+  * Support for streamed URL-based data input (OpenDAP, download on demand)
+  * Sphinx directive to automatically document processes.
+  * Numerous bug-fixes
+
+ -- Tom Kralidis <tomkralidis@gmail.com>  Fri, 14 Dec 2018 12:00:00 +0000
+
 pywps (4.0.0) trusty; urgency=medium
 
   * New version of PyWPS
   * New processes structure
   * Logging to database, jobs control
-  * Jobs queue 
-  * Saparated processes and PyWPS-Demo project
+  * Jobs queue
+  * Separated processes and PyWPS-Demo project
 
  -- Jáchym Čepický <jachym.cepicky@opengeolabs.cz>  Wed, 07 Dec 2016 10:54:43 +0100
 
@@ -37,7 +47,7 @@ pywps (3.2.3) precise; urgency=low
 
 pywps (3.2.2) precise; urgency=low
 
-  * Changelog version number updated to 3.2.2 and removing of entries in /debian/docs as the files don't exist in the doc directory. 
+  * Changelog version number updated to 3.2.2 and removing of entries in /debian/docs as the files don't exist in the doc directory.
 
  -- Jachym Cepicky <jachym@les-ejk.cz>  Tue, 02 Feb 2016 19:22:22 +0000
 
@@ -63,11 +73,11 @@ pywps (1.1.0-1) stable; urgency=low
 
   1.1.0 devel
   Changes since 1.0.0:
-  * ComplexValueReference input type definition is depredecated, 
+  * ComplexValueReference input type definition is deprecated,
     use only ComplexValue - PyWPS will recognise the input type and handle
     it according to it.
-  * GRASS location not created automaticly any more. 
-  * Rewritten exception handeling
+  * GRASS location not created automatically any more.
+  * Rewritten exception handling
   * Basic support for Range in LiteralValue definition
 
  -- Jachym Cepicky <jachym@les-ejk.cz>  Fri, 2 Nov 2006 15:38:00 +0200
@@ -78,7 +88,7 @@ pywps (1.0.0-1) stable; urgency=low
   Changes since RC3:
   * Fixed HTTP POST method
   * Added longer name for PyWPS PID file
-  * Fixed small bug in BoundingBox 
+  * Fixed small bug in BoundingBox
 
  -- Jachym Cepicky <jachym@les-ejk.cz>  Fri, 2 Nov 2006 15:38:00 +0200
 
@@ -87,7 +97,7 @@ pywps (1.0.0rc3-1) unstable; urgency=low
   * Release candidate 3
 
  -- Jachym Cepicky <jachym@les-ejk.cz>  Fri, 2 Nov 2006 15:38:00 +0200
- 
+
 pywps (1.0.0-1) unstable; urgency=low
 
   * Initial release
