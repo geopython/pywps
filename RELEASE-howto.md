@@ -44,7 +44,7 @@ git push --tags
 ```
 
 * Update version in `VERSION.txt` and `pywps/__init__.py` to dev, e.g.
-`4.1-dev` on `master` branch:
+`4.3-dev` on `master` branch:
 
 ```
 git checkout master
