@@ -45,8 +45,9 @@ class ComplexOutput(basic.ComplexOutput):
     """
     :param identifier: The name of this output.
     :param title: Readable form of the output name.
-    :param pywps.inout.formats.Format  supported_formats: List of supported
+    :param supported_formats: List of supported
         formats. The first format in the list will be used as the default.
+    :type supported_formats: (pywps.inout.formats.Format, )
     :param str abstract: Description of the output
     :param pywps.validator.mode.MODE mode: validation mode (none to strict)
     :param metadata: List of metadata advertised by this process. They
