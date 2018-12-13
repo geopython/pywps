@@ -267,15 +267,18 @@ class Process(object):
     def clean(self):
         """Clean the process working dir and other temporary files
         """
-        LOGGER.info("Removing temporary working directory: %s" % self.workdir)
-        try:
-            if os.path.isdir(self.workdir):
-                shutil.rmtree(self.workdir)
-            if self._grass_mapset and os.path.isdir(self._grass_mapset):
-                LOGGER.info("Removing temporary GRASS GIS mapset: %s" % self._grass_mapset)
-                shutil.rmtree(self._grass_mapset)
-        except Exception as err:
-            LOGGER.error('Unable to remove directory: %s', err)
+        if config.get_config_value('server', 'cleantempdir'):
+            LOGGER.info("Removing temporary working directory: %s" % self.workdir)
+            try:
+                if os.path.isdir(self.workdir):
+                    shutil.rmtree(self.workdir)
+                if self._grass_mapset and os.path.isdir(self._grass_mapset):
+                    LOGGER.info("Removing temporary GRASS GIS mapset: %s" % self._grass_mapset)
+                    shutil.rmtree(self._grass_mapset)
+            except Exception as err:
+                LOGGER.error('Unable to remove directory: %s', err)
+        else:
+            LOGGER.warning('Temporary working directory is not removed: %s' % self.workdir)
 
     def set_workdir(self, workdir):
         """Set working dir for all inputs and outputs
