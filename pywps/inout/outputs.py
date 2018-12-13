@@ -70,7 +70,7 @@ class ComplexOutput(basic.ComplexOutput):
 
     @property
     def json(self):
-        
+
         data = {
             "identifier": self.identifier,
             "title": self.title,
