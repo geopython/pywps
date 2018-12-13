@@ -577,7 +577,7 @@ class BasicComplex(object):
 
     """
 
-    def __init__(self, data_format=None, supported_formats=()):
+    def __init__(self, data_format=None, supported_formats=None):
         self._data_format = data_format
         self._supported_formats = ()
         if supported_formats:
@@ -623,7 +623,7 @@ class BasicComplex(object):
                     get_validator(supported_format.mime_type)
             return supported_format
 
-        self._supported_formats = list(map(set_format_validator, supported_formats))
+        self._supported_formats = tuple(map(set_format_validator, supported_formats))
 
     @property
     def data_format(self):
