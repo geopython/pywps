@@ -178,6 +178,8 @@ class ExecuteTest(unittest.TestCase):
     """Test for Exeucte request KVP request"""
 
     def test_dods(self):
+        if not WITH_NC4:
+            self.skipTest('netCDF4 not installed')
         my_process = create_complex_nc_process()
         service = Service(processes=[my_process])
 

@@ -93,13 +93,7 @@
             <wps:Reference href="{{ output.href }}" mimeType="{{ output.mimetype }}" encoding="{{ output.encoding }}" schema="{{ output.schema }}"/>
             {% elif output.type == "complex" %}
 			<wps:Data>
-                    <wps:ComplexData mimeType="{{ output.mimetype }}" encoding="{{ output.encoding }}" schema="{{ output.schema }}">
-                        {% if output.data_format.mime_type in ["application/xml", "application/gml+xml", "text/xml"] %}
-                            {{ output.data | safe }}
-                        {% else %}
-                            <![CDATA[{{ output.data | safe }}]]>
-                        {% endif %}
-                    </wps:ComplexData>
+                    <wps:ComplexData mimeType="{{ output.mimetype }}" encoding="{{ output.encoding }}" schema="{{ output.schema }}">{{ output.data | safe }}</wps:ComplexData>
 			</wps:Data>
             {% elif output.type == "literal" %}
 			<wps:Data>

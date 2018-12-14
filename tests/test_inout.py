@@ -285,7 +285,6 @@ class ComplexOutputTest(unittest.TestCase):
 
         self.data = json.dumps({'a': 1, 'unicodé': u'éîïç', })
         self.ncfile = os.path.join(DATA_DIR, 'netcdf', 'time.nc')
-        self.test_nc_fn = open(os.path.join(self.complex_out.workdir, 'test.nc'), 'wb')
 
         self.test_fn = os.path.join(self.complex_out.workdir, 'test.json')
         with open(self.test_fn, 'w') as f:
@@ -335,7 +334,10 @@ class ComplexOutputTest(unittest.TestCase):
     def test_base64(self):
         self.complex_out.data = self.data
         b = self.complex_out.base64
-        self.assertEqual(base64.b64decode(b), self.data)
+        if PY2:
+            self.assertEqual(base64.b64decode(b), self.data)
+        else:
+            self.assertEqual(base64.b64decode(b).decode(), self.data)
 
     def test_url_handler(self):
         wfsResource = 'http://demo.mapserver.org/cgi-bin/wfs?' \
