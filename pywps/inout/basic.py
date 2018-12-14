@@ -24,7 +24,7 @@ from pywps._compat import PY2, urlparse
 import base64
 from collections import namedtuple
 from io import BytesIO
-
+import six
 
 _SOURCE_TYPE = namedtuple('SOURCE_TYPE', 'MEMORY, FILE, STREAM, DATA, URL')
 SOURCE_TYPE = _SOURCE_TYPE(0, 1, 2, 3, 4)
@@ -279,7 +279,6 @@ class FileHandler(IOHandler):
         """Set file name"""
         self._reset_cache()
         self._file = os.path.abspath(value)
-        self.as_reference = True
         self._check_valid()
 
     @property
@@ -293,7 +292,8 @@ class FileHandler(IOHandler):
     @property
     def base64(self):
         """Return base64 encoding of data."""
-        return base64.b64encode(self.data)
+        data = self.data.encode() if not isinstance(self.data, bytes) else self.data
+        return base64.b64encode(data)
 
     @property
     def stream(self):
@@ -417,7 +417,6 @@ class UrlHandler(FileHandler):
         self._reset_cache()
         self._url = value
         self._check_valid()
-        self.as_reference = True
 
     @property
     def file(self):

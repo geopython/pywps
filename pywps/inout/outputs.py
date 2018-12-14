@@ -129,14 +129,23 @@ class ComplexOutput(basic.ComplexOutput):
         except Exception:
 
             if self.data:
-                if isinstance(self.data, six.string_types):
+                # XML compatible formats don't have to be wrapped in a CDATA tag.
+                if self.data_format.mime_type in ["application/xml", "application/gml+xml", "text/xml"]:
+                    fmt = "{}"
+                else:
+                    fmt = "<![CDATA[{}]]>"
+
+                if self.data_format.encoding == 'base64':
+                    data["data"] = fmt.format(etree.CDATA(self.base64))
+
+                elif isinstance(self.data, six.string_types):
                     if isinstance(self.data, bytes):
-                        data["data"] = self.data.decode("utf-8")
+                        data["data"] = fmt.format(self.data.decode("utf-8"))
                     else:
-                        data["data"] = self.data
+                        data["data"] = fmt.format(self.data)
 
                 else:
-                    data["data"] = etree.tostring(etree.CDATA(self.base64))
+                    raise NotImplementedError
 
         return data
 

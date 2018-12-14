@@ -14,6 +14,7 @@ import tempfile
 import datetime
 import unittest
 import json
+import base64
 from pywps import Format
 from pywps.validator import get_validator
 from pywps import NAMESPACES
@@ -28,6 +29,7 @@ from pywps.validator.mode import MODE
 from pywps.inout.basic import UOM
 from pywps.inout.storage import FileStorage
 from pywps._compat import PY2
+
 
 from lxml import etree
 
@@ -275,7 +277,14 @@ class ComplexOutputTest(unittest.TestCase):
                                          data_format=data_format,
                                          supported_formats=[data_format],
                                          mode=MODE.NONE)
+
+        self.complex_out_nc = ComplexOutput(identifier="netcdf", workdir=tmp_dir,
+                                            data_format=get_data_format('application/x-netcdf'),
+                                            supported_formats=[get_data_format('application/x-netcdf')],
+                                            mode=MODE.NONE)
+
         self.data = json.dumps({'a': 1, 'unicodé': u'éîïç', })
+        self.ncfile = os.path.join(DATA_DIR, 'netcdf', 'time.nc')
 
         self.test_fn = os.path.join(self.complex_out.workdir, 'test.json')
         with open(self.test_fn, 'w') as f:
@@ -298,6 +307,9 @@ class ComplexOutputTest(unittest.TestCase):
         self.assertEqual(self.complex_out.validator,
                          get_validator('application/json'))
 
+        self.assertEqual(self.complex_out_nc.validator,
+                         get_validator('application/x-netcdf'))
+
     def test_file_handler(self):
         self.complex_out.file = self.test_fn
         self.assertEqual(self.complex_out.data, self.data)
@@ -310,10 +322,22 @@ class ComplexOutputTest(unittest.TestCase):
         with open(urlparse(self.complex_out.url).path) as f:
             self.assertEqual(f.read(), self.data)
 
+    def test_file_handler_netcdf(self):
+        self.complex_out_nc.file = self.ncfile
+        data = self.complex_out_nc.base64
+
     def test_data_handler(self):
         self.complex_out.data = self.data
         with open(self.complex_out.file) as f:
             self.assertEqual(f.read(), self.data)
+
+    def test_base64(self):
+        self.complex_out.data = self.data
+        b = self.complex_out.base64
+        if PY2:
+            self.assertEqual(base64.b64decode(b), self.data)
+        else:
+            self.assertEqual(base64.b64decode(b).decode(), self.data)
 
     def test_url_handler(self):
         wfsResource = 'http://demo.mapserver.org/cgi-bin/wfs?' \
