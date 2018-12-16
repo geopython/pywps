@@ -20,14 +20,16 @@ with open('../VERSION.txt') as f:
 release = version
 latex_logo = '_static/pywps.png'
 
-extensions = ['sphinx.ext.extlinks',
-              'sphinx.ext.autodoc',
-              'sphinx.ext.todo',
-              'sphinx.ext.mathjax',
-              'sphinx.ext.viewcode',
-              'sphinx.ext.napoleon',
-              'pywps.ext_autodoc',
-            ]
+extensions = [
+    'sphinx.ext.extlinks',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.todo',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon',
+    'pywps.ext_autodoc'
+]
+
 exclude_patterns = ['_build']
 source_suffix = '.rst'
 master_doc = 'index'
@@ -37,7 +39,7 @@ pygments_style = 'sphinx'
 html_static_path = ['_static']
 
 htmlhelp_basename = 'PyWPSdoc'
-#html_logo = 'pywps.png'
+# html_logo = 'pywps.png'
 
 html_theme = 'alabaster'
 # alabaster settings
@@ -59,6 +61,7 @@ html_theme_options = {
     'logo_name': False
 }
 
+
 class Mock(object):
     def __init__(self, *args, **kwargs):
         pass
@@ -77,7 +80,7 @@ class Mock(object):
 
 MOCK_MODULES = ['lxml', 'lxml.etree', 'lxml.builder']
 
-#with open('../requirements.txt') as f:
+# with open('../requirements.txt') as f:
 #    MOCK_MODULES = f.read().splitlines()
 
 for mod_name in MOCK_MODULES:
