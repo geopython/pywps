@@ -37,7 +37,7 @@ def validategml(data_input, mode):
         GML file is properly validated against given schema.
     """
 
-    LOGGER.info('validating GML; Mode: %s', mode)
+    LOGGER.info('validating GML; Mode: {}'.format(mode))
     passed = False
 
     if mode >= MODE.NONE:
@@ -97,7 +97,7 @@ def validatejson(data_input, mode):
         Returns `True` if the content can be interpreted as a json object.
     """
 
-    LOGGER.info('validating JSON; Mode: %s', mode)
+    LOGGER.info('validating JSON; Mode: {}'.format(mode))
     passed = False
 
     if mode >= MODE.NONE:
@@ -140,7 +140,7 @@ def validategeojson(data_input, mode):
     True
     """
 
-    LOGGER.info('validating GeoJSON; Mode: %s', mode)
+    LOGGER.info('validating GeoJSON; Mode: {}'.format(mode))
     passed = False
 
     if mode >= MODE.NONE:
@@ -208,7 +208,7 @@ def validateshapefile(data_input, mode):
 
     """
 
-    LOGGER.info('validating Shapefile; Mode: %s', mode)
+    LOGGER.info('validating Shapefile; Mode: {}'.format(mode))
     passed = False
 
     if mode >= MODE.NONE:
@@ -247,7 +247,7 @@ def validategeotiff(data_input, mode):
     """GeoTIFF validation example
     """
 
-    LOGGER.info('Validating Shapefile; Mode: %s', mode)
+    LOGGER.info('Validating Shapefile; Mode: {}'.format(mode))
     passed = False
 
     if mode >= MODE.NONE:
@@ -275,7 +275,7 @@ def validatenetcdf(data_input, mode):
     """netCDF validation.
     """
 
-    LOGGER.info('Validating netCDF; Mode: %s', mode)
+    LOGGER.info('Validating netCDF; Mode: {}'.format(mode))
     passed = False
 
     if mode >= MODE.NONE:
@@ -307,7 +307,7 @@ def validatedods(data_input, mode):
     """OPeNDAP validation.
         """
 
-    LOGGER.info('Validating OPeNDAP; Mode: %s', mode)
+    LOGGER.info('Validating OPeNDAP; Mode: {}'.format(mode))
     passed = False
 
     if mode >= MODE.NONE:
@@ -343,7 +343,7 @@ def _get_schemas_home():
         ),
         os.path.pardir,
         "schemas")
-    LOGGER.debug('Schemas directory: %s', schema_dir)
+    LOGGER.debug('Schemas directory: {}'.format(schema_dir))
     return schema_dir
 
 

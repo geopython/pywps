@@ -68,7 +68,7 @@ class WPSRequest(object):
         if service:
             if str(service).lower() != 'wps':
                 raise InvalidParameterValue(
-                    'parameter SERVICE [%s] not supported' % service, 'service')
+                    'parameter SERVICE [{}] not supported'.format(service), 'service')
         else:
             raise MissingParameterValue('service', 'service')
 
@@ -85,7 +85,7 @@ class WPSRequest(object):
         maxsize = configuration.get_size_mb(maxsize) * 1024 * 1024
         if self.http_request.content_length > maxsize:
             raise FileSizeExceeded('File size for input exceeded.'
-                                   ' Maximum request size allowed: %i megabytes' % (maxsize / 1024 / 1024))
+                                   ' Maximum request size allowed: {} megabytes'.format(maxsize / 1024 / 1024))
 
         try:
             doc = lxml.etree.fromstring(self.http_request.get_data())
@@ -177,7 +177,7 @@ class WPSRequest(object):
             return parse_get_execute
         else:
             raise OperationNotSupported(
-                'Unknown request %r' % self.operation, operation)
+                'Unknown request {}'.format(self.operation), operation)
 
     def _post_request_parser(self, tagname):
         """Factory function returing propper parsing function
@@ -260,7 +260,7 @@ class WPSRequest(object):
             return parse_post_execute
         else:
             raise InvalidParameterValue(
-                'Unknown request %r' % tagname, 'request')
+                'Unknown request {}'.format(tagname), 'request')
 
     def set_version(self, version):
         self.version = version
@@ -286,7 +286,7 @@ class WPSRequest(object):
             self.check_and_set_version(version)
         else:
             raise VersionNegotiationFailed(
-                'The requested version "%s" is not supported by this server' % acceptedversions, 'version')
+                'The requested version "{}" is not supported by this server'.format(acceptedversions), 'version')
 
     def check_and_set_version(self, version):
         """set this.version
@@ -296,7 +296,7 @@ class WPSRequest(object):
             raise MissingParameterValue('Missing version', 'version')
         elif not _check_version(version):
             raise VersionNegotiationFailed(
-                'The requested version "%s" is not supported by this server' % version, 'version')
+                'The requested version "{}" is not supported by this server'.format(version), 'version')
         else:
             self.set_version(version)
 
@@ -308,7 +308,7 @@ class WPSRequest(object):
             language = 'None'
         elif language != 'en-US':
             raise InvalidParameterValue(
-                'The requested language "%s" is not supported by this server' % language, 'language')
+                'The requested language "{}" is not supported by this server'.format(language), 'language')
         else:
             self.language = language
 

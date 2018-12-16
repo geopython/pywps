@@ -432,7 +432,7 @@ class UrlHandler(FileHandler):
             reference_file = self._openurl(self.url, self.post_data)
             data_size = reference_file.headers.get('Content-Length', 0)
         except Exception as e:
-            raise NoApplicableCode('File reference error: %s' % e)
+            raise NoApplicableCode('File reference error: {}'.format(e))
 
         FSEE = FileSizeExceeded(
             'File size for input {} exceeded. Maximum allowed: {} megabytes'.
@@ -467,7 +467,7 @@ class UrlHandler(FileHandler):
     def _openurl(href, data=None):
         """Open given href.
         """
-        LOGGER.debug('Fetching URL %s', href)
+        LOGGER.debug('Fetching URL {}'.format(href))
         if data is not None:
             req = requests.post(url=href, data=data, stream=True)
         else:
@@ -637,11 +637,10 @@ class BasicComplex(object):
             if not data_format.validate or data_format.validate == emptyvalidator:
                 data_format.validate = get_validator(data_format.mime_type)
         else:
-            raise InvalidParameterValue("Requested format "
-                                        "%s, %s, %s not supported" %
-                                        (data_format.mime_type,
-                                         data_format.encoding,
-                                         data_format.schema),
+            raise InvalidParameterValue("Requested format {}, {}, {} not supported".format(
+                                        data_format.mime_type,
+                                        data_format.encoding,
+                                        data_format.schema),
                                         'mimeType')
 
     def _is_supported(self, data_format):
@@ -872,10 +871,10 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
             inpt_file = urlparse(inpt.get('href')).path
             inpt_file = os.path.abspath(inpt_file)
             os.symlink(inpt_file, tmp_file)
-            LOGGER.debug("Linked input file %s to %s.", inpt_file, tmp_file)
+            LOGGER.debug("Linked input file {} to {}.".format(inpt_file, tmp_file))
         except Exception:
             # TODO: handle os.symlink on windows
-            # raise NoApplicableCode("Could not link file reference: %s" % e)
+            # raise NoApplicableCode("Could not link file reference: {}".format(e))
             LOGGER.warn("Could not link file reference")
             shutil.copy2(inpt_file, tmp_file)
 

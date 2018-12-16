@@ -163,7 +163,7 @@ class Process(object):
                 maxprocesses = int(config.get_config_value('server', 'maxprocesses'))
                 if stored >= maxprocesses:
                     raise ServerBusy('Maximum number of parallel running processes reached. Please try later.')
-                LOGGER.debug("Store process in job queue, uuid=%s", self.uuid)
+                LOGGER.debug("Store process in job queue, uuid={}".format(self.uuid))
                 dblog.store_process(self.uuid, wps_request)
                 wps_response._update_status(WPS_STATUS.ACCEPTED, u'PyWPS Process stored in job queue', 0)
 
@@ -194,8 +194,8 @@ class Process(object):
             # if required set HOME to the current working directory.
             if config.get_config_value('server', 'sethomedir') is True:
                 os.environ['HOME'] = self.workdir
-                LOGGER.info('Setting HOME to current working directory: %s', os.environ['HOME'])
-            LOGGER.debug('ProcessID=%s, HOME=%s', self.uuid, os.environ.get('HOME'))
+                LOGGER.info('Setting HOME to current working directory: {}'.format(os.environ['HOME']))
+            LOGGER.debug('ProcessID={}, HOME={}'.format(self.uuid, os.environ.get('HOME')))
             wps_response._update_status(WPS_STATUS.STARTED, u'PyWPS Process started', 0)
             self.handler(wps_request, wps_response)  # the user must update the wps_response.
             # Ensure process termination
@@ -225,7 +225,7 @@ class Process(object):
 
             # update the process status to display process failed
 
-            msg = 'Process error: %s.%s Line %i %s' % (fname, method_name, exc_tb.tb_lineno, e)
+            msg = 'Process error: {}.{} Line {} {}'.format(fname, method_name, exc_tb.tb_lineno, e)
             LOGGER.error(msg)
             if config.get_config_value("logging", "level") != "DEBUG":
                 msg = 'Process failed, please check server error log'
@@ -251,7 +251,7 @@ class Process(object):
             (uuid, request_json) = (stored_request.uuid, stored_request.request)
             if not PY2:
                 request_json = request_json.decode('utf-8')
-            LOGGER.debug("Launching the stored request %s", str(uuid))
+            LOGGER.debug("Launching the stored request {}".format(str(uuid)))
             new_wps_request = WPSRequest()
             new_wps_request.json = json.loads(request_json)
             process_identifier = new_wps_request.identifier
@@ -262,23 +262,23 @@ class Process(object):
             process._run_async(new_wps_request, new_wps_response)
             dblog.remove_stored(uuid)
         except Exception as e:
-            LOGGER.error("Could not run stored process. %s", e)
+            LOGGER.error("Could not run stored process. {}".format(e))
 
     def clean(self):
         """Clean the process working dir and other temporary files
         """
         if config.get_config_value('server', 'cleantempdir'):
-            LOGGER.info("Removing temporary working directory: %s" % self.workdir)
+            LOGGER.info("Removing temporary working directory: {}".format(self.workdir))
             try:
                 if os.path.isdir(self.workdir):
                     shutil.rmtree(self.workdir)
                 if self._grass_mapset and os.path.isdir(self._grass_mapset):
-                    LOGGER.info("Removing temporary GRASS GIS mapset: %s" % self._grass_mapset)
+                    LOGGER.info("Removing temporary GRASS GIS mapset: {}".format(self._grass_mapset))
                     shutil.rmtree(self._grass_mapset)
             except Exception as err:
-                LOGGER.error('Unable to remove directory: %s', err)
+                LOGGER.error('Unable to remove directory: {}'.format(err))
         else:
-            LOGGER.warning('Temporary working directory is not removed: %s' % self.workdir)
+            LOGGER.warning('Temporary working directory is not removed: {}'.format(self.workdir))
 
     def set_workdir(self, workdir):
         """Set working dir for all inputs and outputs
@@ -323,7 +323,7 @@ class Process(object):
 
             # GISRC envvariable needs to be set
             gisrc = open(os.path.join(self.workdir, 'GISRC'), 'w')
-            gisrc.write("GISDBASE: %s\n" % self.workdir)
+            gisrc.write("GISDBASE: {}\n".format(self.workdir))
             gisrc.write("GUI: txt\n")
             gisrc.close()
             os.environ['GISRC'] = gisrc.name
@@ -355,11 +355,11 @@ class Process(object):
                 LOGGER.debug('Temporary mapset will be created')
                 dbase = os.path.dirname(self.grass_location)
                 location = os.path.basename(self.grass_location)
-                grass.run_command('g.gisenv', set="GISDBASE=%s" % dbase)
+                grass.run_command('g.gisenv', set="GISDBASE={}".format(dbase))
 
             else:
                 raise NoApplicableCode('Location does exists or does not seem '
-                                       'to be in "EPSG:XXXX" form nor is it existing directory: %s' % location)
+                                       'to be in "EPSG:XXXX" form nor is it existing directory: {}'.format(location))
 
             # copy projection files from PERMAMENT mapset to temporary mapset
             mapset_name = 'pywps_mapset'
@@ -373,7 +373,7 @@ class Process(object):
             self._grass_mapset = mapset_name
 
             # final initialization
-            LOGGER.debug('GRASS Mapset set to %s' % mapset_name)
+            LOGGER.debug('GRASS Mapset set to {}'.format(mapset_name))
 
             LOGGER.debug('GRASS environment initialised')
             LOGGER.debug('GISRC {}, GISBASE {}, GISDBASE {}, LOCATION {}, MAPSET {}'.format(

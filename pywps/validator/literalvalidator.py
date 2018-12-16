@@ -32,7 +32,7 @@ def validate_allowed_values(data_input, mode):
     else:
         data = data_input.data
 
-        LOGGER.debug('validating allowed values: %s in %s', data, data_input.allowed_values)
+        LOGGER.debug('validating allowed values: {} in {}'.format(data, data_input.allowed_values))
         for value in data_input.allowed_values:
 
             if value.allowed_type == ALLOWEDVALUETYPE.VALUE:
@@ -44,7 +44,7 @@ def validate_allowed_values(data_input, mode):
             if passed is True:
                 break
 
-    LOGGER.debug('validation result: %r', passed)
+    LOGGER.debug('validation result: {}'.format(passed))
     return passed
 
 
@@ -68,7 +68,7 @@ def _validate_range(interval, data):
 
     passed = False
 
-    LOGGER.debug('validating range: %s in %r', data, interval)
+    LOGGER.debug('validating range: {} in {}'.format(data, interval))
     if interval.minval <= data <= interval.maxval:
 
         if interval.spacing:
@@ -90,5 +90,5 @@ def _validate_range(interval, data):
     else:
         passed = False
 
-    LOGGER.debug('validation result: %r', passed)
+    LOGGER.debug('validation result: {}'.format(passed))
     return passed

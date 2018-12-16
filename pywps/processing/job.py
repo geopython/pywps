@@ -39,7 +39,7 @@ class Job(object):
         filename = tempfile.mkstemp(prefix='job_', suffix='.dump', dir=self.workdir)[1]
         with open(filename, 'w') as fp:
             dill.dump(self, fp)
-            LOGGER.debug("dumped job status to %s", filename)
+            LOGGER.debug("dumped job status to {}".format(filename))
             return filename
         return None
 
@@ -72,7 +72,7 @@ class JobLauncher(object):
 
     def run(self, args):
         if args.config:
-            LOGGER.debug("using pywps_cfg=%s", args.config)
+            LOGGER.debug("using pywps_cfg={}".format(args.config))
             os.environ['PYWPS_CFG'] = args.config
         self._run_job(args.filename)
 
