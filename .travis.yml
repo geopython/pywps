@@ -17,6 +17,7 @@ addons:
     packages:
       - gdal-bin
       - libgdal-dev
+      - devscripts
 
 # Handle Git submodules yourself
 git:
