@@ -20,6 +20,7 @@ addons:
       - devscripts
       - fakeroot
       - debhelper
+      - python-setuptools
 
 # Handle Git submodules yourself
 git:
