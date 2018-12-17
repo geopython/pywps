@@ -19,6 +19,9 @@ DESCRIPTION = ('PyWPS is an implementation of the Web Processing Service '
                'standard from the Open Geospatial Consortium. PyWPS is '
                'written in Python.')
 
+with open('README.md') as ff:
+    LONG_DESCRIPTION = ff.read()
+
 KEYWORDS = 'PyWPS WPS OGC processing'
 
 with open('requirements.txt') as f:
@@ -28,6 +31,7 @@ CONFIG = {
     'name': 'pywps',
     'version': VERSION,
     'description': DESCRIPTION,
+    'long_description': LONG_DESCRIPTION,
     'keywords': KEYWORDS,
     'license': 'MIT',
     'platforms': 'all',
