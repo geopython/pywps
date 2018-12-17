@@ -17,6 +17,10 @@ addons:
     packages:
       - gdal-bin
       - libgdal-dev
+      - devscripts
+      - fakeroot
+      - debhelper
+      - python-setuptools
 
 # Handle Git submodules yourself
 git:
