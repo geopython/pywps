@@ -56,7 +56,7 @@ def create_greeter():
     def greeter(request, response):
         name = request.inputs['name'][0].data
         assert type(name) is text_type
-        response.outputs['message'].data = "Hello %s!" % name
+        response.outputs['message'].data = "Hello {}!".format(name)
         return response
 
     return Process(handler=greeter,

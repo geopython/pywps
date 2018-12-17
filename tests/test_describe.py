@@ -132,8 +132,7 @@ class DescribeProcessInputTest(unittest.TestCase):
 
     def describe_process(self, process):
         client = client_for(Service(processes=[process]))
-        resp = client.get('?service=wps&version=1.0.0&Request=DescribeProcess&identifier=%s'
-                          % process.identifier)
+        resp = client.get('?service=wps&version=1.0.0&Request=DescribeProcess&identifier={}'.format(process.identifier))
         [result] = get_describe_result(resp)
         return result
 
@@ -249,10 +248,10 @@ class OutputDescriptionTest(unittest.TestCase):
         assert abstract.text == 'Description'
         assert keywords is not None
         assert len(kws) == 2
-        assert data_type.attrib['{%s}reference' % NAMESPACES['ows']] == OGCTYPE['string']
+        assert data_type.attrib['{{{}}}reference'.format(NAMESPACES['ows'])] == OGCTYPE['string']
         assert uoms is not None
         assert default_uom.text == 'metre'
-        assert default_uom.attrib['{%s}reference' % NAMESPACES['ows']] == OGCUNIT['metre']
+        assert default_uom.attrib['{{{}}}reference'.format(NAMESPACES['ows'])] == OGCUNIT['metre']
         assert len(supported_uoms) == 1
 
     def test_complex_output(self):

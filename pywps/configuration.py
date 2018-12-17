@@ -83,7 +83,7 @@ def load_configuration(cfgfiles=None):
     CONFIG.set('server', 'temp_path', tempfile.gettempdir())
     CONFIG.set('server', 'processes_path', '')
     outputpath = tempfile.gettempdir()
-    CONFIG.set('server', 'outputurl', 'file://%s' % outputpath)
+    CONFIG.set('server', 'outputurl', 'file://{}'.format(outputpath))
     CONFIG.set('server', 'outputpath', outputpath)
     # list of allowed input paths (file url input) seperated by ':'
     CONFIG.set('server', 'allowedinputpaths', '')
@@ -142,7 +142,7 @@ def load_configuration(cfgfiles=None):
 
     loaded_files = CONFIG.read(cfgfiles)
     if loaded_files:
-        LOGGER.info('Configuration file(s) %s loaded', loaded_files)
+        LOGGER.info('Configuration file(s) {} loaded'.format(loaded_files))
     else:
         LOGGER.info('No configuration files loaded. Using default values')
 
@@ -159,12 +159,11 @@ def _check_config():
         confvalue = get_config_value('server', confid)
 
         if not os.path.isdir(confvalue):
-            LOGGER.warning('server->%s configuration value %s is not directory'
-                           % (confid, confvalue))
+            LOGGER.warning('server->{} configuration value {} is not directory'.format(confid, confvalue))
 
         if not os.path.isabs(confvalue):
-            LOGGER.warning('server->%s configuration value %s is not absolute path, making it absolute to %s' %
-                           (confid, confvalue, os.path.abspath(confvalue)))
+            LOGGER.warning('server->{} configuration value {} is not absolute path, making it absolute to {}'.format(
+                           confid, confvalue, os.path.abspath(confvalue)))
             CONFIG.set('server', confid, os.path.abspath(confvalue))
 
     [checkdir(n) for n in ['workdir', 'outputpath']]
@@ -237,5 +236,5 @@ def get_size_mb(mbsize):
         newsize /= 1024
     else:
         newsize *= 1
-    LOGGER.debug('Calculated real size of %s is %s', mbsize, newsize)
+    LOGGER.debug('Calculated real size of {} is {}'.format(mbsize, newsize))
     return newsize

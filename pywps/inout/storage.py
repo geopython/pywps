@@ -136,7 +136,7 @@ class FileStorage(CachedStorage):
                                            dir=target)[1]
 
         full_output_name = os.path.join(target, output_name)
-        LOGGER.info('Storing file output to %s', full_output_name)
+        LOGGER.info('Storing file output to {}'.format(full_output_name))
         shutil.copy2(output.file, full_output_name)
 
         just_file_name = os.path.basename(output_name)
@@ -145,7 +145,7 @@ class FileStorage(CachedStorage):
         baseurl = self.output_url.rstrip('/') + '/'
         baseurl += str(request_uuid) + '/'
         url = urljoin(baseurl, just_file_name)
-        LOGGER.info('File output URI: %s', url)
+        LOGGER.info('File output URI: {}'.format(url))
 
         return (STORE_TYPE.PATH, output_name, url)
 
@@ -164,5 +164,5 @@ def get_free_space(folder):
     else:
         free_space = os.statvfs(folder).f_bfree
 
-    LOGGER.debug('Free space: %s', free_space)
+    LOGGER.debug('Free space: {}'.format(free_space))
     return free_space
