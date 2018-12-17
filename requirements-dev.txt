@@ -2,6 +2,7 @@ coverage
 flake8
 flufl.enum
 pylint
-Sphinx
 six
-jinja2
+Sphinx
+twine
+wheel

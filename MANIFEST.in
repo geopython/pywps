@@ -2,5 +2,6 @@ prune docs/
 prune tests/
 include *.txt
 include *.rst
+include README.md
 recursive-include pywps *
 global-exclude *.py[co]
