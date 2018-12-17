@@ -183,6 +183,12 @@ master:
   git checkout develop
   git pull upstream develop
 
+Release Packaging
+-----------------
+
+Release packaging notes are maintained at https://github.com/geopython/pywps/wiki/ReleasePackaging
+
+
 .. _`Corporate`: http://www.osgeo.org/sites/osgeo.org/files/Page/corporate_contributor.txt
 .. _`Individual`: http://www.osgeo.org/sites/osgeo.org/files/Page/individual_contributor.txt
 .. _`info@osgeo.org`: mailto:info@osgeo.org

@@ -38,7 +38,7 @@ Contents:
    external-tools
    extensions
    api
-   development
+   contributing
    exceptions
 
 
