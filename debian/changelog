@@ -1,3 +1,9 @@
+pywps (4.2.1) trusty; urgency=medium
+
+  * updated build/packaging fixes
+
+ -- Tom Kralidis <tomkralidis@gmail.com>  Mon, 17 Dec 2018 15:47:32 +0000
+
 pywps (4.2.0) trusty; urgency=medium
 
   * Jinja2 templates for output generation
