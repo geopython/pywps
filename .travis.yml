@@ -19,6 +19,7 @@ addons:
       - libgdal-dev
       - devscripts
       - fakeroot
+      - debhelper
 
 # Handle Git submodules yourself
 git:
