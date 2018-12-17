@@ -41,6 +41,7 @@ script:
 
 after_success:
   - coveralls
+  - python setup.py sdist bdist_wheel --universal
   - debuild -b -uc -us
 
 # whitelist
