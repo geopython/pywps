@@ -1,3 +1,11 @@
+pywps (4.2.1) trusty; urgency=medium
+
+  * Fixed `flufl.enum` dependency.
+  * Updated string formatting to use `.format()` convention.
+  * Updated docs for release packaging and contribution.
+
+ -- Tom Kralidis <tomkralidis@gmail.com>  Mon, 17 Dec 2018 12:00:00 +0000
+
 pywps (4.2.0) trusty; urgency=medium
 
   * Jinja2 templates for output generation
@@ -8,7 +16,7 @@ pywps (4.2.0) trusty; urgency=medium
   * Added validators for JSON, DODS links and netCDF formats
   * Numerous bug-fixes, additional tests and documentation improvements
 
- -- Tom Kralidis <tomkralidis@gmail.com>  Fri, 14 Dec 2018 12:00:00 +0000
+ -- Tom Kralidis <tomkralidis@gmail.com>  Sun, 16 Dec 2018 12:00:00 +0000
 
 pywps (4.0.0) trusty; urgency=medium
 
