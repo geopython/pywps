@@ -12,8 +12,10 @@ VERSION = "1.0.0"
 WPS, OWS = get_ElementMakerForVersion(VERSION)
 xpath_ns = get_xpath_ns(VERSION)
 
+
 def get_resource(path):
     return os.path.join(os.path.abspath(os.path.dirname(__file__)), 'data', path)
+
 
 test_fmts = {'json': (get_resource('json/point.geojson'), FORMATS.JSON),
              'geojson': (get_resource('json/point.geojson'), FORMATS.GEOJSON),
@@ -74,9 +76,9 @@ class RawInput(unittest.TestCase):
 
         wps = WPSExecution()
         doc = wps.buildRequest('test-fmt',
-                         inputs=[('complex', ComplexDataInput(data, mimeType=fmt.mime_type,
-                                                                          encoding=fmt.encoding))],
-                         mode='sync')
+                               inputs=[('complex', ComplexDataInput(data, mimeType=fmt.mime_type,
+                                                                    encoding=fmt.encoding))],
+                               mode='sync')
 
         resp = client.post_xml(doc=doc)
         assert_response_success(resp)

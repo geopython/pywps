@@ -124,7 +124,7 @@ class ComplexOutput(basic.ComplexOutput):
         data["type"] = "complex"
 
         try:  # Pass-through for XML files.
-              # Note that in a client-server round trip, the original and returned file will not be identical.
+            # Note that in a client-server round trip, the original and returned file will not be identical.
             data_doc = etree.parse(self.file)
             data["data"] = etree.tostring(data_doc, pretty_print=True).decode("utf-8")
 

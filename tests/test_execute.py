@@ -188,7 +188,6 @@ def get_output(doc):
                 ch = list(data_el[0])[0]
                 output[identifier_el.text] = lxml.etree.tostring(ch)
 
-
     return output
 
 
