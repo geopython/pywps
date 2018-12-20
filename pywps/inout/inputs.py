@@ -137,17 +137,19 @@ class ComplexInput(basic.ComplexInput):
         try:
             data_doc = etree.parse(self.file)
             data["data"] = etree.tostring(data_doc, pretty_print=True).decode("utf-8")
-        except Exception:
 
+        except Exception:
             if self.data:
-                if isinstance(self.data, six.string_types):
-                    if isinstance(self.data, bytes):
-                        data["data"] = self.data.decode("utf-8")
-                    else:
-                        data["data"] = self.data
+
+                if self.data_format.encoding == 'base64':
+                    data["data"] = self.base64.decode('utf8')
+
+                # Otherwise we assume all other formats are unsafe
+                elif isinstance(self.data, bytes):
+                    data["data"] = self.data.encode('utf8')
 
                 else:
-                    data["data"] = etree.tostring(etree.CDATA(self.base64))
+                    data["data"] = self.data
 
         return data
 
