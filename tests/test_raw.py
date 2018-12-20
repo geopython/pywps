@@ -2,7 +2,7 @@
 
 import unittest
 import os
-from pywps import get_ElementMakerForVersion
+from pywps import get_ElementMakerForVersion, E
 from pywps.app.basic import get_xpath_ns
 from pywps import Service, Process, ComplexInput, ComplexOutput, FORMATS
 from pywps.tests import client_for, assert_response_success
@@ -66,6 +66,22 @@ def get_data(fn, encoding=None):
 
 
 class RawInput(unittest.TestCase):
+
+    def make_request(self, name, fn, fmt):
+        """Create XML request embedding encoded data."""
+        data = get_data(fn, fmt.encoding)
+
+        doc = WPS.Execute(
+            OWS.Identifier('test-fmt'),
+            WPS.DataInputs(
+                WPS.Input(
+                    OWS.Identifier('complex'),
+                    WPS.Data(
+                        WPS.ComplexData(data, mimeType=fmt.mime_type, encoding=fmt.encoding)))),
+            version='1.0.0')
+
+        return doc
+
     def compare_io(self, name, fn, fmt):
         """Start the dummy process, post the request and check the response matches the input data."""
 
@@ -79,7 +95,7 @@ class RawInput(unittest.TestCase):
                                inputs=[('complex', ComplexDataInput(data, mimeType=fmt.mime_type,
                                                                     encoding=fmt.encoding))],
                                mode='sync')
-
+        #doc = self.make_request(name, fn, fmt)
         resp = client.post_xml(doc=doc)
         assert_response_success(resp)
         wps.parseResponse(resp.xml)
