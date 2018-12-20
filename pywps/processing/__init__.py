@@ -6,6 +6,7 @@
 import pywps.configuration as config
 from pywps.processing.basic import MultiProcessing
 from pywps.processing.scheduler import Scheduler
+from pywps.processing.container import Container
 # api only
 from pywps.processing.basic import Processing  # noqa: F401
 from pywps.processing.job import Job  # noqa: F401
@@ -15,6 +16,7 @@ LOGGER = logging.getLogger("PYWPS")
 
 MULTIPROCESSING = 'multiprocessing'
 SCHEDULER = 'scheduler'
+DOCKER = 'docker'
 DEFAULT = MULTIPROCESSING
 
 
@@ -29,6 +31,8 @@ def Process(process, wps_request, wps_response):
     LOGGER.info("Processing mode: {}".format(mode))
     if mode == SCHEDULER:
         process = Scheduler(process, wps_request, wps_response)
+    elif mode == DOCKER:
+        process = Container(process, wps_request, wps_response)
     else:
         process = MultiProcessing(process, wps_request, wps_response)
     return process
