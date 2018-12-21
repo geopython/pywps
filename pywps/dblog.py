@@ -155,7 +155,6 @@ def get_session():
         _LAST_SESSION.close()
 
     if _SESSION_MAKER:
-        _SESSION_MAKER.close_all()
         _LAST_SESSION = _SESSION_MAKER()
         return _LAST_SESSION
 
