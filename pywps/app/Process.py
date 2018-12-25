@@ -188,7 +188,7 @@ class Process(object):
 
     def _run_sync(self, wps_request, wps_response):
         mode = config.get_config_value('processing', 'mode')
-        if mode=='docker':
+        if mode == 'docker':
             process = pywps.processing.Container(
                 process=self,
                 wps_request=wps_request,

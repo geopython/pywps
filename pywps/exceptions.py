@@ -160,6 +160,7 @@ class SchedulerNotAvailable(NoApplicableCode):
     """
     code = 400
 
+
 class NoAvailablePort(NoApplicableCode):
     """No port available for a new docker container"""
     code = 400

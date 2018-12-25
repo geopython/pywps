@@ -43,10 +43,8 @@ class Container(Processing):
         dckr_inp_dir = config.get_config_value("processing", "dckr_inp_dir")
         dckr_out_dir = config.get_config_value("processing", "dckr_out_dir")
         container = self.client.containers.create(cntnr_img, ports={"5000/tcp": self.port}, detach=True,
-                                              volumes={
-                                              prcs_out_dir: {'bind': dckr_out_dir, 'mode': 'rw'},
-                                              prcs_inp_dir: {'bind': dckr_inp_dir, 'mode': 'ro'}
-                                              })
+                                                  volumes={prcs_out_dir: {'bind': dckr_out_dir, 'mode': 'rw'},
+                                                           prcs_inp_dir: {'bind': dckr_inp_dir, 'mode': 'ro'}})
         return container
 
     def start(self):
