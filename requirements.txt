@@ -1,4 +1,4 @@
-flufl.enum 
+flufl.enum
 jinja2
 jsonschema
 lxml
@@ -8,3 +8,4 @@ python-dateutil
 requests
 SQLAlchemy
 werkzeug
+docker
