@@ -32,7 +32,7 @@ class ClientError:
 class Container(Processing):
     def __init__(self, process, wps_request, wps_response):
         super().__init__(process, wps_request, wps_response)
-        self.port = self._assign_port()
+        self.port = _assign_port()
         self.client = docker.from_env()
         self.cntnr = self._create()
 
@@ -48,17 +48,6 @@ class Container(Processing):
                                               prcs_inp_dir: {'bind': dckr_inp_dir, 'mode': 'ro'}
                                               })
         return container
-
-    def _assign_port(self):
-        port_min = int(config.get_config_value("processing", "port_min"))
-        port_max = int(config.get_config_value("processing", "port_max"))
-        for port in range(port_min, port_max):
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            res = sock.connect_ex(('127.0.0.1', port))
-            # TODO find better solution for errno
-            if res != 0:
-                return port
-        raise NoAvailablePort("No port from range {}-{} available.".format(port_min, port_max))
 
     def start(self):
         self.cntnr.start()
@@ -164,6 +153,18 @@ def get_output(job_output):
     for key in job_output.keys():
         the_output.append((key, job_output[key]['asReference']))
     return the_output
+
+
+def _assign_port():
+    port_min = int(config.get_config_value("processing", "port_min"))
+    port_max = int(config.get_config_value("processing", "port_max"))
+    for port in range(port_min, port_max):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        res = sock.connect_ex(('127.0.0.1', port))
+        # TODO find better solution for errno
+        if res != 0:
+            return port
+    raise NoAvailablePort("No port from range {}-{} available.".format(port_min, port_max))
 
 
 def check_status(container):
