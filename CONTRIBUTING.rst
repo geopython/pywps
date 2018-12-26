@@ -139,7 +139,7 @@ Submitting a Pull Request
 
 This section will guide you through steps of working on PyWPS.  This section
 assumes you have forked PyWPS into your own GitHub repository. Note that 
-``develop`` is the main development branch in PyWPS; ``master`` is only used 
+``master`` is the main development branch in PyWPS.
 for stable releases and managed exclusively by the PyWPS team.
 
 .. code-block:: bash
@@ -155,9 +155,9 @@ for stable releases and managed exclusively by the PyWPS team.
 
   # add the main PyWPS development branch to keep up to date with upstream changes
   git remote add upstream https://github.com/geopython/pywps.git
-  git pull upstream develop
+  git pull upstream master
 
-  # create a local branch off develop
+  # create a local branch off master
   # The name of the branch should include the issue number if it exists
   git branch issue-72
   git checkout issue-72
@@ -180,8 +180,8 @@ master:
 
 .. code-block:: bash
 
-  git checkout develop
-  git pull upstream develop
+  git checkout master
+  git pull upstream master
 
 Release Packaging
 -----------------
