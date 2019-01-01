@@ -231,6 +231,8 @@ class Process(object):
                 msg = 'Process failed, please check server error log'
             wps_response._update_status(WPS_STATUS.FAILED, msg, 100)
 
+            raise NoApplicableCode('Process failed, please check server error log', code=500)
+
         finally:
             # The run of the next pending request if finished here, weather or not it successfull
             self.launch_next_process()
