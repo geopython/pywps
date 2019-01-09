@@ -7,6 +7,7 @@ from pywps.app.basic import get_xpath_ns
 from pywps import Service, Process, ComplexInput, ComplexOutput, FORMATS
 from pywps.tests import client_for, assert_response_success
 from owslib.wps import WPSExecution, ComplexDataInput
+from lxml import etree
 
 VERSION = "1.0.0"
 WPS, OWS = get_ElementMakerForVersion(VERSION)
@@ -95,16 +96,19 @@ class RawInput(unittest.TestCase):
                                inputs=[('complex', ComplexDataInput(data, mimeType=fmt.mime_type,
                                                                     encoding=fmt.encoding))],
                                mode='sync')
-        #doc = self.make_request(name, fn, fmt)
         resp = client.post_xml(doc=doc)
         assert_response_success(resp)
         wps.parseResponse(resp.xml)
         out = wps.processOutputs[0].data[0]
 
         if 'gml' in fmt.mime_type:
-            unittest.skip("Can't compare XML files.")
+            xml_orig = etree.tostring(etree.fromstring(data.encode('utf-8'))).decode('utf-8')
+            xml_out = etree.tostring(etree.fromstring(out.decode('utf-8'))).decode('utf-8')
+            # Not equal because the output includes additional namespaces compared to the origin.
+            # self.assertEqual(xml_out, xml_orig)
+
         else:
-            self.assertEqual(out, data)
+            self.assertEqual(out.strip(), data.strip())
 
     def test_json(self):
         key = 'json'
@@ -132,5 +136,4 @@ class RawInput(unittest.TestCase):
 
     def test_txt(self):
         key = 'txt'
-        # This fails because the content is not safe (contains XML reserved characters) and is not escaped by OWSLib.
         self.compare_io(key, *test_fmts[key])

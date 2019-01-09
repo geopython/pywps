@@ -123,23 +123,26 @@ class ComplexOutput(basic.ComplexOutput):
 
         data["type"] = "complex"
 
-        try:  # Pass-through for XML files.
-            # Note that in a client-server round trip, the original and returned file will not be identical.
-            data_doc = etree.parse(self.file)
-            data["data"] = etree.tostring(data_doc, pretty_print=True).decode("utf-8")
+        if self.data:
 
-        except Exception:
-            if self.data:
+            if self.data_format.mime_type in ["application/xml", "application/gml+xml", "text/xml"]:
+                # Note that in a client-server round trip, the original and returned file will not be identical.
+                data_doc = etree.parse(self.file)
+                data["data"] = etree.tostring(data_doc, pretty_print=True).decode('utf-8')
+
+            else:
 
                 if self.data_format.encoding == 'base64':
-                    data["data"] = self.base64.decode('utf8')
+                    out = self.base64.decode('utf-8')
 
-                # Otherwise we assume all other formats are unsafe
+                # Otherwise we assume all other formats are unsafe and need to be enclosed in a CDATA tag.
                 elif isinstance(self.data, bytes):
-                    data["data"] = self.data.encode('utf8')
+                    out = self.data.encode(self.data_format.encoding or 'utf-8')
 
                 else:
-                    data["data"] = self.data
+                    out = self.data
+
+                data["data"] = u'<![CDATA[{}]]>'.format(out)
 
         return data
 
