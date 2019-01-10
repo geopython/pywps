@@ -142,18 +142,17 @@ class ComplexInput(basic.ComplexInput):
                 data["data"] = etree.tostring(data_doc, pretty_print=True).decode('utf-8')
 
             else:
-
                 if self.data_format.encoding == 'base64':
-                    out = self.base64.decode('utf-8')
-
-                # Otherwise we assume all other formats are unsafe and need to be enclosed in a CDATA tag.
-                elif isinstance(self.data, bytes):
-                    out = self.data.encode(self.data_format.encoding or 'utf-8')
+                    data["data"] = self.base64.decode('utf-8')
 
                 else:
-                    out = self.data
+                    # Otherwise we assume all other formats are unsafe and need to be enclosed in a CDATA tag.
+                    if isinstance(self.data, bytes):
+                        out = self.data.encode(self.data_format.encoding or 'utf-8')
+                    else:
+                        out = self.data
 
-                data["data"] = u'<![CDATA[{}]]>'.format(out)
+                    data["data"] = u'<![CDATA[{}]]>'.format(out)
 
         return data
 
