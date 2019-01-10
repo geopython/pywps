@@ -134,20 +134,25 @@ class ComplexInput(basic.ComplexInput):
 
         data["type"] = "complex"
 
-        try:
-            data_doc = etree.parse(self.file)
-            data["data"] = etree.tostring(data_doc, pretty_print=True).decode("utf-8")
-        except Exception:
+        if self.data:
 
-            if self.data:
-                if isinstance(self.data, six.string_types):
-                    if isinstance(self.data, bytes):
-                        data["data"] = self.data.decode("utf-8")
-                    else:
-                        data["data"] = self.data
+            if self.data_format.mime_type in ["application/xml", "application/gml+xml", "text/xml"]:
+                # Note that in a client-server round trip, the original and returned file will not be identical.
+                data_doc = etree.parse(self.file)
+                data["data"] = etree.tostring(data_doc, pretty_print=True).decode('utf-8')
+
+            else:
+                if self.data_format.encoding == 'base64':
+                    data["data"] = self.base64.decode('utf-8')
 
                 else:
-                    data["data"] = etree.tostring(etree.CDATA(self.base64))
+                    # Otherwise we assume all other formats are unsafe and need to be enclosed in a CDATA tag.
+                    if isinstance(self.data, bytes):
+                        out = self.data.encode(self.data_format.encoding or 'utf-8')
+                    else:
+                        out = self.data
+
+                    data["data"] = u'<![CDATA[{}]]>'.format(out)
 
         return data
 
