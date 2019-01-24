@@ -129,7 +129,7 @@ Deployment on Nginx-Gunicorn
 
    For difference between WSGI server consult:  `WSGI comparison <https://www.digitalocean.com/community/tutorials/a-comparison-of-web-servers-for-python-based-web-applications>`_.
    
-   uWSGU is more popular than gunicorn, best documentation is probably to be found at `Readthedocs <http://uwsgi-docs.readthedocs.io/en/latest/WSGIquickstart.html>`_.
+   uWSGU is more popular than gunicorn, best documentation is probably to be found at `Readthedocs <https://uwsgi-docs.readthedocs.io/en/latest/WSGIquickstart.html>`_.
 
 We need nginx and gunicorn server::
 

@@ -15,7 +15,7 @@ processes in single files, although it's not required.
 Configuration file
 -------------------
 Configuration file format remains the same (it's the one used by `configparser <https://docs.python.org/3.6/library/configparser.html>`_ module). The sections are shift a bit, so they
-are more alike another GeoPython project - `pycsw <http://pycsw.org>`_.
+are more alike another GeoPython project - `pycsw <https://pycsw.org>`_.
 
 See section :ref:`configuration`.
 
@@ -67,7 +67,7 @@ Deployment
 While PyWPS 3.x was usually deployed as CGI application, PyWPS 4.x is configured
 as `WSGI` application. PyWPS 4.x is distributed without any processes or sample
 deploy script. We provide such example in our `pywps-flask
-<http://github.com/geopython/pywps-flask>`_ project.
+<https://github.com/geopython/pywps-flask>`_ project.
 
 .. note:: PYWPS_PROCESSES environment variable is gone, you have to assing
         processes to deploy script manually (or semi-automatically).
@@ -90,7 +90,7 @@ config values to each process class instance during it's definition.
 Sample processes
 ================
 For sample processes, please refer to `pywps-flask
-<http://github.com/geopython/pywps-flask>`_ project on GITHub.
+<https://github.com/geopython/pywps-flask>`_ project on GITHub.
 
 Needed steps summarization
 ==========================

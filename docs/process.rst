@@ -60,7 +60,7 @@ Example vector buffer process
 
 As an example, we will create a *buffer* process - which will take a vector
 file as the input, create specified the buffer around the data (using `Shapely
-<http://toblerity.org/shapely/>`_),  and return back the result.
+<https://shapely.readthedocs.io>`_),  and return back the result.
 
 Therefore, the process will have two inputs:
 
@@ -120,7 +120,7 @@ Next we define the *handler* method. In it, *geospatial analysis
 may happen*. The method gets a :class:`pywps.app.WPSRequest` and a
 :class:`pywps.response.WPSResponse` object as parameters. In our case, we
 calculate the buffer around each vector feature using
-`GDAL/OGR library <http://gdal.org>`_. We will not got much into the details,
+`GDAL/OGR library <https://gdal.org>`_. We will not got much into the details,
 what you should note is how to get input data from the
 :class:`pywps.app.WPSRequest` object and how to set data as outputs in the
 :class:`pywps.response.WPSResponse` object.
@@ -421,5 +421,5 @@ is defined. In other words, if both `title` and `abstract` are given, only the `
 will be included in the documentation to avoid redundancy.
 
 .. _Flask: http://flask.pocoo.org
-.. _PyWPS-Flask: http://github.com/geopython/pywps-flask
+.. _PyWPS-Flask: https://github.com/geopython/pywps-flask
 .. _Sphinx: http://sphinx-doc.org

@@ -46,7 +46,7 @@ Using pip
 
 
 Manual installation
-        Manual installation of PyWPS requires `downloading <http://pywps.org/download>`_ the
+        Manual installation of PyWPS requires `downloading <https://pywps.org/download>`_ the
         source code followed by usage of the `setup.py` script.  An example again for Debian based systems (note
         the usage of `sudo` for install)::
 
