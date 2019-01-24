@@ -115,7 +115,7 @@ def load_configuration(cfgfiles=None):
     CONFIG.set('metadata:main', 'identification_fees', 'NONE')
     CONFIG.set('metadata:main', 'identification_accessconstraints', 'NONE')
     CONFIG.set('metadata:main', 'provider_name', 'Organization Name')
-    CONFIG.set('metadata:main', 'provider_url', 'http://pywps.org/')
+    CONFIG.set('metadata:main', 'provider_url', 'https://pywps.org/')
     CONFIG.set('metadata:main', 'contact_name', 'Lastname, Firstname')
     CONFIG.set('metadata:main', 'contact_position', 'Position Title')
     CONFIG.set('metadata:main', 'contact_address', 'Mailing Address')

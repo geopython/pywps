@@ -39,7 +39,7 @@ CONFIG = {
     'author_email': 'jachym.cepicky@gmail.com',
     'maintainer': 'Jachym Cepicky',
     'maintainer_email': 'jachym.cepicky@gmail.com',
-    'url': 'http://pywps.org',
+    'url': 'https://pywps.org',
     'download_url': 'https://github.com/geopython/pywps',
     'classifiers': [
         'Development Status :: 5 - Production/Stable',

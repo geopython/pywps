@@ -10,7 +10,7 @@ interpolation initialised using `os.environ`.
 .. versionadded:: 4.0.0
 .. warning:: Compatibility with PyWPS 3.x: major changes have been made
   to the config file in order to allow for shared configurations with `PyCSW
-  <http://pycsw.org/>`_ and other projects.
+  <https://pycsw.org/>`_ and other projects.
 
 The configuration file has several sections:
 
@@ -19,7 +19,7 @@ The configuration file has several sections:
     * `processing` for processing backend configuration
     * `logging` for logging configuration
     * `grass` for *optional* configuration to support `GRASS GIS
-      <http://grass.osgeo.org>`_
+      <https://grass.osgeo.org>`_
 
 PyWPS ships with a sample configuration file (``default-sample.cfg``).
 A similar file is also available in the `flask` service as
@@ -31,7 +31,7 @@ Copy the file to ``default.cfg`` and edit the following:
 ---------------
 
 The `[metadata:main]` section was designed according to the `PyCSW project
-configuration file <http://docs.pycsw.org/en/latest/configuration.html>`_.
+configuration file <https://docs.pycsw.org/en/latest/configuration.html>`_.
 
 :identification_title:
     the title of the service
@@ -170,7 +170,7 @@ configuration file <http://docs.pycsw.org/en/latest/configuration.html>`_.
 
 :level:
     the logging level (see
-    http://docs.python.org/library/logging.html#logging-levels)
+    https://docs.python.org/3/library/logging.html#logging-levels)
 
 :format:
     the format string used by the logging `:Formatter:` (see
@@ -182,7 +182,7 @@ configuration file <http://docs.pycsw.org/en/latest/configuration.html>`_.
     messages.
 
 :database:
-    Connection string to database where the login about requests/responses is to be stored. We are using `SQLAlchemy <http://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls>`_
+    Connection string to database where the login about requests/responses is to be stored. We are using `SQLAlchemy <https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls>`_
     please use the configuration string. The default is SQLite3 `:memory:` object.
 
 
@@ -221,7 +221,7 @@ Sample file
   identification_fees=NONE
   identification_accessconstraints=NONE
   provider_name=Organization Name
-  provider_url=http://pywps.org/
+  provider_url=https://pywps.org/
   contact_name=Lastname, Firstname
   contact_position=Position Title
   contact_address=Mailing Address

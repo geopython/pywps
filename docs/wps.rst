@@ -3,7 +3,7 @@
 OGC Web Processing Service (OGC WPS)
 ====================================
 
-`OGC Web Processing Service <http://opengeospatial.org/standards>`_ standard
+`OGC Web Processing Service <https://opengeospatial.org/standards>`_ standard
 provides rules for standardizing how inputs and outputs (requests and
 responses) for geospatial processing services. The standard also defines how a
 client can request the execution of a process, and how the output from the
@@ -105,7 +105,7 @@ as `base64` for raster data.
 
 Usually, the minimum requirement for input data identification is `mimeType`.
 That usually is `application/gml+xml` for `GML
-<http://opengeospatial.org/standards/gml>`_-encoded vector files, `image/tiff;
+<https://opengeospatial.org/standards/gml>`_-encoded vector files, `image/tiff;
 subtype=geotiff` for raster files. The input or output can also be result of any
 OGC OWS service.
 
@@ -154,7 +154,7 @@ Synchronous mode
     The client sends the `Execute` request to the server and waits with open
     server connection, till the process is calculated and final response is
     returned back. This is useful for fast calculations which do not take
-    longer then a couple of seconds (`Apache2 httpd server uses 300 seconds <http://httpd.apache.org/docs/2.4/mod/core.html#timeout>`_ as default value for ConnectionTimeout).
+    longer then a couple of seconds (`Apache2 httpd server uses 300 seconds <https://httpd.apache.org/docs/2.4/mod/core.html#timeout>`_ as default value for ConnectionTimeout).
 
 Asynchronous mode
     Client sends the `Execute` request with explicit request for asynchronous

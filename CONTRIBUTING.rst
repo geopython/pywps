@@ -3,7 +3,7 @@ Contributing to PyWPS
 
 The PyWPS project openly welcomes contributions (bug reports, bug fixes, code
 enhancements/features, etc.).  This document will outline some guidelines on
-contributing to PyWPS.  As well, the PyWPS `community <http://pywps.org/community>`_ is a
+contributing to PyWPS.  As well, the PyWPS `community <https://pywps.org/community>`_ is a
 great place to get an idea of how to connect and participate in the PyWPS community
 and development.
 
@@ -17,7 +17,7 @@ Code of Conduct
 
 Contributors to this project are expected to act respectfully towards others in
 accordance with the `OSGeo Code of Conduct
-<http://www.osgeo.org/code_of_conduct>`_.
+<https://www.osgeo.org/code_of_conduct>`_.
 
 Contributions and Licensing
 ---------------------------
@@ -82,7 +82,7 @@ Documentation
 
 - documentation is managed in ``docs/``, in reStructuredText format
 - `Sphinx`_ is used to generate the documentation
-- See the `reStructuredText Primer <http://sphinx-doc.org/rest.html>`_ on rST
+- See the `reStructuredText Primer <http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_ on rST
   markup and syntax
 
 Bugs
@@ -119,7 +119,7 @@ GitHub Commit Guidelines
 - Git commits shall include the GitHub issue number (i.e. ``#1234``) in the Git
   commit log message
 - all enhancements or bug fixes must successfully pass all
-  `OGC CITE <http://cite.opengeospatial.org>`_ tests before they are committed
+  `OGC CITE <https://cite.opengeospatial.org>`_ tests before they are committed
 - all enhancements or bug fixes must successfully pass all tests
   before they are committed
 - enhancements which can be demonstrated from the PyWPS tests should be
@@ -193,7 +193,7 @@ Release packaging notes are maintained at https://github.com/geopython/pywps/wik
 .. _`Individual`: http://www.osgeo.org/sites/osgeo.org/files/Page/individual_contributor.txt
 .. _`info@osgeo.org`: mailto:info@osgeo.org
 .. _`OSGeo`: http://www.osgeo.org/content/foundation/legal/licenses.html
-.. _`PEP 8`: http://www.python.org/dev/peps/pep-0008/
-.. _`flake8`: https://flake8.readthedocs.org/en/latest/
+.. _`PEP 8`: https://www.python.org/dev/peps/pep-0008/
+.. _`flake8`: https://flake8.readthedocs.io/en/latest/
 .. _`Sphinx`: http://sphinx-doc.org/
-.. _`mailing list`: http://pywps.org/community
+.. _`mailing list`: https://pywps.org/community
