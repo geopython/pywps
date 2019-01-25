@@ -11,8 +11,7 @@ import os
 from pywps.app.Common import Metadata
 from pywps.exceptions import InvalidParameterValue
 from pywps.inout import basic
-from pywps.inout.formats import Format
-from pywps.inout.storage import FileStorage
+from pywps.inout.storage.file import FileStorage
 from pywps.validator.mode import MODE
 from pywps import configuration as config
 

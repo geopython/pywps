@@ -9,11 +9,8 @@ import sys
 import traceback
 import json
 import shutil
-import time
-import tempfile
-import importlib
 
-from pywps import get_ElementMakerForVersion, E, dblog
+from pywps import dblog
 from pywps.response import get_response
 from pywps.response.status import WPS_STATUS
 from pywps.response.execute import ExecuteResponse
@@ -24,7 +21,7 @@ import pywps.configuration as config
 from pywps._compat import PY2
 from pywps.exceptions import (StorageNotSupported, OperationNotSupported,
                               ServerBusy, NoApplicableCode)
-from pywps.app.exceptions import ProcessError
+from pywps.inout.storage.builder import StorageBuilder
 
 
 LOGGER = logging.getLogger("PYWPS")
@@ -65,8 +62,9 @@ class Process(object):
         self.inputs = inputs
         self.outputs = outputs
         self.uuid = None
-        self.status_location = ''
-        self.status_url = ''
+        self.status_store = None
+        # self.status_location = ''
+        # self.status_url = ''
         self.workdir = None
         self._grass_mapset = None
         self.grass_location = grass_location
@@ -117,7 +115,8 @@ class Process(object):
 
     def execute(self, wps_request, uuid):
         self._set_uuid(uuid)
-        self.async_ = False
+        self._setup_status_storage()
+        self.async = False
         response_cls = get_response("execute")
         wps_response = response_cls(wps_request, process=self, uuid=self.uuid)
 
@@ -152,12 +151,20 @@ class Process(object):
         for outpt in self.outputs:
             outpt.uuid = uuid
 
-        file_path = config.get_config_value('server', 'outputpath')
+    def _setup_status_storage(self):
+        self.status_store = StorageBuilder.buildStorage()
 
-        file_url = config.get_config_value('server', 'outputurl')
+    @property
+    def status_location(self):
+        return self.status_store.location(self.status_filename)
 
-        self.status_location = os.path.join(file_path, str(self.uuid)) + '.xml'
-        self.status_url = os.path.join(file_url, str(self.uuid)) + '.xml'
+    @property
+    def status_filename(self):
+        return str(self.uuid) + '.xml'
+
+    @property
+    def status_url(self):
+        return self.status_store.url(self.status_filename)
 
     def _execute_process(self, async_, wps_request, wps_response):
         """Uses :module:`pywps.processing` module for sending process to
@@ -289,7 +296,8 @@ class Process(object):
             process_identifier = new_wps_request.identifier
             process = self.service.prepare_process_for_execution(process_identifier)
             process._set_uuid(uuid)
-            process.async_ = True
+            process._setup_status_storage()
+            process.async = True
             new_wps_response = ExecuteResponse(new_wps_request, process=process, uuid=uuid)
             new_wps_response.store_status_file = True
             process._run_async(new_wps_request, new_wps_response)

@@ -5,65 +5,24 @@
 
 import logging
 import os
-from abc import ABCMeta, abstractmethod
 from pywps._compat import urljoin
 from pywps.exceptions import NotEnoughStorage
 from pywps import configuration as config
+from pywps.inout.basic import IOHandler
+
+from . import CachedStorage
+from .implementationbuilder import StorageImplementationBuilder
+from . import STORE_TYPE
 
 LOGGER = logging.getLogger('PYWPS')
 
 
-class STORE_TYPE:
-    PATH = 0
-# TODO: cover with tests
+class FileStorageBuilder(StorageImplementationBuilder):
 
-
-class StorageAbstract(object):
-    """Data storage abstract class
-    """
-
-    __metaclass__ = ABCMeta
-
-    @abstractmethod
-    def store(self, output):
-        """
-        :param output: of type IOHandler
-        :returns: (type, store, url) where
-            type - is type of STORE_TYPE - number
-            store - string describing storage - file name, database connection
-            url - url, where the data can be downloaded
-        """
-        raise NotImplementedError
-
-
-class CachedStorage(StorageAbstract):
-    def __init__(self):
-        self._cache = {}
-
-    def store(self, output):
-        if output.identifier not in self._cache:
-            self._cache[output.identifier] = self._do_store(output)
-        return self._cache[output.identifier]
-
-    def _do_store(self, output):
-        raise NotImplementedError
-
-
-class DummyStorage(StorageAbstract):
-    """Dummy empty storage implementation, does nothing
-
-    Default instance, for non-reference output request
-
-    >>> store = DummyStorage()
-    >>> assert store.store
-    """
-
-    def __init__(self):
-        """
-        """
-
-    def store(self, output):
-        pass
+    def build(self):
+        file_path = config.get_config_value('server', 'outputpath')
+        base_url = config.get_config_value('server', 'outputurl')
+        return FileStorage(file_path, base_url)
 
 
 class FileStorage(CachedStorage):
@@ -91,12 +50,12 @@ class FileStorage(CachedStorage):
     True
     """
 
-    def __init__(self):
+    def __init__(self, output_path, output_url):
         """
         """
         CachedStorage.__init__(self)
-        self.target = config.get_config_value('server', 'outputpath')
-        self.output_url = config.get_config_value('server', 'outputurl')
+        self.target = output_path
+        self.output_url = output_url
 
     def _do_store(self, output):
         import platform
@@ -128,11 +87,7 @@ class FileStorage(CachedStorage):
             os.makedirs(target)
 
         # build output name
-        (prefix, suffix) = os.path.splitext(file_name)
-        if not suffix:
-            suffix = output.data_format.extension
-        (file_dir, file_name) = os.path.split(prefix)
-        output_name = file_name + suffix
+        output_name, suffix = self._build_output_name(output)
         # build tempfile in case of duplicates
         if os.path.exists(os.path.join(target, output_name)):
             output_name = tempfile.mkstemp(suffix=suffix, prefix=file_name + '_',
@@ -144,13 +99,40 @@ class FileStorage(CachedStorage):
 
         just_file_name = os.path.basename(output_name)
 
-        # make sure base url ends with '/'
-        baseurl = self.output_url.rstrip('/') + '/'
-        baseurl += str(request_uuid) + '/'
-        url = urljoin(baseurl, just_file_name)
+        url = self.url(urljoin(str(request_uuid), just_file_name))
         LOGGER.info('File output URI: {}'.format(url))
 
         return (STORE_TYPE.PATH, output_name, url)
+
+    def write(self, data, destination, data_format=None):
+        """
+        Write data to self.target
+        """
+        if not os.path.exists(os.path.dirname(self.target)):
+            os.makedirs(self.target)
+
+        full_output_name = os.path.join(self.target, destination)
+
+        with open(full_output_name, "w") as file:
+            file.write(data)
+
+        return self.url(destination)
+
+    def url(self, destination):
+        if isinstance(destination, IOHandler):
+            output_name, _ = self._build_output_name(destination)
+            just_file_name = os.path.basename(output_name)
+            dst = urljoin(str(destination.uuid), just_file_name)
+        else:
+            dst = destination
+
+        # make sure base url ends with '/'
+        baseurl = self.output_url.rstrip('/') + '/'
+        url = urljoin(baseurl, dst)
+        return url
+
+    def location(self, destination):
+        return os.path.join(self.target, destination)
 
 
 def get_free_space(folder):
