@@ -39,7 +39,7 @@
             <ows:Title>{{ input.title }}</ows:Title>
             {% if input.type == "complex" %}
 			<wps:Data>
-                    <wps:ComplexData mimeType="{{ input.mimetype }}" encoding="{{ input.encoding }}" schema="{{ input.schema }}">{{ input.data }}</wps:ComplexData>
+                    <wps:ComplexData mimeType="{{ input.mimetype }}" encoding="{{ input.encoding }}" schema="{{ input.schema }}">{{ input.data | safe }}</wps:ComplexData>
 			</wps:Data>
             {% elif input.type == "literal" %}
 			<wps:Data>

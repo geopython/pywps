@@ -49,7 +49,7 @@ class DocExampleProcess(Process):
             title="Process title",
             abstract="Multiline process abstract.",
             version="4.0",
-            metadata=[Metadata('PyWPS docs', 'http://pywps.org'),
+            metadata=[Metadata('PyWPS docs', 'https://pywps.org'),
                       Metadata('NumPy docstring conventions',
                                'https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt')],
             inputs=inputs,

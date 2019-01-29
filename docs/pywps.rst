@@ -35,11 +35,11 @@ PyWPS History
 
 PyWPS started in 2006 as scholarship funded by `German Foundation for
 Environment <http://dbu.de>`_. During the years, it grow to version 4.0.x. In
-2015, we officially entered to `OSGeo <http://osgeo.org>`_ incubation process.
-In 2016, `Project Steering Committee <http://pywps.org/development/psc.html>`_ has started.
+2015, we officially entered to `OSGeo <https://osgeo.org>`_ incubation process.
+In 2016, `Project Steering Committee <https://pywps.org/development/psc.html>`_ has started.
 PyWPS was originally hosted by the `Wald server <http://wald.intevation.org>`_,
 nowadays, we moved to `GeoPython group on GitHub
-<http://gitub.com/geopython/>`_. Since 2016, we also have new domain `PyWPS.org
-<http://pywps.org>`_.
+<https://gitub.com/geopython/>`_. Since 2016, we also have new domain `PyWPS.org
+<https://pywps.org>`_.
 
-You can find more at `history page <http://pywps.org/history>`_.
+You can find more at `history page <https://pywps.org/history>`_.

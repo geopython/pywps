@@ -165,12 +165,29 @@ def create_mimetype_process():
 
 
 def get_output(doc):
+    """Return the content of LiteralData, Reference or ComplexData."""
+
     output = {}
     for output_el in xpath_ns(doc, '/wps:ExecuteResponse'
                                    '/wps:ProcessOutputs/wps:Output'):
         [identifier_el] = xpath_ns(output_el, './ows:Identifier')
-        [value_el] = xpath_ns(output_el, './wps:Data/wps:LiteralData')
-        output[identifier_el.text] = value_el.text
+
+        lit_el = xpath_ns(output_el, './wps:Data/wps:LiteralData')
+        if lit_el != []:
+            output[identifier_el.text] = lit_el[0].text
+
+        ref_el = xpath_ns(output_el, './wps:Reference')
+        if ref_el != []:
+            output[identifier_el.text] = ref_el[0].attrib['href']
+
+        data_el = xpath_ns(output_el, './wps:Data/wps:ComplexData')
+        if data_el != []:
+            if data_el[0].text:
+                output[identifier_el.text] = data_el[0].text
+            else:  # XML children
+                ch = list(data_el[0])[0]
+                output[identifier_el.text] = lxml.etree.tostring(ch)
+
     return output
 
 
