@@ -3,7 +3,7 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-from pywps.inout.storage.file import FileStorageBuilder, FileStorage
+from pywps.inout.storage.file import FileStorageBuilder, FileStorage, _build_output_name
 from pywps.inout.storage import STORE_TYPE
 from pywps.inout.basic import ComplexOutput
 
@@ -24,7 +24,7 @@ class FileStorageTests(unittest.TestCase):
         storage = FileStorageBuilder().build()
         output = ComplexOutput('testme', 'Test', supported_formats=[FORMATS.TEXT], workdir=self.tmp_dir)
         output.data = "Hello World!"
-        output_name, suffix = storage._build_output_name(output)
+        output_name, suffix = _build_output_name(output)
         self.assertEqual(output.file, self.tmp_dir + '/input.txt')
         self.assertEqual(output_name, 'input.txt')
         self.assertEqual(suffix, '.txt')

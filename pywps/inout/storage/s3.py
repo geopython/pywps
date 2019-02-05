@@ -26,6 +26,27 @@ class S3StorageBuilder(StorageImplementationBuilder):
         return S3Storage(bucket, prefix, public_access, encrypt, region)
 
 
+def _build_s3_file_path(prefix, filename):
+    if prefix:
+        path = prefix.rstrip('/') + '/' + filename.lstrip('/')
+    else:
+        path = filename.lstrip('/')
+    return path
+
+
+def _build_extra_args(public=False, encrypt=False, mime_type=''):
+    extraArgs = dict()
+
+    if public:
+        extraArgs['ACL'] = 'public-read'
+    if encrypt:
+        extraArgs['ServerSideEncryption'] = 'AES256'
+
+    extraArgs['ContentType'] = mime_type
+
+    return extraArgs
+
+
 class S3Storage(StorageAbstract):
     """
     Implements a simple class to store files on AWS S3
@@ -44,25 +65,6 @@ class S3Storage(StorageAbstract):
         client = boto3.client('s3', region_name=self.region)
         waiter = client.get_waiter('object_exists')
         waiter.wait(Bucket=self.bucket, Key=filename)
-
-    def _build_extra_args(self, public=False, encrypt=False, mime_type=''):
-        extraArgs = dict()
-
-        if public:
-            extraArgs['ACL'] = 'public-read'
-        if encrypt:
-            extraArgs['ServerSideEncryption'] = 'AES256'
-
-        extraArgs['ContentType'] = mime_type
-
-        return extraArgs
-
-    def _build_s3_file_path(self, prefix, filename):
-        if prefix:
-            path = prefix.rstrip('/') + '/' + filename.lstrip('/')
-        else:
-            path = filename.lstrip('/')
-        return path
 
     def uploadData(self, data, filename, extraArgs):
         """
@@ -94,7 +96,7 @@ class S3Storage(StorageAbstract):
         """
         url = ''
         with open(filename, "rb") as data:
-            s3_path = self._build_s3_file_path(self.prefix, os.path.basename(filename))
+            s3_path = _build_s3_file_path(self.prefix, os.path.basename(filename))
             url = self.uploadData(data, s3_path, extraArgs)
         return url
 
@@ -106,8 +108,8 @@ class S3Storage(StorageAbstract):
         to access the uploaded object
         """
         filename = output.file
-        s3_path = self._build_s3_file_path(self.prefix, os.path.basename(filename))
-        extraArgs = self._build_extra_args(
+        s3_path = _build_s3_file_path(self.prefix, os.path.basename(filename))
+        extraArgs = _build_extra_args(
             public=self.public,
             encrypt=self.encrypt,
             mime_type=output.data_format.mime_type)
@@ -128,8 +130,8 @@ class S3Storage(StorageAbstract):
         """
         # Get MimeType from format if it exists
         mime_type = data_format.mime_type if data_format is not None else ''
-        s3_path = self._build_s3_file_path(self.prefix, destination)
-        extraArgs = self._build_extra_args(
+        s3_path = _build_s3_file_path(self.prefix, destination)
+        extraArgs = _build_extra_args(
             public=self.public,
             encrypt=self.encrypt,
             mime_type=mime_type)

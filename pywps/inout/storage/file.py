@@ -25,6 +25,15 @@ class FileStorageBuilder(StorageImplementationBuilder):
         return FileStorage(file_path, base_url)
 
 
+def _build_output_name(output):
+    (prefix, suffix) = os.path.splitext(output.file)
+    if not suffix:
+        suffix = output.data_format.extension
+    _, file_name = os.path.split(prefix)
+    output_name = file_name + suffix
+    return (output_name, suffix)
+
+
 class FileStorage(CachedStorage):
     """File storage implementation, stores data to file system
 
@@ -87,7 +96,7 @@ class FileStorage(CachedStorage):
             os.makedirs(target)
 
         # build output name
-        output_name, suffix = self._build_output_name(output)
+        output_name, suffix = _build_output_name(output)
         # build tempfile in case of duplicates
         if os.path.exists(os.path.join(target, output_name)):
             output_name = tempfile.mkstemp(suffix=suffix, prefix=file_name + '_',
@@ -120,7 +129,7 @@ class FileStorage(CachedStorage):
 
     def url(self, destination):
         if isinstance(destination, IOHandler):
-            output_name, _ = self._build_output_name(destination)
+            output_name, _ = _build_output_name(destination)
             just_file_name = os.path.basename(output_name)
             dst = urljoin(str(destination.uuid), just_file_name)
         else:
