@@ -306,12 +306,6 @@ class Process(object):
 
         the mapset should be deleted automatically using self.clean() method
         """
-
-        if not PY2:
-            LOGGER.warning('Seems PyWPS is running in Python-3 '
-                           'environment, but GRASS GIS supports Python-2 only')
-            return
-
         if self.grass_location:
 
             import random
@@ -351,7 +345,8 @@ class Process(object):
                     location = 'pywps_loc_{}'.format(
                         ''.join(random.sample(string.ascii_letters, 5)))
 
-                gsetup.init(self.workdir, dbase, location, 'PERMANENT')
+                gsetup.init(os.environ['GISBASE'], dbase,
+                            location, 'PERMANENT')
 
                 grass.create_location(dbase=dbase,
                                       location=location,
@@ -362,7 +357,8 @@ class Process(object):
                                   mapset=mapset_name,
                                   flags='c',
                                   dbase=dbase,
-                                  location=location)
+                                  location=location,
+                                  quiet=True)
 
             # create temporary mapset within existing location
             elif os.path.isdir(self.grass_location):
