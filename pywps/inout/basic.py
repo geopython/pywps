@@ -434,12 +434,11 @@ class UrlHandler(FileHandler):
         except Exception as e:
             raise NoApplicableCode('File reference error: {}'.format(e))
 
-        FSEE = FileSizeExceeded(
-            'File size for input {} exceeded. Maximum allowed: {} megabytes'.
-            format(getattr(self.inpt, 'identifier', '?'), max_byte_size))
+        error_message = 'File size for input "{}" exceeded. Maximum allowed: {} megabytes'.format(
+            self.inpt.get('identifier', '?'), max_byte_size)
 
         if int(data_size) > int(max_byte_size):
-            raise FSEE
+            raise FileSizeExceeded(error_message)
 
         try:
             with open(self._file, 'wb') as f:
@@ -447,7 +446,7 @@ class UrlHandler(FileHandler):
                 for chunk in reference_file.iter_content(chunk_size=1024):
                     data_size += len(chunk)
                     if int(data_size) > int(max_byte_size):
-                        raise FSEE
+                        raise FileSizeExceeded(error_message)
                     f.write(chunk)
 
         except Exception as e:
