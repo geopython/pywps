@@ -15,7 +15,7 @@ import datetime
 import unittest
 import json
 import base64
-from pywps import Format
+from pywps import Format, FORMATS
 from pywps.validator import get_validator
 from pywps import NAMESPACES
 from pywps.inout.basic import IOHandler, SOURCE_TYPE, SimpleHandler, BBoxInput, BBoxOutput, \
@@ -113,6 +113,10 @@ class IOHandlerTest(unittest.TestCase):
         self.iohandler.data_format = Format('foo', extension='.foo')
         self._test_outout(SOURCE_TYPE.DATA, '.foo')
 
+    def test_meta(self):
+        self.iohandler[0].data = self._value
+        self.assertEqual('data', self.iohandler[0].prop)
+
     def test_stream(self):
         """Test stream input IOHandler"""
         source = StringIO(text_type(self._value))
@@ -128,7 +132,9 @@ class IOHandlerTest(unittest.TestCase):
         file_handler.close()
         self.iohandler.file = source
         self._test_outout(SOURCE_TYPE.FILE)
-
+        with self.assertRaises(TypeError):
+            self.iohandler[0].data = '5'
+            
     def test_url(self):
 
         wfsResource = 'http://demo.mapserver.org/cgi-bin/wfs?' \
@@ -181,6 +187,23 @@ class IOHandlerTest(unittest.TestCase):
         self.assertTrue(_is_textfile(gml))
         geojson = os.path.join(DATA_DIR, 'json', 'point.geojson')
         self.assertTrue(_is_textfile(geojson))
+
+
+class TestMetaHandler(unittest.TestCase):
+
+    def test_data(self):
+        from pywps.validator.complexvalidator import validatexml
+        from pywps.inout.outputs import ComplexOutput
+
+        tmp_dir = tempfile.mkdtemp()
+        out = ComplexOutput('test', 'Test', abstract='abstract',
+                            supported_formats=[FORMATS.METALINK, ],
+                            as_reference=True)
+        out.workdir = tmp_dir
+        out['test1'].data = 'one'
+        out['test2'].data = 'two'
+
+        self.assertTrue(validatexml(out, MODE.STRICT))
 
 
 class ComplexInputTest(unittest.TestCase):

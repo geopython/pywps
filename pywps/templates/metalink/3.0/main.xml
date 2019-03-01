@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metalink version="3.0" xmlns="http://www.metalinker.org/">
+    <identity>{{ identifier }}</identity>
+    <description>{{ abstract }}</description>
+    <files>
+        {% for file in files %}
+        <file name="{{ file.file_name }}">
+            <identity>{{ file.identity }}</identity>
+            {% if file.type == "reference" %}
+            <resources>
+                <url type="http">{{ file.href }}</url>
+            </resources>
+            {% endif %}
+        </file>
+        {% endfor %}
+    </files>
+</metalink>
