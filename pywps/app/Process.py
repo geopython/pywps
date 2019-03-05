@@ -147,8 +147,8 @@ class Process(object):
         """
 
         maxparallel = int(config.get_config_value('server', 'parallelprocesses'))
-        running = dblog.get_running().count()
-        stored = dblog.get_stored().count()
+
+        running, stored = dblog.get_process_counts()
 
         # async
         if async:

@@ -78,28 +78,23 @@ def log_request(uuid, request):
     # NoApplicableCode("Could commit to database: {}".format(e.message))
 
 
-def get_running():
-    """Returns running processes ids
+def get_process_counts():
+    """Returns running and stored process counts and
     """
 
     session = get_session()
-    running = session.query(ProcessInstance).filter(
-        ProcessInstance.percent_done < 100).filter(
-            ProcessInstance.percent_done > -1)
-
+    stored_query = session.query(RequestInstance.uuid)
+    running_count = (
+        session.query(ProcessInstance)
+        .filter(ProcessInstance.percent_done < 100)
+        .filter(ProcessInstance.percent_done > -1)
+        .filter(~ProcessInstance.uuid.in_(stored_query))
+        .count()
+    )
+    stored_count = stored_query.count()
     session.close()
-    return running
+    return running_count, stored_count
 
-
-def get_stored():
-    """Returns running processes ids
-    """
-
-    session = get_session()
-    stored = session.query(RequestInstance)
-
-    session.close()
-    return stored
 
 
 def get_first_stored():
