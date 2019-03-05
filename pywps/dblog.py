@@ -16,6 +16,7 @@ import datetime
 import pickle
 import json
 import os
+from multiprocessing import Lock
 
 import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
@@ -25,13 +26,13 @@ from sqlalchemy.pool import NullPool, StaticPool
 
 LOGGER = logging.getLogger('PYWPS')
 _SESSION_MAKER = None
-_LAST_SESSION = None
-
 
 _tableprefix = configuration.get_config_value('logging', 'prefix')
 _schema = configuration.get_config_value('logging', 'schema')
 
 Base = declarative_base()
+
+lock = Lock()
 
 
 class ProcessInstance(Base):
@@ -146,43 +147,42 @@ def _get_identifier(request):
 def get_session():
     """Get Connection for database
     """
-
     LOGGER.debug('Initializing database connection')
     global _SESSION_MAKER
-    global _LAST_SESSION
-
-    if _LAST_SESSION:
-        _LAST_SESSION.close()
 
     if _SESSION_MAKER:
-        _LAST_SESSION = _SESSION_MAKER()
-        return _LAST_SESSION
+        return _SESSION_MAKER()
 
-    database = configuration.get_config_value('logging', 'database')
-    echo = True
-    level = configuration.get_config_value('logging', 'level')
-    level_name = logging.getLevelName(level)
-    if isinstance(level_name, int) and level_name >= logging.INFO:
-        echo = False
-    try:
-        if database.startswith("sqlite") or database.startswith("memory"):
-            engine = sqlalchemy.create_engine(database,
-                                              connect_args={'check_same_thread': False},
-                                              poolclass=StaticPool,
-                                              echo=echo)
-        else:
-            engine = sqlalchemy.create_engine(database, echo=echo, poolclass=NullPool)
-    except sqlalchemy.exc.SQLAlchemyError as e:
-        raise NoApplicableCode("Could not connect to database: {}".format(e.message))
+    with lock:
+        database = configuration.get_config_value('logging', 'database')
+        echo = True
+        level = configuration.get_config_value('logging', 'level')
+        level_name = logging.getLevelName(level)
+        if isinstance(level_name, int) and level_name >= logging.INFO:
+            echo = False
+        try:
+            if ":memory:" in database:
+                engine = sqlalchemy.create_engine(database,
+                                                  echo=echo,
+                                                  connect_args={'check_same_thread': False},
+                                                  poolclass=StaticPool)
+            elif database.startswith("sqlite"):
+                engine = sqlalchemy.create_engine(database,
+                                                  echo=echo,
+                                                  connect_args={'check_same_thread': False},
+                                                  poolclass=NullPool)
+            else:
+                engine = sqlalchemy.create_engine(database, echo=echo, poolclass=NullPool)
+        except sqlalchemy.exc.SQLAlchemyError as e:
+            raise NoApplicableCode("Could not connect to database: {}".format(e.message))
 
-    Session = sessionmaker(bind=engine)
-    ProcessInstance.metadata.create_all(engine)
-    RequestInstance.metadata.create_all(engine)
+        Session = sessionmaker(bind=engine)
+        ProcessInstance.metadata.create_all(engine)
+        RequestInstance.metadata.create_all(engine)
 
-    _SESSION_MAKER = Session
+        _SESSION_MAKER = Session
 
-    _LAST_SESSION = _SESSION_MAKER()
-    return _LAST_SESSION
+    return _SESSION_MAKER()
 
 
 def store_process(uuid, request):
