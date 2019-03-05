@@ -270,6 +270,7 @@ class Process(object):
             process._set_uuid(uuid)
             process.async = True
             new_wps_response = ExecuteResponse(new_wps_request, process=process, uuid=uuid)
+            new_wps_response.store_status_file = True
             process._run_async(new_wps_request, new_wps_response)
         except Exception as e:
             LOGGER.exception("Could not run stored process. {}".format(e))
