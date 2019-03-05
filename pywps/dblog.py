@@ -96,14 +96,19 @@ def get_process_counts():
     return running_count, stored_count
 
 
-
-def get_first_stored():
-    """Returns running processes ids
+def pop_first_stored():
+    """Gets the first stored process and delete it from the stored_requests table
     """
-
     session = get_session()
     request = session.query(RequestInstance).first()
 
+    if request:
+        delete_count = session.query(RequestInstance).filter_by(uuid=request.uuid).delete()
+        if delete_count == 0:
+            LOGGER.debug("Another thread or process took the same stored request")
+            request = None
+
+        session.commit()
     return request
 
 

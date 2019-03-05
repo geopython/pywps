@@ -243,8 +243,13 @@ class Process(object):
         try:
             LOGGER.debug("Checking for stored requests")
 
-            stored_request = dblog.get_first_stored()
-            if not stored_request:
+            for _ in range(2):
+                stored_request = dblog.pop_first_stored()
+                if stored_request:
+                    break
+                LOGGER.debug("No stored request found, retrying in 1 second")
+                time.sleep(1)
+            else:
                 LOGGER.debug("No stored request found")
                 return
 
@@ -260,7 +265,6 @@ class Process(object):
             process.async = True
             new_wps_response = ExecuteResponse(new_wps_request, process=process, uuid=uuid)
             process._run_async(new_wps_request, new_wps_response)
-            dblog.remove_stored(uuid)
         except Exception as e:
             LOGGER.error("Could not run stored process. {}".format(e))
 
