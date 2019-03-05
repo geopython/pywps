@@ -198,14 +198,3 @@ def store_process(uuid, request):
     session.add(request)
     session.commit()
     session.close()
-
-
-def remove_stored(uuid):
-    """Remove given request from stored requests
-    """
-
-    session = get_session()
-    request = session.query(RequestInstance).filter_by(uuid=str(uuid)).first()
-    session.delete(request)
-    session.commit()
-    session.close()
