@@ -154,15 +154,19 @@ class Process(object):
         if async:
 
             # run immedietly
+            LOGGER.debug("Running processes: {} of {} allowed parallelprocesses".format(running, maxparallel))
+            LOGGER.debug("Stored processes: {}".format(stored))
+
             if running < maxparallel or maxparallel == -1:
                 wps_response._update_status(WPS_STATUS.ACCEPTED, u"PyWPS Request accepted", 0)
+                LOGGER.debug("Accepted request {}".format(self.uuid))
                 self._run_async(wps_request, wps_response)
 
             # try to store for later usage
             else:
                 maxprocesses = int(config.get_config_value('server', 'maxprocesses'))
                 if stored >= maxprocesses:
-                    raise ServerBusy('Maximum number of parallel running processes reached. Please try later.')
+                    raise ServerBusy('Maximum number of processes in queue reached. Please try later.')
                 LOGGER.debug("Store process in job queue, uuid={}".format(self.uuid))
                 dblog.store_process(self.uuid, wps_request)
                 wps_response._update_status(WPS_STATUS.ACCEPTED, u'PyWPS Process stored in job queue', 0)
@@ -184,11 +188,13 @@ class Process(object):
             process=self,
             wps_request=wps_request,
             wps_response=wps_response)
+        LOGGER.debug("Starting process for request: {}".format(self.uuid))
         process.start()
 
     # This function may not raise exception and must return a valid wps_response
     # Failure must be reported as wps_response.status = WPS_STATUS.FAILED
     def _run_process(self, wps_request, wps_response):
+        LOGGER.debug("Started processing request: {}".format(self.uuid))
         try:
             self._set_grass(wps_request)
             # if required set HOME to the current working directory.
@@ -266,7 +272,7 @@ class Process(object):
             new_wps_response = ExecuteResponse(new_wps_request, process=process, uuid=uuid)
             process._run_async(new_wps_request, new_wps_response)
         except Exception as e:
-            LOGGER.error("Could not run stored process. {}".format(e))
+            LOGGER.exception("Could not run stored process. {}".format(e))
 
     def clean(self):
         """Clean the process working dir and other temporary files
