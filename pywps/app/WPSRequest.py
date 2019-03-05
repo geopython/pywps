@@ -387,7 +387,8 @@ class WPSRequest(object):
                         ],
                         mode=MODE.NONE
                     )
-                    inpt.file = inpt_def['file']
+                    if inpt_def['file']:
+                        inpt.file = inpt_def['file']
                 elif inpt_def['type'] == 'literal':
 
                     allowed_values = []
