@@ -12,7 +12,7 @@ import base64
 import datetime
 from pywps._compat import text_type, PY2
 from pywps.app.basic import get_xpath_ns
-from pywps.inout.basic import LiteralInput, ComplexInput, BBoxInput
+from pywps.inout.inputs import LiteralInput, ComplexInput, BoundingBoxInput
 from pywps.exceptions import NoApplicableCode, OperationNotSupported, MissingParameterValue, VersionNegotiationFailed, \
     InvalidParameterValue, FileSizeExceeded
 from pywps import configuration
@@ -422,7 +422,7 @@ class WPSRequest(object):
                     inpt.data = inpt_def.get('data')
 
                 elif inpt_def['type'] == 'bbox':
-                    inpt = BBoxInput(
+                    inpt = BoundingBoxInput(
                         identifier=inpt_def['identifier'],
                         title=inpt_def['title'],
                         abstract=inpt_def['abstract'],

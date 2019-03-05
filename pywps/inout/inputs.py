@@ -30,14 +30,14 @@ class BoundingBoxInput(basic.BBoxInput):
     """
 
     def __init__(self, identifier, title, crss, abstract='', keywords=[],
-                 dimensions=2, metadata=[], min_occurs=1,
+                 dimensions=2, workdir=None, metadata=[], min_occurs=1,
                  max_occurs=1,
                  mode=MODE.NONE,
                  default=None, default_type=basic.SOURCE_TYPE.DATA):
 
         basic.BBoxInput.__init__(self, identifier, title=title, crss=crss,
                                  abstract=abstract, keywords=keywords,
-                                 dimensions=dimensions, metadata=metadata,
+                                 dimensions=dimensions, workdir=workdir, metadata=metadata,
                                  min_occurs=min_occurs, max_occurs=max_occurs,
                                  mode=mode, default=default,
                                  default_type=default_type)
@@ -68,7 +68,7 @@ class ComplexInput(basic.ComplexInput):
     """
 
     def __init__(self, identifier, title, supported_formats,
-                 data_format=None, abstract='', keywords=[], metadata=[], min_occurs=1,
+                 data_format=None, abstract='', keywords=[], workdir=None, metadata=[], min_occurs=1,
                  max_occurs=1, mode=MODE.NONE,
                  default=None, default_type=basic.SOURCE_TYPE.DATA):
         """constructor"""
@@ -76,7 +76,7 @@ class ComplexInput(basic.ComplexInput):
         basic.ComplexInput.__init__(self, identifier, title=title,
                                     supported_formats=supported_formats,
                                     data_format=data_format, abstract=abstract,
-                                    keywords=keywords, metadata=metadata,
+                                    keywords=keywords, workdir=workdir, metadata=metadata,
                                     min_occurs=min_occurs,
                                     max_occurs=max_occurs, mode=mode,
                                     default=default, default_type=default_type)
@@ -89,7 +89,6 @@ class ComplexInput(basic.ComplexInput):
     def json(self):
         """Get JSON representation of the input
         """
-
         data = {
             'identifier': self.identifier,
             'title': self.title,
@@ -189,7 +188,7 @@ class LiteralInput(basic.LiteralInput):
                      should be :class:`pywps.app.Common.Metadata` objects.
     """
 
-    def __init__(self, identifier, title, data_type='integer', abstract='', keywords=[],
+    def __init__(self, identifier, title, data_type='integer', workdir=None, abstract='', keywords=[],
                  metadata=[], uoms=None,
                  min_occurs=1, max_occurs=1,
                  mode=MODE.SIMPLE, allowed_values=AnyValue,
@@ -199,7 +198,7 @@ class LiteralInput(basic.LiteralInput):
         """
 
         basic.LiteralInput.__init__(self, identifier, title=title,
-                                    data_type=data_type, abstract=abstract,
+                                    data_type=data_type, workdir=workdir, abstract=abstract,
                                     keywords=keywords, metadata=metadata,
                                     uoms=uoms, min_occurs=min_occurs,
                                     max_occurs=max_occurs, mode=mode,
