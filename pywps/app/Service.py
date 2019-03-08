@@ -201,7 +201,11 @@ class Service(object):
             outinputs.append(data_input)
 
         if len(outinputs) < source.min_occurs:
-            raise MissingParameterValue(description="Given data input is missing", locator=source.identifier)
+            description = "At least {} inputs are required. You provided {}.".format(
+                source.min_occurs,
+                len(outinputs),
+            )
+            raise MissingParameterValue(description=description, locator=source.identifier)
         return outinputs
 
     def create_literal_inputs(self, source, inputs):
@@ -225,7 +229,11 @@ class Service(object):
             outinputs.append(newinpt)
 
         if len(outinputs) < source.min_occurs:
-            raise MissingParameterValue(locator=source.identifier)
+            description = "At least {} inputs are required. You provided {}.".format(
+                source.min_occurs,
+                len(outinputs),
+            )
+            raise MissingParameterValue(description, locator=source.identifier)
 
         return outinputs
 
@@ -274,9 +282,11 @@ class Service(object):
             outinputs.append(newinpt)
 
         if len(outinputs) < source.min_occurs:
-            raise MissingParameterValue(
-                description='Number of inputs is lower than minium required number of inputs',
-                locator=source.identifier)
+            description = "At least {} inputs are required. You provided {}.".format(
+                source.min_occurs,
+                len(outinputs),
+            )
+            raise MissingParameterValue(description=description, locator=source.identifier)
 
         return outinputs
 
