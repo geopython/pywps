@@ -153,17 +153,20 @@ class ComplexInput(basic.ComplexInput):
             'data_format': self.data_format.json,
             'asreference': self.as_reference,
             'supported_formats': [frmt.json for frmt in self.supported_formats],
-            'file': self.file,
-            'url': self.url,
             'workdir': self.workdir,
             'mode': self.valid_mode,
             'min_occurs': self.min_occurs,
             'max_occurs': self.max_occurs
         }
 
-        if self.as_reference:
-            data = self._json_reference(data)
-        else:
+        if self.prop == 'file':
+            data['file'] = self.file
+        elif self.prop == 'url':
+            data["href"] = self.url
+        elif self.prop == 'data':
+            data = self._json_data(data)
+        elif self.prop == 'stream':
+            # we store the stream in the data property
             data = self._json_data(data)
 
         if self.data_format:
