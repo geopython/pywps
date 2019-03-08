@@ -537,8 +537,9 @@ class LiteralInputTest(unittest.TestCase):
 
     def setUp(self):
 
-        self.literal_input = LiteralInput(
+        self.literal_input = inout.inputs.LiteralInput(
             identifier="literalinput",
+            title="Literal Input",
             mode=2,
             allowed_values=(1, 2, (3, 3, 12)),
             default=6,
@@ -580,7 +581,7 @@ class LiteralInputTest(unittest.TestCase):
         self.assertEqual(out['data_type'], 'integer', 'Data type is integer')
         self.assertFalse(out['abstract'], 'abstract exist')
         self.assertFalse(out['keywords'], 'keywords exist')
-        self.assertFalse(out['title'], 'title exist')
+        self.assertTrue(out['title'], 'title does not exist')
         self.assertEqual(out['data'], 9, 'data set')
         self.assertEqual(out['mode'], MODE.STRICT, 'Mode set')
         self.assertEqual(out['identifier'], 'literalinput', 'identifier set')
@@ -589,8 +590,9 @@ class LiteralInputTest(unittest.TestCase):
         self.assertEqual(out['allowed_values'][0]['value'], 1, 'allowed value 1')
 
     def test_json_out_datetime(self):
-        inpt = LiteralInput(
+        inpt = inout.inputs.LiteralInput(
             identifier="datetime",
+            title="Literal Input",
             mode=2,
             data_type='dateTime')
         inpt.data = "2017-04-20T12:30:00"
@@ -598,8 +600,9 @@ class LiteralInputTest(unittest.TestCase):
         self.assertEqual(out['data'], datetime.datetime(2017, 4, 20, 12, 30, 0), 'datetime set')
 
     def test_json_out_time(self):
-        inpt = LiteralInput(
+        inpt = inout.inputs.LiteralInput(
             identifier="time",
+            title="Literal Input",
             mode=2,
             data_type='time')
         inpt.data = "12:30:00"
@@ -607,8 +610,9 @@ class LiteralInputTest(unittest.TestCase):
         self.assertEqual(out['data'], datetime.time(12, 30, 0), 'time set')
 
     def test_json_out_date(self):
-        inpt = LiteralInput(
+        inpt = inout.inputs.LiteralInput(
             identifier="date",
+            title="Literal Input",
             mode=2,
             data_type='date')
         inpt.data = "2017-04-20"
@@ -639,7 +643,7 @@ class BoxInputTest(unittest.TestCase):
 
     def setUp(self):
 
-        self.bbox_input = BBoxInput("bboxinput", dimensions=2)
+        self.bbox_input = inout.inputs.BoundingBoxInput("bboxinput", title="BBox input", dimensions=2)
         self.bbox_input.ll = [0, 1]
         self.bbox_input.ur = [2, 4]
 
@@ -650,7 +654,7 @@ class BoxInputTest(unittest.TestCase):
         out = self.bbox_input.json
 
         self.assertTrue(out['identifier'], 'identifier exists')
-        self.assertFalse(out['title'], 'title exists')
+        self.assertTrue(out['title'], 'title does not exist')
         self.assertFalse(out['abstract'], 'abstract set')
         self.assertEqual(out['type'], 'bbox', 'type set')
         self.assertTupleEqual(out['bbox'], ([0, 1], [2, 4]), 'data are tehre')
