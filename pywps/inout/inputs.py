@@ -5,7 +5,6 @@
 
 import lxml.etree as etree
 import six
-from pywps import configuration
 from pywps.exceptions import InvalidParameterValue
 from pywps.inout.formats import Format
 from pywps.inout import basic
@@ -139,7 +138,6 @@ class ComplexInput(basic.ComplexInput):
 
         self.as_reference = False
         self.method = ''
-        self.max_size = int(0)
 
     @property
     def json(self):
@@ -237,16 +235,6 @@ class ComplexInput(basic.ComplexInput):
                     data["data"] = u'<![CDATA[{}]]>'.format(out)
 
         return data
-
-    def calculate_max_input_size(self):
-        """Calculates maximal size for input file based on configuration
-        and units
-
-        :return: maximum file size bytes
-        """
-        max_size = configuration.get_config_value(
-            'server', 'maxsingleinputsize')
-        self.max_size = configuration.get_size_mb(max_size)
 
     def clone(self):
         """Create copy of yourself
