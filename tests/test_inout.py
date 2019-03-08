@@ -14,6 +14,7 @@ import tempfile
 import datetime
 import unittest
 import json
+from pywps import inout
 import base64
 from pywps import Format
 from pywps.validator import get_validator
@@ -187,12 +188,12 @@ class ComplexInputTest(unittest.TestCase):
     def setUp(self):
         self.tmp_dir = tempfile.mkdtemp()
         data_format = get_data_format('application/json')
-        self.complex_in = ComplexInput(identifier="complexinput",
-                                       title='MyComplex',
-                                       abstract='My complex input',
-                                       keywords=['kw1', 'kw2'],
-                                       workdir=self.tmp_dir,
-                                       supported_formats=[data_format])
+        self.complex_in = inout.inputs.ComplexInput(identifier="complexinput",
+                                                    title='MyComplex',
+                                                    abstract='My complex input',
+                                                    keywords=['kw1', 'kw2'],
+                                                    workdir=self.tmp_dir,
+                                                    supported_formats=[data_format])
 
         self.complex_in.data = "Hallo world!"
 
@@ -215,21 +216,187 @@ class ComplexInputTest(unittest.TestCase):
     def test_data_format(self):
         self.assertIsInstance(self.complex_in.supported_formats[0], Format)
 
-    def test_json_out(self):
-        self.skipTest('json property now in pywps.inout.inputs.ComplexInput')
-        out = self.complex_in.json
 
-        self.assertEqual(out['workdir'], self.tmp_dir, 'Workdir defined')
-        self.assertTrue(out['file'], 'There is no file')
-        self.assertTrue(out['supported_formats'], 'There are some formats')
-        self.assertEqual(len(out['supported_formats']), 1, 'There is one formats')
-        self.assertEqual(out['title'], 'MyComplex', 'Title not set but existing')
-        self.assertEqual(out['abstract'], 'My complex input', 'Abstract not set but existing')
-        self.assertEqual(out['keywords'], ['kw1', 'kw2'], 'Keywords not set but existing')
-        self.assertEqual(out['identifier'], 'complexinput', 'identifier set')
-        self.assertEqual(out['type'], 'complex', 'it is complex input')
-        self.assertTrue(out['data_format'], 'data_format set')
-        self.assertEqual(out['data_format']['mime_type'], 'application/json', 'data_format set')
+class SerializationComplexInputTest(unittest.TestCase):
+    """ComplexInput test cases"""
+
+    def setUp(self):
+        self.tmp_dir = tempfile.mkdtemp()
+
+    def make_complex_input(self):
+        complex = inout.inputs.ComplexInput(
+            identifier="complexinput",
+            title='MyComplex',
+            abstract='My complex input',
+            keywords=['kw1', 'kw2'],
+            workdir=self.tmp_dir,
+            supported_formats=[get_data_format('application/json')],
+            metadata=["special data"],
+            default="/some/file/path",
+            default_type=SOURCE_TYPE.FILE,
+        )
+        complex.as_reference = False
+        complex.method = "GET"
+        complex.max_size = 1000
+        return complex
+
+    def assert_complex_equals(self, complex_1, complex_2):
+        self.assertEqual(complex_1.identifier, complex_2.identifier)
+        self.assertEqual(complex_1.title, complex_2.title)
+        self.assertEqual(complex_1.supported_formats, complex_2.supported_formats)
+        self.assertEqual(complex_1.data_format, complex_2.data_format)
+        self.assertEqual(complex_1.abstract, complex_2.abstract)
+        self.assertEqual(complex_1.keywords, complex_2.keywords)
+        self.assertEqual(complex_1.workdir, complex_2.workdir)
+        self.assertEqual(complex_1.metadata, complex_2.metadata)
+        self.assertEqual(complex_1.max_occurs, complex_2.max_occurs)
+        self.assertEqual(complex_1.valid_mode, complex_2.valid_mode)
+        self.assertEqual(complex_1.as_reference, complex_2.as_reference)
+
+        self.assertEqual(complex_1.prop, complex_2.prop)
+
+        if complex_1.prop != 'url':
+            # don't download the file when running tests
+            self.assertEqual(complex_1.file, complex_2.file)
+            self.assertEqual(complex_1.data, complex_2.data)
+
+        self.assertEqual(complex_1.url, complex_2.url)
+
+    def test_complex_input_file(self):
+        complex = self.make_complex_input()
+        some_file = os.path.join(self.tmp_dir, "some_file.txt")
+        with open(some_file, "w") as f:
+            f.write("some data")
+        complex.file = some_file
+        complex2 = inout.inputs.ComplexInput.from_json(complex.json)
+        self.assert_complex_equals(complex, complex2)
+        self.assertEqual(complex.prop, 'file')
+
+    def test_complex_input_data(self):
+        complex = self.make_complex_input()
+        complex.data = "some data"
+        complex2 = inout.inputs.ComplexInput.from_json(complex.json)
+        # it's expected that the file path changed
+        complex._file = complex2.file
+        self.assert_complex_equals(complex, complex2)
+        self.assertEqual(complex.prop, 'data')
+
+    def test_complex_input_stream(self):
+        complex = self.make_complex_input()
+        complex.stream = StringIO("some data")
+        complex2 = inout.inputs.ComplexInput.from_json(complex.json)
+
+        # the serialized stream becomes a data type
+        # we hard-code it for the testing comparison
+        complex.prop = 'data'
+        # it's expected that the file path changed
+        complex._file = complex2.file
+        self.assert_complex_equals(complex, complex2)
+
+    def test_complex_input_url(self):
+        complex = self.make_complex_input()
+        complex.url = "http://test.opendap.org:80/opendap/netcdf/examples/sresa1b_ncar_ccsm3_0_run1_200001.nc"
+        complex2 = inout.inputs.ComplexInput.from_json(complex.json)
+        self.assert_complex_equals(complex, complex2)
+        self.assertEqual(complex.prop, 'url')
+
+
+class SerializationLiteralInputTest(unittest.TestCase):
+    """LiteralInput test cases"""
+
+    def setUp(self):
+        self.tmp_dir = tempfile.mkdtemp()
+
+    def make_literal_input(self):
+        literal = inout.inputs.LiteralInput(
+            identifier="complexinput",
+            title='MyComplex',
+            data_type='string',
+            workdir=self.tmp_dir,
+            abstract="some description",
+            keywords=['kw1', 'kw2'],
+            metadata=["special data"],
+            uoms=[UOM('metre')],
+            min_occurs=2,
+            max_occurs=5,
+            mode=MODE.STRICT,
+            allowed_values=[AllowedValue(value='something'), AllowedValue(value='something else')],
+            default="something else",
+            default_type=SOURCE_TYPE.DATA,
+        )
+        literal.data = 'something'
+        literal.as_reference = False
+        return literal
+
+    def assert_literal_equals(self, literal_1, literal_2):
+        self.assertEqual(literal_1.identifier, literal_2.identifier)
+        self.assertEqual(literal_1.title, literal_2.title)
+        self.assertEqual(literal_1.data_type, literal_2.data_type)
+        self.assertEqual(literal_1.workdir, literal_2.workdir)
+        self.assertEqual(literal_1.abstract, literal_2.abstract)
+        self.assertEqual(literal_1.keywords, literal_2.keywords)
+        self.assertEqual(literal_1.metadata, literal_2.metadata)
+        self.assertEqual(literal_1.uoms, literal_2.uoms)
+        self.assertEqual(literal_1.min_occurs, literal_2.min_occurs)
+        self.assertEqual(literal_1.max_occurs, literal_2.max_occurs)
+        self.assertEqual(literal_1.valid_mode, literal_2.valid_mode)
+        self.assertEqual(literal_1.allowed_values, literal_2.allowed_values)
+        self.assertEqual(literal_1.as_reference, literal_2.as_reference)
+
+        self.assertEqual(literal_1.data, literal_2.data)
+
+    def test_literal_input(self):
+        literal = self.make_literal_input()
+        literal2 = inout.inputs.LiteralInput.from_json(literal.json)
+        self.assert_literal_equals(literal, literal2)
+
+
+class SerializationBoundingBoxInputTest(unittest.TestCase):
+    """LiteralInput test cases"""
+
+    def setUp(self):
+        self.tmp_dir = tempfile.mkdtemp()
+
+    def make_bbox_input(self):
+        bbox = inout.inputs.BoundingBoxInput(
+            identifier="complexinput",
+            title='MyComplex',
+            crss=['epsg:3857', 'epsg:4326'],
+            abstract="some description",
+            keywords=['kw1', 'kw2'],
+            dimensions=2,
+            workdir=self.tmp_dir,
+            metadata=["special data"],
+            min_occurs=2,
+            max_occurs=5,
+            mode=MODE.NONE,
+            default="something else",
+            default_type=SOURCE_TYPE.DATA,
+        )
+        bbox.as_reference = False
+        return bbox
+
+    def assert_bbox_equals(self, bbox_1, bbox_2):
+        self.assertEqual(bbox_1.identifier, bbox_2.identifier)
+        self.assertEqual(bbox_1.title, bbox_2.title)
+        self.assertEqual(bbox_1.crss, bbox_2.crss)
+        self.assertEqual(bbox_1.abstract, bbox_2.abstract)
+        self.assertEqual(bbox_1.keywords, bbox_2.keywords)
+        self.assertEqual(bbox_1.dimensions, bbox_2.dimensions)
+        self.assertEqual(bbox_1.workdir, bbox_2.workdir)
+        self.assertEqual(bbox_1.metadata, bbox_2.metadata)
+        self.assertEqual(bbox_1.min_occurs, bbox_2.min_occurs)
+        self.assertEqual(bbox_1.max_occurs, bbox_2.max_occurs)
+        self.assertEqual(bbox_1.valid_mode, bbox_2.valid_mode)
+        self.assertEqual(bbox_1.as_reference, bbox_2.as_reference)
+
+        self.assertEqual(bbox_1.ll, bbox_2.ll)
+        self.assertEqual(bbox_1.ur, bbox_2.ur)
+
+    def test_bbox_input(self):
+        bbox = self.make_bbox_input()
+        bbox2 = inout.inputs.BoundingBoxInput.from_json(bbox.json)
+        self.assert_bbox_equals(bbox, bbox2)
 
 
 class DodsComplexInputTest(unittest.TestCase):
@@ -516,6 +683,9 @@ def load_tests(loader=None, tests=None, pattern=None):
         loader.loadTestsFromTestCase(ComplexInputTest),
         loader.loadTestsFromTestCase(DodsComplexInputTest),
         loader.loadTestsFromTestCase(ComplexOutputTest),
+        loader.loadTestsFromTestCase(SerializationBoundingBoxInputTest),
+        loader.loadTestsFromTestCase(SerializationComplexInputTest),
+        loader.loadTestsFromTestCase(SerializationLiteralInputTest),
         loader.loadTestsFromTestCase(SimpleHandlerTest),
         loader.loadTestsFromTestCase(LiteralInputTest),
         loader.loadTestsFromTestCase(LiteralOutputTest),
