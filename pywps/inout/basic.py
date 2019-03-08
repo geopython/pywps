@@ -684,9 +684,11 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
         if default_type != SOURCE_TYPE.DATA:
             raise InvalidParameterValue("Source types other than data are not supported.")
 
-        self.any_value = is_anyvalue(allowed_values)
+        self.any_value = False
         self.allowed_values = []
-        if not self.any_value:
+
+        if allowed_values:
+            self.any_value = is_anyvalue(allowed_values) or any(is_anyvalue(a) for a in allowed_values)
             self.allowed_values = make_allowedvalues(allowed_values)
 
         self._default = default

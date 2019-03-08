@@ -67,7 +67,7 @@ class ValuesReference(object):
         return {'type': 'valuesreference'}
 
 
-class AllowedValue(AnyValue):
+class AllowedValue(object):
     """Allowed value parameters
     the values are evaluated in literal validator functions
 
@@ -336,9 +336,12 @@ def make_allowedvalues(allowed_values):
 
     new_allowedvalues = []
 
+    if not isinstance(allowed_values, (tuple, list)):
+        allowed_values = [allowed_values]
+
     for value in allowed_values:
 
-        if isinstance(value, AllowedValue):
+        if isinstance(value, (AllowedValue, AnyValue, NoValue, ValuesReference)):
             new_allowedvalues.append(value)
 
         elif type(value) == tuple or type(value) == list:
@@ -368,7 +371,7 @@ def is_anyvalue(value):
 
     is_av = False
 
-    if value == AnyValue:
+    if value is AnyValue:
         is_av = True
     elif value is None:
         is_av = True
