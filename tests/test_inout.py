@@ -576,7 +576,6 @@ class LiteralInputTest(unittest.TestCase):
         out = self.literal_input.json
 
         self.assertTrue('uoms' in out, 'UOMs does not exist')
-        self.assertTrue('uom' in out, 'uom exists')
         self.assertFalse(out['workdir'], 'Workdir exist')
         self.assertEqual(out['data_type'], 'integer', 'Data type is integer')
         self.assertFalse(out['abstract'], 'abstract exist')
