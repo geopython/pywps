@@ -67,6 +67,9 @@ class UOM(object):
         return {"reference": OGCUNIT[self.uom],
                 "uom": self.uom}
 
+    def __eq__(self, other):
+        return self.uom == other.uom
+
 
 class IOHandler(object):
     """Base IO handling class subclassed by specialized versions: FileHandler, UrlHandler, DataHandler, etc.
@@ -780,37 +783,6 @@ class BBoxInput(BasicIO, BasicBoundingBox, DataHandler):
         self._default_type = default_type
 
         self._set_default_value(default, default_type)
-
-    @property
-    def json(self):
-        """Get JSON representation of the input. It returns following keys in
-        the JSON object:
-
-            * identifier
-            * title
-            * abstract
-            * type
-            * crs
-            * bbox
-            * dimensions
-            * workdir
-            * mode
-        """
-        return {
-            'identifier': self.identifier,
-            'title': self.title,
-            'abstract': self.abstract,
-            'keywords': self.keywords,
-            'type': 'bbox',
-            'crs': self.crs,
-            'crss': self.crss,
-            'bbox': (self.ll, self.ur),
-            'dimensions': self.dimensions,
-            'workdir': self.workdir,
-            'mode': self.valid_mode,
-            'min_occurs': self.min_occurs,
-            'max_occurs': self.max_occurs
-        }
 
 
 class BBoxOutput(BasicIO, BasicBoundingBox, DataHandler):

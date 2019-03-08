@@ -43,6 +43,9 @@ class AnyValue(object):
     def json(self):
         return {'type': 'anyvalue'}
 
+    def __eq__(self, other):
+        return self.json == other.json
+
 
 class NoValue(object):
     """No value allowed
@@ -88,6 +91,16 @@ class AllowedValue(AnyValue):
         self.maxval = maxval
         self.spacing = spacing
         self.range_closure = range_closure
+
+    def __eq__(self, other):
+        return all([
+            self.allowed_type == other.allowed_type,
+            self.value == other.value,
+            self.minval == other.minval,
+            self.maxval == other.maxval,
+            self.spacing == other.spacing,
+            self.range_closure == other.range_closure,
+        ])
 
     @property
     def json(self):

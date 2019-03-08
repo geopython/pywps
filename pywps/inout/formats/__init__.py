@@ -132,6 +132,9 @@ class Format(object):
                     frmt.encoding == self.encoding,
                     frmt.schema == self.schema])
 
+    def __eq__(self, other):
+        return self.same_as(other)
+
     @property
     def json(self):
         """Get format as json
