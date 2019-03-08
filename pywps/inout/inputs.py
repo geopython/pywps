@@ -148,6 +148,7 @@ class ComplexInput(basic.ComplexInput):
             'title': self.title,
             'abstract': self.abstract,
             'keywords': self.keywords,
+            'metadata': self.metadata,
             'type': 'complex',
             'data_format': self.data_format.json,
             'asreference': self.as_reference,
