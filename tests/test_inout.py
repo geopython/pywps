@@ -17,10 +17,8 @@ import json
 import base64
 from pywps import Format
 from pywps.validator import get_validator
-from pywps import NAMESPACES
 from pywps.inout.basic import IOHandler, SOURCE_TYPE, SimpleHandler, BBoxInput, BBoxOutput, \
     ComplexInput, ComplexOutput, LiteralOutput, LiteralInput, _is_textfile
-from pywps.inout import BoundingBoxInput as BoundingBoxInputXML
 from pywps.inout.literaltypes import convert, AllowedValue
 from pywps._compat import StringIO, text_type, urlparse
 from pywps.validator.base import emptyvalidator
