@@ -706,31 +706,6 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
         else:
             return validate_allowed_values
 
-    @property
-    def json(self):
-        """Get JSON representation of the input
-        """
-        data = {
-            'identifier': self.identifier,
-            'title': self.title,
-            'abstract': self.abstract,
-            'keywords': self.keywords,
-            'type': 'literal',
-            'data_type': self.data_type,
-            'workdir': self.workdir,
-            'any_value': self.any_value,
-            'allowed_values': [value.json for value in self.allowed_values],
-            'mode': self.valid_mode,
-            'data': self.data,
-            'min_occurs': self.min_occurs,
-            'max_occurs': self.max_occurs
-        }
-        if self.uoms:
-            data["uoms"] = [uom.json for uom in self.uoms],
-        if self.uom:
-            data["uom"] = self.uom.json
-        return data
-
 
 class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
     """Basic LiteralOutput class
