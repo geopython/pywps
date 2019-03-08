@@ -24,6 +24,7 @@ class BoundingBoxInput(basic.BBoxInput):
                  system (e.g. ['EPSG:4326'])
     :param list keywords: Keywords that characterize this input.
     :param int dimensions: 2 or 3
+    :param str workdir: working directory, to save temporary file objects in.
     :param list metadata: TODO
     :param int min_occurs: how many times this input occurs
     :param int max_occurs: how many times this input occurs
@@ -115,6 +116,7 @@ class ComplexInput(basic.ComplexInput):
     :param pywps.inout.formats.Format data_format: default data format
     :param str abstract: Input abstract
     :param list keywords: Keywords that characterize this input.
+    :param str workdir: working directory, to save temporary file objects in.
     :param list metadata: TODO
     :param int min_occurs: minimum occurrence
     :param int max_occurs: maximum occurrence
@@ -257,6 +259,7 @@ class LiteralInput(basic.LiteralInput):
     :param str identifier: The name of this input.
     :param str title: Title of the input
     :param pywps.inout.literaltypes.LITERAL_DATA_TYPES data_type: data type
+    :param str workdir: working directory, to save temporary file objects in.
     :param str abstract: Input abstract
     :param list keywords: Keywords that characterize this input.
     :param list metadata: TODO
