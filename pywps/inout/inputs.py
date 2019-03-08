@@ -305,6 +305,8 @@ class LiteralInput(basic.LiteralInput):
         }
         if self.uoms:
             data["uoms"] = [uom.json for uom in self.uoms]
+        if self.uom:
+            data["uom"] = self.uom.json
         return data
 
     @classmethod
@@ -332,11 +334,14 @@ class LiteralInput(basic.LiteralInput):
         json_input['uoms'] = [basic.UOM(uom.get('uom')) for uom in json_input.get('uoms', [])]
 
         data = json_input.pop('data', None)
+        uom = json_input.pop('uom', None)
         json_input.pop('type')
 
         instance = cls(**json_input)
 
         instance.data = data
+        if uom:
+            instance.uom = basic.UOM(uom['uom'])
 
         return instance
 

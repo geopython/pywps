@@ -316,7 +316,7 @@ class SerializationLiteralInputTest(unittest.TestCase):
             abstract="some description",
             keywords=['kw1', 'kw2'],
             metadata=["special data"],
-            uoms=[UOM('metre')],
+            uoms=['metre', 'unity'],
             min_occurs=2,
             max_occurs=5,
             mode=MODE.STRICT,
@@ -325,6 +325,7 @@ class SerializationLiteralInputTest(unittest.TestCase):
             default_type=SOURCE_TYPE.DATA,
         )
         literal.data = 'something'
+        literal.uom = UOM('unity')
         literal.as_reference = False
         return literal
 
@@ -576,6 +577,7 @@ class LiteralInputTest(unittest.TestCase):
         out = self.literal_input.json
 
         self.assertTrue('uoms' in out, 'UOMs does not exist')
+        self.assertTrue('uom' in out, 'uom does not exist')
         self.assertFalse(out['workdir'], 'Workdir exist')
         self.assertEqual(out['data_type'], 'integer', 'Data type is integer')
         self.assertFalse(out['abstract'], 'abstract exist')
