@@ -292,6 +292,7 @@ class LiteralInput(basic.LiteralInput):
             'title': self.title,
             'abstract': self.abstract,
             'keywords': self.keywords,
+            'metadata': self.metadata,
             'type': 'literal',
             'data_type': self.data_type,
             'workdir': self.workdir,
