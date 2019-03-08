@@ -276,8 +276,11 @@ class SerializationComplexInputTest(unittest.TestCase):
         complex = self.make_complex_input()
         complex.data = "some data"
         complex2 = inout.inputs.ComplexInput.from_json(complex.json)
+        # the data is enclosed by a CDATA tag
+        complex._data = u'<![CDATA[{}]]>'.format(complex.data)
         # it's expected that the file path changed
         complex._file = complex2.file
+
         self.assert_complex_equals(complex, complex2)
         self.assertEqual(complex.prop, 'data')
 
@@ -289,8 +292,11 @@ class SerializationComplexInputTest(unittest.TestCase):
         # the serialized stream becomes a data type
         # we hard-code it for the testing comparison
         complex.prop = 'data'
+        # the data is enclosed by a CDATA tag
+        complex._data = u'<![CDATA[{}]]>'.format(complex.data)
         # it's expected that the file path changed
         complex._file = complex2.file
+
         self.assert_complex_equals(complex, complex2)
 
     def test_complex_input_url(self):
