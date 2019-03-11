@@ -250,13 +250,8 @@ class Process(object):
         try:
             LOGGER.debug("Checking for stored requests")
 
-            for _ in range(2):
-                stored_request = dblog.pop_first_stored()
-                if stored_request:
-                    break
-                LOGGER.debug("No stored request found, retrying in 1 second")
-                time.sleep(1)
-            else:
+            stored_request = dblog.pop_first_stored()
+            if not stored_request:
                 LOGGER.debug("No stored request found")
                 return
 
