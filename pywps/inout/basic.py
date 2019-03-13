@@ -770,7 +770,7 @@ class BBoxOutput(BasicIO, BasicBoundingBox, DataHandler):
                  dimensions=None, workdir=None, mode=MODE.NONE):
         BasicIO.__init__(self, identifier, title, abstract, keywords)
         BasicBoundingBox.__init__(self, crss, dimensions)
-        DataHandler.__init__(self, workdir=None, mode=mode)
+        DataHandler.__init__(self, workdir=workdir, mode=mode)
         self._storage = None
 
     @property
