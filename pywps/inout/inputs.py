@@ -48,6 +48,8 @@ class BoundingBoxInput(basic.BBoxInput):
 
     @property
     def json(self):
+        """Get JSON representation of the input
+        """
         return {
             'identifier': self.identifier,
             'title': self.title,

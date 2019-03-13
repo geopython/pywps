@@ -42,6 +42,8 @@ class BoundingBoxOutput(basic.BBoxOutput):
 
     @property
     def json(self):
+        """Get JSON representation of the output
+        """
         return {
             'identifier': self.identifier,
             'title': self.title,
@@ -90,7 +92,8 @@ class ComplexOutput(basic.ComplexOutput):
 
     @property
     def json(self):
-
+        """Get JSON representation of the output
+        """
         data = {
             "identifier": self.identifier,
             "title": self.title,
@@ -187,6 +190,8 @@ class LiteralOutput(basic.LiteralOutput):
 
     @property
     def json(self):
+        """Get JSON representation of the output
+        """
         data = {
             "identifier": self.identifier,
             "title": self.title,
