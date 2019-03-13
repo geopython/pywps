@@ -13,7 +13,7 @@ from pywps.inout.storage import FileStorage
 from pywps.validator.mode import MODE
 
 
-class BoundingBoxOutput(basic.BBoxInput):
+class BoundingBoxOutput(basic.BBoxOutput):
     """
     :param identifier: The name of this input.
     :param str title: Title of the input
@@ -31,9 +31,9 @@ class BoundingBoxOutput(basic.BBoxInput):
                  dimensions=2, metadata=[], min_occurs='1',
                  max_occurs='1', as_reference=False,
                  mode=MODE.NONE):
-        basic.BBoxInput.__init__(self, identifier, title=title,
-                                 abstract=abstract, keywords=keywords, crss=crss,
-                                 dimensions=dimensions, mode=mode)
+        basic.BBoxOutput.__init__(self, identifier, title=title,
+                                  abstract=abstract, keywords=keywords, crss=crss,
+                                  dimensions=dimensions, mode=mode)
 
         self.metadata = metadata
         self.min_occurs = min_occurs
