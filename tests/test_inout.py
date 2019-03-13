@@ -17,6 +17,7 @@ import json
 from pywps import inout
 import base64
 from pywps import Format
+from pywps.app.Common import Metadata
 from pywps.validator import get_validator
 from pywps.inout.basic import IOHandler, SOURCE_TYPE, SimpleHandler, BBoxInput, BBoxOutput, \
     ComplexInput, ComplexOutput, LiteralOutput, LiteralInput, _is_textfile
@@ -231,7 +232,7 @@ class SerializationComplexInputTest(unittest.TestCase):
             keywords=['kw1', 'kw2'],
             workdir=self.tmp_dir,
             supported_formats=[get_data_format('application/json')],
-            metadata=["special data"],
+            metadata=[Metadata("special data")],
             default="/some/file/path",
             default_type=SOURCE_TYPE.FILE,
         )
@@ -321,7 +322,7 @@ class SerializationLiteralInputTest(unittest.TestCase):
             workdir=self.tmp_dir,
             abstract="some description",
             keywords=['kw1', 'kw2'],
-            metadata=["special data"],
+            metadata=[Metadata("special data")],
             uoms=['metre', 'unity'],
             min_occurs=2,
             max_occurs=5,
@@ -373,7 +374,7 @@ class SerializationBoundingBoxInputTest(unittest.TestCase):
             keywords=['kw1', 'kw2'],
             dimensions=2,
             workdir=self.tmp_dir,
-            metadata=["special data"],
+            metadata=[Metadata("special data")],
             min_occurs=2,
             max_occurs=5,
             mode=MODE.NONE,

@@ -5,6 +5,8 @@
 
 import lxml.etree as etree
 import six
+
+from pywps.app.Common import Metadata
 from pywps.exceptions import InvalidParameterValue
 from pywps.inout.formats import Format
 from pywps.inout import basic
@@ -58,7 +60,7 @@ class BoundingBoxInput(basic.BBoxInput):
             'type': 'bbox',
             'crs': self.crs,
             'crss': self.crss,
-            'metadata': self.metadata,
+            'metadata': [m.json for m in self.metadata],
             'bbox': (self.ll, self.ur),
             'dimensions': self.dimensions,
             'workdir': self.workdir,
@@ -75,7 +77,7 @@ class BoundingBoxInput(basic.BBoxInput):
             abstract=json_input['abstract'],
             crss=json_input['crss'],
             keywords=json_input['keywords'],
-            metadata=json_input['metadata'],
+            metadata=[Metadata.from_json(data) for data in json_input.get('metadata', [])],
             dimensions=json_input['dimensions'],
             workdir=json_input['workdir'],
             mode=json_input['mode'],
@@ -137,7 +139,7 @@ class ComplexInput(basic.ComplexInput):
             'title': self.title,
             'abstract': self.abstract,
             'keywords': self.keywords,
-            'metadata': self.metadata,
+            'metadata': [m.json for m in self.metadata],
             'type': 'complex',
             'data_format': self.data_format.json,
             'asreference': self.as_reference,
@@ -176,7 +178,7 @@ class ComplexInput(basic.ComplexInput):
             abstract=json_input.get('abstract'),
             keywords=json_input.get('keywords', []),
             workdir=json_input.get('workdir'),
-            metadata=json_input.get('metadata', []),
+            metadata=[Metadata.from_json(data) for data in json_input.get('metadata', [])],
             data_format=Format(
                 schema=json_input['data_format'].get('schema'),
                 extension=json_input['data_format'].get('extension'),
@@ -281,7 +283,7 @@ class LiteralInput(basic.LiteralInput):
             'title': self.title,
             'abstract': self.abstract,
             'keywords': self.keywords,
-            'metadata': self.metadata,
+            'metadata': [m.json for m in self.metadata],
             'type': 'literal',
             'data_type': self.data_type,
             'workdir': self.workdir,
@@ -325,10 +327,12 @@ class LiteralInput(basic.LiteralInput):
 
         data = json_input.pop('data', None)
         uom = json_input.pop('uom', None)
+        metadata = json_input.pop('metadata', [])
         json_input.pop('type')
 
         instance = cls(**json_input)
 
+        instance.metadata = [Metadata.from_json(data) for data in metadata]
         instance.data = data
         if uom:
             instance.uom = basic.UOM(uom['uom'])
