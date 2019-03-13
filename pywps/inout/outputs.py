@@ -40,6 +40,25 @@ class BoundingBoxOutput(basic.BBoxOutput):
         self.max_occurs = max_occurs
         self.as_reference = as_reference
 
+    @property
+    def json(self):
+        return {
+            'identifier': self.identifier,
+            'title': self.title,
+            'abstract': self.abstract,
+            'keywords': self.keywords,
+            'min_occurs': self.min_occurs,
+            'max_occurs': self.max_occurs,
+            'metadata': self.metadata,
+            'type': 'bbox',
+            'crs': self.crs,
+            'crss': self.crss,
+            'dimensions': self.dimensions,
+            'bbox': (self.ll, self.ur),
+            'workdir': self.workdir,
+            'mode': self.valid_mode,
+        }
+
 
 class ComplexOutput(basic.ComplexOutput):
     """
