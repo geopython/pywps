@@ -332,7 +332,7 @@ class LiteralInput(basic.LiteralInput):
 
         instance = cls(**json_input)
 
-        instance.metadata = [Metadata.from_json(data) for data in metadata]
+        instance.metadata = [Metadata.from_json(d) for d in metadata]
         instance.data = data
         if uom:
             instance.uom = basic.UOM(uom['uom'])
