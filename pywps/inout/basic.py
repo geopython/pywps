@@ -67,6 +67,9 @@ class UOM(object):
         return {"reference": OGCUNIT[self.uom],
                 "uom": self.uom}
 
+    def __eq__(self, other):
+        return self.uom == other.uom
+
 
 class IOHandler(object):
     """Base IO handling class subclassed by specialized versions: FileHandler, UrlHandler, DataHandler, etc.
@@ -681,9 +684,11 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
         if default_type != SOURCE_TYPE.DATA:
             raise InvalidParameterValue("Source types other than data are not supported.")
 
-        self.any_value = is_anyvalue(allowed_values)
+        self.any_value = False
         self.allowed_values = []
-        if not self.any_value:
+
+        if allowed_values:
+            self.any_value = is_anyvalue(allowed_values) or any(is_anyvalue(a) for a in allowed_values)
             self.allowed_values = make_allowedvalues(allowed_values)
 
         self._default = default
@@ -702,31 +707,6 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
             return validate_anyvalue
         else:
             return validate_allowed_values
-
-    @property
-    def json(self):
-        """Get JSON representation of the input
-        """
-        data = {
-            'identifier': self.identifier,
-            'title': self.title,
-            'abstract': self.abstract,
-            'keywords': self.keywords,
-            'type': 'literal',
-            'data_type': self.data_type,
-            'workdir': self.workdir,
-            'any_value': self.any_value,
-            'allowed_values': [value.json for value in self.allowed_values],
-            'mode': self.valid_mode,
-            'data': self.data,
-            'min_occurs': self.min_occurs,
-            'max_occurs': self.max_occurs
-        }
-        if self.uoms:
-            data["uoms"] = [uom.json for uom in self.uoms],
-        if self.uom:
-            data["uom"] = self.uom.json
-        return data
 
 
 class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
@@ -781,37 +761,6 @@ class BBoxInput(BasicIO, BasicBoundingBox, DataHandler):
 
         self._set_default_value(default, default_type)
 
-    @property
-    def json(self):
-        """Get JSON representation of the input. It returns following keys in
-        the JSON object:
-
-            * identifier
-            * title
-            * abstract
-            * type
-            * crs
-            * bbox
-            * dimensions
-            * workdir
-            * mode
-        """
-        return {
-            'identifier': self.identifier,
-            'title': self.title,
-            'abstract': self.abstract,
-            'keywords': self.keywords,
-            'type': 'bbox',
-            'crs': self.crs,
-            'crss': self.crss,
-            'bbox': (self.ll, self.ur),
-            'dimensions': self.dimensions,
-            'workdir': self.workdir,
-            'mode': self.valid_mode,
-            'min_occurs': self.min_occurs,
-            'max_occurs': self.max_occurs
-        }
-
 
 class BBoxOutput(BasicIO, BasicBoundingBox, DataHandler):
     """Basic BoundingBox output class
@@ -821,7 +770,7 @@ class BBoxOutput(BasicIO, BasicBoundingBox, DataHandler):
                  dimensions=None, workdir=None, mode=MODE.NONE):
         BasicIO.__init__(self, identifier, title, abstract, keywords)
         BasicBoundingBox.__init__(self, crss, dimensions)
-        DataHandler.__init__(self, workdir=None, mode=mode)
+        DataHandler.__init__(self, workdir=workdir, mode=mode)
         self._storage = None
 
     @property

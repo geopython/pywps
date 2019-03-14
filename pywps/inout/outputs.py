@@ -13,7 +13,7 @@ from pywps.inout.storage import FileStorage
 from pywps.validator.mode import MODE
 
 
-class BoundingBoxOutput(basic.BBoxInput):
+class BoundingBoxOutput(basic.BBoxOutput):
     """
     :param identifier: The name of this input.
     :param str title: Title of the input
@@ -31,14 +31,35 @@ class BoundingBoxOutput(basic.BBoxInput):
                  dimensions=2, metadata=[], min_occurs='1',
                  max_occurs='1', as_reference=False,
                  mode=MODE.NONE):
-        basic.BBoxInput.__init__(self, identifier, title=title,
-                                 abstract=abstract, keywords=keywords, crss=crss,
-                                 dimensions=dimensions, mode=mode)
+        basic.BBoxOutput.__init__(self, identifier, title=title,
+                                  abstract=abstract, keywords=keywords, crss=crss,
+                                  dimensions=dimensions, mode=mode)
 
         self.metadata = metadata
         self.min_occurs = min_occurs
         self.max_occurs = max_occurs
         self.as_reference = as_reference
+
+    @property
+    def json(self):
+        """Get JSON representation of the output
+        """
+        return {
+            'identifier': self.identifier,
+            'title': self.title,
+            'abstract': self.abstract,
+            'keywords': self.keywords,
+            'min_occurs': self.min_occurs,
+            'max_occurs': self.max_occurs,
+            'metadata': self.metadata,
+            'type': 'bbox',
+            'crs': self.crs,
+            'crss': self.crss,
+            'dimensions': self.dimensions,
+            'bbox': (self.ll, self.ur),
+            'workdir': self.workdir,
+            'mode': self.valid_mode,
+        }
 
 
 class ComplexOutput(basic.ComplexOutput):
@@ -71,7 +92,8 @@ class ComplexOutput(basic.ComplexOutput):
 
     @property
     def json(self):
-
+        """Get JSON representation of the output
+        """
         data = {
             "identifier": self.identifier,
             "title": self.title,
@@ -168,6 +190,8 @@ class LiteralOutput(basic.LiteralOutput):
 
     @property
     def json(self):
+        """Get JSON representation of the output
+        """
         data = {
             "identifier": self.identifier,
             "title": self.title,
