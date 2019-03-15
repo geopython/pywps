@@ -8,9 +8,6 @@ WPS Output classes
 
 import lxml.etree as etree
 import os
-import json
-import six
-from collections import OrderedDict
 from pywps.inout import basic
 from pywps.inout.storage import FileStorage
 from pywps.validator.mode import MODE
@@ -212,15 +209,6 @@ class LiteralOutput(basic.LiteralOutput):
         return data
 
 
-from pywps.response import RelEnvironment
-from jinja2 import PackageLoader
-template_env = RelEnvironment(
-            loader=PackageLoader('pywps', 'templates'),
-            trim_blocks=True, lstrip_blocks=True,
-            autoescape=True,
-        )
-
-
 class MetaFile:
     """MetaFile object."""
     def __init__(self, output, name=''):
@@ -249,7 +237,6 @@ class MetaFile:
         if name != '' or name not in self.attrs:
             self.attrs['name'] = name
 
-
     def __str__(self):
         out = "MetaFile {}:".format(self.attrs['name'])
         for url in self.attrs['urls']:
@@ -269,13 +256,13 @@ class MetaLink:
         Use the `append` method to add MetaFile instances.
         """
         self.attrs = {}
-        self._template = template_env.get_template('metalink/3.0/main.xml')
         self.attrs['identity'] = identity
         self.attrs['description'] = description
         self.attrs['files'] = []
         for file in files:
             self.append(file)
         self.attrs['published'] = self.published
+        self._load_template()
 
     def append(self, file):
         if not isinstance(file, MetaFile):
@@ -291,4 +278,13 @@ class MetaLink:
         import datetime
         return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+    def _load_template(self):
+        from pywps.response import RelEnvironment
+        from jinja2 import PackageLoader
 
+        template_env = RelEnvironment(
+            loader=PackageLoader('pywps', 'templates'),
+            trim_blocks=True, lstrip_blocks=True,
+            autoescape=True, )
+
+        self._template = template_env.get_template('metalink/3.0/main.xml')

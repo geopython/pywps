@@ -429,7 +429,7 @@ class DodsComplexInputTest(unittest.TestCase):
 
     def test_validator(self):
         self.assertEqual(self.complex_in.data_format.validate,
-                       get_validator('application/x-ogc-dods'))
+                         get_validator('application/x-ogc-dods'))
         self.assertEqual(self.complex_in.validator,
                          get_validator('application/x-ogc-dods'))
         frmt = get_data_format('application/x-ogc-dods')
@@ -501,7 +501,7 @@ class ComplexOutputTest(unittest.TestCase):
 
     def test_file_handler_netcdf(self):
         self.complex_out_nc.file = self.ncfile
-        data = self.complex_out_nc.base64
+        self.complex_out_nc.base64
 
     def test_data_handler(self):
         self.complex_out.data = self.data
@@ -696,8 +696,8 @@ class TestMetaLink(unittest.TestCase):
 
     def co(self):
         out = inout.outputs.ComplexOutput('identifier', 'title', abstract='abstract test ',
-                            supported_formats=[FORMATS.JSON, ],
-                            as_reference=True,)
+                                          supported_formats=[FORMATS.JSON, ],
+                                          as_reference=True,)
         out.data = json.dumps({'a': 1})
         out.workdir = self.tmp_dir
         return out
@@ -716,15 +716,15 @@ class TestMetaLink(unittest.TestCase):
     def test_metalink(self):
         from pywps.validator.complexvalidator import validatexml
 
-
         out = inout.outputs.ComplexOutput('metatest', 'MetaLink Test title', abstract='MetaLink test abstract',
-                            supported_formats=[FORMATS.METALINK, ],
-                            as_reference=True)
+                                          supported_formats=[FORMATS.METALINK, ],
+                                          as_reference=True)
         out.workdir = self.tmp_dir
         ml = self.metalink()
 
         out.data = ml.xml
         self.assertTrue(validatexml(out, MODE.STRICT))
+
 
 def load_tests(loader=None, tests=None, pattern=None):
     if not loader:

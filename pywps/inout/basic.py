@@ -274,12 +274,6 @@ class IOHandler(object):
 
             setattr(IOHandler, cls.prop, property(fget=lambda x: None, fset=fset))
 
-    def __getitem__(self, key):
-        self._metaclone = self.clone()
-        extend_instance(self, MetaHandler)
-        self._load_env()
-        return self[key]
-
 
 class FileHandler(IOHandler):
     prop = 'file'
