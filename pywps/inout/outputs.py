@@ -7,7 +7,9 @@ WPS Output classes
 """
 
 import lxml.etree as etree
+import os
 import six
+from collections import OrderedDict
 from pywps.inout import basic
 from pywps.inout.storage import FileStorage
 from pywps.validator.mode import MODE
@@ -183,3 +185,49 @@ class LiteralOutput(basic.LiteralOutput):
             data["uom"] = self.uom.json
 
         return data
+
+
+
+class MetaFile:
+    def __init__(self, identity, description, ):
+        self._attrs = ['identity', 'description']
+
+
+    @property
+    def json(self):
+        return {}
+
+class MetaLink:
+
+    def __init__(self):
+        self._files = OrderedDict()
+        self._attrs = ['published']
+
+    def add_file(self):
+
+    @property
+    def published(self):
+        import datetime
+        return datetime.dt.now()
+
+    @property
+    def data(self):
+        """Create a metalink file."""
+        # This is not ok because it assumes that self is an outputs.ComplexOutput instance with mimetype METALINK.
+        # None of these  conditions are enforced in any way here.
+        files = []
+        for key, val in self._meta.items():
+            js = val.json
+            (file_dir, js['file_name']) = os.path.split(js['href'])
+            js['identity'] = key
+            files.append(js)
+        doc = self.template.render(files=files, identifier=self.identifier, abstract=self.abstract)
+        return doc
+
+    def _load_env(self):
+        template_env = RelEnvironment(
+            loader=PackageLoader('pywps', 'templates'),
+            trim_blocks=True, lstrip_blocks=True,
+            autoescape=True,
+        )
+        self.template = template_env.get_template('metalink/3.0/main.xml')

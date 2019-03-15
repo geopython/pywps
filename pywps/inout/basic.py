@@ -504,46 +504,6 @@ class UrlHandler(FileHandler):
         return config.get_size_mb(ms) * 1024**2
 
 
-class MetaHandler(DataHandler):
-    """Handles multiple handlers.
-
-    IOHandlers are automatically instantiated each time __setitem__ is called. The key is rendered in the metalink as
-    the `identity` attribute. Other attributes are taken from the output's json description.
-
-    File links are described by a Metalink XML file.
-
-    Properties `file`, `data`, `url` will point to a metalink file storing the links.
-    """
-
-    def __getitem__(self, key):
-        if key not in self._meta:
-            self._meta[key] = self._metaclone.clone()
-
-        return self._meta[key]
-
-    @property
-    def data(self):
-        """Create a metalink file."""
-        # This is not ok because it assumes that self is an outputs.ComplexOutput instance with mimetype METALINK.
-        # None of these  conditions are enforced in any way here.
-        files = []
-        for key, val in self._meta.items():
-            js = val.json
-            (file_dir, js['file_name']) = os.path.split(js['href'])
-            js['identity'] = key
-            files.append(js)
-        doc = self.template.render(files=files, identifier=self.identifier, abstract=self.abstract)
-        return doc
-
-    def _load_env(self):
-        template_env = RelEnvironment(
-            loader=PackageLoader('pywps', 'templates'),
-            trim_blocks=True, lstrip_blocks=True,
-            autoescape=True,
-        )
-        self.template = template_env.get_template('metalink/3.0/main.xml')
-
-
 class SimpleHandler(DataHandler):
     """Data handler for Literal In- and Outputs
 
