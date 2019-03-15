@@ -43,6 +43,9 @@ class AnyValue(object):
     def json(self):
         return {'type': 'anyvalue'}
 
+    def __eq__(self, other):
+        return self.json == other.json
+
 
 class NoValue(object):
     """No value allowed
@@ -64,7 +67,7 @@ class ValuesReference(object):
         return {'type': 'valuesreference'}
 
 
-class AllowedValue(AnyValue):
+class AllowedValue(object):
     """Allowed value parameters
     the values are evaluated in literal validator functions
 
@@ -88,6 +91,16 @@ class AllowedValue(AnyValue):
         self.maxval = maxval
         self.spacing = spacing
         self.range_closure = range_closure
+
+    def __eq__(self, other):
+        return all([
+            self.allowed_type == other.allowed_type,
+            self.value == other.value,
+            self.minval == other.minval,
+            self.maxval == other.maxval,
+            self.spacing == other.spacing,
+            self.range_closure == other.range_closure,
+        ])
 
     @property
     def json(self):
@@ -323,9 +336,12 @@ def make_allowedvalues(allowed_values):
 
     new_allowedvalues = []
 
+    if not isinstance(allowed_values, (tuple, list)):
+        allowed_values = [allowed_values]
+
     for value in allowed_values:
 
-        if isinstance(value, AllowedValue):
+        if isinstance(value, (AllowedValue, AnyValue, NoValue, ValuesReference)):
             new_allowedvalues.append(value)
 
         elif type(value) == tuple or type(value) == list:
@@ -355,7 +371,7 @@ def is_anyvalue(value):
 
     is_av = False
 
-    if value == AnyValue:
+    if value is AnyValue:
         is_av = True
     elif value is None:
         is_av = True

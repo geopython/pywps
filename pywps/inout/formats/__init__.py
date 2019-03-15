@@ -13,8 +13,6 @@
 
 from collections import namedtuple
 import mimetypes
-from pywps.validator.mode import MODE
-from pywps.validator.base import emptyvalidator
 
 
 _FORMATS = namedtuple('FORMATS', 'GEOJSON, JSON, SHP, GML, METALINK, KML, KMZ, GEOTIFF,'
@@ -38,7 +36,7 @@ class Format(object):
 
     def __init__(self, mime_type,
                  schema=None, encoding=None,
-                 validate=emptyvalidator, mode=MODE.SIMPLE,
+                 validate=None,
                  extension=None):
         """Constructor
         """
@@ -133,6 +131,9 @@ class Format(object):
         return all([frmt.mime_type == self.mime_type,
                     frmt.encoding == self.encoding,
                     frmt.schema == self.schema])
+
+    def __eq__(self, other):
+        return self.same_as(other)
 
     @property
     def json(self):

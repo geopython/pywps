@@ -10,6 +10,8 @@ import tempfile
 import datetime
 import json
 
+from pywps.inout.literaltypes import AnyValue
+
 
 class WPSRequestTest(unittest.TestCase):
 
@@ -60,7 +62,7 @@ class WPSRequestTest(unittest.TestCase):
 
         self.assertEqual(self.request.inputs['myliteral'][0].data, 1, 'Data are in the file')
         self.assertEqual(self.request.inputs['myin'][0].data, 'ahoj', 'Data are in the file')
-        self.assertListEqual(self.request.inputs['myliteral'][0].allowed_values, [], 'Any value set')
+        self.assertListEqual(self.request.inputs['myliteral'][0].allowed_values, [AnyValue()], 'Any value not set')
         self.assertTrue(self.request.inputs['myliteral'][0].any_value, 'Any value set')
 
     def test_json_inout_datetime(self):

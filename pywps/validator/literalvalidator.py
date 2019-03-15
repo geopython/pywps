@@ -8,6 +8,7 @@
 import logging
 from decimal import Decimal
 
+from pywps.inout.literaltypes import AnyValue, NoValue, ValuesReference
 from pywps.validator.mode import MODE
 from pywps.validator.allowed_value import ALLOWEDVALUETYPE, RANGECLOSURETYPE
 
@@ -35,7 +36,12 @@ def validate_allowed_values(data_input, mode):
         LOGGER.debug('validating allowed values: {} in {}'.format(data, data_input.allowed_values))
         for value in data_input.allowed_values:
 
-            if value.allowed_type == ALLOWEDVALUETYPE.VALUE:
+            if isinstance(value, (AnyValue, NoValue, ValuesReference)):
+                # AnyValue, NoValue and ValuesReference always pass validation
+                # NoValue and ValuesReference are not implemented
+                passed = True
+
+            elif value.allowed_type == ALLOWEDVALUETYPE.VALUE:
                 passed = _validate_value(value, data)
 
             elif value.allowed_type == ALLOWEDVALUETYPE.RANGE:
