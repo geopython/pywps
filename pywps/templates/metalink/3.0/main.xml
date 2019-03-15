@@ -1,16 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metalink version="3.0" xmlns="http://www.metalinker.org/">
-    <identity>{{ identifier }}</identity>
-    <description>{{ abstract }}</description>
+    {% if identity %}
+    <identity>{{ identity }}</identity>
+    {% endif %}
+    {% if description %}
+    <description>{{ description }}</description>
+    {% endif %}
+    {% if publisher %}
+    <publisher>{{ publisher }}</publisher>
+    {% endif %}
     <files>
         {% for file in files %}
-        <file name="{{ file.file_name }}">
+        <file name="{{ file.name }}">
+            {% if file.identity %}
             <identity>{{ file.identity }}</identity>
-            {% if file.type == "reference" %}
-            <resources>
-                <url type="http">{{ file.href }}</url>
-            </resources>
             {% endif %}
+            {% if file.description %}
+            <description>{{ file.description }}</description>
+            {% endif %}
+            {% if file.size %}
+            <size>{{ file.size }}</size>
+            {% endif %}
+            <resources>
+                {% for url in file.urls %}
+                <url type="http">{{ url }}</url>
+                {% endfor %}
+            </resources>
         </file>
         {% endfor %}
     </files>

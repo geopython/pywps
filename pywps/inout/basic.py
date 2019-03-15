@@ -18,8 +18,6 @@ from pywps.validator.base import emptyvalidator
 from pywps.validator import get_validator
 from pywps.validator.literalvalidator import (validate_anyvalue,
                                               validate_allowed_values)
-from pywps.response import RelEnvironment
-from jinja2 import PackageLoader
 from pywps.exceptions import NoApplicableCode, InvalidParameterValue, FileSizeExceeded, \
     FileURLNotSupported
 from pywps._compat import PY2, urlparse
@@ -154,7 +152,6 @@ class IOHandler(object):
         self._post_data = None
         self._stream = None
         self._url = None
-        self._meta = {}
         self.data_set = False
 
     def _check_valid(self):
@@ -504,46 +501,6 @@ class UrlHandler(FileHandler):
         """
         ms = config.get_config_value('server', 'maxsingleinputsize')
         return config.get_size_mb(ms) * 1024**2
-
-
-class MetaHandler(DataHandler):
-    """Handles multiple handlers.
-
-    IOHandlers are automatically instantiated each time __setitem__ is called. The key is rendered in the metalink as
-    the `identity` attribute. Other attributes are taken from the output's json description.
-
-    File links are described by a Metalink XML file.
-
-    Properties `file`, `data`, `url` will point to a metalink file storing the links.
-    """
-
-    def __getitem__(self, key):
-        if key not in self._meta:
-            self._meta[key] = self._metaclone.clone()
-
-        return self._meta[key]
-
-    @property
-    def data(self):
-        """Create a metalink file."""
-        # This is not ok because it assumes that self is an outputs.ComplexOutput instance with mimetype METALINK.
-        # None of these  conditions are enforced in any way here.
-        files = []
-        for key, val in self._meta.items():
-            js = val.json
-            (file_dir, js['file_name']) = os.path.split(js['href'])
-            js['identity'] = key
-            files.append(js)
-        doc = self.template.render(files=files, identifier=self.identifier, abstract=self.abstract)
-        return doc
-
-    def _load_env(self):
-        template_env = RelEnvironment(
-            loader=PackageLoader('pywps', 'templates'),
-            trim_blocks=True, lstrip_blocks=True,
-            autoescape=True,
-        )
-        self.template = template_env.get_template('metalink/3.0/main.xml')
 
 
 class SimpleHandler(DataHandler):
