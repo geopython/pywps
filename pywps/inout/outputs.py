@@ -7,7 +7,7 @@ WPS Output classes
 """
 
 import lxml.etree as etree
-import six
+import os
 from pywps.inout import basic
 from pywps.inout.storage import FileStorage
 from pywps.validator.mode import MODE
@@ -207,3 +207,84 @@ class LiteralOutput(basic.LiteralOutput):
             data["uom"] = self.uom.json
 
         return data
+
+
+class MetaFile:
+    """MetaFile object."""
+    def __init__(self, output, name=''):
+        """Create a MetaFile instance.
+
+        output can either be an href string or a ComplexOutput instance.
+        """
+        self.attrs = {}
+
+        if not isinstance(output, ComplexOutput):
+            raise ValueError("output should be a ComplexOutput instance.")
+
+        js = output.json
+
+        if js['asreference']:
+            (file_dir, self.attrs['name']) = os.path.split(js['href'])
+            self.attrs['urls'] = [js['href'], ]
+
+        if js['file']:
+            info = os.stat(js['file'])
+            self.attrs['size'] = info.st_size
+
+        self.attrs['identity'] = js['identifier']
+        self.attrs['description'] = js['abstract'] or js['title']
+
+        if name != '' or name not in self.attrs:
+            self.attrs['name'] = name
+
+    def __str__(self):
+        out = "MetaFile {}:".format(self.attrs['name'])
+        for url in self.attrs['urls']:
+            out += "\n\t{}".format(url)
+        return out
+
+    def __repr__(self):
+        return "<pywps.inout.outputs.MetaFile {}>".format(self.attrs['name'])
+
+
+class MetaLink:
+    _xml_template = 'metalink/3.0/.xml'
+
+    def __init__(self, identity=None, description=None, publisher=None, files=()):
+        """Create a MetaLink instance.
+
+        Use the `append` method to add MetaFile instances.
+        """
+        self.attrs = {}
+        self.attrs['identity'] = identity
+        self.attrs['description'] = description
+        self.attrs['files'] = []
+        for file in files:
+            self.append(file)
+        self.attrs['published'] = self.published
+        self._load_template()
+
+    def append(self, file):
+        if not isinstance(file, MetaFile):
+            raise ValueError("file must be a MetaFile instance.")
+        self.attrs['files'].append(file.attrs)
+
+    @property
+    def xml(self):
+        return self._template.render(**self.attrs)
+
+    @property
+    def published(self):
+        import datetime
+        return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    def _load_template(self):
+        from pywps.response import RelEnvironment
+        from jinja2 import PackageLoader
+
+        template_env = RelEnvironment(
+            loader=PackageLoader('pywps', 'templates'),
+            trim_blocks=True, lstrip_blocks=True,
+            autoescape=True, )
+
+        self._template = template_env.get_template('metalink/3.0/main.xml')

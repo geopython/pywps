@@ -22,7 +22,8 @@ from pywps.exceptions import NoApplicableCode, InvalidParameterValue, FileSizeEx
     FileURLNotSupported
 from pywps._compat import PY2, urlparse
 import base64
-from collections import namedtuple
+from collections import namedtuple, defaultdict
+from copy import deepcopy
 from io import BytesIO
 import six
 
@@ -237,6 +238,11 @@ class IOHandler(object):
         else:
             return ''
 
+    def clone(self):
+        """Create copy of yourself
+        """
+        return deepcopy(self)
+
     @staticmethod
     def _create_fset_properties():
         """Create properties that when set for the first time, will determine
@@ -318,6 +324,9 @@ class FileHandler(IOHandler):
         """Return url to file."""
         import pathlib
         return pathlib.PurePosixPath(self.file).as_uri()
+
+    def __getitem__(self, key, value):
+        raise TypeError("{} object is not subscriptable.".format(self.__class__.__name__))
 
     def _openmode(self, data=None):
         openmode = 'r'

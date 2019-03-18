@@ -16,12 +16,14 @@ import unittest
 import json
 from pywps import inout
 import base64
-from pywps import Format
+
+from pywps import Format, FORMATS
 from pywps.app.Common import Metadata
 from pywps.validator import get_validator
 from pywps.inout.basic import IOHandler, SOURCE_TYPE, SimpleHandler, BBoxInput, BBoxOutput, \
     ComplexInput, ComplexOutput, LiteralOutput, LiteralInput, _is_textfile
 from pywps.inout.literaltypes import convert, AllowedValue
+from pywps.inout.outputs import MetaFile, MetaLink
 from pywps._compat import StringIO, text_type, urlparse
 from pywps.validator.base import emptyvalidator
 from pywps.exceptions import InvalidParameterValue
@@ -128,6 +130,8 @@ class IOHandlerTest(unittest.TestCase):
         file_handler.close()
         self.iohandler.file = source
         self._test_outout(SOURCE_TYPE.FILE)
+        with self.assertRaises(TypeError):
+            self.iohandler[0].data = '5'
 
     def test_url(self):
 
@@ -425,7 +429,7 @@ class DodsComplexInputTest(unittest.TestCase):
 
     def test_validator(self):
         self.assertEqual(self.complex_in.data_format.validate,
-                       get_validator('application/x-ogc-dods'))
+                         get_validator('application/x-ogc-dods'))
         self.assertEqual(self.complex_in.validator,
                          get_validator('application/x-ogc-dods'))
         frmt = get_data_format('application/x-ogc-dods')
@@ -497,7 +501,7 @@ class ComplexOutputTest(unittest.TestCase):
 
     def test_file_handler_netcdf(self):
         self.complex_out_nc.file = self.ncfile
-        data = self.complex_out_nc.base64
+        self.complex_out_nc.base64
 
     def test_data_handler(self):
         self.complex_out.data = self.data
@@ -685,6 +689,41 @@ class BoxOutputTest(unittest.TestCase):
         storage = Storage()
         self.bbox_out.store = storage
         self.assertEqual(self.bbox_out.store, storage)
+
+
+class TestMetaLink(unittest.TestCase):
+    tmp_dir = tempfile.mkdtemp()
+
+    def co(self):
+        out = inout.outputs.ComplexOutput('identifier', 'title', abstract='abstract test ',
+                                          supported_formats=[FORMATS.JSON, ],
+                                          as_reference=True,)
+        out.data = json.dumps({'a': 1})
+        out.workdir = self.tmp_dir
+        return out
+
+    def metafile(self):
+        return MetaFile(self.co())
+
+    def test_metafile(self):
+        mf = self.metafile()
+        self.assertEqual('identifier', mf.attrs['identity'])
+
+    def metalink(self):
+        ml = MetaLink(identity='unittest', description='desc', files=(self.metafile(), ))
+        return ml
+
+    def test_metalink(self):
+        from pywps.validator.complexvalidator import validatexml
+
+        out = inout.outputs.ComplexOutput('metatest', 'MetaLink Test title', abstract='MetaLink test abstract',
+                                          supported_formats=[FORMATS.METALINK, ],
+                                          as_reference=True)
+        out.workdir = self.tmp_dir
+        ml = self.metalink()
+
+        out.data = ml.xml
+        self.assertTrue(validatexml(out, MODE.STRICT))
 
 
 def load_tests(loader=None, tests=None, pattern=None):
