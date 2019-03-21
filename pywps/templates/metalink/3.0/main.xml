@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metalink version="3.0" xmlns="http://www.metalinker.org/">
-    {% if identity %}
-    <identity>{{ identity }}</identity>
+    {% if meta.identity %}
+    <identity>{{ meta.identity }}</identity>
     {% endif %}
-    {% if description %}
-    <description>{{ description }}</description>
+    {% if meta.description %}
+    <description>{{ meta.description }}</description>
     {% endif %}
-    {% if publisher %}
-    <publisher>{{ publisher }}</publisher>
+    {% if meta.publisher %}
+    <publisher>{{ meta.publisher }}</publisher>
     {% endif %}
     <files>
-        {% for file in files %}
+        {% for file in meta.files %}
         <file name="{{ file.name }}">
             {% if file.identity %}
             <identity>{{ file.identity }}</identity>

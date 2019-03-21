@@ -211,67 +211,89 @@ class LiteralOutput(basic.LiteralOutput):
 
 class MetaFile:
     """MetaFile object."""
-    def __init__(self, output, name=''):
-        """Create a MetaFile instance.
+    def __init__(self, identity=None, description=None,
+                 format=None,):
+        self._output = ComplexOutput(
+            identifier=identity or '',
+            title=description or '',
+            as_reference=True,
+            supported_formats=[format, ],
+        )
 
-        output can either be an href string or a ComplexOutput instance.
-        """
-        self.attrs = {}
+    def _set_workdir(self, workdir):
+        self._output.workdir = workdir
 
-        if not isinstance(output, ComplexOutput):
-            raise ValueError("output should be a ComplexOutput instance.")
+    @property
+    def identity(self):
+        return self._output.identifier
 
-        js = output.json
+    @property
+    def name(self):
+        js = self._output.json
+        (file_dir, name) = os.path.split(js.get('href', 'http:///'))
+        return name
 
-        if js['asreference']:
-            (file_dir, self.attrs['name']) = os.path.split(js['href'])
-            self.attrs['urls'] = [js['href'], ]
+    @property
+    def size(self):
+        return None
 
-        if js['file']:
-            info = os.stat(js['file'])
-            self.attrs['size'] = info.st_size
+    @property
+    def urls(self):
+        js = self._output.json
+        return [js.get('href', ''), ]
 
-        self.attrs['identity'] = js['identifier']
-        self.attrs['description'] = js['abstract'] or js['title']
+    @property
+    def data(self):
+        return self._output.data
 
-        if name != '' or name not in self.attrs:
-            self.attrs['name'] = name
+    @data.setter
+    def data(self, value):
+        self._output.data = value
+
+    @property
+    def file(self):
+        return self._output.file
+
+    @file.setter
+    def file(self, value):
+        self._output.file = value
 
     def __str__(self):
-        out = "MetaFile {}:".format(self.attrs['name'])
-        for url in self.attrs['urls']:
+        out = "MetaFile {}:".format(self.name)
+        for url in self.urls:
             out += "\n\t{}".format(url)
         return out
 
     def __repr__(self):
-        return "<pywps.inout.outputs.MetaFile {}>".format(self.attrs['name'])
+        return "<pywps.inout.outputs.MetaFile {}>".format(self.name)
 
 
 class MetaLink:
     _xml_template = 'metalink/3.0/.xml'
 
-    def __init__(self, identity=None, description=None, publisher=None, files=()):
+    def __init__(self, identity=None, description=None, publisher=None, files=(),
+                 workdir=None):
         """Create a MetaLink instance.
 
         Use the `append` method to add MetaFile instances.
         """
-        self.attrs = {}
-        self.attrs['identity'] = identity
-        self.attrs['description'] = description
-        self.attrs['files'] = []
+        self.identity = identity
+        self.description = description
+        self.workdir = workdir
+        self.files = []
         for file in files:
             self.append(file)
-        self.attrs['published'] = self.published
         self._load_template()
 
     def append(self, file):
         if not isinstance(file, MetaFile):
             raise ValueError("file must be a MetaFile instance.")
-        self.attrs['files'].append(file.attrs)
+        file._set_workdir(self.workdir)
+        self.files.append(file)
 
     @property
     def xml(self):
-        return self._template.render(**self.attrs)
+        return self._template.render(meta=self)
 
     @property
     def published(self):
