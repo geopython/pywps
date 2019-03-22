@@ -694,23 +694,18 @@ class BoxOutputTest(unittest.TestCase):
 class TestMetaLink(unittest.TestCase):
     tmp_dir = tempfile.mkdtemp()
 
-    def co(self):
-        out = inout.outputs.ComplexOutput('identifier', 'title', abstract='abstract test ',
-                                          supported_formats=[FORMATS.JSON, ],
-                                          as_reference=True,)
-        out.data = json.dumps({'a': 1})
-        out.workdir = self.tmp_dir
-        return out
-
     def metafile(self):
-        return MetaFile(self.co())
+        mf = MetaFile('identifier', 'title', format=FORMATS.JSON)
+        mf.data = json.dumps({'a': 1})
+        mf._set_workdir(self.tmp_dir)
+        return mf
 
     def test_metafile(self):
         mf = self.metafile()
-        self.assertEqual('identifier', mf.attrs['identity'])
+        self.assertEqual('identifier', mf.identity)
 
     def metalink(self):
-        ml = MetaLink(identity='unittest', description='desc', files=(self.metafile(), ))
+        ml = MetaLink(identity='unittest', description='desc', files=(self.metafile(), ), workdir=self.tmp_dir)
         return ml
 
     def test_metalink(self):
