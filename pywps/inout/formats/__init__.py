@@ -165,6 +165,7 @@ FORMATS = _FORMATS(
     Format('application/x-zipped-shp', extension='.zip', encoding='base64'),
     Format('application/gml+xml', extension='.gml'),
     Format('application/metalink+xml; version=3.0', extension='.metalink', schema="metalink/3.0/metalink.xsd"),
+    # Format('application/metalink+xml; version=4.0', extension='.meta4', schema="metalink/4.0/metalink4.xsd"),
     Format('application/vnd.google-earth.kml+xml', extension='.kml'),
     Format('application/vnd.google-earth.kmz', extension='.kmz', encoding='base64'),
     Format('image/tiff; subtype=geotiff', extension='.tiff', encoding='base64'),

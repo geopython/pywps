@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<metalink version="3.0" xmlns="http://www.metalinker.org/" generator="{{ meta.generator }}">
+<metalink xmlns="urn:ietf:params:xml:ns:metalink">
     {% if meta.identity %}
     <identity>{{ meta.identity }}</identity>
     {% endif %}
     {% if meta.description %}
     <description>{{ meta.description }}</description>
     {% endif %}
-    {% if meta.publisher %}
-    <publisher>{{ meta.publisher }}</publisher>
-    {% endif %}
-
+    <published>{{ meta.published }}</published>
+    <generator>{{ meta.generator }}</generator>
     <files>
         {% for file in meta.files %}
         <file name="{{ file.name }}">
@@ -24,7 +22,7 @@
             {% endif %}
             <resources>
                 {% for url in file.urls %}
-                <url type="http">{{ url }}</url>
+                <metaurl mediatype="{{file.mediatype}}">{{ url }}</metaurl>
                 {% endfor %}
             </resources>
         </file>
