@@ -1,0 +1,222 @@
+# -*- rnc -*-
+# RELAX NG Compact Syntax Grammar for the
+# Metalink Format Specification Version 4
+# Based on RFC 4287 schema
+
+namespace local = ""
+namespace metalink = "urn:ietf:params:xml:ns:metalink"
+namespace xsd = "http://www.w3.org/2001/XMLSchema"
+
+# Common attributes
+
+metalinkCommonAttributes =
+   attribute xml:lang { metalinkLanguageTag }?,
+   undefinedAttribute*
+
+# Text Constructs
+
+metalinkTextConstruct =
+   metalinkCommonAttributes,
+   text
+
+# Date Construct
+
+metalinkDateConstruct =
+   metalinkCommonAttributes,
+   xsd:dateTime
+
+start = metalinkMetalink
+
+metalinkMetalink =
+   element metalink:metalink {
+      metalinkCommonAttributes,
+      (metalinkFile+
+       & metalinkGenerator?
+       & metalinkOrigin?
+       & metalinkPublished?
+       & metalinkUpdated?
+       & extensionElement*)
+   }
+
+metalinkFile =
+   element metalink:file {
+      metalinkCommonAttributes,
+      attribute name { text },
+      (metalinkCopyright?
+       & metalinkDescription?
+       & metalinkHash*
+       & metalinkIdentity?
+       & metalinkLanguage*
+       & metalinkLogo?
+       & metalinkMetaURL*
+       & metalinkURL*
+       & metalinkOS*
+       & metalinkPieces*
+       & metalinkPublisher?
+       & metalinkSignature?
+       & metalinkSize?
+       & metalinkVersion?
+       & extensionElement*)
+   }
+
+metalinkPieces =
+   element metalink:pieces {
+      attribute length { xsd:positiveInteger },
+      attribute type { text },
+      metalinkHash+
+   }
+
+metalinkCopyright =
+   element metalink:copyright {
+      metalinkTextConstruct
+   }
+
+metalinkDescription =
+   element metalink:description {
+      metalinkTextConstruct
+   }
+
+metalinkGenerator =
+   element metalink:generator {
+      metalinkTextConstruct
+   }
+
+metalinkHash =
+     element metalink:hash {
+       attribute type { text }?,
+       text
+     }
+
+metalinkIdentity =
+   element metalink:identity {
+      metalinkTextConstruct
+   }
+
+metalinkLanguage =
+   element metalink:language {
+      metalinkTextConstruct
+   }
+
+metalinkLogo =
+   element metalink:logo {
+      metalinkCommonAttributes,
+      (metalinkUri)
+   }
+
+metalinkMetaURL =
+   element metalink:metaurl {
+      metalinkCommonAttributes,
+      attribute priority { xsd:positiveInteger {
+         maxInclusive = "999999"}}?,
+      attribute mediatype { text },
+      attribute name { text }?,
+      (metalinkUri)
+   }
+
+metalinkOrigin =
+   element metalink:origin {
+      metalinkCommonAttributes,
+      attribute dynamic { xsd:boolean }?,
+      (metalinkUri)
+   }
+
+metalinkOS =
+   element metalink:os {
+      metalinkTextConstruct
+   }
+
+metalinkPublished =
+   element metalink:published {
+      metalinkDateConstruct
+   }
+
+metalinkPublisher =
+   element metalink:publisher {
+      metalinkCommonAttributes,
+      attribute name { text },
+      attribute url { metalinkUri }?
+   }
+
+metalinkSignature =
+   element metalink:signature {
+      attribute mediatype { text },
+      metalinkTextConstruct
+   }
+
+metalinkSize =
+   element metalink:size {
+      xsd:nonNegativeInteger
+   }
+
+metalinkUpdated =
+   element metalink:updated {
+      metalinkDateConstruct
+   }
+
+metalinkURL =
+   element metalink:url {
+      metalinkCommonAttributes,
+      attribute location { xsd:string {
+         minLength = "2"  maxLength="2"}
+      }?,
+      attribute priority { xsd:positiveInteger {
+         maxInclusive = "999999"}}?,
+      (metalinkUri)
+   }
+
+metalinkVersion =
+   element metalink:version {
+      metalinkTextConstruct
+   }
+
+# As defined in RFC 3066 and compatible with RFC 5646
+metalinkLanguageTag = xsd:string {
+   pattern = "[A-Za-z]{1,8}(-[A-Za-z0-9]{1,8})*"
+}
+
+# Unconstrained; it's not entirely clear how IRI fit into
+# xsd:anyURI so let's not try to constrain it here
+metalinkUri = text
+
+# Simple Extension
+
+simpleExtensionElement =
+   element * - metalink:* {
+      text
+   }
+
+# Structured Extension
+
+structuredExtensionElement =
+   element * - metalink:* {
+      (attribute * { text }+,
+         (text|anyElement)*)
+    | (attribute * { text }*,
+       (text?, anyElement+, (text|anyElement)*))
+   }
+
+# Other Extensibility
+
+extensionElement =
+   simpleExtensionElement | structuredExtensionElement
+
+undefinedAttribute =
+  attribute * - (xml:lang | local:*) { text }
+
+undefinedContent = (text|anyForeignElement)*
+
+anyElement =
+   element * {
+      (attribute * { text }
+       | text
+       | anyElement)*
+   }
+
+anyForeignElement =
+   element * - metalink:* {
+      (attribute * { text }
+       | text
+       | anyElement)*
+}
+
+# EOF

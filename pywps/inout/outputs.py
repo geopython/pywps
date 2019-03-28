@@ -243,6 +243,10 @@ class MetaFile:
         return [js.get('href', ''), ]
 
     @property
+    def mediatype(self):
+        return self._output.data_format.mime_type
+
+    @property
     def data(self):
         return self._output.data
 
@@ -269,7 +273,7 @@ class MetaFile:
 
 
 class MetaLink:
-    _xml_template = 'metalink/3.0/.xml'
+    _xml_template = 'metalink/3.0/main.xml'
 
     def __init__(self, identity=None, description=None, publisher=None, files=(),
                  workdir=None):
@@ -280,7 +284,9 @@ class MetaLink:
         self.identity = identity
         self.description = description
         self.workdir = workdir
+        self.publisher = publisher
         self.files = []
+
         for file in files:
             self.append(file)
         self._load_template()
@@ -300,6 +306,11 @@ class MetaLink:
         import datetime
         return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+    @property
+    def generator(self):
+        import pywps
+        return "PyWPS/{}".format(pywps.__version__)
+
     def _load_template(self):
         from pywps.response import RelEnvironment
         from jinja2 import PackageLoader
@@ -309,4 +320,4 @@ class MetaLink:
             trim_blocks=True, lstrip_blocks=True,
             autoescape=True, )
 
-        self._template = template_env.get_template('metalink/3.0/main.xml')
+        self._template = template_env.get_template(self._xml_template)
