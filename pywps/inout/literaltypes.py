@@ -91,15 +91,7 @@ class AllowedValue(object):
         self.range_closure = range_closure
 
     def __eq__(self, other):
-        return (
-            isinstance(other, AllowedValue)
-            and self.allowed_type == other.allowed_type
-            and self.value == other.value
-            and self.minval == other.minval
-            and self.maxval == other.maxval
-            and self.spacing == other.spacing
-            and self.range_closure == other.range_closure
-        )
+        return isinstance(other, AllowedValue) and self.json == other.json
 
     @property
     def json(self):
