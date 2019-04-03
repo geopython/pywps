@@ -336,8 +336,10 @@ def make_allowedvalues(allowed_values):
     for value in allowed_values:
 
         if value in ALLOWED_VALUES_TYPES:
+            # value is equal to one of the allowed classes objects
             new_allowedvalues.append(value())
         elif isinstance(value, ALLOWED_VALUES_TYPES):
+            # value is an instance of one of the allowed classes
             new_allowedvalues.append(value)
 
         elif type(value) == tuple or type(value) == list:
