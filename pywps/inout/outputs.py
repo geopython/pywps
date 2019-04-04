@@ -223,7 +223,6 @@ class MetaFile:
     def _set_workdir(self, workdir):
         self._output.workdir = workdir
 
-
     @property
     def hash(self):
         """Text construct that conveys a cryptographic hash for a file.
