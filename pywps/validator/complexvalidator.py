@@ -119,6 +119,9 @@ def validatexml(data_input, mode):
         else:
             from urllib.request import urlopen
 
+        # TODO: Raise the actual validation exception to make it easier to spot the error.
+        #  xml = etree.parse(data_input.file)
+        #  schema.assertValid(xml)
         try:
             fn = os.path.join(_get_schemas_home(), data_input.data_format.schema)
             schema_doc = etree.parse(fn)

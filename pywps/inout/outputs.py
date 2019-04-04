@@ -223,19 +223,38 @@ class MetaFile:
     def _set_workdir(self, workdir):
         self._output.workdir = workdir
 
+
+    @property
+    def hash(self):
+        """Text construct that conveys a cryptographic hash for a file.
+        All hashes are encoded in lowercase hexadecimal format.  Hashes
+        are used to verify the integrity of a complete file or portion
+        of a file to determine if the file has been transferred without
+        any errors.
+        """
+        import hashlib
+        m = hashlib.sha256
+        with open(self.file, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                m.update(chunk)
+        return m.hexdigest()
+
     @property
     def identity(self):
+        """Human-readable identity."""
         return self._output.identifier
 
     @property
     def name(self):
+        """Indicate a specific file in a document describing multiple files."""
         js = self._output.json
         (file_dir, name) = os.path.split(js.get('href', 'http:///'))
         return name
 
     @property
     def size(self):
-        return None
+        """Length of the linked content in octets."""
+        return os.stat(self.file).st_size
 
     @property
     def urls(self):
@@ -244,6 +263,8 @@ class MetaFile:
 
     @property
     def mediatype(self):
+        """Multipurpose Internet Mail Extensions (MIME) media type
+        [RFC4288] of the metadata file available at the IRI."""
         return self._output.data_format.mime_type
 
     @property
@@ -302,12 +323,24 @@ class MetaLink:
         return self._template.render(meta=self)
 
     @property
+    def origin(self):
+        """IRI where the Metalink Document was originally published.
+        If the dynamic attribute of metalink:origin is "true", then
+        updated versions of the Metalink can be found at this IRI.
+        """
+        return ""
+
+    @property
     def published(self):
+        """Date construct indicating an instant in time associated
+        with an event early in the life cycle of the entry."""
         import datetime
-        return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        return datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 
     @property
     def generator(self):
+        """Generating agent name and version used to generate a
+        Metalink Document, for debugging and other purposes."""
         import pywps
         return "PyWPS/{}".format(pywps.__version__)
 
@@ -321,3 +354,7 @@ class MetaLink:
             autoescape=True, )
 
         self._template = template_env.get_template(self._xml_template)
+
+
+class MetaLink4(MetaLink):
+    _xml_template = 'metalink/4.0/main.xml'

@@ -23,7 +23,7 @@ from pywps.validator import get_validator
 from pywps.inout.basic import IOHandler, SOURCE_TYPE, SimpleHandler, BBoxInput, BBoxOutput, \
     ComplexInput, ComplexOutput, LiteralOutput, LiteralInput, _is_textfile
 from pywps.inout.literaltypes import convert, AllowedValue
-from pywps.inout.outputs import MetaFile, MetaLink
+from pywps.inout.outputs import MetaFile, MetaLink, MetaLink4
 from pywps._compat import StringIO, text_type, urlparse
 from pywps.validator.base import emptyvalidator
 from pywps.exceptions import InvalidParameterValue
@@ -708,6 +708,10 @@ class TestMetaLink(unittest.TestCase):
         ml = MetaLink(identity='unittest', description='desc', files=(self.metafile(), ), workdir=self.tmp_dir)
         return ml
 
+    def metalink4(self):
+        ml = MetaLink4(identity='unittest', description='desc', files=(self.metafile(), ), workdir=self.tmp_dir)
+        return ml
+
     def test_metalink(self):
         from pywps.validator.complexvalidator import validatexml
 
@@ -716,6 +720,18 @@ class TestMetaLink(unittest.TestCase):
                                           as_reference=True)
         out.workdir = self.tmp_dir
         ml = self.metalink()
+
+        out.data = ml.xml
+        self.assertTrue(validatexml(out, MODE.STRICT))
+
+    def test_metalink4(self):
+        from pywps.validator.complexvalidator import validatexml
+
+        out = inout.outputs.ComplexOutput('metatest', 'MetaLink4 Test title', abstract='MetaLink4 test abstract',
+                                          supported_formats=[FORMATS.META4, ],
+                                          as_reference=True)
+        out.workdir = self.tmp_dir
+        ml = self.metalink4()
 
         out.data = ml.xml
         self.assertTrue(validatexml(out, MODE.STRICT))

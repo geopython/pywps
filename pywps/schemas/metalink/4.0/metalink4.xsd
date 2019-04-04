@@ -6,7 +6,6 @@
   Based on RFC 4287 schema
 -->
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="urn:ietf:params:xml:ns:metalink" xmlns:metalink="urn:ietf:params:xml:ns:metalink">
-  <xsd:import schemaLocation="local.xsd"/>
   <xsd:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
   <!-- Common attributes -->
   <xsd:attributeGroup name="metalinkCommonAttributes">
@@ -33,7 +32,6 @@
         <xsd:element ref="metalink:origin"/>
         <xsd:element ref="metalink:published"/>
         <xsd:element ref="metalink:updated"/>
-        <xsd:group ref="metalink:extensionElement"/>
       </xsd:choice>
       <xsd:attributeGroup ref="metalink:metalinkCommonAttributes"/>
     </xsd:complexType>
@@ -55,7 +53,6 @@
         <xsd:element ref="metalink:signature"/>
         <xsd:element ref="metalink:size"/>
         <xsd:element ref="metalink:version"/>
-        <xsd:group ref="metalink:extensionElement"/>
       </xsd:choice>
       <xsd:attributeGroup ref="metalink:metalinkCommonAttributes"/>
       <xsd:attribute name="name" use="required"/>
@@ -203,7 +200,6 @@
     </xsd:choice>
   </xsd:group>
   <xsd:attributeGroup name="undefinedAttribute">
-    <xsd:attributeGroup ref="local"/>
   </xsd:attributeGroup>
   <xsd:group name="undefinedContent">
     <xsd:sequence>

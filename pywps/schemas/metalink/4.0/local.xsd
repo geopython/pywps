@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"  xmlns:metalink="urn:ietf:params:xml:ns:metalink">
+    <xs:attributeGroup name="empty">
+                 <xs:attribute name="emptyattr" />
+    </xs:attributeGroup>
+</xs:schema>

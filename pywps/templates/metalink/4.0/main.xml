@@ -1,31 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metalink xmlns="urn:ietf:params:xml:ns:metalink">
-    {% if meta.identity %}
-    <identity>{{ meta.identity }}</identity>
-    {% endif %}
-    {% if meta.description %}
-    <description>{{ meta.description }}</description>
-    {% endif %}
     <published>{{ meta.published }}</published>
     <generator>{{ meta.generator }}</generator>
-    <files>
-        {% for file in meta.files %}
-        <file name="{{ file.name }}">
-            {% if file.identity %}
-            <identity>{{ file.identity }}</identity>
-            {% endif %}
-            {% if file.description %}
-            <description>{{ file.description }}</description>
-            {% endif %}
-            {% if file.size %}
-            <size>{{ file.size }}</size>
-            {% endif %}
-            <resources>
-                {% for url in file.urls %}
-                <metaurl mediatype="{{file.mediatype}}">{{ url }}</metaurl>
-                {% endfor %}
-            </resources>
-        </file>
+
+    {% for file in meta.files %}
+    <file name="{{ file.name }}">
+        {% if file.identity %}
+        <identity>{{ file.identity }}</identity>
+        {% endif %}
+        {% if file.description %}
+        <description>{{ file.description }}</description>
+        {% endif %}
+        {% if file.size %}
+        <size>{{ file.size }}</size>
+        {% endif %}
+        <hash type="sha-256">{{ file.hash }}</hash>
+        {% for url in file.urls %}
+        <metaurl mediatype="{{file.mediatype}}">{{ url }}</metaurl>
         {% endfor %}
-    </files>
+    </file>
+    {% endfor %}
+
 </metalink>
