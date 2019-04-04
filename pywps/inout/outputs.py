@@ -211,8 +211,15 @@ class LiteralOutput(basic.LiteralOutput):
 
 class MetaFile:
     """MetaFile object."""
-    def __init__(self, identity=None, description=None,
-                 format=None,):
+    def __init__(self, identity=None, description=None, format=None):
+        """Create a `MetaFile` object.
+
+        The content of each metafile is set like `ComplexOutputs`, ie
+        using either the `data`, `file`, `stream` or `url` properties.
+
+        Append metafiles to a `MetaLink` instance to generate a metalink
+        document.
+        """
         self._output = ComplexOutput(
             identifier=identity or '',
             title=description or '',
@@ -282,6 +289,22 @@ class MetaFile:
     def file(self, value):
         self._output.file = value
 
+    @property
+    def url(self):
+        return self._output.url
+
+    @url.setter
+    def url(self, value):
+        self._output.url = value
+
+    @property
+    def stream(self):
+        return self._output.stream
+
+    @stream.setter
+    def stream(self, value):
+        self._output.stream = value
+
     def __str__(self):
         out = "MetaFile {}:".format(self.name)
         for url in self.urls:
@@ -297,9 +320,13 @@ class MetaLink:
 
     def __init__(self, identity=None, description=None, publisher=None, files=(),
                  workdir=None):
-        """Create a MetaLink instance.
+        """Create a MetaLink v3.0 instance.
 
-        Use the `append` method to add MetaFile instances.
+        To use, first append `MetaFile` instances, then write the metalink using the `xml`
+        property.
+
+        Methods:
+            - `append`: add a `MetaFile` instance
         """
         self.identity = identity
         self.description = description
@@ -312,6 +339,7 @@ class MetaLink:
         self._load_template()
 
     def append(self, file):
+        """Append a `MetaFile` instance."""
         if not isinstance(file, MetaFile):
             raise ValueError("file must be a MetaFile instance.")
         file._set_workdir(self.workdir)
