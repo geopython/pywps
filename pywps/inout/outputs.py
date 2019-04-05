@@ -239,7 +239,7 @@ class MetaFile:
         any errors.
         """
         import hashlib
-        m = hashlib.sha256
+        m = hashlib.sha256()
         with open(self.file, "rb") as f:
             for chunk in iter(lambda: f.read(4096), b""):
                 m.update(chunk)
@@ -362,7 +362,7 @@ class MetaLink:
         """Date construct indicating an instant in time associated
         with an event early in the life cycle of the entry."""
         import datetime
-        return datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+        return datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
 
     @property
     def generator(self):
