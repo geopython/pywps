@@ -76,7 +76,7 @@ class ProcessDocumenter(ClassDocumenter):
                 doc += ', units:[{}]'.format(', '.join([u.uom for u in obj.uoms]))
 
         except Exception as e:
-            raise type(e)(e.message + ' in {0} docstring'.format(self.object().identifier))
+            raise type(e)('{0} in {1} docstring'.format(e, self.object().identifier))
         return doc
 
     def make_numpy_doc(self):
