@@ -22,7 +22,7 @@ from pywps.app.Common import Metadata
 from pywps.validator import get_validator
 from pywps.inout.basic import IOHandler, SOURCE_TYPE, SimpleHandler, BBoxInput, BBoxOutput, \
     ComplexInput, ComplexOutput, LiteralOutput, LiteralInput, _is_textfile
-from pywps.inout.literaltypes import convert, AllowedValue
+from pywps.inout.literaltypes import convert, AllowedValue, AnyValue
 from pywps.inout.outputs import MetaFile, MetaLink, MetaLink4
 from pywps._compat import StringIO, text_type, urlparse
 from pywps.validator.base import emptyvalidator
@@ -331,7 +331,7 @@ class SerializationLiteralInputTest(unittest.TestCase):
             min_occurs=2,
             max_occurs=5,
             mode=MODE.STRICT,
-            allowed_values=[AllowedValue(value='something'), AllowedValue(value='something else')],
+            allowed_values=[AllowedValue(value='something'), AllowedValue(value='something else'), AnyValue()],
             default="something else",
             default_type=SOURCE_TYPE.DATA,
         )
@@ -353,6 +353,8 @@ class SerializationLiteralInputTest(unittest.TestCase):
         self.assertEqual(literal_1.max_occurs, literal_2.max_occurs)
         self.assertEqual(literal_1.valid_mode, literal_2.valid_mode)
         self.assertEqual(literal_1.allowed_values, literal_2.allowed_values)
+        self.assertEqual(literal_1.any_value, literal_2.any_value)
+        self.assertTrue(literal_1.any_value)
         self.assertEqual(literal_1.as_reference, literal_2.as_reference)
 
         self.assertEqual(literal_1.data, literal_2.data)

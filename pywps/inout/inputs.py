@@ -288,6 +288,7 @@ class LiteralInput(basic.LiteralInput):
             'data_type': self.data_type,
             'workdir': self.workdir,
             'allowed_values': [value.json for value in self.allowed_values],
+            'any_value': self.any_value,
             'mode': self.valid_mode,
             'min_occurs': self.min_occurs,
             'max_occurs': self.max_occurs,
@@ -329,6 +330,7 @@ class LiteralInput(basic.LiteralInput):
         uom = json_input.pop('uom', None)
         metadata = json_input.pop('metadata', [])
         json_input.pop('type')
+        json_input.pop('any_value', None)
 
         instance = cls(**json_input)
 
