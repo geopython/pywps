@@ -697,7 +697,7 @@ class TestMetaLink(unittest.TestCase):
     tmp_dir = tempfile.mkdtemp()
 
     def metafile(self):
-        mf = MetaFile('identifier', 'title', format=FORMATS.JSON)
+        mf = MetaFile('identifier', 'title', fmt=FORMATS.JSON)
         mf.data = json.dumps({'a': 1})
         mf._set_workdir(self.tmp_dir)
         return mf
