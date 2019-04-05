@@ -97,7 +97,7 @@ class Process(object):
 
     def execute(self, wps_request, uuid):
         self._set_uuid(uuid)
-        self.async = False
+        self.async_ = False
         response_cls = get_response("execute")
         wps_response = response_cls(wps_request, process=self, uuid=self.uuid)
 
@@ -111,13 +111,13 @@ class Process(object):
                     raise OperationNotSupported('Process does not support the updating of status')
 
                 wps_response.store_status_file = True
-                self.async = True
+                self.async_ = True
             else:
                 wps_response.store_status_file = False
 
         LOGGER.debug('Check if updating of status is not required then no need to spawn a process')
 
-        wps_response = self._execute_process(self.async, wps_request, wps_response)
+        wps_response = self._execute_process(self.async_, wps_request, wps_response)
 
         return wps_response
 
@@ -139,11 +139,11 @@ class Process(object):
         self.status_location = os.path.join(file_path, str(self.uuid)) + '.xml'
         self.status_url = os.path.join(file_url, str(self.uuid)) + '.xml'
 
-    def _execute_process(self, async, wps_request, wps_response):
+    def _execute_process(self, async_, wps_request, wps_response):
         """Uses :module:`pywps.processing` module for sending process to
         background BUT first, check for maxprocesses configuration value
 
-        :param async: run in asynchronous mode
+        :param async_: run in asynchronous mode
         :return: wps_response or None
         """
 
@@ -152,7 +152,7 @@ class Process(object):
         running, stored = dblog.get_process_counts()
 
         # async
-        if async:
+        if async_:
 
             # run immedietly
             LOGGER.debug("Running processes: {} of {} allowed parallelprocesses".format(running, maxparallel))
@@ -264,7 +264,7 @@ class Process(object):
             process_identifier = new_wps_request.identifier
             process = self.service.prepare_process_for_execution(process_identifier)
             process._set_uuid(uuid)
-            process.async = True
+            process.async_ = True
             new_wps_response = ExecuteResponse(new_wps_request, process=process, uuid=uuid)
             new_wps_response.store_status_file = True
             process._run_async(new_wps_request, new_wps_response)

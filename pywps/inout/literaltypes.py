@@ -37,7 +37,12 @@ LITERAL_DATA_TYPES = ('float', 'boolean', 'integer', 'string',
 
 class AnyValue(object):
     """Any value for literal input
+    NOTE: not really implemented
     """
+
+    @property
+    def value(self):
+        return None
 
     @property
     def json(self):
@@ -83,8 +88,6 @@ class AllowedValue(object):
                  minval=None, maxval=None, spacing=None,
                  range_closure=RANGECLOSURETYPE.CLOSED):
 
-        AnyValue.__init__(self)
-
         self.allowed_type = allowed_type
         self.value = value
         self.minval = minval
@@ -93,14 +96,7 @@ class AllowedValue(object):
         self.range_closure = range_closure
 
     def __eq__(self, other):
-        return all([
-            self.allowed_type == other.allowed_type,
-            self.value == other.value,
-            self.minval == other.minval,
-            self.maxval == other.maxval,
-            self.spacing == other.spacing,
-            self.range_closure == other.range_closure,
-        ])
+        return isinstance(other, AllowedValue) and self.json == other.json
 
     @property
     def json(self):
@@ -116,6 +112,9 @@ class AllowedValue(object):
             'spacing': self.spacing,
             'range_closure': self.range_closure
         }
+
+
+ALLOWED_VALUES_TYPES = (AllowedValue, AnyValue, NoValue, ValuesReference)
 
 
 def get_converter(convertor):
@@ -341,7 +340,11 @@ def make_allowedvalues(allowed_values):
 
     for value in allowed_values:
 
-        if isinstance(value, (AllowedValue, AnyValue, NoValue, ValuesReference)):
+        if value in ALLOWED_VALUES_TYPES:
+            # value is equal to one of the allowed classes objects
+            new_allowedvalues.append(value())
+        elif isinstance(value, ALLOWED_VALUES_TYPES):
+            # value is an instance of one of the allowed classes
             new_allowedvalues.append(value)
 
         elif type(value) == tuple or type(value) == list:
