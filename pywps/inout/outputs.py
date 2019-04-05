@@ -11,6 +11,7 @@ import os
 from pywps.inout import basic
 from pywps.inout.storage import FileStorage
 from pywps.validator.mode import MODE
+from pywps import configuration as config
 
 
 class BoundingBoxOutput(basic.BBoxOutput):
@@ -214,11 +215,15 @@ class MetaFile:
     def __init__(self, identity=None, description=None, format=None):
         """Create a `MetaFile` object.
 
+        :param str identity: human readable identity.
+        :param str description: human readable file description.
+        :param pywps.FORMAT format: file mime type.
+
         The content of each metafile is set like `ComplexOutputs`, ie
         using either the `data`, `file`, `stream` or `url` properties.
 
-        Append metafiles to a `MetaLink` instance to generate a metalink
-        document.
+        The metalink document is created by a `MetaLink` instance, which
+        holds a number of `MetaFile` instances.
         """
         self._output = ComplexOutput(
             identifier=identity or '',
@@ -233,6 +238,7 @@ class MetaFile:
     @property
     def hash(self):
         """Text construct that conveys a cryptographic hash for a file.
+
         All hashes are encoded in lowercase hexadecimal format.  Hashes
         are used to verify the integrity of a complete file or portion
         of a file to determine if the file has been transferred without
@@ -317,10 +323,16 @@ class MetaFile:
 
 class MetaLink:
     _xml_template = 'metalink/3.0/main.xml'
+    # Specs: https://www.metalinker.org/Metalink_3.0_Spec.pdf
 
     def __init__(self, identity=None, description=None, publisher=None, files=(),
                  workdir=None):
         """Create a MetaLink v3.0 instance.
+
+        :param str identity: human readable identity.
+        :param str description: human readable file description.
+        :param str publisher: The name of the file's publisher.
+
 
         To use, first append `MetaFile` instances, then write the metalink using the `xml`
         property.
@@ -371,6 +383,11 @@ class MetaLink:
         import pywps
         return "PyWPS/{}".format(pywps.__version__)
 
+    @property
+    def url(self):
+        """Return the server URL."""
+        return config.get_config_value('server', 'url')
+
     def _load_template(self):
         from pywps.response import RelEnvironment
         from jinja2 import PackageLoader
@@ -385,3 +402,4 @@ class MetaLink:
 
 class MetaLink4(MetaLink):
     _xml_template = 'metalink/4.0/main.xml'
+    # Specs: https://tools.ietf.org/html/rfc5854

@@ -18,6 +18,7 @@
         {% for url in file.urls %}
         <metaurl mediatype="{{file.mediatype}}">{{ url }}</metaurl>
         {% endfor %}
+        <publisher name="{{ meta.publisher }}" url="{{ meta.url }}"/>
     </file>
     {% endfor %}
 

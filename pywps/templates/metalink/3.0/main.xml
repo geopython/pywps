@@ -7,7 +7,10 @@
     <description>{{ meta.description }}</description>
     {% endif %}
     {% if meta.publisher %}
-    <publisher>{{ meta.publisher }}</publisher>
+    <publisher>
+        <name>{{ meta.publisher }}</name>
+        <url>{{ meta.url }}</url>
+    </publisher>
     {% endif %}
 
     <files>
@@ -22,6 +25,9 @@
             {% if file.size %}
             <size>{{ file.size }}</size>
             {% endif %}
+            <verification>
+                <hash type="sha256">{{ file.hash }}</hash>
+            </verification>
             <resources>
                 {% for url in file.urls %}
                 <url type="http">{{ url }}</url>
