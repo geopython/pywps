@@ -212,12 +212,12 @@ class LiteralOutput(basic.LiteralOutput):
 
 class MetaFile:
     """MetaFile object."""
-    def __init__(self, identity=None, description=None, format=None):
+    def __init__(self, identity=None, description=None, fmt=None):
         """Create a `MetaFile` object.
 
         :param str identity: human readable identity.
         :param str description: human readable file description.
-        :param pywps.FORMAT format: file mime type.
+        :param pywps.FORMAT fmt: file mime type.
 
         The content of each metafile is set like `ComplexOutputs`, ie
         using either the `data`, `file`, `stream` or `url` properties.
@@ -229,7 +229,7 @@ class MetaFile:
             identifier=identity or '',
             title=description or '',
             as_reference=True,
-            supported_formats=[format, ],
+            supported_formats=[fmt, ],
         )
 
     def _set_workdir(self, workdir):
@@ -260,7 +260,7 @@ class MetaFile:
     def name(self):
         """Indicate a specific file in a document describing multiple files."""
         js = self._output.json
-        (file_dir, name) = os.path.split(js.get('href', 'http:///'))
+        (_, name) = os.path.split(js.get('href', 'http:///'))
         return name
 
     @property

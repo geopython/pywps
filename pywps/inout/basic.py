@@ -12,7 +12,7 @@ import logging
 import pywps.configuration as config
 from pywps.inout.literaltypes import (LITERAL_DATA_TYPES, convert,
                                       make_allowedvalues, is_anyvalue)
-from pywps import get_ElementMakerForVersion, OGCUNIT, NAMESPACES
+from pywps import OGCUNIT
 from pywps.validator.mode import MODE
 from pywps.validator.base import emptyvalidator
 from pywps.validator import get_validator
@@ -22,10 +22,10 @@ from pywps.exceptions import NoApplicableCode, InvalidParameterValue, FileSizeEx
     FileURLNotSupported
 from pywps._compat import PY2, urlparse
 import base64
-from collections import namedtuple, defaultdict
+from collections import namedtuple
 from copy import deepcopy
 from io import BytesIO
-import six
+
 
 _SOURCE_TYPE = namedtuple('SOURCE_TYPE', 'MEMORY, FILE, STREAM, DATA, URL')
 SOURCE_TYPE = _SOURCE_TYPE(0, 1, 2, 3, 4)
@@ -324,9 +324,6 @@ class FileHandler(IOHandler):
         """Return url to file."""
         import pathlib
         return pathlib.PurePosixPath(self.file).as_uri()
-
-    def __getitem__(self, key, value):
-        raise TypeError("{} object is not subscriptable.".format(self.__class__.__name__))
 
     def _openmode(self, data=None):
         openmode = 'r'
