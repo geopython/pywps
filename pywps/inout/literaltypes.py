@@ -37,7 +37,12 @@ LITERAL_DATA_TYPES = ('float', 'boolean', 'integer', 'string',
 
 class AnyValue(object):
     """Any value for literal input
+    NOTE: not really implemented
     """
+
+    @property
+    def value(self):
+        return None
 
     @property
     def json(self):
