@@ -10,12 +10,12 @@ import unittest
 from pywps.validator.literalvalidator import *
 from pywps.inout.literaltypes import AllowedValue
 
-def get_input(allowed_values, data = 1):
+
+def get_input(allowed_values, data=1):
 
     class FakeInput(object):
         data = 1
         data_type = 'data'
-
 
     fake_input = FakeInput()
     fake_input.data = data
@@ -35,7 +35,7 @@ class ValidateTest(unittest.TestCase):
 
     def test_anyvalue_validator(self):
         """Test anyvalue validator"""
-        inpt = get_input(allowed_values = None)
+        inpt = get_input(allowed_values=None)
         self.assertTrue(validate_anyvalue(inpt, MODE.NONE))
 
     def test_allowedvalues_values_validator(self):
@@ -44,7 +44,7 @@ class ValidateTest(unittest.TestCase):
         allowed_value.allowed_type = ALLOWEDVALUETYPE.VALUE
         allowed_value.value = 1
 
-        inpt = get_input(allowed_values = [allowed_value])
+        inpt = get_input(allowed_values=[allowed_value])
         self.assertTrue(validate_allowed_values(inpt, MODE.SIMPLE), 'Allowed value 1 allowed')
 
         inpt.data = 2
@@ -58,12 +58,12 @@ class ValidateTest(unittest.TestCase):
         allowed_value.minval = 1
         allowed_value.maxval = 11
         allowed_value.spacing = 2
-        allowed_value.range_closure = RANGECLOSURETYPE.OPEN
+        allowed_value.range_closure = RANGECLOSURETYPE.CLOSED
 
-        inpt = get_input(allowed_values = [allowed_value])
+        inpt = get_input(allowed_values=[allowed_value])
 
         inpt.data = 1
-        self.assertTrue(validate_allowed_values(inpt, MODE.SIMPLE), 'Range OPEN closure')
+        self.assertTrue(validate_allowed_values(inpt, MODE.SIMPLE), 'Range CLOSED closure')
 
         inpt.data = 12
         self.assertFalse(validate_allowed_values(inpt, MODE.SIMPLE), 'Value too big')
@@ -76,12 +76,13 @@ class ValidateTest(unittest.TestCase):
 
         inpt.data = 11
         allowed_value.range_closure = RANGECLOSURETYPE.OPEN
-        self.assertTrue(validate_allowed_values(inpt, MODE.SIMPLE), 'Open Range')
+        self.assertFalse(validate_allowed_values(inpt, MODE.SIMPLE), 'Open Range')
 
+        inpt.data = 1
         allowed_value.range_closure = RANGECLOSURETYPE.OPENCLOSED
         self.assertFalse(validate_allowed_values(inpt, MODE.SIMPLE), 'OPENCLOSED Range')
 
-        inpt.data = 1
+        inpt.data = 11
         allowed_value.range_closure = RANGECLOSURETYPE.CLOSEDOPEN
         self.assertFalse(validate_allowed_values(inpt, MODE.SIMPLE), 'CLOSEDOPEN Range')
 
@@ -93,16 +94,16 @@ class ValidateTest(unittest.TestCase):
         allowed_value1.minval = 1
         allowed_value1.maxval = 11
         allowed_value1.spacing = 2
-        allowed_value1.range_closure = RANGECLOSURETYPE.OPEN
+        allowed_value1.range_closure = RANGECLOSURETYPE.CLOSED
 
         allowed_value2 = AllowedValue()
         allowed_value2.allowed_type = ALLOWEDVALUETYPE.VALUE
         allowed_value2.value = 15
 
-        inpt = get_input(allowed_values = [allowed_value1, allowed_value2])
+        inpt = get_input(allowed_values=[allowed_value1, allowed_value2])
 
         inpt.data = 1
-        self.assertTrue(validate_allowed_values(inpt, MODE.SIMPLE), 'Range OPEN closure')
+        self.assertTrue(validate_allowed_values(inpt, MODE.SIMPLE), 'Range CLOSED closure')
 
         inpt.data = 15
         self.assertTrue(validate_allowed_values(inpt, MODE.SIMPLE), 'AllowedValue')

@@ -86,13 +86,13 @@ def _validate_range(interval, data):
 
         if passed:
             if interval.range_closure == RANGECLOSURETYPE.OPEN:
-                passed = (interval.minval <= data <= interval.maxval)
-            elif interval.range_closure == RANGECLOSURETYPE.CLOSED:
                 passed = (interval.minval < data < interval.maxval)
+            elif interval.range_closure == RANGECLOSURETYPE.CLOSED:
+                passed = (interval.minval <= data <= interval.maxval)
             elif interval.range_closure == RANGECLOSURETYPE.OPENCLOSED:
-                passed = (interval.minval <= data < interval.maxval)
-            elif interval.range_closure == RANGECLOSURETYPE.CLOSEDOPEN:
                 passed = (interval.minval < data <= interval.maxval)
+            elif interval.range_closure == RANGECLOSURETYPE.CLOSEDOPEN:
+                passed = (interval.minval <= data < interval.maxval)
     else:
         passed = False
 
