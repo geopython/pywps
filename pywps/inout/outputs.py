@@ -7,10 +7,11 @@ WPS Output classes
 """
 
 import lxml.etree as etree
-import six
+import os
 from pywps.inout import basic
 from pywps.inout.storage import FileStorage
 from pywps.validator.mode import MODE
+from pywps import configuration as config
 
 
 class BoundingBoxOutput(basic.BBoxOutput):
@@ -207,3 +208,198 @@ class LiteralOutput(basic.LiteralOutput):
             data["uom"] = self.uom.json
 
         return data
+
+
+class MetaFile:
+    """MetaFile object."""
+    def __init__(self, identity=None, description=None, fmt=None):
+        """Create a `MetaFile` object.
+
+        :param str identity: human readable identity.
+        :param str description: human readable file description.
+        :param pywps.FORMAT fmt: file mime type.
+
+        The content of each metafile is set like `ComplexOutputs`, ie
+        using either the `data`, `file`, `stream` or `url` properties.
+
+        The metalink document is created by a `MetaLink` instance, which
+        holds a number of `MetaFile` instances.
+        """
+        self._output = ComplexOutput(
+            identifier=identity or '',
+            title=description or '',
+            as_reference=True,
+            supported_formats=[fmt, ],
+        )
+
+    def _set_workdir(self, workdir):
+        self._output.workdir = workdir
+
+    @property
+    def hash(self):
+        """Text construct that conveys a cryptographic hash for a file.
+
+        All hashes are encoded in lowercase hexadecimal format.  Hashes
+        are used to verify the integrity of a complete file or portion
+        of a file to determine if the file has been transferred without
+        any errors.
+        """
+        import hashlib
+        m = hashlib.sha256()
+        with open(self.file, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                m.update(chunk)
+        return m.hexdigest()
+
+    @property
+    def identity(self):
+        """Human-readable identity."""
+        return self._output.identifier
+
+    @property
+    def name(self):
+        """Indicate a specific file in a document describing multiple files."""
+        js = self._output.json
+        (_, name) = os.path.split(js.get('href', 'http:///'))
+        return name
+
+    @property
+    def size(self):
+        """Length of the linked content in octets."""
+        return os.stat(self.file).st_size
+
+    @property
+    def urls(self):
+        js = self._output.json
+        return [js.get('href', ''), ]
+
+    @property
+    def mediatype(self):
+        """Multipurpose Internet Mail Extensions (MIME) media type
+        [RFC4288] of the metadata file available at the IRI."""
+        return self._output.data_format.mime_type
+
+    @property
+    def data(self):
+        return self._output.data
+
+    @data.setter
+    def data(self, value):
+        self._output.data = value
+
+    @property
+    def file(self):
+        return self._output.file
+
+    @file.setter
+    def file(self, value):
+        self._output.file = value
+
+    @property
+    def url(self):
+        return self._output.url
+
+    @url.setter
+    def url(self, value):
+        self._output.url = value
+
+    @property
+    def stream(self):
+        return self._output.stream
+
+    @stream.setter
+    def stream(self, value):
+        self._output.stream = value
+
+    def __str__(self):
+        out = "MetaFile {}:".format(self.name)
+        for url in self.urls:
+            out += "\n\t{}".format(url)
+        return out
+
+    def __repr__(self):
+        return "<pywps.inout.outputs.MetaFile {}>".format(self.name)
+
+
+class MetaLink:
+    _xml_template = 'metalink/3.0/main.xml'
+    # Specs: https://www.metalinker.org/Metalink_3.0_Spec.pdf
+
+    def __init__(self, identity=None, description=None, publisher=None, files=(),
+                 workdir=None):
+        """Create a MetaLink v3.0 instance.
+
+        :param str identity: human readable identity.
+        :param str description: human readable file description.
+        :param str publisher: The name of the file's publisher.
+
+
+        To use, first append `MetaFile` instances, then write the metalink using the `xml`
+        property.
+
+        Methods:
+            - `append`: add a `MetaFile` instance
+        """
+        self.identity = identity
+        self.description = description
+        self.workdir = workdir
+        self.publisher = publisher
+        self.files = []
+
+        for file in files:
+            self.append(file)
+        self._load_template()
+
+    def append(self, file):
+        """Append a `MetaFile` instance."""
+        if not isinstance(file, MetaFile):
+            raise ValueError("file must be a MetaFile instance.")
+        file._set_workdir(self.workdir)
+        self.files.append(file)
+
+    @property
+    def xml(self):
+        return self._template.render(meta=self)
+
+    @property
+    def origin(self):
+        """IRI where the Metalink Document was originally published.
+        If the dynamic attribute of metalink:origin is "true", then
+        updated versions of the Metalink can be found at this IRI.
+        """
+        return ""
+
+    @property
+    def published(self):
+        """Date construct indicating an instant in time associated
+        with an event early in the life cycle of the entry."""
+        import datetime
+        return datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    @property
+    def generator(self):
+        """Generating agent name and version used to generate a
+        Metalink Document, for debugging and other purposes."""
+        import pywps
+        return "PyWPS/{}".format(pywps.__version__)
+
+    @property
+    def url(self):
+        """Return the server URL."""
+        return config.get_config_value('server', 'url')
+
+    def _load_template(self):
+        from pywps.response import RelEnvironment
+        from jinja2 import PackageLoader
+
+        template_env = RelEnvironment(
+            loader=PackageLoader('pywps', 'templates'),
+            trim_blocks=True, lstrip_blocks=True,
+            autoescape=True, )
+
+        self._template = template_env.get_template(self._xml_template)
+
+
+class MetaLink4(MetaLink):
+    _xml_template = 'metalink/4.0/main.xml'
+    # Specs: https://tools.ietf.org/html/rfc5854

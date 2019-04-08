@@ -12,7 +12,7 @@ import logging
 import pywps.configuration as config
 from pywps.inout.literaltypes import (LITERAL_DATA_TYPES, convert,
                                       make_allowedvalues, is_anyvalue)
-from pywps import get_ElementMakerForVersion, OGCUNIT, NAMESPACES
+from pywps import OGCUNIT
 from pywps.validator.mode import MODE
 from pywps.validator.base import emptyvalidator
 from pywps.validator import get_validator
@@ -23,8 +23,9 @@ from pywps.exceptions import NoApplicableCode, InvalidParameterValue, FileSizeEx
 from pywps._compat import PY2, urlparse
 import base64
 from collections import namedtuple
+from copy import deepcopy
 from io import BytesIO
-import six
+
 
 _SOURCE_TYPE = namedtuple('SOURCE_TYPE', 'MEMORY, FILE, STREAM, DATA, URL')
 SOURCE_TYPE = _SOURCE_TYPE(0, 1, 2, 3, 4)
@@ -236,6 +237,11 @@ class IOHandler(object):
             return self.data_format.extension
         else:
             return ''
+
+    def clone(self):
+        """Create copy of yourself
+        """
+        return deepcopy(self)
 
     @staticmethod
     def _create_fset_properties():

@@ -164,6 +164,11 @@ def create_mimetype_process():
                    ])
 
 
+def create_metalink_process():
+    from .processes.metalinkprocess import MultipleOutputs
+    return MultipleOutputs()
+
+
 def get_output(doc):
     """Return the content of LiteralData, Reference or ComplexData."""
 
@@ -360,6 +365,11 @@ class ExecuteTest(unittest.TestCase):
         request = FakeRequest('text/xml')
         with self.assertRaises(InvalidParameterValue):
             response = service.execute('get_mimetype_process', request, 'fakeuuid')
+
+    def test_metalink(self):
+        client = client_for(Service(processes=[create_metalink_process()]))
+        resp = client.get('?Request=Execute&identifier=multiple-outputs')
+        assert resp.status_code == 400
 
     def test_missing_process_error(self):
         client = client_for(Service(processes=[create_ultimate_question()]))
