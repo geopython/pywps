@@ -84,16 +84,20 @@ class AllowedValue(object):
     :param pywps.input.literaltypes.RANGECLOSURETYPE range_closure:
     """
 
-    def __init__(self, allowed_type=ALLOWEDVALUETYPE.VALUE, value=None,
+    def __init__(self, value=None,
                  minval=None, maxval=None, spacing=None,
                  range_closure=RANGECLOSURETYPE.CLOSED):
 
-        self.allowed_type = allowed_type
         self.value = value
         self.minval = minval
         self.maxval = maxval
         self.spacing = spacing
         self.range_closure = range_closure
+
+        if self.minval or self.maxval or self.spacing:
+            self.allowed_type = ALLOWEDVALUETYPE.RANGE
+        else:
+            self.allowed_type = ALLOWEDVALUETYPE.VALUE
 
     def __eq__(self, other):
         return isinstance(other, AllowedValue) and self.json == other.json
@@ -357,8 +361,7 @@ def make_allowedvalues(allowed_values):
                 spacing = value[1]
                 maxval = value[2]
             new_allowedvalues.append(
-                AllowedValue(allowed_type=ALLOWEDVALUETYPE.RANGE,
-                             minval=minval, maxval=maxval,
+                AllowedValue(minval=minval, maxval=maxval,
                              spacing=spacing)
             )
 
