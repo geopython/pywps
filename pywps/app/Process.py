@@ -21,6 +21,7 @@ import pywps.configuration as config
 from pywps._compat import PY2
 from pywps.exceptions import (StorageNotSupported, OperationNotSupported,
                               ServerBusy, NoApplicableCode)
+from pywps.app.exceptions import ProcessError
 
 
 LOGGER = logging.getLogger("PYWPS")
@@ -232,9 +233,14 @@ class Process(object):
 
             # update the process status to display process failed
 
-            msg = 'Process error: {}.{} Line {} {}'.format(fname, method_name, exc_tb.tb_lineno, e)
+            msg = 'Process error: method={}.{}, line={}, msg={}'.format(fname, method_name, exc_tb.tb_lineno, e)
             LOGGER.error(msg)
-            if config.get_config_value("logging", "level") != "DEBUG":
+            # In case of a ProcessError use the validated exception message.
+            if isinstance(e, ProcessError):
+                msg = "Process error: {}".format(e)
+            # Only in debug mode we use the log message including the traceback ...
+            elif config.get_config_value("logging", "level") != "DEBUG":
+                # ... otherwise we use a sparse common error message.
                 msg = 'Process failed, please check server error log'
             wps_response._update_status(WPS_STATUS.FAILED, msg, 100)
 
