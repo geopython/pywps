@@ -145,8 +145,8 @@ server:
     Although this is usually used for `ComplexData` input type, it can be used
     for literal and bounding box data too.
 
-Sychronous versus asynchronous process request
-----------------------------------------------
+Synchronous versus asynchronous process request
+-----------------------------------------------
 
 There are two modes of process instance execution: Synchronous and asynchronous.
 

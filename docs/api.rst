@@ -10,6 +10,10 @@ Process
 
 .. autoclass:: Process
 
+Exceptions you can raise in the process implementation to show a user-friendly error message.
+
+.. autoclass:: pywps.app.exceptions.ProcessError
+
 Inputs and outputs
 ==================
 
