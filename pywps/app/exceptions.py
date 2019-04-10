@@ -12,7 +12,7 @@ class ProcessError(Exception):
     min_msg_length = 3
     max_msg_length = 144
     allowed_chars = ['.', ':', '!', '?', '=', ',', '-']
-    default_msg = 'Sorry, process failed.'
+    default_msg = 'Sorry, process failed. Please check server error log.'
 
     def __init__(self, msg=None):
         self.msg = msg
@@ -22,8 +22,7 @@ class ProcessError(Exception):
 
     def _validate_message(self):
         valid = False
-        if self.msg and len(self.msg) <= self.max_msg_length and \
-           len(self.msg) >= self.min_msg_length:
+        if self.msg and self.min_msg_length <= len(self.msg) <= self.max_msg_length:
             # remove spaces
             test_str = self.msg.replace(' ', '')
             # remove allowed non alpha-numeric chars
