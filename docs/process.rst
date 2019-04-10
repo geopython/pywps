@@ -401,9 +401,9 @@ This sparse error message is used to avoid security issues by providing internal
 service information in an uncontrolled way.
 
 But in some cases you want to provide a user-friendly error message to give the user a hint of
-what went wrong with the processing job. In this case you can use the :class:`ProcessError`
+what went wrong with the processing job. In this case you can use the :class:`pywps.app.exceptions.ProcessError`
 exception. The error message will be send to the user encapsulated as `ows:Exception`.
-The class:`ProcessError` validates the error message to make sure it is not too long
+The :class:`pywps.app.exceptions.ProcessError` validates the error message to make sure it is not too long
 and it does not contain any suspicious characters.
 
 .. note::
@@ -412,11 +412,11 @@ and it does not contain any suspicious characters.
     The allowed special characters are: ".", ":", "!", "?", "=", ",", "-".
 
 .. note::
-    During the process development you might want to get traceback shown in `ows:Exception`.
+    During the process development you might want to get a traceback shown in `ows:Exception`.
     This is possible by running PyWPS in debug mode. In `pywps.cfg` config file set::
+
         [logging]
         level=DEBUG
-
 
 Example process
 ---------------
