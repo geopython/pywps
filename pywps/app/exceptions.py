@@ -9,6 +9,13 @@ Process exceptions raised intentionally in processes to provide information for 
 
 
 class ProcessError(Exception):
+    """:class:`pywps.app.exceptions.ProcessError` is an :class:`Exception`
+    you can intentionally raise in a process
+    to provide a user-friendly error message.
+    The error message gets validated (3<= message length <=144) and only
+    alpha numeric characters and a few special characters are allowed.
+    The special characters are: `.`, `:`, `!`, `?`, `=`, `,`, `-`.
+    """
     min_msg_length = 3
     max_msg_length = 144
     allowed_chars = ['.', ':', '!', '?', '=', ',', '-']

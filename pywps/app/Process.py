@@ -235,9 +235,12 @@ class Process(object):
 
             msg = 'Process error: method={}.{}, line={}, msg={}'.format(fname, method_name, exc_tb.tb_lineno, e)
             LOGGER.error(msg)
+            # In case of a ProcessError use the validated exception message.
             if isinstance(e, ProcessError):
                 msg = "Process error: {}".format(e)
+            # Only in debug mode we use the log message including the traceback ...
             elif config.get_config_value("logging", "level") != "DEBUG":
+                # ... otherwise we use a sparse common error message.
                 msg = 'Process failed, please check server error log'
             wps_response._update_status(WPS_STATUS.FAILED, msg, 100)
 
