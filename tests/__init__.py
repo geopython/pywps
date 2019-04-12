@@ -6,6 +6,12 @@
 import sys
 import unittest
 
+import os
+import subprocess
+import tempfile
+import configparser
+import pywps.configuration as config
+
 from tests import test_capabilities
 from tests import test_describe
 from tests import test_execute
@@ -20,13 +26,50 @@ from tests import test_wpsrequest
 from tests import test_service
 from tests import test_processing
 from tests import test_assync
+from tests import test_grass_location
 from tests.validator import test_complexvalidators
 from tests.validator import test_literalvalidators
+
+
+def find_grass():
+    """Check whether GRASS is installed and return path to its GISBASE."""
+    startcmd = ['grass', '--config', 'path']
+
+    try:
+        p = subprocess.Popen(startcmd,
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    except:
+        return None
+
+    out, _ = p.communicate()
+
+    str_out = out.decode("utf-8")
+    gisbase = str_out.rstrip(os.linesep)
+
+    return gisbase
+
+
+def config_grass(gisbase):
+    """Configure PyWPS to allow GRASS commands."""
+    conf = configparser.ConfigParser()
+    conf.add_section('grass')
+    conf.set('grass', 'gisbase', gisbase)
+    conf.set('grass', 'gui', 'text')
+
+    _, conf_path = tempfile.mkstemp()
+    with open(conf_path, 'w') as c:
+        conf.write(c)
+
+    config.load_configuration(conf_path)
 
 
 def load_tests(loader=None, tests=None, pattern=None):
     """Load tests
     """
+    gisbase = find_grass()
+    if gisbase:
+        config_grass(gisbase)
+
     return unittest.TestSuite([
         test_capabilities.load_tests(),
         test_execute.load_tests(),
@@ -43,6 +86,7 @@ def load_tests(loader=None, tests=None, pattern=None):
         test_service.load_tests(),
         test_processing.load_tests(),
         test_assync.load_tests(),
+        test_grass_location.load_tests(),
     ])
 
 

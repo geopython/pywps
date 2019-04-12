@@ -240,11 +240,6 @@ class Service(object):
     def _set_grass(self):
         """Set environment variables needed for GRASS GIS support
         """
-
-        if not PY2:
-            LOGGER.debug('Python3 is not supported by GRASS')
-            return
-
         gisbase = config.get_config_value('grass', 'gisbase')
         if gisbase and os.path.isdir(gisbase):
             LOGGER.debug('GRASS GISBASE set to {}'.format(gisbase))
