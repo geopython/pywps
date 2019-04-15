@@ -326,13 +326,15 @@ class MetaLink:
     # Specs: https://www.metalinker.org/Metalink_3.0_Spec.pdf
 
     def __init__(self, identity=None, description=None, publisher=None, files=(),
-                 workdir=None):
+                 workdir=None, checksums=False):
         """Create a MetaLink v3.0 instance.
 
         :param str identity: human readable identity.
         :param str description: human readable file description.
         :param str publisher: The name of the file's publisher.
-
+        :param tuple files: Sequence of files to include in Metalink. Can also be added using `append`.
+        :param str workdir: Work directory to store temporary files.
+        :param bool checksums: Whether to compute checksums on files.
 
         To use, first append `MetaFile` instances, then write the metalink using the `xml`
         property.
@@ -345,6 +347,7 @@ class MetaLink:
         self.workdir = workdir
         self.publisher = publisher
         self.files = []
+        self.checksums = checksums
 
         for file in files:
             self.append(file)

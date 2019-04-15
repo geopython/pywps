@@ -25,9 +25,11 @@
             {% if file.size %}
             <size>{{ file.size }}</size>
             {% endif %}
+            {% if meta.checksums %}
             <verification>
                 <hash type="sha256">{{ file.hash }}</hash>
             </verification>
+            {% endif %}
             <resources>
                 {% for url in file.urls %}
                 <url type="http">{{ url }}</url>
