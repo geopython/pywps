@@ -255,15 +255,15 @@ class LiteralInput(basic.LiteralInput):
                      should be :class:`pywps.app.Common.Metadata` objects.
     """
 
-    def __init__(self, identifier, title=None, data_type='integer', workdir=None, abstract='', keywords=[],
+    def __init__(self, identifier, title=None, data_type=None, workdir=None, abstract='', keywords=[],
                  metadata=[], uoms=None,
                  min_occurs=1, max_occurs=1,
-                 mode=MODE.SIMPLE, allowed_values=AnyValue,
+                 mode=MODE.SIMPLE, allowed_values=None,
                  default=None, default_type=basic.SOURCE_TYPE.DATA):
 
         """Constructor
         """
-
+        data_type = data_type or 'string'
         basic.LiteralInput.__init__(self, identifier, title=title,
                                     data_type=data_type, workdir=workdir, abstract=abstract,
                                     keywords=keywords, metadata=metadata,
@@ -289,6 +289,7 @@ class LiteralInput(basic.LiteralInput):
             'workdir': self.workdir,
             'allowed_values': [value.json for value in self.allowed_values],
             'any_value': self.any_value,
+            'values_reference': self.values_reference,
             'mode': self.valid_mode,
             'min_occurs': self.min_occurs,
             'max_occurs': self.max_occurs,
@@ -331,6 +332,7 @@ class LiteralInput(basic.LiteralInput):
         metadata = json_input.pop('metadata', [])
         json_input.pop('type')
         json_input.pop('any_value', None)
+        json_input.pop('values_reference', None)
 
         instance = cls(**json_input)
 

@@ -554,6 +554,7 @@ class LiteralInputTest(unittest.TestCase):
         self.literal_input = inout.inputs.LiteralInput(
             identifier="literalinput",
             title="Literal Input",
+            data_type='integer',
             mode=2,
             allowed_values=(1, 2, (3, 3, 12)),
             default=6,

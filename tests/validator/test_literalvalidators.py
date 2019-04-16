@@ -8,7 +8,7 @@
 
 import unittest
 from pywps.validator.literalvalidator import *
-from pywps.inout.literaltypes import AllowedValue
+from pywps.inout.literaltypes import AllowedValue, AnyValue, ValuesReference
 
 
 def get_input(allowed_values, data=1):
@@ -33,10 +33,20 @@ class ValidateTest(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def test_value_validator(self):
+        """Test simple validator for string, integer, etc"""
+        inpt = get_input(allowed_values=None, data='test')
+        self.assertTrue(validate_value(inpt, MODE.SIMPLE))
+
     def test_anyvalue_validator(self):
         """Test anyvalue validator"""
-        inpt = get_input(allowed_values=None)
-        self.assertTrue(validate_anyvalue(inpt, MODE.NONE))
+        inpt = get_input(allowed_values=AnyValue())
+        self.assertTrue(validate_anyvalue(inpt, MODE.SIMPLE))
+
+    def test_values_reference_validator(self):
+        """Test ValuesReference validator"""
+        inpt = get_input(allowed_values=ValuesReference(reference='http://some.org?search=test&format=json'))
+        self.assertTrue(validate_values_reference(inpt, MODE.SIMPLE))
 
     def test_allowedvalues_values_validator(self):
         """Test allowed values - values"""
@@ -110,7 +120,6 @@ class ValidateTest(unittest.TestCase):
 
         inpt.data = 13
         self.assertFalse(validate_allowed_values(inpt, MODE.SIMPLE), 'Out of range')
-
 
 
 def load_tests(loader=None, tests=None, pattern=None):

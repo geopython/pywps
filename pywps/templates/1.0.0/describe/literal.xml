@@ -12,7 +12,9 @@
                 </UOMs>
                 {% endif %}
                 {% if put.any_value %}
-                <ows:AnyValue />
+                <ows:AnyValue/>
+                {% elif put.values_reference %}
+                <ows:ValuesReference ows:reference="{{ put.values_reference.reference }}"/>
                 {% elif put.allowed_values %}
                 <ows:AllowedValues>
                     {% for value in put.allowed_values %}
