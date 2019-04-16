@@ -14,7 +14,9 @@
         {% if file.size %}
         <size>{{ file.size }}</size>
         {% endif %}
+        {% if meta.checksums %}
         <hash type="sha-256">{{ file.hash }}</hash>
+        {% endif %}
         {% for url in file.urls %}
         <metaurl mediatype="{{file.mediatype}}">{{ url }}</metaurl>
         {% endfor %}

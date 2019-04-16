@@ -738,6 +738,19 @@ class TestMetaLink(unittest.TestCase):
         out.data = ml.xml
         self.assertTrue(validatexml(out, MODE.STRICT))
 
+    def test_hash(self):
+        ml = self.metalink()
+        assert 'hash' not in ml.xml
+
+        ml.checksums = True
+        assert 'hash' in ml.xml
+
+        ml4 = self.metalink4()
+        assert 'hash' not in ml4.xml
+
+        ml4.checksums = True
+        assert 'hash' in ml4.xml
+
 
 def load_tests(loader=None, tests=None, pattern=None):
     if not loader:
