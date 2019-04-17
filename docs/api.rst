@@ -37,6 +37,8 @@ LiteralData
 
 .. autoclass:: pywps.inout.literaltypes.AllowedValue
 
+.. autoclass:: pywps.inout.literaltypes.ValuesReference
+
 .. autodata:: pywps.inout.literaltypes.LITERAL_DATA_TYPES
 
 

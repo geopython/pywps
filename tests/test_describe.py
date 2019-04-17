@@ -149,7 +149,7 @@ class DescribeProcessInputTest(unittest.TestCase):
                 Metadata('process metadata 2', 'http://example.org/2')]
         )
         result = self.describe_process(hello_process)
-        assert result.inputs == [('the_name', 'literal', 'integer')]
+        assert result.inputs == [('the_name', 'literal', 'string')]
         assert result.metadata == ['process metadata 1', 'process metadata 2']
 
     def test_one_literal_integer_input(self):

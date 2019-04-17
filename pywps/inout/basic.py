@@ -11,13 +11,16 @@ import tempfile
 import logging
 import pywps.configuration as config
 from pywps.inout.literaltypes import (LITERAL_DATA_TYPES, convert,
-                                      make_allowedvalues, is_anyvalue)
+                                      make_allowedvalues, is_anyvalue,
+                                      is_values_reference)
 from pywps import OGCUNIT
 from pywps.validator.mode import MODE
 from pywps.validator.base import emptyvalidator
 from pywps.validator import get_validator
-from pywps.validator.literalvalidator import (validate_anyvalue,
-                                              validate_allowed_values)
+from pywps.validator.literalvalidator import (validate_value,
+                                              validate_anyvalue,
+                                              validate_allowed_values,
+                                              validate_values_reference)
 from pywps.exceptions import NoApplicableCode, InvalidParameterValue, FileSizeExceeded, \
     FileURLNotSupported
 from pywps._compat import PY2, urlparse
@@ -691,10 +694,17 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
             raise InvalidParameterValue("Source types other than data are not supported.")
 
         self.any_value = False
+        self.values_reference = None
         self.allowed_values = []
 
         if allowed_values:
-            self.any_value = is_anyvalue(allowed_values) or any(is_anyvalue(a) for a in allowed_values)
+            if not isinstance(allowed_values, (tuple, list)):
+                allowed_values = [allowed_values]
+            self.any_value = any(is_anyvalue(a) for a in allowed_values)
+            for value in allowed_values:
+                if is_values_reference(value):
+                    self.values_reference = value
+                    break
             self.allowed_values = make_allowedvalues(allowed_values)
 
         self._default = default
@@ -711,8 +721,12 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
 
         if self.any_value:
             return validate_anyvalue
-        else:
+        elif self.values_reference:
+            return validate_values_reference
+        elif self.allowed_values:
             return validate_allowed_values
+        else:
+            return validate_value
 
 
 class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):

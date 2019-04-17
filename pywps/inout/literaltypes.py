@@ -7,14 +7,12 @@
 """
 
 from pywps._compat import urlparse
-import time
 from dateutil.parser import parse as date_parser
 import datetime
 from pywps.exceptions import InvalidParameterValue
 from pywps.validator.allowed_value import RANGECLOSURETYPE
 from pywps.validator.allowed_value import ALLOWEDVALUETYPE
 from pywps._compat import PY2
-from pywps import get_ElementMakerForVersion
 
 import logging
 LOGGER = logging.getLogger('PYWPS')
@@ -36,7 +34,25 @@ LITERAL_DATA_TYPES = ('float', 'boolean', 'integer', 'string',
 
 
 class AnyValue(object):
-    """Any value for literal input
+    """Specifies that any value is allowed for this quantity.
+    """
+
+    @property
+    def value(self):
+        return None
+
+    @property
+    def json(self):
+        return {
+            'type': 'anyvalue',
+        }
+
+    def __eq__(self, other):
+        return isinstance(other, AnyValue) and self.json == other.json
+
+
+class NoValue(object):
+    """No value allowed
     NOTE: not really implemented
     """
 
@@ -46,35 +62,47 @@ class AnyValue(object):
 
     @property
     def json(self):
-        return {'type': 'anyvalue'}
+        return {'type': 'novalue'}
 
     def __eq__(self, other):
-        return self.json == other.json
-
-
-class NoValue(object):
-    """No value allowed
-    NOTE: not really implemented
-    """
-
-    @property
-    def json(self):
-        return {'type': 'novalue'}
+        return isinstance(other, NoValue) and self.json == other.json
 
 
 class ValuesReference(object):
-    """Any value for literal input
-    NOTE: not really implemented
+    """Reference to list of all valid values and/or ranges of values for this quantity.
+    NOTE: Validation of values is not implemented.
+
+    :param: reference: URL from which this set of ranges and values can be retrieved
+    :param: values_form: Reference to a description of the mimetype, encoding,
+        and schema used for this set of values and ranges.
     """
+
+    def __init__(self, reference=None, values_form=None):
+        self.reference = reference
+        self.values_form = values_form
+
+        if not self.reference:
+            raise InvalidParameterValue("values reference is missing.")
+
+    @property
+    def value(self):
+        return None
 
     @property
     def json(self):
-        return {'type': 'valuesreference'}
+        return {
+            'type': 'valuesreference',
+            'reference': self.reference,
+            'values_form': self.values_form
+        }
+
+    def __eq__(self, other):
+        return isinstance(other, ValuesReference) and self.json == other.json
 
 
 class AllowedValue(object):
-    """Allowed value parameters
-    the values are evaluated in literal validator functions
+    """List of all valid values and/or ranges of values for this quantity.
+    The values are evaluated in literal validator functions
 
     :param pywps.validator.allowed_value.ALLOWEDVALUETYPE allowed_type: VALUE or RANGE
     :param value: single value
@@ -355,7 +383,7 @@ def make_allowedvalues(allowed_values):
             new_allowedvalues.append(value)
 
         elif type(value) == tuple or type(value) == list:
-            minval = maxval = spacing = None
+            spacing = None
             if len(value) == 2:
                 minval = value[0]
                 maxval = value[1]
@@ -390,3 +418,21 @@ def is_anyvalue(value):
         is_av = True
 
     return is_av
+
+
+def is_values_reference(value):
+    """Check for ValuesReference in given value
+    """
+
+    check = False
+
+    if value is ValuesReference:
+        check = True
+    elif value is None:
+        check = False
+    elif isinstance(value, ValuesReference):
+        check = True
+    elif str(value).lower() == 'valuesreference':
+        check = True
+
+    return check
