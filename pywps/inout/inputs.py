@@ -61,7 +61,9 @@ class BoundingBoxInput(basic.BBoxInput):
             'crs': self.crs,
             'crss': self.crss,
             'metadata': [m.json for m in self.metadata],
-            'bbox': (self.ll, self.ur),
+            'bbox': self.data,
+            'll': self.ll,
+            'ur': self.ur,
             'dimensions': self.dimensions,
             'workdir': self.workdir,
             'mode': self.valid_mode,
@@ -84,8 +86,7 @@ class BoundingBoxInput(basic.BBoxInput):
             min_occurs=json_input['min_occurs'],
             max_occurs=json_input['max_occurs'],
         )
-        instance.ll = json_input['bbox'][0]
-        instance.ur = json_input['bbox'][1]
+        instance.data = json_input['bbox']
 
         return instance
 

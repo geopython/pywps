@@ -411,7 +411,6 @@ class ExecuteTest(unittest.TestCase):
         assert get_output(resp.xml) == {'message': "Hello foo!"}
 
     def test_bbox(self):
-        self.skipTest('OWSlib not python 3 compatible')
         client = client_for(Service(processes=[create_bbox_process()]))
         request_doc = WPS.Execute(
             OWS.Identifier('my_bbox_process'),

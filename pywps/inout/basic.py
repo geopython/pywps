@@ -672,8 +672,20 @@ class BasicBoundingBox(object):
         self.crss = crss or ['epsg:4326']
         self.crs = self.crss[0]
         self.dimensions = dimensions
-        self.ll = []
-        self.ur = []
+
+    @property
+    def ll(self):
+        data = getattr(self, 'data', None)
+        if data:
+            return data[:2]
+        return []
+
+    @property
+    def ur(self):
+        data = getattr(self, 'data', None)
+        if data:
+            return data[2:]
+        return []
 
 
 class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):

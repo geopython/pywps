@@ -434,15 +434,15 @@ def get_inputs_from_xml(doc):
             the_inputs[identifier].append(inpt)
             continue
 
-        # OWSlib is not python 3 compatible yet
-        if PY2:
-            from owslib.ows import BoundingBox
-            bbox_datas = xpath_ns(input_el, './wps:Data/wps:BoundingBoxData')
-            if bbox_datas:
-                for bbox_data in bbox_datas:
-                    bbox_data_el = bbox_data
-                    bbox = BoundingBox(bbox_data_el)
-                    the_inputs[identifier].append(bbox)
+        # Using OWSlib BoundingBox
+        from owslib.ows import BoundingBox
+        bbox_datas = xpath_ns(input_el, './wps:Data/wps:BoundingBoxData')
+        if bbox_datas:
+            for bbox_data in bbox_datas:
+                bbox_data_el = bbox_data
+                bbox = BoundingBox(bbox_data_el)
+                the_inputs[identifier].append(bbox)
+                LOGGER.debug("parse bbox: {},{},{},{}".format(bbox.minx, bbox.miny, bbox.maxx, bbox.maxy))
     return the_inputs
 
 

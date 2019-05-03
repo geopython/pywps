@@ -57,7 +57,9 @@ class BoundingBoxOutput(basic.BBoxOutput):
             'crs': self.crs,
             'crss': self.crss,
             'dimensions': self.dimensions,
-            'bbox': (self.ll, self.ur),
+            'bbox': self.data,
+            'll': self.ll,
+            'ur': self.ur,
             'workdir': self.workdir,
             'mode': self.valid_mode,
         }
