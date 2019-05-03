@@ -659,8 +659,7 @@ class BoxInputTest(unittest.TestCase):
     def setUp(self):
 
         self.bbox_input = inout.inputs.BoundingBoxInput("bboxinput", title="BBox input", dimensions=2)
-        self.bbox_input.ll = [0, 1]
-        self.bbox_input.ur = [2, 4]
+        self.bbox_input.data = [0, 1, 2, 4]
 
     def test_contruct(self):
         self.assertIsInstance(self.bbox_input, BBoxInput)
@@ -672,7 +671,8 @@ class BoxInputTest(unittest.TestCase):
         self.assertTrue(out['title'], 'title does not exist')
         self.assertFalse(out['abstract'], 'abstract set')
         self.assertEqual(out['type'], 'bbox', 'type set')
-        self.assertTupleEqual(out['bbox'], ([0, 1], [2, 4]), 'data are tehre')
+        # self.assertTupleEqual(out['bbox'], ([0, 1], [2, 4]), 'data are there')
+        self.assertEqual(out['bbox'], [0, 1, 2, 4], 'data are there')
         self.assertEqual(out['dimensions'], 2, 'Dimensions set')
 
 
