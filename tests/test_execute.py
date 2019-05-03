@@ -434,13 +434,13 @@ class ExecuteTest(unittest.TestCase):
             output,
             './ows:Identifier')[0].text)
 
-        self.assertEqual('15 50', xpath_ns(
+        self.assertEqual(' 15  50 ', xpath_ns(
             output,
-            './wps:Data/ows:BoundingBox/ows:LowerCorner')[0].text)
+            './wps:Data/ows:WGS84BoundingBox/ows:LowerCorner')[0].text)
 
-        self.assertEqual('16 50', xpath_ns(
+        self.assertEqual(' 16  51 ', xpath_ns(
             output,
-            './wps:Data/ows:BoundingBox/ows:LowerCorner')[0].text)
+            './wps:Data/ows:WGS84BoundingBox/ows:UpperCorner')[0].text)
 
     def test_output_response_dataType(self):
         client = client_for(Service(processes=[create_greeter()]))
