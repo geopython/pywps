@@ -48,12 +48,12 @@
             {% elif input.type == "bbox" %}
 			<wps:Data>
                 {% if input.crs == "EPSG:4326" %}
-                <ows:WGS84BoundingBox dimensions="{{ output.dimensions }}">
+                <ows:WGS84BoundingBox dimensions="{{ input.dimensions }}">
                     <ows:LowerCorner>{% for c in input.ll %} {{ c }} {% endfor %}</ows:LowerCorner>
                     <ows:UpperCorner>{% for c in input.ur %} {{ c }} {% endfor %}</ows:UpperCorner>
                 </ows:WGS84BoundingBox>
                 {% else %}
-                <ows:BoundingBox crs="{{ output.crs }}" dimensions="{{ output.dimensions }}">
+                <ows:BoundingBox crs="{{ input.crs }}" dimensions="{{ input.dimensions }}">
                     <ows:LowerCorner>{% for c in input.ll %} {{ c }} {% endfor %}</ows:LowerCorner>
                     <ows:UpperCorner>{% for c in input.ur %} {{ c }} {% endfor %}</ows:UpperCorner>
                 </ows:BoundingBox>
