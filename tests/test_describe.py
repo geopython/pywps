@@ -28,6 +28,14 @@ def get_data_type(el):
     raise RuntimeError("Can't parse data type")
 
 
+def get_default_value(el):
+    default = None
+    xpath = xpath_ns(el, './DefaultValue')
+    if xpath:
+        default = xpath[0].text
+    return default
+
+
 xpath_ns = get_xpath_ns("1.0.0")
 
 
@@ -49,8 +57,9 @@ def get_describe_result(resp):
             if literal_data_el_list:
                 [literal_data_el] = literal_data_el_list
                 [data_type_el] = xpath_ns(literal_data_el, './ows:DataType')
+                default = get_default_value(literal_data_el)
                 data_type = get_data_type(data_type_el)
-                inputs.append((input_identifier, 'literal', data_type))
+                inputs.append((input_identifier, 'literal', data_type, default))
             elif complex_data_el_list:
                 [complex_data_el] = complex_data_el_list
                 formats = []
@@ -58,7 +67,7 @@ def get_describe_result(resp):
                                           './Supported/Format'):
                     [mimetype_el] = xpath_ns(format_el, './ows:MimeType')
                     formats.append({'mime_type': mimetype_el.text})
-                inputs.append((input_identifier, 'complex', formats))
+                inputs.append((input_identifier, 'complex', formats, None))
             else:
                 raise RuntimeError("Can't parse input description")
         result.append(ProcessDescription(identifier_el.text, inputs, metadata))
@@ -149,7 +158,7 @@ class DescribeProcessInputTest(unittest.TestCase):
                 Metadata('process metadata 2', 'http://example.org/2')]
         )
         result = self.describe_process(hello_process)
-        assert result.inputs == [('the_name', 'literal', 'string')]
+        assert result.inputs == [('the_name', 'literal', 'string', None)]
         assert result.metadata == ['process metadata 1', 'process metadata 2']
 
     def test_one_literal_integer_input(self):
@@ -161,7 +170,19 @@ class DescribeProcessInputTest(unittest.TestCase):
                                                      'Input number',
                                                      data_type='positiveInteger')])
         result = self.describe_process(hello_process)
-        assert result.inputs == [('the_number', 'literal', 'positiveInteger')]
+        assert result.inputs == [('the_number', 'literal', 'positiveInteger', None)]
+
+    def test_one_literal_integer_default_zero(self):
+        def hello(request):
+            pass
+        hello_process = Process(hello, 'hello',
+                                'Process Hello',
+                                inputs=[LiteralInput('the_number',
+                                                     'Input number',
+                                                     data_type='integer',
+                                                     default=0)])
+        result = self.describe_process(hello_process)
+        assert result.inputs == [('the_number', 'literal', 'integer', "0")]
 
 
 class InputDescriptionTest(unittest.TestCase):
