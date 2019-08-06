@@ -297,7 +297,7 @@ class FileHandler(IOHandler):
     def data(self):
         """Read file and return content."""
         if self._data is None:
-            openmode = self._openmode(self.data)
+            openmode = self._openmode()
             kwargs = {} if 'b' in openmode else {'encoding': 'utf8'}
             with open(self.file, mode=openmode, **kwargs) as fh:
                 self._data = fh.read()
