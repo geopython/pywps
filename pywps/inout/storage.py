@@ -99,6 +99,7 @@ class FileStorage(CachedStorage):
         self.output_url = config.get_config_value('server', 'outputurl')
 
     def _do_store(self, output):
+        import platform
         import math
         import shutil
         import tempfile
@@ -108,16 +109,18 @@ class FileStorage(CachedStorage):
 
         request_uuid = output.uuid or uuid.uuid1()
 
-        file_block_size = os.stat(file_name).st_blksize
-        # get_free_space delivers the numer of free blocks, not the available size!
-        avail_size = get_free_space(self.target) * file_block_size
-        file_size = os.stat(file_name).st_size
+        # st.blksize is not available in windows, skips the validation on windows
+        if platform.system() != 'Windows':
+            file_block_size = os.stat(file_name).st_blksize
+            # get_free_space delivers the numer of free blocks, not the available size!
+            avail_size = get_free_space(self.target) * file_block_size
+            file_size = os.stat(file_name).st_size
 
-        # calculate space used according to block size
-        actual_file_size = math.ceil(file_size / float(file_block_size)) * file_block_size
+            # calculate space used according to block size
+            actual_file_size = math.ceil(file_size / float(file_block_size)) * file_block_size
 
-        if avail_size < actual_file_size:
-            raise NotEnoughStorage('Not enough space in {} to store {}'.format(self.target, file_name))
+            if avail_size < actual_file_size:
+                raise NotEnoughStorage('Not enough space in {} to store {}'.format(self.target, file_name))
 
         # create a target folder for each request
         target = os.path.join(self.target, str(request_uuid))
