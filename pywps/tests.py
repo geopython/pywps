@@ -4,6 +4,7 @@
 ##################################################################
 
 import lxml.etree
+import requests
 from werkzeug.test import Client
 from werkzeug.wrappers import BaseResponse
 from pywps import __version__
@@ -17,6 +18,22 @@ import re
 import logging
 
 logging.disable(logging.CRITICAL)
+
+
+def service_ok(url, timeout=5):
+    try:
+        resp = requests.get(url, timeout=timeout)
+        if 'html' in resp.headers['content-type']:
+            ok = False
+        else:
+            ok = resp.ok
+    except requests.exceptions.ReadTimeout:
+        ok = False
+    except requests.exceptions.ConnectTimeout:
+        ok = False
+    except Exception:
+        ok = False
+    return ok
 
 
 class DocExampleProcess(Process):

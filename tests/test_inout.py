@@ -31,6 +31,7 @@ from pywps.validator.mode import MODE
 from pywps.inout.basic import UOM
 from pywps.inout.storage import FileStorage
 from pywps._compat import PY2
+from pywps.tests import service_ok
 
 
 from lxml import etree
@@ -134,7 +135,8 @@ class IOHandlerTest(unittest.TestCase):
             self.iohandler[0].data = '5'
 
     def test_url(self):
-
+        if not service_ok('https://demo.mapserver.org'):
+            self.skipTest("mapserver is unreachable")
         wfsResource = 'http://demo.mapserver.org/cgi-bin/wfs?' \
                       'service=WFS&version=1.1.0&' \
                       'request=GetFeature&' \

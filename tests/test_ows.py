@@ -17,12 +17,13 @@ from pywps.exceptions import NoApplicableCode
 from pywps import get_ElementMakerForVersion
 from pywps.wpsserver import temp_dir
 import pywps.configuration as config
-from pywps.tests import client_for, assert_response_success
+from pywps.tests import client_for, assert_response_success, service_ok
 
-wfsResource = 'http://demo.mapserver.org/cgi-bin/wfs?service=WFS&version=1.1.0&request=GetFeature&typename=continents&maxfeatures=10'  # noqa
-wcsResource = 'http://demo.mapserver.org/cgi-bin/wcs?service=WCS&version=1.0.0&request=GetCoverage&coverage=ndvi&crs=EPSG:4326&bbox=-92,42,-85,45&format=image/tiff&width=400&height=300'  # noqa
+wfsResource = 'https://demo.mapserver.org/cgi-bin/wfs?service=WFS&version=1.1.0&request=GetFeature&typename=continents&maxfeatures=10'  # noqa
+wcsResource = 'https://demo.mapserver.org/cgi-bin/wcs?service=WCS&version=1.0.0&request=GetCoverage&coverage=ndvi&crs=EPSG:4326&bbox=-92,42,-85,45&format=image/tiff&width=400&height=300'  # noqa
 
 WPS, OWS = get_ElementMakerForVersion("1.0.0")
+
 
 def create_feature():
 
@@ -129,6 +130,8 @@ def create_sum_one():
 class ExecuteTests(unittest.TestCase):
 
     def test_wfs(self):
+        if not service_ok('https://demo.mapserver.org'):
+            self.skipTest("mapserver is unreachable")
         client = client_for(Service(processes=[create_feature()]))
         request_doc = WPS.Execute(
             OWS.Identifier('feature'),
@@ -155,6 +158,8 @@ class ExecuteTests(unittest.TestCase):
     def test_wcs(self):
         if not config.CONFIG.get('grass', 'gisbase'):
             self.skipTest('GRASS lib not found')
+        if not service_ok('https://demo.mapserver.org'):
+            self.skipTest("mapserver is unreachable")
 
         client = client_for(Service(processes=[create_sum_one()]))
         request_doc = WPS.Execute(
