@@ -5,6 +5,7 @@
 
 from pywps._compat import text_type, StringIO
 import os
+from io import open
 import shutil
 import requests
 import tempfile
