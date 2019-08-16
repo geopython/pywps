@@ -306,7 +306,6 @@ class LiteralInput(basic.LiteralInput):
 
     @classmethod
     def from_json(cls, json_input):
-
         allowed_values = []
         for allowed_value in json_input['allowed_values']:
             if allowed_value['type'] == 'anyvalue':
@@ -325,17 +324,18 @@ class LiteralInput(basic.LiteralInput):
                     range_closure=allowed_value['range_closure']
                 ))
 
-        json_input['allowed_values'] = allowed_values
-        json_input['uoms'] = [basic.UOM(uom.get('uom')) for uom in json_input.get('uoms', [])]
+        json_input_copy = deepcopy(json_input)
+        json_input_copy['allowed_values'] = allowed_values
+        json_input_copy['uoms'] = [basic.UOM(uom.get('uom')) for uom in json_input.get('uoms', [])]
 
-        data = json_input.pop('data', None)
-        uom = json_input.pop('uom', None)
-        metadata = json_input.pop('metadata', [])
-        json_input.pop('type')
-        json_input.pop('any_value', None)
-        json_input.pop('values_reference', None)
+        data = json_input_copy.pop('data', None)
+        uom = json_input_copy.pop('uom', None)
+        metadata = json_input_copy.pop('metadata', [])
+        json_input_copy.pop('type')
+        json_input_copy.pop('any_value', None)
+        json_input_copy.pop('values_reference', None)
 
-        instance = cls(**json_input)
+        instance = cls(**json_input_copy)
 
         instance.metadata = [Metadata.from_json(d) for d in metadata]
         instance.data = data
@@ -351,13 +351,14 @@ class LiteralInput(basic.LiteralInput):
 
 
 def input_from_json(json_data):
-    if json_data['type'] == 'complex':
+    data_type = json_data['type']
+    if data_type == 'complex':
         inpt = ComplexInput.from_json(json_data)
-    elif json_data['type'] == 'literal':
+    elif data_type == 'literal':
         inpt = LiteralInput.from_json(json_data)
-    elif json_data['type'] == 'bbox':
+    elif data_type == 'bbox':
         inpt = BoundingBoxInput.from_json(json_data)
     else:
-        raise InvalidParameterValue("Input type not recognized: {}".format(json_data['type']))
+        raise InvalidParameterValue("Input type not recognized: {}".format(data_type))
 
     return inpt

@@ -24,6 +24,7 @@ from tests import test_formats
 from tests import test_dblog
 from tests import test_wpsrequest
 from tests import test_service
+from tests import test_process
 from tests import test_processing
 from tests import test_assync
 from tests import test_grass_location
@@ -84,6 +85,7 @@ def load_tests(loader=None, tests=None, pattern=None):
         test_dblog.load_tests(),
         test_wpsrequest.load_tests(),
         test_service.load_tests(),
+        test_process.load_tests(),
         test_processing.load_tests(),
         test_assync.load_tests(),
         test_grass_location.load_tests(),

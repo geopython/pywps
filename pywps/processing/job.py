@@ -6,6 +6,10 @@
 import os
 import tempfile
 import pywps.configuration as config
+from pywps import Process, WPSRequest
+from pywps.response.execute import ExecuteResponse
+
+import json
 
 import logging
 LOGGER = logging.getLogger("PYWPS")
@@ -33,12 +37,42 @@ class Job(object):
     def uuid(self):
         return self.process.uuid
 
+    @property
+    def json(self):
+        """Return JSON encoded representation of the request
+        """
+        obj = {
+            'process': self.process.json,
+            'wps_request': self.wps_request.json,
+        }
+
+        return json.dumps(obj, allow_nan=False)
+
+    @classmethod
+    def from_json(cls, value):
+        """init this request from json back again
+
+        :param value: the json (not string) representation
+        """
+        process = Process.from_json(value['process'])
+        wps_request = WPSRequest()
+        wps_request.json = json.loads(value['wps_request'])
+        wps_response = ExecuteResponse(
+            wps_request=wps_request,
+            uuid=process.uuid,
+            process=process)
+        wps_response.store_status_file = True
+        new_job = Job(
+            process=Process.from_json(value['process']),
+            wps_request=wps_request,
+            wps_response=wps_response)
+        return new_job
+
     def dump(self):
         LOGGER.debug('dump job ...')
-        import dill
         filename = tempfile.mkstemp(prefix='job_', suffix='.dump', dir=self.workdir)[1]
-        with open(filename, 'wb') as fp:
-            dill.dump(self, fp)
+        with open(filename, 'w') as fp:
+            fp.write(self.json)
             LOGGER.debug("dumped job status to {}".format(filename))
             return filename
         return None
@@ -46,9 +80,8 @@ class Job(object):
     @classmethod
     def load(cls, filename):
         LOGGER.debug('load job ...')
-        import dill
-        with open(filename, 'rb') as fp:
-            job = dill.load(fp)
+        with open(filename, 'r') as fp:
+            job = Job.from_json(json.load(fp))
             return job
         return None
 

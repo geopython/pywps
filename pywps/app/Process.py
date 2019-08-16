@@ -11,12 +11,15 @@ import json
 import shutil
 import time
 import tempfile
+import importlib
 
 from pywps import get_ElementMakerForVersion, E, dblog
 from pywps.response import get_response
 from pywps.response.status import WPS_STATUS
 from pywps.response.execute import ExecuteResponse
 from pywps.app.WPSRequest import WPSRequest
+from pywps.inout.inputs import input_from_json
+from pywps.inout.outputs import output_from_json
 import pywps.configuration as config
 from pywps._compat import PY2
 from pywps.exceptions import (StorageNotSupported, OperationNotSupported,
@@ -83,18 +86,34 @@ class Process(object):
     def json(self):
 
         return {
+            'class': '{}:{}'.format(self.__module__, self.__class__.__name__),
+            'uuid': str(self.uuid),
+            'workdir': self.workdir,
             'version': self.version,
             'identifier': self.identifier,
             'title': self.title,
             'abstract': self.abstract,
             'keywords': self.keywords,
-            'metadata': [m for m in self.metadata],
+            'metadata': [m.json for m in self.metadata],
             'inputs': [i.json for i in self.inputs],
             'outputs': [o.json for o in self.outputs],
             'store_supported': self.store_supported,
             'status_supported': self.status_supported,
             'profile': [p for p in self.profile],
         }
+
+    @classmethod
+    def from_json(cls, value):
+        """init this process from json back again
+
+        :param value: the json (not string) representation
+        """
+        module, classname = value['class'].split(':')
+        # instantiate subclass of Process
+        new_process = getattr(importlib.import_module(module), classname)()
+        new_process._set_uuid(value['uuid'])
+        new_process.set_workdir(value['workdir'])
+        return new_process
 
     def execute(self, wps_request, uuid):
         self._set_uuid(uuid)

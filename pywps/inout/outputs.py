@@ -8,7 +8,10 @@ WPS Output classes
 
 import lxml.etree as etree
 import os
+from pywps.app.Common import Metadata
+from pywps.exceptions import InvalidParameterValue
 from pywps.inout import basic
+from pywps.inout.formats import Format
 from pywps.inout.storage import FileStorage
 from pywps.validator.mode import MODE
 from pywps import configuration as config
@@ -64,6 +67,25 @@ class BoundingBoxOutput(basic.BBoxOutput):
             'mode': self.valid_mode,
         }
 
+    @classmethod
+    def from_json(cls, json_output):
+        instance = cls(
+            identifier=json_output['identifier'],
+            title=json_output['title'],
+            abstract=json_output['abstract'],
+            keywords=json_output['keywords'],
+            min_occurs=json_output['min_occurs'],
+            max_occurs=json_output['max_occurs'],
+            metadata=[Metadata.from_json(data) for data in json_output.get('metadata', [])],
+            crss=json_output['crss'],
+            dimensions=json_output['dimensions'],
+            mode=json_output['mode'],
+        )
+        instance.data = json_output['bbox']
+        instance.workdir = json_output['workdir']
+
+        return instance
+
 
 class ComplexOutput(basic.ComplexOutput):
     """
@@ -79,13 +101,14 @@ class ComplexOutput(basic.ComplexOutput):
     """
 
     def __init__(self, identifier, title, supported_formats=None,
-                 abstract='', keywords=[], metadata=None,
+                 data_format=None, abstract='', keywords=[], workdir=None, metadata=None,
                  as_reference=False, mode=MODE.NONE):
         if metadata is None:
             metadata = []
 
         basic.ComplexOutput.__init__(self, identifier, title=title,
-                                     abstract=abstract, keywords=keywords,
+                                     data_format=data_format, abstract=abstract, keywords=keywords,
+                                     workdir=workdir,
                                      supported_formats=supported_formats,
                                      mode=mode)
         self.metadata = metadata
@@ -127,6 +150,37 @@ class ComplexOutput(basic.ComplexOutput):
                 data['schema'] = self.data_format.schema
 
         return data
+
+    @classmethod
+    def from_json(cls, json_output):
+        instance = cls(
+            identifier=json_output['identifier'],
+            title=json_output.get('title'),
+            abstract=json_output.get('abstract'),
+            keywords=json_output.get('keywords', []),
+            workdir=json_output.get('workdir'),
+            metadata=[Metadata.from_json(data) for data in json_output.get('metadata', [])],
+            data_format=Format(
+                schema=json_output['data_format'].get('schema'),
+                extension=json_output['data_format'].get('extension'),
+                mime_type=json_output['data_format']['mime_type'],
+                encoding=json_output['data_format'].get('encoding')
+            ),
+            supported_formats=[
+                Format(
+                    schema=infrmt.get('schema'),
+                    extension=infrmt.get('extension'),
+                    mime_type=infrmt['mime_type'],
+                    encoding=infrmt.get('encoding')
+                ) for infrmt in json_output['supported_formats']
+            ],
+            mode=json_output.get('mode', MODE.NONE)
+        )
+        instance.as_reference = json_output.get('asreference', False)
+        if json_output.get('file'):
+            instance.file = json_output['file']
+
+        return instance
 
     def _json_reference(self, data):
         """Return Reference node
@@ -210,6 +264,26 @@ class LiteralOutput(basic.LiteralOutput):
             data["uom"] = self.uom.json
 
         return data
+
+    @classmethod
+    def from_json(cls, json_output):
+        uoms = [basic.UOM(uom.get('uom')) for uom in json_output.get('uoms', [])]
+        uom = json_output.get('uom')
+
+        instance = cls(
+            identifier=json_output['identifier'],
+            title=json_output['title'],
+            data_type=json_output['data_type'],
+            abstract=json_output['abstract'],
+            keywords=json_output['keywords'],
+            uoms=uoms,
+        )
+
+        instance.data = json_output.get('data')
+        if uom:
+            instance.uom = basic.UOM(uom['uom'])
+
+        return instance
 
 
 class MetaFile:
@@ -408,3 +482,16 @@ class MetaLink:
 class MetaLink4(MetaLink):
     _xml_template = 'metalink/4.0/main.xml'
     # Specs: https://tools.ietf.org/html/rfc5854
+
+
+def output_from_json(json_data):
+    if json_data['type'] == 'complex':
+        output = ComplexOutput.from_json(json_data)
+    elif json_data['type'] == 'literal':
+        output = LiteralOutput.from_json(json_data)
+    elif json_data['type'] == 'bbox':
+        output = BoundingBoxOutput.from_json(json_data)
+    else:
+        raise InvalidParameterValue("Output type not recognized: {}".format(json_data['type']))
+
+    return output
