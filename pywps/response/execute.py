@@ -83,6 +83,16 @@ class ExecuteResponse(WPSResponse):
             status_percentage = self.status_percentage
         self._update_status(self.status, message, status_percentage, False)
 
+    def update_status_succeeded(self, message):
+        """
+        Update status report of succeeded process instance.
+
+        This method is for Docker container processing.
+
+        :param str message: Message you need to share with the client
+        """
+        self._update_status(WPS_STATUS.SUCCEEDED, message, 100, True)
+
     def _update_status_doc(self):
         try:
             # rebuild the doc
