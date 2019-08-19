@@ -78,6 +78,7 @@ class Mock(object):
         else:
             return Mock()
 
+
 MOCK_MODULES = ['lxml', 'lxml.etree', 'lxml.builder']
 
 # with open('../requirements.txt') as f:

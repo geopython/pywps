@@ -454,15 +454,21 @@ class ComplexOutputTest(unittest.TestCase):
     def setUp(self):
         tmp_dir = tempfile.mkdtemp()
         data_format = get_data_format('application/json')
-        self.complex_out = ComplexOutput(identifier="complexinput", workdir=tmp_dir,
-                                         data_format=data_format,
-                                         supported_formats=[data_format],
-                                         mode=MODE.NONE)
+        self.complex_out = inout.outputs.ComplexOutput(
+            identifier="complexoutput",
+            title='Complex Output',
+            workdir=tmp_dir,
+            data_format=data_format,
+            supported_formats=[data_format],
+            mode=MODE.NONE)
 
-        self.complex_out_nc = ComplexOutput(identifier="netcdf", workdir=tmp_dir,
-                                            data_format=get_data_format('application/x-netcdf'),
-                                            supported_formats=[get_data_format('application/x-netcdf')],
-                                            mode=MODE.NONE)
+        self.complex_out_nc = inout.outputs.ComplexOutput(
+            identifier="netcdf",
+            title="NetCDF output",
+            workdir=tmp_dir,
+            data_format=get_data_format('application/x-netcdf'),
+            supported_formats=[get_data_format('application/x-netcdf')],
+            mode=MODE.NONE)
 
         self.data = json.dumps({'a': 1, 'unicodé': u'éîïç', })
         self.ncfile = os.path.join(DATA_DIR, 'netcdf', 'time.nc')
@@ -530,6 +536,10 @@ class ComplexOutputTest(unittest.TestCase):
         self.complex_out.storage = storage
         url = self.complex_out.get_url()
         self.assertEqual('file', urlparse(url).scheme)
+
+    def test_json(self):
+        new_output = inout.outputs.ComplexOutput.from_json(self.complex_out.json)
+        self.assertEqual(new_output.identifier, 'complexoutput')
 
 
 class SimpleHandlerTest(unittest.TestCase):
@@ -642,7 +652,8 @@ class LiteralOutputTest(unittest.TestCase):
 
     def setUp(self):
 
-        self.literal_output = LiteralOutput("literaloutput", data_type="integer")
+        self.literal_output = inout.outputs.LiteralOutput(
+            "literaloutput", data_type="integer", title="Literal Output")
 
     def test_contruct(self):
         self.assertIsInstance(self.literal_output, LiteralOutput)
@@ -654,9 +665,13 @@ class LiteralOutputTest(unittest.TestCase):
         self.literal_output.store = storage
         self.assertEqual(self.literal_output.store, storage)
 
+    def test_json(self):
+        new_output = inout.outputs.LiteralOutput.from_json(self.literal_output.json)
+        self.assertEqual(new_output.identifier, 'literaloutput')
 
-class BoxInputTest(unittest.TestCase):
-    """BBoxInput test cases"""
+
+class BBoxInputTest(unittest.TestCase):
+    """BountingBoxInput test cases"""
 
     def setUp(self):
 
@@ -678,12 +693,15 @@ class BoxInputTest(unittest.TestCase):
         self.assertEqual(out['dimensions'], 2, 'Dimensions set')
 
 
-class BoxOutputTest(unittest.TestCase):
+class BBoxOutputTest(unittest.TestCase):
     """BoundingBoxOutput test cases"""
 
     def setUp(self):
-
-        self.bbox_out = BBoxOutput("bboxoutput")
+        self.bbox_out = inout.outputs.BoundingBoxOutput(
+            "bboxoutput",
+            title="BBox output",
+            dimensions=2,
+            crss=['epsg:3857', 'epsg:4326'])
 
     def test_contruct(self):
         self.assertIsInstance(self.bbox_out, BBoxOutput)
@@ -694,6 +712,10 @@ class BoxOutputTest(unittest.TestCase):
         storage = Storage()
         self.bbox_out.store = storage
         self.assertEqual(self.bbox_out.store, storage)
+
+    def test_json(self):
+        new_bbox = inout.outputs.BoundingBoxOutput.from_json(self.bbox_out.json)
+        self.assertEqual(new_bbox.identifier, 'bboxoutput')
 
 
 class TestMetaLink(unittest.TestCase):
@@ -769,7 +791,7 @@ def load_tests(loader=None, tests=None, pattern=None):
         loader.loadTestsFromTestCase(SimpleHandlerTest),
         loader.loadTestsFromTestCase(LiteralInputTest),
         loader.loadTestsFromTestCase(LiteralOutputTest),
-        loader.loadTestsFromTestCase(BoxInputTest),
-        loader.loadTestsFromTestCase(BoxOutputTest)
+        loader.loadTestsFromTestCase(BBoxInputTest),
+        loader.loadTestsFromTestCase(BBoxOutputTest)
     ]
     return unittest.TestSuite(suite_list)
