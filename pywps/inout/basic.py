@@ -5,6 +5,7 @@
 
 from pywps._compat import text_type, StringIO
 import os
+from io import open
 import shutil
 import requests
 import tempfile
@@ -297,7 +298,9 @@ class FileHandler(IOHandler):
     def data(self):
         """Read file and return content."""
         if self._data is None:
-            with open(self.file, mode=self._openmode()) as fh:
+            openmode = self._openmode()
+            kwargs = {} if 'b' in openmode else {'encoding': 'utf8'}
+            with open(self.file, mode=openmode, **kwargs) as fh:
                 self._data = fh.read()
         return self._data
 
@@ -378,7 +381,9 @@ class DataHandler(FileHandler):
         """
         if self._file is None:
             self._file = self._build_file_name()
-            with open(self._file, self._openmode(self.data)) as fh:
+            openmode = self._openmode(self.data)
+            kwargs = {} if 'b' in openmode else {'encoding': 'utf8'}
+            with open(self._file, openmode, **kwargs) as fh:
                 fh.write(self.data)
 
         return self._file
