@@ -5,7 +5,7 @@
 
 from pywps._compat import text_type, StringIO
 import os
-from io import open
+import io  # TODO: using io.open for PY2 compatibility
 import shutil
 import requests
 import tempfile
@@ -46,7 +46,7 @@ def _is_textfile(filename):
         # read the first part of the file to check for a binary indicator.
         # This method won't detect all binary files.
         blocksize = 512
-        fh = open(filename, 'rb')
+        fh = io.open(filename, 'rb')
         is_text = b'\x00' not in fh.read(blocksize)
         fh.close()
     return is_text
@@ -107,7 +107,7 @@ class IOHandler(object):
     >>> assert isinstance(ioh_file, IOHandler)
     >>>
     >>> # Create test file input
-    >>> fileobj = open(os.path.join(tmp, 'myfile.txt'), 'w')
+    >>> fileobj = io.open(os.path.join(tmp, 'myfile.txt'), 'w')
     >>> fileobj.write('ASDF ASFADSF ASF ASF ASDF ASFASF')
     >>> fileobj.close()
     >>>
@@ -123,7 +123,7 @@ class IOHandler(object):
     >>> assert ioh_stream.workdir == tmp
     >>> ioh_stream.stream = FileIO(fileobj.name,'r')
     >>> assert isinstance(ioh_stream, StreamHandler)
-    >>> assert open(ioh_stream.file).read() == ioh_file.stream.read()
+    >>> assert io.open(ioh_stream.file).read() == ioh_file.stream.read()
     >>> assert isinstance(ioh_stream.stream, RawIOBase)
     """
     prop = None
@@ -300,7 +300,7 @@ class FileHandler(IOHandler):
         if self._data is None:
             openmode = self._openmode()
             kwargs = {} if 'b' in openmode else {'encoding': 'utf8'}
-            with open(self.file, mode=openmode, **kwargs) as fh:
+            with io.open(self.file, mode=openmode, **kwargs) as fh:
                 self._data = fh.read()
         return self._data
 
@@ -383,7 +383,7 @@ class DataHandler(FileHandler):
             self._file = self._build_file_name()
             openmode = self._openmode(self.data)
             kwargs = {} if 'b' in openmode else {'encoding': 'utf8'}
-            with open(self._file, openmode, **kwargs) as fh:
+            with io.open(self._file, openmode, **kwargs) as fh:
                 fh.write(self.data)
 
         return self._file
@@ -458,7 +458,7 @@ class UrlHandler(FileHandler):
             raise FileSizeExceeded(error_message)
 
         try:
-            with open(self._file, 'wb') as f:
+            with io.open(self._file, 'wb') as f:
                 data_size = 0
                 for chunk in reference_file.iter_content(chunk_size=1024):
                     data_size += len(chunk)
@@ -927,7 +927,7 @@ class ComplexOutput(BasicIO, BasicComplex, IOHandler):
     >>> config.set('server', 'outputurl', 'http://foo/bar/filestorage')
     >>>
     >>> # create temporary file
-    >>> tiff_file = open('file.tiff', 'w')
+    >>> tiff_file = io.open('file.tiff', 'w')
     >>> tiff_file.write("AA")
     >>> tiff_file.close()
     >>>
