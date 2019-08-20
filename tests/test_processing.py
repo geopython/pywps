@@ -86,7 +86,7 @@ class InOutProcessingTest(unittest.TestCase):
         self.assertEqual(new_job.name, 'inout')
         self.assertEqual(new_job.uuid, str(self.uuid))
         self.assertEqual(new_job.workdir, '/tmp')
-        self.assertEqual(len(new_job.process.inputs), 1)
+        self.assertEqual(len(new_job.process.inputs), 2)
 
 
 def load_tests(loader=None, tests=None, pattern=None):

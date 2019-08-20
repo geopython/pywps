@@ -96,6 +96,14 @@ class ValuesReference(object):
             'values_form': self.values_form
         }
 
+    @classmethod
+    def from_json(cls, json_input):
+        instance = cls(
+            reference=json_input['reference'],
+            values_form=json_input['values_form'],
+        )
+        return instance
+
     def __eq__(self, other):
         return isinstance(other, ValuesReference) and self.json == other.json
 

@@ -5,6 +5,7 @@
 
 from pywps import Process
 from pywps.inout import LiteralInput, LiteralOutput
+from pywps.inout.literaltypes import ValuesReference
 
 
 class SimpleProcess(Process):
@@ -53,7 +54,10 @@ class InOut(Process):
             identifier='inout',
             title='In and Out',
             inputs=[
-                LiteralInput('string', 'String', data_type='string')
+                LiteralInput('string', 'String', data_type='string'),
+                LiteralInput('ref_value', 'Referenced Value', data_type='string',
+                    allowed_values=ValuesReference(reference="https://en.wikipedia.org/w/api.php?action=opensearch&search=scotland&format=json"),  # noqa
+                    default='Scotland',),
             ],
             outputs=[
                 LiteralOutput('string', 'Output', data_type='string')
