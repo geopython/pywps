@@ -44,3 +44,24 @@ class Greeter(Process):
         assert type(name) is text_type
         response.outputs['message'].data = "Hello {}!".format(name)
         return response
+
+
+class InOut(Process):
+    def __init__(self):
+        super(InOut, self).__init__(
+            self.inout,
+            identifier='inout',
+            title='In and Out',
+            inputs=[
+                LiteralInput('string', 'String', data_type='string')
+            ],
+            outputs=[
+                LiteralOutput('string', 'Output', data_type='string')
+            ]
+        )
+
+    @staticmethod
+    def inout(request, response):
+        a_string = request.inputs['string'][0].data
+        response.outputs['string'].data = "".format(a_string)
+        return response
