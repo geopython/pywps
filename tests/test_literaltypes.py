@@ -7,7 +7,15 @@
 
 import unittest
 import datetime
-from pywps.inout.literaltypes import *
+from pywps.inout.literaltypes import (
+    convert_integer,
+    convert_float,
+    convert_string,
+    convert_boolean,
+    convert_time,
+    convert_date,
+    convert_datetime,
+)
 
 
 class ConvertorTest(unittest.TestCase):
