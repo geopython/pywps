@@ -156,6 +156,18 @@ class AllowedValue(object):
             'range_closure': self.range_closure
         }
 
+    @classmethod
+    def from_json(cls, json_input):
+        instance = cls(
+            allowed_type=json_input['allowed_type'],
+            value=json_input['value'],
+            minval=json_input['minval'],
+            maxval=json_input['maxval'],
+            spacing=json_input['spacing'],
+            range_closure=json_input['range_closure']
+        )
+        return instance
+
 
 ALLOWED_VALUES_TYPES = (AllowedValue, AnyValue, NoValue, ValuesReference)
 
