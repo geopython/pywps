@@ -313,19 +313,9 @@ class LiteralInput(basic.LiteralInput):
             elif allowed_value['type'] == 'novalue':
                 allowed_values.append(NoValue())
             elif allowed_value['type'] == 'valuesreference':
-                allowed_values.append(ValuesReference(
-                    reference=allowed_value['reference'],
-                    values_form=allowed_value['values_form']
-                ))
+                allowed_values.append(ValuesReference.from_json(allowed_value))
             elif allowed_value['type'] == 'allowedvalue':
-                allowed_values.append(AllowedValue(
-                    allowed_type=allowed_value['allowed_type'],
-                    value=allowed_value['value'],
-                    minval=allowed_value['minval'],
-                    maxval=allowed_value['maxval'],
-                    spacing=allowed_value['spacing'],
-                    range_closure=allowed_value['range_closure']
-                ))
+                allowed_values.append(AllowedValue.from_json(allowed_value))
 
         json_input_copy = deepcopy(json_input)
         json_input_copy['allowed_values'] = allowed_values
