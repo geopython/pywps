@@ -86,7 +86,16 @@ class InOutProcessingTest(unittest.TestCase):
         self.assertEqual(new_job.name, 'inout')
         self.assertEqual(new_job.uuid, str(self.uuid))
         self.assertEqual(new_job.workdir, '/tmp')
-        self.assertEqual(len(new_job.process.inputs), 2)
+        self.assertEqual(len(new_job.process.inputs), 3)
+        self.assertEqual(new_job.json, self.job.json)  # idempotent test
+
+    def test_job_dump(self):
+        new_job = Job.load(self.job.dump())
+        self.assertEqual(new_job.name, 'inout')
+        self.assertEqual(new_job.uuid, str(self.uuid))
+        self.assertEqual(new_job.workdir, '/tmp')
+        self.assertEqual(len(new_job.process.inputs), 3)
+        self.assertEqual(new_job.json, self.job.json)  # idempotent test
 
 
 def load_tests(loader=None, tests=None, pattern=None):

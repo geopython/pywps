@@ -55,6 +55,8 @@ class InOut(Process):
             title='In and Out',
             inputs=[
                 LiteralInput('string', 'String', data_type='string'),
+                LiteralInput('time', 'Time', data_type='time',
+                             default='12:00:00'),
                 LiteralInput('ref_value', 'Referenced Value', data_type='string',
                     allowed_values=ValuesReference(reference="https://en.wikipedia.org/w/api.php?action=opensearch&search=scotland&format=json"),  # noqa
                     default='Scotland',),

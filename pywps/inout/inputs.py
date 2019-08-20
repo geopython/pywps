@@ -293,9 +293,8 @@ class LiteralInput(basic.LiteralInput):
             'mode': self.valid_mode,
             'min_occurs': self.min_occurs,
             'max_occurs': self.max_occurs,
-
             # other values not set in the constructor
-            'data': self.data,
+            'data': str(self.data),
         }
         if self.values_reference:
             data['values_reference'] = self.values_reference.json
