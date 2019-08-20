@@ -290,14 +290,14 @@ class LiteralInput(basic.LiteralInput):
             'workdir': self.workdir,
             'allowed_values': [value.json for value in self.allowed_values],
             'any_value': self.any_value,
-            'values_reference': self.values_reference,
             'mode': self.valid_mode,
             'min_occurs': self.min_occurs,
             'max_occurs': self.max_occurs,
-
             # other values not set in the constructor
-            'data': self.data,
+            'data': str(self.data),
         }
+        if self.values_reference:
+            data['values_reference'] = self.values_reference.json
         if self.uoms:
             data["uoms"] = [uom.json for uom in self.uoms]
         if self.uom:
@@ -313,7 +313,10 @@ class LiteralInput(basic.LiteralInput):
             elif allowed_value['type'] == 'novalue':
                 allowed_values.append(NoValue())
             elif allowed_value['type'] == 'valuesreference':
-                allowed_values.append(ValuesReference())
+                allowed_values.append(ValuesReference(
+                    reference=allowed_value['reference'],
+                    values_form=allowed_value['values_form']
+                ))
             elif allowed_value['type'] == 'allowedvalue':
                 allowed_values.append(AllowedValue(
                     allowed_type=allowed_value['allowed_type'],

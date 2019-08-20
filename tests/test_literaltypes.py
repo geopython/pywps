@@ -7,7 +7,29 @@
 
 import unittest
 import datetime
-from pywps.inout.literaltypes import *
+from pywps.inout.literaltypes import (
+    convert_integer,
+    convert_float,
+    convert_string,
+    convert_boolean,
+    convert_time,
+    convert_date,
+    convert_datetime,
+    ValuesReference,
+)
+
+
+class ValuesReferenceTest(unittest.TestCase):
+    """ValuesReference test cases"""
+
+    def setUp(self):
+        self.reference = "https://en.wikipedia.org/w/api.php?action=opensearch&search=scotland&format=json"
+
+    def test_json(self):
+        val_ref = ValuesReference(
+            reference=self.reference)
+        new_val_ref = ValuesReference.from_json(val_ref.json)
+        self.assertEqual(new_val_ref.reference, self.reference)
 
 
 class ConvertorTest(unittest.TestCase):
@@ -79,6 +101,7 @@ def load_tests(loader=None, tests=None, pattern=None):
     if not loader:
         loader = unittest.TestLoader()
     suite_list = [
-        loader.loadTestsFromTestCase(ConvertorTest)
+        loader.loadTestsFromTestCase(ConvertorTest),
+        loader.loadTestsFromTestCase(ValuesReferenceTest),
     ]
     return unittest.TestSuite(suite_list)
