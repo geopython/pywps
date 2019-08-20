@@ -22,8 +22,8 @@ from pywps.response.execute import ExecuteResponse
 from .processes import Greeter
 
 
-class ProcessingTest(unittest.TestCase):
-    """Processing test cases"""
+class GreeterProcessingTest(unittest.TestCase):
+    """Processing test case with Greeter process"""
 
     def setUp(self):
         self.uuid = uuid.uuid1()
@@ -71,6 +71,6 @@ def load_tests(loader=None, tests=None, pattern=None):
     if not loader:
         loader = unittest.TestLoader()
     suite_list = [
-        loader.loadTestsFromTestCase(ProcessingTest)
+        loader.loadTestsFromTestCase(GreeterProcessingTest)
     ]
     return unittest.TestSuite(suite_list)
