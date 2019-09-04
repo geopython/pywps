@@ -609,7 +609,7 @@ class LiteralInputTest(unittest.TestCase):
         self.assertFalse(out['abstract'], 'abstract exist')
         self.assertFalse(out['keywords'], 'keywords exist')
         self.assertTrue(out['title'], 'title does not exist')
-        self.assertEqual(out['data'], 9, 'data set')
+        self.assertEqual(out['data'], '9', 'data set')
         self.assertEqual(out['mode'], MODE.STRICT, 'Mode set')
         self.assertEqual(out['identifier'], 'literalinput', 'identifier set')
         self.assertEqual(out['type'], 'literal', 'it\'s literal input')
@@ -624,7 +624,7 @@ class LiteralInputTest(unittest.TestCase):
             data_type='dateTime')
         inpt.data = "2017-04-20T12:30:00"
         out = inpt.json
-        self.assertEqual(out['data'], datetime.datetime(2017, 4, 20, 12, 30, 0), 'datetime set')
+        self.assertEqual(out['data'], '2017-04-20 12:30:00', 'datetime set')
 
     def test_json_out_time(self):
         inpt = inout.inputs.LiteralInput(
@@ -634,7 +634,7 @@ class LiteralInputTest(unittest.TestCase):
             data_type='time')
         inpt.data = "12:30:00"
         out = inpt.json
-        self.assertEqual(out['data'], datetime.time(12, 30, 0), 'time set')
+        self.assertEqual(out['data'], '12:30:00', 'time set')
 
     def test_json_out_date(self):
         inpt = inout.inputs.LiteralInput(
@@ -644,7 +644,7 @@ class LiteralInputTest(unittest.TestCase):
             data_type='date')
         inpt.data = "2017-04-20"
         out = inpt.json
-        self.assertEqual(out['data'], datetime.date(2017, 4, 20), 'date set')
+        self.assertEqual(out['data'], '2017-04-20', 'date set')
 
 
 class LiteralOutputTest(unittest.TestCase):
