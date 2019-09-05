@@ -294,7 +294,6 @@ class LiteralInput(basic.LiteralInput):
             'min_occurs': self.min_occurs,
             'max_occurs': self.max_occurs,
             # other values not set in the constructor
-            'data': str(self.data),
         }
         if self.values_reference:
             data['values_reference'] = self.values_reference.json
@@ -302,6 +301,8 @@ class LiteralInput(basic.LiteralInput):
             data["uoms"] = [uom.json for uom in self.uoms]
         if self.uom:
             data["uom"] = self.uom.json
+        if self.data is not None:
+            data['data'] = str(self.data)
         return data
 
     @classmethod
