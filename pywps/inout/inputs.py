@@ -290,18 +290,19 @@ class LiteralInput(basic.LiteralInput):
             'workdir': self.workdir,
             'allowed_values': [value.json for value in self.allowed_values],
             'any_value': self.any_value,
-            'values_reference': self.values_reference,
             'mode': self.valid_mode,
             'min_occurs': self.min_occurs,
             'max_occurs': self.max_occurs,
-
             # other values not set in the constructor
-            'data': self.data,
         }
+        if self.values_reference:
+            data['values_reference'] = self.values_reference.json
         if self.uoms:
             data["uoms"] = [uom.json for uom in self.uoms]
         if self.uom:
             data["uom"] = self.uom.json
+        if self.data is not None:
+            data['data'] = str(self.data)
         return data
 
     @classmethod
@@ -313,16 +314,9 @@ class LiteralInput(basic.LiteralInput):
             elif allowed_value['type'] == 'novalue':
                 allowed_values.append(NoValue())
             elif allowed_value['type'] == 'valuesreference':
-                allowed_values.append(ValuesReference())
+                allowed_values.append(ValuesReference.from_json(allowed_value))
             elif allowed_value['type'] == 'allowedvalue':
-                allowed_values.append(AllowedValue(
-                    allowed_type=allowed_value['allowed_type'],
-                    value=allowed_value['value'],
-                    minval=allowed_value['minval'],
-                    maxval=allowed_value['maxval'],
-                    spacing=allowed_value['spacing'],
-                    range_closure=allowed_value['range_closure']
-                ))
+                allowed_values.append(AllowedValue.from_json(allowed_value))
 
         json_input_copy = deepcopy(json_input)
         json_input_copy['allowed_values'] = allowed_values

@@ -19,11 +19,11 @@ from pywps import Process
 from pywps.app import WPSRequest
 from pywps.response.execute import ExecuteResponse
 
-from .processes import Greeter
+from .processes import Greeter, InOut
 
 
-class ProcessingTest(unittest.TestCase):
-    """Processing test cases"""
+class GreeterProcessingTest(unittest.TestCase):
+    """Processing test case with Greeter process"""
 
     def setUp(self):
         self.uuid = uuid.uuid1()
@@ -65,12 +65,46 @@ class ProcessingTest(unittest.TestCase):
         self.assertEqual(len(new_job.process.inputs), 1)
 
 
+class InOutProcessingTest(unittest.TestCase):
+    """Processing test case with InOut process"""
+
+    def setUp(self):
+        self.uuid = uuid.uuid1()
+        self.dummy_process = InOut()
+        self.dummy_process._set_uuid(self.uuid)
+        self.dummy_process.set_workdir('/tmp')
+        self.wps_request = WPSRequest()
+        self.wps_response = ExecuteResponse(self.wps_request, self.uuid,
+                                            process=self.dummy_process)
+        self.job = Job(
+            process=self.dummy_process,
+            wps_request=self.wps_request,
+            wps_response=self.wps_response)
+
+    def test_job_json(self):
+        new_job = Job.from_json(json.loads(self.job.json))
+        self.assertEqual(new_job.name, 'inout')
+        self.assertEqual(new_job.uuid, str(self.uuid))
+        self.assertEqual(new_job.workdir, '/tmp')
+        self.assertEqual(len(new_job.process.inputs), 3)
+        self.assertEqual(new_job.json, self.job.json)  # idempotent test
+
+    def test_job_dump(self):
+        new_job = Job.load(self.job.dump())
+        self.assertEqual(new_job.name, 'inout')
+        self.assertEqual(new_job.uuid, str(self.uuid))
+        self.assertEqual(new_job.workdir, '/tmp')
+        self.assertEqual(len(new_job.process.inputs), 3)
+        self.assertEqual(new_job.json, self.job.json)  # idempotent test
+
+
 def load_tests(loader=None, tests=None, pattern=None):
     """Load local tests
     """
     if not loader:
         loader = unittest.TestLoader()
     suite_list = [
-        loader.loadTestsFromTestCase(ProcessingTest)
+        loader.loadTestsFromTestCase(GreeterProcessingTest),
+        loader.loadTestsFromTestCase(InOutProcessingTest)
     ]
     return unittest.TestSuite(suite_list)

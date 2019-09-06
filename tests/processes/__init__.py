@@ -5,6 +5,7 @@
 
 from pywps import Process
 from pywps.inout import LiteralInput, LiteralOutput
+from pywps.inout.literaltypes import ValuesReference
 
 
 class SimpleProcess(Process):
@@ -43,4 +44,30 @@ class Greeter(Process):
         name = request.inputs['name'][0].data
         assert type(name) is text_type
         response.outputs['message'].data = "Hello {}!".format(name)
+        return response
+
+
+class InOut(Process):
+    def __init__(self):
+        super(InOut, self).__init__(
+            self.inout,
+            identifier='inout',
+            title='In and Out',
+            inputs=[
+                LiteralInput('string', 'String', data_type='string'),
+                LiteralInput('time', 'Time', data_type='time',
+                             default='12:00:00'),
+                LiteralInput('ref_value', 'Referenced Value', data_type='string',
+                    allowed_values=ValuesReference(reference="https://en.wikipedia.org/w/api.php?action=opensearch&search=scotland&format=json"),  # noqa
+                    default='Scotland',),
+            ],
+            outputs=[
+                LiteralOutput('string', 'Output', data_type='string')
+            ]
+        )
+
+    @staticmethod
+    def inout(request, response):
+        a_string = request.inputs['string'][0].data
+        response.outputs['string'].data = "".format(a_string)
         return response
