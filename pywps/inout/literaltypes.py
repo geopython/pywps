@@ -287,7 +287,7 @@ def convert_anyURI(inpt):
     inpt = convert_string(inpt)
     components = urlparse(inpt)
 
-    if components[0] and components[1]:
+    if (components[0] and components[1]) or components[0] == 'file':
         return components
     else:
         raise InvalidParameterValue(
