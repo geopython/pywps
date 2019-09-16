@@ -77,7 +77,7 @@ class ConvertorTest(unittest.TestCase):
     def test_anyuri(self):
         """Test URI convertor"""
         self.assertEqual(convert_anyURI("http://username:password@hostname.dom:port/deep/path/;params?query#fragment"),
-                         ('http', 'username:password@hostname.dom:port', '/deep/path/', 'params', 'k=v', 'fragment')
+                         ('http', 'username:password@hostname.dom:port', '/deep/path/', 'params', 'query', 'fragment')
                         )
         self.assertEqual(convert_anyURI("file:///very/very/very/deep/path"),
                          ('file', '', '/very/very/very/deep/path', '', '', '')
