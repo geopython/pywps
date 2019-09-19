@@ -15,7 +15,9 @@ from pywps.inout.literaltypes import (
     convert_time,
     convert_date,
     convert_datetime,
+    convert_anyURI,
     ValuesReference,
+    InvalidParameterValue,
 )
 
 
@@ -107,6 +109,16 @@ class ConvertorTest(unittest.TestCase):
             convert_datetime(datetime.datetime(2016, 9, 22, 6)),
             datetime.datetime))
 
+    def test_anyuri(self):
+        """Test URI convertor"""
+        self.assertEqual(convert_anyURI("http://username:password@hostname.dom:port/deep/path/;params?query#fragment"),
+                         ('http', 'username:password@hostname.dom:port', '/deep/path/', 'params', 'query', 'fragment')
+                        )
+        self.assertEqual(convert_anyURI("file:///very/very/very/deep/path"),
+                         ('file', '', '/very/very/very/deep/path', '', '', '')
+                        )
+        with self.assertRaises(InvalidParameterValue):
+            convert_anyURI("ftp:///deep/path/;params?query#fragment")
 
 def load_tests(loader=None, tests=None, pattern=None):
     if not loader:
