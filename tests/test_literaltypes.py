@@ -15,7 +15,9 @@ from pywps.inout.literaltypes import (
     convert_time,
     convert_date,
     convert_datetime,
+    convert_anyURI,
     ValuesReference,
+    InvalidParameterValue,
 )
 
 
