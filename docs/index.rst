@@ -1,7 +1,7 @@
 PyWPS |version| Documentation
 =============================
 Documentation for `PyWPS <http://pywps.wald.intevaton.org>`_. PyWPS is
-implementation of `OGC Web Processing Service (WPS) <http://opengeospatil.org/standards/wps>`_,
+implementation of `OGC Web Processing Service (WPS) <http://opengeospatial.org/standards/wps>`_,
 version 1.0.0. 
 
 PyWPS is written in `Python <http://python.org>`_. It
