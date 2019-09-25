@@ -88,7 +88,7 @@ class ExecuteResponse(WPSResponse):
             # rebuild the doc
             self.doc = self._construct_doc()
         except Exception as e:
-            raise NoApplicableCode('Building Response Document failed with : %s' % e)
+            raise NoApplicableCode('Building Response Document failed with : {}'.format(e))
 
     def _update_status_file(self):
         # TODO: check if file/directory is still present, maybe deleted in mean time
@@ -99,7 +99,7 @@ class ExecuteResponse(WPSResponse):
                 f.flush()
                 os.fsync(f.fileno())
         except Exception as e:
-            raise NoApplicableCode('Writing Response Document failed with : %s' % e)
+            raise NoApplicableCode('Writing Response Document failed with : {}'.format(e))
 
     def _process_accepted(self):
         percent = int(self.status_percentage)
@@ -167,7 +167,7 @@ class ExecuteResponse(WPSResponse):
                 data["status_location"] = self.process.status_url
 
         if self.status == WPS_STATUS.ACCEPTED:
-            self.message = 'PyWPS Process %s accepted' % self.process.identifier
+            self.message = 'PyWPS Process {} accepted'.format(self.process.identifier)
             data["status"] = self._process_accepted()
         elif self.status == WPS_STATUS.STARTED:
             data["status"] = self._process_started()
@@ -188,7 +188,7 @@ class ExecuteResponse(WPSResponse):
                     # instead of a ``pywps.inout.inputs.LiteralInput``.
                     data["input_definitions"] = [self.wps_request.inputs[i][0].json for i in self.wps_request.inputs]
                 except Exception as e:
-                    LOGGER.error("Failed to update lineage for input parameter. %s", e)
+                    LOGGER.error("Failed to update lineage for input parameter. {}".format(e))
 
                 data["output_definitions"] = [self.outputs[o].json for o in self.outputs]
 
@@ -212,7 +212,7 @@ class ExecuteResponse(WPSResponse):
                 if wps_output_value.source_type is None:
                     return NoApplicableCode("Expected output was not generated")
                 return Response(wps_output_value.data,
-                                mimetype=self.wps_request.outputs[wps_output_identifier]['mimetype'])
+                                mimetype=self.wps_request.outputs[wps_output_identifier].get('mimetype', None))
         else:
             if not self.doc:
                 return NoApplicableCode("Output was not generated")

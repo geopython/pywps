@@ -7,14 +7,12 @@
 """
 
 from pywps._compat import urlparse
-import time
 from dateutil.parser import parse as date_parser
 import datetime
 from pywps.exceptions import InvalidParameterValue
 from pywps.validator.allowed_value import RANGECLOSURETYPE
 from pywps.validator.allowed_value import ALLOWEDVALUETYPE
 from pywps._compat import PY2
-from pywps import get_ElementMakerForVersion
 
 import logging
 LOGGER = logging.getLogger('PYWPS')
@@ -36,12 +34,21 @@ LITERAL_DATA_TYPES = ('float', 'boolean', 'integer', 'string',
 
 
 class AnyValue(object):
-    """Any value for literal input
+    """Specifies that any value is allowed for this quantity.
     """
 
     @property
+    def value(self):
+        return None
+
+    @property
     def json(self):
-        return {'type': 'anyvalue'}
+        return {
+            'type': 'anyvalue',
+        }
+
+    def __eq__(self, other):
+        return isinstance(other, AnyValue) and self.json == other.json
 
 
 class NoValue(object):
@@ -50,23 +57,60 @@ class NoValue(object):
     """
 
     @property
-    def json(self):
-        return {'type': 'novalue'}
-
-
-class ValuesReference(object):
-    """Any value for literal input
-    NOTE: not really implemented
-    """
+    def value(self):
+        return None
 
     @property
     def json(self):
-        return {'type': 'valuesreference'}
+        return {'type': 'novalue'}
+
+    def __eq__(self, other):
+        return isinstance(other, NoValue) and self.json == other.json
 
 
-class AllowedValue(AnyValue):
-    """Allowed value parameters
-    the values are evaluated in literal validator functions
+class ValuesReference(object):
+    """Reference to list of all valid values and/or ranges of values for this quantity.
+    NOTE: Validation of values is not implemented.
+
+    :param: reference: URL from which this set of ranges and values can be retrieved
+    :param: values_form: Reference to a description of the mimetype, encoding,
+        and schema used for this set of values and ranges.
+    """
+
+    def __init__(self, reference=None, values_form=None):
+        self.reference = reference
+        self.values_form = values_form
+
+        if not self.reference:
+            raise InvalidParameterValue("values reference is missing.")
+
+    @property
+    def value(self):
+        return None
+
+    @property
+    def json(self):
+        return {
+            'type': 'valuesreference',
+            'reference': self.reference,
+            'values_form': self.values_form
+        }
+
+    @classmethod
+    def from_json(cls, json_input):
+        instance = cls(
+            reference=json_input['reference'],
+            values_form=json_input['values_form'],
+        )
+        return instance
+
+    def __eq__(self, other):
+        return isinstance(other, ValuesReference) and self.json == other.json
+
+
+class AllowedValue(object):
+    """List of all valid values and/or ranges of values for this quantity.
+    The values are evaluated in literal validator functions
 
     :param pywps.validator.allowed_value.ALLOWEDVALUETYPE allowed_type: VALUE or RANGE
     :param value: single value
@@ -76,11 +120,9 @@ class AllowedValue(AnyValue):
     :param pywps.input.literaltypes.RANGECLOSURETYPE range_closure:
     """
 
-    def __init__(self, allowed_type=ALLOWEDVALUETYPE.VALUE, value=None,
+    def __init__(self, allowed_type=None, value=None,
                  minval=None, maxval=None, spacing=None,
                  range_closure=RANGECLOSURETYPE.CLOSED):
-
-        AnyValue.__init__(self)
 
         self.allowed_type = allowed_type
         self.value = value
@@ -88,6 +130,16 @@ class AllowedValue(AnyValue):
         self.maxval = maxval
         self.spacing = spacing
         self.range_closure = range_closure
+
+        if not self.allowed_type:
+            # automatically set allowed_type: RANGE or VALUE
+            if self.minval or self.maxval or self.spacing:
+                self.allowed_type = ALLOWEDVALUETYPE.RANGE
+            else:
+                self.allowed_type = ALLOWEDVALUETYPE.VALUE
+
+    def __eq__(self, other):
+        return isinstance(other, AllowedValue) and self.json == other.json
 
     @property
     def json(self):
@@ -103,6 +155,21 @@ class AllowedValue(AnyValue):
             'spacing': self.spacing,
             'range_closure': self.range_closure
         }
+
+    @classmethod
+    def from_json(cls, json_input):
+        instance = cls(
+            allowed_type=json_input['allowed_type'],
+            value=json_input['value'],
+            minval=json_input['minval'],
+            maxval=json_input['maxval'],
+            spacing=json_input['spacing'],
+            range_closure=json_input['range_closure']
+        )
+        return instance
+
+
+ALLOWED_VALUES_TYPES = (AllowedValue, AnyValue, NoValue, ValuesReference)
 
 
 def get_converter(convertor):
@@ -238,9 +305,9 @@ def convert_anyURI(inpt):
     :rtype: url components
     """
     inpt = convert_string(inpt)
-    components = urlparse.urlparse(inpt)
+    components = urlparse(inpt)
 
-    if components[0] and components[1]:
+    if (components[0] and components[1]) or components[0] == 'file':
         return components
     else:
         raise InvalidParameterValue(
@@ -323,13 +390,20 @@ def make_allowedvalues(allowed_values):
 
     new_allowedvalues = []
 
+    if not isinstance(allowed_values, (tuple, list)):
+        allowed_values = [allowed_values]
+
     for value in allowed_values:
 
-        if isinstance(value, AllowedValue):
+        if value in ALLOWED_VALUES_TYPES:
+            # value is equal to one of the allowed classes objects
+            new_allowedvalues.append(value())
+        elif isinstance(value, ALLOWED_VALUES_TYPES):
+            # value is an instance of one of the allowed classes
             new_allowedvalues.append(value)
 
         elif type(value) == tuple or type(value) == list:
-            minval = maxval = spacing = None
+            spacing = None
             if len(value) == 2:
                 minval = value[0]
                 maxval = value[1]
@@ -338,8 +412,7 @@ def make_allowedvalues(allowed_values):
                 spacing = value[1]
                 maxval = value[2]
             new_allowedvalues.append(
-                AllowedValue(allowed_type=ALLOWEDVALUETYPE.RANGE,
-                             minval=minval, maxval=maxval,
+                AllowedValue(minval=minval, maxval=maxval,
                              spacing=spacing)
             )
 
@@ -355,7 +428,7 @@ def is_anyvalue(value):
 
     is_av = False
 
-    if value == AnyValue:
+    if value is AnyValue:
         is_av = True
     elif value is None:
         is_av = True
@@ -365,3 +438,21 @@ def is_anyvalue(value):
         is_av = True
 
     return is_av
+
+
+def is_values_reference(value):
+    """Check for ValuesReference in given value
+    """
+
+    check = False
+
+    if value is ValuesReference:
+        check = True
+    elif value is None:
+        check = False
+    elif isinstance(value, ValuesReference):
+        check = True
+    elif str(value).lower() == 'valuesreference':
+        check = True
+
+    return check

@@ -56,7 +56,7 @@ def create_greeter():
     def greeter(request, response):
         name = request.inputs['name'][0].data
         assert type(name) is text_type
-        response.outputs['message'].data = "Hello %s!" % name
+        response.outputs['message'].data = "Hello {}!".format(name)
         return response
 
     return Process(handler=greeter,
@@ -164,13 +164,35 @@ def create_mimetype_process():
                    ])
 
 
+def create_metalink_process():
+    from .processes.metalinkprocess import MultipleOutputs
+    return MultipleOutputs()
+
+
 def get_output(doc):
+    """Return the content of LiteralData, Reference or ComplexData."""
+
     output = {}
     for output_el in xpath_ns(doc, '/wps:ExecuteResponse'
                                    '/wps:ProcessOutputs/wps:Output'):
         [identifier_el] = xpath_ns(output_el, './ows:Identifier')
-        [value_el] = xpath_ns(output_el, './wps:Data/wps:LiteralData')
-        output[identifier_el.text] = value_el.text
+
+        lit_el = xpath_ns(output_el, './wps:Data/wps:LiteralData')
+        if lit_el != []:
+            output[identifier_el.text] = lit_el[0].text
+
+        ref_el = xpath_ns(output_el, './wps:Reference')
+        if ref_el != []:
+            output[identifier_el.text] = ref_el[0].attrib['href']
+
+        data_el = xpath_ns(output_el, './wps:Data/wps:ComplexData')
+        if data_el != []:
+            if data_el[0].text:
+                output[identifier_el.text] = data_el[0].text
+            else:  # XML children
+                ch = list(data_el[0])[0]
+                output[identifier_el.text] = lxml.etree.tostring(ch)
+
     return output
 
 
@@ -178,6 +200,8 @@ class ExecuteTest(unittest.TestCase):
     """Test for Exeucte request KVP request"""
 
     def test_dods(self):
+        if PY2:
+            self.skipTest('fails on python 2.7')
         if not WITH_NC4:
             self.skipTest('netCDF4 not installed')
         my_process = create_complex_nc_process()
@@ -344,6 +368,11 @@ class ExecuteTest(unittest.TestCase):
         with self.assertRaises(InvalidParameterValue):
             response = service.execute('get_mimetype_process', request, 'fakeuuid')
 
+    def test_metalink(self):
+        client = client_for(Service(processes=[create_metalink_process()]))
+        resp = client.get('?Request=Execute&identifier=multiple-outputs')
+        assert resp.status_code == 400
+
     def test_missing_process_error(self):
         client = client_for(Service(processes=[create_ultimate_question()]))
         resp = client.get('?Request=Execute&identifier=foo')
@@ -384,7 +413,6 @@ class ExecuteTest(unittest.TestCase):
         assert get_output(resp.xml) == {'message': "Hello foo!"}
 
     def test_bbox(self):
-        self.skipTest('OWSlib not python 3 compatible')
         client = client_for(Service(processes=[create_bbox_process()]))
         request_doc = WPS.Execute(
             OWS.Identifier('my_bbox_process'),
@@ -408,13 +436,13 @@ class ExecuteTest(unittest.TestCase):
             output,
             './ows:Identifier')[0].text)
 
-        self.assertEqual('15 50', xpath_ns(
+        self.assertEqual(' 15  50 ', xpath_ns(
             output,
-            './wps:Data/ows:BoundingBox/ows:LowerCorner')[0].text)
+            './wps:Data/ows:WGS84BoundingBox/ows:LowerCorner')[0].text)
 
-        self.assertEqual('16 50', xpath_ns(
+        self.assertEqual(' 16  51 ', xpath_ns(
             output,
-            './wps:Data/ows:BoundingBox/ows:LowerCorner')[0].text)
+            './wps:Data/ows:WGS84BoundingBox/ows:UpperCorner')[0].text)
 
     def test_output_response_dataType(self):
         client = client_for(Service(processes=[create_greeter()]))

@@ -101,7 +101,7 @@ def _handler(request, response):
     # make buffer for each feature
     while index < count:
 
-        response._update_status(WPS_STATUS.STARTED, 'Buffering feature %s' % index, float(index) / count)
+        response._update_status(WPS_STATUS.STARTED, 'Buffering feature {}'.format(index), float(index) / count)
 
         # get the geometry
         input_feature = input_layer.GetNextFeature()

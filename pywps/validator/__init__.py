@@ -44,7 +44,7 @@ def get_validator(identifier):
     """
 
     if identifier in _VALIDATORS:
-        LOGGER.debug('validator: %s', _VALIDATORS[identifier])
+        LOGGER.debug('validator: {}'.format(_VALIDATORS[identifier]))
         return _VALIDATORS[identifier]
     else:
         LOGGER.debug('empty validator')

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metalink version="3.0" xmlns="http://www.metalinker.org/" generator="{{ meta.generator }}">
+    {% if meta.identity %}
+    <identity>{{ meta.identity }}</identity>
+    {% endif %}
+    {% if meta.description %}
+    <description>{{ meta.description }}</description>
+    {% endif %}
+    {% if meta.publisher %}
+    <publisher>
+        <name>{{ meta.publisher }}</name>
+        <url>{{ meta.url }}</url>
+    </publisher>
+    {% endif %}
+
+    <files>
+        {% for file in meta.files %}
+        <file name="{{ file.name }}">
+            {% if file.identity %}
+            <identity>{{ file.identity }}</identity>
+            {% endif %}
+            {% if file.description %}
+            <description>{{ file.description }}</description>
+            {% endif %}
+            {% if file.size %}
+            <size>{{ file.size }}</size>
+            {% endif %}
+            {% if meta.checksums %}
+            <verification>
+                <hash type="sha256">{{ file.hash }}</hash>
+            </verification>
+            {% endif %}
+            <resources>
+                {% for url in file.urls %}
+                <url type="http">{{ url }}</url>
+                {% endfor %}
+            </resources>
+        </file>
+        {% endfor %}
+    </files>
+</metalink>

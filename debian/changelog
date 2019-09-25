@@ -1,8 +1,22 @@
+pywps (4.2.2) trusty; urgency=medium
+
+  * Fixed scheduler extension (#480).
+  * Fixed ValuesReference implementation (#471, #484).
+  * Fixed AllowedValue range (#467, #464).
+  * Add metalink support to facilitate outputs with multiple files (#466).
+  * Rename async to async_ for Python 3.7 compatibility (#462).
+  * Improve queue race conditions (#455).
+  * Numerous bug-fixes, additional tests and documentation improvements.
+
+ -- Carsten Ehbrecht <ehbrecht@dkrz.de>  Fr, 20 Sep 2019 12:00:00 +0000
+
 pywps (4.2.1) trusty; urgency=medium
 
-  * updated build/packaging fixes
+  * Fixed `flufl.enum` dependency.
+  * Updated string formatting to use `.format()` convention.
+  * Updated docs for release packaging and contribution.
 
- -- Tom Kralidis <tomkralidis@gmail.com>  Mon, 17 Dec 2018 15:47:32 +0000
+ -- Tom Kralidis <tomkralidis@gmail.com>  Mon, 17 Dec 2018 12:00:00 +0000
 
 pywps (4.2.0) trusty; urgency=medium
 
@@ -14,7 +28,7 @@ pywps (4.2.0) trusty; urgency=medium
   * Added validators for JSON, DODS links and netCDF formats
   * Numerous bug-fixes, additional tests and documentation improvements
 
- -- Tom Kralidis <tomkralidis@gmail.com>  Fri, 14 Dec 2018 12:00:00 +0000
+ -- Tom Kralidis <tomkralidis@gmail.com>  Sun, 16 Dec 2018 12:00:00 +0000
 
 pywps (4.0.0) trusty; urgency=medium
 

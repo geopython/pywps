@@ -30,7 +30,7 @@ class DescribeResponse(WPSResponse):
         else:
             for identifier in self.identifiers:
                 if identifier not in self.processes:
-                    msg = "Unknown process %r" % identifier
+                    msg = "Unknown process {}".format(identifier)
                     raise InvalidParameterValue(msg, "identifier")
                 else:
                     processes.append(self.processes[identifier].json)

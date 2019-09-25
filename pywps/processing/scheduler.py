@@ -27,7 +27,7 @@ class Scheduler(Processing):
         # run remote pywps process
         jobid = self.run_job()
         self.job.wps_response._update_status(WPS_STATUS.ACCEPTED,
-                                             'Your job has been submitted with ID %s'.format(jobid), 0)
+                                             'Your job has been submitted with ID {}'.format(jobid), 0)
 
     def run_job(self):
         LOGGER.info("Submitting job ...")
@@ -49,7 +49,7 @@ class Scheduler(Processing):
                 import shutil
                 cfg_file = os.path.join(self.job.workdir, "pywps.cfg")
                 shutil.copy2(os.getenv('PYWPS_CFG'), cfg_file)
-                LOGGER.debug("Copied pywps config: %s", cfg_file)
+                LOGGER.debug("Copied pywps config: {}".format(cfg_file))
                 jt.args = ['-c', cfg_file, dump_filename]
             else:
                 jt.args = [dump_filename]
@@ -57,15 +57,15 @@ class Scheduler(Processing):
             jt.outputPath = ":{}".format(os.path.join(self.job.workdir, "job-output.txt"))
             # run job
             jobid = session.runJob(jt)
-            LOGGER.info('Your job has been submitted with ID %s', jobid)
+            LOGGER.info('Your job has been submitted with ID {}'.format(jobid))
             # show status
             import time
             time.sleep(1)
-            LOGGER.info('Job status: %s', session.jobStatus(jobid))
+            LOGGER.info('Job status: {}'.format(session.jobStatus(jobid)))
             # Cleaning up
             session.deleteJobTemplate(jt)
             # close session
             session.exit()
         except Exception as e:
-            raise SchedulerNotAvailable("Could not submit job: %s" % str(e))
+            raise SchedulerNotAvailable("Could not submit job: {}".format(str(e)))
         return jobid

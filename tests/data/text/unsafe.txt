@@ -1,0 +1,1 @@
+< Bunch of characters that would break XML <> & "" '

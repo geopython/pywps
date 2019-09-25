@@ -13,14 +13,12 @@
 
 from collections import namedtuple
 import mimetypes
-from pywps.validator.mode import MODE
-from pywps.validator.base import emptyvalidator
 
 
-_FORMATS = namedtuple('FORMATS', 'GEOJSON, JSON, SHP, GML, KML, KMZ, GEOTIFF,'
+_FORMATS = namedtuple('FORMATS', 'GEOJSON, JSON, SHP, GML, METALINK, META4, KML, KMZ, GEOTIFF,'
                                  'WCS, WCS100, WCS110, WCS20, WFS, WFS100,'
                                  'WFS110, WFS20, WMS, WMS130, WMS110,'
-                                 'WMS100, TEXT, DODS, NETCDF, LAZ, LAS')
+                                 'WMS100, TEXT, DODS, NETCDF, LAZ, LAS, ZIP')
 
 
 class Format(object):
@@ -38,7 +36,7 @@ class Format(object):
 
     def __init__(self, mime_type,
                  schema=None, encoding=None,
-                 validate=emptyvalidator, mode=MODE.SIMPLE,
+                 validate=None,
                  extension=None):
         """Constructor
         """
@@ -134,6 +132,9 @@ class Format(object):
                     frmt.encoding == self.encoding,
                     frmt.schema == self.schema])
 
+    def __eq__(self, other):
+        return self.same_as(other)
+
     @property
     def json(self):
         """Get format as json
@@ -161,11 +162,13 @@ class Format(object):
 FORMATS = _FORMATS(
     Format('application/vnd.geo+json', extension='.geojson'),
     Format('application/json', extension='.json'),
-    Format('application/x-zipped-shp', extension='.zip'),
+    Format('application/x-zipped-shp', extension='.zip', encoding='base64'),
     Format('application/gml+xml', extension='.gml'),
+    Format('application/metalink+xml; version=3.0', extension='.metalink', schema="metalink/3.0/metalink.xsd"),
+    Format('application/metalink+xml; version=4.0', extension='.meta4', schema="metalink/4.0/metalink4.xsd"),
     Format('application/vnd.google-earth.kml+xml', extension='.kml'),
-    Format('application/vnd.google-earth.kmz', extension='.kmz'),
-    Format('image/tiff; subtype=geotiff', extension='.tiff'),
+    Format('application/vnd.google-earth.kmz', extension='.kmz', encoding='base64'),
+    Format('image/tiff; subtype=geotiff', extension='.tiff', encoding='base64'),
     Format('application/x-ogc-wcs', extension='.xml'),
     Format('application/x-ogc-wcs; version=1.0.0', extension='.xml'),
     Format('application/x-ogc-wcs; version=1.1.0', extension='.xml'),
@@ -183,6 +186,7 @@ FORMATS = _FORMATS(
     Format('application/x-netcdf', extension='.nc', encoding='base64'),
     Format('application/octet-stream', extension='.laz'),
     Format('application/octet-stream', extension='.las'),
+    Format('application/zip', extension='.zip', encoding='base64')
 )
 
 

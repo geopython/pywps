@@ -10,6 +10,10 @@ Process
 
 .. autoclass:: Process
 
+Exceptions you can raise in the process implementation to show a user-friendly error message.
+
+.. autoclass:: pywps.app.exceptions.ProcessError
+
 Inputs and outputs
 ==================
 
@@ -32,6 +36,8 @@ LiteralData
 .. autoclass:: pywps.inout.literaltypes.AnyValue
 
 .. autoclass:: pywps.inout.literaltypes.AllowedValue
+
+.. autoclass:: pywps.inout.literaltypes.ValuesReference
 
 .. autodata:: pywps.inout.literaltypes.LITERAL_DATA_TYPES
 

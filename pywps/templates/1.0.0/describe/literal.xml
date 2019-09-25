@@ -11,12 +11,16 @@
                     </Supported>
                 </UOMs>
                 {% endif %}
-                {% if put.allowed_values %}
+                {% if put.any_value %}
+                <ows:AnyValue/>
+                {% elif put.values_reference %}
+                <ows:ValuesReference ows:reference="{{ put.values_reference.reference }}"/>
+                {% elif put.allowed_values %}
                 <ows:AllowedValues>
-                {% for value in put.allowed_values %}
-                {% if value.allowed_type == "value" %}
+                    {% for value in put.allowed_values %}
+                    {% if value.allowed_type == "value" %}
                     <ows:Value>{{ value.value }}</ows:Value>
-                {% else %}
+                    {% else %}
                     <ows:Range ows:rangeClosure="{{ value.range_closure }}">
                         <ows:MinimumValue>{{ value.minval }}</ows:MinimumValue>
                         <ows:MaximumValue>{{ value.maxval }}</ows:MaximumValue>
@@ -24,12 +28,10 @@
                         <ows:Spacing>{{ value.spacing }}</ows:Spacing>
                         {% endif %}
                     </ows:Range>
-                {% endif %}
-                {% endfor %}
+                    {% endif %}
+                    {% endfor %}
                 </ows:AllowedValues>
-                {% elif put.any_value %}
-                <ows:AnyValue />
                 {% endif %}
-                {% if put.data %}
+                {% if put.data is not none %}
                 <DefaultValue>{{ put.data }}</DefaultValue>
                 {% endif %}

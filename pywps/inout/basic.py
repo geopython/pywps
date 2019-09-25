@@ -5,26 +5,31 @@
 
 from pywps._compat import text_type, StringIO
 import os
+from io import open
 import shutil
 import requests
 import tempfile
 import logging
 import pywps.configuration as config
 from pywps.inout.literaltypes import (LITERAL_DATA_TYPES, convert,
-                                      make_allowedvalues, is_anyvalue)
-from pywps import get_ElementMakerForVersion, OGCUNIT, NAMESPACES
+                                      make_allowedvalues, is_anyvalue,
+                                      is_values_reference)
+from pywps import OGCUNIT
 from pywps.validator.mode import MODE
 from pywps.validator.base import emptyvalidator
 from pywps.validator import get_validator
-from pywps.validator.literalvalidator import (validate_anyvalue,
-                                              validate_allowed_values)
+from pywps.validator.literalvalidator import (validate_value,
+                                              validate_anyvalue,
+                                              validate_allowed_values,
+                                              validate_values_reference)
 from pywps.exceptions import NoApplicableCode, InvalidParameterValue, FileSizeExceeded, \
     FileURLNotSupported
 from pywps._compat import PY2, urlparse
 import base64
 from collections import namedtuple
+from copy import deepcopy
 from io import BytesIO
-import six
+
 
 _SOURCE_TYPE = namedtuple('SOURCE_TYPE', 'MEMORY, FILE, STREAM, DATA, URL')
 SOURCE_TYPE = _SOURCE_TYPE(0, 1, 2, 3, 4)
@@ -66,6 +71,9 @@ class UOM(object):
     def json(self):
         return {"reference": OGCUNIT[self.uom],
                 "uom": self.uom}
+
+    def __eq__(self, other):
+        return self.uom == other.uom
 
 
 class IOHandler(object):
@@ -234,6 +242,11 @@ class IOHandler(object):
         else:
             return ''
 
+    def clone(self):
+        """Create copy of yourself
+        """
+        return deepcopy(self)
+
     @staticmethod
     def _create_fset_properties():
         """Create properties that when set for the first time, will determine
@@ -285,7 +298,9 @@ class FileHandler(IOHandler):
     def data(self):
         """Read file and return content."""
         if self._data is None:
-            with open(self.file, mode=self._openmode()) as fh:
+            openmode = self._openmode()
+            kwargs = {} if 'b' in openmode else {'encoding': 'utf8'}
+            with open(self.file, mode=openmode, **kwargs) as fh:
                 self._data = fh.read()
         return self._data
 
@@ -366,7 +381,9 @@ class DataHandler(FileHandler):
         """
         if self._file is None:
             self._file = self._build_file_name()
-            with open(self._file, self._openmode(self.data)) as fh:
+            openmode = self._openmode(self.data)
+            kwargs = {} if 'b' in openmode else {'encoding': 'utf8'}
+            with open(self._file, openmode, **kwargs) as fh:
                 fh.write(self.data)
 
         return self._file
@@ -432,14 +449,13 @@ class UrlHandler(FileHandler):
             reference_file = self._openurl(self.url, self.post_data)
             data_size = reference_file.headers.get('Content-Length', 0)
         except Exception as e:
-            raise NoApplicableCode('File reference error: %s' % e)
+            raise NoApplicableCode('File reference error: {}'.format(e))
 
-        FSEE = FileSizeExceeded(
-            'File size for input {} exceeded. Maximum allowed: {} megabytes'.
-            format(getattr(self.inpt, 'identifier', '?'), max_byte_size))
+        error_message = 'File size for input "{}" exceeded. Maximum allowed: {} megabytes'.format(
+            self.inpt.get('identifier', '?'), max_byte_size)
 
         if int(data_size) > int(max_byte_size):
-            raise FSEE
+            raise FileSizeExceeded(error_message)
 
         try:
             with open(self._file, 'wb') as f:
@@ -447,7 +463,7 @@ class UrlHandler(FileHandler):
                 for chunk in reference_file.iter_content(chunk_size=1024):
                     data_size += len(chunk)
                     if int(data_size) > int(max_byte_size):
-                        raise FSEE
+                        raise FileSizeExceeded(error_message)
                     f.write(chunk)
 
         except Exception as e:
@@ -467,7 +483,7 @@ class UrlHandler(FileHandler):
     def _openurl(href, data=None):
         """Open given href.
         """
-        LOGGER.debug('Fetching URL %s', href)
+        LOGGER.debug('Fetching URL {}'.format(href))
         if data is not None:
             req = requests.post(url=href, data=data, stream=True)
         else:
@@ -637,11 +653,10 @@ class BasicComplex(object):
             if not data_format.validate or data_format.validate == emptyvalidator:
                 data_format.validate = get_validator(data_format.mime_type)
         else:
-            raise InvalidParameterValue("Requested format "
-                                        "%s, %s, %s not supported" %
-                                        (data_format.mime_type,
-                                         data_format.encoding,
-                                         data_format.schema),
+            raise InvalidParameterValue("Requested format {}, {}, {} not supported".format(
+                                        data_format.mime_type,
+                                        data_format.encoding,
+                                        data_format.schema),
                                         'mimeType')
 
     def _is_supported(self, data_format):
@@ -662,8 +677,20 @@ class BasicBoundingBox(object):
         self.crss = crss or ['epsg:4326']
         self.crs = self.crss[0]
         self.dimensions = dimensions
-        self.ll = []
-        self.ur = []
+
+    @property
+    def ll(self):
+        data = getattr(self, 'data', None)
+        if data:
+            return data[:2]
+        return []
+
+    @property
+    def ur(self):
+        data = getattr(self, 'data', None)
+        if data:
+            return data[2:]
+        return []
 
 
 class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
@@ -683,9 +710,18 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
         if default_type != SOURCE_TYPE.DATA:
             raise InvalidParameterValue("Source types other than data are not supported.")
 
-        self.any_value = is_anyvalue(allowed_values)
+        self.any_value = False
+        self.values_reference = None
         self.allowed_values = []
-        if not self.any_value:
+
+        if allowed_values:
+            if not isinstance(allowed_values, (tuple, list)):
+                allowed_values = [allowed_values]
+            self.any_value = any(is_anyvalue(a) for a in allowed_values)
+            for value in allowed_values:
+                if is_values_reference(value):
+                    self.values_reference = value
+                    break
             self.allowed_values = make_allowedvalues(allowed_values)
 
         self._default = default
@@ -702,33 +738,12 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
 
         if self.any_value:
             return validate_anyvalue
-        else:
+        elif self.values_reference:
+            return validate_values_reference
+        elif self.allowed_values:
             return validate_allowed_values
-
-    @property
-    def json(self):
-        """Get JSON representation of the input
-        """
-        data = {
-            'identifier': self.identifier,
-            'title': self.title,
-            'abstract': self.abstract,
-            'keywords': self.keywords,
-            'type': 'literal',
-            'data_type': self.data_type,
-            'workdir': self.workdir,
-            'any_value': self.any_value,
-            'allowed_values': [value.json for value in self.allowed_values],
-            'mode': self.valid_mode,
-            'data': self.data,
-            'min_occurs': self.min_occurs,
-            'max_occurs': self.max_occurs
-        }
-        if self.uoms:
-            data["uoms"] = [uom.json for uom in self.uoms],
-        if self.uom:
-            data["uom"] = self.uom.json
-        return data
+        else:
+            return validate_value
 
 
 class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
@@ -783,37 +798,6 @@ class BBoxInput(BasicIO, BasicBoundingBox, DataHandler):
 
         self._set_default_value(default, default_type)
 
-    @property
-    def json(self):
-        """Get JSON representation of the input. It returns following keys in
-        the JSON object:
-
-            * identifier
-            * title
-            * abstract
-            * type
-            * crs
-            * bbox
-            * dimensions
-            * workdir
-            * mode
-        """
-        return {
-            'identifier': self.identifier,
-            'title': self.title,
-            'abstract': self.abstract,
-            'keywords': self.keywords,
-            'type': 'bbox',
-            'crs': self.crs,
-            'crss': self.crss,
-            'bbox': (self.ll, self.ur),
-            'dimensions': self.dimensions,
-            'workdir': self.workdir,
-            'mode': self.valid_mode,
-            'min_occurs': self.min_occurs,
-            'max_occurs': self.max_occurs
-        }
-
 
 class BBoxOutput(BasicIO, BasicBoundingBox, DataHandler):
     """Basic BoundingBox output class
@@ -823,7 +807,7 @@ class BBoxOutput(BasicIO, BasicBoundingBox, DataHandler):
                  dimensions=None, workdir=None, mode=MODE.NONE):
         BasicIO.__init__(self, identifier, title, abstract, keywords)
         BasicBoundingBox.__init__(self, crss, dimensions)
-        DataHandler.__init__(self, workdir=None, mode=mode)
+        DataHandler.__init__(self, workdir=workdir, mode=mode)
         self._storage = None
 
     @property
@@ -872,10 +856,10 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
             inpt_file = urlparse(inpt.get('href')).path
             inpt_file = os.path.abspath(inpt_file)
             os.symlink(inpt_file, tmp_file)
-            LOGGER.debug("Linked input file %s to %s.", inpt_file, tmp_file)
+            LOGGER.debug("Linked input file {} to {}.".format(inpt_file, tmp_file))
         except Exception:
             # TODO: handle os.symlink on windows
-            # raise NoApplicableCode("Could not link file reference: %s" % e)
+            # raise NoApplicableCode("Could not link file reference: {}".format(e))
             LOGGER.warn("Could not link file reference")
             shutil.copy2(inpt_file, tmp_file)
 

@@ -37,7 +37,7 @@ def validategml(data_input, mode):
         GML file is properly validated against given schema.
     """
 
-    LOGGER.info('validating GML; Mode: %s', mode)
+    LOGGER.info('validating GML; Mode: {}'.format(mode))
     passed = False
 
     if mode >= MODE.NONE:
@@ -80,6 +80,60 @@ def validategml(data_input, mode):
     return passed
 
 
+def validatexml(data_input, mode):
+    """XML validation function
+
+    :param data_input: :class:`ComplexInput`
+    :param pywps.validator.mode.MODE mode:
+
+    This function validates XML input based on given validation mode. Following
+    happens, if `mode` parameter is given:
+
+    `MODE.NONE`
+        it will return always `True`
+    `MODE.SIMPLE`
+        the mimetype will be checked
+    `MODE.STRICT` and `MODE.VERYSTRICT`
+        the :class:`lxml.etree` is used along with given input `schema` and the
+        XML file is properly validated against given schema.
+    """
+
+    LOGGER.info('validating XML; Mode: {}'.format(mode))
+    passed = False
+
+    if mode >= MODE.NONE:
+        passed = True
+
+    if mode >= MODE.SIMPLE:
+
+        name = data_input.file
+        (mtype, encoding) = mimetypes.guess_type(name, strict=False)
+        passed = data_input.data_format.mime_type in {mtype, FORMATS.GML.mime_type}
+
+    if mode >= MODE.STRICT:
+        from lxml import etree
+
+        from pywps._compat import PY2
+        if PY2:
+            from urllib2 import urlopen
+        else:
+            from urllib.request import urlopen
+
+        # TODO: Raise the actual validation exception to make it easier to spot the error.
+        #  xml = etree.parse(data_input.file)
+        #  schema.assertValid(xml)
+        try:
+            fn = os.path.join(_get_schemas_home(), data_input.data_format.schema)
+            schema_doc = etree.parse(fn)
+            schema = etree.XMLSchema(schema_doc)
+            passed = schema.validate(etree.parse(data_input.file))
+        except Exception as e:
+            LOGGER.warning(e)
+            passed = False
+
+    return passed
+
+
 def validatejson(data_input, mode):
     """JSON validation function
 
@@ -97,7 +151,7 @@ def validatejson(data_input, mode):
         Returns `True` if the content can be interpreted as a json object.
     """
 
-    LOGGER.info('validating JSON; Mode: %s', mode)
+    LOGGER.info('validating JSON; Mode: {}'.format(mode))
     passed = False
 
     if mode >= MODE.NONE:
@@ -140,7 +194,7 @@ def validategeojson(data_input, mode):
     True
     """
 
-    LOGGER.info('validating GeoJSON; Mode: %s', mode)
+    LOGGER.info('validating GeoJSON; Mode: {}'.format(mode))
     passed = False
 
     if mode >= MODE.NONE:
@@ -208,7 +262,7 @@ def validateshapefile(data_input, mode):
 
     """
 
-    LOGGER.info('validating Shapefile; Mode: %s', mode)
+    LOGGER.info('validating Shapefile; Mode: {}'.format(mode))
     passed = False
 
     if mode >= MODE.NONE:
@@ -247,7 +301,7 @@ def validategeotiff(data_input, mode):
     """GeoTIFF validation example
     """
 
-    LOGGER.info('Validating Shapefile; Mode: %s', mode)
+    LOGGER.info('Validating Shapefile; Mode: {}'.format(mode))
     passed = False
 
     if mode >= MODE.NONE:
@@ -275,7 +329,7 @@ def validatenetcdf(data_input, mode):
     """netCDF validation.
     """
 
-    LOGGER.info('Validating netCDF; Mode: %s', mode)
+    LOGGER.info('Validating netCDF; Mode: {}'.format(mode))
     passed = False
 
     if mode >= MODE.NONE:
@@ -307,7 +361,7 @@ def validatedods(data_input, mode):
     """OPeNDAP validation.
         """
 
-    LOGGER.info('Validating OPeNDAP; Mode: %s', mode)
+    LOGGER.info('Validating OPeNDAP; Mode: {}'.format(mode))
     passed = False
 
     if mode >= MODE.NONE:
@@ -343,7 +397,7 @@ def _get_schemas_home():
         ),
         os.path.pardir,
         "schemas")
-    LOGGER.debug('Schemas directory: %s', schema_dir)
+    LOGGER.debug('Schemas directory: {}'.format(schema_dir))
     return schema_dir
 
 

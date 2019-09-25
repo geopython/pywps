@@ -86,7 +86,7 @@ class Service(object):
         try:
             process = self.processes[identifier]
         except KeyError:
-            raise InvalidParameterValue("Unknown process '%r'" % identifier, 'Identifier')
+            raise InvalidParameterValue("Unknown process '{}'".format(identifier), 'Identifier')
         # make deep copy of the process instace
         # so that processes are not overriding each other
         # just for execute
@@ -114,7 +114,7 @@ class Service(object):
             if not request_inputs:
                 if inpt._default is not None:
                     if not inpt.data_set and isinstance(inpt, ComplexInput):
-                            inpt._set_default_value()
+                        inpt._set_default_value()
 
                     data_inputs[inpt.identifier] = [inpt.clone()]
             else:
@@ -133,7 +133,7 @@ class Service(object):
 
             if inpt.identifier not in data_inputs:
                 if inpt.min_occurs > 0:
-                    LOGGER.error('Missing parameter value: %s', inpt.identifier)
+                    LOGGER.error('Missing parameter value: {}'.format(inpt.identifier))
                     raise MissingParameterValue(
                         inpt.identifier, inpt.identifier)
 
@@ -193,8 +193,7 @@ class Service(object):
                 data_input.data_format = frmt
             else:
                 raise InvalidParameterValue(
-                    'Invalid mimeType value %s for input %s' %
-                    (inpt.get('mimeType'), source.identifier),
+                    'Invalid mimeType value {} for input {}'.format(inpt.get('mimeType'), source.identifier),
                     'mimeType')
 
             data_input.method = inpt.get('method', 'GET')
@@ -202,7 +201,11 @@ class Service(object):
             outinputs.append(data_input)
 
         if len(outinputs) < source.min_occurs:
-            raise MissingParameterValue(description="Given data input is missing", locator=source.identifier)
+            description = "At least {} inputs are required. You provided {}.".format(
+                source.min_occurs,
+                len(outinputs),
+            )
+            raise MissingParameterValue(description=description, locator=source.identifier)
         return outinputs
 
     def create_literal_inputs(self, source, inputs):
@@ -226,21 +229,20 @@ class Service(object):
             outinputs.append(newinpt)
 
         if len(outinputs) < source.min_occurs:
-            raise MissingParameterValue(locator=source.identifier)
+            description = "At least {} inputs are required. You provided {}.".format(
+                source.min_occurs,
+                len(outinputs),
+            )
+            raise MissingParameterValue(description, locator=source.identifier)
 
         return outinputs
 
     def _set_grass(self):
         """Set environment variables needed for GRASS GIS support
         """
-
-        if not PY2:
-            LOGGER.debug('Python3 is not supported by GRASS')
-            return
-
         gisbase = config.get_config_value('grass', 'gisbase')
         if gisbase and os.path.isdir(gisbase):
-            LOGGER.debug('GRASS GISBASE set to %s' % gisbase)
+            LOGGER.debug('GRASS GISBASE set to {}'.format(gisbase))
 
             os.environ['GISBASE'] = gisbase
 
@@ -275,9 +277,11 @@ class Service(object):
             outinputs.append(newinpt)
 
         if len(outinputs) < source.min_occurs:
-            raise MissingParameterValue(
-                description='Number of inputs is lower than minium required number of inputs',
-                locator=source.identifier)
+            description = "At least {} inputs are required. You provided {}.".format(
+                source.min_occurs,
+                len(outinputs),
+            )
+            raise MissingParameterValue(description=description, locator=source.identifier)
 
         return outinputs
 
@@ -299,11 +303,11 @@ class Service(object):
 
             environ_cfg = http_request.environ.get('PYWPS_CFG')
             if 'PYWPS_CFG' not in os.environ and environ_cfg:
-                LOGGER.debug('Setting PYWPS_CFG to %s', environ_cfg)
+                LOGGER.debug('Setting PYWPS_CFG to {}'.format(environ_cfg))
                 os.environ['PYWPS_CFG'] = environ_cfg
 
             wps_request = WPSRequest(http_request)
-            LOGGER.info('Request: %s', wps_request.operation)
+            LOGGER.info('Request: {}'.format(wps_request.operation))
             if wps_request.operation in ['getcapabilities',
                                          'describeprocess',
                                          'execute']:
@@ -331,8 +335,7 @@ class Service(object):
                     store_status(request_uuid, WPS_STATUS.FAILED, u'Request rejected due to exception', 100)
                     raise e
             else:
-                raise RuntimeError("Unknown operation %r"
-                                   % wps_request.operation)
+                raise RuntimeError("Unknown operation {}".format(wps_request.operation))
 
         except NoApplicableCode as e:
             return e

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metalink xmlns="urn:ietf:params:xml:ns:metalink">
+    <published>{{ meta.published }}</published>
+    <generator>{{ meta.generator }}</generator>
+
+    {% for file in meta.files %}
+    <file name="{{ file.name }}">
+        {% if file.identity %}
+        <identity>{{ file.identity }}</identity>
+        {% endif %}
+        {% if file.description %}
+        <description>{{ file.description }}</description>
+        {% endif %}
+        {% if file.size %}
+        <size>{{ file.size }}</size>
+        {% endif %}
+        {% if meta.checksums %}
+        <hash type="sha-256">{{ file.hash }}</hash>
+        {% endif %}
+        {% for url in file.urls %}
+        <metaurl mediatype="{{file.mediatype}}">{{ url }}</metaurl>
+        {% endfor %}
+        <publisher name="{{ meta.publisher }}" url="{{ meta.url }}"/>
+    </file>
+    {% endfor %}
+
+</metalink>

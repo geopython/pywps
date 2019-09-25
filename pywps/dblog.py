@@ -16,6 +16,7 @@ import datetime
 import pickle
 import json
 import os
+from multiprocessing import Lock
 
 import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
@@ -25,13 +26,13 @@ from sqlalchemy.pool import NullPool, StaticPool
 
 LOGGER = logging.getLogger('PYWPS')
 _SESSION_MAKER = None
-_LAST_SESSION = None
-
 
 _tableprefix = configuration.get_config_value('logging', 'prefix')
 _schema = configuration.get_config_value('logging', 'schema')
 
 Base = declarative_base()
+
+lock = Lock()
 
 
 class ProcessInstance(Base):
@@ -78,37 +79,37 @@ def log_request(uuid, request):
     # NoApplicableCode("Could commit to database: {}".format(e.message))
 
 
-def get_running():
-    """Returns running processes ids
+def get_process_counts():
+    """Returns running and stored process counts and
     """
 
     session = get_session()
-    running = session.query(ProcessInstance).filter(
-        ProcessInstance.percent_done < 100).filter(
-            ProcessInstance.percent_done > -1)
-
+    stored_query = session.query(RequestInstance.uuid)
+    running_count = (
+        session.query(ProcessInstance)
+        .filter(ProcessInstance.percent_done < 100)
+        .filter(ProcessInstance.percent_done > -1)
+        .filter(~ProcessInstance.uuid.in_(stored_query))
+        .count()
+    )
+    stored_count = stored_query.count()
     session.close()
-    return running
+    return running_count, stored_count
 
 
-def get_stored():
-    """Returns running processes ids
+def pop_first_stored():
+    """Gets the first stored process and delete it from the stored_requests table
     """
-
-    session = get_session()
-    stored = session.query(RequestInstance)
-
-    session.close()
-    return stored
-
-
-def get_first_stored():
-    """Returns running processes ids
-    """
-
     session = get_session()
     request = session.query(RequestInstance).first()
 
+    if request:
+        delete_count = session.query(RequestInstance).filter_by(uuid=request.uuid).delete()
+        if delete_count == 0:
+            LOGGER.debug("Another thread or process took the same stored request")
+            request = None
+
+        session.commit()
     return request
 
 
@@ -146,44 +147,42 @@ def _get_identifier(request):
 def get_session():
     """Get Connection for database
     """
-
     LOGGER.debug('Initializing database connection')
     global _SESSION_MAKER
-    global _LAST_SESSION
-
-    if _LAST_SESSION:
-        _LAST_SESSION.close()
 
     if _SESSION_MAKER:
-        _SESSION_MAKER.close_all()
-        _LAST_SESSION = _SESSION_MAKER()
-        return _LAST_SESSION
+        return _SESSION_MAKER()
 
-    database = configuration.get_config_value('logging', 'database')
-    echo = True
-    level = configuration.get_config_value('logging', 'level')
-    level_name = logging.getLevelName(level)
-    if isinstance(level_name, int) and level_name >= logging.INFO:
-        echo = False
-    try:
-        if database.startswith("sqlite") or database.startswith("memory"):
-            engine = sqlalchemy.create_engine(database,
-                                              connect_args={'check_same_thread': False},
-                                              poolclass=StaticPool,
-                                              echo=echo)
-        else:
-            engine = sqlalchemy.create_engine(database, echo=echo, poolclass=NullPool)
-    except sqlalchemy.exc.SQLAlchemyError as e:
-        raise NoApplicableCode("Could not connect to database: {}".format(e.message))
+    with lock:
+        database = configuration.get_config_value('logging', 'database')
+        echo = True
+        level = configuration.get_config_value('logging', 'level')
+        level_name = logging.getLevelName(level)
+        if isinstance(level_name, int) and level_name >= logging.INFO:
+            echo = False
+        try:
+            if ":memory:" in database:
+                engine = sqlalchemy.create_engine(database,
+                                                  echo=echo,
+                                                  connect_args={'check_same_thread': False},
+                                                  poolclass=StaticPool)
+            elif database.startswith("sqlite"):
+                engine = sqlalchemy.create_engine(database,
+                                                  echo=echo,
+                                                  connect_args={'check_same_thread': False},
+                                                  poolclass=NullPool)
+            else:
+                engine = sqlalchemy.create_engine(database, echo=echo, poolclass=NullPool)
+        except sqlalchemy.exc.SQLAlchemyError as e:
+            raise NoApplicableCode("Could not connect to database: {}".format(e.message))
 
-    Session = sessionmaker(bind=engine)
-    ProcessInstance.metadata.create_all(engine)
-    RequestInstance.metadata.create_all(engine)
+        Session = sessionmaker(bind=engine)
+        ProcessInstance.metadata.create_all(engine)
+        RequestInstance.metadata.create_all(engine)
 
-    _SESSION_MAKER = Session
+        _SESSION_MAKER = Session
 
-    _LAST_SESSION = _SESSION_MAKER()
-    return _LAST_SESSION
+    return _SESSION_MAKER()
 
 
 def store_process(uuid, request):
@@ -197,16 +196,5 @@ def store_process(uuid, request):
         request_json = request_json.encode('utf-8')
     request = RequestInstance(uuid=str(uuid), request=request_json)
     session.add(request)
-    session.commit()
-    session.close()
-
-
-def remove_stored(uuid):
-    """Remove given request from stored requests
-    """
-
-    session = get_session()
-    request = session.query(RequestInstance).filter_by(uuid=str(uuid)).first()
-    session.delete(request)
     session.commit()
     session.close()

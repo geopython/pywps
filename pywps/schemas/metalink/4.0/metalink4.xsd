@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  -*- rnc -*-
+  RELAX NG Compact Syntax Grammar for the
+  Metalink Format Specification Version 4
+  Based on RFC 4287 schema
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="urn:ietf:params:xml:ns:metalink" xmlns:metalink="urn:ietf:params:xml:ns:metalink">
+  <xsd:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
+  <!-- Common attributes -->
+  <xsd:attributeGroup name="metalinkCommonAttributes">
+    <xsd:attribute ref="xml:lang"/>
+    <xsd:attributeGroup ref="metalink:undefinedAttribute"/>
+  </xsd:attributeGroup>
+  <!-- Text Constructs -->
+  <xsd:attributeGroup name="metalinkTextConstruct">
+    <xsd:attributeGroup ref="metalink:metalinkCommonAttributes"/>
+  </xsd:attributeGroup>
+  <!-- Date Construct -->
+  <xsd:complexType name="metalinkDateConstruct">
+    <xsd:simpleContent>
+      <xsd:extension base="xsd:dateTime">
+        <xsd:attributeGroup ref="metalink:metalinkCommonAttributes"/>
+      </xsd:extension>
+    </xsd:simpleContent>
+  </xsd:complexType>
+  <xsd:element name="metalink">
+    <xsd:complexType>
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="metalink:file"/>
+        <xsd:element ref="metalink:generator"/>
+        <xsd:element ref="metalink:origin"/>
+        <xsd:element ref="metalink:published"/>
+        <xsd:element ref="metalink:updated"/>
+      </xsd:choice>
+      <xsd:attributeGroup ref="metalink:metalinkCommonAttributes"/>
+    </xsd:complexType>
+  </xsd:element>
+  <xsd:element name="file">
+    <xsd:complexType>
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="metalink:copyright"/>
+        <xsd:element ref="metalink:description"/>
+        <xsd:element ref="metalink:hash"/>
+        <xsd:element ref="metalink:identity"/>
+        <xsd:element ref="metalink:language"/>
+        <xsd:element ref="metalink:logo"/>
+        <xsd:element ref="metalink:metaurl"/>
+        <xsd:element ref="metalink:url"/>
+        <xsd:element ref="metalink:os"/>
+        <xsd:element ref="metalink:pieces"/>
+        <xsd:element ref="metalink:publisher"/>
+        <xsd:element ref="metalink:signature"/>
+        <xsd:element ref="metalink:size"/>
+        <xsd:element ref="metalink:version"/>
+      </xsd:choice>
+      <xsd:attributeGroup ref="metalink:metalinkCommonAttributes"/>
+      <xsd:attribute name="name" use="required"/>
+    </xsd:complexType>
+  </xsd:element>
+  <xsd:element name="pieces">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element maxOccurs="unbounded" ref="metalink:hash"/>
+      </xsd:sequence>
+      <xsd:attribute name="length" use="required" type="xsd:positiveInteger"/>
+      <xsd:attribute name="type" use="required"/>
+    </xsd:complexType>
+  </xsd:element>
+  <xsd:element name="copyright">
+    <xsd:complexType mixed="true">
+      <xsd:attributeGroup ref="metalink:metalinkTextConstruct"/>
+    </xsd:complexType>
+  </xsd:element>
+  <xsd:element name="description">
+    <xsd:complexType mixed="true">
+      <xsd:attributeGroup ref="metalink:metalinkTextConstruct"/>
+    </xsd:complexType>
+  </xsd:element>
+  <xsd:element name="generator">
+    <xsd:complexType mixed="true">
+      <xsd:attributeGroup ref="metalink:metalinkTextConstruct"/>
+    </xsd:complexType>
+  </xsd:element>
+  <xsd:element name="hash">
+    <xsd:complexType mixed="true">
+      <xsd:attribute name="type"/>
+    </xsd:complexType>
+  </xsd:element>
+  <xsd:element name="identity">
+    <xsd:complexType mixed="true">
+      <xsd:attributeGroup ref="metalink:metalinkTextConstruct"/>
+    </xsd:complexType>
+  </xsd:element>
+  <xsd:element name="language">
+    <xsd:complexType mixed="true">
+      <xsd:attributeGroup ref="metalink:metalinkTextConstruct"/>
+    </xsd:complexType>
+  </xsd:element>
+  <xsd:element name="logo">
+    <xsd:complexType mixed="true">
+      <xsd:attributeGroup ref="metalink:metalinkCommonAttributes"/>
+    </xsd:complexType>
+  </xsd:element>
+  <xsd:element name="metaurl">
+    <xsd:complexType mixed="true">
+      <xsd:attributeGroup ref="metalink:metalinkCommonAttributes"/>
+      <xsd:attribute name="priority">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:positiveInteger">
+            <xsd:maxInclusive value="999999"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:attribute>
+      <xsd:attribute name="mediatype" use="required"/>
+      <xsd:attribute name="name"/>
+    </xsd:complexType>
+  </xsd:element>
+  <xsd:element name="origin">
+    <xsd:complexType mixed="true">
+      <xsd:attributeGroup ref="metalink:metalinkCommonAttributes"/>
+      <xsd:attribute name="dynamic" type="xsd:boolean"/>
+    </xsd:complexType>
+  </xsd:element>
+  <xsd:element name="os">
+    <xsd:complexType mixed="true">
+      <xsd:attributeGroup ref="metalink:metalinkTextConstruct"/>
+    </xsd:complexType>
+  </xsd:element>
+  <xsd:element name="published" type="metalink:metalinkDateConstruct"/>
+  <xsd:element name="publisher">
+    <xsd:complexType>
+      <xsd:attributeGroup ref="metalink:metalinkCommonAttributes"/>
+      <xsd:attribute name="name" use="required"/>
+      <xsd:attribute name="url"/>
+    </xsd:complexType>
+  </xsd:element>
+  <xsd:element name="signature">
+    <xsd:complexType mixed="true">
+      <xsd:attribute name="mediatype" use="required"/>
+      <xsd:attributeGroup ref="metalink:metalinkTextConstruct"/>
+    </xsd:complexType>
+  </xsd:element>
+  <xsd:element name="size" type="xsd:nonNegativeInteger"/>
+  <xsd:element name="updated" type="metalink:metalinkDateConstruct"/>
+  <xsd:element name="url">
+    <xsd:complexType mixed="true">
+      <xsd:attributeGroup ref="metalink:metalinkCommonAttributes"/>
+      <xsd:attribute name="location">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:string">
+            <xsd:minLength value="2"/>
+            <xsd:maxLength value="2"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:attribute>
+      <xsd:attribute name="priority">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:positiveInteger">
+            <xsd:maxInclusive value="999999"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+  <xsd:element name="version">
+    <xsd:complexType mixed="true">
+      <xsd:attributeGroup ref="metalink:metalinkTextConstruct"/>
+    </xsd:complexType>
+  </xsd:element>
+  <!-- As defined in RFC 3066 and compatible with RFC 5646 -->
+  <xsd:simpleType name="metalinkLanguageTag">
+    <xsd:restriction base="xsd:string">
+      <xsd:pattern value="[A-Za-z]{1,8}(-[A-Za-z0-9]{1,8})*"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <!--
+    Unconstrained; it's not entirely clear how IRI fit into
+    xsd:anyURI so let's not try to constrain it here
+  -->
+  <!-- Simple Extension -->
+  <xsd:group name="simpleExtensionElement">
+    <xsd:choice>
+      <xsd:any namespace="##other" processContents="skip"/>
+      <xsd:any namespace="##local" processContents="skip"/>
+    </xsd:choice>
+  </xsd:group>
+  <!-- Structured Extension -->
+  <xsd:group name="structuredExtensionElement">
+    <xsd:choice>
+      <xsd:any namespace="##other" processContents="skip"/>
+      <xsd:any namespace="##local" processContents="skip"/>
+    </xsd:choice>
+  </xsd:group>
+  <!-- Other Extensibility -->
+  <xsd:group name="extensionElement">
+    <xsd:choice>
+      <xsd:group ref="metalink:simpleExtensionElement"/>
+      <xsd:group ref="metalink:structuredExtensionElement"/>
+    </xsd:choice>
+  </xsd:group>
+  <xsd:attributeGroup name="undefinedAttribute">
+  </xsd:attributeGroup>
+  <xsd:group name="undefinedContent">
+    <xsd:sequence>
+      <xsd:group minOccurs="0" maxOccurs="unbounded" ref="metalink:anyForeignElement"/>
+    </xsd:sequence>
+  </xsd:group>
+  <xsd:group name="anyElement">
+    <xsd:sequence>
+      <xsd:any processContents="skip"/>
+    </xsd:sequence>
+  </xsd:group>
+  <xsd:group name="anyForeignElement">
+    <xsd:choice>
+      <xsd:any namespace="##other" processContents="skip"/>
+      <xsd:any namespace="##local" processContents="skip"/>
+    </xsd:choice>
+  </xsd:group>
+</xsd:schema>
+<!-- EOF -->

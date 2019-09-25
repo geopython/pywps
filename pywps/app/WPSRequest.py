@@ -12,13 +12,10 @@ import base64
 import datetime
 from pywps._compat import text_type, PY2
 from pywps.app.basic import get_xpath_ns
-from pywps.inout.basic import LiteralInput, ComplexInput, BBoxInput
+from pywps.inout.inputs import input_from_json
 from pywps.exceptions import NoApplicableCode, OperationNotSupported, MissingParameterValue, VersionNegotiationFailed, \
     InvalidParameterValue, FileSizeExceeded
 from pywps import configuration
-from pywps.validator.mode import MODE
-from pywps.inout.literaltypes import AnyValue, NoValue, ValuesReference, AllowedValue
-from pywps.inout.formats import Format
 from pywps import get_version_from_ns
 
 import json
@@ -68,7 +65,7 @@ class WPSRequest(object):
         if service:
             if str(service).lower() != 'wps':
                 raise InvalidParameterValue(
-                    'parameter SERVICE [%s] not supported' % service, 'service')
+                    'parameter SERVICE [{}] not supported'.format(service), 'service')
         else:
             raise MissingParameterValue('service', 'service')
 
@@ -85,7 +82,7 @@ class WPSRequest(object):
         maxsize = configuration.get_size_mb(maxsize) * 1024 * 1024
         if self.http_request.content_length > maxsize:
             raise FileSizeExceeded('File size for input exceeded.'
-                                   ' Maximum request size allowed: %i megabytes' % (maxsize / 1024 / 1024))
+                                   ' Maximum request size allowed: {} megabytes'.format(maxsize / 1024 / 1024))
 
         try:
             doc = lxml.etree.fromstring(self.http_request.get_data())
@@ -177,7 +174,7 @@ class WPSRequest(object):
             return parse_get_execute
         else:
             raise OperationNotSupported(
-                'Unknown request %r' % self.operation, operation)
+                'Unknown request {}'.format(self.operation), operation)
 
     def _post_request_parser(self, tagname):
         """Factory function returing propper parsing function
@@ -260,7 +257,7 @@ class WPSRequest(object):
             return parse_post_execute
         else:
             raise InvalidParameterValue(
-                'Unknown request %r' % tagname, 'request')
+                'Unknown request {}'.format(tagname), 'request')
 
     def set_version(self, version):
         self.version = version
@@ -286,7 +283,7 @@ class WPSRequest(object):
             self.check_and_set_version(version)
         else:
             raise VersionNegotiationFailed(
-                'The requested version "%s" is not supported by this server' % acceptedversions, 'version')
+                'The requested version "{}" is not supported by this server'.format(acceptedversions), 'version')
 
     def check_and_set_version(self, version):
         """set this.version
@@ -296,7 +293,7 @@ class WPSRequest(object):
             raise MissingParameterValue('Missing version', 'version')
         elif not _check_version(version):
             raise VersionNegotiationFailed(
-                'The requested version "%s" is not supported by this server' % version, 'version')
+                'The requested version "{}" is not supported by this server'.format(version), 'version')
         else:
             self.set_version(version)
 
@@ -308,7 +305,7 @@ class WPSRequest(object):
             language = 'None'
         elif language != 'en-US':
             raise InvalidParameterValue(
-                'The requested language "%s" is not supported by this server' % language, 'language')
+                'The requested language "{}" is not supported by this server'.format(language), 'language')
         else:
             self.language = language
 
@@ -360,84 +357,15 @@ class WPSRequest(object):
         self.inputs = {}
 
         for identifier in value['inputs']:
-            inpt = None
             inpt_defs = value['inputs'][identifier]
 
             for inpt_def in inpt_defs:
+                inpt = input_from_json(inpt_def)
 
-                if inpt_def['type'] == 'complex':
-                    inpt = ComplexInput(
-                        identifier=inpt_def['identifier'],
-                        title=inpt_def.get('title'),
-                        abstract=inpt_def.get('abstract'),
-                        workdir=inpt_def.get('workdir'),
-                        data_format=Format(
-                            schema=inpt_def['data_format'].get('schema'),
-                            extension=inpt_def['data_format'].get('extension'),
-                            mime_type=inpt_def['data_format']['mime_type'],
-                            encoding=inpt_def['data_format'].get('encoding')
-                        ),
-                        supported_formats=[
-                            Format(
-                                schema=infrmt.get('schema'),
-                                extension=infrmt.get('extension'),
-                                mime_type=infrmt['mime_type'],
-                                encoding=infrmt.get('encoding')
-                            ) for infrmt in inpt_def['supported_formats']
-                        ],
-                        mode=MODE.NONE
-                    )
-                    inpt.file = inpt_def['file']
-                elif inpt_def['type'] == 'literal':
-
-                    allowed_values = []
-                    for allowed_value in inpt_def['allowed_values']:
-                        if allowed_value['type'] == 'anyvalue':
-                            allowed_values.append(AnyValue())
-                        elif allowed_value['type'] == 'novalue':
-                            allowed_values.append(NoValue())
-                        elif allowed_value['type'] == 'valuesreference':
-                            allowed_values.append(ValuesReference())
-                        elif allowed_value['type'] == 'allowedvalue':
-                            allowed_values.append(AllowedValue(
-                                allowed_type=allowed_value['allowed_type'],
-                                value=allowed_value['value'],
-                                minval=allowed_value['minval'],
-                                maxval=allowed_value['maxval'],
-                                spacing=allowed_value['spacing'],
-                                range_closure=allowed_value['range_closure']
-                            ))
-
-                    inpt = LiteralInput(
-                        identifier=inpt_def['identifier'],
-                        title=inpt_def.get('title'),
-                        abstract=inpt_def.get('abstract'),
-                        data_type=inpt_def.get('data_type'),
-                        workdir=inpt_def.get('workdir'),
-                        allowed_values=AnyValue,
-                        uoms=inpt_def.get('uoms'),
-                        mode=inpt_def.get('mode')
-                    )
-                    inpt.uom = inpt_def.get('uom')
-                    inpt.data = inpt_def.get('data')
-
-                elif inpt_def['type'] == 'bbox':
-                    inpt = BBoxInput(
-                        identifier=inpt_def['identifier'],
-                        title=inpt_def['title'],
-                        abstract=inpt_def['abstract'],
-                        crss=inpt_def['crs'],
-                        dimensions=inpt_def['dimensions'],
-                        workdir=inpt_def['workdir'],
-                        mode=inpt_def['mode']
-                    )
-                    inpt.ll = inpt_def['bbox'][0]
-                    inpt.ur = inpt_def['bbox'][1]
-
-            if identifier in self.inputs:
-                self.inputs[identifier].append(inpt)
-            else:
-                self.inputs[identifier] = [inpt]
+                if identifier in self.inputs:
+                    self.inputs[identifier].append(inpt)
+                else:
+                    self.inputs[identifier] = [inpt]
 
 
 def get_inputs_from_xml(doc):
@@ -506,15 +434,15 @@ def get_inputs_from_xml(doc):
             the_inputs[identifier].append(inpt)
             continue
 
-        # OWSlib is not python 3 compatible yet
-        if PY2:
-            from owslib.ows import BoundingBox
-            bbox_datas = xpath_ns(input_el, './wps:Data/wps:BoundingBoxData')
-            if bbox_datas:
-                for bbox_data in bbox_datas:
-                    bbox_data_el = bbox_data
-                    bbox = BoundingBox(bbox_data_el)
-                    the_inputs[identifier].append(bbox)
+        # Using OWSlib BoundingBox
+        from owslib.ows import BoundingBox
+        bbox_datas = xpath_ns(input_el, './wps:Data/wps:BoundingBoxData')
+        if bbox_datas:
+            for bbox_data in bbox_datas:
+                bbox_data_el = bbox_data
+                bbox = BoundingBox(bbox_data_el)
+                the_inputs[identifier].append(bbox)
+                LOGGER.debug("parse bbox: {},{},{},{}".format(bbox.minx, bbox.miny, bbox.maxx, bbox.maxy))
     return the_inputs
 
 
