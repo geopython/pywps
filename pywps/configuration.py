@@ -134,6 +134,10 @@ def load_configuration(cfgfiles=None):
     CONFIG.add_section('grass')
     CONFIG.set('grass', 'gisbase', '')
 
+    CONFIG.add_section("daemon")
+    CONFIG.set("daemon", "pidfile", "/var/run/pywps-daemon.pid")
+    CONFIG.set("daemon", "pause", "30")
+
     if not cfgfiles:
         cfgfiles = _get_default_config_files_location()
 

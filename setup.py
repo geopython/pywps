@@ -54,7 +54,7 @@ CONFIG = {
     'install_requires': INSTALL_REQUIRES,
     'packages': find_packages(exclude=["docs", "tests.*", "tests"]),
     'include_package_data': True,
-    'scripts': [],
+    'scripts': ["bin/pywps_daemon.py"],
     'entry_points': {
         'console_scripts': [
             'joblauncher=pywps.processing.job:launcher', ]},

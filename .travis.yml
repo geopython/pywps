@@ -4,8 +4,8 @@ sudo: required
 dist: trusty
 
 python:
-  - "2.7"
   - "3.6"
+# - "2.7"
 
 git:
   submodules: false
@@ -38,6 +38,7 @@ script:
   - python -m unittest tests
   - coverage run --source=pywps -m unittest tests
   - flake8 pywps/
+  - flake8 bin/
 
 after_success:
   - coveralls

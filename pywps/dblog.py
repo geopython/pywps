@@ -22,7 +22,7 @@ import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, VARCHAR, Float, DateTime, LargeBinary
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import NullPool, StaticPool
+from sqlalchemy.pool import NullPool, StaticPool, QueuePool
 
 LOGGER = logging.getLogger('PYWPS')
 _SESSION_MAKER = None
@@ -36,7 +36,7 @@ lock = Lock()
 
 
 class ProcessInstance(Base):
-    __tablename__ = '{}requests'.format(_tableprefix)
+    __tablename__ = '{}jobs'.format(_tableprefix)
 
     uuid = Column(VARCHAR(255), primary_key=True, nullable=False)
     pid = Column(Integer, nullable=False)
@@ -55,6 +55,7 @@ class RequestInstance(Base):
 
     uuid = Column(VARCHAR(255), primary_key=True, nullable=False)
     request = Column(LargeBinary, nullable=False)
+    process = Column(LargeBinary, nullable=False)
 
 
 def log_request(uuid, request):
@@ -113,18 +114,19 @@ def pop_first_stored():
     return request
 
 
-def store_status(uuid, wps_status, message=None, status_percentage=None):
+def store_status(uuid, wps_status, message=None, status_percentage=None, pid=-1):
     """Writes response to database
     """
     session = get_session()
 
-    requests = session.query(ProcessInstance).filter_by(uuid=str(uuid))
-    if requests.count():
-        request = requests.one()
-        request.time_end = datetime.datetime.now()
-        request.message = str(message)
-        request.percent_done = status_percentage
-        request.status = wps_status
+    job = session.query(ProcessInstance).filter_by(uuid=str(uuid))
+    if job.count():
+        job = job.one()
+        job.time_end = datetime.datetime.now()
+        job.message = str(message)
+        job.percent_done = status_percentage
+        job.status = wps_status
+        job.pid = pid
         session.commit()
     session.close()
 
@@ -161,6 +163,7 @@ def get_session():
         if isinstance(level_name, int) and level_name >= logging.INFO:
             echo = False
         try:
+            maxparallel = int(configuration.get_config_value('server', 'parallelprocesses'))
             if ":memory:" in database:
                 engine = sqlalchemy.create_engine(database,
                                                   echo=echo,
@@ -170,13 +173,16 @@ def get_session():
                 engine = sqlalchemy.create_engine(database,
                                                   echo=echo,
                                                   connect_args={'check_same_thread': False},
-                                                  poolclass=NullPool)
+                                                  poolclass=QueuePool,
+                                                  pool_size=maxparallel * 2,
+                                                  max_overflow=20)
             else:
                 engine = sqlalchemy.create_engine(database, echo=echo, poolclass=NullPool)
+
         except sqlalchemy.exc.SQLAlchemyError as e:
             raise NoApplicableCode("Could not connect to database: {}".format(e.message))
 
-        Session = sessionmaker(bind=engine)
+        Session = sessionmaker(bind=engine, expire_on_commit=True)
         ProcessInstance.metadata.create_all(engine)
         RequestInstance.metadata.create_all(engine)
 
@@ -185,16 +191,18 @@ def get_session():
     return _SESSION_MAKER()
 
 
-def store_process(uuid, request):
+def store_request(uuid, request, process):
     """Save given request under given UUID for later usage
     """
 
     session = get_session()
-    request_json = request.json
-    if not PY2:
-        # the BLOB type requires bytes on Python 3
-        request_json = request_json.encode('utf-8')
-    request = RequestInstance(uuid=str(uuid), request=request_json)
+    request_json = json.dumps(request.json).encode("utf-8")
+    process_json = json.dumps(process.json).encode("utf-8")
+    request = RequestInstance(
+        uuid=str(uuid),
+        request=request_json,
+        process=process_json
+    )
     session.add(request)
     session.commit()
     session.close()

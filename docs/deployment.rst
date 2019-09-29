@@ -3,6 +3,47 @@
 Deployment to a production server
 =================================
 
+PyWPS consists from 2 main parts: PyWPS :py:class:`pywps.app.Service` and the
+:py:module:`bin.pywps_daemon`
+
+
+The second part is :py:module:`bin.pywps_daemon` - the Daemon, which is
+running as background daemon process, responsible for calling of the stored
+request in the asynchronous mode.
+
+--------------
+Service module
+--------------
+The :py:class:`pywps.app.Service` class is responsible for *synchronous*
+request executions: GetCapabilites, DescribeProcess and Execute in sync. mode,
+in this case, the Service class will
+
+1. Accept request
+2a. In case, the request is to be executed in *synchronous* mode, it will be
+        directly executed - sync requests are immediately executed.
+2b. In case, the request is to be executed as *asynchronous* mode, request
+    will be stored in to the database.
+
+This means: asynchronous requests are not executed by the Service class, they
+will be just stored into database.
+
+-----------------
+`pywps_daemon.py`
+-----------------
+The :py:module:`bin.pywps_daemon` script is to be started separately - it will
+start daemon process, which will periodically check for the database stored
+requests and in case, some process is there, it will removed and executed.
+
+The daemon does start only so many processes, as many are allowed in the
+`maxparallel` process number.
+
+The daemon does not accept requests from the client, it is just watching the
+database and starting process jobs.
+
+
+------------
+Installation
+------------
 As already described in the :ref:`installation` section, no specific deployment
 procedures are for PyWPS when using flask-based server. But this formula is not 
 intended to be used in a production environment. For production, `sudo service apache2 restartApache httpd
@@ -10,6 +51,8 @@ intended to be used in a production environment. For production, `sudo service a
 more advised. PyWPS is runs as a `WSGI
 <https://wsgi.readthedocs.io/en/latest/>`_ application on those servers. PyWPS
 relies on the `Werkzeug <http://werkzeug.pocoo.org/>`_ library for this purpose.
+
+Then the daemon has to be started too.
 
 Deploying an individual PyWPS instance
 --------------------------------------
@@ -88,6 +131,7 @@ example of a PyWPS WSGI script::
 
         The Configuration is described in next chapter (:ref:`configuration`), 
         as well as process creation and deployment (:ref:`process`).
+
 
 Deployment on Apache2 httpd server
 ----------------------------------
@@ -232,6 +276,13 @@ And  to check that everything is ok::
    
    Todo NGIX + uWSGI
 
+---------------
+Daemon starting
+---------------
+The daemon has to be started from command line::
+
+        export PYWPS_CFG=/path/to/configuration/pywps.cfg
+        pywps_daemon.py start
 
 .. _deployment-testing:
 
