@@ -21,7 +21,9 @@ import pywps.configuration as config
 from pywps._compat import PY2
 from pywps.exceptions import (StorageNotSupported, OperationNotSupported,
                               ServerBusy, NoApplicableCode)
+from pywps.app.exceptions import ProcessError
 from pywps.inout.storage.builder import StorageBuilder
+import importlib
 
 
 LOGGER = logging.getLogger("PYWPS")
@@ -116,7 +118,7 @@ class Process(object):
     def execute(self, wps_request, uuid):
         self._set_uuid(uuid)
         self._setup_status_storage()
-        self.async = False
+        self.async_ = False
         response_cls = get_response("execute")
         wps_response = response_cls(wps_request, process=self, uuid=self.uuid)
 

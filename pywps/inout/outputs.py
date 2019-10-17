@@ -14,6 +14,7 @@ from pywps.inout import basic
 from pywps.inout.storage.file import FileStorage
 from pywps.validator.mode import MODE
 from pywps import configuration as config
+from pywps.inout.formats import Format
 
 
 class BoundingBoxOutput(basic.BBoxOutput):
