@@ -183,7 +183,7 @@ configuration file <https://docs.pycsw.org/en/latest/configuration.html>`_.
 
 :database:
     Connection string to database where the login about requests/responses is to be stored. We are using `SQLAlchemy <https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls>`_
-    please use the configuration string. The default is SQLite3 `:memory:` object.
+    please use the configuration string. The default is SQLite3 `:memory:` object, however this has `known issues <https://github.com/geopython/pywps/issues?utf8=%E2%9C%93&q=is%3Aissue+async+sqlite>`_ with async processing and should be avoided.
 
 
 [grass]
