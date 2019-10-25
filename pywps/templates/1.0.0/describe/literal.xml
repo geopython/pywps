@@ -32,6 +32,6 @@
                     {% endfor %}
                 </ows:AllowedValues>
                 {% endif %}
-                {% if put.data is not none %}
+                {% if put.data is defined and put.data is not none %}
                 <DefaultValue>{{ put.data }}</DefaultValue>
                 {% endif %}
