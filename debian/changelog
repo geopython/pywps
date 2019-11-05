@@ -1,3 +1,10 @@
+pywps (4.2.3) trusty; urgency=medium
+
+  * Check data is defined in literal template (#499)
+  * Mention known issues with sqlite memory in docs for logging.database config (#496)
+
+ -- Carsten Ehbrecht <ehbrecht@dkrz.de>  Di, 05 Nov 2019 12:00:00 +0000
+
 pywps (4.2.2) trusty; urgency=medium
 
   * Fixed scheduler extension (#480).
