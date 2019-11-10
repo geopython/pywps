@@ -20,6 +20,7 @@ The configuration file has several sections:
     * `logging` for logging configuration
     * `grass` for *optional* configuration to support `GRASS GIS
       <https://grass.osgeo.org>`_
+    * `s3` for *optional* configuration to support AWS S3 storage
 
 PyWPS ships with a sample configuration file (``default-sample.cfg``).
 A similar file is also available in the `flask` service as
@@ -146,7 +147,8 @@ configuration file <https://docs.pycsw.org/en/latest/configuration.html>`_.
         Example: `outputpath=/var/www/wps/outputs` shall correspond with
         `outputurl=http://foo.bar/wps/outputs`
 
-
+:storagetype:
+    The type of storage to use when storing status and results. Possible values are: ``file``, ``s3``. Defaults to ``file``.
 
 [processing]
 ------------
@@ -193,6 +195,23 @@ configuration file <https://docs.pycsw.org/en/latest/configuration.html>`_.
   directory of the GRASS GIS instalation, refered as `GISBASE
   <https://grass.osgeo.org/grass73/manuals/variables.html>`_
 
+
+[s3]
+:bucket:
+  Name of the bucket to store files in. e.g. ``my-wps-results``
+
+:region:
+  Region in which the bucket refered to above exists. e.g. ``us-east-1``
+
+:public:
+  Set this to ``true`` if public access to status and result files is desired. Defaults to ``false``.
+
+:prefix:
+  Prefix to prepend to all file paths written to the S3 bucket by PyWPS. e.g. ``wps/results``
+
+:encrypt:
+  Set this to ``true`` if encryption at rest is desired. Defaults to ``false``
+
 -----------
 Sample file
 -----------
@@ -212,6 +231,7 @@ Sample file
   outputpath=/tmp/outputs/
   workdir=
   allowedinputpaths=/tmp
+  storagetype=file
 
   [metadata:main]
   identification_title=PyWPS Processing Service
@@ -248,3 +268,11 @@ Sample file
 
   [grass]
   gisbase=/usr/local/grass-7.3.svn/
+
+  [s3]
+  bucket=my-org-wps
+  region=us-east-1
+  prefix=appname/coolapp/
+  public=true
+  encrypt=false
+

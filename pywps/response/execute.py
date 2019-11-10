@@ -4,19 +4,16 @@
 ##################################################################
 
 import logging
-import os
-from lxml import etree
 import time
 from werkzeug.wrappers import Request
-from werkzeug.exceptions import HTTPException
 from pywps import get_ElementMakerForVersion
-from pywps.app.basic import xml_response
 from pywps.exceptions import NoApplicableCode
 import pywps.configuration as config
 from werkzeug.wrappers import Response
 
 from pywps.response.status import WPS_STATUS
 from pywps.response import WPSResponse
+from pywps.inout.formats import FORMATS
 
 from pywps._compat import PY2
 
@@ -94,10 +91,10 @@ class ExecuteResponse(WPSResponse):
         # TODO: check if file/directory is still present, maybe deleted in mean time
         try:
             # update the status xml file
-            with open(self.process.status_location, 'w') as f:
-                f.write(self.doc)
-                f.flush()
-                os.fsync(f.fileno())
+            self.process.status_store.write(
+                self.doc,
+                self.process.status_filename,
+                data_format=FORMATS.XML)
         except Exception as e:
             raise NoApplicableCode('Writing Response Document failed with : {}'.format(e))
 

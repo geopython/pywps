@@ -95,6 +95,7 @@ def load_configuration(cfgfiles=None):
     # If this flag is enabled PyWPS will remove the process temporary workdir
     # after process has finished.
     CONFIG.set('server', 'cleantempdir', 'true')
+    CONFIG.set('server', 'storagetype', 'file')
 
     CONFIG.add_section('processing')
     CONFIG.set('processing', 'mode', 'default')
@@ -133,6 +134,13 @@ def load_configuration(cfgfiles=None):
 
     CONFIG.add_section('grass')
     CONFIG.set('grass', 'gisbase', '')
+
+    CONFIG.add_section('s3')
+    CONFIG.set('s3', 'bucket', '')
+    CONFIG.set('s3', 'prefix', '')
+    CONFIG.set('s3', 'public', 'false')
+    CONFIG.set('s3', 'encrypt', 'false')
+    CONFIG.set('s3', 'region', '')
 
     if not cfgfiles:
         cfgfiles = _get_default_config_files_location()

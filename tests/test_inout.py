@@ -29,10 +29,9 @@ from pywps.validator.base import emptyvalidator
 from pywps.exceptions import InvalidParameterValue
 from pywps.validator.mode import MODE
 from pywps.inout.basic import UOM
-from pywps.inout.storage import FileStorage
 from pywps._compat import PY2
+from pywps.inout.storage.file import FileStorageBuilder
 from pywps.tests import service_ok
-
 
 from lxml import etree
 
@@ -540,8 +539,7 @@ class ComplexOutputTest(unittest.TestCase):
                       'request=GetFeature&' \
                       'typename=continents&maxfeatures=2'
         self.complex_out.url = wfsResource
-        storage = FileStorage()
-        self.complex_out.storage = storage
+        self.complex_out.storage = FileStorageBuilder().build()
         url = self.complex_out.get_url()
         self.assertEqual('file', urlparse(url).scheme)
 

@@ -28,6 +28,9 @@ from tests import test_process
 from tests import test_processing
 from tests import test_assync
 from tests import test_grass_location
+from tests import test_storage
+from tests import test_filestorage
+from tests import test_s3storage
 from tests.validator import test_complexvalidators
 from tests.validator import test_literalvalidators
 
@@ -89,6 +92,9 @@ def load_tests(loader=None, tests=None, pattern=None):
         test_processing.load_tests(),
         test_assync.load_tests(),
         test_grass_location.load_tests(),
+        test_storage.load_tests(),
+        test_filestorage.load_tests(),
+        test_s3storage.load_tests(),
     ])
 
 
