@@ -11,7 +11,7 @@ import os
 from pywps.app.Common import Metadata
 from pywps.exceptions import InvalidParameterValue
 from pywps.inout import basic
-from pywps.inout.storage.file import FileStorage
+from pywps.inout.storage.file import FileStorageBuilder
 from pywps.validator.mode import MODE
 from pywps import configuration as config
 from pywps.inout.formats import Format
@@ -191,7 +191,7 @@ class ComplexOutput(basic.ComplexOutput):
         if self.prop == 'url':
             data["href"] = self.url
         elif self.prop is not None:
-            self.storage = FileStorage()
+            self.storage = FileStorageBuilder().build()
             data["href"] = self.get_url()
 
         return data
