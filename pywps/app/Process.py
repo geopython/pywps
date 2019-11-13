@@ -299,7 +299,7 @@ class Process(object):
             process = self.service.prepare_process_for_execution(process_identifier)
             process._set_uuid(uuid)
             process._setup_status_storage()
-            process.async = True
+            process.async_ = True
             new_wps_response = ExecuteResponse(new_wps_request, process=process, uuid=uuid)
             new_wps_response.store_status_file = True
             process._run_async(new_wps_request, new_wps_response)
