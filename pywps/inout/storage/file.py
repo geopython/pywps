@@ -108,7 +108,7 @@ class FileStorage(CachedStorage):
 
         just_file_name = os.path.basename(output_name)
 
-        url = self.url(urljoin(str(request_uuid), just_file_name))
+        url = self.url("{}/{}".format(request_uuid, just_file_name))
         LOGGER.info('File output URI: {}'.format(url))
 
         return (STORE_TYPE.PATH, output_name, url)
@@ -131,7 +131,7 @@ class FileStorage(CachedStorage):
         if isinstance(destination, IOHandler):
             output_name, _ = _build_output_name(destination)
             just_file_name = os.path.basename(output_name)
-            dst = urljoin(str(destination.uuid), just_file_name)
+            dst = "{}/{}".format(destination.uuid, just_file_name)
         else:
             dst = destination
 
