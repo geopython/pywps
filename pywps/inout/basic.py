@@ -966,7 +966,7 @@ class ComplexOutput(BasicIO, BasicComplex, IOHandler):
         """Return URL pointing to data
         """
         # TODO: it is not obvious that storing happens here
-        (outtype, storage, url) = self.storage.store(self)
+        (_, _, url) = self.storage.store(self)
         # url = self.storage.url(self)
         return url
 
