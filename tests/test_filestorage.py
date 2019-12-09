@@ -15,6 +15,7 @@ import os
 
 import unittest
 
+
 class FileStorageTests(unittest.TestCase):
 
     def setUp(self):
@@ -42,7 +43,6 @@ class FileStorageTests(unittest.TestCase):
         with open(self.tmp_dir + '/' + store_str) as f:
             self.assertEqual(f.read(), "Hello World!")
 
-
     def test_write(self):
         configuration.CONFIG.set('server', 'outputpath', self.tmp_dir)
         configuration.CONFIG.set('server', 'outputurl', 'file://' + self.tmp_dir)
@@ -61,15 +61,15 @@ class FileStorageTests(unittest.TestCase):
         storage = FileStorageBuilder().build()
         output = ComplexOutput('testme', 'Test', supported_formats=[FORMATS.TEXT], workdir=self.tmp_dir)
         output.data = "Hello World!"
+        output.uuid = '595129f0-1a6c-11ea-a30c-acde48001122'
         url = storage.url(output)
 
-        self.assertEqual('file://' + self.tmp_dir + '/input.txt', url)
+        self.assertEqual('file://' + self.tmp_dir + '/595129f0-1a6c-11ea-a30c-acde48001122' + '/input.txt', url)
 
         file_name = 'test.txt'
         url = storage.url(file_name)
 
         self.assertEqual('file://' + self.tmp_dir + '/test.txt', url)
-
 
     def test_location(self):
         configuration.CONFIG.set('server', 'outputpath', self.tmp_dir)
