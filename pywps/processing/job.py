@@ -21,7 +21,7 @@ class Job(object):
     """
     def __init__(self, process, wps_request, wps_response):
         self.process = process
-        self.method = '_run_process'
+        self.method = 'run_process'
         self.wps_request = wps_request
         self.wps_response = wps_response
 

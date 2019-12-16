@@ -28,7 +28,7 @@ class GreeterProcessingTest(unittest.TestCase):
     def setUp(self):
         self.uuid = uuid.uuid1()
         self.dummy_process = Greeter()
-        self.dummy_process._set_uuid(self.uuid)
+        self.dummy_process.uuid = self.uuid
         self.dummy_process.set_workdir('/tmp')
         self.wps_request = WPSRequest()
         self.wps_response = ExecuteResponse(self.wps_request, self.uuid,
@@ -71,7 +71,7 @@ class InOutProcessingTest(unittest.TestCase):
     def setUp(self):
         self.uuid = uuid.uuid1()
         self.dummy_process = InOut()
-        self.dummy_process._set_uuid(self.uuid)
+        self.dummy_process.uuid = self.uuid
         self.dummy_process.set_workdir('/tmp')
         self.wps_request = WPSRequest()
         self.wps_response = ExecuteResponse(self.wps_request, self.uuid,

@@ -5,6 +5,7 @@
 
 import logging
 import tempfile
+import importlib
 from werkzeug.exceptions import HTTPException
 from werkzeug.wrappers import Request, Response
 from pywps._compat import PY2
@@ -41,12 +42,9 @@ class Service(object):
     :param cfgfiles: A list of configuration files
     """
 
-    def __init__(self, processes=[], cfgfiles=None):
-        # ordered dict of processes
-        self.processes = OrderedDict((p.identifier, p) for p in processes)
-
-        if cfgfiles:
-            config.load_configuration(cfgfiles)
+    def __init__(self, processes=None, cfgfiles=None):
+        processes = processes or []
+        config.load_configuration(cfgfiles)
 
         if config.get_config_value('logging', 'file') and config.get_config_value('logging', 'level'):
             LOGGER.setLevel(getattr(logging, config.get_config_value('logging', 'level')))
@@ -57,6 +55,17 @@ class Service(object):
         else:  # NullHandler | StreamHandler
             if not LOGGER.handlers:
                 LOGGER.addHandler(logging.NullHandler())
+
+        if not processes:
+            # load processes from processes_module.processes_list
+            pname = config.get_config_value('server', 'processes')
+            if pname:
+                pmodule = '.'.join(pname.split('.')[0:-1])
+                plist = pname.split('.')[-1]
+                processes = getattr(importlib.import_module(pmodule), plist)
+
+        # ordered dict of processes
+        self.processes = OrderedDict((p.identifier, p) for p in processes)
 
     def get_capabilities(self, wps_request, uuid):
 

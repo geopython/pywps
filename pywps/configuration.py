@@ -67,10 +67,7 @@ def load_configuration(cfgfiles=None):
     global CONFIG
 
     LOGGER.info('loading configuration')
-    if PY2:
-        CONFIG = ConfigParser.SafeConfigParser(os.environ)
-    else:
-        CONFIG = configparser.ConfigParser(os.environ)
+    CONFIG = configparser.ConfigParser(os.environ)
 
     LOGGER.debug('setting default values')
     CONFIG.add_section('server')
@@ -81,7 +78,7 @@ def load_configuration(cfgfiles=None):
     CONFIG.set('server', 'maxsingleinputsize', '1mb')
     CONFIG.set('server', 'maxrequestsize', '3mb')
     CONFIG.set('server', 'temp_path', tempfile.gettempdir())
-    CONFIG.set('server', 'processes_path', '')
+    CONFIG.set('server', 'processes', '')
     outputpath = tempfile.gettempdir()
     CONFIG.set('server', 'outputurl', 'file://{}'.format(outputpath))
     CONFIG.set('server', 'outputpath', outputpath)
@@ -135,6 +132,9 @@ def load_configuration(cfgfiles=None):
     CONFIG.add_section('grass')
     CONFIG.set('grass', 'gisbase', '')
 
+    CONFIG.add_section("watchdog")
+    CONFIG.set("watchdog", "pause", "30")
+
     CONFIG.add_section('s3')
     CONFIG.set('s3', 'bucket', '')
     CONFIG.set('s3', 'prefix', '')
@@ -142,13 +142,15 @@ def load_configuration(cfgfiles=None):
     CONFIG.set('s3', 'encrypt', 'false')
     CONFIG.set('s3', 'region', '')
 
-    if not cfgfiles:
-        cfgfiles = _get_default_config_files_location()
+    config_files = _get_default_config_files_location()
 
-    if isinstance(cfgfiles, str):
-        cfgfiles = [cfgfiles]
+    if cfgfiles:
+        config_files.extend(cfgfiles)
 
-    loaded_files = CONFIG.read(cfgfiles)
+    if 'PYWPS_CFG' in os.environ:
+        config_files.append(os.environ['PYWPS_CFG'])
+
+    loaded_files = CONFIG.read(config_files)
     if loaded_files:
         LOGGER.info('Configuration file(s) {} loaded'.format(loaded_files))
     else:
@@ -179,48 +181,16 @@ def _check_config():
 
 def _get_default_config_files_location():
     """Get the locations of the standard configuration files. These are
-    Unix/Linux:
-        1. `/etc/pywps.cfg`
-        2. `$HOME/.pywps.cfg`
-    Windows:
-        1. `pywps\\etc\\default.cfg`
-
-    Both:
-        1. `$PYWPS_CFG environment variable`
+        1. `PYWPS_INSTALLATION/etc/pywps.cfg`
+        2. `/etc/pywps.cfg`
+        3. `$HOME/.pywps.cfg`
     :returns: configuration files
     :rtype: list of strings
     """
-
-    is_win32 = sys.platform == 'win32'
-    if is_win32:
-        LOGGER.debug('Windows based environment')
-    else:
-        LOGGER.debug('UNIX based environment')
-
-    if os.getenv("PYWPS_CFG"):
-        LOGGER.debug('using PYWPS_CFG environment variable')
-        # Windows or Unix
-        if is_win32:
-            PYWPS_INSTALL_DIR = os.path.abspath(os.path.join(os.getcwd(), os.path.dirname(sys.argv[0])))
-            cfgfiles = (os.getenv("PYWPS_CFG"))
-        else:
-            cfgfiles = (os.getenv("PYWPS_CFG"))
-
-    else:
-        LOGGER.debug('trying to estimate the default location')
-        # Windows or Unix
-        if is_win32:
-            PYWPS_INSTALL_DIR = os.path.abspath(os.path.join(os.getcwd(), os.path.dirname(sys.argv[0])))
-            cfgfiles = (os.path.join(PYWPS_INSTALL_DIR, "pywps", "etc", "pywps.cfg"))
-        else:
-            homePath = os.getenv("HOME")
-            if homePath:
-                cfgfiles = (os.path.join(pywps.__path__[0], "etc", "pywps.cfg"), "/etc/pywps.cfg",
-                            os.path.join(os.getenv("HOME"), ".pywps.cfg"))
-            else:
-                cfgfiles = (os.path.join(pywps.__path__[0], "etc",
-                            "pywps.cfg"), "/etc/pywps.cfg")
-
+    LOGGER.debug('trying to estimate the default location')
+    cfgfiles = [os.path.join(pywps.__path__[0], "etc", "pywps.cfg"), "/etc/pywps.cfg"]
+    if 'HOME' in os.environ:
+        cfgfiles.append(os.path.join(os.environ['HOME'], ".pywps.cfg"))
     return cfgfiles
 
 

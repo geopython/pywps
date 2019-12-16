@@ -1,4 +1,5 @@
-flufl.enum 
+click
+flufl.enum
 jinja2
 jsonschema
 lxml

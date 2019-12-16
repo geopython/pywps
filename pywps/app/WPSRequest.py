@@ -348,7 +348,10 @@ class WPSRequest(object):
         self.version = value['version']
         self.language = value['language']
         self.identifier = value['identifier']
-        self.identifiers = value['identifiers']
+        if "identifiers" in value:
+            self.identifiers = value['identifiers']
+        else:
+            self.identifiers = [self.identifier]
         self.store_execute = value['store_execute']
         self.status = value['status']
         self.lineage = value['lineage']

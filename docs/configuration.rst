@@ -195,8 +195,18 @@ configuration file <https://docs.pycsw.org/en/latest/configuration.html>`_.
   directory of the GRASS GIS instalation, refered as `GISBASE
   <https://grass.osgeo.org/grass73/manuals/variables.html>`_
 
+[daemon]
+--------
+
+:pidfile:
+  location of the PID file for PyWPS daemon running in the background
+  `/var/run/pywps-daemon.pid`
+:pause:
+  pausing in seconds between periodical check for new stored requests
 
 [s3]
+----
+
 :bucket:
   Name of the bucket to store files in. e.g. ``my-wps-results``
 
@@ -269,10 +279,13 @@ Sample file
   [grass]
   gisbase=/usr/local/grass-7.3.svn/
 
+  [daemon]
+  pidfile=/var/run/pywps-daemon.pid
+  pause=30
+
   [s3]
   bucket=my-org-wps
   region=us-east-1
   prefix=appname/coolapp/
   public=true
   encrypt=false
-
