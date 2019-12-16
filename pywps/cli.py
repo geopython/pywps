@@ -6,6 +6,7 @@
 ###########################################################
 
 import os
+import sys
 import click
 import signal
 import threading
@@ -14,7 +15,6 @@ from pywps.app.Service import Service
 from pywps import configuration
 from pywps.watchdog import WatchDog
 
-from .application import make_app
 from urllib.parse import urlparse
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -60,7 +60,7 @@ def start(config, bind_host, use_watchdog):
     """
     if config:
         os.environ['PYWPS_CFG'] = config
-    app = make_app()
+    app = Service()
 
     def inner(application, bind_host=None):
         # call this *after* app is initialized ... needs pywps config.
