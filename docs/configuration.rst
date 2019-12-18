@@ -16,6 +16,7 @@ The configuration file has several sections:
 
     * `metadata:main` for the server metadata inputs
     * `server` for server configuration
+    * `jobqueue` for job queue configuration
     * `processing` for processing backend configuration
     * `logging` for logging configuration
     * `grass` for *optional* configuration to support `GRASS GIS
@@ -100,6 +101,12 @@ configuration file <https://docs.pycsw.org/en/latest/configuration.html>`_.
     the content type encoding (e.g. ``ISO-8859-1``, see
     https://docs.python.org/2/library/codecs.html#standard-encodings).  Default
     value is 'UTF-8'
+
+:processes:
+    optional parameter to configure the processes list using a Python expression.
+    This expression will be loaded using ``importlib``.
+    For example use `myapp.processes.processes` which points to the Python
+    list of your processes in your application: ``processes = [Sleep(), SayHello()]``.
 
 :parallelprocesses:
     maximum number of parallel running processes - set this number carefully.
@@ -195,12 +202,9 @@ configuration file <https://docs.pycsw.org/en/latest/configuration.html>`_.
   directory of the GRASS GIS instalation, refered as `GISBASE
   <https://grass.osgeo.org/grass73/manuals/variables.html>`_
 
-[daemon]
+[jobqueue]
 --------
 
-:pidfile:
-  location of the PID file for PyWPS daemon running in the background
-  `/var/run/pywps-daemon.pid`
 :pause:
   pausing in seconds between periodical check for new stored requests
 
@@ -279,8 +283,7 @@ Sample file
   [grass]
   gisbase=/usr/local/grass-7.3.svn/
 
-  [daemon]
-  pidfile=/var/run/pywps-daemon.pid
+  [jobqueue]
   pause=30
 
   [s3]

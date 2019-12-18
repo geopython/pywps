@@ -4,12 +4,12 @@ Deployment to a production server
 =================================
 
 PyWPS consists from 2 main parts: PyWPS :py:class:`pywps.app.Service` and the
-:py:module:`bin.pywps_daemon`
+:py:module:`pywps.queue`
 
 
-The second part is :py:module:`bin.pywps_daemon` - the Daemon, which is
-running as background daemon process, responsible for calling of the stored
-request in the asynchronous mode.
+The second part is :py:module:`pywps.queue` - a Service, which is
+running as background process, responsible for calling of the stored
+requests in the asynchronous mode.
 
 --------------
 Service module
@@ -27,17 +27,17 @@ in this case, the Service class will
 This means: asynchronous requests are not executed by the Service class, they
 will be just stored into database.
 
------------------
-`pywps_daemon.py`
------------------
-The :py:module:`bin.pywps_daemon` script is to be started separately - it will
-start daemon process, which will periodically check for the database stored
+------------
+Queue module
+------------
+The :py:module:`pywps.queue` has a `JobQueueService` to be started separately - it will
+start a process, which will periodically check for the database stored
 requests and in case, some process is there, it will removed and executed.
 
-The daemon does start only so many processes, as many are allowed in the
+The service does only start as many processes are allowed in the
 `maxparallel` process number.
 
-The daemon does not accept requests from the client, it is just watching the
+The service does not accept requests from the client, it is just watching the
 database and starting process jobs.
 
 
@@ -45,23 +45,23 @@ database and starting process jobs.
 Installation
 ------------
 As already described in the :ref:`installation` section, no specific deployment
-procedures are for PyWPS when using flask-based server. But this formula is not 
+procedures are for PyWPS when using flask-based server. But this formula is not
 intended to be used in a production environment. For production, `sudo service apache2 restartApache httpd
 <https://httpd.apache.org/>`_ or `nginx <https://nginx.org/>`_ servers are
 more advised. PyWPS is runs as a `WSGI
 <https://wsgi.readthedocs.io/en/latest/>`_ application on those servers. PyWPS
 relies on the `Werkzeug <http://werkzeug.pocoo.org/>`_ library for this purpose.
 
-Then the daemon has to be started too.
+Then the job queue service has to be started too.
 
 Deploying an individual PyWPS instance
 --------------------------------------
 
-PyWPS should be installed in your computer (as per the :ref:`installation` 
-section). As a following step, you can now create several instances of your WPS 
+PyWPS should be installed in your computer (as per the :ref:`installation`
+section). As a following step, you can now create several instances of your WPS
 server.
 
-It is advisable for each PyWPS instance to have its own directory, where the 
+It is advisable for each PyWPS instance to have its own directory, where the
 WSGI file along with available processes should reside. Therefore create a new
 directory for the PyWPS instance::
 
@@ -72,21 +72,40 @@ directory for the PyWPS instance::
 
 .. note:: In this configuration example it is assumed that there is only one
         instance of PyWPS on the server.
-        
-Each instance is represented by a single `WSGI` script (written in Python), 
+
+Each instance is represented by a single `WSGI` script (written in Python),
 which:
 
     1. Loads the configuration files
     2. Serves processes
     3. Takes care about maximum number of concurrent processes and similar
 
+Starting PyWPS using Werkzeug
+-----------------------------
+
+PyWPS has a command line interface to start a PyWPS instance with Werkzeug for
+development purposes. You need a configuration file ```pywps.cfg`` pointing to
+the available processes::
+
+    [server]
+    processes = myapp.processes.processes
+
+Start the pywps with the following command::
+
+    $ pywps start -c pywps.cfg
+
+You can also start the pywps service and the job queue as seperated processes::
+
+    $ pywps start -c pywps.cfg --no-jobqueue
+    $ pywps jobqueue -c pywps.cfg
+
 Creating a PyWPS `WSGI` instance
 --------------------------------
 
-An example WSGI script is distributed along with the pywps-flask service, as 
-described in the :ref:`installation` section. The script is actually 
-straightforward - in fact, it's a just wrapper around the PyWPS server with a 
-list of processes and configuration files passed as arguments. Here is an 
+An example WSGI script is distributed along with the pywps-flask service, as
+described in the :ref:`installation` section. The script is actually
+straightforward - in fact, it's a just wrapper around the PyWPS server with a
+list of processes and configuration files passed as arguments. Here is an
 example of a PyWPS WSGI script::
 
     $ $EDITOR /path/to/pywps/pywps.wsgi
@@ -129,7 +148,7 @@ example of a PyWPS WSGI script::
         processes at hand that can be directly included. Also it assumes, that
         the configuration file already exists - which is not the case yet.
 
-        The Configuration is described in next chapter (:ref:`configuration`), 
+        The Configuration is described in next chapter (:ref:`configuration`),
         as well as process creation and deployment (:ref:`process`).
 
 
@@ -162,17 +181,17 @@ You then can edit your site configuration file
         The `outputpath` directory need also be accessible from the URL mentioned in `outputurl` configuration.
 
 And of course restart the server::
-    
+
     $ sudo service apache2 restart
 
 
 Deployment on Nginx-Gunicorn
 ----------------------------
 
-.. note:: We will use Greenunicorn  for pyWPS deployment, since it is a very simple to configurate server. 
+.. note:: We will use Greenunicorn  for pyWPS deployment, since it is a very simple to configurate server.
 
    For difference between WSGI server consult:  `WSGI comparison <https://www.digitalocean.com/community/tutorials/a-comparison-of-web-servers-for-python-based-web-applications>`_.
-   
+
    uWSGU is more popular than gunicorn, best documentation is probably to be found at `Readthedocs <https://uwsgi-docs.readthedocs.io/en/latest/WSGIquickstart.html>`_.
 
 We need nginx and gunicorn server::
@@ -183,31 +202,31 @@ We need nginx and gunicorn server::
 It is assumed that PyWPS  is installed in your system (if not see: ref:`installation`) and we will use pywps-flask as installation example.
 
 First, cloning the pywps-flask example to the root / (you need to be sudoer or root to run the examples)::
-   
+
    $ cd /
    $ git clone https://github.com/geopython/pywps-flask.git
 
-Second, preparing the WSGI script for gunicorn. It is necessary that the 
-WSGI script located in the pywps-flask service is identified as a python module by gunicorn, 
-this is done by creating a link with .py extention to the wsgi file::  
-   
+Second, preparing the WSGI script for gunicorn. It is necessary that the
+WSGI script located in the pywps-flask service is identified as a python module by gunicorn,
+this is done by creating a link with .py extention to the wsgi file::
+
    $ cd /pywps-flask/wsgi
-   $ ln -s ./pywps.wsgi ./pywps_app.py 
-   
+   $ ln -s ./pywps.wsgi ./pywps_app.py
+
 Gunicorn can already be tested by setting python path on the command options::
-   
-   $ gunicorn3 -b 127.0.0.1:8081  --workers $((2*`nproc --all`)) --log-syslog  --pythonpath /pywps-flask wsgi.pywps_app:application   
-  
-The command will start a gunicorn instance on the localhost IP and port 8081, logging to systlog 
-(/var/log/syslog), using pywps process folder /pywps-flask/processes and loading module wsgi.pywps_app and object/function application for WSGI.  
 
-.. note::  Gunicorn uses a prefork model where the master process forks processes (workers) 
-   that willl accept incomming connections. The --workers flag sets the number of processes, 
-   the default values is 1 but the recomended value is 2 or 4 times the number of CPU cores.      
+   $ gunicorn3 -b 127.0.0.1:8081  --workers $((2*`nproc --all`)) --log-syslog  --pythonpath /pywps-flask wsgi.pywps_app:application
 
-Next step is to configure NGINX,  by pointing to the WSGI server by changing the location paths of the  default  
-site file but editing file /etc/nginx/sites-enabled as follows::: 
-   
+The command will start a gunicorn instance on the localhost IP and port 8081, logging to systlog
+(/var/log/syslog), using pywps process folder /pywps-flask/processes and loading module wsgi.pywps_app and object/function application for WSGI.
+
+.. note::  Gunicorn uses a prefork model where the master process forks processes (workers)
+   that willl accept incomming connections. The --workers flag sets the number of processes,
+   the default values is 1 but the recomended value is 2 or 4 times the number of CPU cores.
+
+Next step is to configure NGINX,  by pointing to the WSGI server by changing the location paths of the  default
+site file but editing file /etc/nginx/sites-enabled as follows:::
+
    server {
         listen 80 default_server;
         listen [::]:80 default_server;
@@ -229,19 +248,19 @@ site file but editing file /etc/nginx/sites-enabled as follows:::
                 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
                 proxy_pass http://127.0.0.1:8081;
                 }
-   
+
    }
- 
-It is likely that part of the proxy configuration is already set on the file /etc/nginx/proxy.conf.  
-Of course the necessatyrestart of nginx :: 
-   
+
+It is likely that part of the proxy configuration is already set on the file /etc/nginx/proxy.conf.
+Of course the necessatyrestart of nginx ::
+
    $ service nginx restart
-   
+
 The service will now be available on the IP of the server or localhost ::
-   
+
    http://localhost/wps?request=GetCapabilities&service=wps
- 
-The current gunicorn instance was launched by the user. In a production server it is necessary to set gunicorn as a service  
+
+The current gunicorn instance was launched by the user. In a production server it is necessary to set gunicorn as a service
 
 On ubuntu 16.04  the systemcltd system requires a service file that will start the gunicorn3 service. The service file (/lib/systemd/system/gunicorn.service)
 has to be configure as follows::
@@ -258,31 +277,30 @@ has to be configure as follows::
    ExecStart=/usr/bin/gunicorn3 -b 127.0.0.1:8081   --preload --workers $WORKERS --log-syslog --pythonpath /pywps-flask wsgi.pywps_app:application
    ExecReload=/bin/kill -s HUP $MAINPID
    ExecStop=/bin/kill -s TERM $MAINPID
-   
+
    [Install]
    WantedBy=multi-user.target
 
 And then enable the service and then reload the systemctl daemon::
-   
+
    $ systemctl enable gunicorn3.service
    $ systemctl daemon-reload
    $ systemctl restart gunicorn3.service
 
 And  to check that everything is ok::
-   
+
    $ systemctl status gunicorn3.service
 
 .. note::
-   
+
    Todo NGIX + uWSGI
 
----------------
-Daemon starting
----------------
-The daemon has to be started from command line::
+------------------
+Job queue starting
+------------------
+The job queue has to be started from command line::
 
-        export PYWPS_CFG=/path/to/configuration/pywps.cfg
-        pywps_daemon.py start
+        pywps jobqueue --config /path/to/configuration/pywps.cfg
 
 .. _deployment-testing:
 
@@ -309,11 +327,11 @@ The result should be an XML-encoded error message.
         </ows:Exception>
     </ows:ExceptionReport>
 
-The server responded with the :py:class:`pywps.exceptions.MissingParameterValue` 
-exception, telling us that the parameter `service` was not set. This is  
-compliant with the OGC WPS standard, since each request mast have at least the 
-`service` and `request` parameters. We can say for now, that this PyWPS 
-instance is properly deployed on the server, since it returns proper exception 
+The server responded with the :py:class:`pywps.exceptions.MissingParameterValue`
+exception, telling us that the parameter `service` was not set. This is
+compliant with the OGC WPS standard, since each request mast have at least the
+`service` and `request` parameters. We can say for now, that this PyWPS
+instance is properly deployed on the server, since it returns proper exception
 report.
 
 We now have to configure the instance by editing the `pywps.cfg` file and adding
