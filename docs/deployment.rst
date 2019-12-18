@@ -3,13 +3,9 @@
 Deployment to a production server
 =================================
 
-PyWPS consists from 2 main parts: PyWPS :py:class:`pywps.app.Service` and the
-:py:module:`pywps.queue`
-
-
-The second part is :py:module:`pywps.queue` - a Service, which is
-running as background process, responsible for calling of the stored
-requests in the asynchronous mode.
+PyWPS consists from two main parts:
+* PyWPS :py:class:`pywps.app.Service` the main process to accept client requests,
+* :py:module:`pywps.queue` responsible for calling the stored requests in the asynchronous mode.
 
 --------------
 Service module
