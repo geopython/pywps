@@ -24,12 +24,16 @@ class JobQueueService(object):
         self.maxparallel = int(config.get_config_value('server', 'parallelprocesses'))
 
     def run(self):
+        old_running = old_stored = 0
         while True:
             # Logging errors and exceptions
             try:
                 running, stored = dblog.get_process_counts()
-                LOGGER.info('PyWPS job queue: {} running processes {} stored requests'.format(
-                    running, stored))
+                if old_running != running or old_stored != stored:
+                    old_running = running
+                    old_stored = stored
+                    LOGGER.info('PyWPS job queue: {} running processes {} stored requests'.format(
+                        running, stored))
 
                 while (running < self.maxparallel or self.maxparallel == -1) and stored > 0:
                     launch_process()
