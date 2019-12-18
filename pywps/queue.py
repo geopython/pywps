@@ -4,6 +4,7 @@ import logging
 from pywps import dblog
 import pywps.processing
 import pywps.configuration as config
+from pywps.log import get_logger
 import json
 
 # Configure logging
@@ -14,15 +15,10 @@ class JobQueueService(object):
     def __init__(self, cfgfiles=None):
         config.load_configuration(cfgfiles)
 
-        if config.get_config_value('logging', 'file') and config.get_config_value('logging', 'level'):
-            LOGGER.setLevel(getattr(logging, config.get_config_value('logging', 'level')))
-            if not LOGGER.handlers:  # hasHandlers in Python 3.x
-                fh = logging.FileHandler(config.get_config_value('logging', 'file'))
-                fh.setFormatter(logging.Formatter(config.get_config_value('logging', 'format')))
-                LOGGER.addHandler(fh)
-        else:  # NullHandler | StreamHandler
-            if not LOGGER.handlers:
-                LOGGER.addHandler(logging.NullHandler())
+        LOGGER = get_logger(
+            file=config.get_config_value('logging', 'file'),
+            level=config.get_config_value('logging', 'level'),
+            format=config.get_config_value('logging', 'format'))
 
         self.max_time = int(config.get_config_value('jobqueue', 'pause'))
         self.maxparallel = int(config.get_config_value('server', 'parallelprocesses'))

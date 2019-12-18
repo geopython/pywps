@@ -8,6 +8,7 @@ import tempfile
 import pywps.configuration as config
 from pywps import Process, WPSRequest
 from pywps.response.execute import ExecuteResponse
+from pywps.log import get_logger
 
 import json
 
@@ -121,15 +122,10 @@ class JobLauncher(object):
         # cd into workdir
         os.chdir(job.workdir)
         # init logger ... code copied from app.Service
-        if config.get_config_value('logging', 'file') and config.get_config_value('logging', 'level'):
-            LOGGER.setLevel(getattr(logging, config.get_config_value('logging', 'level')))
-            if not LOGGER.handlers:  # hasHandlers in Python 3.x
-                fh = logging.FileHandler(config.get_config_value('logging', 'file'))
-                fh.setFormatter(logging.Formatter(config.get_config_value('logging', 'format')))
-                LOGGER.addHandler(fh)
-        else:  # NullHandler
-            if not LOGGER.handlers:
-                LOGGER.addHandler(logging.NullHandler())
+        LOGGER = get_logger(
+            file=config.get_config_value('logging', 'file'),
+            level=config.get_config_value('logging', 'level'),
+            format=config.get_config_value('logging', 'format'))
         job.run()
 
 

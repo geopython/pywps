@@ -12,12 +12,7 @@ import sys
 import os
 import tempfile
 import pywps
-
-from pywps._compat import PY2
-if PY2:
-    import ConfigParser
-else:
-    import configparser
+import configparser
 
 __author__ = "Calin Ciociu"
 
@@ -100,8 +95,9 @@ def load_configuration(cfgfiles=None):
 
     CONFIG.add_section('logging')
     CONFIG.set('logging', 'file', '')
-    CONFIG.set('logging', 'level', 'DEBUG')
+    CONFIG.set('logging', 'level', 'WARNING')
     CONFIG.set('logging', 'database', 'sqlite:///:memory:')
+    CONFIG.set('logging', 'db_echo', 'false')
     CONFIG.set('logging', 'prefix', 'pywps_')
     CONFIG.set('logging', 'format', '%(asctime)s] [%(levelname)s] file=%(pathname)s line=%(lineno)s module=%(module)s function=%(funcName)s %(message)s')  # noqa
 
