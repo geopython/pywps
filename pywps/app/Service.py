@@ -60,8 +60,7 @@ class Service(object):
             # load processes from processes_module.processes_list
             pname = config.get_config_value('server', 'processes')
             if pname:
-                pmodule = '.'.join(pname.split('.')[0:-1])
-                plist = pname.split('.')[-1]
+                pmodule, plist = pname.rsplit('.', 1)
                 processes = getattr(importlib.import_module(pmodule), plist)
 
         # ordered dict of processes
