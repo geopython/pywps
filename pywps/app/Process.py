@@ -260,10 +260,6 @@ class Process(object):
                 msg = 'Process failed, please check server error log'
             wps_response._update_status(WPS_STATUS.FAILED, msg, 100)
 
-        finally:
-            # nothing
-            pass
-
         return wps_response
 
     def clean(self):
