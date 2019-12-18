@@ -111,6 +111,8 @@ class JobLauncher(object):
         self._run_job(args.filename)
 
     def _run_job(self, filename):
+        global LOGGER
+
         job = Job.load(filename)
         # init config
         if 'PYWPS_CFG' in os.environ:

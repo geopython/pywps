@@ -13,6 +13,8 @@ LOGGER = logging.getLogger("PYWPS")
 
 class JobQueueService(object):
     def __init__(self, cfgfiles=None):
+        global LOGGER
+
         config.load_configuration(cfgfiles)
 
         LOGGER = get_logger(

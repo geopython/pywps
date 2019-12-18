@@ -44,6 +44,8 @@ class Service(object):
     """
 
     def __init__(self, processes=None, cfgfiles=None):
+        global LOGGER
+
         processes = processes or []
         config.load_configuration(cfgfiles)
 
