@@ -22,7 +22,7 @@ import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, VARCHAR, Float, DateTime, LargeBinary
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import NullPool, StaticPool, QueuePool
+from sqlalchemy.pool import NullPool, StaticPool
 
 LOGGER = logging.getLogger('PYWPS')
 _SESSION_MAKER = None
@@ -173,9 +173,7 @@ def get_session():
                 engine = sqlalchemy.create_engine(database,
                                                   echo=echo,
                                                   connect_args={'check_same_thread': False},
-                                                  poolclass=QueuePool,
-                                                  pool_size=maxparallel * 2,
-                                                  max_overflow=20)
+                                                  poolclass=NullPool)
             else:
                 engine = sqlalchemy.create_engine(database, echo=echo, poolclass=NullPool)
 
