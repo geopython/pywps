@@ -163,7 +163,6 @@ def get_session():
         if isinstance(level_name, int) and level_name >= logging.INFO:
             echo = False
         try:
-            maxparallel = int(configuration.get_config_value('server', 'parallelprocesses'))
             if ":memory:" in database:
                 engine = sqlalchemy.create_engine(database,
                                                   echo=echo,
