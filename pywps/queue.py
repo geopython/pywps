@@ -24,7 +24,7 @@ class JobQueueService(object):
             if not LOGGER.handlers:
                 LOGGER.addHandler(logging.NullHandler())
 
-        self.max_time = int(config.get_config_value('watchdog', 'pause'))
+        self.max_time = int(config.get_config_value('jobqueue', 'pause'))
         self.maxparallel = int(config.get_config_value('server', 'parallelprocesses'))
 
     def run(self):
@@ -32,7 +32,7 @@ class JobQueueService(object):
             # Logging errors and exceptions
             try:
                 running, stored = dblog.get_process_counts()
-                LOGGER.info('PyWPS watchdog: {} running processes {} stored requests'.format(
+                LOGGER.info('PyWPS job queue: {} running processes {} stored requests'.format(
                     running, stored))
 
                 while (running < self.maxparallel or self.maxparallel == -1) and stored > 0:
@@ -40,9 +40,9 @@ class JobQueueService(object):
                     running, stored = dblog.get_process_counts()
 
             except Exception as e:
-                LOGGER.exception("PyWPS watchdog failed: {}".format(str(e)))
+                LOGGER.exception("PyWPS job queue failed: {}".format(str(e)))
 
-            # The watchdog will repeat your tasks according to this variable
+            # The job queue will repeat your tasks according to this variable
             # it's in second so 60 is 1 minute, 3600 is 1 hour, etc.
             time.sleep(self.max_time)
 

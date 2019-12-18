@@ -132,8 +132,8 @@ def load_configuration(cfgfiles=None):
     CONFIG.add_section('grass')
     CONFIG.set('grass', 'gisbase', '')
 
-    CONFIG.add_section("watchdog")
-    CONFIG.set("watchdog", "pause", "30")
+    CONFIG.add_section("jobqueue")
+    CONFIG.set("jobqueue", "pause", "30")
 
     CONFIG.add_section('s3')
     CONFIG.set('s3', 'bucket', '')
