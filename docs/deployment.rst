@@ -35,7 +35,7 @@ start a process, which will periodically check for the database stored
 requests and in case, some process is there, it will removed and executed.
 
 The service does only start as many processes are allowed in the
-`maxparallel` process number.
+`parallelprocesses` process number.
 
 The service does not accept requests from the client, it is just watching the
 database and starting process jobs.
