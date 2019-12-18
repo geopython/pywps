@@ -13,7 +13,7 @@ import threading
 from werkzeug.serving import run_simple
 from pywps.app.Service import Service
 from pywps import configuration
-from pywps.watchdog import WatchDog
+from pywps.queue import JobQueueService
 
 from urllib.parse import urlparse
 
@@ -52,9 +52,9 @@ def cli():
 @click.option('--config', '-c', metavar='PATH', help='path to pywps configuration file.')
 @click.option('--bind-host', '-b', metavar='IP-ADDRESS', default='127.0.0.1',
               help='IP address used to bind service.')
-@click.option('--use-watchdog', '-w', is_flag=True,
-              help='Start watchdog for job queue.')
-def start(config, bind_host, use_watchdog):
+@click.option('--no-jobqueue', '-n', is_flag=True,
+              help='Do not start job queue service.')
+def start(config, bind_host, no_jobqueue):
     """Start PyWPS service.
     This service is by default available at http://localhost:5000/wps
     """
@@ -84,33 +84,33 @@ def start(config, bind_host, use_watchdog):
     # See:
     # * https://github.com/geopython/pywps-flask/blob/master/demo.py
     # * http://werkzeug.pocoo.org/docs/0.14/serving/
-    if use_watchdog:
-        click.echo('Starting pywps with watchdog')
-        watchdog = WatchDog()
+    if no_jobqueue:
+        click.echo('Starting pywps without job queue')
+        inner(app, bind_host)
+    else:
+        click.echo('Starting pywps with job queue')
+        jq_service = JobQueueService()
         signal.signal(signal.SIGTERM, lambda *args: sys.exit(0))
         try:
             t = threading.Thread(target=inner, args=(app, bind_host))
             t.setDaemon(True)
             t.start()
-            watchdog.run()
+            jq_service.run()
         except KeyboardInterrupt:
             pass
-    else:
-        click.echo('Starting pywps without watchdog')
-        inner(app, bind_host)
 
 
 @cli.command()
 @click.option('--config', '-c', metavar='PATH', help='path to pywps configuration file.')
-def watchdog(config):
-    """Start watchdog service.
+def jobqueue(config):
+    """Start job queue service.
     """
     if config:
         os.environ['PYWPS_CFG'] = config
-    watchdog = WatchDog()
+    jq_service = JobQueueService()
     signal.signal(signal.SIGTERM, lambda *args: sys.exit(0))
-    click.echo('Starting watchdog')
+    click.echo('Starting job queue service (Press CTRL+C to quit)')
     try:
-        watchdog.run()
+        jq_service.run()
     except KeyboardInterrupt:
         pass

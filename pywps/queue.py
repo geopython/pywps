@@ -10,7 +10,7 @@ import json
 LOGGER = logging.getLogger("PYWPS")
 
 
-class WatchDog(object):
+class JobQueueService(object):
     def __init__(self, cfgfiles=None):
         config.load_configuration(cfgfiles)
 
