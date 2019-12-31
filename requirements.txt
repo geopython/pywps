@@ -8,3 +8,4 @@ python-dateutil
 requests
 SQLAlchemy
 werkzeug
+python-daemon
