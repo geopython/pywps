@@ -20,7 +20,6 @@ from pywps.app.WPSRequest import WPSRequest
 from pywps.inout.inputs import input_from_json
 from pywps.inout.outputs import output_from_json
 import pywps.configuration as config
-from pywps._compat import PY2
 from pywps.exceptions import (StorageNotSupported, OperationNotSupported,
                               ServerBusy, NoApplicableCode)
 from pywps.app.exceptions import ProcessError
