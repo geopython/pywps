@@ -10,7 +10,6 @@ Implementation of logging for PyWPS-4
 import logging
 from pywps import configuration
 from pywps.exceptions import NoApplicableCode
-from pywps._compat import PY2
 import sqlite3
 import datetime
 import pickle

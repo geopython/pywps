@@ -12,12 +12,9 @@ import shutil
 from pywps import dblog
 from pywps.response import get_response
 from pywps.response.status import WPS_STATUS
-from pywps.response.execute import ExecuteResponse
-from pywps.app.WPSRequest import WPSRequest
 from pywps.inout.inputs import input_from_json
 from pywps.inout.outputs import output_from_json
 import pywps.configuration as config
-from pywps._compat import PY2
 from pywps.exceptions import (StorageNotSupported, OperationNotSupported,
                               ServerBusy, NoApplicableCode)
 from pywps.app.exceptions import ProcessError
