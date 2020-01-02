@@ -87,7 +87,7 @@ Initialize database
 
 Before you can start the service you need to initialize or upgrade the database::
 
-    $ pywps migrate -c pywps.cfg
+    $ pywps -c pywps.cfg migrate 
 
 .. _flask:
 

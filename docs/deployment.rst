@@ -88,12 +88,12 @@ the available processes::
 
 Start the pywps with the following command::
 
-    $ pywps start -c pywps.cfg
+    $ pywps -c pywps.cfg start
 
 You can also start the pywps service and the job queue as seperated processes::
 
-    $ pywps start -c pywps.cfg --no-jobqueue
-    $ pywps jobqueue -c pywps.cfg
+    $ pywps -c pywps.cfg start --no-jobqueue
+    $ pywps -c pywps.cfg jobqueue 
 
 Creating a PyWPS `WSGI` instance
 --------------------------------

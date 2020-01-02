@@ -41,28 +41,27 @@ def get_host():
 
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.version_option()
-def cli():
+@click.option('--config', '-c', metavar='PATH', help='path to pywps configuration file.')
+def cli(config):
     """Command line to start/stop a PyWPS service.
 
     Do not use this service in a production environment.
     It's intended to be running in a test environment only!
     For more documentation, visit http://pywps.org/doc
     """
-    pass
+    if config:
+        os.environ['PYWPS_CFG'] = config
 
 
 @cli.command()
-@click.option('--config', '-c', metavar='PATH', help='path to pywps configuration file.')
 @click.option('--bind-host', '-b', metavar='IP-ADDRESS', default='127.0.0.1',
               help='IP address used to bind service.')
 @click.option('--no-jobqueue', '-n', is_flag=True,
               help='Do not start job queue service.')
-def start(config, bind_host, no_jobqueue):
+def start(bind_host, no_jobqueue):
     """Start PyWPS service.
     This service is by default available at http://localhost:5000/wps
     """
-    if config:
-        os.environ['PYWPS_CFG'] = config
     app = Service()
 
     def inner(application, bind_host=None):
@@ -104,12 +103,9 @@ def start(config, bind_host, no_jobqueue):
 
 
 @cli.command()
-@click.option('--config', '-c', metavar='PATH', help='path to pywps configuration file.')
-def jobqueue(config):
+def jobqueue():
     """Start job queue service.
     """
-    if config:
-        os.environ['PYWPS_CFG'] = config
     jq_service = JobQueueService()
     signal.signal(signal.SIGTERM, lambda *args: sys.exit(0))
     click.echo('Starting job queue service (Press CTRL+C to quit)')
@@ -120,12 +116,9 @@ def jobqueue(config):
 
 
 @cli.command()
-@click.option('--config', '-c', metavar='PATH', help='path to pywps configuration file.')
-def migrate(config):
+def migrate():
     """Uprade or initialize database.
     """
-    if config:
-        os.environ['PYWPS_CFG'] = config
     alembic_cfg = Config()
     alembic_cfg.set_main_option("script_location", "pywps:alembic")
     command.upgrade(alembic_cfg, "head")
