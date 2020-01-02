@@ -15,6 +15,9 @@ from pywps.app.Service import Service
 from pywps import configuration
 from pywps.queue import JobQueueService
 
+from alembic.config import Config
+from alembic import command
+
 from urllib.parse import urlparse
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -114,3 +117,15 @@ def jobqueue(config):
         jq_service.run()
     except KeyboardInterrupt:
         pass
+
+
+@cli.command()
+@click.option('--config', '-c', metavar='PATH', help='path to pywps configuration file.')
+def migrate(config):
+    """Uprade or initialize database.
+    """
+    if config:
+        os.environ['PYWPS_CFG'] = config
+    alembic_cfg = Config()
+    alembic_cfg.set_main_option("script_location", "pywps:alembic")
+    command.upgrade(alembic_cfg, "head")

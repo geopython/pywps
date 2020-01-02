@@ -1,3 +1,4 @@
+alembic
 click
 jinja2
 jsonschema

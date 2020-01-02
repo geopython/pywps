@@ -1,4 +1,4 @@
-from logging.config import fileConfig
+# from logging.config import fileConfig
 import configparser
 
 from sqlalchemy import engine_from_config
@@ -15,7 +15,7 @@ from pywps import configuration as pywpscfg
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
-fileConfig(config.config_file_name)
+# fileConfig(config.config_file_name)
 
 from pywps.dblog import ProcessInstance
 from pywps.dblog import RequestInstance

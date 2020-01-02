@@ -44,7 +44,7 @@ As already described in the :ref:`installation` section, no specific deployment
 procedures are for PyWPS when using flask-based server. But this formula is not
 intended to be used in a production environment. For production, `sudo service apache2 restartApache httpd
 <https://httpd.apache.org/>`_ or `nginx <https://nginx.org/>`_ servers are
-more advised. PyWPS is runs as a `WSGI
+more advised. PyWPS is run as a `WSGI
 <https://wsgi.readthedocs.io/en/latest/>`_ application on those servers. PyWPS
 relies on the `Werkzeug <http://werkzeug.pocoo.org/>`_ library for this purpose.
 
