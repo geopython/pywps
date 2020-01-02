@@ -55,7 +55,7 @@ class RequestInstance(Base):
 
     uuid = Column(VARCHAR(255), primary_key=True, nullable=False)
     request = Column(LargeBinary, nullable=False)
-    process = Column(LargeBinary, nullable=False)
+    process = Column(LargeBinary, nullable=True)
 
 
 def log_request(uuid, request):
@@ -176,8 +176,6 @@ def get_session():
             raise NoApplicableCode("Could not connect to database: {}".format(e.message))
 
         Session = sessionmaker(bind=engine, expire_on_commit=True)
-        ProcessInstance.metadata.create_all(engine)
-        RequestInstance.metadata.create_all(engine)
 
         _SESSION_MAKER = Session
 
