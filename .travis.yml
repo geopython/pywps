@@ -36,7 +36,7 @@ install:
   - pip install -r requirements-dev.txt
   - pip install coveralls
   - pip install -e .
-  - pywps migrate -c $PYWPS_CFG
+  - pywps -c $PYWPS_CFG migrate 
 
 script:
   - python -m unittest tests
