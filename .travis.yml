@@ -36,7 +36,7 @@ install:
 
 script:
   - pywps migrate -c tests/test-pywps.cfg
-  - export PYWPS_CFG="$TRAVIS_BUILD_DIR/tests/test-pywps.cfg"
+  - export PYWPS_CFG=/home/travis/build/geopython/pywps/tests/test-pywps.cfg
   - python -m unittest tests
   - coverage run --source=pywps -m unittest tests
   - flake8 pywps/
