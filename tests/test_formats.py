@@ -63,6 +63,23 @@ class FormatsTest(unittest.TestCase):
 
         self.assertTrue(frmt.same_as(frmt2))
 
+    def test_format_equal_types(self):
+        """Test that equality check returns the expected bool and doesn't raise
+        when types mismatch.
+        """
+        frmt = get_format('GML')
+        self.assertTrue(isinstance(frmt, Format))
+        try:
+            res = frmt.same_as("GML")  # not a Format type
+        except AssertionError:
+            self.fail("Comparing a format to another type should not raise")
+        except Exception:
+            self.fail("Unexpected error, test failed for unknown reason")
+        self.assertFalse(res, "Equality check with other type should be False")
+
+        frmt_other = get_format('GML')
+        self.assertTrue(frmt == frmt_other, "Same formats should return True")
+
     def test_json_out(self):
         """Test json export
         """
