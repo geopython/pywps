@@ -12,6 +12,9 @@ docs/_build
 .DS_Store
 .*.un~
 
+# project
+.idea
+
 # git
 
 *.orig

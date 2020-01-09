@@ -129,6 +129,8 @@ class Format(object):
     def same_as(self, frmt):
         """Check input frmt, if it seems to be the same as self
         """
+        if not isinstance(frmt, Format):
+            return False
         return all([frmt.mime_type == self.mime_type,
                     frmt.encoding == self.encoding,
                     frmt.schema == self.schema])
