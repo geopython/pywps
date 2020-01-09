@@ -1,9 +1,7 @@
-###########################################################
-# Demo WPS service for testing and debugging.
-#
-# See the werkzeug documentation on how to use the debugger:
-# http://werkzeug.pocoo.org/docs/0.12/debug/
-###########################################################
+##################################################################
+# Copyright 2018 Open Source Geospatial Foundation and others    #
+# licensed under MIT, Please consult LICENSE.txt for details     #
+##################################################################
 
 import os
 import sys
