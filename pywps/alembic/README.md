@@ -31,7 +31,7 @@ INFO  [alembic.runtime.migration] Running upgrade eead25e2ad3a -> 01d5298bfc61, 
 
 1. Change ORM
 
-        Currently, all changes in the database are  done in `pywps/dblog.py` - make the
+        Currently, all changes in the database are done in `pywps/dblog.py` - make the
         changes there to the objects `ProcessInstance` and `RequestInstance`.
 
 2. Set fake configuration file variable
