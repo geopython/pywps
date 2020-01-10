@@ -21,7 +21,8 @@ from urllib.parse import urlparse
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
-def get_host():
+def get_host(cfgfiles=None):
+    configuration.load_configuration(cfgfiles)
     url = configuration.get_config_value('server', 'url')
     url = url or 'http://localhost:5000/wps'
 
@@ -40,15 +41,18 @@ def get_host():
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.version_option()
 @click.option('--config', '-c', metavar='PATH', help='path to pywps configuration file.')
-def cli(config):
+@click.pass_context
+def cli(ctx, config):
     """Command line to start/stop a PyWPS service.
 
     Do not use this service in a production environment.
     It's intended to be running in a test environment only!
     For more documentation, visit http://pywps.org/doc
     """
+    ctx.ensure_object(dict)
+    ctx.obj['CFG_FILES'] = []
     if config:
-        os.environ['PYWPS_CFG'] = config
+        ctx.obj['CFG_FILES'].append(config)
 
 
 @cli.command()
@@ -56,15 +60,16 @@ def cli(config):
               help='IP address used to bind service.')
 @click.option('--no-jobqueue', '-n', is_flag=True,
               help='Do not start job queue service.')
-def start(bind_host, no_jobqueue):
+@click.pass_context
+def start(ctx, bind_host, no_jobqueue):
     """Start PyWPS service.
     This service is by default available at http://localhost:5000/wps
     """
-    app = Service()
+    app = Service(cfgfiles=ctx.obj['CFG_FILES'])
 
     def inner(application, bind_host=None):
         # call this *after* app is initialized ... needs pywps config.
-        host, port = get_host()
+        host, port = get_host(cfgfiles=ctx.obj['CFG_FILES'])
         bind_host = bind_host or host
         # need to serve the wps outputs
         static_files = {
@@ -89,7 +94,7 @@ def start(bind_host, no_jobqueue):
         inner(app, bind_host)
     else:
         click.echo('Starting pywps with job queue')
-        jq_service = JobQueueService()
+        jq_service = JobQueueService(cfgfiles=ctx.obj['CFG_FILES'])
         signal.signal(signal.SIGTERM, lambda *args: sys.exit(0))
         try:
             t = threading.Thread(target=inner, args=(app, bind_host))
@@ -101,10 +106,11 @@ def start(bind_host, no_jobqueue):
 
 
 @cli.command()
-def jobqueue():
+@click.pass_context
+def jobqueue(ctx):
     """Start job queue service.
     """
-    jq_service = JobQueueService()
+    jq_service = JobQueueService(cfgfiles=ctx.obj['CFG_FILES'])
     signal.signal(signal.SIGTERM, lambda *args: sys.exit(0))
     click.echo('Starting job queue service (Press CTRL+C to quit)')
     try:
@@ -117,6 +123,8 @@ def jobqueue():
 def migrate():
     """Uprade or initialize database.
     """
+    if ctx.obj['CFG_FILES']:
+        os.environ['PYWPS_CFG'] = ctx.obj['CFG_FILES'][0]
     alembic_cfg = Config()
     alembic_cfg.set_main_option("script_location", "pywps:alembic")
     command.upgrade(alembic_cfg, "head")
