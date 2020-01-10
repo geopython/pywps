@@ -120,8 +120,9 @@ def jobqueue(ctx):
 
 
 @cli.command()
-def migrate():
-    """Uprade or initialize database.
+@click.pass_context
+def migrate(ctx):
+    """Upgrade or initialize database.
     """
     if ctx.obj['CFG_FILES']:
         os.environ['PYWPS_CFG'] = ctx.obj['CFG_FILES'][0]
