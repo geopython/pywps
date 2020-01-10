@@ -5,6 +5,7 @@ dist: trusty
 
 python:
   - "3.6"
+  - "3.7"
 
 git:
   submodules: false
@@ -36,7 +37,7 @@ install:
   - pip install -r requirements-dev.txt
   - pip install coveralls
   - pip install -e .
-  - pywps -c $PYWPS_CFG migrate 
+  - pywps -c $PYWPS_CFG migrate
 
 script:
   - python -m unittest tests
