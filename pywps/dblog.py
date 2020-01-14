@@ -172,7 +172,7 @@ def get_session():
                 engine = sqlalchemy.create_engine(database, echo=echo, poolclass=NullPool)
 
         except sqlalchemy.exc.SQLAlchemyError as e:
-            raise NoApplicableCode("Could not connect to database: {}".format(e.message))
+            raise NoApplicableCode("Could not connect to database: {}".format(e))
 
         Session = sessionmaker(bind=engine, expire_on_commit=True)
 
