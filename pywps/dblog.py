@@ -26,8 +26,8 @@ from sqlalchemy.pool import NullPool, StaticPool
 LOGGER = logging.getLogger('PYWPS')
 _SESSION_MAKER = None
 
-_tableprefix = configuration.get_config_value('logging', 'prefix')
-_schema = configuration.get_config_value('logging', 'schema')
+_tableprefix = 'pywps_'  # configuration.get_config_value('logging', 'prefix')
+# _schema = configuration.get_config_value('logging', 'schema')
 
 Base = declarative_base()
 
