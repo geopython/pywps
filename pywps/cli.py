@@ -13,6 +13,7 @@ from pywps.app.Service import Service
 from pywps import configuration
 from pywps.queue import JobQueueService
 
+import sqlalchemy
 from alembic.config import Config
 from alembic import command
 
@@ -120,12 +121,26 @@ def jobqueue(ctx):
 
 
 @cli.command()
+@click.option('--force', '-f', is_flag=True,
+              help='Force dropping exising database.')
 @click.pass_context
-def migrate(ctx):
+def migrate(ctx, force):
     """Upgrade or initialize database.
     """
     if ctx.obj['CFG_FILES']:
         os.environ['PYWPS_CFG'] = ctx.obj['CFG_FILES'][0]
+    if force:
+        click.echo('dropping database')
+        _drop_db()
+    click.echo('migrating database')
     alembic_cfg = Config()
     alembic_cfg.set_main_option("script_location", "pywps:alembic")
     command.upgrade(alembic_cfg, "head")
+
+
+def _drop_db():
+    database = configuration.get_config_value('logging', 'database')
+    engine = sqlalchemy.create_engine(database, echo=False)
+    for table in engine.table_names():
+        sql = sqlalchemy.text("DROP TABLE IF EXISTS {}".format(table))
+        engine.execute(sql)
