@@ -50,7 +50,7 @@ class Process(object):
                    objects.
     :param metadata: List of metadata advertised by this process. They
                      should be :class:`pywps.app.Common.Metadata` objects.
-    :param dict[str, dict[str, str]] translations: The first key is the RFC 4646 language code,
+    :param dict[str,dict[str,str]] translations: The first key is the RFC 4646 language code,
         and the nested mapping contains translated strings accessible by a string property.
         ex: {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
     """

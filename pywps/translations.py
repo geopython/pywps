@@ -2,7 +2,7 @@ def get_translation(obj, attribute, language):
     """Get the translation from an object, for an attribute.
 
     The `obj` object is expected to have an attribute or key named `translations`
-    and its value should be of type `dict[str, dict[str, str]]`.
+    and its value should be of type `dict[str,dict[str,str]]`.
 
     If the translation can't be found in the translations mapping,
     get the attribute on the object itself and raise

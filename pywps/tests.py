@@ -46,7 +46,7 @@ class DocExampleProcess(Process):
     """
 
     def __init__(self):
-        inputs = [LiteralInput('literal_input', "Literal input title", 'integer', "Literal input value abstract.",
+        inputs = [LiteralInput('literal_input', "Literal input title", 'integer', abstract="Literal input value abstract.",
                                min_occurs=0, max_occurs=1, uoms=['meters', 'feet'], default=1),
                   LiteralInput('date_input', 'The title is shown when no abstract is provided.', 'date',
                                allowed_values=['2000-01-01', '2018-01-01']),
@@ -56,7 +56,7 @@ class DocExampleProcess(Process):
                   BoundingBoxInput('bb_input', 'BoundingBox input title', ['EPSG:4326', ],
                                    metadata=[Metadata('EPSG.io', 'http://epsg.io/'), ]),
                   ]
-        outputs = [LiteralOutput('literal_output', 'Literal output title', 'boolean', 'Boolean output abstract.',),
+        outputs = [LiteralOutput('literal_output', 'Literal output title', 'boolean', abstract='Boolean output abstract.',),
                    ComplexOutput('complex_output', 'Complex output', [Format('text/plain'), ], ),
                    BoundingBoxOutput('bb_output', 'BoundingBox output title', ['EPSG:4326', ])]
 
