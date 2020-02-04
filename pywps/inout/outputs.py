@@ -31,7 +31,7 @@ class BoundingBoxOutput(basic.BBoxOutput):
                      should be :class:`pywps.app.Common.Metadata` objects.
     :param dict[str,dict[str,str]] translations: The first key is the RFC 4646 language code,
         and the nested mapping contains translated strings accessible by a string property.
-        ex: {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
+        e.g. {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
     """
 
     def __init__(self, identifier, title, crss, abstract='', keywords=[],
@@ -105,7 +105,7 @@ class ComplexOutput(basic.ComplexOutput):
                      should be :class:`pywps.app.Common.Metadata` objects.
     :param dict[str,dict[str,str]] translations: The first key is the RFC 4646 language code,
         and the nested mapping contains translated strings accessible by a string property.
-        ex: {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
+        e.g. {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
     """
 
     def __init__(self, identifier, title, supported_formats=None,
@@ -247,7 +247,7 @@ class LiteralOutput(basic.LiteralOutput):
                      should be :class:`pywps.app.Common.Metadata` objects.
     :param dict[str,dict[str,str]] translations: The first key is the RFC 4646 language code,
         and the nested mapping contains translated strings accessible by a string property.
-        ex: {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
+        e.g. {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
     """
 
     def __init__(self, identifier, title, data_type='string', abstract='', keywords=[],

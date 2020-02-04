@@ -474,6 +474,64 @@ Use the `run` method to start the server::
 
 To make the server visible from another computer, replace ``localhost`` with ``0.0.0.0``.
 
+Supporting multiple languages
+=============================
+
+Supporting multiple languages requires:
+
+- Setting the `language` property in the server configuration (see :ref:`server-configuration`)
+- Adding translations to :class:`Process`, inputs and outputs objects
+
+The expected translations format is always the same. The first key is the RFC 4646 language code, 
+and the nested mapping contains translated strings accessible by a string property::
+
+    from pywps import Process, LiteralInput, LiteralOutput
+
+
+    class SayHello(Process):
+        def __init__(self):
+            inputs = [
+                LiteralInput(
+                    'name',
+                    title='Input name',
+                    abstract='The name to say hello to.',
+                    translations={"fr-CA": {"abstract": "Le nom à saluer."}}
+                )
+            ],
+            outputs=[
+                LiteralOutput(
+                    'response',
+                    title='Output response',
+                    abstract='The complete output message.',
+                    translations={"fr-CA": {
+                        "title": "La réponse", 
+                        "abstract": "Le message complet."
+                    }}
+                )
+            ],
+
+            super().__init__(
+                self._handler,
+                identifier='say_hello',
+                title='Process Say Hello',
+                abstract='Returns a literal string output with Hello plus the inputed name',
+                version='1.0',
+                inputs=inputs,
+                outputs=outputs,
+                store_supported=True,
+                status_supported=True,
+                translations={"fr-CA": {
+                    "title": "Processus Dire Bonjour", 
+                    "abstract": "Retourne une chaine de caractères qui dit bonjour au nom fournit en entrée."
+                }},
+            )
+
+        def _handler(self, request, response):
+            ...
+
+The translation will default to the untranslated attribute of the base object if 
+the key is not provided in the `translations` dictionnary.
+
 Automated process documentation
 ===============================
 

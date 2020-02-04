@@ -33,7 +33,7 @@ class BoundingBoxInput(basic.BBoxInput):
                      should be :class:`pywps.app.Common.Metadata` objects.
     :param dict[str,dict[str,str]] translations: The first key is the RFC 4646 language code,
         and the nested mapping contains translated strings accessible by a string property.
-        ex: {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
+        e.g. {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
     """
 
     def __init__(self, identifier, title, crss=None, abstract='', keywords=[],
@@ -121,7 +121,7 @@ class ComplexInput(basic.ComplexInput):
     :param pywps.validator.mode.MODE mode: validation mode (none to strict)
     :param dict[str,dict[str,str]] translations: The first key is the RFC 4646 language code,
         and the nested mapping contains translated strings accessible by a string property.
-        ex: {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
+        e.g. {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
     """
 
     def __init__(self, identifier, title, supported_formats,
@@ -268,7 +268,7 @@ class LiteralInput(basic.LiteralInput):
                      should be :class:`pywps.app.Common.Metadata` objects.
     :param dict[str,dict[str,str]] translations: The first key is the RFC 4646 language code,
         and the nested mapping contains translated strings accessible by a string property.
-        ex: {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
+        e.g. {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
     """
 
     def __init__(self, identifier, title=None, data_type=None, workdir=None, abstract='', keywords=[],

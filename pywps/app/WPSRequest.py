@@ -306,6 +306,7 @@ class WPSRequest(object):
         """set this.language
         """
         supported_languages = configuration.get_config_value('server', 'language').split(',')
+        supported_languages = [lang.strip() for lang in supported_languages]
 
         if not language:
             # default to the first supported language

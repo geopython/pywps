@@ -52,7 +52,7 @@ class Process(object):
                      should be :class:`pywps.app.Common.Metadata` objects.
     :param dict[str,dict[str,str]] translations: The first key is the RFC 4646 language code,
         and the nested mapping contains translated strings accessible by a string property.
-        ex: {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
+        e.g. {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
     """
 
     def __init__(self, handler, identifier, title, abstract='', keywords=[], profile=[],
