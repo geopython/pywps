@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- PyWPS {{ pywps_version }} -->
-<wps:ProcessDescriptions xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 ../wpsDescribeProcess_response.xsd" service="WPS" version="1.0.0" xml:lang="{{ lang }}">
+<wps:ProcessDescriptions xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 ../wpsDescribeProcess_response.xsd" service="WPS" version="1.0.0" xml:lang="{{ language }}">
     {% for process in processes %}
     <ProcessDescription wps:processVersion="{{ process.version }}" storeSupported="{{ process.store_supported }}" statusSupported="{{ process.status_supported }}">
         <ows:Identifier>{{ process.identifier }}</ows:Identifier>
-        <ows:Title>{{ process.title }}</ows:Title>
-        <ows:Abstract>{{ process.abstract }}</ows:Abstract>
+        <ows:Title>{{ get_translation(process, "title", language) }}</ows:Title>
+        <ows:Abstract>{{ get_translation(process, "abstract", language) }}</ows:Abstract>
         {% for metadata in process.metadata %}
         <ows:Metadata xlink:title="{{ metadata.title }}" xlink:type="{{ metadata.type }}"
           {% if metadata.href != None %}
@@ -24,8 +24,8 @@
             {% for put in process.inputs %}
             <Input minOccurs="{{ put.min_occurs }}" maxOccurs="{{ put.max_occurs }}">
                 <ows:Identifier>{{ put.identifier }}</ows:Identifier>
-                <ows:Title>{{ put.title }}</ows:Title>
-                <ows:Abstract>{{ put.abstract }}</ows:Abstract>
+                <ows:Title>{{ get_translation(put, "title", language) }}</ows:Title>
+                <ows:Abstract>{{ get_translation(put, "abstract", language) }}</ows:Abstract>
                 {% if put.type == "complex" %}
                 <ComplexData maximumMegabytes="{{ max_size }}">
                     {% include 'complex.xml' %}
@@ -48,8 +48,8 @@
             {% for put in process.outputs %}
             <Output>
                 <ows:Identifier>{{ put.identifier }}</ows:Identifier>
-                <ows:Title>{{ put.title }}</ows:Title>
-                <ows:Abstract>{{ put.abstract }}</ows:Abstract>
+                <ows:Title>{{ get_translation(put, "title", language) }}</ows:Title>
+                <ows:Abstract>{{ get_translation(put, "abstract", language) }}</ows:Abstract>
                 {% if put.type in ["complex", "reference"] %}
                 <ComplexOutput>
                     {% include 'complex.xml' %}

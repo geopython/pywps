@@ -19,6 +19,7 @@ from pywps import E, get_ElementMakerForVersion
 from pywps.app.basic import get_xpath_ns
 from pywps._compat import text_type
 from pywps.tests import client_for, assert_response_success
+from pywps.configuration import CONFIG
 
 from pywps._compat import PY2
 from pywps._compat import StringIO
@@ -64,6 +65,39 @@ def create_greeter():
                    title='Greeter',
                    inputs=[LiteralInput('name', 'Input name', data_type='string')],
                    outputs=[LiteralOutput('message', 'Output message', data_type='string')])
+
+
+def create_translated_greeter():
+    def greeter(request, response):
+        name = request.inputs['name'][0].data
+        response.outputs['message'].data = "Hello {}!".format(name)
+        return response
+
+    return Process(
+        handler=greeter,
+        identifier='greeter',
+        title='Greeter',
+        abstract='Say hello',
+        inputs=[
+            LiteralInput(
+                'name',
+                'Input name',
+                data_type='string',
+                abstract='Input description',
+                translations={"fr-CA": {"title": "Nom", "abstract": "Description"}},
+            )
+        ],
+        outputs=[
+            LiteralOutput(
+                'message',
+                'Output message',
+                data_type='string',
+                abstract='Output description',
+                translations={"fr-CA": {"title": "Message de retour", "abstract": "Description"}},
+            )
+        ],
+        translations={"fr-CA": {"title": "Salutations", "abstract": "Dire allô"}},
+    )
 
 
 def create_bbox_process():
@@ -243,6 +277,7 @@ class ExecuteTest(unittest.TestCase):
             store_execute = False
             lineage = False
             outputs = ['conventions']
+            language = "en-US"
 
         request = FakeRequest()
 
@@ -273,6 +308,8 @@ class ExecuteTest(unittest.TestCase):
                 'mimeType': 'text/gml',
                 'data': 'the data'
             }]}
+            language = "en-US"
+
         request = FakeRequest()
 
         try:
@@ -328,6 +365,7 @@ class ExecuteTest(unittest.TestCase):
             outputs = {}
             store_execute = False
             lineage = False
+            language = "en-US"
 
         request = FakeRequest()
         response = service.execute('my_complex_process', request, 'fakeuuid')
@@ -357,6 +395,7 @@ class ExecuteTest(unittest.TestCase):
             raw = False
             store_execute = False
             lineage = False
+            language = "en-US"
 
         # valid mimetype
         request = FakeRequest('text/plain+test')
@@ -459,6 +498,58 @@ class ExecuteTest(unittest.TestCase):
         resp = client.post_xml(doc=request_doc)
         el = next(resp.xml.iter('{http://www.opengis.net/wps/1.0.0}LiteralData'))
         assert el.attrib['dataType'] == 'string'
+
+
+class ExecuteTranslationsTest(unittest.TestCase):
+
+    def setUp(self):
+        CONFIG.set('server', 'language', 'en-US,fr-CA')
+
+    def tearDown(self):
+        CONFIG.set('server', 'language', 'en-US')
+
+    def test_translations(self):
+        client = client_for(Service(processes=[create_translated_greeter()]))
+
+        request_doc = WPS.Execute(
+            OWS.Identifier('greeter'),
+            WPS.DataInputs(
+                WPS.Input(
+                    OWS.Identifier('name'),
+                    WPS.Data(WPS.LiteralData('foo'))
+                )
+            ),
+            WPS.ResponseForm(
+                WPS.ResponseDocument(
+                    lineage='true',
+                )
+            ),
+            version='1.0.0',
+            language='fr-CA',
+        )
+        resp = client.post_xml(doc=request_doc)
+
+        assert resp.xpath('/wps:ExecuteResponse/@xml:lang')[0] == "fr-CA"
+
+        process_title = [e.text for e in resp.xpath('//wps:Process/ows:Title')]
+        assert process_title == ["Salutations"]
+        process_abstract = [e.text for e in resp.xpath('//wps:Process/ows:Abstract')]
+        assert process_abstract == ["Dire allô"]
+
+        input_titles = [e.text for e in resp.xpath('//wps:Input/ows:Title')]
+        assert input_titles == ["Nom"]
+        input_abstract = [e.text for e in resp.xpath('//wps:Input/ows:Abstract')]
+        assert input_abstract == ["Description"]
+
+        output_titles = [e.text for e in resp.xpath('//wps:OutputDefinitions/wps:Output/ows:Title')]
+        assert output_titles == ["Message de retour"]
+        output_abstract = [e.text for e in resp.xpath('//wps:OutputDefinitions/wps:Output/ows:Abstract')]
+        assert output_abstract == ["Description"]
+
+        output_titles = [e.text for e in resp.xpath('//wps:ProcessOutputs/wps:Output/ows:Title')]
+        assert output_titles == ["Message de retour"]
+        output_abstract = [e.text for e in resp.xpath('//wps:ProcessOutputs/wps:Output/ows:Abstract')]
+        assert output_abstract == ["Description"]
 
 
 class ExecuteXmlParserTest(unittest.TestCase):
@@ -641,6 +732,7 @@ def load_tests(loader=None, tests=None, pattern=None):
         loader = unittest.TestLoader()
     suite_list = [
         loader.loadTestsFromTestCase(ExecuteTest),
+        loader.loadTestsFromTestCase(ExecuteTranslationsTest),
         loader.loadTestsFromTestCase(ExecuteXmlParserTest),
     ]
     return unittest.TestSuite(suite_list)

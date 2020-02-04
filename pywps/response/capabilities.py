@@ -56,6 +56,7 @@ class CapabilitiesResponse(WPSResponse):
             },
             'serviceurl': config.get_config_value('server', 'url'),
             'languages': config.get_config_value('server', 'language').split(','),
+            'language': self.wps_request.language,
             'processes': processes
         }
 

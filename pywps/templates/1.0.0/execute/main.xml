@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<wps:ExecuteResponse xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 ../wpsExecute_response.xsd" service="WPS" version="1.0.0" xml:lang="{{ lang }}" serviceInstance="{{ service_instance }}" statusLocation="{{ status_location }}">
+<wps:ExecuteResponse xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 ../wpsExecute_response.xsd" service="WPS" version="1.0.0" xml:lang="{{ language }}" serviceInstance="{{ service_instance }}" statusLocation="{{ status_location }}">
     <wps:Process wps:processVersion="{{ process.version }}">
         <ows:Identifier>{{ process.identifier }}</ows:Identifier>
-        <ows:Title>{{ process.title }}</ows:Title>
-        <ows:Abstract>{{ process.abstract }}</ows:Abstract>
+        <ows:Title>{{ get_translation(process, "title", language) }}</ows:Title>
+        <ows:Abstract>{{ get_translation(process, "abstract", language) }}</ows:Abstract>
         {% if profile %}
         <wps:Profile>{{ process.profile }}</wps:Profile>
         {% endif %}
@@ -36,7 +36,8 @@
         {% for input in input_definitions %}
 		<wps:Input>
             <ows:Identifier>{{ input.identifier }}</ows:Identifier>
-            <ows:Title>{{ input.title }}</ows:Title>
+            <ows:Title>{{ get_translation(input, "title", language) }}</ows:Title>
+            <ows:Abstract>{{ get_translation(input, "abstract", language) }}</ows:Abstract>
             {% if input.type == "complex" %}
 			<wps:Data>
                     <wps:ComplexData mimeType="{{ input.mimetype }}" encoding="{{ input.encoding }}" schema="{{ input.schema }}">{{ input.data | safe }}</wps:ComplexData>
@@ -75,8 +76,8 @@
         <wps:Output>
         {% endif %}
             <ows:Identifier>{{ output.identifier }}</ows:Identifier>
-            <ows:Title>{{ output.title }}</ows:Title>
-            <ows:Abstract>{{ output.abstract }}</ows:Abstract>
+            <ows:Title>{{ get_translation(output, "title", language) }}</ows:Title>
+            <ows:Abstract>{{ get_translation(output, "abstract", language) }}</ows:Abstract>
 		</wps:Output>
         {% endfor %}
 	</wps:OutputDefinitions>
@@ -87,8 +88,8 @@
         {% for output in outputs %}
 		<wps:Output>
             <ows:Identifier>{{ output.identifier }}</ows:Identifier>
-            <ows:Title>{{ output.title }}</ows:Title>
-            <ows:Abstract>{{ output.abstract }}</ows:Abstract>
+            <ows:Title>{{ get_translation(output, "title", language) }}</ows:Title>
+            <ows:Abstract>{{ get_translation(output, "abstract", language) }}</ows:Abstract>
             {% if output.type == "reference" %}
             <wps:Reference href="{{ output.href }}" mimeType="{{ output.mimetype }}" encoding="{{ output.encoding }}" schema="{{ output.schema }}"/>
             {% elif output.type == "complex" %}

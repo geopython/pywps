@@ -5,6 +5,7 @@
 
 import logging
 import os
+from pywps.translations import lower_case_dict
 import sys
 import traceback
 import json
@@ -49,10 +50,14 @@ class Process(object):
                    objects.
     :param metadata: List of metadata advertised by this process. They
                      should be :class:`pywps.app.Common.Metadata` objects.
+    :param dict[str, dict[str, str]] translations: The first key is the RFC 4646 language code, 
+        and the nested mapping contains translated strings accessible by a string property.
+        ex: {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
     """
 
-    def __init__(self, handler, identifier, title, abstract='', keywords=[], profile=[], metadata=[], inputs=[],
-                 outputs=[], version='None', store_supported=False, status_supported=False, grass_location=None):
+    def __init__(self, handler, identifier, title, abstract='', keywords=[], profile=[],
+                 metadata=[], inputs=[], outputs=[], version='None', store_supported=False,
+                 status_supported=False, grass_location=None, translations=None):
         self.identifier = identifier
         self.handler = handler
         self.title = title
@@ -71,6 +76,7 @@ class Process(object):
         self._grass_mapset = None
         self.grass_location = grass_location
         self.service = None
+        self.translations = lower_case_dict(translations)
 
         if store_supported:
             self.store_supported = 'true'
@@ -100,6 +106,7 @@ class Process(object):
             'store_supported': self.store_supported,
             'status_supported': self.status_supported,
             'profile': [p for p in self.profile],
+            'translations': self.translations,
         }
 
     @classmethod

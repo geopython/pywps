@@ -32,6 +32,7 @@ from pywps.inout.basic import UOM
 from pywps._compat import PY2
 from pywps.inout.storage.file import FileStorageBuilder
 from pywps.tests import service_ok
+from pywps.translations import get_translation
 
 from lxml import etree
 
@@ -244,6 +245,7 @@ class SerializationComplexInputTest(unittest.TestCase):
             metadata=[Metadata("special data")],
             default="/some/file/path",
             default_type=SOURCE_TYPE.FILE,
+            translations={"fr-CA": {"title": "Mon input", "abstract": "Une description"}},
         )
         complex.as_reference = False
         complex.method = "GET"
@@ -262,6 +264,7 @@ class SerializationComplexInputTest(unittest.TestCase):
         self.assertEqual(complex_1.max_occurs, complex_2.max_occurs)
         self.assertEqual(complex_1.valid_mode, complex_2.valid_mode)
         self.assertEqual(complex_1.as_reference, complex_2.as_reference)
+        self.assertEqual(complex_1.translations, complex_2.translations)
 
         self.assertEqual(complex_1.prop, complex_2.prop)
 
@@ -463,7 +466,9 @@ class ComplexOutputTest(unittest.TestCase):
             workdir=tmp_dir,
             data_format=data_format,
             supported_formats=[data_format],
-            mode=MODE.NONE)
+            mode=MODE.NONE,
+            translations={"fr-CA": {"title": "Mon output", "abstract": "Une description"}},
+            )
 
         self.complex_out_nc = inout.outputs.ComplexOutput(
             identifier="netcdf",
@@ -546,6 +551,11 @@ class ComplexOutputTest(unittest.TestCase):
     def test_json(self):
         new_output = inout.outputs.ComplexOutput.from_json(self.complex_out.json)
         self.assertEqual(new_output.identifier, 'complexoutput')
+        self.assertEqual(
+            new_output.translations,
+            {"fr-ca": {"title": "Mon output", "abstract": "Une description"}},
+            'translations does not exist'
+        )
 
 
 class SimpleHandlerTest(unittest.TestCase):
@@ -576,7 +586,9 @@ class LiteralInputTest(unittest.TestCase):
             mode=2,
             allowed_values=(1, 2, (3, 3, 12)),
             default=6,
-            uoms=(UOM("metre"),))
+            uoms=(UOM("metre"),),
+            translations={"fr-CA": {"title": "Mon input", "abstract": "Une description"}},
+        )
 
     def test_contruct(self):
         self.assertIsInstance(self.literal_input, LiteralInput)
@@ -621,6 +633,11 @@ class LiteralInputTest(unittest.TestCase):
         self.assertEqual(out['type'], 'literal', 'it\'s literal input')
         self.assertEqual(len(out['allowed_values']), 3, '3 allowed values')
         self.assertEqual(out['allowed_values'][0]['value'], 1, 'allowed value 1')
+        self.assertEqual(
+            out['translations'],
+            {"fr-ca": {"title": "Mon input", "abstract": "Une description"}},
+            'translations does not exist'
+        )
 
     def test_json_out_datetime(self):
         inpt = inout.inputs.LiteralInput(
@@ -652,6 +669,13 @@ class LiteralInputTest(unittest.TestCase):
         out = inpt.json
         self.assertEqual(out['data'], '2017-04-20', 'date set')
 
+    def test_translations(self):
+        title_fr = get_translation(self.literal_input, "title", "fr-CA")
+        assert title_fr == "Mon input"
+        abstract_fr = get_translation(self.literal_input, "abstract", "fr-CA")
+        assert abstract_fr == "Une description"
+        identifier = get_translation(self.literal_input, "identifier", "fr-CA")
+        assert identifier == self.literal_input.identifier
 
 class LiteralOutputTest(unittest.TestCase):
     """LiteralOutput test cases"""
@@ -659,7 +683,11 @@ class LiteralOutputTest(unittest.TestCase):
     def setUp(self):
 
         self.literal_output = inout.outputs.LiteralOutput(
-            "literaloutput", data_type="integer", title="Literal Output")
+            "literaloutput", 
+            data_type="integer", 
+            title="Literal Output",
+            translations={"fr-CA": {"title": "Mon output", "abstract": "Une description"}},
+        )
 
     def test_contruct(self):
         self.assertIsInstance(self.literal_output, LiteralOutput)
@@ -674,6 +702,11 @@ class LiteralOutputTest(unittest.TestCase):
     def test_json(self):
         new_output = inout.outputs.LiteralOutput.from_json(self.literal_output.json)
         self.assertEqual(new_output.identifier, 'literaloutput')
+        self.assertEqual(
+            new_output.translations,
+            {"fr-ca": {"title": "Mon output", "abstract": "Une description"}},
+            'translations does not exist'
+        )
 
 
 class BBoxInputTest(unittest.TestCase):
@@ -681,7 +714,12 @@ class BBoxInputTest(unittest.TestCase):
 
     def setUp(self):
 
-        self.bbox_input = inout.inputs.BoundingBoxInput("bboxinput", title="BBox input", dimensions=2)
+        self.bbox_input = inout.inputs.BoundingBoxInput(
+            "bboxinput", 
+            title="BBox input", 
+            dimensions=2,
+            translations={"fr-CA": {"title": "Mon input", "abstract": "Une description"}},
+        )
         self.bbox_input.data = [0, 1, 2, 4]
 
     def test_contruct(self):
@@ -697,6 +735,11 @@ class BBoxInputTest(unittest.TestCase):
         # self.assertTupleEqual(out['bbox'], ([0, 1], [2, 4]), 'data are there')
         self.assertEqual(out['bbox'], [0, 1, 2, 4], 'data are there')
         self.assertEqual(out['dimensions'], 2, 'Dimensions set')
+        self.assertEqual(
+            out['translations'],
+            {"fr-ca": {"title": "Mon input", "abstract": "Une description"}},
+            'translations does not exist'
+        )
 
 
 class BBoxOutputTest(unittest.TestCase):
@@ -707,7 +750,9 @@ class BBoxOutputTest(unittest.TestCase):
             "bboxoutput",
             title="BBox output",
             dimensions=2,
-            crss=['epsg:3857', 'epsg:4326'])
+            crss=['epsg:3857', 'epsg:4326'],
+            translations={"fr-CA": {"title": "Mon output", "abstract": "Une description"}},
+        )
 
     def test_contruct(self):
         self.assertIsInstance(self.bbox_out, BBoxOutput)
@@ -722,6 +767,11 @@ class BBoxOutputTest(unittest.TestCase):
     def test_json(self):
         new_bbox = inout.outputs.BoundingBoxOutput.from_json(self.bbox_out.json)
         self.assertEqual(new_bbox.identifier, 'bboxoutput')
+        self.assertEqual(
+            new_bbox.translations,
+            {"fr-ca": {"title": "Mon output", "abstract": "Une description"}},
+            'translations does not exist'
+        )
 
 
 class TestMetaLink(unittest.TestCase):

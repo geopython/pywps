@@ -6,12 +6,14 @@
 import unittest
 import lxml
 import lxml.etree
+from pywps.configuration import CONFIG
 from pywps.app import Process, Service
 from pywps.app.Common import Metadata
 from pywps import get_ElementMakerForVersion
 from pywps.tests import assert_pywps_version, client_for, assert_wps_version
 
-WPS, OWS  = get_ElementMakerForVersion("1.0.0")
+WPS, OWS = get_ElementMakerForVersion("1.0.0")
+
 
 class BadRequestTest(unittest.TestCase):
 
@@ -30,7 +32,7 @@ class BadRequestTest(unittest.TestCase):
         resp = client.get('?service=foo')
 
         exception = resp.xpath('/ows:ExceptionReport'
-                                '/ows:Exception')
+                               '/ows:Exception')
 
         assert resp.status_code == 400
         assert exception[0].attrib['exceptionCode'] == 'InvalidParameterValue'
@@ -47,7 +49,27 @@ class CapabilitiesTest(unittest.TestCase):
     def setUp(self):
         def pr1(): pass
         def pr2(): pass
-        self.client = client_for(Service(processes=[Process(pr1, 'pr1', 'Process 1', abstract='Process 1', keywords=['kw1a','kw1b'], metadata=[Metadata('pr1 metadata')]), Process(pr2, 'pr2', 'Process 2', keywords=['kw2a'], metadata=[Metadata('pr2 metadata')])]))
+        self.client = client_for(
+            Service(
+                processes=[
+                    Process(
+                        pr1,
+                        "pr1",
+                        "Process 1",
+                        abstract="Process 1",
+                        keywords=["kw1a", "kw1b"],
+                        metadata=[Metadata("pr1 metadata")],
+                    ),
+                    Process(
+                        pr2,
+                        "pr2",
+                        "Process 2",
+                        keywords=["kw2a"],
+                        metadata=[Metadata("pr2 metadata")],
+                    ),
+                ]
+            )
+        )
 
     def check_capabilities_response(self, resp):
 
@@ -64,10 +86,10 @@ class CapabilitiesTest(unittest.TestCase):
         assert sorted(names.split()) == ['pr1', 'pr2']
 
         keywords = resp.xpath('/wps:Capabilities'
-                                  '/wps:ProcessOfferings'
-                                  '/wps:Process'
-                                  '/ows:Keywords'
-                                  '/ows:Keyword')
+                              '/wps:ProcessOfferings'
+                              '/wps:Process'
+                              '/ows:Keywords'
+                              '/ows:Keyword')
         assert len(keywords) == 3
 
         metadatas = resp.xpath('/wps:Capabilities'
@@ -92,7 +114,7 @@ class CapabilitiesTest(unittest.TestCase):
     def test_get_bad_version(self):
         resp = self.client.get('?request=getcapabilities&service=wps&acceptversions=2001-123')
         exception = resp.xpath('/ows:ExceptionReport'
-                                '/ows:Exception')
+                               '/ows:Exception')
         assert resp.status_code == 400
         assert exception[0].attrib['exceptionCode'] == 'VersionNegotiationFailed'
 
@@ -101,7 +123,7 @@ class CapabilitiesTest(unittest.TestCase):
         request_doc = WPS.GetCapabilities(acceptedVersions_doc)
         resp = self.client.post_xml(doc=request_doc)
         exception = resp.xpath('/ows:ExceptionReport'
-                                '/ows:Exception')
+                               '/ows:Exception')
 
         assert resp.status_code == 400
         assert exception[0].attrib['exceptionCode'] == 'VersionNegotiationFailed'
@@ -115,11 +137,55 @@ class CapabilitiesTest(unittest.TestCase):
         assert_wps_version(resp, version="2.0.0")
 
 
+class CapabilitiesTranslationsTest(unittest.TestCase):
+    def setUp(self):
+        CONFIG.set('server', 'language', 'en-US,fr-CA')
+        self.client = client_for(
+            Service(
+                processes=[
+                    Process(
+                        lambda: None,
+                        "pr1",
+                        "Process 1",
+                        abstract="Process 1",
+                        translations={"fr-CA": {"title": "Processus 1", "abstract": "Processus 1"}},
+                    ),
+                    Process(
+                        lambda: None,
+                        "pr2",
+                        "Process 2",
+                        abstract="Process 2",
+                        translations={"fr-CA": {"title": "Processus 2"}},
+                    ),
+                ]
+            )
+        )
+
+    def tearDown(self):
+        CONFIG.set('server', 'language', 'en-US')
+
+    def test_get_translated(self):
+        resp = self.client.get('?Request=GetCapabilities&service=wps&language=fr-CA')
+
+        assert resp.xpath('/wps:Capabilities/@xml:lang')[0] == "fr-CA"
+
+        default = resp.xpath_text('/wps:Capabilities/wps:Languages/wps:Default/ows:Language')
+        assert default == 'en-US'
+
+        supported = resp.xpath('/wps:Capabilities/wps:Languages/wps:Supported/ows:Language/text()')
+        assert supported == ["en-US", "fr-CA"]
+
+        processes = list(resp.xpath('//wps:ProcessOfferings')[0])
+        assert [e.text for e in processes[0]] == ['pr1', 'Processus 1', 'Processus 1']
+        assert [e.text for e in processes[1]] == ['pr2', 'Processus 2', 'Process 2']
+
+
 def load_tests(loader=None, tests=None, pattern=None):
     if not loader:
         loader = unittest.TestLoader()
     suite_list = [
         loader.loadTestsFromTestCase(BadRequestTest),
         loader.loadTestsFromTestCase(CapabilitiesTest),
+        loader.loadTestsFromTestCase(CapabilitiesTranslationsTest),
     ]
     return unittest.TestSuite(suite_list)
