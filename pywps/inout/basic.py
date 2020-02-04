@@ -544,6 +544,7 @@ class SimpleHandler(DataHandler):
 class BasicIO:
     """Basic Input/Output class
     """
+
     def __init__(self, identifier, title=None, abstract=None, keywords=None,
                  min_occurs=1, max_occurs=1, metadata=[], translations=None):
         self.identifier = identifier
@@ -704,16 +705,16 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
                  uoms=None, mode=MODE.NONE,
                  min_occurs=1, max_occurs=1, metadata=[],
                  default=None, default_type=SOURCE_TYPE.DATA, translations=None):
-        BasicIO.__init__(self, 
-            identifier=identifier,
-            title=title,
-            abstract=abstract,
-            keywords=keywords,
-            min_occurs=min_occurs,
-            max_occurs=max_occurs,
-            metadata=metadata,
-            translations=translations,
-        )
+        BasicIO.__init__(self,
+                         identifier=identifier,
+                         title=title,
+                         abstract=abstract,
+                         keywords=keywords,
+                         min_occurs=min_occurs,
+                         max_occurs=max_occurs,
+                         metadata=metadata,
+                         translations=translations,
+                         )
         BasicLiteral.__init__(self, data_type, uoms)
         SimpleHandler.__init__(self, workdir, data_type, mode=mode)
 
@@ -795,16 +796,16 @@ class BBoxInput(BasicIO, BasicBoundingBox, DataHandler):
                  mode=MODE.SIMPLE,
                  min_occurs=1, max_occurs=1, metadata=[],
                  default=None, default_type=SOURCE_TYPE.DATA, translations=None):
-        BasicIO.__init__(self, 
-            identifier=identifier,
-            title=title,
-            abstract=abstract,
-            keywords=keywords,
-            min_occurs=min_occurs,
-            max_occurs=max_occurs,
-            metadata=metadata,
-            translations=translations,
-        )
+        BasicIO.__init__(self,
+                         identifier=identifier,
+                         title=title,
+                         abstract=abstract,
+                         keywords=keywords,
+                         min_occurs=min_occurs,
+                         max_occurs=max_occurs,
+                         metadata=metadata,
+                         translations=translations,
+                         )
         BasicBoundingBox.__init__(self, crss, dimensions)
         DataHandler.__init__(self, workdir=workdir, mode=mode)
 
@@ -851,16 +852,16 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
                  mode=MODE.NONE,
                  min_occurs=1, max_occurs=1, metadata=[],
                  default=None, default_type=SOURCE_TYPE.DATA, translations=None):
-        BasicIO.__init__(self, 
-            identifier=identifier,
-            title=title,
-            abstract=abstract,
-            keywords=keywords,
-            min_occurs=min_occurs,
-            max_occurs=max_occurs,
-            metadata=metadata,
-            translations=translations,
-        )
+        BasicIO.__init__(self,
+                         identifier=identifier,
+                         title=title,
+                         abstract=abstract,
+                         keywords=keywords,
+                         min_occurs=min_occurs,
+                         max_occurs=max_occurs,
+                         metadata=metadata,
+                         translations=translations,
+                         )
         IOHandler.__init__(self, workdir=workdir, mode=mode)
         BasicComplex.__init__(self, data_format, supported_formats)
 

@@ -4,8 +4,8 @@ def get_translation(obj, attribute, language):
     The `obj` object is expected to have an attribute or key named `translations`
     and its value should be of type `dict[str, dict[str, str]]`.
 
-    If the translation can't be found in the translations mapping, 
-    get the attribute on the object itself and raise 
+    If the translation can't be found in the translations mapping,
+    get the attribute on the object itself and raise
     :py:exc:`AttributeError` if it can't be found.
 
     The language property is converted to lowercase (see :py:func:`lower_case_dict`

@@ -31,7 +31,7 @@ class BoundingBoxInput(basic.BBoxInput):
     :param int max_occurs: how many times this input occurs
     :param metadata: List of metadata advertised by this process. They
                      should be :class:`pywps.app.Common.Metadata` objects.
-    :param dict[str, dict[str, str]] translations: The first key is the RFC 4646 language code, 
+    :param dict[str, dict[str, str]] translations: The first key is the RFC 4646 language code,
         and the nested mapping contains translated strings accessible by a string property.
         ex: {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
     """
@@ -119,7 +119,7 @@ class ComplexInput(basic.ComplexInput):
     :param int min_occurs: minimum occurrence
     :param int max_occurs: maximum occurrence
     :param pywps.validator.mode.MODE mode: validation mode (none to strict)
-    :param dict[str, dict[str, str]] translations: The first key is the RFC 4646 language code, 
+    :param dict[str, dict[str, str]] translations: The first key is the RFC 4646 language code,
         and the nested mapping contains translated strings accessible by a string property.
         ex: {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
     """
@@ -266,7 +266,7 @@ class LiteralInput(basic.LiteralInput):
     :param pywps.inout.literaltypes.AnyValue allowed_values: or :py:class:`pywps.inout.literaltypes.AllowedValue` object
     :param metadata: List of metadata advertised by this process. They
                      should be :class:`pywps.app.Common.Metadata` objects.
-    :param dict[str, dict[str, str]] translations: The first key is the RFC 4646 language code, 
+    :param dict[str, dict[str, str]] translations: The first key is the RFC 4646 language code,
         and the nested mapping contains translated strings accessible by a string property.
         ex: {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
     """
