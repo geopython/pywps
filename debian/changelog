@@ -1,3 +1,13 @@
+pywps (4.2.4) trusty; urgency=medium
+
+  * Added support for multiple languages (#510).
+  * Added AWS S3 Storage option (#451).
+  * Fixed type check (#507).
+  * Fixed file storage (#504).
+  * Fixed async keyword (#502).
+
+ -- Carsten Ehbrecht <ehbrecht@dkrz.de>  Thu, 06 Feb 2020 12:00:00 +0000
+
 pywps (4.2.3) trusty; urgency=medium
 
   * Check data is defined in literal template (#499)
