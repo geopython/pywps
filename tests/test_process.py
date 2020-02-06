@@ -14,6 +14,7 @@ from pywps.inout import LiteralInput
 from pywps.inout import BoundingBoxInput
 from pywps.inout import ComplexInput
 from pywps.inout import FORMATS
+from pywps.translations import get_translation
 
 
 class DoNothing(Process):
@@ -22,12 +23,14 @@ class DoNothing(Process):
             self.donothing,
             "process",
             title="Process",
+            abstract="Process description",
             inputs=[LiteralInput("length", title="Length"),
                     BoundingBoxInput("bbox", title="BBox", crss=[]),
                     ComplexInput("vector", title="Vector", supported_formats=[FORMATS.GML])],
             outputs=[],
             metadata=[Metadata('process metadata 1', 'http://example.org/1'),
-                      Metadata('process metadata 2', 'http://example.org/2')]
+                      Metadata('process metadata 2', 'http://example.org/2')],
+            translations={"fr-CA": {"title": "Processus", "abstract": "Une description"}}
         )
 
     @staticmethod
@@ -62,6 +65,13 @@ class ProcessTestCase(unittest.TestCase):
         self.assertEqual("BBox", new_inputs["bbox"])
         self.assertEqual("Vector", new_inputs["vector"])
 
+    def test_get_translations(self):
+        title_fr = get_translation(self.process, "title", "fr-CA")
+        assert title_fr == "Processus"
+        abstract_fr = get_translation(self.process, "abstract", "fr-CA")
+        assert abstract_fr == "Une description"
+        identifier = get_translation(self.process, "identifier", "fr-CA")
+        assert identifier == self.process.identifier
 
 def load_tests(loader=None, tests=None, pattern=None):
     """Load local tests

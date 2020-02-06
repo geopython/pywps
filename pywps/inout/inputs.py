@@ -31,20 +31,25 @@ class BoundingBoxInput(basic.BBoxInput):
     :param int max_occurs: how many times this input occurs
     :param metadata: List of metadata advertised by this process. They
                      should be :class:`pywps.app.Common.Metadata` objects.
+    :param dict[str,dict[str,str]] translations: The first key is the RFC 4646 language code,
+        and the nested mapping contains translated strings accessible by a string property.
+        e.g. {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
     """
 
     def __init__(self, identifier, title, crss=None, abstract='', keywords=[],
                  dimensions=2, workdir=None, metadata=[], min_occurs=1,
                  max_occurs=1,
                  mode=MODE.NONE,
-                 default=None, default_type=basic.SOURCE_TYPE.DATA):
+                 default=None, default_type=basic.SOURCE_TYPE.DATA,
+                 translations=None):
 
         basic.BBoxInput.__init__(self, identifier, title=title, crss=crss,
                                  abstract=abstract, keywords=keywords,
                                  dimensions=dimensions, workdir=workdir, metadata=metadata,
                                  min_occurs=min_occurs, max_occurs=max_occurs,
                                  mode=mode, default=default,
-                                 default_type=default_type)
+                                 default_type=default_type,
+                                 translations=translations)
 
         self.as_reference = False
 
@@ -68,7 +73,8 @@ class BoundingBoxInput(basic.BBoxInput):
             'workdir': self.workdir,
             'mode': self.valid_mode,
             'min_occurs': self.min_occurs,
-            'max_occurs': self.max_occurs
+            'max_occurs': self.max_occurs,
+            'translations': self.translations,
         }
 
     @classmethod
@@ -85,6 +91,7 @@ class BoundingBoxInput(basic.BBoxInput):
             mode=json_input['mode'],
             min_occurs=json_input['min_occurs'],
             max_occurs=json_input['max_occurs'],
+            translations=json_input.get('translations'),
         )
         instance.data = json_input['bbox']
 
@@ -112,12 +119,15 @@ class ComplexInput(basic.ComplexInput):
     :param int min_occurs: minimum occurrence
     :param int max_occurs: maximum occurrence
     :param pywps.validator.mode.MODE mode: validation mode (none to strict)
+    :param dict[str,dict[str,str]] translations: The first key is the RFC 4646 language code,
+        and the nested mapping contains translated strings accessible by a string property.
+        e.g. {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
     """
 
     def __init__(self, identifier, title, supported_formats,
                  data_format=None, abstract='', keywords=[], workdir=None, metadata=[], min_occurs=1,
                  max_occurs=1, mode=MODE.NONE,
-                 default=None, default_type=basic.SOURCE_TYPE.DATA):
+                 default=None, default_type=basic.SOURCE_TYPE.DATA, translations=None):
         """constructor"""
 
         basic.ComplexInput.__init__(self, identifier, title=title,
@@ -126,7 +136,7 @@ class ComplexInput(basic.ComplexInput):
                                     keywords=keywords, workdir=workdir, metadata=metadata,
                                     min_occurs=min_occurs,
                                     max_occurs=max_occurs, mode=mode,
-                                    default=default, default_type=default_type)
+                                    default=default, default_type=default_type, translations=translations)
 
         self.as_reference = False
         self.method = ''
@@ -148,7 +158,8 @@ class ComplexInput(basic.ComplexInput):
             'workdir': self.workdir,
             'mode': self.valid_mode,
             'min_occurs': self.min_occurs,
-            'max_occurs': self.max_occurs
+            'max_occurs': self.max_occurs,
+            'translations': self.translations,
         }
 
         if self.prop == 'file':
@@ -194,7 +205,8 @@ class ComplexInput(basic.ComplexInput):
                     encoding=infrmt.get('encoding')
                 ) for infrmt in json_input['supported_formats']
             ],
-            mode=json_input.get('mode', MODE.NONE)
+            mode=json_input.get('mode', MODE.NONE),
+            translations=json_input.get('translations'),
         )
         instance.as_reference = json_input.get('asreference', False)
         if json_input.get('file'):
@@ -254,14 +266,16 @@ class LiteralInput(basic.LiteralInput):
     :param pywps.inout.literaltypes.AnyValue allowed_values: or :py:class:`pywps.inout.literaltypes.AllowedValue` object
     :param metadata: List of metadata advertised by this process. They
                      should be :class:`pywps.app.Common.Metadata` objects.
+    :param dict[str,dict[str,str]] translations: The first key is the RFC 4646 language code,
+        and the nested mapping contains translated strings accessible by a string property.
+        e.g. {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
     """
 
     def __init__(self, identifier, title=None, data_type=None, workdir=None, abstract='', keywords=[],
                  metadata=[], uoms=None,
                  min_occurs=1, max_occurs=1,
                  mode=MODE.SIMPLE, allowed_values=None,
-                 default=None, default_type=basic.SOURCE_TYPE.DATA):
-
+                 default=None, default_type=basic.SOURCE_TYPE.DATA, translations=None):
         """Constructor
         """
         data_type = data_type or 'string'
@@ -271,7 +285,8 @@ class LiteralInput(basic.LiteralInput):
                                     uoms=uoms, min_occurs=min_occurs,
                                     max_occurs=max_occurs, mode=mode,
                                     allowed_values=allowed_values,
-                                    default=default, default_type=default_type)
+                                    default=default, default_type=default_type,
+                                    translations=translations)
 
         self.as_reference = False
 
@@ -293,6 +308,7 @@ class LiteralInput(basic.LiteralInput):
             'mode': self.valid_mode,
             'min_occurs': self.min_occurs,
             'max_occurs': self.max_occurs,
+            'translations': self.translations,
             # other values not set in the constructor
         }
         if self.values_reference:

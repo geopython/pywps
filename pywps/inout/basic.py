@@ -3,6 +3,7 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
+from pywps.translations import lower_case_dict
 from pywps._compat import text_type, StringIO
 import os
 from io import open
@@ -543,8 +544,9 @@ class SimpleHandler(DataHandler):
 class BasicIO:
     """Basic Input/Output class
     """
+
     def __init__(self, identifier, title=None, abstract=None, keywords=None,
-                 min_occurs=1, max_occurs=1, metadata=[]):
+                 min_occurs=1, max_occurs=1, metadata=[], translations=None):
         self.identifier = identifier
         self.title = title
         self.abstract = abstract
@@ -552,6 +554,7 @@ class BasicIO:
         self.min_occurs = int(min_occurs)
         self.max_occurs = int(max_occurs)
         self.metadata = metadata
+        self.translations = lower_case_dict(translations)
 
 
 class BasicLiteral:
@@ -701,9 +704,17 @@ class LiteralInput(BasicIO, BasicLiteral, SimpleHandler):
                  data_type="integer", workdir=None, allowed_values=None,
                  uoms=None, mode=MODE.NONE,
                  min_occurs=1, max_occurs=1, metadata=[],
-                 default=None, default_type=SOURCE_TYPE.DATA):
-        BasicIO.__init__(self, identifier, title, abstract, keywords,
-                         min_occurs, max_occurs, metadata)
+                 default=None, default_type=SOURCE_TYPE.DATA, translations=None):
+        BasicIO.__init__(self,
+                         identifier=identifier,
+                         title=title,
+                         abstract=abstract,
+                         keywords=keywords,
+                         min_occurs=min_occurs,
+                         max_occurs=max_occurs,
+                         metadata=metadata,
+                         translations=translations,
+                         )
         BasicLiteral.__init__(self, data_type, uoms)
         SimpleHandler.__init__(self, workdir, data_type, mode=mode)
 
@@ -752,8 +763,8 @@ class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
 
     def __init__(self, identifier, title=None, abstract=None, keywords=None,
                  data_type=None, workdir=None, uoms=None, validate=None,
-                 mode=MODE.NONE):
-        BasicIO.__init__(self, identifier, title, abstract, keywords)
+                 mode=MODE.NONE, translations=None):
+        BasicIO.__init__(self, identifier, title, abstract, keywords, translations=translations)
         BasicLiteral.__init__(self, data_type, uoms)
         SimpleHandler.__init__(self, workdir=None, data_type=data_type,
                                mode=mode)
@@ -784,9 +795,17 @@ class BBoxInput(BasicIO, BasicBoundingBox, DataHandler):
                  dimensions=None, workdir=None,
                  mode=MODE.SIMPLE,
                  min_occurs=1, max_occurs=1, metadata=[],
-                 default=None, default_type=SOURCE_TYPE.DATA):
-        BasicIO.__init__(self, identifier, title, abstract, keywords,
-                         min_occurs, max_occurs, metadata)
+                 default=None, default_type=SOURCE_TYPE.DATA, translations=None):
+        BasicIO.__init__(self,
+                         identifier=identifier,
+                         title=title,
+                         abstract=abstract,
+                         keywords=keywords,
+                         min_occurs=min_occurs,
+                         max_occurs=max_occurs,
+                         metadata=metadata,
+                         translations=translations,
+                         )
         BasicBoundingBox.__init__(self, crss, dimensions)
         DataHandler.__init__(self, workdir=workdir, mode=mode)
 
@@ -804,8 +823,8 @@ class BBoxOutput(BasicIO, BasicBoundingBox, DataHandler):
     """
 
     def __init__(self, identifier, title=None, abstract=None, keywords=None, crss=None,
-                 dimensions=None, workdir=None, mode=MODE.NONE):
-        BasicIO.__init__(self, identifier, title, abstract, keywords)
+                 dimensions=None, workdir=None, mode=MODE.NONE, translations=None):
+        BasicIO.__init__(self, identifier, title, abstract, keywords, translations=translations)
         BasicBoundingBox.__init__(self, crss, dimensions)
         DataHandler.__init__(self, workdir=workdir, mode=mode)
         self._storage = None
@@ -832,10 +851,17 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
                  workdir=None, data_format=None, supported_formats=None,
                  mode=MODE.NONE,
                  min_occurs=1, max_occurs=1, metadata=[],
-                 default=None, default_type=SOURCE_TYPE.DATA):
-
-        BasicIO.__init__(self, identifier, title, abstract, keywords,
-                         min_occurs, max_occurs, metadata)
+                 default=None, default_type=SOURCE_TYPE.DATA, translations=None):
+        BasicIO.__init__(self,
+                         identifier=identifier,
+                         title=title,
+                         abstract=abstract,
+                         keywords=keywords,
+                         min_occurs=min_occurs,
+                         max_occurs=max_occurs,
+                         metadata=metadata,
+                         translations=translations,
+                         )
         IOHandler.__init__(self, workdir=workdir, mode=mode)
         BasicComplex.__init__(self, data_format, supported_formats)
 
@@ -944,8 +970,8 @@ class ComplexOutput(BasicIO, BasicComplex, IOHandler):
 
     def __init__(self, identifier, title=None, abstract=None, keywords=None,
                  workdir=None, data_format=None, supported_formats=None,
-                 mode=MODE.NONE):
-        BasicIO.__init__(self, identifier, title, abstract, keywords)
+                 mode=MODE.NONE, translations=None):
+        BasicIO.__init__(self, identifier, title, abstract, keywords, translations=translations)
         IOHandler.__init__(self, workdir=workdir, mode=mode)
         BasicComplex.__init__(self, data_format, supported_formats)
 

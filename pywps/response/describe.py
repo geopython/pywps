@@ -38,7 +38,7 @@ class DescribeResponse(WPSResponse):
         return {
             'pywps_version': __version__,
             'processes': processes,
-            'lang': 'en-US'
+            'language': self.wps_request.language,
         }
 
     def _construct_doc(self):

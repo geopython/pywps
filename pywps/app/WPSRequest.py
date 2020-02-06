@@ -111,6 +111,9 @@ class WPSRequest(object):
             acceptedversions = _get_get_param(http_request, 'acceptversions')
             wpsrequest.check_accepted_versions(acceptedversions)
 
+            language = _get_get_param(http_request, 'language')
+            wpsrequest.check_and_set_language(language)
+
         def parse_get_describeprocess(http_request):
             """Parse GET DescribeProcess request
             """
@@ -191,6 +194,9 @@ class WPSRequest(object):
                 map(lambda v: v.text, acceptedversions))
             wpsrequest.check_accepted_versions(acceptedversions)
 
+            language = doc.attrib.get('language')
+            wpsrequest.check_and_set_language(language)
+
         def parse_post_describeprocess(doc):
             """Parse POST DescribeProcess request
             """
@@ -208,7 +214,6 @@ class WPSRequest(object):
         def parse_post_execute(doc):
             """Parse POST Execute request
             """
-
             version = doc.attrib.get('version')
             wpsrequest.check_and_set_version(version)
 
@@ -300,14 +305,20 @@ class WPSRequest(object):
     def check_and_set_language(self, language):
         """set this.language
         """
+        supported_languages = configuration.get_config_value('server', 'language').split(',')
+        supported_languages = [lang.strip() for lang in supported_languages]
 
         if not language:
-            language = 'None'
-        elif language != 'en-US':
+            # default to the first supported language
+            language = supported_languages[0]
+
+        if language not in supported_languages:
             raise InvalidParameterValue(
-                'The requested language "{}" is not supported by this server'.format(language), 'language')
-        else:
-            self.language = language
+                'The requested language "{}" is not supported by this server'.format(language),
+                'language',
+            )
+
+        self.language = language
 
     @property
     def json(self):

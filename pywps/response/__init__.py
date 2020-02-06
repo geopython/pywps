@@ -1,5 +1,6 @@
 from pywps.dblog import store_status
 from pywps.response.status import WPS_STATUS
+from pywps.translations import get_translation
 from jinja2 import Environment, PackageLoader
 import os
 
@@ -40,6 +41,7 @@ class WPSResponse(object):
             trim_blocks=True, lstrip_blocks=True,
             autoescape=True,
         )
+        self.template_env.globals.update(get_translation=get_translation)
 
     def _update_status(self, status, message, status_percentage):
         """

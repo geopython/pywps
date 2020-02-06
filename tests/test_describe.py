@@ -13,6 +13,7 @@ from pywps.app.basic import get_xpath_ns
 from pywps.app.Common import Metadata
 from pywps.inout.literaltypes import AllowedValue
 from pywps.validator.allowed_value import ALLOWEDVALUETYPE
+from pywps.configuration import CONFIG
 
 from pywps.tests import assert_pywps_version, client_for
 
@@ -135,6 +136,89 @@ class DescribeProcessTest(unittest.TestCase):
         result = get_describe_result(resp)
         # print(b"\n".join(resp.response).decode("utf-8"))
         assert [pr.identifier for pr in result] == ['hello', 'ping']
+
+
+class DescribeProcessTranslationsTest(unittest.TestCase):
+
+    def setUp(self):
+        CONFIG.set('server', 'language', 'en-US,fr-CA')
+        self.client = client_for(
+            Service(
+                processes=[
+                    Process(
+                        lambda: None,
+                        "pr1",
+                        "Process 1",
+                        abstract="Process 1",
+                        inputs=[
+                            LiteralInput(
+                                'input1',
+                                title='Input name',
+                                abstract='Input abstract',
+                                translations={"fr-CA": {"title": "Nom de l'input", "abstract": "Description"}}
+                            )
+                        ],
+                        outputs=[
+                            LiteralOutput(
+                                'output1',
+                                title='Output name',
+                                abstract='Output abstract',
+                                translations={"fr-CA": {"title": "Nom de l'output", "abstract": "Description"}}
+                            )
+                        ],
+                        translations={"fr-CA": {"title": "Processus 1", "abstract": "Processus 1"}},
+                    ),
+                    Process(
+                        lambda: None,
+                        "pr2",
+                        "Process 2",
+                        abstract="Process 2",
+                        inputs=[
+                            LiteralInput(
+                                'input1',
+                                title='Input name',
+                                abstract='Input abstract',
+                                translations={"fr-CA": {"abstract": "Description"}}
+                            )
+                        ],
+                        outputs=[
+                            LiteralOutput(
+                                'output1',
+                                title='Output name',
+                                abstract='Output abstract',
+                                translations={"fr-CA": {"abstract": "Description"}}
+                            )
+                        ],
+                        translations={"fr-CA": {"title": "Processus 2"}},
+                    ),
+                ]
+            )
+        )
+
+    def tearDown(self):
+        CONFIG.set('server', 'language', 'en-US')
+
+    def test_get_describe_translations(self):
+        resp = self.client.get('?Request=DescribeProcess&service=wps&version=1.0.0&identifier=all&language=fr-CA')
+
+        assert resp.xpath('/wps:ProcessDescriptions/@xml:lang')[0] == "fr-CA"
+
+        titles = [e.text for e in resp.xpath('//ProcessDescription/ows:Title')]
+        abstracts = [e.text for e in resp.xpath('//ProcessDescription/ows:Abstract')]
+        assert titles == ['Processus 1', 'Processus 2']
+        assert abstracts == ['Processus 1', 'Process 2']
+
+        input_titles = [e.text for e in resp.xpath('//Input/ows:Title')]
+        input_abstracts = [e.text for e in resp.xpath('//Input/ows:Abstract')]
+
+        assert input_titles == ["Nom de l'input", "Input name"]
+        assert input_abstracts == ["Description", "Description"]
+
+        output_titles = [e.text for e in resp.xpath('//Output/ows:Title')]
+        output_abstracts = [e.text for e in resp.xpath('//Output/ows:Abstract')]
+
+        assert output_titles == ["Nom de l'output", "Output name"]
+        assert output_abstracts == ["Description", "Description"]
 
 
 class DescribeProcessInputTest(unittest.TestCase):
@@ -312,5 +396,6 @@ def load_tests(loader=None, tests=None, pattern=None):
         loader.loadTestsFromTestCase(DescribeProcessTest),
         loader.loadTestsFromTestCase(DescribeProcessInputTest),
         loader.loadTestsFromTestCase(InputDescriptionTest),
+        loader.loadTestsFromTestCase(DescribeProcessTranslationsTest),
     ]
     return unittest.TestSuite(suite_list)

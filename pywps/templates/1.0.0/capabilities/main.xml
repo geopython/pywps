@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- PyWPS {{ pywps_version }} -->
-<wps:Capabilities service="WPS" version="1.0.0" xml:lang="en-CA" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 ../wpsGetCapabilities_response.xsd" updateSequence="1">
+<wps:Capabilities service="WPS" version="1.0.0" xml:lang="{{ language }}" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 ../wpsGetCapabilities_response.xsd" updateSequence="1">
     <ows:ServiceIdentification>
         <ows:Title>{{ title }}</ows:Title>
         <ows:Abstract>{{ abstract }}</ows:Abstract>
@@ -73,8 +73,8 @@
         {% for process in processes %}
         <wps:Process wps:processVersion="{{ process.version }}">
             <ows:Identifier>{{ process.identifier }}</ows:Identifier>
-            <ows:Title>{{ process.title }}</ows:Title>
-            <ows:Abstract>{{ process.abstract }}</ows:Abstract>
+            <ows:Title>{{ get_translation(process, "title", language) }}</ows:Title>
+            <ows:Abstract>{{ get_translation(process, "abstract", language) }}</ows:Abstract>
             {% if process.keywords %}
             <ows:Keywords>
             {% for keyword in process.keywords %}
@@ -93,7 +93,7 @@
             />
             {% endfor %}
         </wps:Process>
-    {% endfor %}
+        {% endfor %}
     </wps:ProcessOfferings>
     <wps:Languages>
         <wps:Default>
@@ -101,7 +101,7 @@
         </wps:Default>
         <wps:Supported>
             {% for lang in languages %}
-            <ows:Language>lang</ows:Language>
+            <ows:Language>{{ lang }}</ows:Language>
             {% endfor %}
         </wps:Supported>
     </wps:Languages>

@@ -29,15 +29,18 @@ class BoundingBoxOutput(basic.BBoxOutput):
     :param pywps.validator.mode.MODE mode: validation mode (none to strict)
     :param metadata: List of metadata advertised by this process. They
                      should be :class:`pywps.app.Common.Metadata` objects.
+    :param dict[str,dict[str,str]] translations: The first key is the RFC 4646 language code,
+        and the nested mapping contains translated strings accessible by a string property.
+        e.g. {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
     """
 
     def __init__(self, identifier, title, crss, abstract='', keywords=[],
                  dimensions=2, metadata=[], min_occurs='1',
                  max_occurs='1', as_reference=False,
-                 mode=MODE.NONE):
+                 mode=MODE.NONE, translations=None):
         basic.BBoxOutput.__init__(self, identifier, title=title,
                                   abstract=abstract, keywords=keywords, crss=crss,
-                                  dimensions=dimensions, mode=mode)
+                                  dimensions=dimensions, mode=mode, translations=translations)
 
         self.metadata = metadata
         self.min_occurs = min_occurs
@@ -65,6 +68,7 @@ class BoundingBoxOutput(basic.BBoxOutput):
             'ur': self.ur,
             'workdir': self.workdir,
             'mode': self.valid_mode,
+            'translations': self.translations,
         }
 
     @classmethod
@@ -80,6 +84,7 @@ class BoundingBoxOutput(basic.BBoxOutput):
             crss=json_output['crss'],
             dimensions=json_output['dimensions'],
             mode=json_output['mode'],
+            translations=json_output.get('translations'),
         )
         instance.data = json_output['bbox']
         instance.workdir = json_output['workdir']
@@ -98,11 +103,14 @@ class ComplexOutput(basic.ComplexOutput):
     :param pywps.validator.mode.MODE mode: validation mode (none to strict)
     :param metadata: List of metadata advertised by this process. They
                      should be :class:`pywps.app.Common.Metadata` objects.
+    :param dict[str,dict[str,str]] translations: The first key is the RFC 4646 language code,
+        and the nested mapping contains translated strings accessible by a string property.
+        e.g. {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
     """
 
     def __init__(self, identifier, title, supported_formats=None,
                  data_format=None, abstract='', keywords=[], workdir=None, metadata=None,
-                 as_reference=False, mode=MODE.NONE):
+                 as_reference=False, mode=MODE.NONE, translations=None):
         if metadata is None:
             metadata = []
 
@@ -110,7 +118,7 @@ class ComplexOutput(basic.ComplexOutput):
                                      data_format=data_format, abstract=abstract, keywords=keywords,
                                      workdir=workdir,
                                      supported_formats=supported_formats,
-                                     mode=mode)
+                                     mode=mode, translations=translations)
         self.metadata = metadata
         self.as_reference = as_reference
 
@@ -133,7 +141,8 @@ class ComplexOutput(basic.ComplexOutput):
             'workdir': self.workdir,
             'mode': self.valid_mode,
             'min_occurs': self.min_occurs,
-            'max_occurs': self.max_occurs
+            'max_occurs': self.max_occurs,
+            'translations': self.translations,
         }
 
         if self.as_reference:
@@ -174,7 +183,8 @@ class ComplexOutput(basic.ComplexOutput):
                     encoding=infrmt.get('encoding')
                 ) for infrmt in json_output['supported_formats']
             ],
-            mode=json_output.get('mode', MODE.NONE)
+            mode=json_output.get('mode', MODE.NONE),
+            translations=json_output.get('translations'),
         )
         instance.as_reference = json_output.get('asreference', False)
         if json_output.get('file'):
@@ -235,14 +245,17 @@ class LiteralOutput(basic.LiteralOutput):
     :param pywps.validator.mode.MODE mode: validation mode (none to strict)
     :param metadata: List of metadata advertised by this process. They
                      should be :class:`pywps.app.Common.Metadata` objects.
+    :param dict[str,dict[str,str]] translations: The first key is the RFC 4646 language code,
+        and the nested mapping contains translated strings accessible by a string property.
+        e.g. {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
     """
 
     def __init__(self, identifier, title, data_type='string', abstract='', keywords=[],
-                 metadata=[], uoms=None, mode=MODE.SIMPLE):
+                 metadata=[], uoms=None, mode=MODE.SIMPLE, translations=None):
         if uoms is None:
             uoms = []
         basic.LiteralOutput.__init__(self, identifier, title=title, abstract=abstract, keywords=keywords,
-                                     data_type=data_type, uoms=uoms, mode=mode)
+                                     data_type=data_type, uoms=uoms, mode=mode, translations=translations)
         self.metadata = metadata
 
     @property
@@ -257,7 +270,8 @@ class LiteralOutput(basic.LiteralOutput):
             "data": self.data,
             "data_type": self.data_type,
             "type": "literal",
-            "uoms": [u.json for u in self.uoms]
+            "uoms": [u.json for u in self.uoms],
+            "translations": self.translations,
         }
 
         if self.uom:
@@ -277,6 +291,7 @@ class LiteralOutput(basic.LiteralOutput):
             abstract=json_output['abstract'],
             keywords=json_output['keywords'],
             uoms=uoms,
+            translations=json_output.get('translations'),
         )
 
         instance.data = json_output.get('data')
@@ -288,6 +303,7 @@ class LiteralOutput(basic.LiteralOutput):
 
 class MetaFile:
     """MetaFile object."""
+
     def __init__(self, identity=None, description=None, fmt=None):
         """Create a `MetaFile` object.
 
