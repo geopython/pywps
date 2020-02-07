@@ -16,4 +16,3 @@ class DapStorageBuilder(StorageImplementationBuilder):
         file_path = config.get_config_value('dap', 'outputpath')
         base_url = config.get_config_value('dap', 'outputurl')
         return FileStorage(file_path, base_url)
-
