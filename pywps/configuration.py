@@ -142,6 +142,11 @@ def load_configuration(cfgfiles=None):
     CONFIG.set('s3', 'encrypt', 'false')
     CONFIG.set('s3', 'region', '')
 
+    CONFIG.add_section('dap')
+    CONFIG.set('dap', 'url', 'http://localhost/dap')
+    CONFIG.set('dap', 'outputurl', 'http://localhost/dap/dodsC/outputs')
+    CONFIG.set('dap', 'outputpath', outputpath)
+
     if not cfgfiles:
         cfgfiles = _get_default_config_files_location()
 

@@ -5,11 +5,13 @@
 
 from .s3 import S3StorageBuilder
 from .file import FileStorageBuilder
+from .dap import DapStorageBuilder
 import pywps.configuration as wpsConfig
 
 STORAGE_MAP = {
     's3': S3StorageBuilder,
-    'file': FileStorageBuilder
+    'file': FileStorageBuilder,
+    'dap': DapStorageBuilder,
 }
 
 

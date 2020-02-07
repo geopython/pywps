@@ -4,12 +4,13 @@
 ##################################################################
 
 from pywps.inout.storage.builder import StorageBuilder
+from pywps.inout.storage.dap import DapStorageBuilder
 from pywps.inout.storage.file import FileStorage
 from pywps.inout.storage.s3 import S3Storage
 
 from pywps import configuration
-
 import unittest
+
 
 class StorageBuilderTests(unittest.TestCase):
 
@@ -17,11 +18,18 @@ class StorageBuilderTests(unittest.TestCase):
         storage = StorageBuilder.buildStorage()
         self.assertIsInstance(storage, FileStorage)
 
+    def test_dap_storage(self):
+        configuration.CONFIG.set('server', 'storagetype', 'dap')
+        storage = StorageBuilder.buildStorage()
+        self.assertIsInstance(storage, FileStorage)
+        url = storage.url('test.txt')
+        assert url == 'http://localhost/dap/dodsC/outputs/test.txt'
 
     def test_s3_storage(self):
         configuration.CONFIG.set('server', 'storagetype', 's3')
         storage = StorageBuilder.buildStorage()
         self.assertIsInstance(storage, S3Storage)
+
 
 def load_tests(loader=None, tests=None, pattern=None):
     """Load local tests

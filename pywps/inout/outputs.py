@@ -12,6 +12,7 @@ from pywps.app.Common import Metadata
 from pywps.exceptions import InvalidParameterValue
 from pywps.inout import basic
 from pywps.inout.storage.file import FileStorageBuilder
+from pywps.inout.storage.dap import DapStorageBuilder
 from pywps.validator.mode import MODE
 from pywps import configuration as config
 from pywps.inout.formats import Format
@@ -201,7 +202,10 @@ class ComplexOutput(basic.ComplexOutput):
         if self.prop == 'url':
             data["href"] = self.url
         elif self.prop is not None:
-            self.storage = FileStorageBuilder().build()
+            if self.data_format.mime_type == "application/x-ogc-dods":
+                self.storage = DapStorageBuilder().build()
+            else:
+                self.storage = FileStorageBuilder().build()
             data["href"] = self.get_url()
 
         return data
