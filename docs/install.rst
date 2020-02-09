@@ -4,10 +4,10 @@ Installation
 ============
 
 .. note:: PyWPS is not tested on the MS Windows platform. Please join the
-    development team if you need this platform to be supported. This is mainly 
-    because of the lack of a multiprocessing library.  It is used to process 
-    asynchronous execution, i.e., when making requests storing the response 
-    document and updating a status document displaying the progress of 
+    development team if you need this platform to be supported. This is mainly
+    because of the lack of a multiprocessing library.  It is used to process
+    asynchronous execution, i.e., when making requests storing the response
+    document and updating a status document displaying the progress of
     execution.
 
 
@@ -15,7 +15,7 @@ Dependencies and requirements
 -----------------------------
 
 PyWPS runs on Python 2.7, 3.3 or higher. PyWPS is currently tested and
-developed on Linux (mostly Ubuntu).  In the documentation we take this 
+developed on Linux (mostly Ubuntu).  In the documentation we take this
 distribution as reference.
 
 Prior to installing PyWPS, Git and the Python bindings for GDAL must be
@@ -82,6 +82,13 @@ For Developers
         installation option is handy for development and / or users who may not have system-wide administration
         privileges.
 
+Initialize database
+-------------------
+
+Before you can start the service you need to initialize or upgrade the database::
+
+    $ pywps -c pywps.cfg migrate 
+
 .. _flask:
 
 The Flask service and its sample processes
@@ -101,8 +108,8 @@ start by studying the structure of this project and then code their own processe
 
 There is also an example service
 
-Full more details please consult the :ref:`process` section. The example service 
-contains some basic processes too, so you could get started with some examples 
-(like `area`, `buffer`, `feature_count` and `grassbuffer`). These processes are 
+Full more details please consult the :ref:`process` section. The example service
+contains some basic processes too, so you could get started with some examples
+(like `area`, `buffer`, `feature_count` and `grassbuffer`). These processes are
 to be taken just as inspiration and code documentation - most of them do not
 make any sense (e.g. `sayhello`).

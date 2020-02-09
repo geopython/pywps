@@ -324,15 +324,18 @@ class LiteralInput(basic.LiteralInput):
     @classmethod
     def from_json(cls, json_input):
         allowed_values = []
-        for allowed_value in json_input['allowed_values']:
-            if allowed_value['type'] == 'anyvalue':
-                allowed_values.append(AnyValue())
-            elif allowed_value['type'] == 'novalue':
-                allowed_values.append(NoValue())
-            elif allowed_value['type'] == 'valuesreference':
-                allowed_values.append(ValuesReference.from_json(allowed_value))
-            elif allowed_value['type'] == 'allowedvalue':
-                allowed_values.append(AllowedValue.from_json(allowed_value))
+        if "allowed_values" in json_input:
+            for allowed_value in json_input['allowed_values']:
+                if allowed_value['type'] == 'anyvalue':
+                    allowed_values.append(AnyValue())
+                elif allowed_value['type'] == 'novalue':
+                    allowed_values.append(NoValue())
+                elif allowed_value['type'] == 'valuesreference':
+                    allowed_values.append(ValuesReference.from_json(allowed_value))
+                elif allowed_value['type'] == 'allowedvalue':
+                    allowed_values.append(AllowedValue.from_json(allowed_value))
+        else:
+            allowed_values.append(AnyValue())
 
         json_input_copy = deepcopy(json_input)
         json_input_copy['allowed_values'] = allowed_values

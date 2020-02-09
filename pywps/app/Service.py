@@ -5,6 +5,7 @@
 
 import logging
 import tempfile
+import importlib
 from werkzeug.exceptions import HTTPException
 from werkzeug.wrappers import Request, Response
 from pywps._compat import PY2
@@ -18,6 +19,7 @@ from pywps.inout.outputs import ComplexOutput
 from pywps.dblog import log_request, store_status
 from pywps import response
 from pywps.response.status import WPS_STATUS
+from pywps.log import get_logger
 
 from collections import deque, OrderedDict
 import os
@@ -41,22 +43,26 @@ class Service(object):
     :param cfgfiles: A list of configuration files
     """
 
-    def __init__(self, processes=[], cfgfiles=None):
+    def __init__(self, processes=None, cfgfiles=None):
+        global LOGGER
+
+        processes = processes or []
+        config.load_configuration(cfgfiles)
+
+        LOGGER = get_logger(
+            file=config.get_config_value('logging', 'file'),
+            level=config.get_config_value('logging', 'level'),
+            format=config.get_config_value('logging', 'format'))
+
+        if not processes:
+            # load processes from processes_module.processes_list
+            pname = config.get_config_value('server', 'processes')
+            if pname:
+                pmodule, plist = pname.rsplit('.', 1)
+                processes = getattr(importlib.import_module(pmodule), plist)
+
         # ordered dict of processes
         self.processes = OrderedDict((p.identifier, p) for p in processes)
-
-        if cfgfiles:
-            config.load_configuration(cfgfiles)
-
-        if config.get_config_value('logging', 'file') and config.get_config_value('logging', 'level'):
-            LOGGER.setLevel(getattr(logging, config.get_config_value('logging', 'level')))
-            if not LOGGER.handlers:  # hasHandlers in Python 3.x
-                fh = logging.FileHandler(config.get_config_value('logging', 'file'))
-                fh.setFormatter(logging.Formatter(config.get_config_value('logging', 'format')))
-                LOGGER.addHandler(fh)
-        else:  # NullHandler | StreamHandler
-            if not LOGGER.handlers:
-                LOGGER.addHandler(logging.NullHandler())
 
     def get_capabilities(self, wps_request, uuid):
 

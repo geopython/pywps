@@ -1,10 +1,11 @@
+dist: xenial   # required for Python >= 3.7
 language: python
 
 sudo: required
-dist: trusty
 
 python:
   - "3.6"
+  - "3.7"
 
 git:
   submodules: false
@@ -25,6 +26,9 @@ addons:
 git:
     submodules: false
 
+env:
+  - PYWPS_CFG="$TRAVIS_BUILD_DIR/tests/test-pywps.cfg"
+
 install:
   - pip install pip --upgrade
   - pip install -r requirements.txt
@@ -32,6 +36,8 @@ install:
   - pip install -r requirements-extra.txt
   - pip install -r requirements-dev.txt
   - pip install coveralls
+  - pip install -e .
+  - pywps -c $PYWPS_CFG migrate
 
 script:
   - python -m unittest tests

@@ -10,7 +10,6 @@ Implementation of logging for PyWPS-4
 import logging
 from pywps import configuration
 from pywps.exceptions import NoApplicableCode
-from pywps._compat import PY2
 import sqlite3
 import datetime
 import pickle
@@ -27,8 +26,8 @@ from sqlalchemy.pool import NullPool, StaticPool
 LOGGER = logging.getLogger('PYWPS')
 _SESSION_MAKER = None
 
-_tableprefix = configuration.get_config_value('logging', 'prefix')
-_schema = configuration.get_config_value('logging', 'schema')
+_tableprefix = 'pywps_'  # configuration.get_config_value('logging', 'prefix')
+# _schema = configuration.get_config_value('logging', 'schema')
 
 Base = declarative_base()
 
@@ -36,7 +35,7 @@ lock = Lock()
 
 
 class ProcessInstance(Base):
-    __tablename__ = '{}requests'.format(_tableprefix)
+    __tablename__ = '{}jobs'.format(_tableprefix)
 
     uuid = Column(VARCHAR(255), primary_key=True, nullable=False)
     pid = Column(Integer, nullable=False)
@@ -55,6 +54,7 @@ class RequestInstance(Base):
 
     uuid = Column(VARCHAR(255), primary_key=True, nullable=False)
     request = Column(LargeBinary, nullable=False)
+    process = Column(LargeBinary, nullable=True)
 
 
 def log_request(uuid, request):
@@ -113,18 +113,19 @@ def pop_first_stored():
     return request
 
 
-def store_status(uuid, wps_status, message=None, status_percentage=None):
+def store_status(uuid, wps_status, message=None, status_percentage=None, pid=-1):
     """Writes response to database
     """
     session = get_session()
 
-    requests = session.query(ProcessInstance).filter_by(uuid=str(uuid))
-    if requests.count():
-        request = requests.one()
-        request.time_end = datetime.datetime.now()
-        request.message = str(message)
-        request.percent_done = status_percentage
-        request.status = wps_status
+    job = session.query(ProcessInstance).filter_by(uuid=str(uuid))
+    if job.count():
+        job = job.one()
+        job.time_end = datetime.datetime.now()
+        job.message = str(message)
+        job.percent_done = status_percentage
+        job.status = wps_status
+        job.pid = pid
         session.commit()
     session.close()
 
@@ -155,11 +156,7 @@ def get_session():
 
     with lock:
         database = configuration.get_config_value('logging', 'database')
-        echo = True
-        level = configuration.get_config_value('logging', 'level')
-        level_name = logging.getLevelName(level)
-        if isinstance(level_name, int) and level_name >= logging.INFO:
-            echo = False
+        echo = configuration.get_config_value('logging', 'db_echo')
         try:
             if ":memory:" in database:
                 engine = sqlalchemy.create_engine(database,
@@ -173,28 +170,29 @@ def get_session():
                                                   poolclass=NullPool)
             else:
                 engine = sqlalchemy.create_engine(database, echo=echo, poolclass=NullPool)
-        except sqlalchemy.exc.SQLAlchemyError as e:
-            raise NoApplicableCode("Could not connect to database: {}".format(e.message))
 
-        Session = sessionmaker(bind=engine)
-        ProcessInstance.metadata.create_all(engine)
-        RequestInstance.metadata.create_all(engine)
+        except sqlalchemy.exc.SQLAlchemyError as e:
+            raise NoApplicableCode("Could not connect to database: {}".format(e))
+
+        Session = sessionmaker(bind=engine, expire_on_commit=True)
 
         _SESSION_MAKER = Session
 
     return _SESSION_MAKER()
 
 
-def store_process(uuid, request):
+def store_request(uuid, request, process):
     """Save given request under given UUID for later usage
     """
 
     session = get_session()
-    request_json = request.json
-    if not PY2:
-        # the BLOB type requires bytes on Python 3
-        request_json = request_json.encode('utf-8')
-    request = RequestInstance(uuid=str(uuid), request=request_json)
+    request_json = json.dumps(request.json).encode("utf-8")
+    process_json = json.dumps(process.json).encode("utf-8")
+    request = RequestInstance(
+        uuid=str(uuid),
+        request=request_json,
+        process=process_json
+    )
     session.add(request)
     session.commit()
     session.close()

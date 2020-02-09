@@ -16,6 +16,7 @@ The configuration file has several sections:
 
     * `metadata:main` for the server metadata inputs
     * `server` for server configuration
+    * `jobqueue` for job queue configuration
     * `processing` for processing backend configuration
     * `logging` for logging configuration
     * `grass` for *optional* configuration to support `GRASS GIS
@@ -104,6 +105,12 @@ configuration file <https://docs.pycsw.org/en/latest/configuration.html>`_.
     https://docs.python.org/2/library/codecs.html#standard-encodings).  Default
     value is 'UTF-8'
 
+:processes:
+    optional parameter to configure the processes list using a Python expression.
+    This expression will be loaded using ``importlib``.
+    For example use `myapp.processes.processes` which points to the Python
+    list of your processes in your application: ``processes = [Sleep(), SayHello()]``.
+
 :parallelprocesses:
     maximum number of parallel running processes - set this number carefully.
     The effective number of parallel running processes is limited by the number
@@ -190,6 +197,10 @@ configuration file <https://docs.pycsw.org/en/latest/configuration.html>`_.
     Connection string to database where the login about requests/responses is to be stored. We are using `SQLAlchemy <https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls>`_
     please use the configuration string. The default is SQLite3 `:memory:` object, however this has `known issues <https://github.com/geopython/pywps/issues?utf8=%E2%9C%93&q=is%3Aissue+async+sqlite>`_ with async processing and should be avoided.
 
+:db_echo:
+    flag to enable database logging.
+
+    Default = `false`.
 
 [grass]
 -------
@@ -198,6 +209,11 @@ configuration file <https://docs.pycsw.org/en/latest/configuration.html>`_.
   directory of the GRASS GIS instalation, refered as `GISBASE
   <https://grass.osgeo.org/grass73/manuals/variables.html>`_
 
+[jobqueue]
+--------
+
+:pause:
+  pausing in seconds between periodical check for new stored requests
 
 [s3]
 ----
@@ -274,10 +290,12 @@ Sample file
   [grass]
   gisbase=/usr/local/grass-7.3.svn/
 
+  [jobqueue]
+  pause=30
+
   [s3]
   bucket=my-org-wps
   region=us-east-1
   prefix=appname/coolapp/
   public=true
   encrypt=false
-

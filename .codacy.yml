@@ -1,4 +1,5 @@
 ---
 exclude_paths:
+  - 'pywps/alembic/versions/**'
   - 'tests/**'
   - 'docs/conf.py'

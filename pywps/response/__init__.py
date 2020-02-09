@@ -55,7 +55,8 @@ class WPSResponse(object):
         self.message = message
         self.status = status
         self.status_percentage = status_percentage
-        store_status(self.uuid, self.status, self.message, self.status_percentage)
+        pid = os.getpid()
+        store_status(self.uuid, self.status, self.message, self.status_percentage, pid)
 
     def get_response_doc(self):
         try:
