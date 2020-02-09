@@ -18,7 +18,7 @@ import mimetypes
 _FORMATS = namedtuple('FORMATS', 'GEOJSON, JSON, SHP, GML, GPX, METALINK, META4, KML, KMZ, GEOTIFF,'
                                  'WCS, WCS100, WCS110, WCS20, WFS, WFS100,'
                                  'WFS110, WFS20, WMS, WMS130, WMS110,'
-                                 'WMS100, TEXT, DODS, NETCDF, LAZ, LAS, ZIP,'
+                                 'WMS100, TEXT, DODS, NETCDF, NCML, LAZ, LAS, ZIP,'
                                  'XML')
 
 
@@ -188,6 +188,7 @@ FORMATS = _FORMATS(
     Format('text/plain', extension='.txt'),
     Format('application/x-ogc-dods', extension='.nc'),
     Format('application/x-netcdf', extension='.nc', encoding='base64'),
+    Format('application/ncML+xml', extension='.ncml', schema="ncml/2.2/ncml-2.2.xsd"),
     Format('application/octet-stream', extension='.laz'),
     Format('application/octet-stream', extension='.las'),
     Format('application/zip', extension='.zip', encoding='base64'),
