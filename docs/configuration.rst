@@ -160,6 +160,9 @@ configuration file <https://docs.pycsw.org/en/latest/configuration.html>`_.
 :storagetype:
     The type of storage to use when storing status and results. Possible values are: ``file``, ``s3``. Defaults to ``file``.
 
+:processes:
+    Python module with list of processes. See :ref:`werkzeug_start`
+
 [processing]
 ------------
 
