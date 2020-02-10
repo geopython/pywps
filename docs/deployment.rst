@@ -76,6 +76,8 @@ which:
     2. Serves processes
     3. Takes care about maximum number of concurrent processes and similar
 
+.. _werkzeug_start:
+
 Starting PyWPS using Werkzeug
 -----------------------------
 
@@ -88,12 +90,13 @@ the available processes::
 
 Start the pywps with the following command::
 
+    $ export PYTHONPATH=/path/to/myapp # add myapp to Python modules
     $ pywps -c pywps.cfg start
 
 You can also start the pywps service and the job queue as seperated processes::
 
     $ pywps -c pywps.cfg start --no-jobqueue
-    $ pywps -c pywps.cfg jobqueue 
+    $ pywps -c pywps.cfg jobqueue
 
 Creating a PyWPS `WSGI` instance
 --------------------------------

@@ -96,7 +96,7 @@ configuration file <https://docs.pycsw.org/en/latest/configuration.html>`_.
     the URL of the WPS service endpoint
 
 :language:
-    a comma-separated list of ISO 639-1 language and ISO 3166-1 alpha2 country 
+    a comma-separated list of ISO 639-1 language and ISO 3166-1 alpha2 country
     code of the service
     (e.g. ``en-CA``, ``fr-CA``, ``en-US``)
 
@@ -106,8 +106,8 @@ configuration file <https://docs.pycsw.org/en/latest/configuration.html>`_.
     value is 'UTF-8'
 
 :processes:
-    optional parameter to configure the processes list using a Python expression.
-    This expression will be loaded using ``importlib``.
+    optional parameter to configure the list of processes. See :ref:`werkzeug_start`.
+    It is using a Python expression which will be loaded using ``importlib``.
     For example use `myapp.processes.processes` which points to the Python
     list of your processes in your application: ``processes = [Sleep(), SayHello()]``.
 
