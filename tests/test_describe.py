@@ -13,7 +13,7 @@ from pywps.app.basic import get_xpath_ns
 from pywps.app.Common import Metadata
 from pywps.inout.literaltypes import AllowedValue
 from pywps.validator.allowed_value import ALLOWEDVALUETYPE
-from pywps.configuration import CONFIG
+from pywps import configuration
 
 from pywps.tests import assert_pywps_version, client_for
 
@@ -141,7 +141,8 @@ class DescribeProcessTest(unittest.TestCase):
 class DescribeProcessTranslationsTest(unittest.TestCase):
 
     def setUp(self):
-        CONFIG.set('server', 'language', 'en-US,fr-CA')
+        configuration.get_config_value('server', 'language')
+        configuration.CONFIG.set('server', 'language', 'en-US,fr-CA')
         self.client = client_for(
             Service(
                 processes=[
@@ -196,7 +197,7 @@ class DescribeProcessTranslationsTest(unittest.TestCase):
         )
 
     def tearDown(self):
-        CONFIG.set('server', 'language', 'en-US')
+        configuration.CONFIG.set('server', 'language', 'en-US')
 
     def test_get_describe_translations(self):
         resp = self.client.get('?Request=DescribeProcess&service=wps&version=1.0.0&identifier=all&language=fr-CA')
