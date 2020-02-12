@@ -10,7 +10,7 @@ from werkzeug.exceptions import MethodNotAllowed
 from pywps import get_ElementMakerForVersion
 import base64
 import datetime
-from pywps._compat import text_type, PY2
+from pywps._compat import text_type
 from pywps.app.basic import get_xpath_ns
 from pywps.inout.inputs import input_from_json
 from pywps.exceptions import NoApplicableCode, OperationNotSupported, MissingParameterValue, VersionNegotiationFailed, \
@@ -87,10 +87,7 @@ class WPSRequest(object):
         try:
             doc = lxml.etree.fromstring(self.http_request.get_data())
         except Exception as e:
-            if PY2:
-                raise NoApplicableCode(e.message)
-            else:
-                raise NoApplicableCode(e.msg)
+            raise NoApplicableCode(e.msg)
 
         operation = doc.tag
         version = get_version_from_ns(doc.nsmap[doc.prefix])
@@ -572,10 +569,7 @@ def _get_dataelement_value(value_el):
     """
 
     if isinstance(value_el, lxml.etree._Element):
-        if PY2:
-            return lxml.etree.tostring(value_el, encoding=unicode)  # noqa
-        else:
-            return lxml.etree.tostring(value_el, encoding=str)
+        return lxml.etree.tostring(value_el, encoding=str)
     else:
         return value_el
 

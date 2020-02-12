@@ -12,7 +12,6 @@ import datetime
 from pywps.exceptions import InvalidParameterValue
 from pywps.validator.allowed_value import RANGECLOSURETYPE
 from pywps.validator.allowed_value import ALLOWEDVALUETYPE
-from pywps._compat import PY2
 
 import logging
 LOGGER = logging.getLogger('PYWPS')
@@ -281,11 +280,7 @@ def convert_string(inpt):
     >>> convert_string(1)
     '1'
     """
-
-    if PY2:
-        return str(inpt).decode()
-    else:
-        return str(inpt)
+    return str(inpt)
 
 
 def convert_positiveInteger(inpt):

@@ -29,7 +29,6 @@ from pywps.validator.base import emptyvalidator
 from pywps.exceptions import InvalidParameterValue
 from pywps.validator.mode import MODE
 from pywps.inout.basic import UOM
-from pywps._compat import PY2
 from pywps.inout.storage.file import FileStorageBuilder
 from pywps.tests import service_ok
 from pywps.translations import get_translation
@@ -93,10 +92,7 @@ class IOHandlerTest(unittest.TestCase):
         stream_val = self.iohandler.stream.read()
         self.iohandler.stream.close()
 
-        if PY2 and isinstance(stream_val, str):
-            self.assertEqual(self._value, stream_val.decode('utf-8'),
-                             'Stream obtained')
-        elif not PY2 and isinstance(stream_val, bytes):
+        if isinstance(stream_val, bytes):
             self.assertEqual(self._value, stream_val.decode('utf-8'),
                              'Stream obtained')
         else:
@@ -112,8 +108,6 @@ class IOHandlerTest(unittest.TestCase):
 
     def test_data(self):
         """Test data input IOHandler"""
-        if PY2:
-            self.skipTest('fails on python 2.7')
         self.iohandler.data = self._value
         self.iohandler.data_format = Format('foo', extension='.foo')
         self._test_outout(SOURCE_TYPE.DATA, '.foo')
@@ -163,8 +157,6 @@ class IOHandlerTest(unittest.TestCase):
         self.skipTest('Memory object not implemented')
 
     def test_data_bytes(self):
-        if PY2:
-            self.skipTest('fails on python 2.7')
         self._value = b'aa'
 
         self.iohandler.data = self._value
@@ -508,24 +500,17 @@ class ComplexOutputTest(unittest.TestCase):
     def test_file_handler(self):
         self.complex_out.file = self.test_fn
         self.assertEqual(self.complex_out.data, self.data)
-        if PY2:
-            self.assertEqual(self.complex_out.stream.read(), self.data)
-        else:
-            with self.complex_out.stream as s:
-                self.assertEqual(s.read(), bytes(self.data, encoding='utf8'))
+        with self.complex_out.stream as s:
+            self.assertEqual(s.read(), bytes(self.data, encoding='utf8'))
 
         with open(urlparse(self.complex_out.url).path) as f:
             self.assertEqual(f.read(), self.data)
 
     def test_file_handler_netcdf(self):
-        if PY2:
-            self.skipTest('fails on python 2.7')
         self.complex_out_nc.file = self.ncfile
         self.complex_out_nc.base64
 
     def test_data_handler(self):
-        if PY2:
-            self.skipTest('fails on python 2.7')
         self.complex_out.data = self.data
         with open(self.complex_out.file) as f:
             self.assertEqual(f.read(), self.data)
@@ -533,10 +518,7 @@ class ComplexOutputTest(unittest.TestCase):
     def test_base64(self):
         self.complex_out.data = self.data
         b = self.complex_out.base64
-        if PY2:
-            self.assertEqual(base64.b64decode(b), self.data)
-        else:
-            self.assertEqual(base64.b64decode(b).decode(), self.data)
+        self.assertEqual(base64.b64decode(b).decode(), self.data)
 
     def test_url_handler(self):
         wfsResource = 'http://demo.mapserver.org/cgi-bin/wfs?' \
@@ -683,8 +665,8 @@ class LiteralOutputTest(unittest.TestCase):
     def setUp(self):
 
         self.literal_output = inout.outputs.LiteralOutput(
-            "literaloutput", 
-            data_type="integer", 
+            "literaloutput",
+            data_type="integer",
             title="Literal Output",
             translations={"fr-CA": {"title": "Mon output", "abstract": "Une description"}},
         )
@@ -715,8 +697,8 @@ class BBoxInputTest(unittest.TestCase):
     def setUp(self):
 
         self.bbox_input = inout.inputs.BoundingBoxInput(
-            "bboxinput", 
-            title="BBox input", 
+            "bboxinput",
+            title="BBox input",
             dimensions=2,
             translations={"fr-CA": {"title": "Mon input", "abstract": "Une description"}},
         )

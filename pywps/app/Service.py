@@ -8,7 +8,6 @@ import tempfile
 import importlib
 from werkzeug.exceptions import HTTPException
 from werkzeug.wrappers import Request, Response
-from pywps._compat import PY2
 from pywps._compat import urlparse
 from pywps.app.WPSRequest import WPSRequest
 import pywps.configuration as config

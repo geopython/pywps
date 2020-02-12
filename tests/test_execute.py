@@ -21,10 +21,8 @@ from pywps._compat import text_type
 from pywps.tests import client_for, assert_response_success
 from pywps import configuration
 
-from pywps._compat import PY2
 from pywps._compat import StringIO
-if PY2:
-    from owslib.ows import BoundingBox
+from owslib.ows import BoundingBox
 
 try:
     import netCDF4
@@ -234,8 +232,6 @@ class ExecuteTest(unittest.TestCase):
     """Test for Exeucte request KVP request"""
 
     def test_dods(self):
-        if PY2:
-            self.skipTest('fails on python 2.7')
         if not WITH_NC4:
             self.skipTest('netCDF4 not installed')
         my_process = create_complex_nc_process()
@@ -640,8 +636,6 @@ class ExecuteXmlParserTest(unittest.TestCase):
         self.assertEqual(json_data['plot']['Version'], '0.1')
 
     def test_bbox_input(self):
-        if not PY2:
-            self.skipTest('OWSlib not python 3 compatible')
         request_doc = WPS.Execute(
             OWS.Identifier('request'),
             WPS.DataInputs(

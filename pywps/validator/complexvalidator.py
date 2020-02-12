@@ -61,12 +61,7 @@ def validategml(data_input, mode):
     if mode >= MODE.VERYSTRICT:
 
         from lxml import etree
-
-        from pywps._compat import PY2
-        if PY2:
-            from urllib2 import urlopen
-        else:
-            from urllib.request import urlopen
+        from urllib.request import urlopen
 
         try:
             schema_url = data_input.data_format.schema
@@ -112,12 +107,7 @@ def validatexml(data_input, mode):
 
     if mode >= MODE.STRICT:
         from lxml import etree
-
-        from pywps._compat import PY2
-        if PY2:
-            from urllib2 import urlopen
-        else:
-            from urllib.request import urlopen
+        from urllib.request import urlopen
 
         # TODO: Raise the actual validation exception to make it easier to spot the error.
         #  xml = etree.parse(data_input.file)
