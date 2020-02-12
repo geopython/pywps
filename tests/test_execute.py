@@ -277,7 +277,7 @@ class ExecuteTest(unittest.TestCase):
         request = FakeRequest()
 
         resp = service.execute('my_opendap_process', request, 'fakeuuid')
-        self.assertEqual(resp.outputs['conventions'].data, u'CF-1.0')
+        self.assertEqual(resp.outputs['conventions'].data, 'CF-1.0')
         self.assertEqual(resp.outputs['outdods'].url, href)
         self.assertTrue(resp.outputs['outdods'].as_reference)
         self.assertFalse(resp.outputs['ncraw'].as_reference)
@@ -290,7 +290,7 @@ class ExecuteTest(unittest.TestCase):
         """
         my_process = create_complex_proces()
         service = Service(processes=[my_process])
-        self.assertEqual(len(service.processes.keys()), 1)
+        self.assertEqual(len(list(service.processes.keys())), 1)
         self.assertTrue(service.processes['my_complex_process'])
 
         class FakeRequest():
@@ -347,7 +347,7 @@ class ExecuteTest(unittest.TestCase):
         """
         my_process = create_complex_proces()
         service = Service(processes=[my_process])
-        self.assertEqual(len(service.processes.keys()), 1)
+        self.assertEqual(len(list(service.processes.keys())), 1)
         self.assertTrue(service.processes['my_complex_process'])
 
         class FakeRequest():
@@ -371,7 +371,7 @@ class ExecuteTest(unittest.TestCase):
         """
         my_process = create_mimetype_process()
         service = Service(processes=[my_process])
-        self.assertEqual(len(service.processes.keys()), 1)
+        self.assertEqual(len(list(service.processes.keys())), 1)
         self.assertTrue(service.processes['get_mimetype_process'])
 
         class FakeRequest():

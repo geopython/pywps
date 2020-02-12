@@ -7,7 +7,7 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-from __future__ import absolute_import
+
 import requests
 import os
 import tempfile
@@ -283,7 +283,7 @@ class SerializationComplexInputTest(unittest.TestCase):
         complex.data = "some data"
         complex2 = inout.inputs.ComplexInput.from_json(complex.json)
         # the data is enclosed by a CDATA tag
-        complex._data = u'<![CDATA[{}]]>'.format(complex.data)
+        complex._data = '<![CDATA[{}]]>'.format(complex.data)
         # it's expected that the file path changed
         complex._file = complex2.file
 
@@ -299,7 +299,7 @@ class SerializationComplexInputTest(unittest.TestCase):
         # we hard-code it for the testing comparison
         complex.prop = 'data'
         # the data is enclosed by a CDATA tag
-        complex._data = u'<![CDATA[{}]]>'.format(complex.data)
+        complex._data = '<![CDATA[{}]]>'.format(complex.data)
         # it's expected that the file path changed
         complex._file = complex2.file
 
@@ -471,7 +471,7 @@ class ComplexOutputTest(unittest.TestCase):
             supported_formats=[get_data_format('application/x-netcdf')],
             mode=MODE.NONE)
 
-        self.data = json.dumps({'a': 1, 'unicodé': u'éîïç', })
+        self.data = json.dumps({'a': 1, 'unicodé': 'éîïç', })
         self.ncfile = os.path.join(DATA_DIR, 'netcdf', 'time.nc')
 
         self.test_fn = os.path.join(self.complex_out.workdir, 'test.json')
