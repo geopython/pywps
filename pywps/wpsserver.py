@@ -23,11 +23,9 @@ def temp_dir():
         shutil.rmtree(tmp)
 
 
-class PyWPSServerAbstract(object):
+class PyWPSServerAbstract(object, metaclass=ABCMeta):
     """General stub for the PyWPS Server class.
     """
-
-    __metaclass__ = ABCMeta
 
     route_base = '/'
 

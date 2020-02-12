@@ -240,7 +240,7 @@ class ComplexInput(basic.ComplexInput):
                     else:
                         out = self.data
 
-                    data["data"] = u'<![CDATA[{}]]>'.format(out)
+                    data["data"] = '<![CDATA[{}]]>'.format(out)
 
         return data
 

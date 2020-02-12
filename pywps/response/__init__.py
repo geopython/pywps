@@ -70,6 +70,6 @@ class WPSResponse(object):
             raise e
 
         else:
-            self._update_status(WPS_STATUS.SUCCEEDED, u"Response generated", 100)
+            self._update_status(WPS_STATUS.SUCCEEDED, "Response generated", 100)
 
             return self.doc

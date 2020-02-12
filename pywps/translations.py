@@ -44,4 +44,4 @@ def lower_case_dict(translations=None):
     """
     if translations is None:
         return
-    return {k.lower(): v for k, v in translations.items()}
+    return {k.lower(): v for k, v in list(translations.items())}

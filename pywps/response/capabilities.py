@@ -20,7 +20,7 @@ class CapabilitiesResponse(WPSResponse):
         """Convert the response to JSON structure
         """
 
-        processes = [p.json for p in self.processes.values()]
+        processes = [p.json for p in list(self.processes.values())]
         return {
             'pywps_version': __version__,
             'version': self.version,

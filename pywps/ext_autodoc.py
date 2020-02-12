@@ -90,7 +90,7 @@ class ProcessDocumenter(ClassDocumenter):
 
         # Description
         doc = list()
-        doc.append(u":program:`{}` {} (v{})".format(obj.identifier, obj.title, obj.version or '', ))
+        doc.append(":program:`{}` {} (v{})".format(obj.identifier, obj.title, obj.version or '', ))
         doc.append('')
         doc.append(obj.abstract)
         doc.append('')
@@ -127,7 +127,7 @@ class ProcessDocumenter(ClassDocumenter):
             else:
                 title, href = None, None
             if title and href:
-                ref.append(u" - `{} <{}>`_".format(title, href))
+                ref.append(" - `{} <{}>`_".format(title, href))
                 hasref = True
 
         ref.append('')
