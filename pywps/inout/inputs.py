@@ -4,7 +4,6 @@
 ##################################################################
 
 import lxml.etree as etree
-import six
 
 from pywps.app.Common import Metadata
 from pywps.exceptions import InvalidParameterValue
