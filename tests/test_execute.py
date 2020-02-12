@@ -19,7 +19,7 @@ from pywps import E, get_ElementMakerForVersion
 from pywps.app.basic import get_xpath_ns
 from pywps._compat import text_type
 from pywps.tests import client_for, assert_response_success
-from pywps.configuration import CONFIG
+from pywps import configuration
 
 from pywps._compat import PY2
 from pywps._compat import StringIO
@@ -503,10 +503,11 @@ class ExecuteTest(unittest.TestCase):
 class ExecuteTranslationsTest(unittest.TestCase):
 
     def setUp(self):
-        CONFIG.set('server', 'language', 'en-US,fr-CA')
+        configuration.get_config_value('server', 'language')
+        configuration.CONFIG.set('server', 'language', 'en-US,fr-CA')
 
     def tearDown(self):
-        CONFIG.set('server', 'language', 'en-US')
+        configuration.CONFIG.set('server', 'language', 'en-US')
 
     def test_translations(self):
         client = client_for(Service(processes=[create_translated_greeter()]))

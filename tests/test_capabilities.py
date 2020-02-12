@@ -6,7 +6,7 @@
 import unittest
 import lxml
 import lxml.etree
-from pywps.configuration import CONFIG
+from pywps import configuration
 from pywps.app import Process, Service
 from pywps.app.Common import Metadata
 from pywps import get_ElementMakerForVersion
@@ -139,7 +139,8 @@ class CapabilitiesTest(unittest.TestCase):
 
 class CapabilitiesTranslationsTest(unittest.TestCase):
     def setUp(self):
-        CONFIG.set('server', 'language', 'en-US,fr-CA')
+        configuration.load_configuration()
+        configuration.CONFIG.set('server', 'language', 'en-US,fr-CA')
         self.client = client_for(
             Service(
                 processes=[
@@ -162,7 +163,7 @@ class CapabilitiesTranslationsTest(unittest.TestCase):
         )
 
     def tearDown(self):
-        CONFIG.set('server', 'language', 'en-US')
+        configuration.CONFIG.set('server', 'language', 'en-US')
 
     def test_get_translated(self):
         resp = self.client.get('?Request=GetCapabilities&service=wps&language=fr-CA')
