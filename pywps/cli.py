@@ -14,8 +14,8 @@ from pywps import configuration
 from pywps.queue import JobQueueService
 
 import sqlalchemy
-from .alembic.config import Config
-from .alembic import command
+from alembic.config import Config
+from alembic import command
 
 from urllib.parse import urlparse
 
