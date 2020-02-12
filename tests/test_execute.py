@@ -17,11 +17,10 @@ from pywps.exceptions import InvalidParameterValue
 from pywps import get_inputs_from_xml, get_output_from_xml
 from pywps import E, get_ElementMakerForVersion
 from pywps.app.basic import get_xpath_ns
-from pywps._compat import text_type
 from pywps.tests import client_for, assert_response_success
 from pywps import configuration
 
-from pywps._compat import StringIO
+from io import StringIO
 from owslib.ows import BoundingBox
 
 try:
@@ -54,7 +53,7 @@ def create_ultimate_question():
 def create_greeter():
     def greeter(request, response):
         name = request.inputs['name'][0].data
-        assert type(name) is text_type
+        assert isinstance(name, str)
         response.outputs['message'].data = "Hello {}!".format(name)
         return response
 

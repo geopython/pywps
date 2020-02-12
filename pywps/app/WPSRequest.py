@@ -10,7 +10,6 @@ from werkzeug.exceptions import MethodNotAllowed
 from pywps import get_ElementMakerForVersion
 import base64
 import datetime
-from pywps._compat import text_type
 from pywps.app.basic import get_xpath_ns
 from pywps.inout.inputs import input_from_json
 from pywps.exceptions import NoApplicableCode, OperationNotSupported, MissingParameterValue, VersionNegotiationFailed, \
@@ -395,7 +394,7 @@ def get_inputs_from_xml(doc):
             value_el = literal_data[0]
             inpt = {}
             inpt['identifier'] = identifier_el.text
-            inpt['data'] = text_type(value_el.text)
+            inpt['data'] = str(value_el.text)
             inpt['uom'] = value_el.attrib.get('uom', '')
             inpt['datatype'] = value_el.attrib.get('datatype', '')
             the_inputs[identifier].append(inpt)

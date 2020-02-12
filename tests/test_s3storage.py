@@ -8,7 +8,7 @@ from pywps.inout.storage import STORE_TYPE
 from pywps.inout.basic import ComplexOutput
 
 from pywps import configuration, FORMATS
-from pywps._compat import urlparse
+from urllib.parse import urlparse
 
 import tempfile
 import os

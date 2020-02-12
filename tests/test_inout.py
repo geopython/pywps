@@ -24,7 +24,8 @@ from pywps.inout.basic import IOHandler, SOURCE_TYPE, SimpleHandler, BBoxInput, 
     ComplexInput, ComplexOutput, LiteralOutput, LiteralInput, _is_textfile
 from pywps.inout.literaltypes import convert, AllowedValue, AnyValue
 from pywps.inout.outputs import MetaFile, MetaLink, MetaLink4
-from pywps._compat import StringIO, text_type, urlparse
+from io import StringIO
+from urllib.parse import urlparse
 from pywps.validator.base import emptyvalidator
 from pywps.exceptions import InvalidParameterValue
 from pywps.validator.mode import MODE
@@ -76,7 +77,7 @@ class IOHandlerTest(unittest.TestCase):
             self.assertEqual('file', urlparse(self.iohandler.url).scheme)
 
         if self.iohandler.source_type == SOURCE_TYPE.STREAM:
-            source = StringIO(text_type(self._value))
+            source = StringIO(str(self._value))
             self.iohandler.stream = source
 
         file_path = self.iohandler.file
@@ -86,7 +87,7 @@ class IOHandlerTest(unittest.TestCase):
         file_handler.close()
 
         if self.iohandler.source_type == SOURCE_TYPE.STREAM:
-            source = StringIO(text_type(self._value))
+            source = StringIO(str(self._value))
             self.iohandler.stream = source
 
         stream_val = self.iohandler.stream.read()
@@ -100,7 +101,7 @@ class IOHandlerTest(unittest.TestCase):
                              'Stream obtained')
 
         if self.iohandler.source_type == SOURCE_TYPE.STREAM:
-            source = StringIO(text_type(self._value))
+            source = StringIO(str(self._value))
             self.iohandler.stream = source
 
         # self.assertEqual(stream_val, self.iohandler.memory_object,
@@ -114,7 +115,7 @@ class IOHandlerTest(unittest.TestCase):
 
     def test_stream(self):
         """Test stream input IOHandler"""
-        source = StringIO(text_type(self._value))
+        source = StringIO(str(self._value))
         self.iohandler.stream = source
         self._test_outout(SOURCE_TYPE.STREAM)
 

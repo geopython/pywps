@@ -4,7 +4,7 @@
 ##################################################################
 
 from pywps.translations import lower_case_dict
-from pywps._compat import text_type, StringIO
+from io import StringIO
 import os
 from io import open
 import shutil
@@ -25,7 +25,7 @@ from pywps.validator.literalvalidator import (validate_value,
                                               validate_values_reference)
 from pywps.exceptions import NoApplicableCode, InvalidParameterValue, FileSizeExceeded, \
     FileURLNotSupported
-from pywps._compat import urlparse
+from urllib.parse import urlparse
 import base64
 from collections import namedtuple
 from copy import deepcopy
@@ -394,7 +394,7 @@ class DataHandler(FileHandler):
         if isinstance(self.data, bytes):
             return BytesIO(self.data)
         else:
-            return StringIO(text_type(self.data))
+            return StringIO(str(self.data))
 
 
 class StreamHandler(DataHandler):

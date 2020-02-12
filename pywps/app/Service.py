@@ -8,7 +8,7 @@ import tempfile
 import importlib
 from werkzeug.exceptions import HTTPException
 from werkzeug.wrappers import Request, Response
-from pywps._compat import urlparse
+from urllib.parse import urlparse
 from pywps.app.WPSRequest import WPSRequest
 import pywps.configuration as config
 from pywps.exceptions import MissingParameterValue, NoApplicableCode, InvalidParameterValue, FileSizeExceeded, \

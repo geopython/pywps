@@ -6,7 +6,7 @@
 """Literaltypes are used for LiteralInputs, to make sure, input data are OK
 """
 
-from pywps._compat import urlparse
+from urllib.parse import urlparse
 from dateutil.parser import parse as date_parser
 import datetime
 from pywps.exceptions import InvalidParameterValue

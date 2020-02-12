@@ -14,7 +14,6 @@ http://lists.opengeospatial.org/pipermail/wps-dev/2013-October/000335.html
 
 from werkzeug.wrappers import Response
 from werkzeug.exceptions import HTTPException
-from werkzeug._compat import text_type
 from werkzeug.utils import escape
 
 import logging
@@ -66,7 +65,7 @@ class NoApplicableCode(HTTPException):
             'name': escape(self.name),
             'description': self.get_description(environ)
         }
-        doc = text_type((
+        doc = str((
             u'<?xml version="1.0" encoding="UTF-8"?>\n'
             u'<!-- PyWPS {version} -->\n'
             u'<ows:ExceptionReport xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/ows/1.1 http://schemas.opengis.net/ows/1.1.0/owsExceptionReport.xsd" version="1.0.0">\n'  # noqa
@@ -134,7 +133,7 @@ class ServerBusy(NoApplicableCode):
             'name': escape(self.name),
             'description': self.get_description(environ)
         }
-        return text_type((
+        return str((
             u'<?xml version="1.0" encoding="UTF-8"?>\n'
             u'<ows:ExceptionReport xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/ows/1.1 ../../../ows/1.1.0/owsExceptionReport.xsd" version="1.0.0">'  # noqa
             u'<ows:Exception exceptionCode="{name}">'
