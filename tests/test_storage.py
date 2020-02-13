@@ -11,6 +11,7 @@ from pywps import configuration
 
 import unittest
 
+
 class StorageBuilderTests(unittest.TestCase):
 
     def test_default_storage(self):
@@ -21,6 +22,7 @@ class StorageBuilderTests(unittest.TestCase):
         configuration.CONFIG.set('server', 'storagetype', 's3')
         storage = StorageBuilder.buildStorage()
         self.assertIsInstance(storage, S3Storage)
+
 
 def load_tests(loader=None, tests=None, pattern=None):
     """Load local tests

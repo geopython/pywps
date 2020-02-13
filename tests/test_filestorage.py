@@ -25,7 +25,6 @@ class FileStorageTests(unittest.TestCase):
         self.tmp_dir = tempfile.mkdtemp()
 
     def test_build_output_name(self):
-        storage = FileStorageBuilder().build()
         output = ComplexOutput('testme', 'Test', supported_formats=[FORMATS.TEXT], workdir=self.tmp_dir)
         output.data = "Hello World!"
         output_name, suffix = _build_output_name(output)
@@ -86,7 +85,8 @@ class FileStorageTests(unittest.TestCase):
         output.uuid = '595129f0-1a6c-11ea-a30c-acde48001122'
         store_type, store_str, url = storage.store(output)
 
-        self.assertEqual('http://localhost/textserver' + self.tmp_dir + '/595129f0-1a6c-11ea-a30c-acde48001122' + '/input.txt', url)
+        self.assertEqual('http://localhost/textserver' + self.tmp_dir +
+                         '/595129f0-1a6c-11ea-a30c-acde48001122' + '/input.txt', url)
 
         file_name = 'test.txt'
         url = storage.url(file_name)
