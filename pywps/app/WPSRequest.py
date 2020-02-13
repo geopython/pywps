@@ -553,7 +553,7 @@ def _get_get_param(http_request, key, default=None, aslist=False):
     value = default
     # http_request.args.keys will make + sign disappear in GET url if not
     # urlencoded
-    for k in list(http_request.args.keys()):
+    for k in http_request.args.keys():
         if k.lower() == key:
             value = http_request.args.get(k)
             if aslist:

@@ -371,7 +371,7 @@ class ExecuteTest(unittest.TestCase):
         """
         my_process = create_mimetype_process()
         service = Service(processes=[my_process])
-        self.assertEqual(len(list(service.processes.keys())), 1)
+        self.assertEqual(len(service.processes), 1)
         self.assertTrue(service.processes['get_mimetype_process'])
 
         class FakeRequest():
