@@ -3,26 +3,21 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-from pywps.inout.storage.file import FileStorageBuilder, FileStorage, _build_output_name
+from pywps.inout.storage.file import FileStorageBuilder, _build_output_name
 from pywps.inout.storage import STORE_TYPE
 from pywps.inout.basic import ComplexOutput
-
-from pywps import configuration, FORMATS
-from urllib.parse import urlparse
+from pywps import configuration
+from pywps import FORMATS
 
 import tempfile
-import os
-
 import unittest
-
-# TODO: The configuration from one test changes the configuration from other tests. Ideally it would be reset between
-#  each individual test.
 
 
 class FileStorageTests(unittest.TestCase):
 
     def setUp(self):
         self.tmp_dir = tempfile.mkdtemp()
+        configuration.load_configuration()
 
     def test_build_output_name(self):
         output = ComplexOutput('testme', 'Test', supported_formats=[FORMATS.TEXT], workdir=self.tmp_dir)
@@ -34,7 +29,7 @@ class FileStorageTests(unittest.TestCase):
 
     def test_store(self):
         configuration.CONFIG.set('server', 'outputpath', self.tmp_dir)
-        configuration.CONFIG.set('services', 'TEXT', "")
+
         storage = FileStorageBuilder().build()
         output = ComplexOutput('testme', 'Test', supported_formats=[FORMATS.TEXT], workdir=self.tmp_dir)
         output.data = "Hello World!"
@@ -80,18 +75,13 @@ class FileStorageTests(unittest.TestCase):
         configuration.CONFIG.set('server', 'outputurl', 'file://' + self.tmp_dir)
         configuration.CONFIG.set('services', 'TEXT', 'http://localhost/textserver' + self.tmp_dir)
         storage = FileStorageBuilder().build()
+
         output = ComplexOutput('testme', 'Test', supported_formats=[FORMATS.TEXT], workdir=self.tmp_dir)
         output.data = "Hello World!"
         output.uuid = '595129f0-1a6c-11ea-a30c-acde48001122'
         store_type, store_str, url = storage.store(output)
 
-        self.assertEqual('http://localhost/textserver' + self.tmp_dir
-                         + '/595129f0-1a6c-11ea-a30c-acde48001122' + '/input.txt', url)
-
-        file_name = 'test.txt'
-        url = storage.url(file_name)
-
-        self.assertEqual('file://' + self.tmp_dir + '/test.txt', url)
+        self.assertEqual(f'http://localhost/textserver{self.tmp_dir}/{output.uuid}/input.txt', url)
 
     def test_location(self):
         configuration.CONFIG.set('server', 'outputpath', self.tmp_dir)
