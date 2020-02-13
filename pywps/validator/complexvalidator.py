@@ -11,6 +11,7 @@ import logging
 
 from pywps.validator.mode import MODE
 from pywps.inout.formats import FORMATS
+from urllib.request import urlopen
 import mimetypes
 import os
 

@@ -5,7 +5,7 @@
 
 import logging
 import os
-from pywps._compat import urljoin
+from urllib.parse import urljoin
 from pywps.exceptions import NotEnoughStorage
 from pywps import configuration as config
 from pywps.inout.basic import IOHandler

@@ -201,7 +201,7 @@ class Process(object):
             LOGGER.debug("Stored processes: {}".format(stored))
 
             if running < maxparallel or maxparallel == -1:
-                wps_response._update_status(WPS_STATUS.ACCEPTED, u"PyWPS Request accepted", 0)
+                wps_response._update_status(WPS_STATUS.ACCEPTED, "PyWPS Request accepted", 0)
                 LOGGER.debug("Accepted request {}".format(self.uuid))
                 self._run_async(wps_request, wps_response)
 
@@ -212,13 +212,13 @@ class Process(object):
                     raise ServerBusy('Maximum number of processes in queue reached. Please try later.')
                 LOGGER.debug("Store process in job queue, uuid={}".format(self.uuid))
                 dblog.store_process(self.uuid, wps_request)
-                wps_response._update_status(WPS_STATUS.ACCEPTED, u'PyWPS Process stored in job queue', 0)
+                wps_response._update_status(WPS_STATUS.ACCEPTED, 'PyWPS Process stored in job queue', 0)
 
         # not async
         else:
             if running >= maxparallel and maxparallel != -1:
                 raise ServerBusy('Maximum number of parallel running processes reached. Please try later.')
-            wps_response._update_status(WPS_STATUS.ACCEPTED, u"PyWPS Request accepted", 0)
+            wps_response._update_status(WPS_STATUS.ACCEPTED, "PyWPS Request accepted", 0)
             wps_response = self._run_process(wps_request, wps_response)
 
         return wps_response
@@ -245,7 +245,7 @@ class Process(object):
                 os.environ['HOME'] = self.workdir
                 LOGGER.info('Setting HOME to current working directory: {}'.format(os.environ['HOME']))
             LOGGER.debug('ProcessID={}, HOME={}'.format(self.uuid, os.environ.get('HOME')))
-            wps_response._update_status(WPS_STATUS.STARTED, u'PyWPS Process started', 0)
+            wps_response._update_status(WPS_STATUS.STARTED, 'PyWPS Process started', 0)
             self.handler(wps_request, wps_response)  # the user must update the wps_response.
             # Ensure process termination
             if wps_response.status != WPS_STATUS.SUCCEEDED and wps_response.status != WPS_STATUS.FAILED:

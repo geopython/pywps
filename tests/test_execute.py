@@ -17,14 +17,11 @@ from pywps.exceptions import InvalidParameterValue
 from pywps import get_inputs_from_xml, get_output_from_xml
 from pywps import E, get_ElementMakerForVersion
 from pywps.app.basic import get_xpath_ns
-from pywps._compat import text_type
 from pywps.tests import client_for, assert_response_success
 from pywps import configuration
 
-from pywps._compat import PY2
-from pywps._compat import StringIO
-if PY2:
-    from owslib.ows import BoundingBox
+from io import StringIO
+from owslib.ows import BoundingBox
 
 try:
     import netCDF4
@@ -56,7 +53,7 @@ def create_ultimate_question():
 def create_greeter():
     def greeter(request, response):
         name = request.inputs['name'][0].data
-        assert type(name) is text_type
+        assert isinstance(name, str)
         response.outputs['message'].data = "Hello {}!".format(name)
         return response
 
@@ -234,8 +231,6 @@ class ExecuteTest(unittest.TestCase):
     """Test for Exeucte request KVP request"""
 
     def test_dods(self):
-        if PY2:
-            self.skipTest('fails on python 2.7')
         if not WITH_NC4:
             self.skipTest('netCDF4 not installed')
         my_process = create_complex_nc_process()
@@ -282,7 +277,7 @@ class ExecuteTest(unittest.TestCase):
         request = FakeRequest()
 
         resp = service.execute('my_opendap_process', request, 'fakeuuid')
-        self.assertEqual(resp.outputs['conventions'].data, u'CF-1.0')
+        self.assertEqual(resp.outputs['conventions'].data, 'CF-1.0')
         self.assertEqual(resp.outputs['outdods'].url, href)
         self.assertTrue(resp.outputs['outdods'].as_reference)
         self.assertFalse(resp.outputs['ncraw'].as_reference)
@@ -295,7 +290,7 @@ class ExecuteTest(unittest.TestCase):
         """
         my_process = create_complex_proces()
         service = Service(processes=[my_process])
-        self.assertEqual(len(service.processes.keys()), 1)
+        self.assertEqual(len(service.processes), 1)
         self.assertTrue(service.processes['my_complex_process'])
 
         class FakeRequest():
@@ -352,7 +347,7 @@ class ExecuteTest(unittest.TestCase):
         """
         my_process = create_complex_proces()
         service = Service(processes=[my_process])
-        self.assertEqual(len(service.processes.keys()), 1)
+        self.assertEqual(len(service.processes), 1)
         self.assertTrue(service.processes['my_complex_process'])
 
         class FakeRequest():
@@ -376,7 +371,7 @@ class ExecuteTest(unittest.TestCase):
         """
         my_process = create_mimetype_process()
         service = Service(processes=[my_process])
-        self.assertEqual(len(service.processes.keys()), 1)
+        self.assertEqual(len(service.processes), 1)
         self.assertTrue(service.processes['get_mimetype_process'])
 
         class FakeRequest():
@@ -640,8 +635,6 @@ class ExecuteXmlParserTest(unittest.TestCase):
         self.assertEqual(json_data['plot']['Version'], '0.1')
 
     def test_bbox_input(self):
-        if not PY2:
-            self.skipTest('OWSlib not python 3 compatible')
         request_doc = WPS.Execute(
             OWS.Identifier('request'),
             WPS.DataInputs(

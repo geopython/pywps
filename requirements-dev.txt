@@ -2,7 +2,6 @@ coverage
 coveralls
 flake8
 pylint
-six
 Sphinx
 twine
 wheel
