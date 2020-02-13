@@ -85,8 +85,8 @@ class FileStorageTests(unittest.TestCase):
         output.uuid = '595129f0-1a6c-11ea-a30c-acde48001122'
         store_type, store_str, url = storage.store(output)
 
-        self.assertEqual('http://localhost/textserver' + self.tmp_dir +
-                         '/595129f0-1a6c-11ea-a30c-acde48001122' + '/input.txt', url)
+        self.assertEqual('http://localhost/textserver' + self.tmp_dir
+                         + '/595129f0-1a6c-11ea-a30c-acde48001122' + '/input.txt', url)
 
         file_name = 'test.txt'
         url = storage.url(file_name)
