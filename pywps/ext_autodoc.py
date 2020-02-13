@@ -36,8 +36,7 @@ class ProcessDocumenter(ClassDocumenter):
 
     @classmethod
     def can_document_member(cls, member, membername, isattr, parent):
-        from six import class_types
-        return isinstance(member, class_types) and issubclass(member, Process)
+        return isinstance(member, type) and issubclass(member, Process)
 
     def fmt_type(self, obj):
         """Input and output type formatting (type, default and allowed
@@ -90,7 +89,7 @@ class ProcessDocumenter(ClassDocumenter):
 
         # Description
         doc = list()
-        doc.append(u":program:`{}` {} (v{})".format(obj.identifier, obj.title, obj.version or '', ))
+        doc.append(":program:`{}` {} (v{})".format(obj.identifier, obj.title, obj.version or '', ))
         doc.append('')
         doc.append(obj.abstract)
         doc.append('')
@@ -127,7 +126,7 @@ class ProcessDocumenter(ClassDocumenter):
             else:
                 title, href = None, None
             if title and href:
-                ref.append(u" - `{} <{}>`_".format(title, href))
+                ref.append(" - `{} <{}>`_".format(title, href))
                 hasref = True
 
         ref.append('')
@@ -141,16 +140,13 @@ class ProcessDocumenter(ClassDocumenter):
         """Overrides ClassDocumenter.get_doc to create the doc scraped from the Process object, then adds additional
         content from the class docstring.
         """
-        from six import text_type
         # Get the class docstring. This is a copy of the ClassDocumenter.get_doc method. Using "super" does weird stuff.
         docstring = self.get_attr(self.object, '__doc__', None)
 
         # make sure we have Unicode docstrings, then sanitize and split
         # into lines
-        if isinstance(docstring, text_type):
+        if isinstance(docstring, str):
             docstring = prepare_docstring(docstring, ignore)
-        elif isinstance(docstring, str):  # this will not trigger on Py3
-            docstring = prepare_docstring(force_decode(docstring, encoding), ignore)
 
         # Create the docstring by scraping info from the Process instance.
         pdocstrings = self.make_numpy_doc()

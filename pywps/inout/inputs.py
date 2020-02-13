@@ -4,7 +4,6 @@
 ##################################################################
 
 import lxml.etree as etree
-import six
 
 from pywps.app.Common import Metadata
 from pywps.exceptions import InvalidParameterValue
@@ -240,7 +239,7 @@ class ComplexInput(basic.ComplexInput):
                     else:
                         out = self.data
 
-                    data["data"] = u'<![CDATA[{}]]>'.format(out)
+                    data["data"] = '<![CDATA[{}]]>'.format(out)
 
         return data
 

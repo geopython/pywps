@@ -6,14 +6,12 @@
 from abc import ABCMeta, abstractmethod
 
 
-class StorageImplementationBuilder(object):
+class StorageImplementationBuilder(object, metaclass=ABCMeta):
     """
     Storage implementations should implement
     this class and build method then import and register
     the build class into the StorageBuilder.
     """
-
-    __metaclass__ = ABCMeta
 
     @abstractmethod
     def build(self):

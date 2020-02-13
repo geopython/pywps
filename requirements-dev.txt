@@ -1,8 +1,6 @@
 coverage
 flake8
-flufl.enum
 pylint
-six
 Sphinx
 twine
 wheel

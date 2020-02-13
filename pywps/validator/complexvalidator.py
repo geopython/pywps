@@ -11,6 +11,7 @@ import logging
 
 from pywps.validator.mode import MODE
 from pywps.inout.formats import FORMATS
+from urllib.request import urlopen
 import mimetypes
 import os
 
@@ -62,12 +63,6 @@ def validategml(data_input, mode):
 
         from lxml import etree
 
-        from pywps._compat import PY2
-        if PY2:
-            from urllib2 import urlopen
-        else:
-            from urllib.request import urlopen
-
         try:
             schema_url = data_input.data_format.schema
             gmlschema_doc = etree.parse(urlopen(schema_url))
@@ -112,12 +107,6 @@ def validatexml(data_input, mode):
 
     if mode >= MODE.STRICT:
         from lxml import etree
-
-        from pywps._compat import PY2
-        if PY2:
-            from urllib2 import urlopen
-        else:
-            from urllib.request import urlopen
 
         # TODO: Raise the actual validation exception to make it easier to spot the error.
         #  xml = etree.parse(data_input.file)

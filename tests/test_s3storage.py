@@ -8,22 +8,19 @@ from pywps.inout.storage import STORE_TYPE
 from pywps.inout.basic import ComplexOutput
 
 from pywps import configuration, FORMATS
-from pywps._compat import urlparse, PY2
+from urllib.parse import urlparse
 
 import tempfile
 import os
 
 import unittest
-if PY2:
-    from mock import patch
-else:
-    from unittest.mock import patch
+from unittest.mock import patch
+
 
 class S3StorageTests(unittest.TestCase):
 
     def setUp(self):
         self.tmp_dir = tempfile.mkdtemp()
-
 
     @patch('pywps.inout.storage.s3.S3Storage.uploadData')
     def test_store(self, uploadData):

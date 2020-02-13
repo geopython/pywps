@@ -4,7 +4,7 @@
 ##################################################################
 
 from pywps.translations import lower_case_dict
-from pywps._compat import text_type, StringIO
+from io import StringIO
 import os
 from io import open
 import shutil
@@ -25,7 +25,7 @@ from pywps.validator.literalvalidator import (validate_value,
                                               validate_values_reference)
 from pywps.exceptions import NoApplicableCode, InvalidParameterValue, FileSizeExceeded, \
     FileURLNotSupported
-from pywps._compat import PY2, urlparse
+from urllib.parse import urlparse
 import base64
 from collections import namedtuple
 from copy import deepcopy
@@ -334,21 +334,20 @@ class FileHandler(IOHandler):
 
     def _openmode(self, data=None):
         openmode = 'r'
-        if not PY2:
-            # in Python 3 we need to open binary files in binary mode.
-            checked = False
-            if hasattr(self, 'data_format'):
-                if self.data_format.encoding == 'base64':
-                    # binary, when the data is to be encoded to base64
-                    openmode += 'b'
-                    checked = True
-                elif 'text/' in self.data_format.mime_type:
-                    # not binary, when mime_type is 'text/'
-                    checked = True
-            # when we can't guess it from the mime_type, we need to check the file.
-            # mimetypes like application/xml and application/json are text files too.
-            if not checked and not _is_textfile(self.file):
+        # in Python 3 we need to open binary files in binary mode.
+        checked = False
+        if hasattr(self, 'data_format'):
+            if self.data_format.encoding == 'base64':
+                # binary, when the data is to be encoded to base64
                 openmode += 'b'
+                checked = True
+            elif 'text/' in self.data_format.mime_type:
+                # not binary, when mime_type is 'text/'
+                checked = True
+        # when we can't guess it from the mime_type, we need to check the file.
+        # mimetypes like application/xml and application/json are text files too.
+        if not checked and not _is_textfile(self.file):
+            openmode += 'b'
         return openmode
 
 
@@ -357,7 +356,7 @@ class DataHandler(FileHandler):
 
     def _openmode(self, data=None):
         openmode = 'w'
-        if not PY2 and isinstance(data, bytes):
+        if isinstance(data, bytes):
             # on Python 3 open the file in binary mode if the source is
             # bytes, which happens when the data was base64-decoded
             openmode += 'b'
@@ -392,10 +391,10 @@ class DataHandler(FileHandler):
     @property
     def stream(self):
         """Return a stream representation of the data."""
-        if not PY2 and isinstance(self.data, bytes):
+        if isinstance(self.data, bytes):
             return BytesIO(self.data)
         else:
-            return StringIO(text_type(self.data))
+            return StringIO(str(self.data))
 
 
 class StreamHandler(DataHandler):

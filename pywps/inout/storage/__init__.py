@@ -16,11 +16,9 @@ class STORE_TYPE:
 # TODO: cover with tests
 
 
-class StorageAbstract(object):
+class StorageAbstract(object, metaclass=ABCMeta):
     """Data storage abstract class
     """
-
-    __metaclass__ = ABCMeta
 
     @abstractmethod
     def store(self, output):

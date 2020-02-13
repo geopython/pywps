@@ -8,8 +8,7 @@ import tempfile
 import importlib
 from werkzeug.exceptions import HTTPException
 from werkzeug.wrappers import Request, Response
-from pywps._compat import PY2
-from pywps._compat import urlparse
+from urllib.parse import urlparse
 from pywps.app.WPSRequest import WPSRequest
 import pywps.configuration as config
 from pywps.exceptions import MissingParameterValue, NoApplicableCode, InvalidParameterValue, FileSizeExceeded, \
@@ -322,11 +321,11 @@ class Service(object):
                     response = None
                     if wps_request.operation == 'getcapabilities':
                         response = self.get_capabilities(wps_request, request_uuid)
-                        response._update_status(WPS_STATUS.SUCCEEDED, u'', 100)
+                        response._update_status(WPS_STATUS.SUCCEEDED, '', 100)
 
                     elif wps_request.operation == 'describeprocess':
                         response = self.describe(wps_request, request_uuid, wps_request.identifiers)
-                        response._update_status(WPS_STATUS.SUCCEEDED, u'', 100)
+                        response._update_status(WPS_STATUS.SUCCEEDED, '', 100)
 
                     elif wps_request.operation == 'execute':
                         response = self.execute(
@@ -338,7 +337,7 @@ class Service(object):
                 except Exception as e:
                     # This ensure that logged request get terminated in case of exception while the request is not
                     # accepted
-                    store_status(request_uuid, WPS_STATUS.FAILED, u'Request rejected due to exception', 100)
+                    store_status(request_uuid, WPS_STATUS.FAILED, 'Request rejected due to exception', 100)
                     raise e
             else:
                 raise RuntimeError("Unknown operation {}".format(wps_request.operation))
