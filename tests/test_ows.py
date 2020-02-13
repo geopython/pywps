@@ -15,7 +15,6 @@ from pywps import Service, Process, ComplexInput, ComplexOutput, Format, FORMATS
 from pywps.dependencies import ogr
 from pywps.exceptions import NoApplicableCode
 from pywps import get_ElementMakerForVersion
-from pywps.wpsserver import temp_dir
 import pywps.configuration as config
 from pywps.tests import client_for, assert_response_success, service_ok
 

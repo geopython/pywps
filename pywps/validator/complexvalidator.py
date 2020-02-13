@@ -451,13 +451,3 @@ def _get_schemas_home():
         "schemas")
     LOGGER.debug('Schemas directory: {}'.format(schema_dir))
     return schema_dir
-
-
-if __name__ == "__main__":
-    import doctest
-
-    from pywps.wpsserver import temp_dir
-
-    with temp_dir() as tmp:
-        os.chdir(tmp)
-        doctest.testmod()

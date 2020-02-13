@@ -1006,12 +1006,3 @@ class ComplexOutput(BasicIO, BasicComplex, IOHandler):
         (_, _, url) = self.storage.store(self)
         # url = self.storage.url(self)
         return url
-
-
-if __name__ == "__main__":
-    import doctest
-    from pywps.wpsserver import temp_dir
-
-    with temp_dir() as tmp:
-        os.chdir(tmp)
-        doctest.testmod()
