@@ -46,10 +46,10 @@ class StorageAbstract(object, metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def url(self, destination):
+    def url(self, destination, output_url=None):
         """
-        :param destination: the name of the output to calculate
-                            the url for
+        :param destination: the name of the output to calculate the url for
+        :param output_url: Custom base URL.
         :returns: URL where file_name can be reached
         """
         raise NotImplementedError

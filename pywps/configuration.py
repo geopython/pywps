@@ -138,6 +138,10 @@ def load_configuration(cfgfiles=None):
     CONFIG.set('s3', 'encrypt', 'false')
     CONFIG.set('s3', 'region', '')
 
+    # Configure URL endpoints based on the data format. Keyed by pywps.FORMATS._fields
+    # Will default to outputurl if no mapping is found for a given format.
+    CONFIG.add_section('services')
+
     config_files = _get_default_config_files_location()
 
     if cfgfiles:

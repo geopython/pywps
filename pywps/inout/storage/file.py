@@ -9,6 +9,7 @@ from urllib.parse import urljoin
 from pywps.exceptions import NotEnoughStorage
 from pywps import configuration as config
 from pywps.inout.basic import IOHandler
+from pywps.inout.formats import FORMATS
 
 from . import CachedStorage
 from .implementationbuilder import StorageImplementationBuilder
@@ -108,7 +109,10 @@ class FileStorage(CachedStorage):
 
         just_file_name = os.path.basename(output_name)
 
-        url = self.url("{}/{}".format(request_uuid, just_file_name))
+        fmt = FORMATS._fields[FORMATS.index(output.data_format)]
+        output_url = config.get_config_value("services", fmt)
+
+        url = self.url("{}/{}".format(request_uuid, just_file_name), output_url)
         LOGGER.info('File output URI: {}'.format(url))
 
         return (STORE_TYPE.PATH, output_name, url)
@@ -127,7 +131,7 @@ class FileStorage(CachedStorage):
 
         return self.url(destination)
 
-    def url(self, destination):
+    def url(self, destination, output_url=None):
         if isinstance(destination, IOHandler):
             output_name, _ = _build_output_name(destination)
             just_file_name = os.path.basename(output_name)
@@ -135,8 +139,11 @@ class FileStorage(CachedStorage):
         else:
             dst = destination
 
+        # Defaults to the configured `output_url`
+        output_url = output_url or self.output_url
+
         # make sure base url ends with '/'
-        baseurl = self.output_url.rstrip('/') + '/'
+        baseurl = output_url.rstrip('/') + '/'
         url = urljoin(baseurl, dst)
         return url
 

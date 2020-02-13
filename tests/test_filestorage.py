@@ -15,6 +15,9 @@ import os
 
 import unittest
 
+# TODO: The configuration from one test changes the configuration from other tests. Ideally it would be reset between
+#  each individual test.
+
 
 class FileStorageTests(unittest.TestCase):
 
@@ -32,6 +35,7 @@ class FileStorageTests(unittest.TestCase):
 
     def test_store(self):
         configuration.CONFIG.set('server', 'outputpath', self.tmp_dir)
+        configuration.CONFIG.set('services', 'TEXT', "")
         storage = FileStorageBuilder().build()
         output = ComplexOutput('testme', 'Test', supported_formats=[FORMATS.TEXT], workdir=self.tmp_dir)
         output.data = "Hello World!"
@@ -39,6 +43,7 @@ class FileStorageTests(unittest.TestCase):
 
         self.assertEqual(store_type, STORE_TYPE.PATH)
         self.assertEqual(store_str, 'input.txt')
+        assert url.startswith("file://")
 
         with open(self.tmp_dir + '/' + store_str) as f:
             self.assertEqual(f.read(), "Hello World!")
@@ -65,6 +70,23 @@ class FileStorageTests(unittest.TestCase):
         url = storage.url(output)
 
         self.assertEqual('file://' + self.tmp_dir + '/595129f0-1a6c-11ea-a30c-acde48001122' + '/input.txt', url)
+
+        file_name = 'test.txt'
+        url = storage.url(file_name)
+
+        self.assertEqual('file://' + self.tmp_dir + '/test.txt', url)
+
+    def test_configured_url(self):
+        configuration.CONFIG.set('server', 'outputpath', self.tmp_dir)
+        configuration.CONFIG.set('server', 'outputurl', 'file://' + self.tmp_dir)
+        configuration.CONFIG.set('services', 'TEXT', 'http://localhost/textserver' + self.tmp_dir)
+        storage = FileStorageBuilder().build()
+        output = ComplexOutput('testme', 'Test', supported_formats=[FORMATS.TEXT], workdir=self.tmp_dir)
+        output.data = "Hello World!"
+        output.uuid = '595129f0-1a6c-11ea-a30c-acde48001122'
+        store_type, store_str, url = storage.store(output)
+
+        self.assertEqual('http://localhost/textserver' + self.tmp_dir + '/595129f0-1a6c-11ea-a30c-acde48001122' + '/input.txt', url)
 
         file_name = 'test.txt'
         url = storage.url(file_name)

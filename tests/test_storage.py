@@ -17,7 +17,6 @@ class StorageBuilderTests(unittest.TestCase):
         storage = StorageBuilder.buildStorage()
         self.assertIsInstance(storage, FileStorage)
 
-
     def test_s3_storage(self):
         configuration.CONFIG.set('server', 'storagetype', 's3')
         storage = StorageBuilder.buildStorage()
