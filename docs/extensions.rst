@@ -99,3 +99,16 @@ Docker Container Extension
 .. todo:: This extension is on our wish list. In can be used to encapsulate
   and control the execution of a process. It enhances also the use case of
   Web Processing Services in a cloud computing infrastructure.
+
+
+--------------------------------
+Running PyWPS with other servers
+--------------------------------
+PyWPS is often run in conjunction with other servers providing endpoints for
+OGC protocol such as WMS, WMS, WFS or DAP. PyWPS can be configured so that
+process outputs URL points to these services instead of the standard file URL.
+For example, if an output has a DODS mime-type (Data Access Protocol), the
+configuration file could include a line in the ``services`` section with::
+
+  DODS=http://localhost/thredds/dodsC/outputs
+

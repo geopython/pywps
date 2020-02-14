@@ -22,6 +22,7 @@ The configuration file has several sections:
     * `grass` for *optional* configuration to support `GRASS GIS
       <https://grass.osgeo.org>`_
     * `s3` for *optional* configuration to support AWS S3 storage
+    * `services` for custom output URLs based on output's mime-type
 
 PyWPS ships with a sample configuration file (``default-sample.cfg``).
 A similar file is also available in the `flask` service as
@@ -96,7 +97,7 @@ configuration file <https://docs.pycsw.org/en/latest/configuration.html>`_.
     the URL of the WPS service endpoint
 
 :language:
-    a comma-separated list of ISO 639-1 language and ISO 3166-1 alpha2 country 
+    a comma-separated list of ISO 639-1 language and ISO 3166-1 alpha2 country
     code of the service
     (e.g. ``en-CA``, ``fr-CA``, ``en-US``)
 
@@ -210,7 +211,7 @@ configuration file <https://docs.pycsw.org/en/latest/configuration.html>`_.
   <https://grass.osgeo.org/grass73/manuals/variables.html>`_
 
 [jobqueue]
---------
+----------
 
 :pause:
   pausing in seconds between periodical check for new stored requests
@@ -232,6 +233,14 @@ configuration file <https://docs.pycsw.org/en/latest/configuration.html>`_.
 
 :encrypt:
   Set this to ``true`` if encryption at rest is desired. Defaults to ``false``
+
+
+[services]
+----------
+
+:<format>:
+  The URL for outputs whose requested mime-type matches one of the :py:const:`pywps.FORMATS`.
+
 
 -----------
 Sample file
@@ -299,3 +308,6 @@ Sample file
   prefix=appname/coolapp/
   public=true
   encrypt=false
+
+  [services]
+  NETCDF=http://localhost/thredds/fileServer/outputs
