@@ -65,12 +65,16 @@ class UOM(object):
     :param uom: unit of measure
     """
 
-    def __init__(self, uom=''):
+    def __init__(self, uom='', reference=None):
         self.uom = uom
+        self.reference = reference
+
+        if self.reference is None:
+            self.reference = OGCUNIT[self.uom]
 
     @property
     def json(self):
-        return {"reference": OGCUNIT[self.uom],
+        return {"reference": self.reference,
                 "uom": self.uom}
 
     def __eq__(self, other):

@@ -343,7 +343,10 @@ class LiteralInput(basic.LiteralInput):
 
         json_input_copy = deepcopy(json_input)
         json_input_copy['allowed_values'] = allowed_values
-        json_input_copy['uoms'] = [basic.UOM(uom.get('uom')) for uom in json_input.get('uoms', [])]
+        json_input_copy['uoms'] = [
+            basic.UOM(uom['uom'], uom['reference'])
+            for uom in json_input.get('uoms', [])
+        ]
 
         data = json_input_copy.pop('data', None)
         uom = json_input_copy.pop('uom', None)
@@ -357,7 +360,7 @@ class LiteralInput(basic.LiteralInput):
         instance.metadata = [Metadata.from_json(d) for d in metadata]
         instance.data = data
         if uom:
-            instance.uom = basic.UOM(uom['uom'])
+            instance.uom = basic.UOM(uom['uom'], uom['reference'])
 
         return instance
 
