@@ -281,7 +281,10 @@ class LiteralOutput(basic.LiteralOutput):
 
     @classmethod
     def from_json(cls, json_output):
-        uoms = [basic.UOM(uom.get('uom')) for uom in json_output.get('uoms', [])]
+        uoms = [
+            basic.UOM(uom['uom'], uom['reference'])
+            for uom in json_output.get('uoms', [])
+        ]
         uom = json_output.get('uom')
 
         instance = cls(
@@ -296,7 +299,7 @@ class LiteralOutput(basic.LiteralOutput):
 
         instance.data = json_output.get('data')
         if uom:
-            instance.uom = basic.UOM(uom['uom'])
+            instance.uom = basic.UOM(uom['uom'], uom['reference'])
 
         return instance
 

@@ -569,7 +569,7 @@ class LiteralInputTest(unittest.TestCase):
             mode=2,
             allowed_values=(1, 2, (3, 3, 12)),
             default=6,
-            uoms=(UOM("metre"),),
+            uoms=(UOM("metre"), UOM("km / h", "custom reference")),
             translations={"fr-CA": {"title": "Mon input", "abstract": "Une description"}},
         )
 
@@ -603,8 +603,10 @@ class LiteralInputTest(unittest.TestCase):
         self.literal_input.data = 9
         out = self.literal_input.json
 
-        self.assertTrue('uoms' in out, 'UOMs does not exist')
-        self.assertTrue('uom' in out, 'uom does not exist')
+        self.assertEqual(out['uoms'][0]["uom"], "metre")
+        self.assertEqual(out['uoms'][1]["uom"], "km / h")
+        self.assertEqual(out['uoms'][1]["reference"], "custom reference")
+        self.assertEqual(out['uom']["uom"], "metre")
         self.assertFalse(out['workdir'], 'Workdir exist')
         self.assertEqual(out['data_type'], 'integer', 'Data type is integer')
         self.assertFalse(out['abstract'], 'abstract exist')
@@ -669,6 +671,7 @@ class LiteralOutputTest(unittest.TestCase):
             "literaloutput",
             data_type="integer",
             title="Literal Output",
+            uoms=[UOM("km / h", "custom reference"), UOM("m / s", "other reference")],
             translations={"fr-CA": {"title": "Mon output", "abstract": "Une description"}},
         )
 
@@ -685,6 +688,8 @@ class LiteralOutputTest(unittest.TestCase):
     def test_json(self):
         new_output = inout.outputs.LiteralOutput.from_json(self.literal_output.json)
         self.assertEqual(new_output.identifier, 'literaloutput')
+        self.assertEqual(new_output.uom, self.literal_output.uom)
+        self.assertEqual(new_output.uoms, self.literal_output.uoms)
         self.assertEqual(
             new_output.translations,
             {"fr-ca": {"title": "Mon output", "abstract": "Une description"}},
