@@ -5,3 +5,4 @@ pylint
 Sphinx
 twine
 wheel
+bump2version
