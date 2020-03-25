@@ -163,7 +163,7 @@ class Format(object):
 
 
 FORMATS = _FORMATS(
-    Format('application/vnd.geo+json', extension='.geojson'),
+    Format('application/geo+json', extension='.geojson'),
     Format('application/json', extension='.json'),
     Format('application/x-zipped-shp', extension='.zip', encoding='base64'),
     Format('application/gml+xml', extension='.gml'),
