@@ -146,7 +146,7 @@ def load_configuration(cfgfiles=None):
     if 'PYWPS_CFG' in os.environ:
         config_files.append(os.environ['PYWPS_CFG'])
 
-    loaded_files = CONFIG.read(config_files)
+    loaded_files = CONFIG.read(config_files, encoding='utf-8')
     if loaded_files:
         LOGGER.info('Configuration file(s) {} loaded'.format(loaded_files))
     else:
