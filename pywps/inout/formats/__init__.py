@@ -15,7 +15,7 @@ from collections import namedtuple
 import mimetypes
 
 
-_FORMATS = namedtuple('FORMATS', 'GEOJSON, JSON, SHP, GML, METALINK, META4, KML, KMZ, GEOTIFF,'
+_FORMATS = namedtuple('FORMATS', 'GEOJSON, JSON, SHP, GML, GPX, METALINK, META4, KML, KMZ, GEOTIFF,'
                                  'WCS, WCS100, WCS110, WCS20, WFS, WFS100,'
                                  'WFS110, WFS20, WMS, WMS130, WMS110,'
                                  'WMS100, TEXT, DODS, NETCDF, LAZ, LAS, ZIP,'
@@ -167,6 +167,7 @@ FORMATS = _FORMATS(
     Format('application/json', extension='.json'),
     Format('application/x-zipped-shp', extension='.zip', encoding='base64'),
     Format('application/gml+xml', extension='.gml'),
+    Format('application/gpx+xml', extension='.gpx'),
     Format('application/metalink+xml; version=3.0', extension='.metalink', schema="metalink/3.0/metalink.xsd"),
     Format('application/metalink+xml; version=4.0', extension='.meta4', schema="metalink/4.0/metalink4.xsd"),
     Format('application/vnd.google-earth.kml+xml', extension='.kml'),

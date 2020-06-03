@@ -80,6 +80,63 @@ def validategml(data_input, mode):
     return passed
 
 
+def validategpx(data_input, mode):
+    """GPX validation function
+
+    :param data_input: :class:`ComplexInput`
+    :param pywps.validator.mode.MODE mode:
+
+    This function validates GPX input based on given validation mode. Following
+    happens, if `mode` parameter is given:
+
+    `MODE.NONE`
+        it will return always `True`
+    `MODE.SIMPLE`
+        the mimetype will be checked
+    `MODE.STRICT`
+        `GDAL/OGR <http://gdal.org/>`_ is used for getting the proper format.
+    `MODE.VERYSTRICT`
+        the :class:`lxml.etree` is used along with given input `schema` and the
+        GPX file is properly validated against given schema.
+    """
+
+    LOGGER.info('validating GPX; Mode: {}'.format(mode))
+    passed = False
+
+    if mode >= MODE.NONE:
+        passed = True
+
+    if mode >= MODE.SIMPLE:
+
+        name = data_input.file
+        (mtype, encoding) = mimetypes.guess_type(name, strict=False)
+        passed = data_input.data_format.mime_type in {mtype, FORMATS.GPX.mime_type}
+
+    if mode >= MODE.STRICT:
+
+        from pywps.dependencies import ogr
+        data_source = ogr.Open(data_input.file)
+        if data_source:
+            passed = (data_source.GetDriver().GetName() == "GPX")
+        else:
+            passed = False
+
+    if mode >= MODE.VERYSTRICT:
+
+        from lxml import etree
+
+        try:
+            schema_url = data_input.data_format.schema
+            gpxschema_doc = etree.parse(urlopen(schema_url))
+            gpxschema = etree.XMLSchema(gpxschema_doc)
+            passed = gpxschema.validate(etree.parse(data_input.stream))
+        except Exception as e:
+            LOGGER.warning(e)
+            passed = False
+
+    return passed
+
+
 def validatexml(data_input, mode):
     """XML validation function
 

@@ -9,7 +9,7 @@
 
 import logging
 from pywps.validator.complexvalidator import validategml, validateshapefile, validatejson, validategeojson, \
-    validategeotiff, validatenetcdf, validatedods
+    validategeotiff, validatenetcdf, validatedods, validategpx
 from pywps.validator.base import emptyvalidator
 
 LOGGER = logging.getLogger('PYWPS')
@@ -19,6 +19,7 @@ _VALIDATORS = {
     'application/json': validatejson,
     'application/x-zipped-shp': validateshapefile,
     'application/gml+xml': validategml,
+    'application/gpx+xml': validategpx,
     'image/tiff; subtype=geotiff': validategeotiff,
     'application/x-netcdf': validatenetcdf,
     'application/x-ogc-dods': validatedods,
