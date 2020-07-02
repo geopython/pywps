@@ -69,7 +69,7 @@ class Process(object):
         self.inputs = inputs
         self.outputs = outputs
         self.uuid = None
-        self.status_store = None
+        self._status_store = None
         # self.status_location = ''
         # self.status_url = ''
         self.workdir = None
@@ -161,7 +161,13 @@ class Process(object):
             outpt.uuid = uuid
 
     def _setup_status_storage(self):
-        self.status_store = StorageBuilder.buildStorage()
+        self._status_store = StorageBuilder.buildStorage()
+
+    @property
+    def status_store(self):
+        if self._status_store is None:
+            self._setup_status_storage()
+        return self._status_store
 
     @property
     def status_location(self):
