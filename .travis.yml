@@ -1,7 +1,8 @@
 language: python
 
-sudo: required
-dist: trusty
+# sudo: required
+os: linux
+dist: xenial
 
 python:
   - "3.6"
@@ -14,6 +15,8 @@ addons:
     sources:
       - sourceline: 'ppa:ubuntugis/ppa'
     packages:
+      - libnetcdf-dev
+      - libhdf5-dev
       - gdal-bin
       - libgdal-dev
       - devscripts
