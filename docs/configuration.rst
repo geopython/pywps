@@ -210,7 +210,7 @@ configuration file <https://docs.pycsw.org/en/latest/configuration.html>`_.
   <https://grass.osgeo.org/grass73/manuals/variables.html>`_
 
 [jobqueue]
---------
+----------
 
 :pause:
   pausing in seconds between periodical check for new stored requests
