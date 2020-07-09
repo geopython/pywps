@@ -79,7 +79,9 @@ OGCTYPE = {
 
 OGCUNIT = {
     'degree': 'urn:ogc:def:uom:OGC:1.0:degree',
+    'degrees': 'urn:ogc:def:uom:OGC:1.0:degree',
     'metre': 'urn:ogc:def:uom:OGC:1.0:metre',
+    'metres': 'urn:ogc:def:uom:OGC:1.0:metre',
     'unity': 'urn:ogc:def:uom:OGC:1.0:unity'
 }
 
