@@ -83,7 +83,8 @@ OGCUNIT = {
     'meter': 'urn:ogc:def:uom:OGC:1.0:metre',
     'meteres': 'urn:ogc:def:uom:OGC:1.0:metre',
     'meters': 'urn:ogc:def:uom:OGC:1.0:metre',
-    'unity': 'urn:ogc:def:uom:OGC:1.0:unity'
+    'unity': 'urn:ogc:def:uom:OGC:1.0:unity',
+    'feet': 'urn:ogc:def:uom:OGC:1.0:feet'
 }
 
 from pywps.app import Process, Service, WPSRequest
