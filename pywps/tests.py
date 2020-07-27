@@ -12,6 +12,7 @@ from pywps import Process
 from pywps.inout import LiteralInput, LiteralOutput, ComplexInput, ComplexOutput, BoundingBoxInput, BoundingBoxOutput
 from pywps.inout import Format
 from pywps.app.Common import Metadata
+from pywps.ext_autodoc import MetadataUrl
 
 import re
 
@@ -75,7 +76,10 @@ class DocExampleProcess(Process):
             version="4.0",
             metadata=[Metadata('PyWPS docs', 'https://pywps.org'),
                       Metadata('NumPy docstring conventions',
-                               'https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt')],
+                               'https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt'),
+                      MetadataUrl('Duplicate label', 'http://one.example.com', anonymous=True),
+                      MetadataUrl('Duplicate label', 'http://two.example.com', anonymous=True),
+                      ],
             inputs=inputs,
             outputs=outputs,
         )
