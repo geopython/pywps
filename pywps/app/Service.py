@@ -372,23 +372,7 @@ def _build_input_file_name(href, workdir, extension=None):
     return input_file_name
 
 
-def _validate_file_input(href):
-    href = href or ''
-    parsed_url = urlparse(href)
-    if parsed_url.scheme != 'file':
-        raise FileURLNotSupported('Invalid URL scheme')
-    file_path = parsed_url.path
-    if not file_path:
-        raise FileURLNotSupported('Invalid URL path')
-    file_path = os.path.abspath(file_path)
-    # build allowed paths list
-    inputpaths = config.get_config_value('server', 'allowedinputpaths')
-    allowed_paths = [os.path.abspath(p.strip()) for p in inputpaths.split(':') if p.strip()]
-    for allowed_path in allowed_paths:
-        if file_path.startswith(allowed_path):
-            LOGGER.debug("Accepted file url as input.")
-            return
-    raise FileURLNotSupported()
+_validate_file_input = ComplexInput._validate_file_input
 
 
 def _extension(complexinput):
