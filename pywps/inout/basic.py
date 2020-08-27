@@ -932,7 +932,7 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
         file_path = os.path.abspath(file_path)
         # build allowed paths list
         inputpaths = config.get_config_value('server', 'allowedinputpaths')
-        allowed_paths = [os.path.abspath(p.strip()) for p in inputpaths.split(':') if p.strip()]
+        allowed_paths = [os.path.abspath(p.strip()) for p in inputpaths.split(os.pathsep) if p.strip()]
         for allowed_path in allowed_paths:
             if file_path.startswith(allowed_path):
                 LOGGER.debug("Accepted file url as input.")
