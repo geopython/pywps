@@ -95,7 +95,7 @@ configuration file <https://docs.pycsw.org/en/latest/configuration.html>`_.
     the URL of the WPS service endpoint
 
 :language:
-    a comma-separated list of ISO 639-1 language and ISO 3166-1 alpha2 country 
+    a comma-separated list of ISO 639-1 language and ISO 3166-1 alpha2 country
     code of the service
     (e.g. ``en-CA``, ``fr-CA``, ``en-US``)
 
@@ -110,14 +110,14 @@ configuration file <https://docs.pycsw.org/en/latest/configuration.html>`_.
     of cores  in the processor of the hosting machine. As well, speed and
     response time of hard drives impact ultimate processing performance. A
     reasonable number of parallel running processes is not higher than the
-    number of processor cores.
+    number of processor cores. -1 for no limit.
 
 :maxrequestsize:
     maximal request size. 0 for no limit
 
 :maxprocesses:
     maximal number of requests being stored in queue, waiting till they can be
-    processed (see ``parallelprocesses`` configuration option).
+    processed (see ``parallelprocesses`` configuration option). -1 for no limit.
 
 :workdir:
     a directory to store all temporary files (which should be always deleted,
@@ -169,6 +169,11 @@ configuration file <https://docs.pycsw.org/en/latest/configuration.html>`_.
     path to the PyWPS `joblauncher` executable. This option is only used for
     the `scheduler` backend and is by default set automatically:
     `os.path.dirname(os.path.realpath(sys.argv[0]))`
+
+:drmaa_native_specification:
+    option to set the DRMAA native specification, for example to limit number of
+    CPUs and memory usage. Example: `--cpus-per-task=1 --mem=1024`.
+    See DRMAA docs for details: https://github.com/natefoo/slurm-drmaa
 
 [logging]
 ---------
@@ -280,4 +285,3 @@ Sample file
   prefix=appname/coolapp/
   public=true
   encrypt=false
-

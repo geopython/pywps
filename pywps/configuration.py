@@ -100,6 +100,8 @@ def load_configuration(cfgfiles=None):
     CONFIG.add_section('processing')
     CONFIG.set('processing', 'mode', 'default')
     CONFIG.set('processing', 'path', os.path.dirname(os.path.realpath(sys.argv[0])))
+    # https://github.com/natefoo/slurm-drmaa
+    CONFIG.set('processing', 'drmaa_native_specification', '')
 
     CONFIG.add_section('logging')
     CONFIG.set('logging', 'file', '')
