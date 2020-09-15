@@ -53,6 +53,9 @@ class Scheduler(Processing):
                 jt.args = ['-c', cfg_file, dump_filename]
             else:
                 jt.args = [dump_filename]
+            drmaa_native_specification = config.get_config_value('processing', 'drmaa_native_specification')
+            if drmaa_native_specification:
+                jt.nativeSpecification = drmaa_native_specification
             jt.joinFiles = True
             jt.outputPath = ":{}".format(os.path.join(self.job.workdir, "job-output.txt"))
             # run job

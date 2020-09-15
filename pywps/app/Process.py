@@ -208,7 +208,7 @@ class Process(object):
             # try to store for later usage
             else:
                 maxprocesses = int(config.get_config_value('server', 'maxprocesses'))
-                if stored >= maxprocesses:
+                if stored >= maxprocesses and maxprocesses != -1:
                     raise ServerBusy('Maximum number of processes in queue reached. Please try later.')
                 LOGGER.debug("Store process in job queue, uuid={}".format(self.uuid))
                 dblog.store_process(self.uuid, wps_request)
