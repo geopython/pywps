@@ -4,7 +4,7 @@
 ##################################################################
 
 import unittest
-from pywps.app.exceptions import format_message, ProcessError
+from pywps.app.exceptions import format_message, ProcessError, DEFAULT_ALLOWED_CHARS
 
 
 class AppExceptionsTest(unittest.TestCase):
@@ -18,7 +18,7 @@ class AppExceptionsTest(unittest.TestCase):
         assert format_message('no') == ''
         assert format_message('no data available', max_length=7) == 'no data'
         assert format_message('no &data% available') == 'no data available'
-        assert format_message(".:!?=,;_/") == ".:!?=,;_/"
+        assert format_message(DEFAULT_ALLOWED_CHARS) == DEFAULT_ALLOWED_CHARS
 
     def test_process_error(self):
         assert ProcessError(' no &data available!').message == 'no data available!'
