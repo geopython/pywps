@@ -9,7 +9,7 @@ Process exceptions raised intentionally in processes to provide information for 
 
 import re
 
-DEFAULT_ALLOWED_CHARS = ".:!?=,;_/"
+DEFAULT_ALLOWED_CHARS = ".:!?=,;-_/"
 
 import logging
 
@@ -19,7 +19,7 @@ LOGGER = logging.getLogger('PYWPS')
 def format_message(text, min_length=3, max_length=300, allowed_chars=None):
     allowed_chars = allowed_chars or DEFAULT_ALLOWED_CHARS
     special = re.escape(allowed_chars)
-    pattern = rf'[\w{allowed_chars}]+'
+    pattern = rf'[\w{special}]+'
     msg = ' '.join(re.findall(pattern, text))
     msg.strip()
     if len(msg) >= min_length:
