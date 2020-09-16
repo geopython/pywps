@@ -1,9 +1,17 @@
+pywps (4.2.8) trusty; urgency=medium
+
+  * update scheduler with drmaa config (#547).
+  * process error with formatting (#546).
+  * allow path list separation also on Windows (#545).
+  * allow inputpaths to accept full windows paths (#544).
+
+ -- Carsten Ehbrecht <ehbrecht@dkrz.de>  Web, 15 Sep 2020 18:00:00 +0000
+
 pywps (4.2.7) trusty; urgency=medium
 
   * ext_autodoc: support RST anonymous link (#542).
 
  -- Carsten Ehbrecht <ehbrecht@dkrz.de>  Tue, 04 Aug 2020 18:00:00 +0000
-
 
 pywps (4.2.6) trusty; urgency=medium
 
