@@ -381,18 +381,18 @@ class SerializationBoundingBoxInputTest(unittest.TestCase):
 
     def make_bbox_input(self):
         bbox = inout.inputs.BoundingBoxInput(
-            identifier="complexinput",
-            title='MyComplex',
+            identifier="bbox",
+            title='BBox',
             crss=['epsg:3857', 'epsg:4326'],
             abstract="some description",
             keywords=['kw1', 'kw2'],
             dimensions=2,
             workdir=self.tmp_dir,
-            metadata=[Metadata("special data")],
+            metadata=[Metadata("bbox")],
             min_occurs=2,
             max_occurs=5,
             mode=MODE.NONE,
-            default="something else",
+            default="0,50,20,70",
             default_type=SOURCE_TYPE.DATA,
         )
         bbox.as_reference = False
@@ -411,7 +411,6 @@ class SerializationBoundingBoxInputTest(unittest.TestCase):
         self.assertEqual(bbox_1.max_occurs, bbox_2.max_occurs)
         self.assertEqual(bbox_1.valid_mode, bbox_2.valid_mode)
         self.assertEqual(bbox_1.as_reference, bbox_2.as_reference)
-
         self.assertEqual(bbox_1.ll, bbox_2.ll)
         self.assertEqual(bbox_1.ur, bbox_2.ur)
 
