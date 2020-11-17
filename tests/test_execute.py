@@ -105,7 +105,7 @@ def create_bbox_process():
         coords = request.inputs['mybbox'][0].data
         assert isinstance(coords, list)
         assert len(coords) == 4
-        assert coords[0] == '15'
+        assert coords[0] == 15.0
         response.outputs['outbbox'].data = coords
         return response
 
@@ -459,8 +459,8 @@ class ExecuteTest(unittest.TestCase):
                 WPS.Input(
                     OWS.Identifier('mybbox'),
                     WPS.Data(WPS.BoundingBoxData(
-                        OWS.LowerCorner('15 50'),
-                        OWS.UpperCorner('16 51'),
+                        OWS.LowerCorner('15.0 50.0'),
+                        OWS.UpperCorner('16.0 51.0'),
                     ))
                 )
             ),
@@ -477,11 +477,11 @@ class ExecuteTest(unittest.TestCase):
 
         lower_corner = xpath_ns(output, './wps:Data/ows:WGS84BoundingBox/ows:LowerCorner')[0].text
         lower_corner = lower_corner.strip().replace('  ', ' ')
-        self.assertEqual('15 50', lower_corner)
+        self.assertEqual('15.0 50.0', lower_corner)
 
         upper_corner = xpath_ns(output, './wps:Data/ows:WGS84BoundingBox/ows:UpperCorner')[0].text
         upper_corner = upper_corner.strip().replace('  ', ' ')
-        self.assertEqual('16 51', upper_corner)
+        self.assertEqual('16.0 51.0', upper_corner)
 
     def test_output_response_dataType(self):
         client = client_for(Service(processes=[create_greeter()]))
