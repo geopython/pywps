@@ -450,10 +450,15 @@ def get_inputs_from_xml(doc):
         bbox_datas = xpath_ns(input_el, './wps:Data/wps:BoundingBoxData')
         if bbox_datas:
             for bbox_data in bbox_datas:
-                bbox_data_el = bbox_data
-                bbox = BoundingBox(bbox_data_el)
-                the_inputs[identifier].append(bbox)
-                LOGGER.debug("parse bbox: {},{},{},{}".format(bbox.minx, bbox.miny, bbox.maxx, bbox.maxy))
+                bbox = BoundingBox(bbox_data)
+                LOGGER.debug("parse bbox: minx={}, miny={}, maxx={},maxy={}".format(
+                    bbox.minx, bbox.miny, bbox.maxx, bbox.maxy))
+                inpt = {}
+                inpt['identifier'] = identifier_el.text
+                inpt['data'] = [bbox.minx, bbox.miny, bbox.maxx, bbox.maxy]
+                inpt['crs'] = bbox.crs
+                inpt['dimensions'] = bbox.dimensions
+                the_inputs[identifier].append(inpt)
     return the_inputs
 
 

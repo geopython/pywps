@@ -270,10 +270,12 @@ class Service(object):
 
         outinputs = deque(maxlen=source.max_occurs)
 
-        for datainput in inputs:
+        for inpt in inputs:
             newinpt = source.clone()
-            newinpt.data = [datainput.minx, datainput.miny,
-                            datainput.maxx, datainput.maxy]
+            newinpt.data = inpt.get('data')
+            LOGGER.debug(f'newinpt bbox data={newinpt.data}')
+            newinpt.crs = inpt.get('crs')
+            newinpt.dimensions = inpt.get('dimensions')
             outinputs.append(newinpt)
 
         if len(outinputs) < source.min_occurs:

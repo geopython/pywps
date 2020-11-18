@@ -677,22 +677,34 @@ class BasicBoundingBox(object):
     """
 
     def __init__(self, crss=None, dimensions=2):
+        self._data = None
         self.crss = crss or ['epsg:4326']
         self.crs = self.crss[0]
         self.dimensions = dimensions
 
     @property
+    def data(self):
+        return self._data
+
+    @data.setter
+    def data(self, value):
+        if isinstance(value, list):
+            self._data = [float(number) for number in value]
+        elif isinstance(value, str):
+            self._data = [float(number) for number in value.split(',')[:4]]
+        else:
+            self._data = None
+
+    @property
     def ll(self):
-        data = getattr(self, 'data', None)
-        if data:
-            return data[:2]
+        if self.data:
+            return self.data[:2]
         return []
 
     @property
     def ur(self):
-        data = getattr(self, 'data', None)
-        if data:
-            return data[2:]
+        if self.data:
+            return self.data[2:]
         return []
 
 
