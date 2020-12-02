@@ -475,11 +475,11 @@ class ExecuteTest(unittest.TestCase):
             output,
             './ows:Identifier')[0].text)
 
-        lower_corner = xpath_ns(output, './wps:Data/ows:WGS84BoundingBox/ows:LowerCorner')[0].text
+        lower_corner = xpath_ns(output, './wps:Data/wps:BoundingBoxData/ows:LowerCorner')[0].text
         lower_corner = lower_corner.strip().replace('  ', ' ')
         self.assertEqual('15.0 50.0', lower_corner)
 
-        upper_corner = xpath_ns(output, './wps:Data/ows:WGS84BoundingBox/ows:UpperCorner')[0].text
+        upper_corner = xpath_ns(output, './wps:Data/wps:BoundingBoxData/ows:UpperCorner')[0].text
         upper_corner = upper_corner.strip().replace('  ', ' ')
         self.assertEqual('16.0 51.0', upper_corner)
 
