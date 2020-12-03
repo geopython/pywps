@@ -48,17 +48,10 @@
 			</wps:Data>
             {% elif input.type == "bbox" %}
 			<wps:Data>
-                {% if input.crs == "EPSG:4326" %}
-                <ows:WGS84BoundingBox dimensions="{{ input.dimensions }}">
+                <wps:BoundingBoxData crs="{{ input.crs }}" dimensions="{{ input.dimensions }}">
                     <ows:LowerCorner>{% for c in input.ll %} {{ c }} {% endfor %}</ows:LowerCorner>
                     <ows:UpperCorner>{% for c in input.ur %} {{ c }} {% endfor %}</ows:UpperCorner>
-                </ows:WGS84BoundingBox>
-                {% else %}
-                <ows:BoundingBox crs="{{ input.crs }}" dimensions="{{ input.dimensions }}">
-                    <ows:LowerCorner>{% for c in input.ll %} {{ c }} {% endfor %}</ows:LowerCorner>
-                    <ows:UpperCorner>{% for c in input.ur %} {{ c }} {% endfor %}</ows:UpperCorner>
-                </ows:BoundingBox>
-                {% endif %}
+                </wps:BoundingBoxData>
 			</wps:Data>
             {% elif input.type == "reference" %}
             <wps:Reference xlink:href="{{ input.href }}" method="{{ input.method }}" mimeType="{{ input.mimetype }}" encoding="{{ input.encoding }}" schema="{{ input.schema }}"/>
@@ -102,17 +95,10 @@
 			</wps:Data>
             {% elif output.type == "bbox" %}
 			<wps:Data>
-                    {% if output.crs == "EPSG:4326" %}
-                    <ows:WGS84BoundingBox dimensions="{{ output.dimensions }}">
+                    <wps:BoundingBoxData crs="{{ output.crs }}" dimensions="{{ output.dimensions }}">
                         <ows:LowerCorner>{% for c in output.ll %} {{ c }} {% endfor %}</ows:LowerCorner>
                         <ows:UpperCorner>{% for c in output.ur %} {{ c }} {% endfor %}</ows:UpperCorner>
-                    </ows:WGS84BoundingBox>
-                    {% else %}
-                    <ows:BoundingBox crs="{{ output.crs }}" dimensions="{{ output.dimensions }}">
-                        <ows:LowerCorner>{% for c in output.ll %} {{ c }} {% endfor %}</ows:LowerCorner>
-                        <ows:UpperCorner>{% for c in output.ur %} {{ c }} {% endfor %}</ows:UpperCorner>
-                    </ows:BoundingBox>
-                    {% endif %}
+                    </wps:BoundingBoxData>
 			</wps:Data>
             {% endif %}
 		</wps:Output>
