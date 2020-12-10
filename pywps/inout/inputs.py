@@ -214,7 +214,11 @@ class ComplexInput(basic.ComplexInput):
         elif json_input.get('href'):
             instance.url = json_input['href']
         elif json_input.get('data'):
-            instance.data = json_input['data']
+            data = json_input['data']
+            # remove cdata tag if it exists (issue #553)
+            if 'CDATA' in data:
+                data = data.replace("<![CDATA[", "").replace("]]>", "")
+            instance.data = data
 
         return instance
 

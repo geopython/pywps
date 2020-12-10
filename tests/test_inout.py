@@ -288,9 +288,10 @@ class SerializationComplexInputTest(unittest.TestCase):
     def test_complex_input_data(self):
         complex = self.make_complex_input()
         complex.data = "some data"
+        # the data is enclosed by a CDATA tag in json
+        assert complex.json['data'] == '<![CDATA[some data]]>'
+        # dump to json and load it again
         complex2 = inout.inputs.ComplexInput.from_json(complex.json)
-        # the data is enclosed by a CDATA tag
-        complex._data = u'<![CDATA[{}]]>'.format(complex.data)
         # it's expected that the file path changed
         complex._file = complex2.file
 
@@ -300,13 +301,13 @@ class SerializationComplexInputTest(unittest.TestCase):
     def test_complex_input_stream(self):
         complex = self.make_complex_input()
         complex.stream = StringIO("some data")
+        # the data is enclosed by a CDATA tag in json
+        assert complex.json['data'] == '<![CDATA[some data]]>'
+        # dump to json and load it again
         complex2 = inout.inputs.ComplexInput.from_json(complex.json)
-
         # the serialized stream becomes a data type
         # we hard-code it for the testing comparison
         complex.prop = 'data'
-        # the data is enclosed by a CDATA tag
-        complex._data = u'<![CDATA[{}]]>'.format(complex.data)
         # it's expected that the file path changed
         complex._file = complex2.file
 
@@ -682,8 +683,8 @@ class LiteralOutputTest(unittest.TestCase):
     def setUp(self):
 
         self.literal_output = inout.outputs.LiteralOutput(
-            "literaloutput", 
-            data_type="integer", 
+            "literaloutput",
+            data_type="integer",
             title="Literal Output",
             translations={"fr-CA": {"title": "Mon output", "abstract": "Une description"}},
         )
@@ -714,8 +715,8 @@ class BBoxInputTest(unittest.TestCase):
     def setUp(self):
 
         self.bbox_input = inout.inputs.BoundingBoxInput(
-            "bboxinput", 
-            title="BBox input", 
+            "bboxinput",
+            title="BBox input",
             dimensions=2,
             translations={"fr-CA": {"title": "Mon input", "abstract": "Une description"}},
         )
