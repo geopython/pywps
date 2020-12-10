@@ -501,13 +501,14 @@ class MetaLink4(MetaLink):
 
 
 def output_from_json(json_data):
-    if json_data['type'] == 'complex':
+    data_type = json_data.get('type', 'literal')
+    if data_type == 'complex':
         output = ComplexOutput.from_json(json_data)
-    elif json_data['type'] == 'literal':
+    elif data_type == 'literal':
         output = LiteralOutput.from_json(json_data)
-    elif json_data['type'] == 'bbox':
+    elif data_type == 'bbox':
         output = BoundingBoxOutput.from_json(json_data)
     else:
-        raise InvalidParameterValue("Output type not recognized: {}".format(json_data['type']))
+        raise InvalidParameterValue("Output type not recognized: {}".format(data_type))
 
     return output

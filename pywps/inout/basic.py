@@ -164,11 +164,12 @@ class IOHandler(object):
         """
 
         validate = self.validator
-        _valid = validate(self, self.valid_mode)
-        if not _valid:
-            self.data_set = False
-            raise InvalidParameterValue('Input data not valid using '
-                                        'mode {}'.format(self.valid_mode))
+        if validate is not None:
+            _valid = validate(self, self.valid_mode)
+            if not _valid:
+                self.data_set = False
+                raise InvalidParameterValue('Input data not valid using '
+                                            'mode {}'.format(self.valid_mode))
         self.data_set = True
 
     @property
@@ -623,7 +624,7 @@ class BasicComplex(object):
     def validator(self):
         """Return the proper validator for given data_format
         """
-        return self.data_format.validate
+        return None if self.data_format is None else self.data_format.validate
 
     @property
     def supported_formats(self):
