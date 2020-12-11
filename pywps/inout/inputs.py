@@ -3,6 +3,7 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
+import re
 import lxml.etree as etree
 import six
 
@@ -13,6 +14,8 @@ from pywps.inout import basic
 from copy import deepcopy
 from pywps.validator.mode import MODE
 from pywps.inout.literaltypes import AnyValue, NoValue, ValuesReference, AllowedValue
+
+CDATA_PATTERN = re.compile(r'<!\[CDATA\[(.*?)\]\]>')
 
 
 class BoundingBoxInput(basic.BBoxInput):
@@ -214,7 +217,12 @@ class ComplexInput(basic.ComplexInput):
         elif json_input.get('href'):
             instance.url = json_input['href']
         elif json_input.get('data'):
-            instance.data = json_input['data']
+            data = json_input['data']
+            # remove cdata tag if it exists (issue #553)
+            match = CDATA_PATTERN.match(data)
+            if match:
+                data = match.group(1)
+            instance.data = data
 
         return instance
 
