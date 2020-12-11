@@ -300,9 +300,9 @@ class SerializationComplexInputTest(unittest.TestCase):
 
     def test_complex_input_stream(self):
         complex = self.make_complex_input()
-        complex.stream = StringIO("some data")
+        complex.stream = StringIO("{'name': 'test', 'input1': ']]'}")
         # the data is enclosed by a CDATA tag in json
-        assert complex.json['data'] == '<![CDATA[some data]]>'
+        assert complex.json['data'] == "<![CDATA[{'name': 'test', 'input1': ']]'}]]>"
         # dump to json and load it again
         complex2 = inout.inputs.ComplexInput.from_json(complex.json)
         # the serialized stream becomes a data type
