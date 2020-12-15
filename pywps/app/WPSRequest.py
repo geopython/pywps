@@ -588,6 +588,8 @@ def _get_rawvalue_value(data, encoding=None):
     try:
         if encoding is None or encoding == "":
             return data
+        elif encoding == "utf-8":
+            return data
         elif encoding == 'base64':
             return base64.b64decode(data)
         return base64.b64decode(data)
