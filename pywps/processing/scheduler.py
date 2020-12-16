@@ -33,42 +33,38 @@ class Scheduler(Processing):
         LOGGER.info("Submitting job ...")
         try:
             import drmaa
-            session = drmaa.Session()
-            # init session
-            session.initialize()
-            # dump job to file
-            dump_filename = self.job.dump()
-            if not dump_filename:
-                raise Exception("Could not dump job status.")
-            # prepare remote command
-            jt = session.createJobTemplate()
-            jt.remoteCommand = os.path.join(
-                config.get_config_value('processing', 'path'),
-                'joblauncher')
-            if os.getenv("PYWPS_CFG"):
-                import shutil
-                cfg_file = os.path.join(self.job.workdir, "pywps.cfg")
-                shutil.copy2(os.getenv('PYWPS_CFG'), cfg_file)
-                LOGGER.debug("Copied pywps config: {}".format(cfg_file))
-                jt.args = ['-c', cfg_file, dump_filename]
-            else:
-                jt.args = [dump_filename]
-            drmaa_native_specification = config.get_config_value('processing', 'drmaa_native_specification')
-            if drmaa_native_specification:
-                jt.nativeSpecification = drmaa_native_specification
-            jt.joinFiles = True
-            jt.outputPath = ":{}".format(os.path.join(self.job.workdir, "job-output.txt"))
-            # run job
-            jobid = session.runJob(jt)
-            LOGGER.info('Your job has been submitted with ID {}'.format(jobid))
-            # show status
-            import time
-            time.sleep(1)
-            LOGGER.info('Job status: {}'.format(session.jobStatus(jobid)))
-            # Cleaning up
-            session.deleteJobTemplate(jt)
-            # close session
-            session.exit()
+            with drmaa.Session() as session:
+                # dump job to file
+                dump_filename = self.job.dump()
+                if not dump_filename:
+                    raise Exception("Could not dump job status.")
+                # prepare remote command
+                jt = session.createJobTemplate()
+                jt.remoteCommand = os.path.join(
+                    config.get_config_value('processing', 'path'),
+                    'joblauncher')
+                if os.getenv("PYWPS_CFG"):
+                    import shutil
+                    cfg_file = os.path.join(self.job.workdir, "pywps.cfg")
+                    shutil.copy2(os.getenv('PYWPS_CFG'), cfg_file)
+                    LOGGER.debug("Copied pywps config: {}".format(cfg_file))
+                    jt.args = ['-c', cfg_file, dump_filename]
+                else:
+                    jt.args = [dump_filename]
+                drmaa_native_specification = config.get_config_value('processing', 'drmaa_native_specification')
+                if drmaa_native_specification:
+                    jt.nativeSpecification = drmaa_native_specification
+                jt.joinFiles = True
+                jt.outputPath = ":{}".format(os.path.join(self.job.workdir, "job-output.txt"))
+                # run job
+                jobid = session.runJob(jt)
+                LOGGER.info('Your job has been submitted with ID {}'.format(jobid))
+                # show status
+                import time
+                time.sleep(1)
+                LOGGER.info('Job status: {}'.format(session.jobStatus(jobid)))
+                # Cleaning up
+                session.deleteJobTemplate(jt)
         except Exception as e:
             raise SchedulerNotAvailable("Could not submit job: {}".format(str(e)))
         return jobid
