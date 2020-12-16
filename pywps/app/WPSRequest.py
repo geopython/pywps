@@ -586,12 +586,16 @@ def _get_rawvalue_value(data, encoding=None):
     """Return real value of CDATA section"""
 
     try:
+        LOGGER.debug("encoding={}".format(encoding))
         if encoding is None or encoding == "":
+            return data
+        elif encoding == "utf-8":
             return data
         elif encoding == 'base64':
             return base64.b64decode(data)
         return base64.b64decode(data)
     except Exception:
+        LOGGER.warning("failed to decode base64")
         return data
 
 
