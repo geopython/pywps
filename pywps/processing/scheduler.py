@@ -54,7 +54,8 @@ class Scheduler(Processing):
                 drmaa_native_specification = config.get_config_value('processing', 'drmaa_native_specification')
                 if drmaa_native_specification:
                     jt.nativeSpecification = drmaa_native_specification
-                jt.joinFiles = True
+                jt.joinFiles = False
+                jt.errorPath = ":{}".format(os.path.join(self.job.workdir, "job-error.txt"))
                 jt.outputPath = ":{}".format(os.path.join(self.job.workdir, "job-output.txt"))
                 # run job
                 jobid = session.runJob(jt)
