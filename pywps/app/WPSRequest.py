@@ -85,8 +85,9 @@ class WPSRequest(object):
             raise FileSizeExceeded('File size for input exceeded.'
                                    ' Maximum request size allowed: {} megabytes'.format(maxsize / 1024 / 1024))
 
-        input_is_xml = self.http_request.content_type != 'application/json'
-        if not input_is_xml:
+        mimetype = self.http_request.mimetype if self.http_request.mimetype is not None else self.http_request.content_type
+        json_input = 'json' in mimetype
+        if json_input:
             jdoc = json.loads(self.http_request.get_data())
             self.json = jdoc
             operation = jdoc.get('operation', 'execute')
