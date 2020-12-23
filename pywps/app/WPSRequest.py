@@ -459,17 +459,14 @@ class WPSRequest(object):
             inpt_defs = value['inputs'][identifier]
             if not isinstance(inpt_defs, (list, tuple)):
                 inpt_defs = [inpt_defs]
+            self.inputs[identifier] = []
             for inpt_def in inpt_defs:
                 if not isinstance(inpt_def, dict):
                     inpt_def = {"data": inpt_def}
                 if 'identifier' not in inpt_def:
                     inpt_def['identifier'] = identifier
                 inpt = input_from_json(inpt_def)
-
-                if identifier in self.inputs:
-                    self.inputs[identifier].append(inpt)
-                else:
-                    self.inputs[identifier] = [inpt]
+                self.inputs[identifier].append(inpt)
 
 
 def get_inputs_from_xml(doc):
