@@ -11,7 +11,10 @@ Based on OGC OWS, WPS and
 http://lists.opengeospatial.org/pipermail/wps-dev/2013-October/000335.html
 """
 
+import json
 
+from werkzeug.datastructures import MIMEAccept
+from werkzeug.http import parse_accept_header
 from werkzeug.wrappers import Response
 from werkzeug.exceptions import HTTPException
 from werkzeug._compat import text_type
@@ -20,6 +23,7 @@ from werkzeug.utils import escape
 import logging
 
 from pywps import __version__
+from pywps.app.basic import get_default_response_mimetype, get_json_indent, get_response_type
 
 __author__ = "Alex Morega & Calin Ciociu"
 
@@ -54,7 +58,7 @@ class NoApplicableCode(HTTPException):
     def get_description(self, environ=None):
         """Get the description."""
         if self.description:
-            return '''<ows:ExceptionText>{}</ows:ExceptionText>'''.format(escape(self.description))
+            return '{}'.format(escape(self.description))
         else:
             return ''
 
@@ -66,17 +70,22 @@ class NoApplicableCode(HTTPException):
             'name': escape(self.name),
             'description': self.get_description(environ)
         }
-        doc = text_type((
-            u'<?xml version="1.0" encoding="UTF-8"?>\n'
-            u'<!-- PyWPS {version} -->\n'
-            u'<ows:ExceptionReport xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/ows/1.1 http://schemas.opengis.net/ows/1.1.0/owsExceptionReport.xsd" version="1.0.0">\n'  # noqa
-            u'  <ows:Exception exceptionCode="{name}" locator="{locator}" >\n'
-            u'      {description}\n'
-            u'  </ows:Exception>\n'
-            u'</ows:ExceptionReport>'
-        ).format(**args))
+        accept_mimetypes = parse_accept_header(environ.get("HTTP_ACCEPT"), MIMEAccept)
+        json_response, content_type = get_response_type(accept_mimetypes)
+        if json_response:
+            doc = json.dumps(args, indent=get_json_indent())
+        else:
+            doc = text_type((
+                u'<?xml version="1.0" encoding="UTF-8"?>\n'
+                u'<!-- PyWPS {version} -->\n'
+                u'<ows:ExceptionReport xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/ows/1.1 http://schemas.opengis.net/ows/1.1.0/owsExceptionReport.xsd" version="1.0.0">\n'  # noqa
+                u'  <ows:Exception exceptionCode="{name}" locator="{locator}" >\n'
+                u'      <ows:ExceptionText>{description}</ows:ExceptionText>\n'
+                u'  </ows:Exception>\n'
+                u'</ows:ExceptionReport>'
+            ).format(**args))
 
-        return Response(doc, self.code, mimetype='text/xml')
+        return Response(doc, self.code, mimetype=content_type)
 
 
 class InvalidParameterValue(NoApplicableCode):

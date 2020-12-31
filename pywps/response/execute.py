@@ -3,10 +3,12 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
+import json
 import logging
 import time
 from werkzeug.wrappers import Request
 from pywps import get_ElementMakerForVersion
+from pywps.app.basic import get_response_type, get_default_response_mimetype, get_json_indent
 from pywps.exceptions import NoApplicableCode
 import pywps.configuration as config
 from werkzeug.wrappers import Response
@@ -83,7 +85,7 @@ class ExecuteResponse(WPSResponse):
     def _update_status_doc(self):
         try:
             # rebuild the doc
-            self.doc = self._construct_doc()
+            self.doc, self.content_type = self._construct_doc()
         except Exception as e:
             raise NoApplicableCode('Building Response Document failed with : {}'.format(e))
 
@@ -193,10 +195,22 @@ class ExecuteResponse(WPSResponse):
             data["outputs"] = [self.outputs[o].json for o in self.outputs]
         return data
 
+    def _render_json_response(self, jdoc):
+        response = dict()
+        response['status'] = jdoc['status']
+        out = jdoc['process']['outputs']
+        response['outputs'] = {val['identifier']: val['data'] for val in out if ('identifier' in val and 'data' in val)}
+        return response
+
     def _construct_doc(self):
-        template = self.template_env.get_template(self.version + '/execute/main.xml')
-        doc = template.render(**self.json)
-        return doc
+        doc = self.json
+        json_response, content_type = get_response_type(self.wps_request.http_request.accept_mimetypes)
+        if json_response:
+            doc = json.dumps(self._render_json_response(doc), indent=get_json_indent())
+        else:
+            template = self.template_env.get_template(self.version + '/execute/main.xml')
+            doc = template.render(**doc)
+        return doc, content_type
 
     @Request.application
     def __call__(self, request):
@@ -213,4 +227,5 @@ class ExecuteResponse(WPSResponse):
         else:
             if not self.doc:
                 return NoApplicableCode("Output was not generated")
-            return Response(self.doc, mimetype='text/xml')
+            mimetype = self.content_type or get_default_response_mimetype()
+            return Response(self.doc, mimetype=mimetype)

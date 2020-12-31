@@ -1,6 +1,8 @@
+import json
+
 from werkzeug.wrappers import Request
 import pywps.configuration as config
-from pywps.app.basic import xml_response
+from pywps.app.basic import make_response, get_response_type, get_json_indent
 from pywps.response import WPSResponse
 from pywps import __version__
 from pywps.exceptions import NoApplicableCode
@@ -60,20 +62,25 @@ class CapabilitiesResponse(WPSResponse):
             'processes': processes
         }
 
+    def _render_json_response(self, jdoc):
+        return jdoc
+
     def _construct_doc(self):
-
-        template = self.template_env.get_template(self.version + '/capabilities/main.xml')
-
-        doc = template.render(**self.json)
-
-        return doc
+        doc = self.json
+        json_response, content_type = get_response_type(self.wps_request.http_request.accept_mimetypes)
+        if json_response:
+            doc = json.dumps(self._render_json_response(doc), indent=get_json_indent())
+        else:
+            template = self.template_env.get_template(self.version + '/capabilities/main.xml')
+            doc = template.render(**doc)
+        return doc, content_type
 
     @Request.application
     def __call__(self, request):
         # This function must return a valid response.
         try:
-            doc = self.get_response_doc()
-            return xml_response(doc)
+            doc, content_type = self.get_response_doc()
+            return make_response(doc, content_type=content_type)
         except NoApplicableCode as e:
             return e
         except Exception as e:

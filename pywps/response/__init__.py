@@ -35,6 +35,7 @@ class WPSResponse(object):
         self.status = WPS_STATUS.ACCEPTED
         self.status_percentage = 0
         self.doc = None
+        self.content_type = None
         self.version = version
         self.template_env = RelEnvironment(
             loader=PackageLoader('pywps', 'templates'),
@@ -59,7 +60,7 @@ class WPSResponse(object):
 
     def get_response_doc(self):
         try:
-            self.doc = self._construct_doc()
+            self.doc, self.content_type = self._construct_doc()
         except Exception as e:
             if hasattr(e, "description"):
                 msg = e.description
@@ -71,4 +72,4 @@ class WPSResponse(object):
         else:
             self._update_status(WPS_STATUS.SUCCEEDED, u"Response generated", 100)
 
-            return self.doc
+            return self.doc, self.content_type
