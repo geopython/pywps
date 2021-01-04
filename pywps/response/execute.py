@@ -13,6 +13,7 @@ from pywps.exceptions import NoApplicableCode
 import pywps.configuration as config
 from werkzeug.wrappers import Response
 
+from pywps.inout.numpy_array_encode import NumpyArrayEncoder
 from pywps.response.status import WPS_STATUS
 from pywps.response import WPSResponse
 from pywps.inout.formats import FORMATS
@@ -206,7 +207,7 @@ class ExecuteResponse(WPSResponse):
         doc = self.json
         json_response, content_type = get_response_type(self.wps_request.http_request.accept_mimetypes)
         if json_response:
-            doc = json.dumps(self._render_json_response(doc), indent=get_json_indent())
+            doc = json.dumps(self._render_json_response(doc), cls=NumpyArrayEncoder, indent=get_json_indent())
         else:
             template = self.template_env.get_template(self.version + '/execute/main.xml')
             doc = template.render(**doc)
