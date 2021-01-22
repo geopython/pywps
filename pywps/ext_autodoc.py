@@ -5,22 +5,7 @@ from sphinx.util.docstrings import prepare_docstring
 from sphinx.util import force_decode
 from docutils.parsers.rst import directives
 from pywps import Process
-from pywps.app.Common import Metadata
-
-
-class MetadataUrl(Metadata):
-    """Metadata subclass to allow anonymous links generation.
-
-    Useful to avoid Sphinx "Duplicate explicit target name" warning.
-
-    See https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#anonymous-hyperlinks.
-    """
-
-    def __init__(self, title, href=None, role=None, type_='simple',
-                 anonymous=False):
-        super().__init__(title, href=href, role=role, type_=type_)
-        self.anonymous = anonymous
-        "Whether to create anonymous link (boolean)."
+from pywps.app.Common import Metadata, MetadataUrl
 
 
 class ProcessDocumenter(ClassDocumenter):

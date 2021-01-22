@@ -11,8 +11,7 @@ from pywps import __version__
 from pywps import Process
 from pywps.inout import LiteralInput, LiteralOutput, ComplexInput, ComplexOutput, BoundingBoxInput, BoundingBoxOutput
 from pywps.inout import Format
-from pywps.app.Common import Metadata
-from pywps.ext_autodoc import MetadataUrl
+from pywps.app.Common import Metadata, MetadataUrl
 
 import re
 
