@@ -1,3 +1,12 @@
+pywps (4.2.10) trusty; urgency=medium
+
+  * Moved MetadataUrl to pywps.app.Common to avoid dependencies on sphinx (#565).
+  * Fixed output stream of scheduler (#563).
+  * Fixed scheduler: use with statement to close drmaa session (#561).
+  * Fixed embedded json in wps request (#560).
+
+ -- Carsten Ehbrecht <ehbrecht@dkrz.de>  Mon, 25 Jan 2021 18:00:00 +0000
+
 pywps (4.2.9) trusty; urgency=medium
 
   * fix bbox (#551, #552)
