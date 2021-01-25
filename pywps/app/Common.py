@@ -63,3 +63,21 @@ class Metadata(object):
             self.role == other.role,
             self.type == other.type,
         ])
+
+
+class MetadataUrl(Metadata):
+    """Metadata subclass to allow anonymous links generation in documentation.
+
+    Useful to avoid Sphinx "Duplicate explicit target name" warning.
+
+    See https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#anonymous-hyperlinks.
+
+    Meant to use in documentation only, not needed in the xml response, nor being serialized or
+    deserialized to/from json.  So that's why it is not directly in the base class.
+    """
+
+    def __init__(self, title, href=None, role=None, type_='simple',
+                 anonymous=False):
+        super().__init__(title, href=href, role=role, type_=type_)
+        self.anonymous = anonymous
+        "Whether to create anonymous link (boolean)."
