@@ -13,6 +13,9 @@ jobs:
         COVERALLS_SERVICE_NAME: github
     steps:
     - uses: actions/checkout@v2
+    - name: Install packages
+      run: |
+        sudo apt-get -y install gdal-bin libgdal-dev libnetcdf-dev libhdf5-dev
     - uses: actions/setup-python@v2
       name: Setup Python ${{ matrix.python-version }}
       with:
