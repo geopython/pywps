@@ -47,9 +47,9 @@ after_success:
   - debuild -b -uc -us
 
 # whitelist
-# branches:
-#   only:
-#     - master
+branches:
+  only:
+    - master
 
 # notifications:
 #  irc:
