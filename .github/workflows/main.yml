@@ -34,8 +34,8 @@ jobs:
       if: matrix.python-version == 3.6
     - name: build docs 🏗️
       run: |
-      pip3 install -e .
-      cd docs && make html
+        pip3 install -e .
+        cd docs && make html
       if: matrix.python-version == 3.6
     - name: run flake8 ⚙️
       run: flake8 pywps
