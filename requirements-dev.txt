@@ -1,4 +1,5 @@
 coverage
+coveralls
 flake8
 flufl.enum
 pylint
