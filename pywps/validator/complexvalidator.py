@@ -362,8 +362,8 @@ def validategeotiff(data_input, mode):
     if mode >= MODE.STRICT:
 
         try:
-            from pywps.dependencies import gdal
-            data_source = gdal.Open(data_input.file)
+            from pywps.dependencies import osgeo
+            data_source = osgeo.gdal.Open(data_input.file)
             passed = (data_source.GetDriver().ShortName == "GTiff")
         except ImportError:
             passed = False
