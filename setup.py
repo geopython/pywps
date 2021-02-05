@@ -56,6 +56,7 @@ CONFIG = {
         'Topic :: Scientific/Engineering :: GIS'
     ],
     'install_requires': INSTALL_REQUIRES,
+    'python_requires': '>=3.6, <4',
     'packages': find_packages(exclude=["docs", "tests.*", "tests"]),
     'include_package_data': True,
     'scripts': [],
