@@ -1,9 +1,7 @@
-flufl.enum 
 jinja2
 jsonschema
 lxml
 owslib
-pathlib
 python-dateutil
 requests
 SQLAlchemy
