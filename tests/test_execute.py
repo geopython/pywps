@@ -646,11 +646,12 @@ class ExecuteXmlParserTest(unittest.TestCase):
                             OWS.UpperCorner('60 70'))))))
         rv = get_inputs_from_xml(request_doc)
         bbox = rv['bbox'][0]
-        assert isinstance(bbox, BoundingBox)
-        assert bbox.minx == '40'
-        assert bbox.miny == '50'
-        assert bbox.maxx == '60'
-        assert bbox.maxy == '70'
+        # assert isinstance(bbox, BoundingBox)
+        assert bbox['data'] == ['40', '50', '60', '70']
+        # assert bbox.minx == '40'
+        # assert bbox.miny == '50'
+        # assert bbox.maxx == '60'
+        # assert bbox.maxy == '70'
 
     def test_reference_post_input(self):
         request_doc = WPS.Execute(
