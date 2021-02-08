@@ -19,7 +19,6 @@ from pywps.app.WPSRequest import WPSRequest
 from pywps.inout.inputs import input_from_json
 from pywps.inout.outputs import output_from_json
 import pywps.configuration as config
-from pywps._compat import PY2
 from pywps.exceptions import (StorageNotSupported, OperationNotSupported,
                               ServerBusy, NoApplicableCode)
 from pywps.app.exceptions import ProcessError
@@ -303,8 +302,7 @@ class Process(object):
                 return
 
             (uuid, request_json) = (stored_request.uuid, stored_request.request)
-            if not PY2:
-                request_json = request_json.decode('utf-8')
+            request_json = request_json.decode('utf-8')
             LOGGER.debug("Launching the stored request {}".format(str(uuid)))
             new_wps_request = WPSRequest()
             new_wps_request.json = json.loads(request_json)

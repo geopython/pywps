@@ -15,11 +15,6 @@ from urllib.request import urlopen
 import mimetypes
 import os
 
-from pywps._compat import PY2
-if PY2:
-    from urllib2 import urlopen
-else:
-    from urllib.request import urlopen
 
 LOGGER = logging.getLogger('PYWPS')
 
