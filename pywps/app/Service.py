@@ -14,7 +14,6 @@ import pywps.configuration as config
 from pywps.exceptions import MissingParameterValue, NoApplicableCode, InvalidParameterValue, FileSizeExceeded, \
     StorageNotSupported, FileURLNotSupported
 from pywps.inout.inputs import ComplexInput, LiteralInput, BoundingBoxInput
-from pywps.inout.outputs import ComplexOutput
 from pywps.dblog import log_request, store_status
 from pywps import response
 from pywps.response.status import WPS_STATUS
@@ -139,32 +138,7 @@ class Service(object):
 
         wps_request.inputs = data_inputs
 
-        # set as_reference to True for all the outputs specified as reference
-        # if the output is not required to be raw
-        if not wps_request.raw:
-            for wps_outpt in wps_request.outputs:
-
-                is_reference = wps_request.outputs[wps_outpt].get('asReference', 'false')
-                mimetype = wps_request.outputs[wps_outpt].get('mimetype', '')
-                if is_reference.lower() == 'true':
-                    # check if store is supported
-                    if process.store_supported == 'false':
-                        raise StorageNotSupported(
-                            'The storage of data is not supported for this process.')
-
-                    is_reference = True
-                else:
-                    is_reference = False
-
-                for outpt in process.outputs:
-                    if outpt.identifier == wps_outpt:
-                        outpt.as_reference = is_reference
-                        if isinstance(outpt, ComplexOutput) and mimetype != '':
-                            data_format = [f for f in outpt.supported_formats if f.mime_type == mimetype]
-                            if len(data_format) == 0:
-                                raise InvalidParameterValue(
-                                    'MimeType ' + mimetype + ' not valid')
-                            outpt.data_format = data_format[0]
+        process.setup_outputs_from_wps_request(wps_request)
 
         wps_response = process.execute(wps_request, uuid)
         return wps_response
