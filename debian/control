@@ -9,7 +9,7 @@ Vcs-Git: https://github.com/geopython/pywps.git
 
 Package: python-pywps
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends}, python-pkg-resources, python-dateutil, python-flufl.enum, python-jsonschema, python-lxml, python-owslib, python-werkzeug
+Depends: ${misc:Depends}, ${python:Depends}, python-pkg-resources, python-dateutil, python-jsonschema, python-lxml, python-owslib, python-werkzeug
 Suggests: grass, apache2, apache
 Homepage: https://pywps.org
 Description: OGC Web Processing Service (WPS) Implementation

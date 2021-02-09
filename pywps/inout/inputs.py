@@ -5,7 +5,6 @@
 
 import re
 import lxml.etree as etree
-import six
 
 from pywps.app.Common import Metadata
 from pywps.exceptions import InvalidParameterValue
@@ -248,7 +247,7 @@ class ComplexInput(basic.ComplexInput):
                     else:
                         out = self.data
 
-                    data["data"] = u'<![CDATA[{}]]>'.format(out)
+                    data["data"] = '<![CDATA[{}]]>'.format(out)
 
         return data
 
@@ -344,7 +343,10 @@ class LiteralInput(basic.LiteralInput):
 
         json_input_copy = deepcopy(json_input)
         json_input_copy['allowed_values'] = allowed_values
-        json_input_copy['uoms'] = [basic.UOM(uom.get('uom')) for uom in json_input.get('uoms', [])]
+        json_input_copy['uoms'] = [
+            basic.UOM(uom['uom'], uom['reference'])
+            for uom in json_input.get('uoms', [])
+        ]
 
         data = json_input_copy.pop('data', None)
         uom = json_input_copy.pop('uom', None)
@@ -358,7 +360,7 @@ class LiteralInput(basic.LiteralInput):
         instance.metadata = [Metadata.from_json(d) for d in metadata]
         instance.data = data
         if uom:
-            instance.uom = basic.UOM(uom['uom'])
+            instance.uom = basic.UOM(uom['uom'], uom['reference'])
 
         return instance
 

@@ -17,14 +17,11 @@ from pywps.exceptions import InvalidParameterValue
 from pywps import get_inputs_from_xml, get_output_from_xml
 from pywps import E, get_ElementMakerForVersion
 from pywps.app.basic import get_xpath_ns
-from pywps._compat import text_type
 from pywps.tests import client_for, assert_response_success
-from pywps.configuration import CONFIG
+from pywps import configuration
 
-from pywps._compat import PY2
-from pywps._compat import StringIO
-if PY2:
-    from owslib.ows import BoundingBox
+from io import StringIO
+from owslib.ows import BoundingBox
 
 try:
     import netCDF4
@@ -56,7 +53,7 @@ def create_ultimate_question():
 def create_greeter():
     def greeter(request, response):
         name = request.inputs['name'][0].data
-        assert type(name) is text_type
+        assert isinstance(name, str)
         response.outputs['message'].data = "Hello {}!".format(name)
         return response
 
@@ -234,8 +231,6 @@ class ExecuteTest(unittest.TestCase):
     """Test for Exeucte request KVP request"""
 
     def test_dods(self):
-        if PY2:
-            self.skipTest('fails on python 2.7')
         if not WITH_NC4:
             self.skipTest('netCDF4 not installed')
         my_process = create_complex_nc_process()
@@ -282,7 +277,7 @@ class ExecuteTest(unittest.TestCase):
         request = FakeRequest()
 
         resp = service.execute('my_opendap_process', request, 'fakeuuid')
-        self.assertEqual(resp.outputs['conventions'].data, u'CF-1.0')
+        self.assertEqual(resp.outputs['conventions'].data, 'CF-1.0')
         self.assertEqual(resp.outputs['outdods'].url, href)
         self.assertTrue(resp.outputs['outdods'].as_reference)
         self.assertFalse(resp.outputs['ncraw'].as_reference)
@@ -295,7 +290,7 @@ class ExecuteTest(unittest.TestCase):
         """
         my_process = create_complex_proces()
         service = Service(processes=[my_process])
-        self.assertEqual(len(service.processes.keys()), 1)
+        self.assertEqual(len(service.processes), 1)
         self.assertTrue(service.processes['my_complex_process'])
 
         class FakeRequest():
@@ -352,7 +347,7 @@ class ExecuteTest(unittest.TestCase):
         """
         my_process = create_complex_proces()
         service = Service(processes=[my_process])
-        self.assertEqual(len(service.processes.keys()), 1)
+        self.assertEqual(len(service.processes), 1)
         self.assertTrue(service.processes['my_complex_process'])
 
         class FakeRequest():
@@ -376,7 +371,7 @@ class ExecuteTest(unittest.TestCase):
         """
         my_process = create_mimetype_process()
         service = Service(processes=[my_process])
-        self.assertEqual(len(service.processes.keys()), 1)
+        self.assertEqual(len(service.processes), 1)
         self.assertTrue(service.processes['get_mimetype_process'])
 
         class FakeRequest():
@@ -503,10 +498,11 @@ class ExecuteTest(unittest.TestCase):
 class ExecuteTranslationsTest(unittest.TestCase):
 
     def setUp(self):
-        CONFIG.set('server', 'language', 'en-US,fr-CA')
+        configuration.get_config_value('server', 'language')
+        configuration.CONFIG.set('server', 'language', 'en-US,fr-CA')
 
     def tearDown(self):
-        CONFIG.set('server', 'language', 'en-US')
+        configuration.CONFIG.set('server', 'language', 'en-US')
 
     def test_translations(self):
         client = client_for(Service(processes=[create_translated_greeter()]))
@@ -639,8 +635,6 @@ class ExecuteXmlParserTest(unittest.TestCase):
         self.assertEqual(json_data['plot']['Version'], '0.1')
 
     def test_bbox_input(self):
-        if not PY2:
-            self.skipTest('OWSlib not python 3 compatible')
         request_doc = WPS.Execute(
             OWS.Identifier('request'),
             WPS.DataInputs(
@@ -652,11 +646,12 @@ class ExecuteXmlParserTest(unittest.TestCase):
                             OWS.UpperCorner('60 70'))))))
         rv = get_inputs_from_xml(request_doc)
         bbox = rv['bbox'][0]
-        assert isinstance(bbox, BoundingBox)
-        assert bbox.minx == '40'
-        assert bbox.miny == '50'
-        assert bbox.maxx == '60'
-        assert bbox.maxy == '70'
+        # assert isinstance(bbox, BoundingBox)
+        assert bbox['data'] == ['40', '50', '60', '70']
+        # assert bbox.minx == '40'
+        # assert bbox.miny == '50'
+        # assert bbox.maxx == '60'
+        # assert bbox.maxy == '70'
 
     def test_reference_post_input(self):
         request_doc = WPS.Execute(

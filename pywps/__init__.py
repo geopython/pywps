@@ -9,7 +9,7 @@ import os
 
 from lxml.builder import ElementMaker
 
-__version__ = '4.2.11'
+__version__ = '4.4.0'
 
 LOGGER = logging.getLogger('PYWPS')
 LOGGER.debug('setting core variables')
@@ -79,8 +79,13 @@ OGCTYPE = {
 
 OGCUNIT = {
     'degree': 'urn:ogc:def:uom:OGC:1.0:degree',
+    'degrees': 'urn:ogc:def:uom:OGC:1.0:degree',
+    'meter': 'urn:ogc:def:uom:OGC:1.0:metre',
     'metre': 'urn:ogc:def:uom:OGC:1.0:metre',
-    'unity': 'urn:ogc:def:uom:OGC:1.0:unity'
+    'meteres': 'urn:ogc:def:uom:OGC:1.0:metre',
+    'meters': 'urn:ogc:def:uom:OGC:1.0:metre',
+    'unity': 'urn:ogc:def:uom:OGC:1.0:unity',
+    'feet': 'urn:ogc:def:uom:OGC:1.0:feet'
 }
 
 from pywps.app import Process, Service, WPSRequest

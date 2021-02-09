@@ -14,7 +14,6 @@ http://lists.opengeospatial.org/pipermail/wps-dev/2013-October/000335.html
 
 from werkzeug.wrappers import Response
 from werkzeug.exceptions import HTTPException
-from werkzeug._compat import text_type
 from werkzeug.utils import escape
 
 import logging
@@ -66,14 +65,14 @@ class NoApplicableCode(HTTPException):
             'name': escape(self.name),
             'description': self.get_description(environ)
         }
-        doc = text_type((
-            u'<?xml version="1.0" encoding="UTF-8"?>\n'
-            u'<!-- PyWPS {version} -->\n'
-            u'<ows:ExceptionReport xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/ows/1.1 http://schemas.opengis.net/ows/1.1.0/owsExceptionReport.xsd" version="1.0.0">\n'  # noqa
-            u'  <ows:Exception exceptionCode="{name}" locator="{locator}" >\n'
-            u'      {description}\n'
-            u'  </ows:Exception>\n'
-            u'</ows:ExceptionReport>'
+        doc = str((
+            '<?xml version="1.0" encoding="UTF-8"?>\n'
+            '<!-- PyWPS {version} -->\n'
+            '<ows:ExceptionReport xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/ows/1.1 http://schemas.opengis.net/ows/1.1.0/owsExceptionReport.xsd" version="1.0.0">\n'  # noqa
+            '  <ows:Exception exceptionCode="{name}" locator="{locator}" >\n'
+            '      {description}\n'
+            '  </ows:Exception>\n'
+            '</ows:ExceptionReport>'
         ).format(**args))
 
         return Response(doc, self.code, mimetype='text/xml')
@@ -134,13 +133,13 @@ class ServerBusy(NoApplicableCode):
             'name': escape(self.name),
             'description': self.get_description(environ)
         }
-        return text_type((
-            u'<?xml version="1.0" encoding="UTF-8"?>\n'
-            u'<ows:ExceptionReport xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/ows/1.1 ../../../ows/1.1.0/owsExceptionReport.xsd" version="1.0.0">'  # noqa
-            u'<ows:Exception exceptionCode="{name}">'
-            u'{description}'
-            u'</ows:Exception>'
-            u'</ows:ExceptionReport>'
+        return str((
+            '<?xml version="1.0" encoding="UTF-8"?>\n'
+            '<ows:ExceptionReport xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/ows/1.1 ../../../ows/1.1.0/owsExceptionReport.xsd" version="1.0.0">'  # noqa
+            '<ows:Exception exceptionCode="{name}">'
+            '{description}'
+            '</ows:Exception>'
+            '</ows:ExceptionReport>'
         ).format(**args))
 
 

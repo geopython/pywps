@@ -13,11 +13,7 @@ import os
 import tempfile
 import pywps
 
-from pywps._compat import PY2
-if PY2:
-    import ConfigParser
-else:
-    import configparser
+import configparser
 
 __author__ = "Calin Ciociu"
 
@@ -67,10 +63,7 @@ def load_configuration(cfgfiles=None):
     global CONFIG
 
     LOGGER.info('loading configuration')
-    if PY2:
-        CONFIG = ConfigParser.SafeConfigParser(os.environ)
-    else:
-        CONFIG = configparser.ConfigParser(os.environ)
+    CONFIG = configparser.ConfigParser(os.environ)
 
     LOGGER.debug('setting default values')
     CONFIG.add_section('server')

@@ -11,14 +11,10 @@ import logging
 
 from pywps.validator.mode import MODE
 from pywps.inout.formats import FORMATS
+from urllib.request import urlopen
 import mimetypes
 import os
 
-from pywps._compat import PY2
-if PY2:
-    from urllib2 import urlopen
-else:
-    from urllib.request import urlopen
 
 LOGGER = logging.getLogger('PYWPS')
 
@@ -450,13 +446,3 @@ def _get_schemas_home():
         "schemas")
     LOGGER.debug('Schemas directory: {}'.format(schema_dir))
     return schema_dir
-
-
-if __name__ == "__main__":
-    import doctest
-
-    from pywps.wpsserver import temp_dir
-
-    with temp_dir() as tmp:
-        os.chdir(tmp)
-        doctest.testmod()
