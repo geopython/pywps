@@ -33,7 +33,7 @@ class ExecuteResponse(WPSResponse):
         :param uuid: string this request uuid
         """
 
-        super(self.__class__, self).__init__(wps_request, uuid)
+        super(ExecuteResponse, self).__init__(wps_request, uuid)
 
         self.process = kwargs["process"]
         self.outputs = {o.identifier: o for o in self.process.outputs}
