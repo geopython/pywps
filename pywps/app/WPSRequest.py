@@ -88,7 +88,13 @@ class WPSRequest(object):
         mimetype = self.http_request.mimetype if self.http_request.mimetype is not None else self.http_request.content_type
         json_input = 'json' in mimetype
         if json_input:
-            jdoc = json.loads(self.http_request.get_data())
+            try:
+                jdoc = json.loads(self.http_request.get_data())
+            except Exception as e:
+                if PY2:
+                    raise NoApplicableCode(e.message)
+                else:
+                    raise NoApplicableCode(e.msg)
             self.json = jdoc
             operation = jdoc.get('operation', 'execute')
             version = jdoc.get('version', default_version)
