@@ -1,3 +1,12 @@
+pywps (4.4.0) trusty; urgency=medium
+
+  * Dropping support for Python 2.x (#574).
+  * Backport of patches in master (#574).
+  * Fix a namespace warning when importing gdal directly (#575).
+  * Fix incorrect use of `self.__class__` in super (#578)
+
+ -- Carsten Ehbrecht <ehbrecht@dkrz.de>  Fri, 12 Feb 2021 18:00:00 +0000
+
 pywps (4.2.11) trusty; urgency=medium
 
   * Dropping support for Python 2.x in requirements (#569).
