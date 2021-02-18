@@ -20,9 +20,11 @@ from pywps.inout.inputs import input_from_json
 from pywps.inout.outputs import output_from_json
 import pywps.configuration as config
 from pywps.exceptions import (StorageNotSupported, OperationNotSupported,
-                              ServerBusy, NoApplicableCode)
+                              ServerBusy, NoApplicableCode,
+                              InvalidParameterValue)
 from pywps.app.exceptions import ProcessError
 from pywps.inout.storage.builder import StorageBuilder
+from pywps.inout.outputs import ComplexOutput
 import importlib
 
 
@@ -311,6 +313,7 @@ class Process(object):
             process._set_uuid(uuid)
             process._setup_status_storage()
             process.async_ = True
+            process.setup_outputs_from_wps_request(new_wps_request)
             new_wps_response = ExecuteResponse(new_wps_request, process=process, uuid=uuid)
             new_wps_response.store_status_file = True
             process._run_async(new_wps_request, new_wps_response)
@@ -446,3 +449,31 @@ class Process(object):
             LOGGER.debug('GISRC {}, GISBASE {}, GISDBASE {}, LOCATION {}, MAPSET {}'.format(
                          os.environ.get('GISRC'), os.environ.get('GISBASE'),
                          dbase, location, os.path.basename(mapset_name)))
+
+    def setup_outputs_from_wps_request(self, wps_request):
+        # set as_reference to True for all the outputs specified as reference
+        # if the output is not required to be raw
+        if not wps_request.raw:
+            for wps_outpt in wps_request.outputs:
+
+                is_reference = wps_request.outputs[wps_outpt].get('asReference', 'false')
+                mimetype = wps_request.outputs[wps_outpt].get('mimetype', '')
+                if is_reference.lower() == 'true':
+                    # check if store is supported
+                    if self.store_supported == 'false':
+                        raise StorageNotSupported(
+                            'The storage of data is not supported for this process.')
+
+                    is_reference = True
+                else:
+                    is_reference = False
+
+                for outpt in self.outputs:
+                    if outpt.identifier == wps_outpt:
+                        outpt.as_reference = is_reference
+                        if isinstance(outpt, ComplexOutput) and mimetype != '':
+                            data_format = [f for f in outpt.supported_formats if f.mime_type == mimetype]
+                            if len(data_format) == 0:
+                                raise InvalidParameterValue(
+                                    'MimeType ' + mimetype + ' not valid')
+                            outpt.data_format = data_format[0]
