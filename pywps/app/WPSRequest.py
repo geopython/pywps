@@ -26,7 +26,7 @@ default_version = '1.0.0'
 
 class WPSRequest(object):
 
-    def __init__(self, http_request=None):
+    def __init__(self, http_request=None, preprocessors=None):
         self.http_request = http_request
 
         self.operation = None
@@ -43,6 +43,9 @@ class WPSRequest(object):
         self.WPS = None
         self.OWS = None
         self.xpath_ns = None
+        self.preprocessors = preprocessors or dict()
+        self.preprocess_request = None
+        self.preprocess_response = None
 
         if self.http_request:
             request_parser = self._get_request_parser_method(http_request.method)
@@ -97,8 +100,32 @@ class WPSRequest(object):
                     raise NoApplicableCode(e.msg)
             self.json = jdoc
             operation = jdoc.get('operation', 'execute')
+
+            identifier = jdoc.get('identifier', None)
+
+            http_url_parts = str(self.http_request.path[1:]).split('/')
+            if http_url_parts[0] == 'api':
+                api = http_url_parts[1]
+                identifier = http_url_parts[2]
+                jdoc = {'api': api, 'inputs': jdoc}
+                if len(http_url_parts) >= 4:
+                    outputs = http_url_parts[3]
+                    if outputs != '':
+                        jdoc['outputs'] = outputs
+
             version = jdoc.get('version', default_version)
             self.set_version(version)
+
+            preprocessor_tuple = self.preprocessors.get(identifier, None)
+            if preprocessor_tuple:
+                identifier = preprocessor_tuple[0]
+                self.preprocess_request = preprocessor_tuple[1]
+                self.preprocess_response = preprocessor_tuple[2]
+
+            jdoc['identifier'] = identifier
+            if self.preprocess_request is not None:
+                jdoc = self.preprocess_request(jdoc)
+
             request_parser = self._post_json_request_parser(operation)
             request_parser(jdoc)
         else:
