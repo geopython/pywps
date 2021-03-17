@@ -113,7 +113,13 @@ configuration file <https://docs.pycsw.org/en/latest/configuration.html>`_.
     number of processor cores. -1 for no limit.
 
 :maxrequestsize:
-    maximal request size. 0 for no limit
+    maximal request size. 0 for no limit.
+
+:maxsingleinputsize:
+    maximal request size for a single input. 0 for no limit.
+
+:maxsingleoutputsize:
+    maximal size for a single output. 0 for no limit.
 
 :maxprocesses:
     maximal number of requests being stored in queue, waiting till they can be

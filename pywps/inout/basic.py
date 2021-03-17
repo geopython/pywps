@@ -446,7 +446,7 @@ class UrlHandler(FileHandler):
 
         self._file = self._build_file_name(href=self.url)
 
-        max_byte_size = self.max_input_size()
+        max_byte_size, max_mb_size = self.max_size()
 
         # Create request
         try:
@@ -456,20 +456,23 @@ class UrlHandler(FileHandler):
             raise NoApplicableCode('File reference error: {}'.format(e))
 
         error_message = 'File size for input "{}" exceeded. Maximum allowed: {} megabytes'.format(
-            self.inpt.get('identifier', '?'), max_byte_size)
+            self.inpt.get('identifier', '?'), max_mb_size)
 
-        if int(data_size) > int(max_byte_size):
-            raise FileSizeExceeded(error_message)
+        if int(max_byte_size) > 0:
+            if int(data_size) > int(max_byte_size):
+                raise FileSizeExceeded(error_message)
 
         try:
             with open(self._file, 'wb') as f:
                 data_size = 0
                 for chunk in reference_file.iter_content(chunk_size=1024):
                     data_size += len(chunk)
-                    if int(data_size) > int(max_byte_size):
-                        raise FileSizeExceeded(error_message)
+                    if int(max_byte_size) > 0:
+                        if int(data_size) > int(max_byte_size):
+                            raise FileSizeExceeded(error_message)
                     f.write(chunk)
-
+        except FileSizeExceeded:
+            raise
         except Exception as e:
             raise NoApplicableCode(e)
 
@@ -495,15 +498,16 @@ class UrlHandler(FileHandler):
 
         return req
 
-    @staticmethod
-    def max_input_size():
+    def max_size(self):
         """Calculates maximal size for input file based on configuration
         and units.
 
-        :return: maximum file size in bytes
+        :return: maximum file size in bytes and megabytes
         """
         ms = config.get_config_value('server', 'maxsingleinputsize')
-        return config.get_size_mb(ms) * 1024**2
+        mb_size = config.get_size_mb(ms)
+        byte_size = mb_size * 1024**2
+        return byte_size, mb_size
 
 
 class SimpleHandler(DataHandler):
@@ -1010,3 +1014,14 @@ class ComplexOutput(BasicIO, BasicComplex, IOHandler):
         (_, _, url) = self.storage.store(self)
         # url = self.storage.url(self)
         return url
+
+    def max_size(self):
+        """Calculates maximal size for output file based on configuration
+        and units.
+
+        :return: maximum file size in bytes and megabytes
+        """
+        ms = config.get_config_value('server', 'maxsingleoutputsize')
+        mb_size = config.get_size_mb(ms)
+        byte_size = mb_size * 1024**2
+        return byte_size, mb_size

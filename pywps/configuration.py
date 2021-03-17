@@ -71,6 +71,7 @@ def load_configuration(cfgfiles=None):
     CONFIG.set('server', 'language', 'en-US')
     CONFIG.set('server', 'url', 'http://localhost/wps')
     CONFIG.set('server', 'maxprocesses', '30')
+    CONFIG.set('server', 'maxsingleoutputsize', '0')
     CONFIG.set('server', 'maxsingleinputsize', '1mb')
     CONFIG.set('server', 'maxrequestsize', '3mb')
     CONFIG.set('server', 'temp_path', tempfile.gettempdir())
