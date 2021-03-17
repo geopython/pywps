@@ -23,7 +23,7 @@ from werkzeug.utils import escape
 import logging
 
 from pywps import __version__
-from pywps.app.basic import get_default_response_mimetype, get_json_indent, get_response_type
+from pywps.app.basic import get_json_indent, get_response_type, parse_http_url
 
 __author__ = "Alex Morega & Calin Ciociu"
 
@@ -71,7 +71,11 @@ class NoApplicableCode(HTTPException):
             'description': self.get_description(environ)
         }
         accept_mimetypes = parse_accept_header(environ.get("HTTP_ACCEPT"), MIMEAccept)
-        json_response, content_type = get_response_type(accept_mimetypes)
+        request = environ.get('werkzeug.request', None)
+        default_mimetype = None if not request else request.args.get('f', None)
+        if default_mimetype is None:
+            default_mimetype = parse_http_url(request).get('default_mimetype')
+        json_response, content_type = get_response_type(accept_mimetypes, default_mimetype)
         if json_response:
             doc = json.dumps(args, indent=get_json_indent())
         else:

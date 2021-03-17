@@ -11,7 +11,7 @@ from pywps import get_ElementMakerForVersion
 import base64
 import datetime
 from pywps._compat import text_type, PY2
-from pywps.app.basic import get_xpath_ns
+from pywps.app.basic import get_xpath_ns, parse_http_url
 from pywps.inout.inputs import input_from_json
 from pywps.exceptions import NoApplicableCode, OperationNotSupported, MissingParameterValue, VersionNegotiationFailed, \
     InvalidParameterValue, FileSizeExceeded
@@ -31,6 +31,8 @@ class WPSRequest(object):
 
         self.operation = None
         self.version = None
+        self.api = None
+        self.default_mimetype = None
         self.language = None
         self.identifier = None
         self.identifiers = None
@@ -38,6 +40,7 @@ class WPSRequest(object):
         self.status = None
         self.lineage = None
         self.inputs = {}
+        self.output_ids = None
         self.outputs = {}
         self.raw = None
         self.WPS = None
@@ -47,7 +50,13 @@ class WPSRequest(object):
         self.preprocess_request = None
         self.preprocess_response = None
 
-        if self.http_request:
+        if http_request:
+            d = parse_http_url(http_request)
+            self.operation = d.get('operation')
+            self.identifier = d.get('identifier')
+            self.output_ids = d.get('output_ids')
+            self.api = d.get('api')
+            self.default_mimetype = d.get('default_mimetype')
             request_parser = self._get_request_parser_method(http_request.method)
             request_parser()
 
@@ -65,7 +74,7 @@ class WPSRequest(object):
         """
 
         # service shall be WPS
-        service = _get_get_param(self.http_request, 'service')
+        service = _get_get_param(self.http_request, 'service', 'wps')
         if service:
             if str(service).lower() != 'wps':
                 raise InvalidParameterValue(
@@ -73,9 +82,12 @@ class WPSRequest(object):
         else:
             raise MissingParameterValue('service', 'service')
 
-        operation = _get_get_param(self.http_request, 'request')
+        self.operation = _get_get_param(self.http_request, 'request', self.operation)
 
-        request_parser = self._get_request_parser(operation)
+        language = _get_get_param(self.http_request, 'language')
+        self.check_and_set_language(language)
+
+        request_parser = self._get_request_parser(self.operation)
         request_parser(self.http_request)
 
     def _post_request(self):
@@ -98,35 +110,35 @@ class WPSRequest(object):
                     raise NoApplicableCode(e.message)
                 else:
                     raise NoApplicableCode(e.msg)
-            self.json = jdoc
-            operation = jdoc.get('operation', 'execute')
+            if self.identifier is not None:
+                jdoc = {'inputs': jdoc}
+            else:
+                self.identifier = jdoc.get('identifier', None)
 
-            identifier = jdoc.get('identifier', None)
+            self.operation = jdoc.get('operation', self.operation)
 
-            http_url_parts = str(self.http_request.path[1:]).split('/')
-            if http_url_parts[0] == 'api':
-                api = http_url_parts[1]
-                identifier = http_url_parts[2]
-                jdoc = {'api': api, 'inputs': jdoc}
-                if len(http_url_parts) >= 4:
-                    outputs = http_url_parts[3]
-                    if outputs != '':
-                        jdoc['outputs'] = outputs
-
-            version = jdoc.get('version', default_version)
-            self.set_version(version)
-
-            preprocessor_tuple = self.preprocessors.get(identifier, None)
+            preprocessor_tuple = self.preprocessors.get(self.identifier, None)
             if preprocessor_tuple:
-                identifier = preprocessor_tuple[0]
+                self.identifier = preprocessor_tuple[0]
                 self.preprocess_request = preprocessor_tuple[1]
                 self.preprocess_response = preprocessor_tuple[2]
 
-            jdoc['identifier'] = identifier
+            jdoc['operation'] = self.operation
+            jdoc['identifier'] = self.identifier
+            jdoc['api'] = self.api
+            jdoc['default_mimetype'] = self.default_mimetype
+
             if self.preprocess_request is not None:
                 jdoc = self.preprocess_request(jdoc)
+            self.json = jdoc
 
-            request_parser = self._post_json_request_parser(operation)
+            version = jdoc.get('version')
+            self.set_version(version)
+
+            language = jdoc.get('language')
+            self.check_and_set_language(language)
+
+            request_parser = self._post_json_request_parser()
             request_parser(jdoc)
         else:
             try:
@@ -139,6 +151,10 @@ class WPSRequest(object):
             operation = doc.tag
             version = get_version_from_ns(doc.nsmap[doc.prefix])
             self.set_version(version)
+
+            language = doc.attrib.get('language')
+            self.check_and_set_language(language)
+
             request_parser = self._post_request_parser(operation)
             request_parser(doc)
 
@@ -155,20 +171,14 @@ class WPSRequest(object):
             acceptedversions = _get_get_param(http_request, 'acceptversions')
             wpsrequest.check_accepted_versions(acceptedversions)
 
-            language = _get_get_param(http_request, 'language')
-            wpsrequest.check_and_set_language(language)
-
         def parse_get_describeprocess(http_request):
             """Parse GET DescribeProcess request
             """
             version = _get_get_param(http_request, 'version')
             wpsrequest.check_and_set_version(version)
 
-            language = _get_get_param(http_request, 'language')
-            wpsrequest.check_and_set_language(language)
-
             wpsrequest.identifiers = _get_get_param(
-                http_request, 'identifier', aslist=True)
+                http_request, 'identifier', wpsrequest.identifiers or [self.identifier], aslist=True)
 
         def parse_get_execute(http_request):
             """Parse GET Execute request
@@ -176,10 +186,7 @@ class WPSRequest(object):
             version = _get_get_param(http_request, 'version')
             wpsrequest.check_and_set_version(version)
 
-            language = _get_get_param(http_request, 'language')
-            wpsrequest.check_and_set_language(language)
-
-            wpsrequest.identifier = _get_get_param(http_request, 'identifier')
+            wpsrequest.identifier = _get_get_param(http_request, 'identifier', wpsrequest.identifier)
             wpsrequest.store_execute = _get_get_param(
                 http_request, 'storeExecuteResponse', 'false')
             wpsrequest.status = _get_get_param(http_request, 'status', 'false')
@@ -190,28 +197,28 @@ class WPSRequest(object):
             if self.inputs is None:
                 self.inputs = {}
 
-            wpsrequest.outputs = {}
-
             # take responseDocument preferably
-            resp_outputs = get_data_from_kvp(
-                _get_get_param(http_request, 'ResponseDocument'))
-            raw_outputs = get_data_from_kvp(
-                _get_get_param(http_request, 'RawDataOutput'))
-            wpsrequest.raw = False
-            if resp_outputs:
-                wpsrequest.outputs = resp_outputs
-            elif raw_outputs:
-                wpsrequest.outputs = raw_outputs
-                wpsrequest.raw = True
+            raw, output_ids = False, _get_get_param(http_request, 'ResponseDocument')
+            if output_ids is None:
+                raw, output_ids = True, _get_get_param(http_request, 'RawDataOutput')
+            if output_ids is not None:
+                wpsrequest.raw, wpsrequest.output_ids = raw, output_ids
+            elif wpsrequest.raw is None:
+                wpsrequest.raw = wpsrequest.output_ids is not None
+
+            wpsrequest.default_mimetype = _get_get_param(http_request, 'f', wpsrequest.default_mimetype)
+            wpsrequest.outputs = get_data_from_kvp(wpsrequest.output_ids) or {}
+            if wpsrequest.raw:
                 # executeResponse XML will not be stored and no updating of
                 # status
                 wpsrequest.store_execute = 'false'
                 wpsrequest.status = 'false'
 
-        if not operation:
-            raise MissingParameterValue('Missing request value', 'request')
-        else:
+        if operation:
             self.operation = operation.lower()
+        else:
+            self.operation = 'execute'
+            # raise MissingParameterValue('Missing request value', 'request')
 
         if self.operation == 'getcapabilities':
             return parse_get_getcapabilities
@@ -238,18 +245,12 @@ class WPSRequest(object):
                 map(lambda v: v.text, acceptedversions))
             wpsrequest.check_accepted_versions(acceptedversions)
 
-            language = doc.attrib.get('language')
-            wpsrequest.check_and_set_language(language)
-
         def parse_post_describeprocess(doc):
             """Parse POST DescribeProcess request
             """
 
             version = doc.attrib.get('version')
             wpsrequest.check_and_set_version(version)
-
-            language = doc.attrib.get('language')
-            wpsrequest.check_and_set_language(language)
 
             wpsrequest.operation = 'describeprocess'
             wpsrequest.identifiers = [identifier_el.text for identifier_el in
@@ -260,9 +261,6 @@ class WPSRequest(object):
             """
             version = doc.attrib.get('version')
             wpsrequest.check_and_set_version(version)
-
-            language = doc.attrib.get('language')
-            wpsrequest.check_and_set_language(language)
 
             wpsrequest.operation = 'execute'
 
@@ -308,7 +306,7 @@ class WPSRequest(object):
             raise InvalidParameterValue(
                 'Unknown request {}'.format(tagname), 'request')
 
-    def _post_json_request_parser(self, operation):
+    def _post_json_request_parser(self):
         """Factory function returing propper parsing function
         """
 
@@ -320,33 +318,20 @@ class WPSRequest(object):
             acceptedversions = jdoc.get('acceptedversions')
             wpsrequest.check_accepted_versions(acceptedversions)
 
-            language = jdoc.get('language')
-            wpsrequest.check_and_set_language(language)
-
         def parse_json_post_describeprocess(jdoc):
             """Parse POST DescribeProcess request
             """
 
-            version = jdoc.get('version', default_version)
+            version = jdoc.get('version')
             wpsrequest.check_and_set_version(version)
-
-            language = jdoc.get('language')
-            wpsrequest.check_and_set_language(language)
-
-            wpsrequest.operation = 'describeprocess'
             wpsrequest.identifiers = [identifier_el.text for identifier_el in
                                       self.xpath_ns(jdoc, './ows:Identifier')]
 
         def parse_json_post_execute(jdoc):
             """Parse POST Execute request
             """
-            version = jdoc.get('version', default_version)
+            version = jdoc.get('version')
             wpsrequest.check_and_set_version(version)
-
-            language = jdoc.get('language')
-            wpsrequest.check_and_set_language(language)
-
-            wpsrequest.operation = 'execute'
 
             wpsrequest.identifier = jdoc.get('identifier')
             if wpsrequest.identifier is None:
@@ -357,32 +342,31 @@ class WPSRequest(object):
             wpsrequest.store_execute = 'false'
             wpsrequest.status = 'false'
             wpsrequest.inputs = get_inputs_from_json(jdoc)
-            wpsrequest.raw, wpsrequest.outputs = get_output_from_json(jdoc)
+
+            if wpsrequest.output_ids is None:
+                wpsrequest.output_ids = jdoc.get('outputs', {})
+                wpsrequest.raw = jdoc.get('raw', False)
+            wpsrequest.raw, wpsrequest.outputs = get_output_from_dict(wpsrequest.output_ids, wpsrequest.raw)
+
             if wpsrequest.raw:
                 # executeResponse XML will not be stored
                 wpsrequest.store_execute = 'false'
 
-            # check if response document tag has been set then retrieve
-            # response_document = self.xpath_ns(
-            #     jdoc, './wps:ResponseForm/wps:ResponseDocument')
-            # if len(response_document) > 0:
-            #     wpsrequest.lineage = response_document[
-            #         0].attrib.get('lineage', 'false')
-            #     wpsrequest.store_execute = response_document[
-            #         0].attrib.get('storeExecuteResponse', 'false')
-            #     wpsrequest.status = response_document[
-            #         0].attrib.get('status', 'false')
+            # todo: parse response_document like in the xml version?
 
-        self.operation = operation
-        if operation == 'getcapabilities':
+        if self.operation is None:
+            self.operation = 'execute'
+        else:
+            self.operation = self.operation.lower()
+        if self.operation == 'getcapabilities':
             return parse_json_post_getcapabilities
-        elif operation == 'describeprocess':
+        elif self.operation == 'describeprocess':
             return parse_json_post_describeprocess
-        elif operation == 'execute':
+        elif self.operation == 'execute':
             return parse_json_post_execute
         else:
             raise InvalidParameterValue(
-                'Unknown request {}'.format(operation), 'request')
+                'Unknown request {}'.format(self.operation), 'request')
 
     def set_version(self, version):
         self.version = version
@@ -410,14 +394,16 @@ class WPSRequest(object):
             raise VersionNegotiationFailed(
                 'The requested version "{}" is not supported by this server'.format(acceptedversions), 'version')
 
-    def check_and_set_version(self, version):
+    def check_and_set_version(self, version, allow_default=True):
         """set this.version
         """
 
         if not version:
-            # version = '1.0.0'  # default version
-            raise MissingParameterValue('Missing version', 'version')
-        elif not _check_version(version):
+            if allow_default:
+                version = default_version
+            else:
+                raise MissingParameterValue('Missing version', 'version')
+        if not _check_version(version):
             raise VersionNegotiationFailed(
                 'The requested version "{}" is not supported by this server'.format(version), 'version')
         else:
@@ -456,6 +442,8 @@ class WPSRequest(object):
         obj = {
             'operation': self.operation,
             'version': self.version,
+            'api': self.api,
+            'default_mimetype': self.default_mimetype,
             'language': self.language,
             'identifier': self.identifier,
             'identifiers': self.identifiers,
@@ -476,8 +464,10 @@ class WPSRequest(object):
         :param value: the json (not string) representation
         """
 
-        self.operation = value.get('operation', "execute")
-        self.version = value.get('version', default_version)
+        self.operation = value.get('operation')
+        self.version = value.get('version')
+        self.api = value.get('api')
+        self.default_mimetype = value.get('default_mimetype')
         self.language = value.get('language')
         self.identifier = value.get('identifier')
         self.identifiers = value.get('identifiers')
@@ -676,18 +666,16 @@ def get_inputs_from_json(jdoc):
     return the_inputs
 
 
-def get_output_from_json(jdoc):
+def get_output_from_dict(output_ids, raw):
     the_output = {}
-    outputs_dict = jdoc.get('outputs', {})
-    raw = jdoc.get('raw', False)
-    if isinstance(outputs_dict, dict):
+    if isinstance(output_ids, dict):
         pass
-    elif isinstance(outputs_dict, (tuple, list)):
-        outputs_dict = {x: {} for x in outputs_dict}
+    elif isinstance(output_ids, (tuple, list)):
+        output_ids = {x: {} for x in output_ids}
     else:
-        outputs_dict = {outputs_dict: {}}
+        output_ids = {output_ids: {}}
         raw = True  # single non-dict output means raw output
-    for identifier, output_el in outputs_dict.items():
+    for identifier, output_el in output_ids.items():
         if isinstance(output_el, list):
             output_el = output_el[0]
         outpt = {}

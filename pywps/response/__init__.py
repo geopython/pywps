@@ -1,3 +1,8 @@
+from abc import abstractmethod
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from pywps import WPSRequest
+
 from pywps.dblog import store_status
 from pywps.response.status import WPS_STATUS
 from pywps.translations import get_translation
@@ -27,7 +32,7 @@ def get_response(operation):
 
 class WPSResponse(object):
 
-    def __init__(self, wps_request, uuid=None, version="1.0.0"):
+    def __init__(self, wps_request: 'WPSRequest', uuid=None, version="1.0.0"):
 
         self.wps_request = wps_request
         self.uuid = uuid
@@ -57,6 +62,10 @@ class WPSResponse(object):
         self.status = status
         self.status_percentage = status_percentage
         store_status(self.uuid, self.status, self.message, self.status_percentage)
+
+    @abstractmethod
+    def _construct_doc(self):
+        ...
 
     def get_response_doc(self):
         try:

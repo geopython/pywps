@@ -55,11 +55,58 @@ def get_json_indent():
     return json_ident if json_ident >= 0 else None
 
 
-def get_response_type(accept_mimetypes):
-    json_is_default = 'json' in get_default_response_mimetype()
+def get_response_type(accept_mimetypes, selected_type):
+    if not selected_type:
+        selected_type = get_default_response_mimetype()
+    json_is_default = 'json' in selected_type
     json_response = (
             (accept_mimetypes.accept_json and (not accept_mimetypes.accept_xhtml or json_is_default)) or
             (json_is_default and accept_mimetypes.accept_json == accept_mimetypes.accept_xhtml)
     )
     content_type = 'application/json' if json_response else 'text/xml'
     return json_response, content_type
+
+
+def parse_http_url(http_request) -> dict:
+    operation = api = identifier = output_ids = default_mimetype = base_url = None
+    if http_request:
+        parts = str(http_request.path[1:]).split('/')
+        i = 0
+        if len(parts) > i:
+            base_url = parts[i].lower()
+            if base_url == 'wps':
+                default_mimetype = 'xml'
+            elif base_url in ['processes', 'jobs', 'api']:
+                default_mimetype = 'json'
+            i += 1
+            if base_url == 'api':
+                api = parts[i]
+                i += 1
+            if len(parts) > i:
+                identifier = parts[i]
+                i += 1
+                if len(parts) > i:
+                    output_ids = parts[i]
+                    if not output_ids:
+                        output_ids = None
+    if base_url in ['jobs', 'api']:
+        operation = 'execute'
+    elif base_url == 'processes':
+        if identifier:
+            operation = 'describeprocess'
+        else:
+            operation = 'getcapabilities'
+    d = {}
+    if operation:
+        d['operation'] = operation
+    if identifier:
+        d['identifier'] = identifier
+    if output_ids:
+        d['output_ids'] = output_ids
+    if default_mimetype:
+        d['default_mimetype'] = default_mimetype
+    if api:
+        d['api'] = api
+    if base_url:
+        d['base_url'] = base_url
+    return d

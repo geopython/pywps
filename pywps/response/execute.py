@@ -196,7 +196,8 @@ class ExecuteResponse(WPSResponse):
             data["outputs"] = [self.outputs[o].json for o in self.outputs]
         return data
 
-    def _render_json_response(self, jdoc):
+    @staticmethod
+    def _render_json_response(jdoc):
         response = dict()
         response['status'] = jdoc['status']
         out = jdoc['process']['outputs']
@@ -207,7 +208,8 @@ class ExecuteResponse(WPSResponse):
         if self.status == WPS_STATUS.SUCCEEDED and self.wps_request.preprocess_response:
             self.outputs = self.wps_request.preprocess_response(self.outputs)
         doc = self.json
-        json_response, content_type = get_response_type(self.wps_request.http_request.accept_mimetypes)
+        json_response, content_type = get_response_type(
+            self.wps_request.http_request.accept_mimetypes, self.wps_request.default_mimetype)
         if json_response:
             doc = json.dumps(self._render_json_response(doc), cls=NumpyArrayEncoder, indent=get_json_indent())
         else:

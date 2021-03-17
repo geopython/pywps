@@ -43,7 +43,8 @@ class DescribeResponse(WPSResponse):
             'language': self.wps_request.language,
         }
 
-    def _render_json_response(self, jdoc):
+    @staticmethod
+    def _render_json_response(jdoc):
         return jdoc
 
     def _construct_doc(self):
@@ -51,7 +52,8 @@ class DescribeResponse(WPSResponse):
             raise MissingParameterValue('Missing parameter value "identifier"', 'identifier')
 
         doc = self.json
-        json_response, content_type = get_response_type(self.wps_request.http_request.accept_mimetypes)
+        json_response, content_type = get_response_type(
+            self.wps_request.http_request.accept_mimetypes, self.wps_request.default_mimetype)
         if json_response:
             doc = json.dumps(self._render_json_response(doc), indent=get_json_indent())
         else:
