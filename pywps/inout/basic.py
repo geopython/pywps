@@ -336,6 +336,11 @@ class FileHandler(IOHandler):
         import pathlib
         return pathlib.PurePosixPath(self.file).as_uri()
 
+    @property
+    def size(self):
+        """Length of the linked content in octets."""
+        return os.stat(self.file).st_size
+
     def _openmode(self, data=None):
         openmode = 'r'
         # in Python 3 we need to open binary files in binary mode.
@@ -482,6 +487,16 @@ class UrlHandler(FileHandler):
     @post_data.setter
     def post_data(self, value):
         self._post_data = value
+
+    @property
+    def size(self):
+        """Get content-length of URL without download"""
+        req = requests.head(self.url)
+        if req.ok:
+            size = int(req.headers.get('content-length', '0'))
+        else:
+            size = 0
+        return size
 
     @staticmethod
     def _openurl(href, data=None):
