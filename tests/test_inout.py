@@ -772,6 +772,12 @@ class TestMetaLink(unittest.TestCase):
         mf._set_workdir(self.tmp_dir)
         return mf
 
+    def metafile_with_url(self):
+        mf = MetaFile('identifier', 'title', fmt=FORMATS.JSON)
+        mf.url = "https://pywps.org/"
+        mf._set_workdir(self.tmp_dir)
+        return mf
+
     def test_metafile(self):
         mf = self.metafile()
         self.assertEqual('identifier', mf.identity)
@@ -820,6 +826,11 @@ class TestMetaLink(unittest.TestCase):
 
         ml4.checksums = True
         assert 'hash' in ml4.xml
+
+    def test_size(self):
+        ml4 = self.metalink4()
+        ml4.append(self.metafile_with_url())
+        assert 'size' in ml4.xml
 
 
 def load_tests(loader=None, tests=None, pattern=None):

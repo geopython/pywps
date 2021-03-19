@@ -361,7 +361,7 @@ class MetaFile:
     @property
     def size(self):
         """Length of the linked content in octets."""
-        return os.stat(self.file).st_size
+        return self._output.size
 
     @property
     def urls(self):
