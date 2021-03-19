@@ -118,9 +118,6 @@ configuration file <https://docs.pycsw.org/en/latest/configuration.html>`_.
 :maxsingleinputsize:
     maximal request size for a single input. 0 for no limit.
 
-:maxsingleoutputsize:
-    maximal size for a single output. 0 for no limit.
-
 :maxprocesses:
     maximal number of requests being stored in queue, waiting till they can be
     processed (see ``parallelprocesses`` configuration option). -1 for no limit.
