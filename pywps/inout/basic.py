@@ -456,7 +456,7 @@ class UrlHandler(FileHandler):
         except Exception as e:
             raise NoApplicableCode('File reference error: {}'.format(e))
 
-        error_message = 'File size for input "{}" exceeded. Maximum allowed: {} megabytes'.format(
+        error_message = 'File size for input "{}" exceeded. Maximum allowed: {}'.format(
             self.inpt.get('identifier', '?'), humanize.naturalsize(max_byte_size))
 
         if int(max_byte_size) > 0:
@@ -503,7 +503,7 @@ class UrlHandler(FileHandler):
         """Calculates maximal size for input file based on configuration
         and units.
 
-        :return: maximum file size in bytes and megabytes
+        :return: maximum file size in bytes
         """
         ms = config.get_config_value('server', 'maxsingleinputsize')
         mb_size = config.get_size_mb(ms)
