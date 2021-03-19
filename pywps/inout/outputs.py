@@ -430,7 +430,6 @@ class MetaLink:
         :param tuple files: Sequence of files to include in Metalink. Can also be added using `append`.
         :param str workdir: Work directory to store temporary files.
         :param bool checksums: Whether to compute checksums on files.
-        :param bool check_size: Whether to compute size on files.
 
         To use, first append `MetaFile` instances, then write the metalink using the `xml`
         property.
