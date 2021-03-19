@@ -1016,12 +1016,12 @@ class ComplexOutput(BasicIO, BasicComplex, IOHandler):
         return url
 
     def max_size(self):
-        """Calculates maximal size for output file based on configuration
+        """Calculates maximal size for inout file based on configuration
         and units.
 
         :return: maximum file size in bytes and megabytes
         """
-        ms = config.get_config_value('server', 'maxsingleoutputsize')
+        ms = config.get_config_value('server', 'maxsingleinputsize')
         mb_size = config.get_size_mb(ms)
         byte_size = mb_size * 1024**2
         return byte_size, mb_size
