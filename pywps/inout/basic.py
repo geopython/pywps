@@ -521,8 +521,7 @@ class UrlHandler(FileHandler):
         :return: maximum file size in bytes
         """
         ms = config.get_config_value('server', 'maxsingleinputsize')
-        mb_size = config.get_size_mb(ms)
-        byte_size = mb_size * 1024**2
+        byte_size = config.get_size_mb(ms) * 1024**2
         return byte_size
 
 
@@ -1030,14 +1029,3 @@ class ComplexOutput(BasicIO, BasicComplex, IOHandler):
         (_, _, url) = self.storage.store(self)
         # url = self.storage.url(self)
         return url
-
-    def max_size(self):
-        """Calculates maximal size for inout file based on configuration
-        and units.
-
-        :return: maximum file size in bytes and megabytes
-        """
-        ms = config.get_config_value('server', 'maxsingleinputsize')
-        mb_size = config.get_size_mb(ms)
-        byte_size = mb_size * 1024**2
-        return byte_size, mb_size
