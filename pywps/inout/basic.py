@@ -30,6 +30,7 @@ import base64
 from collections import namedtuple
 from copy import deepcopy
 from io import BytesIO
+import humanize
 
 
 _SOURCE_TYPE = namedtuple('SOURCE_TYPE', 'MEMORY, FILE, STREAM, DATA, URL')
@@ -446,7 +447,7 @@ class UrlHandler(FileHandler):
 
         self._file = self._build_file_name(href=self.url)
 
-        max_byte_size, max_mb_size = self.max_size()
+        max_byte_size = self.max_size()
 
         # Create request
         try:
@@ -456,7 +457,7 @@ class UrlHandler(FileHandler):
             raise NoApplicableCode('File reference error: {}'.format(e))
 
         error_message = 'File size for input "{}" exceeded. Maximum allowed: {} megabytes'.format(
-            self.inpt.get('identifier', '?'), max_mb_size)
+            self.inpt.get('identifier', '?'), humanize.naturalsize(max_byte_size))
 
         if int(max_byte_size) > 0:
             if int(data_size) > int(max_byte_size):
@@ -507,7 +508,7 @@ class UrlHandler(FileHandler):
         ms = config.get_config_value('server', 'maxsingleinputsize')
         mb_size = config.get_size_mb(ms)
         byte_size = mb_size * 1024**2
-        return byte_size, mb_size
+        return byte_size
 
 
 class SimpleHandler(DataHandler):
