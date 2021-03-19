@@ -517,7 +517,8 @@ class UrlHandler(FileHandler):
 
         return req
 
-    def max_size(self):
+    @staticmethod
+    def max_size():
         """Calculates maximal size for input file based on configuration
         and units.
 
