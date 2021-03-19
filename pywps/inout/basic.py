@@ -447,6 +447,9 @@ class UrlHandler(FileHandler):
 
     @property
     def file(self):
+        """Downloads URL and return file pointer.
+        Checks if size is allowed before download.
+        """
         if self._file is not None:
             return self._file
 
