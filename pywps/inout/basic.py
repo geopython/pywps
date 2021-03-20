@@ -498,7 +498,7 @@ class UrlHandler(FileHandler):
     @property
     def size(self):
         """Get content-length of URL without download"""
-        req = requests.head(self.url)
+        req = self._openurl(self.url)
         if req.ok:
             size = int(req.headers.get('content-length', '0'))
         else:

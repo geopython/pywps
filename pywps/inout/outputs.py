@@ -320,6 +320,7 @@ class MetaFile:
         The metalink document is created by a `MetaLink` instance, which
         holds a number of `MetaFile` instances.
         """
+        self._size = None
         self._output = ComplexOutput(
             identifier=identity or '',
             title=description or '',
@@ -360,8 +361,15 @@ class MetaFile:
 
     @property
     def size(self):
-        """Length of the linked content in octets."""
-        return self._output.size
+        """Size of the linked content in bytes."""
+        if self._size is None:
+            self._size = self._output.size
+        return self._size
+
+    @size.setter
+    def size(self, value):
+        """Set size to avoid size calculation."""
+        self._size = int(value)
 
     @property
     def urls(self):
