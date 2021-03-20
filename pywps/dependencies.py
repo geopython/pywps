@@ -10,7 +10,6 @@ try:
     from osgeo import gdal, ogr
 except ImportError:
     warnings.warn('Complex validation requires GDAL/OGR support.')
-    ogr = None
 
 try:
     import netCDF4
