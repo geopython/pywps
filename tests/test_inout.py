@@ -832,6 +832,20 @@ class TestMetaLink(unittest.TestCase):
         ml4.append(self.metafile_with_url())
         assert 'size' in ml4.xml
 
+    def test_no_size(self):
+        ml4 = self.metalink4()
+        mf = self.metafile_with_url()
+        mf.size = 0
+        ml4.files = [mf]
+        assert 'size' not in ml4.xml
+
+    def test_set_size(self):
+        ml4 = self.metalink4()
+        mf = self.metafile_with_url()
+        mf.size = 100
+        ml4.files = [mf]
+        assert '<size>100</size>' in ml4.xml
+
 
 def load_tests(loader=None, tests=None, pattern=None):
     if not loader:
