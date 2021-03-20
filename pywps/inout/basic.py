@@ -30,6 +30,7 @@ import base64
 from collections import namedtuple
 from copy import deepcopy
 from io import BytesIO
+import humanize
 
 
 _SOURCE_TYPE = namedtuple('SOURCE_TYPE', 'MEMORY, FILE, STREAM, DATA, URL')
@@ -446,12 +447,15 @@ class UrlHandler(FileHandler):
 
     @property
     def file(self):
+        """Downloads URL and return file pointer.
+        Checks if size is allowed before download.
+        """
         if self._file is not None:
             return self._file
 
         self._file = self._build_file_name(href=self.url)
 
-        max_byte_size = self.max_input_size()
+        max_byte_size = self.max_size()
 
         # Create request
         try:
@@ -460,21 +464,24 @@ class UrlHandler(FileHandler):
         except Exception as e:
             raise NoApplicableCode('File reference error: {}'.format(e))
 
-        error_message = 'File size for input "{}" exceeded. Maximum allowed: {} megabytes'.format(
-            self.inpt.get('identifier', '?'), max_byte_size)
+        error_message = 'File size for input "{}" exceeded. Maximum allowed: {}'.format(
+            self.inpt.get('identifier', '?'), humanize.naturalsize(max_byte_size))
 
-        if int(data_size) > int(max_byte_size):
-            raise FileSizeExceeded(error_message)
+        if int(max_byte_size) > 0:
+            if int(data_size) > int(max_byte_size):
+                raise FileSizeExceeded(error_message)
 
         try:
             with open(self._file, 'wb') as f:
                 data_size = 0
                 for chunk in reference_file.iter_content(chunk_size=1024):
                     data_size += len(chunk)
-                    if int(data_size) > int(max_byte_size):
-                        raise FileSizeExceeded(error_message)
+                    if int(max_byte_size) > 0:
+                        if int(data_size) > int(max_byte_size):
+                            raise FileSizeExceeded(error_message)
                     f.write(chunk)
-
+        except FileSizeExceeded:
+            raise
         except Exception as e:
             raise NoApplicableCode(e)
 
@@ -511,14 +518,15 @@ class UrlHandler(FileHandler):
         return req
 
     @staticmethod
-    def max_input_size():
+    def max_size():
         """Calculates maximal size for input file based on configuration
         and units.
 
         :return: maximum file size in bytes
         """
         ms = config.get_config_value('server', 'maxsingleinputsize')
-        return config.get_size_mb(ms) * 1024**2
+        byte_size = config.get_size_mb(ms) * 1024**2
+        return byte_size
 
 
 class SimpleHandler(DataHandler):
