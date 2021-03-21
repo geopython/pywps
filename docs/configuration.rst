@@ -156,6 +156,15 @@ configuration file <https://docs.pycsw.org/en/latest/configuration.html>`_.
 :storagetype:
     The type of storage to use when storing status and results. Possible values are: ``file``, ``s3``. Defaults to ``file``.
 
+:storage_copy_function:
+    When using file storage you can choose the copy function. Possible values are:
+
+    * ``copy``: using ``shutil.copy2``,
+    * ``move``: using ``shutil.move``,
+    * ``link``: using ``os.link`` (hardlink).
+
+    Default: ``copy``.
+
 [processing]
 ------------
 
