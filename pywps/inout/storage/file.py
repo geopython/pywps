@@ -135,7 +135,7 @@ class FileStorage(CachedStorage):
                 os.link(src, dst)
             except Exception:
                 LOGGER.warn("Could not create hardlink. Fallback to copy.")
-                self.copy(src, dst)
+                FileStorage.copy(src, dst)
         else:
             shutil.copy2(src, dst)
 
