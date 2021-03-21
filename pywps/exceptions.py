@@ -115,7 +115,13 @@ class StorageNotSupported(NoApplicableCode):
 
 
 class NotEnoughStorage(NoApplicableCode):
-    """Storage not supported exception implementation
+    """Not enough storage exception implementation
+    """
+    code = 400
+
+
+class FileStorageError(NoApplicableCode):
+    """File storage exception implementation
     """
     code = 400
 

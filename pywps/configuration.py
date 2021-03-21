@@ -89,6 +89,10 @@ def load_configuration(cfgfiles=None):
     # after process has finished.
     CONFIG.set('server', 'cleantempdir', 'true')
     CONFIG.set('server', 'storagetype', 'file')
+    # File storage outputs can be copied, moved or linked
+    # from the workdir to the output folder.
+    # Allowed functions: "copy", "move", "link" (default "copy")
+    CONFIG.set('server', 'storage_copy_function', 'copy')
 
     CONFIG.add_section('processing')
     CONFIG.set('processing', 'mode', 'default')

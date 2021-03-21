@@ -6,7 +6,7 @@
 import logging
 import os
 from urllib.parse import urljoin
-from pywps.exceptions import NotEnoughStorage
+from pywps.exceptions import NotEnoughStorage, FileStorageError
 from pywps import configuration as config
 from pywps.inout.basic import IOHandler
 
@@ -22,7 +22,8 @@ class FileStorageBuilder(StorageImplementationBuilder):
     def build(self):
         file_path = config.get_config_value('server', 'outputpath')
         base_url = config.get_config_value('server', 'outputurl')
-        return FileStorage(file_path, base_url)
+        copy_function = config.get_config_value('server', 'storage_copy_function')
+        return FileStorage(file_path, base_url, copy_function=copy_function)
 
 
 def _build_output_name(output):
@@ -59,17 +60,17 @@ class FileStorage(CachedStorage):
     True
     """
 
-    def __init__(self, output_path, output_url):
+    def __init__(self, output_path, output_url, copy_function=None):
         """
         """
         CachedStorage.__init__(self)
         self.target = output_path
         self.output_url = output_url
+        self.copy_function = copy_function
 
     def _do_store(self, output):
         import platform
         import math
-        import shutil
         import tempfile
         import uuid
 
@@ -103,8 +104,12 @@ class FileStorage(CachedStorage):
                                            dir=target)[1]
 
         full_output_name = os.path.join(target, output_name)
-        LOGGER.info('Storing file output to {}'.format(full_output_name))
-        shutil.copy2(output.file, full_output_name)
+        LOGGER.info(f'Storing file output to {full_output_name} ({self.copy_function}).')
+        try:
+            self.copy(output.file, full_output_name, self.copy_function)
+        except Exception:
+            LOGGER.exception(f"Could not copy {output_name}.")
+            raise FileStorageError("Could not copy output file.")
 
         just_file_name = os.path.basename(output_name)
 
@@ -112,6 +117,27 @@ class FileStorage(CachedStorage):
         LOGGER.info('File output URI: {}'.format(url))
 
         return (STORE_TYPE.PATH, output_name, url)
+
+    @staticmethod
+    def copy(src, dst, copy_function=None):
+        """Copy file from source to destination using `copy_function`.
+
+        Values of `copy_function` (default=`copy`):
+        * copy: using `shutil.copy2`
+        * move: using `shutil.move`
+        * link: using `os.link`  (hardlink)
+        """
+        import shutil
+        if copy_function == 'move':
+            shutil.move(src, dst)
+        elif copy_function == 'link':
+            try:
+                os.link(src, dst)
+            except Exception:
+                LOGGER.warn("Could not create hardlink. Fallback to copy.")
+                FileStorage.copy(src, dst)
+        else:
+            shutil.copy2(src, dst)
 
     def write(self, data, destination, data_format=None):
         """
