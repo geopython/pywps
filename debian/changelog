@@ -1,3 +1,13 @@
+pywps (4.4.1) trusty; urgency=medium
+
+  * Added option `storage_copy_function` (#584).
+  * Quick-fix to avoid import ogr exception when running tests without gdal (#583).
+  * Fixed issues with metalink URL outputs (#582, #581, #580, #571).
+  * Fixed issue with stored requests (#579).
+  * Fixed incorrect use of `self.__class__` in super (#578).
+
+ -- Carsten Ehbrecht <ehbrecht@dkrz.de>  Sun, 21 Mar 2021 18:00:00 +0000
+
 pywps (4.4.0) trusty; urgency=medium
 
   * Dropping support for Python 2.x (#574).
