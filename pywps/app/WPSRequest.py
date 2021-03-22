@@ -519,7 +519,7 @@ def get_inputs_from_xml(doc):
             complex_data_el = complex_data[0]
             inpt = {}
             inpt['identifier'] = identifier_el.text
-            inpt['mimeType'] = complex_data_el.attrib.get('mimeType', '')
+            inpt['mimeType'] = complex_data_el.attrib.get('mimeType', None)
             inpt['encoding'] = complex_data_el.attrib.get('encoding', '').lower()
             inpt['schema'] = complex_data_el.attrib.get('schema', '')
             inpt['method'] = complex_data_el.attrib.get('method', 'GET')
@@ -540,7 +540,7 @@ def get_inputs_from_xml(doc):
             inpt[identifier_el.text] = reference_data_el.text
             inpt['href'] = reference_data_el.attrib.get(
                 '{http://www.w3.org/1999/xlink}href', '')
-            inpt['mimeType'] = reference_data_el.attrib.get('mimeType', '')
+            inpt['mimeType'] = reference_data_el.attrib.get('mimeType', None)
             inpt['method'] = reference_data_el.attrib.get('method', 'GET')
             header_element = xpath_ns(reference_data_el, './wps:Header')
             if header_element:
@@ -584,7 +584,7 @@ def get_output_from_xml(doc):
             [identifier_el] = xpath_ns(output_el, './ows:Identifier')
             outpt = {}
             outpt[identifier_el.text] = ''
-            outpt['mimetype'] = output_el.attrib.get('mimeType', '')
+            outpt['mimetype'] = output_el.attrib.get('mimeType', None)
             outpt['encoding'] = output_el.attrib.get('encoding', '')
             outpt['schema'] = output_el.attrib.get('schema', '')
             outpt['uom'] = output_el.attrib.get('uom', '')
@@ -596,7 +596,7 @@ def get_output_from_xml(doc):
             [identifier_el] = xpath_ns(output_el, './ows:Identifier')
             outpt = {}
             outpt[identifier_el.text] = ''
-            outpt['mimetype'] = output_el.attrib.get('mimeType', '')
+            outpt['mimetype'] = output_el.attrib.get('mimeType', None)
             outpt['encoding'] = output_el.attrib.get('encoding', '')
             outpt['schema'] = output_el.attrib.get('schema', '')
             outpt['uom'] = output_el.attrib.get('uom', '')
@@ -628,7 +628,7 @@ def get_inputs_from_json(jdoc):
             if data_type == 'complex':
                 inpt = {}
                 inpt['identifier'] = identifier
-                inpt['mimeType'] = inpt_def.get('mimeType', '')
+                inpt['mimeType'] = inpt_def.get('mimeType', None)
                 inpt['encoding'] = inpt_def.get('encoding', '').lower()
                 inpt['schema'] = inpt_def.get('schema', '')
                 inpt['method'] = inpt_def.get('method', 'GET')
@@ -646,7 +646,7 @@ def get_inputs_from_json(jdoc):
                 inpt['identifier'] = identifier
                 inpt[identifier] = inpt_def
                 inpt['href'] = inpt_def.get('href', '')
-                inpt['mimeType'] = inpt_def.get('mimeType', '')
+                inpt['mimeType'] = inpt_def.get('mimeType', None)
                 inpt['method'] = inpt_def.get('method', 'GET')
                 inpt['header'] = inpt_def.get('header', '')
                 inpt['body'] = inpt_def.get('body', '')
@@ -680,7 +680,7 @@ def get_output_from_dict(output_ids, raw):
             output_el = output_el[0]
         outpt = {}
         outpt[identifier] = ''
-        outpt['mimetype'] = output_el.get('mimeType', '')
+        outpt['mimetype'] = output_el.get('mimeType', None)
         outpt['encoding'] = output_el.get('encoding', '')
         outpt['schema'] = output_el.get('schema', '')
         outpt['uom'] = output_el.get('uom', '')

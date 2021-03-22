@@ -68,14 +68,14 @@ class CapabilitiesResponse(WPSResponse):
 
     def _construct_doc(self):
         doc = self.json
-        json_response, content_type = get_response_type(
+        json_response, mimetype = get_response_type(
             self.wps_request.http_request.accept_mimetypes, self.wps_request.default_mimetype)
         if json_response:
             doc = json.dumps(self._render_json_response(doc), indent=get_json_indent())
         else:
             template = self.template_env.get_template(self.version + '/capabilities/main.xml')
             doc = template.render(**doc)
-        return doc, content_type
+        return doc, mimetype
 
     @Request.application
     def __call__(self, request):

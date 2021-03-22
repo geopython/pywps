@@ -208,17 +208,19 @@ class ExecuteResponse(WPSResponse):
         if self.status == WPS_STATUS.SUCCEEDED and self.wps_request.preprocess_response:
             self.outputs = self.wps_request.preprocess_response(self.outputs)
         doc = self.json
-        json_response, content_type = get_response_type(
+        json_response, mimetype = get_response_type(
             self.wps_request.http_request.accept_mimetypes, self.wps_request.default_mimetype)
         if json_response:
             doc = json.dumps(self._render_json_response(doc), cls=NumpyArrayEncoder, indent=get_json_indent())
         else:
             template = self.template_env.get_template(self.version + '/execute/main.xml')
             doc = template.render(**doc)
-        return doc, content_type
+        return doc, mimetype
 
     @Request.application
     def __call__(self, request):
+        json_response, mimetype = get_response_type(
+            self.wps_request.http_request.accept_mimetypes, self.wps_request.default_mimetype)
         if self.wps_request.raw:
             if self.status == WPS_STATUS.FAILED:
                 return NoApplicableCode(self.message)
@@ -228,14 +230,18 @@ class ExecuteResponse(WPSResponse):
                 if wps_output_value.source_type is None:
                     return NoApplicableCode("Expected output was not generated")
                 data = wps_output_value.data
-                if self.wps_request.http_request.accept_mimetypes.accept_json:
-                    data = json.dumps(data, cls=NumpyArrayEncoder, indent=get_json_indent())
-                    mimetype = 'application/json'
-                else:
+                if mimetype is None:
                     mimetype = self.wps_request.outputs[wps_output_identifier].get('mimetype', None)
+                if mimetype == '':
+                    mimetype = None
+                json_response = json_response or (mimetype is not None and 'json' in mimetype)
+                if json_response:
+                    mimetype = 'application/json'
+                    data = json.dumps(data, cls=NumpyArrayEncoder, indent=get_json_indent())
+                else:
+                    data = str(data)
                 return Response(data, mimetype=mimetype)
         else:
             if not self.doc:
                 return NoApplicableCode("Output was not generated")
-            mimetype = self.content_type or get_default_response_mimetype()
             return Response(self.doc, mimetype=mimetype)

@@ -52,7 +52,7 @@ class DescribeResponse(WPSResponse):
             raise MissingParameterValue('Missing parameter value "identifier"', 'identifier')
 
         doc = self.json
-        json_response, content_type = get_response_type(
+        json_response, mimetype = get_response_type(
             self.wps_request.http_request.accept_mimetypes, self.wps_request.default_mimetype)
         if json_response:
             doc = json.dumps(self._render_json_response(doc), indent=get_json_indent())
@@ -60,7 +60,7 @@ class DescribeResponse(WPSResponse):
             template = self.template_env.get_template(self.version + '/describe/main.xml')
             max_size = int(config.get_size_mb(config.get_config_value('server', 'maxsingleinputsize')))
             doc = template.render(max_size=max_size, **doc)
-        return doc, content_type
+        return doc, mimetype
 
     @Request.application
     def __call__(self, request):

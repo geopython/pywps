@@ -55,16 +55,24 @@ def get_json_indent():
     return json_ident if json_ident >= 0 else None
 
 
-def get_response_type(accept_mimetypes, selected_type):
-    if not selected_type:
-        selected_type = get_default_response_mimetype()
-    json_is_default = 'json' in selected_type
+def get_response_type(accept_mimetypes, default_mimetype):
+    if not default_mimetype:
+        default_mimetype = get_default_response_mimetype()
+    json_is_default = 'json' in default_mimetype
+    accept_json = \
+        accept_mimetypes.accept_json or \
+        accept_mimetypes.best is None or \
+        'json' in accept_mimetypes.best.lower()
+    accept_xhtml = \
+        accept_mimetypes.accept_xhtml or \
+        accept_mimetypes.best is None or \
+        'xml' in accept_mimetypes.best.lower()
     json_response = (
-            (accept_mimetypes.accept_json and (not accept_mimetypes.accept_xhtml or json_is_default)) or
-            (json_is_default and accept_mimetypes.accept_json == accept_mimetypes.accept_xhtml)
+            (accept_json and (not accept_xhtml or json_is_default)) or
+            (json_is_default and accept_json == accept_xhtml)
     )
-    content_type = 'application/json' if json_response else 'text/xml'
-    return json_response, content_type
+    mimetype = 'application/json' if json_response else 'text/xml'
+    return json_response, mimetype
 
 
 def parse_http_url(http_request) -> dict:

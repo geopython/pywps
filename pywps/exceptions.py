@@ -75,7 +75,7 @@ class NoApplicableCode(HTTPException):
         default_mimetype = None if not request else request.args.get('f', None)
         if default_mimetype is None:
             default_mimetype = parse_http_url(request).get('default_mimetype')
-        json_response, content_type = get_response_type(accept_mimetypes, default_mimetype)
+        json_response, mimetype = get_response_type(accept_mimetypes, default_mimetype)
         if json_response:
             doc = json.dumps(args, indent=get_json_indent())
         else:
@@ -89,7 +89,7 @@ class NoApplicableCode(HTTPException):
                 u'</ows:ExceptionReport>'
             ).format(**args))
 
-        return Response(doc, self.code, mimetype=content_type)
+        return Response(doc, self.code, mimetype=mimetype)
 
 
 class InvalidParameterValue(NoApplicableCode):
