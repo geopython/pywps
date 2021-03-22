@@ -5,6 +5,7 @@
 """
 WPS Output classes
 """
+from typing import Optional, Sequence, Dict
 
 import lxml.etree as etree
 import os
@@ -108,9 +109,9 @@ class ComplexOutput(basic.ComplexOutput):
         e.g. {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
     """
 
-    def __init__(self, identifier, title, supported_formats=None,
-                 data_format=None, abstract='', keywords=[], workdir=None, metadata=None,
-                 as_reference=False, mode=MODE.NONE, translations=None):
+    def __init__(self, identifier: str, title: str, supported_formats: Optional[Sequence[str]] = None,
+                 data_format=None, abstract: str = '', keywords=[], workdir=None, metadata: Optional[Sequence[Metadata]] = None,
+                 as_reference=False, mode: MODE = MODE.NONE, translations: Optional[Dict[str, Dict[str, str]]] = None):
         if metadata is None:
             metadata = []
 
