@@ -61,8 +61,6 @@ class Scheduler(Processing):
                 jobid = session.runJob(jt)
                 LOGGER.info('Your job has been submitted with ID {}'.format(jobid))
                 # show status
-                import time
-                time.sleep(1)
                 LOGGER.info('Job status: {}'.format(session.jobStatus(jobid)))
                 # Cleaning up
                 session.deleteJobTemplate(jt)
