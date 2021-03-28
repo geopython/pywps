@@ -170,7 +170,10 @@ class ExecuteResponse(WPSResponse):
             data["status"] = self._process_paused()
         elif self.status == WPS_STATUS.SUCCEEDED:
             data["status"] = self._process_succeeded()
-
+            # Process outputs XML
+            data["outputs"] = [self.outputs[o].json for o in self.outputs]
+        # lineage: add optional lineage when process has finished
+        if self.status in [WPS_STATUS.SUCCEEDED, WPS_STATUS.FAILED]:
             # DataInputs and DataOutputs definition XML if lineage=true
             if self.wps_request.lineage == 'true':
                 data["lineage"] = True
@@ -182,9 +185,6 @@ class ExecuteResponse(WPSResponse):
                     LOGGER.error("Failed to update lineage for input parameter. {}".format(e))
 
                 data["output_definitions"] = [self.outputs[o].json for o in self.outputs]
-
-            # Process outputs XML
-            data["outputs"] = [self.outputs[o].json for o in self.outputs]
         return data
 
     def _construct_doc(self):
