@@ -2,6 +2,8 @@
 # Copyright 2018 Open Source Geospatial Foundation and others    #
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
+import tempfile
+from pathlib import Path
 
 import lxml.etree
 import requests
@@ -172,5 +174,6 @@ def assert_wps_version(response, version="1.0.0"):
                           '/ows:ServiceTypeVersion')
     found_version = elem[0].text
     assert version == found_version
-    with open("/tmp/out.xml", "wb") as out:
+    tmp = Path(tempfile.mkdtemp())
+    with open(tmp / "out.xml", "wb") as out:
         out.writelines(response.response)
