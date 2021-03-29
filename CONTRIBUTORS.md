@@ -9,6 +9,7 @@
 * @SiggyF Fedor Baart
 * @jonas-eberle Jonas Eberle
 * @cehbrecht Carsten Ehbrecht
+* @idanmiara Idan Miara
 
 # Contributor to older versions of PyWPS (< 4.x)
 
@@ -28,5 +29,5 @@
 
 # NOTE
 
-This file is keeped manually. Feel free to contact us, if your contribution is
+This file is kept manually. Feel free to contact us, if your contribution is
 missing here.
