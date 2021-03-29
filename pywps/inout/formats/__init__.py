@@ -19,7 +19,7 @@ _FORMATS = namedtuple('FORMATS', 'GEOJSON, JSON, SHP, GML, GPX, METALINK, META4,
                                  'WCS, WCS100, WCS110, WCS20, WFS, WFS100,'
                                  'WFS110, WFS20, WMS, WMS130, WMS110,'
                                  'WMS100, TEXT, DODS, NETCDF, NCML, LAZ, LAS, ZIP,'
-                                 'XML', 'CSV')
+                                 'XML, CSV')
 
 
 class Format(object):
