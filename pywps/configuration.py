@@ -17,6 +17,8 @@ import configparser
 
 __author__ = "Calin Ciociu"
 
+from pywps.util import file_uri
+
 RAW_OPTIONS = [('logging', 'format'), ]
 
 CONFIG = None
@@ -76,7 +78,7 @@ def load_configuration(cfgfiles=None):
     CONFIG.set('server', 'temp_path', tempfile.gettempdir())
     CONFIG.set('server', 'processes_path', '')
     outputpath = tempfile.gettempdir()
-    CONFIG.set('server', 'outputurl', 'file://{}'.format(outputpath))
+    CONFIG.set('server', 'outputurl', file_uri(outputpath))
     CONFIG.set('server', 'outputpath', outputpath)
     # list of allowed input paths (file url input) seperated by ':'
     CONFIG.set('server', 'allowedinputpaths', '')

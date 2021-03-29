@@ -42,7 +42,7 @@ class Greeter(Process):
     @staticmethod
     def greeter(request, response):
         name = request.inputs['name'][0].data
-        assert type(name) is text_type
+        assert type(name) is str
         response.outputs['message'].data = "Hello {}!".format(name)
         return response
 
