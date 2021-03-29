@@ -385,7 +385,7 @@ instance.
 Example process
 ---------------
 
-.. literalinclude:: metalinkprocess.py
+.. literalinclude:: ../tests/processes/metalinkprocess.py
    :language: python
 
 Process Exceptions
