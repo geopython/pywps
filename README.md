@@ -4,10 +4,9 @@ PyWPS is an implementation of the Web Processing Service standard from
 the Open Geospatial Consortium. PyWPS is written in Python.
 
 [![Documentation Status](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://pywps.readthedocs.io/en/latest/?badge=latest)
-[![Build Status](https://travis-ci.org/geopython/pywps.png)](https://travis-ci.org/geopython/pywps)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/19d53c45a3854e37b89523cf9bb1d262)](https://www.codacy.com/project/cehbrecht/pywps/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=geopython/pywps&amp;utm_campaign=Badge_Grade_Dashboard)
+[![Build Status](https://github.com/geopython/pywps/actions/workflows/main.yml/badge.svg)](https://github.com/geopython/pywps/actions/workflows/main.yml)
 [![Coverage Status](https://coveralls.io/repos/github/geopython/pywps/badge.svg?branch=master)](https://coveralls.io/github/geopython/pywps?branch=master)
-[![PyPI](https://img.shields.io/pypi/dm/pywps.svg)]()
+[![PyPI](https://img.shields.io/pypi/dm/pywps.svg)](https://pypi.org/project/pywps/)
 [![GitHub license](https://img.shields.io/github/license/geopython/pywps.svg)]()
 
 [![Join the chat at https://gitter.im/geopython/pywps](https://badges.gitter.im/geopython/pywps.svg)](https://gitter.im/geopython/pywps?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
