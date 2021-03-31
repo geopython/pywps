@@ -1,3 +1,12 @@
+pywps (4.4.2) trusty; urgency=medium
+
+  * Added csv format (#593).
+  * Update ci badge int Readme (#592).
+  * Fix scheduler: don't sleep in drmaa session (#591).
+  * Show lineage also when process failed (#589).
+
+ -- Carsten Ehbrecht <ehbrecht@dkrz.de>  Tue, 30 Mar 2021 18:00:00 +0000
+
 pywps (4.4.1) trusty; urgency=medium
 
   * Added option `storage_copy_function` (#584).
