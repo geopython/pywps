@@ -9,7 +9,7 @@ import os
 
 from lxml.builder import ElementMaker
 
-__version__ = '4.4.1'
+__version__ = "4.4.1"
 
 LOGGER = logging.getLogger('PYWPS')
 LOGGER.debug('setting core variables')
