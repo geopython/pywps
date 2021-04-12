@@ -29,7 +29,7 @@ def create_feature():
     def feature(request, response):
         input = request.inputs['input'][0].file
         # What do we need to assert a Complex input?
-        # assert type(input) is text_type
+        # assert type(input) is str
 
         # open the input file
         try:
@@ -83,7 +83,7 @@ def create_sum_one():
     def sum_one(request, response):
         input = request.inputs['input'][0].file
         # What do we need to assert a Complex input?
-        # assert type(input) is text_type
+        # assert type(input) is str
 
         import grass.script as grass
 

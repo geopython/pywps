@@ -157,7 +157,7 @@ class FileStorage(CachedStorage):
         if isinstance(destination, IOHandler):
             output_name, _ = _build_output_name(destination)
             just_file_name = os.path.basename(output_name)
-            dst = "{}/{}".format(destination.uuid, just_file_name)
+            dst = f"{destination.uuid}/{just_file_name}"
         else:
             dst = destination
 

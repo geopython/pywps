@@ -2,6 +2,7 @@
 # Copyright 2018 Open Source Geospatial Foundation and others    #
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
+from pathlib import PurePath
 
 from pywps.translations import lower_case_dict
 from io import StringIO
@@ -334,8 +335,8 @@ class FileHandler(IOHandler):
     @property
     def url(self):
         """Return url to file."""
-        import pathlib
-        return pathlib.PurePosixPath(self.file).as_uri()
+        result = PurePath(self.file).as_uri()
+        return result
 
     @property
     def size(self):

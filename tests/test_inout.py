@@ -22,6 +22,7 @@ from pywps.app.Common import Metadata
 from pywps.validator import get_validator
 from pywps.inout.basic import IOHandler, SOURCE_TYPE, SimpleHandler, BBoxInput, BBoxOutput, \
     ComplexInput, ComplexOutput, LiteralOutput, LiteralInput, _is_textfile
+from pywps.util import uri_to_path
 from pywps.inout.literaltypes import convert, AllowedValue, AnyValue
 from pywps.inout.outputs import MetaFile, MetaLink, MetaLink4
 from io import StringIO
@@ -504,7 +505,8 @@ class ComplexOutputTest(unittest.TestCase):
         with self.complex_out.stream as s:
             self.assertEqual(s.read(), bytes(self.data, encoding='utf8'))
 
-        with open(urlparse(self.complex_out.url).path) as f:
+        path = uri_to_path(self.complex_out.url)
+        with open(path) as f:
             self.assertEqual(f.read(), self.data)
 
     def test_file_handler_netcdf(self):
