@@ -203,7 +203,7 @@ class ExecuteResponse(WPSResponse):
                 if wps_output_value.source_type is None:
                     return NoApplicableCode("Expected output was not generated")
                 return Response(wps_output_value.data,
-                                mimetype=self.wps_request.outputs[wps_output_identifier].get('mimetype', None))
+                                mimetype=wps_output_value.data_format.mime_type)
         else:
             if not self.doc:
                 return NoApplicableCode("Output was not generated")
