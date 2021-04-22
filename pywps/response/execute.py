@@ -203,7 +203,8 @@ class ExecuteResponse(WPSResponse):
                 if wps_output_value.source_type is None:
                     return NoApplicableCode("Expected output was not generated")
                 return Response(wps_output_value.data,
-                                mimetype=wps_output_value.data_format.mime_type)
+                                mimetype=wps_output_value.data_format.mime_type,
+                                headers={'Content-Disposition': 'attachment; filename="{}"'.format(wps_output_identifier)})
         else:
             if not self.doc:
                 return NoApplicableCode("Output was not generated")
