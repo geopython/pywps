@@ -18,6 +18,7 @@ from pywps import configuration
 from pywps import get_version_from_ns
 
 import json
+from urllib.parse import unquote
 
 LOGGER = logging.getLogger("PYWPS")
 
@@ -509,15 +510,15 @@ def get_data_from_kvp(data, part=None):
             # First field is identifier and its value
             (identifier, val) = fields[0].split("=")
             io['identifier'] = identifier
-            io['data'] = val
+            io['data'] = unquote(val)
 
             # Get the attributes of the data
             for attr in fields[1:]:
                 (attribute, attr_val) = attr.split('=', 1)
                 if attribute == 'xlink:href':
-                    io['href'] = attr_val
+                    io['href'] = unquote(attr_val)
                 else:
-                    io[attribute] = attr_val
+                    io[attribute] = unquote(attr_val)
 
             # Add the input/output with all its attributes and values to the
             # dictionary
