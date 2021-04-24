@@ -83,12 +83,56 @@ class UOM(object):
         return self.uom == other.uom
 
 
-class IOHandler(object):
-    """Base IO handling class subclassed by specialized versions: FileHandler, UrlHandler, DataHandler, etc.
+class NoneIOHandler(object):
+    """Base class for implementation of IOHandler internal"""
 
-    If the specialized handling class is not known when the object is created, instantiate the object with IOHandler.
-    The first time the `file`, `url` or `data` attribute is set, the associated subclass will be automatically
-    registered. Once set, the specialized subclass cannot be switched.
+    prop = None
+
+    def file(self, base):
+        """Return filename."""
+        return None
+
+    def data(self, base):
+        """Read file and return content."""
+        return None
+
+    def base64(self, base):
+        """Return base64 encoding of data."""
+        return None
+
+    def stream(self, base):
+        """Return stream object."""
+        return None
+
+    def mem(self, base):
+        """Return memory object."""
+        return None
+
+    def url(self, base):
+        """Return url to file."""
+        return None
+
+    def size(self, base):
+        """Length of the linked content in octets."""
+        return None
+
+    @property
+    def post_data(self, base):
+        raise NotImplementedError
+
+    # Will raise an error if used on invalid object
+    @post_data.setter
+    def post_data(self, value):
+        raise NotImplementedError
+
+
+class IOHandler(object):
+    """Base IO handling class that handle multple IO types
+
+    This class is created with NoneIOHandler that have no data
+    inside. To initialise data you can set the `file`, `url`, `data` or
+    `stream` attribute. If reset one of this attribute old data are lost and
+    replaced by the new one.
 
     :param workdir: working directory, to save temporal file objects in.
     :param mode: ``MODE`` validation mode.
@@ -120,7 +164,6 @@ class IOHandler(object):
     >>>
     >>> # testing file object on input
     >>> ioh_file.file = fileobj.name
-    >>> assert isinstance(ioh_file, FileHandler
     >>> assert ioh_file.file == fileobj.name
     >>> assert isinstance(ioh_file.stream, RawIOBase)
     >>> # skipped assert isinstance(ioh_file.memory_object, POSH)
@@ -129,16 +172,16 @@ class IOHandler(object):
     >>> ioh_stream = IOHandler(workdir=tmp)
     >>> assert ioh_stream.workdir == tmp
     >>> ioh_stream.stream = FileIO(fileobj.name,'r')
-    >>> assert isinstance(ioh_stream, StreamHandler)
     >>> assert open(ioh_stream.file).read() == ioh_file.stream.read()
     >>> assert isinstance(ioh_stream.stream, RawIOBase)
     """
-    prop = None
 
     def __init__(self, workdir=None, mode=MODE.NONE):
+
+        self._iohandler = NoneIOHandler()
+
         # Internal defaults for class and subclass properties.
         self._workdir = None
-        self._reset_cache()
 
         # Set public defaults
         self.workdir = workdir
@@ -148,21 +191,6 @@ class IOHandler(object):
         self.as_reference = False
         self.inpt = {}
         self.uuid = None  # request identifier
-        self.data_set = False
-
-        # This creates dummy property setters and getters for `file`, `data`, `url`, `stream` that
-        #  1. register the subclass methods according to the given property
-        #  2. replace the property setter by the subclass property setter
-        #  3. set the property
-        self._create_fset_properties()
-
-    def _reset_cache(self):
-        """Sets all internal objects to None."""
-        self._file = None
-        self._data = None
-        self._post_data = None
-        self._stream = None
-        self._url = None
         self.data_set = False
 
     def _check_valid(self):
@@ -184,6 +212,7 @@ class IOHandler(object):
     @workdir.setter
     def workdir(self, path):
         """Set working temporary directory for files to be stored in."""
+
         if path is not None:
             if not os.path.exists(path):
                 os.makedirs(path)
@@ -254,116 +283,151 @@ class IOHandler(object):
         """
         return deepcopy(self)
 
-    @staticmethod
-    def _create_fset_properties():
-        """Create properties that when set for the first time, will determine
-        the instance's handler class.
-
-        Example
-        -------
-        >>> h = IOHandler()
-        >>> isinstance(h, DataHandler)
-        False
-        >>> h.data = 1 # Mixes the DataHandler class to IOHandler. h inherits DataHandler methods.
-        >>> isinstance(h, DataHandler)
-        True
-
-        Note that trying to set another attribute (e.g. `h.file = 'a.txt'`) will raise an AttributeError.
-        """
-        for cls in (FileHandler, DataHandler, StreamHandler, UrlHandler):
-            def fset(s, value, kls=cls):
-                """Assign the handler class and set the value to the attribute.
-
-                This function will only be called once. The next `fset` will
-                use the subclass' property.
-                """
-                # Add cls methods to this instance.
-                extend_instance(s, kls)
-
-                # Set the attribute value through the associated cls property.
-                setattr(s, kls.prop, value)
-
-            setattr(IOHandler, cls.prop, property(fget=lambda x: None, fset=fset))
-
-
-class FileHandler(IOHandler):
-    prop = 'file'
+    @property
+    def base64(self):
+        """Return raw data
+        WARNING: may be bytes or str"""
+        return self._iohandler.base64(self)
 
     @property
     def file(self):
-        """Return filename."""
-        return self._file
+        """Return a file name"""
+        return self._iohandler.file(self)
 
     @file.setter
     def file(self, value):
-        """Set file name"""
-        self._reset_cache()
-        self._file = os.path.abspath(value)
+        self._iohandler = FileHandler(value)
         self._check_valid()
 
     @property
     def data(self):
-        """Read file and return content."""
-        if self._data is None:
-            openmode = self._openmode()
-            kwargs = {} if 'b' in openmode else {'encoding': 'utf8'}
-            with open(self.file, mode=openmode, **kwargs) as fh:
-                self._data = fh.read()
-        return self._data
+        """Return raw data
+        WARNING: may be bytes or str"""
+        return self._iohandler.data(self)
 
-    @property
-    def base64(self):
-        """Return base64 encoding of data."""
-        data = self.data.encode() if not isinstance(self.data, bytes) else self.data
-        return base64.b64encode(data)
+    @data.setter
+    def data(self, value):
+        self._iohandler = DataHandler(value)
+        self._check_valid()
 
     @property
     def stream(self):
-        """Return stream object."""
-        from io import FileIO
-        if getattr(self, '_stream', None) and not self._stream.closed:
-            self._stream.close()
+        """Return stream of data
+        WARNING: may be FileIO or StringIO"""
+        return self._iohandler.stream(self)
 
-        self._stream = FileIO(self.file, mode='r', closefd=True)
-        return self._stream
-
-    @property
-    def mem(self):
-        """Return memory object."""
-        raise NotImplementedError
+    @stream.setter
+    def stream(self, value):
+        self._iohandler = StreamHandler(value)
+        self._check_valid()
 
     @property
     def url(self):
-        """Return url to file."""
-        result = PurePath(self.file).as_uri()
-        return result
+        """Return the url of data"""
+        return self._iohandler.url(self)
+
+    @url.setter
+    def url(self, value):
+        self._iohandler = UrlHandler(value)
+        self._check_valid()
+
+    # FIXME: post_data is only related to url, this should be initialize with url setter
+    @property
+    def post_data(self):
+        return self._iohandler.post_data
+
+    # Will raise an arror if used on invalid object
+    @post_data.setter
+    def post_data(self, value):
+        self._iohandler.post_data = value
 
     @property
-    def size(self):
-        """Length of the linked content in octets."""
-        return os.stat(self.file).st_size
+    def prop(self):
+        return self._iohandler.prop
 
-    def _openmode(self, data=None):
+    @prop.setter
+    def prop(self, value):
+        LOGGER.warning("Deprecated use of IOHandler.prop, prefer self.value = self.value")
+        if value == "file":
+            self._iohandler = FileHandler(self._iohandler.file(self))
+        elif value == "data":
+            self._iohandler = DataHandler(self._iohandler.data(self))
+        elif value == "stream":
+            self._iohandler = StreamHandler(self._iohandler.stream(self))
+        elif value == "url":
+            self._iohandler = UrlHandler(self._iohandler.url(self))
+
+
+class FileHandler(NoneIOHandler):
+    prop = 'file'
+
+    def __init__(self, value):
+        self._data = None
+        self._stream = None
+        self._file = os.path.abspath(value)
+
+    def file(self, base):
+        """Return filename."""
+        return self._file
+
+    def data(self, base):
+        """Read file and return content."""
+        if self._data is None:
+            openmode = self._openmode(base)
+            kwargs = {} if 'b' in openmode else {'encoding': 'utf8'}
+            with open(self.file(base), mode=openmode, **kwargs) as fh:
+                self._data = fh.read()
+        return self._data
+
+    def base64(self, base):
+        """Return base64 encoding of data."""
+        data = self.data(base).encode() if not isinstance(self.data(base), bytes) else self.data(base)
+        return base64.b64encode(data)
+
+    def stream(self, base):
+        """Return stream object."""
+        from io import FileIO
+        if self._stream and not self._stream.closed:
+            self._stream.close()
+
+        self._stream = FileIO(self.file(base), mode='r', closefd=True)
+        return self._stream
+
+    def url(self, base):
+        """Return url to file."""
+        result = PurePath(self.file(base)).as_uri()
+        return result
+
+    def size(self, base):
+        """Length of the linked content in octets."""
+        return os.stat(self.file(base)).st_size
+
+    def _openmode(self, base, data=None):
         openmode = 'r'
         # in Python 3 we need to open binary files in binary mode.
         checked = False
-        if hasattr(self, 'data_format'):
-            if self.data_format.encoding == 'base64':
+        if hasattr(base, 'data_format'):
+            if base.data_format.encoding == 'base64':
                 # binary, when the data is to be encoded to base64
                 openmode += 'b'
                 checked = True
-            elif 'text/' in self.data_format.mime_type:
+            elif 'text/' in base.data_format.mime_type:
                 # not binary, when mime_type is 'text/'
                 checked = True
         # when we can't guess it from the mime_type, we need to check the file.
         # mimetypes like application/xml and application/json are text files too.
-        if not checked and not _is_textfile(self.file):
+        if not checked and not _is_textfile(self.file(base)):
             openmode += 'b'
         return openmode
 
 
 class DataHandler(FileHandler):
     prop = 'data'
+
+    def __init__(self, value):
+        self._file = None
+        self._stream = None
+        self._data = value
 
     def _openmode(self, data=None):
         openmode = 'w'
@@ -373,100 +437,85 @@ class DataHandler(FileHandler):
             openmode += 'b'
         return openmode
 
-    @property
-    def data(self):
+    def data(self, base):
         """Return data."""
-        return getattr(self, '_data', None)
+        return self._data
 
-    @data.setter
-    def data(self, value):
-        self._reset_cache()
-        self._data = value
-        self._check_valid()
-
-    @property
-    def file(self):
+    def file(self, base):
         """Return file name storing the data.
 
         Requesting the file attributes writes the data to a temporary file on disk.
         """
         if self._file is None:
-            self._file = self._build_file_name()
-            openmode = self._openmode(self.data)
+            self._file = base._build_file_name()
+            openmode = self._openmode(self.data(base))
             kwargs = {} if 'b' in openmode else {'encoding': 'utf8'}
             with open(self._file, openmode, **kwargs) as fh:
-                fh.write(self.data)
+                fh.write(self.data(base))
 
         return self._file
 
-    @property
-    def stream(self):
+    def stream(self, base):
         """Return a stream representation of the data."""
-        if isinstance(self.data, bytes):
-            return BytesIO(self.data)
+        if isinstance(self.data(base), bytes):
+            return BytesIO(self.data(base))
         else:
-            return StringIO(str(self.data))
+            return StringIO(str(self.data(base)))
 
 
 class StreamHandler(DataHandler):
     prop = 'stream'
 
-    @property
-    def stream(self):
+    def __init__(self, value):
+        self._file = None
+        self._data = None
+        self._stream = value
+
+    def stream(self, base):
         """Return the stream."""
         return self._stream
 
-    @stream.setter
-    def stream(self, value):
-        """Set the stream."""
-        self._reset_cache()
-        self._stream = value
-        self._check_valid()
-
-    @property
-    def data(self):
+    def data(self, base):
         """Return the data from the stream."""
         if self._data is None:
-            self._data = self.stream.read()
+            self._data = self.stream(base).read()
         return self._data
 
 
 class UrlHandler(FileHandler):
     prop = 'url'
 
-    @property
-    def url(self):
+    def __init__(self, value):
+        self._file = None
+        self._data = None
+        self._stream = None
+        self._url = value
+        self._post_data = None
+
+    def url(self, base):
         """Return the URL."""
         return self._url
 
-    @url.setter
-    def url(self, value):
-        """Set the URL value."""
-        self._reset_cache()
-        self._url = value
-        self._check_valid()
-
-    @property
-    def file(self):
+    def file(self, base):
         """Downloads URL and return file pointer.
         Checks if size is allowed before download.
         """
         if self._file is not None:
             return self._file
 
-        self._file = self._build_file_name(href=self.url)
+        self._file = base._build_file_name(href=self.url(base))
 
         max_byte_size = self.max_size()
 
         # Create request
         try:
-            reference_file = self._openurl(self.url, self.post_data)
+            reference_file = self._openurl(self.url(base), self.post_data)
             data_size = reference_file.headers.get('Content-Length', 0)
         except Exception as e:
             raise NoApplicableCode('File reference error: {}'.format(e))
 
         error_message = 'File size for input "{}" exceeded. Maximum allowed: {}'.format(
-            self.inpt.get('identifier', '?'), humanize.naturalsize(max_byte_size))
+            base.inpt.get('identifier', '?'), humanize.naturalsize(max_byte_size))
 
         if int(max_byte_size) > 0:
             if int(data_size) > int(max_byte_size):
@@ -496,10 +545,9 @@ class UrlHandler(FileHandler):
     def post_data(self, value):
         self._post_data = value
 
-    @property
-    def size(self):
+    def size(self, base):
         """Get content-length of URL without download"""
-        req = self._openurl(self.url)
+        req = self._openurl(self.url(base))
         if req.ok:
             size = int(req.headers.get('content-length', '0'))
         else:
@@ -530,7 +578,7 @@ class UrlHandler(FileHandler):
         return byte_size
 
 
-class SimpleHandler(DataHandler):
+class SimpleHandler(IOHandler):
     """Data handler for Literal In- and Outputs
 
     >>> class Int_type(object):
@@ -553,19 +601,19 @@ class SimpleHandler(DataHandler):
     """
 
     def __init__(self, workdir=None, data_type=None, mode=MODE.NONE):
-        DataHandler.__init__(self, workdir=workdir, mode=mode)
+        IOHandler.__init__(self, workdir=workdir, mode=mode)
         if data_type not in LITERAL_DATA_TYPES:
             raise ValueError('data_type {} not in {}'.format(data_type, LITERAL_DATA_TYPES))
         self.data_type = data_type
 
-    @DataHandler.data.setter
+    @IOHandler.data.setter
     def data(self, value):
         """Set data value. Inputs are converted into target format.
         """
         if self.data_type and value is not None:
             value = convert(self.data_type, value)
 
-        DataHandler.data.fset(self, value)
+        IOHandler.data.fset(self, value)
 
 
 class BasicIO:
@@ -826,7 +874,7 @@ class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
         return validate_anyvalue
 
 
-class BBoxInput(BasicIO, BasicBoundingBox, DataHandler):
+class BBoxInput(BasicIO, BasicBoundingBox, IOHandler):
     """Basic Bounding box input abstract class
     """
 
@@ -846,7 +894,7 @@ class BBoxInput(BasicIO, BasicBoundingBox, DataHandler):
                          translations=translations,
                          )
         BasicBoundingBox.__init__(self, crss, dimensions)
-        DataHandler.__init__(self, workdir=workdir, mode=mode)
+        IOHandler.__init__(self, workdir=workdir, mode=mode)
 
         if default_type != SOURCE_TYPE.DATA:
             raise InvalidParameterValue("Source types other than data are not supported.")
@@ -857,7 +905,7 @@ class BBoxInput(BasicIO, BasicBoundingBox, DataHandler):
         self._set_default_value(default, default_type)
 
 
-class BBoxOutput(BasicIO, BasicBoundingBox, DataHandler):
+class BBoxOutput(BasicIO, BasicBoundingBox, IOHandler):
     """Basic BoundingBox output class
     """
 
@@ -865,7 +913,7 @@ class BBoxOutput(BasicIO, BasicBoundingBox, DataHandler):
                  dimensions=None, workdir=None, mode=MODE.NONE, translations=None):
         BasicIO.__init__(self, identifier, title, abstract, keywords, translations=translations)
         BasicBoundingBox.__init__(self, crss, dimensions)
-        DataHandler.__init__(self, workdir=workdir, mode=mode)
+        IOHandler.__init__(self, workdir=workdir, mode=mode)
         self._storage = None
 
     @property
