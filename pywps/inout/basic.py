@@ -33,6 +33,8 @@ from copy import deepcopy
 from io import BytesIO
 import humanize
 
+import weakref
+
 
 _SOURCE_TYPE = namedtuple('SOURCE_TYPE', 'MEMORY, FILE, STREAM, DATA, URL')
 SOURCE_TYPE = _SOURCE_TYPE(0, 1, 2, 3, 4)
@@ -88,36 +90,46 @@ class NoneIOHandler(object):
 
     prop = None
 
-    def file(self, base):
+    def __init__(self, ref):
+        self._ref = weakref.ref(ref)
+
+    @property
+    def file(self):
         """Return filename."""
         return None
 
-    def data(self, base):
+    @property
+    def data(self):
         """Read file and return content."""
         return None
 
-    def base64(self, base):
+    @property
+    def base64(self):
         """Return base64 encoding of data."""
         return None
 
-    def stream(self, base):
+    @property
+    def stream(self):
         """Return stream object."""
         return None
 
-    def mem(self, base):
+    @property
+    def mem(self):
         """Return memory object."""
         return None
 
-    def url(self, base):
+    @property
+    def url(self):
         """Return url to file."""
         return None
 
-    def size(self, base):
+    @property
+    def size(self):
         """Length of the linked content in octets."""
         return None
 
     @property
-    def post_data(self, base):
+    def post_data(self):
         raise NotImplementedError
 
     # Will raise an error if used on invalid object
@@ -178,7 +190,7 @@ class IOHandler(object):
 
     def __init__(self, workdir=None, mode=MODE.NONE):
 
-        self._iohandler = NoneIOHandler()
+        self._iohandler = NoneIOHandler(self)
 
         # Internal defaults for class and subclass properties.
         self._workdir = None
@@ -287,48 +299,48 @@ class IOHandler(object):
     def base64(self):
         """Return raw data
         WARNING: may be bytes or str"""
-        return self._iohandler.base64(self)
+        return self._iohandler.base64
 
     @property
     def file(self):
         """Return a file name"""
-        return self._iohandler.file(self)
+        return self._iohandler.file
 
     @file.setter
     def file(self, value):
-        self._iohandler = FileHandler(value)
+        self._iohandler = FileHandler(value, self)
         self._check_valid()
 
     @property
     def data(self):
         """Return raw data
         WARNING: may be bytes or str"""
-        return self._iohandler.data(self)
+        return self._iohandler.data
 
     @data.setter
     def data(self, value):
-        self._iohandler = DataHandler(value)
+        self._iohandler = DataHandler(value, self)
         self._check_valid()
 
     @property
     def stream(self):
         """Return stream of data
         WARNING: may be FileIO or StringIO"""
-        return self._iohandler.stream(self)
+        return self._iohandler.stream
 
     @stream.setter
     def stream(self, value):
-        self._iohandler = StreamHandler(value)
+        self._iohandler = StreamHandler(value, self)
         self._check_valid()
 
     @property
     def url(self):
         """Return the url of data"""
-        return self._iohandler.url(self)
+        return self._iohandler.url
 
     @url.setter
     def url(self, value):
-        self._iohandler = UrlHandler(value)
+        self._iohandler = UrlHandler(value, self)
         self._check_valid()
 
     # FIXME: post_data is only related to url, this should be initialize with url setter
@@ -349,58 +361,65 @@ class IOHandler(object):
     def prop(self, value):
         LOGGER.warning("Deprecated use of IOHandler.prop, prefer self.value = self.value")
         if value == "file":
-            self._iohandler = FileHandler(self._iohandler.file(self))
+            self._iohandler = FileHandler(self._iohandler.file, self)
         elif value == "data":
-            self._iohandler = DataHandler(self._iohandler.data(self))
+            self._iohandler = DataHandler(self._iohandler.data, self)
         elif value == "stream":
-            self._iohandler = StreamHandler(self._iohandler.stream(self))
+            self._iohandler = StreamHandler(self._iohandler.stream, self)
         elif value == "url":
-            self._iohandler = UrlHandler(self._iohandler.url(self))
+            self._iohandler = UrlHandler(self._iohandler.url, self)
 
 
 class FileHandler(NoneIOHandler):
     prop = 'file'
 
-    def __init__(self, value):
+    def __init__(self, value, ref):
+        self._ref = weakref.ref(ref)
         self._data = None
         self._stream = None
         self._file = os.path.abspath(value)
 
-    def file(self, base):
+    @property
+    def file(self):
         """Return filename."""
         return self._file
 
-    def data(self, base):
+    @property
+    def data(self):
         """Read file and return content."""
         if self._data is None:
-            openmode = self._openmode(base)
+            openmode = self._openmode(self._ref())
             kwargs = {} if 'b' in openmode else {'encoding': 'utf8'}
-            with open(self.file(base), mode=openmode, **kwargs) as fh:
+            with open(self.file, mode=openmode, **kwargs) as fh:
                 self._data = fh.read()
         return self._data
 
-    def base64(self, base):
+    @property
+    def base64(self):
         """Return base64 encoding of data."""
-        data = self.data(base).encode() if not isinstance(self.data(base), bytes) else self.data(base)
+        data = self.data.encode() if not isinstance(self.data, bytes) else self.data
         return base64.b64encode(data)
 
-    def stream(self, base):
+    @property
+    def stream(self):
         """Return stream object."""
         from io import FileIO
         if self._stream and not self._stream.closed:
             self._stream.close()
 
-        self._stream = FileIO(self.file(base), mode='r', closefd=True)
+        self._stream = FileIO(self.file, mode='r', closefd=True)
         return self._stream
 
-    def url(self, base):
+    @property
+    def url(self):
         """Return url to file."""
-        result = PurePath(self.file(base)).as_uri()
+        result = PurePath(self.file).as_uri()
         return result
 
-    def size(self, base):
+    @property
+    def size(self):
         """Length of the linked content in octets."""
-        return os.stat(self.file(base)).st_size
+        return os.stat(self.file).st_size
 
     def _openmode(self, base, data=None):
         openmode = 'r'
@@ -416,7 +435,7 @@ class FileHandler(NoneIOHandler):
                 checked = True
         # when we can't guess it from the mime_type, we need to check the file.
         # mimetypes like application/xml and application/json are text files too.
-        if not checked and not _is_textfile(self.file(base)):
+        if not checked and not _is_textfile(self.file):
             openmode += 'b'
         return openmode
 
@@ -424,7 +443,8 @@ class FileHandler(NoneIOHandler):
 class DataHandler(FileHandler):
     prop = 'data'
 
-    def __init__(self, value):
+    def __init__(self, value, ref):
+        self._ref = weakref.ref(ref)
         self._file = None
         self._stream = None
         self._data = value
@@ -437,85 +457,94 @@ class DataHandler(FileHandler):
             openmode += 'b'
         return openmode
 
-    def data(self, base):
+    @property
+    def data(self):
         """Return data."""
         return self._data
 
-    def file(self, base):
+    @property
+    def file(self):
         """Return file name storing the data.
 
         Requesting the file attributes writes the data to a temporary file on disk.
         """
         if self._file is None:
-            self._file = base._build_file_name()
-            openmode = self._openmode(self.data(base))
+            self._file = self._ref()._build_file_name()
+            openmode = self._openmode(self.data)
             kwargs = {} if 'b' in openmode else {'encoding': 'utf8'}
             with open(self._file, openmode, **kwargs) as fh:
-                fh.write(self.data(base))
+                fh.write(self.data)
 
         return self._file
 
-    def stream(self, base):
+    @property
+    def stream(self):
         """Return a stream representation of the data."""
-        if isinstance(self.data(base), bytes):
-            return BytesIO(self.data(base))
+        if isinstance(self.data, bytes):
+            return BytesIO(self.data)
         else:
-            return StringIO(str(self.data(base)))
+            return StringIO(str(self.data))
 
 
 class StreamHandler(DataHandler):
     prop = 'stream'
 
-    def __init__(self, value):
+    def __init__(self, value, ref):
+        self._ref = weakref.ref(ref)
         self._file = None
         self._data = None
         self._stream = value
 
-    def stream(self, base):
+    @property
+    def stream(self):
         """Return the stream."""
         return self._stream
 
-    def data(self, base):
+    @property
+    def data(self):
         """Return the data from the stream."""
         if self._data is None:
-            self._data = self.stream(base).read()
+            self._data = self.stream.read()
         return self._data
 
 
 class UrlHandler(FileHandler):
     prop = 'url'
 
-    def __init__(self, value):
+    def __init__(self, value, ref):
+        self._ref = weakref.ref(ref)
         self._file = None
         self._data = None
         self._stream = None
         self._url = value
         self._post_data = None
 
-    def url(self, base):
+    @property
+    def url(self):
         """Return the URL."""
         return self._url
 
-    def file(self, base):
+    @property
+    def file(self):
         """Downloads URL and return file pointer.
         Checks if size is allowed before download.
         """
         if self._file is not None:
             return self._file
 
-        self._file = base._build_file_name(href=self.url(base))
+        self._file = self._ref()._build_file_name(href=self.url)
 
         max_byte_size = self.max_size()
 
         # Create request
         try:
-            reference_file = self._openurl(self.url(base), self.post_data)
+            reference_file = self._openurl(self.url, self.post_data)
             data_size = reference_file.headers.get('Content-Length', 0)
         except Exception as e:
             raise NoApplicableCode('File reference error: {}'.format(e))
 
         error_message = 'File size for input "{}" exceeded. Maximum allowed: {}'.format(
-            base.inpt.get('identifier', '?'), humanize.naturalsize(max_byte_size))
+            self._ref().inpt.get('identifier', '?'), humanize.naturalsize(max_byte_size))
 
         if int(max_byte_size) > 0:
             if int(data_size) > int(max_byte_size):
@@ -545,9 +574,10 @@ class UrlHandler(FileHandler):
     def post_data(self, value):
         self._post_data = value
 
-    def size(self, base):
+    @property
+    def size(self):
         """Get content-length of URL without download"""
-        req = self._openurl(self.url(base))
+        req = self._openurl(self.url)
         if req.ok:
             size = int(req.headers.get('content-length', '0'))
         else:
