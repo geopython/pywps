@@ -260,15 +260,6 @@ class SerializationComplexInputTest(unittest.TestCase):
         self.assertEqual(complex_1.as_reference, complex_2.as_reference)
         self.assertEqual(complex_1.translations, complex_2.translations)
 
-        self.assertEqual(complex_1.prop, complex_2.prop)
-
-        if complex_1.prop != 'url':
-            # don't download the file when running tests
-            self.assertEqual(complex_1.file, complex_2.file)
-            self.assertEqual(complex_1.data, complex_2.data)
-
-        self.assertEqual(complex_1.url, complex_2.url)
-
     def test_complex_input_file(self):
         complex = self.make_complex_input()
         some_file = os.path.join(self.tmp_dir, "some_file.txt")
@@ -278,6 +269,9 @@ class SerializationComplexInputTest(unittest.TestCase):
         complex2 = inout.inputs.ComplexInput.from_json(complex.json)
         self.assert_complex_equals(complex, complex2)
         self.assertEqual(complex.prop, 'file')
+        self.assertEqual(complex2.prop, 'file')
+        self.assertEqual(complex.file, complex2.file)
+        self.assertEqual(complex.data, complex2.data)
 
     def test_complex_input_data(self):
         complex = self.make_complex_input()
@@ -286,11 +280,11 @@ class SerializationComplexInputTest(unittest.TestCase):
         assert complex.json['data'] == '<![CDATA[some data]]>'
         # dump to json and load it again
         complex2 = inout.inputs.ComplexInput.from_json(complex.json)
-        # it's expected that the file path changed
-        complex._file = complex2.file
 
         self.assert_complex_equals(complex, complex2)
         self.assertEqual(complex.prop, 'data')
+        self.assertEqual(complex2.prop, 'data')
+        self.assertEqual(complex.data, complex2.data)
 
     def test_complex_input_stream(self):
         complex = self.make_complex_input()
@@ -300,12 +294,10 @@ class SerializationComplexInputTest(unittest.TestCase):
         # dump to json and load it again
         complex2 = inout.inputs.ComplexInput.from_json(complex.json)
         # the serialized stream becomes a data type
-        # we hard-code it for the testing comparison
-        complex.prop = 'data'
-        # it's expected that the file path changed
-        complex._file = complex2.file
-
+        self.assertEqual(complex.prop, 'stream')
+        self.assertEqual(complex2.prop, 'data')
         self.assert_complex_equals(complex, complex2)
+        self.assertEqual(complex.data, complex2.data)
 
     def test_complex_input_url(self):
         complex = self.make_complex_input()

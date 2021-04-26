@@ -302,6 +302,12 @@ class IOHandler(object):
         return self._iohandler.base64
 
     @property
+    def size(self):
+        """Return object size in bytes.
+        """
+        return self._iohandler.size
+
+    @property
     def file(self):
         """Return a file name"""
         return self._iohandler.file
