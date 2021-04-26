@@ -15,7 +15,7 @@ from pywps.validator.base import emptyvalidator
 LOGGER = logging.getLogger('PYWPS')
 
 _VALIDATORS = {
-    'application/vnd.geo+json': validategeojson,
+    'application/geo+json': validategeojson,
     'application/json': validatejson,
     'application/x-zipped-shp': validateshapefile,
     'application/gml+xml': validategml,
