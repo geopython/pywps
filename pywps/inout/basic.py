@@ -356,18 +356,6 @@ class IOHandler(object):
     def prop(self):
         return self._iohandler.prop
 
-    @prop.setter
-    def prop(self, value):
-        LOGGER.warning("Deprecated use of IOHandler.prop, prefer self.value = self.value")
-        if value == "file":
-            self._iohandler = FileHandler(self._iohandler.file, self)
-        elif value == "data":
-            self._iohandler = DataHandler(self._iohandler.data, self)
-        elif value == "stream":
-            self._iohandler = StreamHandler(self._iohandler.stream, self)
-        elif value == "url":
-            self._iohandler = UrlHandler(self._iohandler.url, self)
-
 
 class FileHandler(NoneIOHandler):
     prop = 'file'
