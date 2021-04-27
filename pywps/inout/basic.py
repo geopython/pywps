@@ -57,13 +57,6 @@ def _is_textfile(filename):
     return is_text
 
 
-def extend_instance(obj, cls):
-    """Apply mixins to a class instance after creation."""
-    base_cls = obj.__class__
-    base_cls_name = obj.__class__.__name__
-    obj.__class__ = type(base_cls_name, (cls, base_cls), {})
-
-
 class UOM(object):
     """
     :param uom: unit of measure
@@ -994,8 +987,6 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
     def file_handler(self, inpt):
         """<wps:Reference /> handler.
         Used when href is a file url."""
-        extend_instance(self, FileHandler)
-
         # check if file url is allowed
         self._validate_file_input(href=inpt.get('href'))
         # save the file reference input in workdir
