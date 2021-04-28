@@ -7,6 +7,7 @@
 """
 
 import unittest
+import pytest
 import sys
 from pywps.validator.complexvalidator import *
 from pywps.inout.formats import FORMATS
@@ -140,6 +141,7 @@ class ValidateTest(unittest.TestCase):
         else:
             self.assertFalse(validatenetcdf(netcdf_input, MODE.STRICT), 'STRICT validation')
 
+    @pytest.mark.xfail(reason="test.opendap.org is offline")
     def test_dods_validator(self):
         opendap_input = ComplexInput('dods', 'opendap test', [FORMATS.DODS,])
         opendap_input.url = "http://test.opendap.org:80/opendap/netcdf/examples/sresa1b_ncar_ccsm3_0_run1_200001.nc"

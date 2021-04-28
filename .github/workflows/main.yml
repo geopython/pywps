@@ -28,7 +28,7 @@ jobs:
         pip3 install -r requirements-extra.txt
         pip3 install -r requirements-gdal.txt
     - name: run tests ⚙️
-      run: python3 -m unittest tests
+      run: pytest -v tests
     - name: run coveralls ⚙️
       run: coveralls
       if: matrix.python-version == 3.6

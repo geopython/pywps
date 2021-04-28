@@ -1,5 +1,6 @@
 coverage
 coveralls
+pytest
 flake8
 pylint
 Sphinx
