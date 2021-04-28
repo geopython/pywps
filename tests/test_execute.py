@@ -4,6 +4,7 @@
 ##################################################################
 
 import unittest
+import pytest
 import lxml.etree
 import json
 import tempfile
@@ -230,6 +231,7 @@ def get_output(doc):
 class ExecuteTest(unittest.TestCase):
     """Test for Exeucte request KVP request"""
 
+    @pytest.mark.xfail(reason="test.opendap.org is offline")
     def test_dods(self):
         if not WITH_NC4:
             self.skipTest('netCDF4 not installed')
