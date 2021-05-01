@@ -210,6 +210,8 @@ class ComplexOutput(basic.ComplexOutput):
     def _json_data(self, data):
         """Return Data node
         """
+        # Match only data that are safe CDATA pattern.
+        CDATA_PATTERN = re.compile(r'^<!\[CDATA\[((?!\]\]>).)*\]\]>$')
 
         data["type"] = "complex"
 
@@ -229,21 +231,33 @@ class ComplexOutput(basic.ComplexOutput):
                         # Try to inline data as text but if fail encode is in base64
                         if self.data_format.encoding == 'utf-8':
                             out = self.data.decode('utf-8')
-                            if not re.search('\\]\\]>', out):
-                                data["data"] = '<![CDATA[{}]]>'.format(out)
+                            # If data is already enclose with CDATApatern do not add it twise
+                            if CDATA_PATTERN.match(out):
+                                data["data"] = out
                             else:
-                                data['encoding'] = 'base64'  # override the unsafe encoding
-                                data["data"] = self.base64.decode('utf-8')
+                                # Check if the data does not contain ]]> patern if is safe to use CDATA
+                                # other wise we fallback to base64 encoding.
+                                if not re.search('\\]\\]>', out):
+                                    data["data"] = '<![CDATA[{}]]>'.format(out)
+                                else:
+                                    data['encoding'] = 'base64'  # override the unsafe encoding
+                                    data["data"] = self.base64.decode('utf-8')
                         else:
                             data['encoding'] = 'base64'  # override the unsafe encoding
                             data["data"] = self.base64.decode('utf-8')
                     else:
                         out = str(self.data)
-                        if not re.search('\\]\\]>', out):
-                            data["data"] = '<![CDATA[{}]]>'.format(out)
+                        # If data is already enclose with CDATApatern do not add it twise
+                        if CDATA_PATTERN.match(out):
+                            data["data"] = out
                         else:
-                            data['encoding'] = 'base64'  # override the unsafe encoding
-                            data["data"] = self.base64.decode('utf-8')
+                            # Check if the data does not contain ]]> patern if is safe to use CDATA
+                            # other wise we fallback to base64 encoding.
+                            if not re.search('\\]\\]>', out):
+                                data["data"] = '<![CDATA[{}]]>'.format(out)
+                            else:
+                                data['encoding'] = 'base64'  # override the unsafe encoding
+                                data["data"] = self.base64.decode('utf-8')
 
         return data
 
