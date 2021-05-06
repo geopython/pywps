@@ -33,6 +33,8 @@ from copy import deepcopy
 from io import BytesIO
 import humanize
 
+import weakref
+
 
 _SOURCE_TYPE = namedtuple('SOURCE_TYPE', 'MEMORY, FILE, STREAM, DATA, URL')
 SOURCE_TYPE = _SOURCE_TYPE(0, 1, 2, 3, 4)
@@ -53,13 +55,6 @@ def _is_textfile(filename):
         is_text = b'\x00' not in fh.read(blocksize)
         fh.close()
     return is_text
-
-
-def extend_instance(obj, cls):
-    """Apply mixins to a class instance after creation."""
-    base_cls = obj.__class__
-    base_cls_name = obj.__class__.__name__
-    obj.__class__ = type(base_cls_name, (cls, base_cls), {})
 
 
 class UOM(object):
@@ -83,12 +78,66 @@ class UOM(object):
         return self.uom == other.uom
 
 
-class IOHandler(object):
-    """Base IO handling class subclassed by specialized versions: FileHandler, UrlHandler, DataHandler, etc.
+class NoneIOHandler(object):
+    """Base class for implementation of IOHandler internal"""
 
-    If the specialized handling class is not known when the object is created, instantiate the object with IOHandler.
-    The first time the `file`, `url` or `data` attribute is set, the associated subclass will be automatically
-    registered. Once set, the specialized subclass cannot be switched.
+    prop = None
+
+    def __init__(self, ref):
+        self._ref = weakref.ref(ref)
+
+    @property
+    def file(self):
+        """Return filename."""
+        return None
+
+    @property
+    def data(self):
+        """Read file and return content."""
+        return None
+
+    @property
+    def base64(self):
+        """Return base64 encoding of data."""
+        return None
+
+    @property
+    def stream(self):
+        """Return stream object."""
+        return None
+
+    @property
+    def mem(self):
+        """Return memory object."""
+        return None
+
+    @property
+    def url(self):
+        """Return url to file."""
+        return None
+
+    @property
+    def size(self):
+        """Length of the linked content in octets."""
+        return None
+
+    @property
+    def post_data(self):
+        raise NotImplementedError
+
+    # Will raise an error if used on invalid object
+    @post_data.setter
+    def post_data(self, value):
+        raise NotImplementedError
+
+
+class IOHandler(object):
+    """Base IO handling class that handle multple IO types
+
+    This class is created with NoneIOHandler that have no data
+    inside. To initialise data you can set the `file`, `url`, `data` or
+    `stream` attribute. If reset one of this attribute old data are lost and
+    replaced by the new one.
 
     :param workdir: working directory, to save temporal file objects in.
     :param mode: ``MODE`` validation mode.
@@ -120,7 +169,6 @@ class IOHandler(object):
     >>>
     >>> # testing file object on input
     >>> ioh_file.file = fileobj.name
-    >>> assert isinstance(ioh_file, FileHandler
     >>> assert ioh_file.file == fileobj.name
     >>> assert isinstance(ioh_file.stream, RawIOBase)
     >>> # skipped assert isinstance(ioh_file.memory_object, POSH)
@@ -129,16 +177,16 @@ class IOHandler(object):
     >>> ioh_stream = IOHandler(workdir=tmp)
     >>> assert ioh_stream.workdir == tmp
     >>> ioh_stream.stream = FileIO(fileobj.name,'r')
-    >>> assert isinstance(ioh_stream, StreamHandler)
     >>> assert open(ioh_stream.file).read() == ioh_file.stream.read()
     >>> assert isinstance(ioh_stream.stream, RawIOBase)
     """
-    prop = None
 
     def __init__(self, workdir=None, mode=MODE.NONE):
+
+        self._iohandler = NoneIOHandler(self)
+
         # Internal defaults for class and subclass properties.
         self._workdir = None
-        self._reset_cache()
 
         # Set public defaults
         self.workdir = workdir
@@ -148,21 +196,6 @@ class IOHandler(object):
         self.as_reference = False
         self.inpt = {}
         self.uuid = None  # request identifier
-        self.data_set = False
-
-        # This creates dummy property setters and getters for `file`, `data`, `url`, `stream` that
-        #  1. register the subclass methods according to the given property
-        #  2. replace the property setter by the subclass property setter
-        #  3. set the property
-        self._create_fset_properties()
-
-    def _reset_cache(self):
-        """Sets all internal objects to None."""
-        self._file = None
-        self._data = None
-        self._post_data = None
-        self._stream = None
-        self._url = None
         self.data_set = False
 
     def _check_valid(self):
@@ -184,6 +217,7 @@ class IOHandler(object):
     @workdir.setter
     def workdir(self, path):
         """Set working temporary directory for files to be stored in."""
+
         if path is not None:
             if not os.path.exists(path):
                 os.makedirs(path)
@@ -254,58 +288,94 @@ class IOHandler(object):
         """
         return deepcopy(self)
 
-    @staticmethod
-    def _create_fset_properties():
-        """Create properties that when set for the first time, will determine
-        the instance's handler class.
+    @property
+    def base64(self):
+        """Return raw data
+        WARNING: may be bytes or str"""
+        return self._iohandler.base64
 
-        Example
-        -------
-        >>> h = IOHandler()
-        >>> isinstance(h, DataHandler)
-        False
-        >>> h.data = 1 # Mixes the DataHandler class to IOHandler. h inherits DataHandler methods.
-        >>> isinstance(h, DataHandler)
-        True
-
-        Note that trying to set another attribute (e.g. `h.file = 'a.txt'`) will raise an AttributeError.
+    @property
+    def size(self):
+        """Return object size in bytes.
         """
-        for cls in (FileHandler, DataHandler, StreamHandler, UrlHandler):
-            def fset(s, value, kls=cls):
-                """Assign the handler class and set the value to the attribute.
+        return self._iohandler.size
 
-                This function will only be called once. The next `fset` will
-                use the subclass' property.
-                """
-                # Add cls methods to this instance.
-                extend_instance(s, kls)
+    @property
+    def file(self):
+        """Return a file name"""
+        return self._iohandler.file
 
-                # Set the attribute value through the associated cls property.
-                setattr(s, kls.prop, value)
+    @file.setter
+    def file(self, value):
+        self._iohandler = FileHandler(value, self)
+        self._check_valid()
 
-            setattr(IOHandler, cls.prop, property(fget=lambda x: None, fset=fset))
+    @property
+    def data(self):
+        """Return raw data
+        WARNING: may be bytes or str"""
+        return self._iohandler.data
+
+    @data.setter
+    def data(self, value):
+        self._iohandler = DataHandler(value, self)
+        self._check_valid()
+
+    @property
+    def stream(self):
+        """Return stream of data
+        WARNING: may be FileIO or StringIO"""
+        return self._iohandler.stream
+
+    @stream.setter
+    def stream(self, value):
+        self._iohandler = StreamHandler(value, self)
+        self._check_valid()
+
+    @property
+    def url(self):
+        """Return the url of data"""
+        return self._iohandler.url
+
+    @url.setter
+    def url(self, value):
+        self._iohandler = UrlHandler(value, self)
+        self._check_valid()
+
+    # FIXME: post_data is only related to url, this should be initialize with url setter
+    @property
+    def post_data(self):
+        return self._iohandler.post_data
+
+    # Will raise an arror if used on invalid object
+    @post_data.setter
+    def post_data(self, value):
+        self._iohandler.post_data = value
+
+    @property
+    def prop(self):
+        return self._iohandler.prop
 
 
-class FileHandler(IOHandler):
+class FileHandler(NoneIOHandler):
     prop = 'file'
+
+    def __init__(self, value, ref):
+        self._ref = weakref.ref(ref)
+        self._data = None
+        self._stream = None
+        self._file = os.path.abspath(value)
 
     @property
     def file(self):
         """Return filename."""
         return self._file
 
-    @file.setter
-    def file(self, value):
-        """Set file name"""
-        self._reset_cache()
-        self._file = os.path.abspath(value)
-        self._check_valid()
-
     @property
     def data(self):
         """Read file and return content."""
         if self._data is None:
-            openmode = self._openmode()
+            openmode = self._openmode(self._ref())
             kwargs = {} if 'b' in openmode else {'encoding': 'utf8'}
             with open(self.file, mode=openmode, **kwargs) as fh:
                 self._data = fh.read()
@@ -321,16 +391,11 @@ class FileHandler(IOHandler):
     def stream(self):
         """Return stream object."""
         from io import FileIO
-        if getattr(self, '_stream', None) and not self._stream.closed:
+        if self._stream and not self._stream.closed:
             self._stream.close()
 
         self._stream = FileIO(self.file, mode='r', closefd=True)
         return self._stream
-
-    @property
-    def mem(self):
-        """Return memory object."""
-        raise NotImplementedError
 
     @property
     def url(self):
@@ -343,16 +408,16 @@ class FileHandler(IOHandler):
         """Length of the linked content in octets."""
         return os.stat(self.file).st_size
 
-    def _openmode(self, data=None):
+    def _openmode(self, base, data=None):
         openmode = 'r'
         # in Python 3 we need to open binary files in binary mode.
         checked = False
-        if hasattr(self, 'data_format'):
-            if self.data_format.encoding == 'base64':
+        if hasattr(base, 'data_format'):
+            if base.data_format.encoding == 'base64':
                 # binary, when the data is to be encoded to base64
                 openmode += 'b'
                 checked = True
-            elif 'text/' in self.data_format.mime_type:
+            elif 'text/' in base.data_format.mime_type:
                 # not binary, when mime_type is 'text/'
                 checked = True
         # when we can't guess it from the mime_type, we need to check the file.
@@ -365,6 +430,12 @@ class FileHandler(IOHandler):
 class DataHandler(FileHandler):
     prop = 'data'
 
+    def __init__(self, value, ref):
+        self._ref = weakref.ref(ref)
+        self._file = None
+        self._stream = None
+        self._data = value
+
     def _openmode(self, data=None):
         openmode = 'w'
         if isinstance(data, bytes):
@@ -376,13 +447,7 @@ class DataHandler(FileHandler):
     @property
     def data(self):
         """Return data."""
-        return getattr(self, '_data', None)
-
-    @data.setter
-    def data(self, value):
-        self._reset_cache()
-        self._data = value
-        self._check_valid()
+        return self._data
 
     @property
     def file(self):
@@ -391,7 +456,7 @@ class DataHandler(FileHandler):
         Requesting the file attributes writes the data to a temporary file on disk.
         """
         if self._file is None:
-            self._file = self._build_file_name()
+            self._file = self._ref()._build_file_name()
             openmode = self._openmode(self.data)
             kwargs = {} if 'b' in openmode else {'encoding': 'utf8'}
             with open(self._file, openmode, **kwargs) as fh:
@@ -411,17 +476,16 @@ class DataHandler(FileHandler):
 class StreamHandler(DataHandler):
     prop = 'stream'
 
+    def __init__(self, value, ref):
+        self._ref = weakref.ref(ref)
+        self._file = None
+        self._data = None
+        self._stream = value
+
     @property
     def stream(self):
         """Return the stream."""
         return self._stream
-
-    @stream.setter
-    def stream(self, value):
-        """Set the stream."""
-        self._reset_cache()
-        self._stream = value
-        self._check_valid()
 
     @property
     def data(self):
@@ -434,17 +498,18 @@ class StreamHandler(DataHandler):
 class UrlHandler(FileHandler):
     prop = 'url'
 
+    def __init__(self, value, ref):
+        self._ref = weakref.ref(ref)
+        self._file = None
+        self._data = None
+        self._stream = None
+        self._url = value
+        self._post_data = None
+
     @property
     def url(self):
         """Return the URL."""
         return self._url
-
-    @url.setter
-    def url(self, value):
-        """Set the URL value."""
-        self._reset_cache()
-        self._url = value
-        self._check_valid()
 
     @property
     def file(self):
@@ -454,7 +519,7 @@ class UrlHandler(FileHandler):
         if self._file is not None:
             return self._file
 
-        self._file = self._build_file_name(href=self.url)
+        self._file = self._ref()._build_file_name(href=self.url)
 
         max_byte_size = self.max_size()
 
@@ -466,7 +531,7 @@ class UrlHandler(FileHandler):
             raise NoApplicableCode('File reference error: {}'.format(e))
 
         error_message = 'File size for input "{}" exceeded. Maximum allowed: {}'.format(
-            self.inpt.get('identifier', '?'), humanize.naturalsize(max_byte_size))
+            self._ref().inpt.get('identifier', '?'), humanize.naturalsize(max_byte_size))
 
         if int(max_byte_size) > 0:
             if int(data_size) > int(max_byte_size):
@@ -530,7 +595,7 @@ class UrlHandler(FileHandler):
         return byte_size
 
 
-class SimpleHandler(DataHandler):
+class SimpleHandler(IOHandler):
     """Data handler for Literal In- and Outputs
 
     >>> class Int_type(object):
@@ -553,19 +618,19 @@ class SimpleHandler(DataHandler):
     """
 
     def __init__(self, workdir=None, data_type=None, mode=MODE.NONE):
-        DataHandler.__init__(self, workdir=workdir, mode=mode)
+        IOHandler.__init__(self, workdir=workdir, mode=mode)
         if data_type not in LITERAL_DATA_TYPES:
             raise ValueError('data_type {} not in {}'.format(data_type, LITERAL_DATA_TYPES))
         self.data_type = data_type
 
-    @DataHandler.data.setter
+    @IOHandler.data.setter
     def data(self, value):
         """Set data value. Inputs are converted into target format.
         """
         if self.data_type and value is not None:
             value = convert(self.data_type, value)
 
-        DataHandler.data.fset(self, value)
+        IOHandler.data.fset(self, value)
 
 
 class BasicIO:
@@ -826,7 +891,7 @@ class LiteralOutput(BasicIO, BasicLiteral, SimpleHandler):
         return validate_anyvalue
 
 
-class BBoxInput(BasicIO, BasicBoundingBox, DataHandler):
+class BBoxInput(BasicIO, BasicBoundingBox, IOHandler):
     """Basic Bounding box input abstract class
     """
 
@@ -846,7 +911,7 @@ class BBoxInput(BasicIO, BasicBoundingBox, DataHandler):
                          translations=translations,
                          )
         BasicBoundingBox.__init__(self, crss, dimensions)
-        DataHandler.__init__(self, workdir=workdir, mode=mode)
+        IOHandler.__init__(self, workdir=workdir, mode=mode)
 
         if default_type != SOURCE_TYPE.DATA:
             raise InvalidParameterValue("Source types other than data are not supported.")
@@ -857,7 +922,7 @@ class BBoxInput(BasicIO, BasicBoundingBox, DataHandler):
         self._set_default_value(default, default_type)
 
 
-class BBoxOutput(BasicIO, BasicBoundingBox, DataHandler):
+class BBoxOutput(BasicIO, BasicBoundingBox, IOHandler):
     """Basic BoundingBox output class
     """
 
@@ -865,7 +930,7 @@ class BBoxOutput(BasicIO, BasicBoundingBox, DataHandler):
                  dimensions=None, workdir=None, mode=MODE.NONE, translations=None):
         BasicIO.__init__(self, identifier, title, abstract, keywords, translations=translations)
         BasicBoundingBox.__init__(self, crss, dimensions)
-        DataHandler.__init__(self, workdir=workdir, mode=mode)
+        IOHandler.__init__(self, workdir=workdir, mode=mode)
         self._storage = None
 
     @property
@@ -910,8 +975,6 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
     def file_handler(self, inpt):
         """<wps:Reference /> handler.
         Used when href is a file url."""
-        extend_instance(self, FileHandler)
-
         # check if file url is allowed
         self._validate_file_input(href=inpt.get('href'))
         # save the file reference input in workdir
