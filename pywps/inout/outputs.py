@@ -231,7 +231,7 @@ class ComplexOutput(basic.ComplexOutput):
                         # Try to inline data as text but if fail encode is in base64
                         if self.data_format.encoding == 'utf-8':
                             out = self.data.decode('utf-8')
-                            # If data is already enclose with CDATApatern do not add it twise
+                            # If data is already enclosed with CDATA pattern, do not add it twice
                             if CDATA_PATTERN.match(out):
                                 data["data"] = out
                             else:
