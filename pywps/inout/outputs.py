@@ -8,6 +8,7 @@ WPS Output classes
 
 import lxml.etree as etree
 import os
+import re
 from pywps.app.Common import Metadata
 from pywps.exceptions import InvalidParameterValue
 from pywps.inout import basic
@@ -145,11 +146,6 @@ class ComplexOutput(basic.ComplexOutput):
             'translations': self.translations,
         }
 
-        if self.as_reference:
-            data = self._json_reference(data)
-        else:
-            data = self._json_data(data)
-
         if self.data_format:
             if self.data_format.mime_type:
                 data['mimetype'] = self.data_format.mime_type
@@ -157,6 +153,11 @@ class ComplexOutput(basic.ComplexOutput):
                 data['encoding'] = self.data_format.encoding
             if self.data_format.schema:
                 data['schema'] = self.data_format.schema
+
+        if self.as_reference:
+            data = self._json_reference(data)
+        else:
+            data = self._json_data(data)
 
         return data
 
@@ -209,6 +210,8 @@ class ComplexOutput(basic.ComplexOutput):
     def _json_data(self, data):
         """Return Data node
         """
+        # Match only data that are safe CDATA pattern.
+        CDATA_PATTERN = re.compile(r'^<!\[CDATA\[((?!\]\]>).)*\]\]>$')
 
         data["type"] = "complex"
 
@@ -222,15 +225,39 @@ class ComplexOutput(basic.ComplexOutput):
             else:
                 if self.data_format.encoding == 'base64':
                     data["data"] = self.base64.decode('utf-8')
-
                 else:
                     # Otherwise we assume all other formats are unsafe and need to be enclosed in a CDATA tag.
                     if isinstance(self.data, bytes):
-                        out = self.data.encode(self.data_format.encoding or 'utf-8')
+                        # Try to inline data as text but if fail encode is in base64
+                        if self.data_format.encoding == 'utf-8':
+                            out = self.data.decode('utf-8')
+                            # If data is already enclosed with CDATA pattern, do not add it twice
+                            if CDATA_PATTERN.match(out):
+                                data["data"] = out
+                            else:
+                                # Check if the data does not contain ]]> patern if is safe to use CDATA
+                                # other wise we fallback to base64 encoding.
+                                if not re.search('\\]\\]>', out):
+                                    data["data"] = '<![CDATA[{}]]>'.format(out)
+                                else:
+                                    data['encoding'] = 'base64'  # override the unsafe encoding
+                                    data["data"] = self.base64.decode('utf-8')
+                        else:
+                            data['encoding'] = 'base64'  # override the unsafe encoding
+                            data["data"] = self.base64.decode('utf-8')
                     else:
-                        out = self.data
-
-                    data["data"] = '<![CDATA[{}]]>'.format(out)
+                        out = str(self.data)
+                        # If data is already enclose with CDATApatern do not add it twise
+                        if CDATA_PATTERN.match(out):
+                            data["data"] = out
+                        else:
+                            # Check if the data does not contain ]]> patern if is safe to use CDATA
+                            # other wise we fallback to base64 encoding.
+                            if not re.search('\\]\\]>', out):
+                                data["data"] = '<![CDATA[{}]]>'.format(out)
+                            else:
+                                data['encoding'] = 'base64'  # override the unsafe encoding
+                                data["data"] = self.base64.decode('utf-8')
 
         return data
 
