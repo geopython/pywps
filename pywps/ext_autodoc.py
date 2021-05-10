@@ -2,7 +2,6 @@
 from sphinx.ext.autodoc import ClassDocumenter, bool_option
 from sphinx.ext.napoleon.docstring import NumpyDocstring
 from sphinx.util.docstrings import prepare_docstring
-from sphinx.util import force_decode
 from docutils.parsers.rst import directives
 from pywps import Process
 from pywps.app.Common import Metadata, MetadataUrl
