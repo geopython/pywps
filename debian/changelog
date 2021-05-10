@@ -1,3 +1,15 @@
+pywps (4.4.3) trusty; urgency=medium
+
+  * Using pytest ... xfail online opendap tests (#605).
+  * Update geojson mimetype in validators to match that of FORMATS (#604).
+  * Simplify the implementation of IOHandler (#602).
+  * Give a nicer name of the output file in raw data mode using Content-Disposition (#601).
+  * Fix the mimetype of the raw data output (#599).
+  * Fix erroneous encode of bytes array (#598).
+  * Fix kvp decoding to follow specification (#597).
+
+ -- Carsten Ehbrecht <ehbrecht@dkrz.de>  Mon, 10 May 2021 18:00:00 +0000
+
 pywps (4.4.2) trusty; urgency=medium
 
   * Added csv format (#593).
