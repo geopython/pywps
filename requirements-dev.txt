@@ -3,7 +3,7 @@ coveralls
 pytest
 flake8
 pylint
-Sphinx
+Sphinx<4.0
 twine
 wheel
 bump2version
