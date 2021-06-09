@@ -24,8 +24,10 @@ RAW_OPTIONS = [('logging', 'format'), ]
 CONFIG = None
 LOGGER = logging.getLogger("PYWPS")
 
+wps_strict = True
 
-def get_config_value(section, option):
+
+def get_config_value(section, option, default_value=''):
     """Get desired value from  configuration files
 
     :param section: section in configuration files
@@ -38,7 +40,7 @@ def get_config_value(section, option):
     if not CONFIG:
         load_configuration()
 
-    value = ''
+    value = default_value
 
     if CONFIG.has_section(section):
         if CONFIG.has_option(section, option):
@@ -95,6 +97,13 @@ def load_configuration(cfgfiles=None):
     # from the workdir to the output folder.
     # Allowed functions: "copy", "move", "link" (default "copy")
     CONFIG.set('server', 'storage_copy_function', 'copy')
+
+    # handles the default mimetype for requests.
+    # available options: "text/xml", "application/json"
+    CONFIG.set("server", "default_mimetype", "text/xml")
+
+    # default json indentation for responses.
+    CONFIG.set("server", "json_indent", "2")
 
     CONFIG.add_section('processing')
     CONFIG.set('processing', 'mode', 'default')
