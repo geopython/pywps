@@ -233,8 +233,14 @@ class ExecuteResponse(WPSResponse):
                     return NoApplicableCode("Expected output was not generated")
                 suffix = ''
                 # if isinstance(wps_output_value, ComplexOutput):
-                if hasattr(wps_output_value, 'data_format'):
+                data_format = None
+                if hasattr(wps_output_value, 'output_format'):
+                    # this is set in the response, thus should be more precise
+                    data_format = wps_output_value.output_format
+                elif hasattr(wps_output_value, 'data_format'):
+                    # this is set in the process' response _handler function, thus could have a few supported formats
                     data_format = wps_output_value.data_format
+                if data_format is not None:
                     mimetype = data_format.mime_type
                     if data_format.extension is not None:
                         suffix = data_format.extension
