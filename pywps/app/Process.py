@@ -287,7 +287,7 @@ class Process(object):
             wps_response._update_status(WPS_STATUS.FAILED, msg, 100)
 
         finally:
-            # The run of the next pending request if finished here, weather or not it successfull
+            # The run of the next pending request if finished here, weather or not it successful
             self.launch_next_process()
 
         return wps_response
