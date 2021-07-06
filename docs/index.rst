@@ -38,6 +38,7 @@ Contents:
    external-tools
    extensions
    api
+   api_rest
    contributing
    exceptions
 

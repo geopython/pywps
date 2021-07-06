@@ -165,6 +165,7 @@ class WPSRequest(object):
 
             acceptedversions = _get_get_param(http_request, 'acceptversions')
             wpsrequest.check_accepted_versions(acceptedversions)
+            wpsrequest.default_mimetype = _get_get_param(http_request, 'f', wpsrequest.default_mimetype)
 
         def parse_get_describeprocess(http_request):
             """Parse GET DescribeProcess request
@@ -176,6 +177,7 @@ class WPSRequest(object):
                 http_request, 'identifier', wpsrequest.identifiers, aslist=True)
             if wpsrequest.identifiers is None and self.identifier is not None:
                 wpsrequest.identifiers = [wpsrequest.identifier]
+            wpsrequest.default_mimetype = _get_get_param(http_request, 'f', wpsrequest.default_mimetype)
 
         def parse_get_execute(http_request):
             """Parse GET Execute request
