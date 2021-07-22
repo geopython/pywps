@@ -330,7 +330,76 @@ POST Execute Response:
     Hello Dude
 
 
-The example above only shows `LiteralInput`.
+Example for a reference input:
+
+.. code-block::
+
+    "raster": {
+        "type": "reference",
+        "href": "file:./path/to/data/data.tif"
+    }
+
+Example for a BoundingBox input:
+(bbox default axis order is yx (EPSG:4326), i.e. miny, minx, maxy, maxx)
+
+.. code-block::
+
+    "extent": {
+        "type": "bbox",
+        "bbox": [32, 34.7, 32.1, 34.8]
+    }
+
+
+Example for a ComplexInput input:
+(the data is a standard GeoJSON)
+
+.. code-block::
+
+    "cutline": {
+        "type": "complex",
+        "data": {
+            "type": "FeatureCollection",
+            "name": "Center",
+            "crs": {
+                "type": "name",
+                "properties": {
+                    "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+                }
+            },
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [
+                            [
+                                [
+                                    34.76844787397541,
+                                    32.07247233606565
+                                ],
+                                [
+                                    34.78658619364754,
+                                    32.07260143442631
+                                ],
+                                [
+                                    34.77780750512295,
+                                    32.09532274590172
+                                ],
+                                [
+                                    34.76844787397541,
+                                    32.07247233606565
+                                ]
+                            ]
+                        ]
+                    }
+                }
+            ]
+        }
+    }
+
+
+The examples above show some `Literal`, 'Complex', `BoundingBox` inputs.
 Internally, PyWPS always keeps the inputs in JSON formats (also in previous versions)
 So potentially all input types that are supported in XML should also be supported in JSON,
 though only a small subset of them were tested in this preliminary implementation.
