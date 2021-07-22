@@ -2,6 +2,7 @@
 # Copyright 2018 Open Source Geospatial Foundation and others    #
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
+import json
 from pathlib import PurePath
 
 from pywps.inout.formats import Supported_Formats
@@ -463,7 +464,10 @@ class DataHandler(FileHandler):
             openmode = self._openmode(self.data)
             kwargs = {} if 'b' in openmode else {'encoding': 'utf8'}
             with open(self._file, openmode, **kwargs) as fh:
-                fh.write(self.data)
+                if isinstance(self.data, (bytes, str)):
+                    fh.write(self.data)
+                else:
+                    json.dump(self.data, fh)
 
         return self._file
 
