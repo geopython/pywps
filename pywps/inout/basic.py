@@ -646,7 +646,7 @@ class BasicIO:
         self.title = title
         self.abstract = abstract
         self.keywords = keywords
-        self.min_occurs = int(min_occurs)
+        self.min_occurs = int(min_occurs) if min_occurs is not None else 0
         self.max_occurs = int(max_occurs) if max_occurs is not None else None
         self.metadata = metadata
         self.translations = lower_case_dict(translations)

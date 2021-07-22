@@ -83,16 +83,16 @@ class BoundingBoxInput(basic.BBoxInput):
     def from_json(cls, json_input):
         instance = cls(
             identifier=json_input['identifier'],
-            title=json_input['title'],
-            abstract=json_input['abstract'],
-            crss=json_input['crss'],
-            keywords=json_input['keywords'],
+            title=json_input.get('title'),
+            abstract=json_input.get('abstract'),
+            crss=json_input.get('crss'),
+            keywords=json_input.get('keywords'),
             metadata=[Metadata.from_json(data) for data in json_input.get('metadata', [])],
-            dimensions=json_input['dimensions'],
-            workdir=json_input['workdir'],
-            mode=json_input['mode'],
-            min_occurs=json_input['min_occurs'],
-            max_occurs=json_input['max_occurs'],
+            dimensions=json_input.get('dimensions'),
+            workdir=json_input.get('workdir'),
+            mode=json_input.get('mode'),
+            min_occurs=json_input.get('min_occurs'),
+            max_occurs=json_input.get('max_occurs'),
             translations=json_input.get('translations'),
         )
         instance.data = json_input['bbox']

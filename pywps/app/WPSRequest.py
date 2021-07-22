@@ -4,6 +4,8 @@
 ##################################################################
 
 import logging
+from collections import Sequence
+
 import lxml
 import lxml.etree
 from werkzeug.exceptions import MethodNotAllowed
@@ -618,9 +620,9 @@ def get_inputs_from_json(jdoc):
             if not isinstance(inpt_def, dict):
                 inpt_def = {"data": inpt_def}
             data_type = inpt_def.get('type', 'literal')
+            inpt = {}
+            inpt['identifier'] = identifier
             if data_type == 'literal':
-                inpt = {}
-                inpt['identifier'] = identifier
                 inpt['data'] = inpt_def.get('data')
                 inpt['uom'] = inpt_def.get('uom', '')
                 inpt['datatype'] = inpt_def.get('datatype', '')
@@ -628,8 +630,6 @@ def get_inputs_from_json(jdoc):
                 continue
 
             if data_type == 'complex':
-                inpt = {}
-                inpt['identifier'] = identifier
                 inpt['mimeType'] = inpt_def.get('mimeType', None)
                 inpt['encoding'] = inpt_def.get('encoding', '').lower()
                 inpt['schema'] = inpt_def.get('schema', '')
@@ -644,8 +644,6 @@ def get_inputs_from_json(jdoc):
                 continue
 
             if data_type == 'reference':
-                inpt = {}
-                inpt['identifier'] = identifier
                 inpt[identifier] = inpt_def
                 inpt['href'] = inpt_def.get('href', '')
                 inpt['mimeType'] = inpt_def.get('mimeType', None)
@@ -657,14 +655,10 @@ def get_inputs_from_json(jdoc):
                 continue
 
             if data_type == 'bbox':
-                # Using OWSlib BoundingBox
-                from owslib.ows import BoundingBox
-                bbox_datas = inpt_def
-                for bbox_data in bbox_datas:
-                    bbox_data_el = bbox_data
-                    bbox = BoundingBox(bbox_data_el)
-                    the_inputs[identifier].append(bbox)
-                    LOGGER.debug("parse bbox: {},{},{},{}".format(bbox.minx, bbox.miny, bbox.maxx, bbox.maxy))
+                inpt['data'] = inpt_def['bbox']
+                inpt['crs'] = inpt_def.get('crs', 'urn:ogc:def:crs:EPSG::4326')
+                inpt['dimensions'] = inpt_def.get('dimensions', 2)
+                the_inputs[identifier].append(inpt)
     return the_inputs
 
 
