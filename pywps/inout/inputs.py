@@ -221,9 +221,10 @@ class ComplexInput(basic.ComplexInput):
         elif json_input.get('data'):
             data = json_input['data']
             # remove cdata tag if it exists (issue #553)
-            match = CDATA_PATTERN.match(data)
-            if match:
-                data = match.group(1)
+            if isinstance(data, str):
+                match = CDATA_PATTERN.match(data)
+                if match:
+                    data = match.group(1)
             instance.data = data
 
         return instance
