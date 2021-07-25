@@ -17,7 +17,7 @@ from pywps.inout.storage.file import FileStorageBuilder
 from pywps.inout.types import Translations
 from pywps.validator.mode import MODE
 from pywps import configuration as config
-from pywps.inout.formats import Format, Supported_Formats
+from pywps.inout.formats import Format, Supported_Formats, FORMATS
 
 
 class BoundingBoxOutput(basic.BBoxOutput):
@@ -213,14 +213,12 @@ class ComplexOutput(basic.ComplexOutput):
     def _json_data(self, data):
         """Return Data node
         """
-        # Match only data that are safe CDATA pattern.
-        CDATA_PATTERN = re.compile(r'^<!\[CDATA\[((?!\]\]>).)*\]\]>$')
-
         data["type"] = "complex"
 
         if self.data:
-
-            if self.data_format.mime_type in ["application/xml", "application/gml+xml", "text/xml"]:
+            if self.data_format.mime_type in [FORMATS.GEOJSON.mime_type, FORMATS.JSON.mime_type]:
+                data["data"] = self.data
+            elif self.data_format.mime_type in ["application/xml", "application/gml+xml", "text/xml"]:
                 # Note that in a client-server round trip, the original and returned file will not be identical.
                 data_doc = etree.parse(self.file)
                 data["data"] = etree.tostring(data_doc, pretty_print=True).decode('utf-8')
@@ -229,6 +227,9 @@ class ComplexOutput(basic.ComplexOutput):
                 if self.data_format.encoding == 'base64':
                     data["data"] = self.base64.decode('utf-8')
                 else:
+                    # Match only data that are safe CDATA pattern.
+                    CDATA_PATTERN = re.compile(r'^<!\[CDATA\[((?!\]\]>).)*\]\]>$')
+
                     # Otherwise we assume all other formats are unsafe and need to be enclosed in a CDATA tag.
                     if isinstance(self.data, bytes):
                         # Try to inline data as text but if fail encode is in base64
