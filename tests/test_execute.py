@@ -114,12 +114,17 @@ def create_bbox_process():
                    outputs=[BoundingBoxOutput('outbbox', 'Output message', ["EPSG:4326"])])
 
 
-def create_complex_proces():
+def create_complex_proces(mime_type: str = 'gml'):
     def complex_proces(request, response):
-        response.outputs['complex'].data = request.inputs['complex'][0].data
+        response.outputs['complex'].data = request.inputs['complex'][0].data_as_json()
         return response
 
-    frmt = Format(mime_type='application/gml', extension=".gml")  # this is unknown mimetype
+    if mime_type == 'gml':
+        frmt = Format(mime_type='application/gml', extension=".gml")  # this is unknown mimetype
+    elif mime_type == 'geojson':
+        frmt = FORMATS.GEOJSON
+    else:
+        raise Exception(f'Unknown mime type {mime_type}')
 
     return Process(handler=complex_proces,
                    identifier='my_complex_process',
@@ -501,6 +506,47 @@ class ExecuteTest(unittest.TestCase):
         upper_corner = upper_corner.strip().replace('  ', ' ')
         self.assertEqual('16.0 51.0', upper_corner)
 
+    def test_bbox_rest(self):
+        client = client_for(Service(processes=[create_bbox_process()]))
+        bbox = [15.0, 50.0, 16.0, 51.0]
+        request = dict(
+            identifier='my_bbox_process',
+            version='1.0.0',
+            inputs={
+                'mybbox': {
+                    "type": "bbox",
+                    'bbox': bbox,
+                }
+            },
+        )
+        result = {'outbbox': bbox}
+
+        resp = client.post_json(doc=request)
+        assert_response_success_json(resp, result)
+
+    def test_geojson_input_rest(self):
+        geojson = os.path.join(DATA_DIR, 'json', 'point.geojson')
+        with open(geojson) as f:
+            p = json.load(f)
+
+        my_process = create_complex_proces('geojson')
+        client = client_for(Service(processes=[my_process]))
+
+        request = dict(
+            identifier='my_complex_process',
+            version='1.0.0',
+            inputs={
+                'complex': {
+                    "type": "complex",
+                    'data': p
+                }
+            },
+        )
+        result = {'complex': p}
+
+        resp = client.post_json(doc=request)
+        assert_response_success_json(resp, result)
+
     def test_output_response_dataType(self):
         client = client_for(Service(processes=[create_greeter()]))
         request_doc = WPS.Execute(
@@ -516,6 +562,39 @@ class ExecuteTest(unittest.TestCase):
         resp = client.post_xml(doc=request_doc)
         el = next(resp.xml.iter('{http://www.opengis.net/wps/1.0.0}LiteralData'))
         assert el.attrib['dataType'] == 'string'
+
+
+class AllowedInputReferenceExecuteTest(unittest.TestCase):
+
+    def setUp(self):
+        self.allowedinputpaths = configuration.get_config_value('server', 'allowedinputpaths')
+        configuration.CONFIG.set('server', 'allowedinputpaths', DATA_DIR)
+
+    def tearDown(self):
+        configuration.CONFIG.set('server', 'allowedinputpaths', self.allowedinputpaths)
+
+    def test_geojson_input_reference_rest(self):
+        geojson = os.path.join(DATA_DIR, 'json', 'point.geojson')
+        with open(geojson) as f:
+            p = json.load(f)
+
+        my_process = create_complex_proces('geojson')
+        client = client_for(Service(processes=[my_process]))
+
+        request = dict(
+            identifier='my_complex_process',
+            version='1.0.0',
+            inputs={
+                'complex': {
+                    "type": "reference",
+                    "href": f"file:{geojson}"
+                }
+            },
+        )
+        result = {'complex': p}
+
+        resp = client.post_json(doc=request)
+        assert_response_success_json(resp, result)
 
 
 class ExecuteTranslationsTest(unittest.TestCase):
