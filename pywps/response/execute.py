@@ -196,7 +196,16 @@ class ExecuteResponse(WPSResponse):
         response = dict()
         response['status'] = jdoc['status']
         out = jdoc['process']['outputs']
-        response['outputs'] = {val['identifier']: val['data'] for val in out if ('identifier' in val and 'data' in val)}
+        d = {}
+        for val in out:
+            id = val.get('identifier')
+            if id is None:
+                continue
+            type = val.get('type')
+            key = 'bbox' if type == 'bbox' else 'data'
+            if key in val:
+                d[id] = val[key]
+        response['outputs'] = d
         return response
 
     def _construct_doc(self):
