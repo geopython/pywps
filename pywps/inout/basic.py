@@ -320,6 +320,14 @@ class IOHandler(object):
         WARNING: may be bytes or str"""
         return self._iohandler.data
 
+    def data_as_json(self):
+        # applies json.loads if needed
+        data = self._iohandler.data
+        if data and not isinstance(self._iohandler, DataHandler) and self.extension in ['.geojson', 'json']:
+            data = json.loads(data)
+            self.data = data  # switch to a DataHandler
+        return data
+
     @data.setter
     def data(self, value):
         self._iohandler = DataHandler(value, self)
