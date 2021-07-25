@@ -620,30 +620,20 @@ def get_inputs_from_json(jdoc):
             if not isinstance(inpt_def, dict):
                 inpt_def = {"data": inpt_def}
             data_type = inpt_def.get('type', 'literal')
-            inpt = {}
-            inpt['identifier'] = identifier
+            inpt = {'identifier': identifier}
             if data_type == 'literal':
                 inpt['data'] = inpt_def.get('data')
                 inpt['uom'] = inpt_def.get('uom', '')
                 inpt['datatype'] = inpt_def.get('datatype', '')
                 the_inputs[identifier].append(inpt)
-                continue
-
-            if data_type == 'complex':
+            elif data_type == 'complex':
                 inpt['mimeType'] = inpt_def.get('mimeType', None)
                 inpt['encoding'] = inpt_def.get('encoding', '').lower()
                 inpt['schema'] = inpt_def.get('schema', '')
                 inpt['method'] = inpt_def.get('method', 'GET')
-                # if len(complex_data_el.getchildren()) > 0:
-                #     value_el = complex_data_el[0]
-                #     inpt['data'] = _get_dataelement_value(value_el)
-                # else:
-                if True:
-                    inpt['data'] = _get_rawvalue_value(inpt_def, inpt['encoding'])
+                inpt['data'] = _get_rawvalue_value(inpt_def.get('data', ''), inpt['encoding'])
                 the_inputs[identifier].append(inpt)
-                continue
-
-            if data_type == 'reference':
+            elif data_type == 'reference':
                 inpt[identifier] = inpt_def
                 inpt['href'] = inpt_def.get('href', '')
                 inpt['mimeType'] = inpt_def.get('mimeType', None)
@@ -652,9 +642,7 @@ def get_inputs_from_json(jdoc):
                 inpt['body'] = inpt_def.get('body', '')
                 inpt['bodyreference'] = inpt_def.get('bodyreference', '')
                 the_inputs[identifier].append(inpt)
-                continue
-
-            if data_type == 'bbox':
+            elif data_type == 'bbox':
                 inpt['data'] = inpt_def['bbox']
                 inpt['crs'] = inpt_def.get('crs', 'urn:ogc:def:crs:EPSG::4326')
                 inpt['dimensions'] = inpt_def.get('dimensions', 2)
