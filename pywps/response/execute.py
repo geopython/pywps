@@ -212,7 +212,9 @@ class ExecuteResponse(WPSResponse):
         if self.status == WPS_STATUS.SUCCEEDED and \
                 hasattr(self.wps_request, 'preprocess_response') and \
                 self.wps_request.preprocess_response:
-            self.outputs = self.wps_request.preprocess_response(self.outputs)
+            self.outputs = self.wps_request.preprocess_response(self.outputs,
+                                                                request=self.wps_request,
+                                                                http_request=self.wps_request.http_request)
         doc = self.json
         try:
             json_response, mimetype = get_response_type(

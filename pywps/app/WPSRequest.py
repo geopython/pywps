@@ -143,7 +143,7 @@ class WPSRequest(object):
             jdoc['default_mimetype'] = self.default_mimetype
 
             if self.preprocess_request is not None:
-                jdoc = self.preprocess_request(jdoc)
+                jdoc = self.preprocess_request(jdoc, http_request=self.http_request)
             self.json = jdoc
 
             version = jdoc.get('version')
