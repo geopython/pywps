@@ -4,7 +4,6 @@
 ##################################################################
 
 import logging
-from collections import Sequence
 
 import lxml
 import lxml.etree
