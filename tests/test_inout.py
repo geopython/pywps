@@ -11,7 +11,6 @@
 import requests
 import os
 import tempfile
-import datetime
 import unittest
 import json
 from pywps import inout
@@ -35,7 +34,6 @@ from pywps.inout.storage.file import FileStorageBuilder
 from pywps.tests import service_ok
 from pywps.translations import get_translation
 
-from lxml import etree
 
 DATA_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'data')
 

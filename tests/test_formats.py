@@ -8,9 +8,8 @@
 import unittest
 
 from pywps.inout.formats import Format, get_format, FORMATS
-from lxml import etree
 from pywps.app.basic import get_xpath_ns
-from pywps.validator.base import emptyvalidator
+
 
 xpath_ns = get_xpath_ns("1.0.0")
 
@@ -121,4 +120,3 @@ def load_tests(loader=None, tests=None, pattern=None):
         loader.loadTestsFromTestCase(FormatsTest)
     ]
     return unittest.TestSuite(suite_list)
-

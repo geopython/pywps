@@ -17,7 +17,7 @@ from werkzeug.datastructures import MIMEAccept
 from werkzeug.http import parse_accept_header
 from werkzeug.wrappers import Response
 from werkzeug.exceptions import HTTPException
-from werkzeug.utils import escape
+from markupsafe import escape
 
 import logging
 

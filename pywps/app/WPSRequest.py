@@ -6,7 +6,7 @@
 import logging
 
 import lxml
-import lxml.etree
+from pywps import xml_util as etree
 from werkzeug.exceptions import MethodNotAllowed
 from pywps import get_ElementMakerForVersion
 import base64
@@ -106,7 +106,7 @@ class WPSRequest(object):
         json_input = 'json' in content_type
         if not json_input:
             try:
-                doc = lxml.etree.fromstring(self.http_request.get_data())
+                doc = etree.fromstring(self.http_request.get_data())
             except Exception as e:
                 raise NoApplicableCode(e.msg)
             operation = doc.tag
@@ -754,7 +754,7 @@ def _get_dataelement_value(value_el):
     """
 
     if isinstance(value_el, lxml.etree._Element):
-        return lxml.etree.tostring(value_el, encoding=str)
+        return etree.tostring(value_el, encoding=str)
     else:
         return value_el
 

@@ -4,10 +4,9 @@
 ##################################################################
 
 import unittest
-from pywps import Process, Service, get_ElementMakerForVersion
+from pywps import Service, get_ElementMakerForVersion
 from pywps.app.basic import get_xpath_ns
 from pywps.tests import assert_pywps_version, client_for
-import lxml.etree
 
 import re
 

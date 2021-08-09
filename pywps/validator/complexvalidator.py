@@ -11,6 +11,8 @@ import logging
 
 from pywps.validator.mode import MODE
 from pywps.inout.formats import FORMATS
+from lxml.etree import XMLSchema
+from pywps import xml_util as etree
 from urllib.request import urlopen
 import mimetypes
 import os
@@ -61,13 +63,10 @@ def validategml(data_input, mode):
             passed = False
 
     if mode >= MODE.VERYSTRICT:
-
-        from lxml import etree
-
         try:
             schema_url = data_input.data_format.schema
             gmlschema_doc = etree.parse(urlopen(schema_url))
-            gmlschema = etree.XMLSchema(gmlschema_doc)
+            gmlschema = XMLSchema(gmlschema_doc)
             passed = gmlschema.validate(etree.parse(data_input.stream))
         except Exception as e:
             LOGGER.warning(e)
@@ -118,13 +117,10 @@ def validategpx(data_input, mode):
             passed = False
 
     if mode >= MODE.VERYSTRICT:
-
-        from lxml import etree
-
         try:
             schema_url = data_input.data_format.schema
             gpxschema_doc = etree.parse(urlopen(schema_url))
-            gpxschema = etree.XMLSchema(gpxschema_doc)
+            gpxschema = XMLSchema(gpxschema_doc)
             passed = gpxschema.validate(etree.parse(data_input.stream))
         except Exception as e:
             LOGGER.warning(e)
@@ -164,15 +160,13 @@ def validatexml(data_input, mode):
         passed = data_input.data_format.mime_type in {mtype, FORMATS.GML.mime_type}
 
     if mode >= MODE.STRICT:
-        from lxml import etree
-
         # TODO: Raise the actual validation exception to make it easier to spot the error.
         #  xml = etree.parse(data_input.file)
         #  schema.assertValid(xml)
         try:
             fn = os.path.join(_get_schemas_home(), data_input.data_format.schema)
             schema_doc = etree.parse(fn)
-            schema = etree.XMLSchema(schema_doc)
+            schema = XMLSchema(schema_doc)
             passed = schema.validate(etree.parse(data_input.file))
         except Exception as e:
             LOGGER.warning(e)

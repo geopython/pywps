@@ -2,12 +2,12 @@
 
 import unittest
 import os
-from pywps import get_ElementMakerForVersion, E
+from pywps import get_ElementMakerForVersion
 from pywps.app.basic import get_xpath_ns
 from pywps import Service, Process, ComplexInput, ComplexOutput, FORMATS
 from pywps.tests import client_for, assert_response_success
 from owslib.wps import WPSExecution, ComplexDataInput
-from lxml import etree
+from pywps import xml_util as etree
 
 VERSION = "1.0.0"
 WPS, OWS = get_ElementMakerForVersion(VERSION)
