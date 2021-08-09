@@ -1,6 +1,6 @@
 pywps (4.5.0) trusty; urgency=medium
 
-  * Initial implementation of OGC API - Processes / REST API (#612)
+  * Initial implementation of OGC API - Processes / REST API (#612, #614)
 
  -- Carsten Ehbrecht <ehbrecht@dkrz.de>  Mon, 19 Jul 2021 18:00:00 +0000
 
