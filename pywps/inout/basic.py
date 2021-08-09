@@ -2,6 +2,7 @@
 # Copyright 2018 Open Source Geospatial Foundation and others    #
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
+import json
 from pathlib import PurePath
 
 from pywps.inout.formats import Supported_Formats
@@ -319,6 +320,14 @@ class IOHandler(object):
         WARNING: may be bytes or str"""
         return self._iohandler.data
 
+    def data_as_json(self):
+        # applies json.loads if needed
+        data = self._iohandler.data
+        if data and not isinstance(self._iohandler, DataHandler) and self.extension in ['.geojson', 'json']:
+            data = json.loads(data)
+            self.data = data  # switch to a DataHandler
+        return data
+
     @data.setter
     def data(self, value):
         self._iohandler = DataHandler(value, self)
@@ -463,7 +472,10 @@ class DataHandler(FileHandler):
             openmode = self._openmode(self.data)
             kwargs = {} if 'b' in openmode else {'encoding': 'utf8'}
             with open(self._file, openmode, **kwargs) as fh:
-                fh.write(self.data)
+                if isinstance(self.data, (bytes, str)):
+                    fh.write(self.data)
+                else:
+                    json.dump(self.data, fh)
 
         return self._file
 
@@ -646,7 +658,7 @@ class BasicIO:
         self.title = title
         self.abstract = abstract
         self.keywords = keywords
-        self.min_occurs = int(min_occurs)
+        self.min_occurs = int(min_occurs) if min_occurs is not None else 0
         self.max_occurs = int(max_occurs) if max_occurs is not None else None
         self.metadata = metadata
         self.translations = lower_case_dict(translations)

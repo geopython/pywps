@@ -196,14 +196,25 @@ class ExecuteResponse(WPSResponse):
         response = dict()
         response['status'] = jdoc['status']
         out = jdoc['process']['outputs']
-        response['outputs'] = {val['identifier']: val['data'] for val in out if ('identifier' in val and 'data' in val)}
+        d = {}
+        for val in out:
+            id = val.get('identifier')
+            if id is None:
+                continue
+            type = val.get('type')
+            key = 'bbox' if type == 'bbox' else 'data'
+            if key in val:
+                d[id] = val[key]
+        response['outputs'] = d
         return response
 
     def _construct_doc(self):
         if self.status == WPS_STATUS.SUCCEEDED and \
                 hasattr(self.wps_request, 'preprocess_response') and \
                 self.wps_request.preprocess_response:
-            self.outputs = self.wps_request.preprocess_response(self.outputs)
+            self.outputs = self.wps_request.preprocess_response(self.outputs,
+                                                                request=self.wps_request,
+                                                                http_request=self.wps_request.http_request)
         doc = self.json
         try:
             json_response, mimetype = get_response_type(

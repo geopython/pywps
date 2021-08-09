@@ -4,6 +4,7 @@
 ##################################################################
 
 import logging
+
 import lxml
 import lxml.etree
 from werkzeug.exceptions import MethodNotAllowed
@@ -141,7 +142,7 @@ class WPSRequest(object):
             jdoc['default_mimetype'] = self.default_mimetype
 
             if self.preprocess_request is not None:
-                jdoc = self.preprocess_request(jdoc)
+                jdoc = self.preprocess_request(jdoc, http_request=self.http_request)
             self.json = jdoc
 
             version = jdoc.get('version')
@@ -618,34 +619,20 @@ def get_inputs_from_json(jdoc):
             if not isinstance(inpt_def, dict):
                 inpt_def = {"data": inpt_def}
             data_type = inpt_def.get('type', 'literal')
+            inpt = {'identifier': identifier}
             if data_type == 'literal':
-                inpt = {}
-                inpt['identifier'] = identifier
                 inpt['data'] = inpt_def.get('data')
                 inpt['uom'] = inpt_def.get('uom', '')
                 inpt['datatype'] = inpt_def.get('datatype', '')
                 the_inputs[identifier].append(inpt)
-                continue
-
-            if data_type == 'complex':
-                inpt = {}
-                inpt['identifier'] = identifier
+            elif data_type == 'complex':
                 inpt['mimeType'] = inpt_def.get('mimeType', None)
                 inpt['encoding'] = inpt_def.get('encoding', '').lower()
                 inpt['schema'] = inpt_def.get('schema', '')
                 inpt['method'] = inpt_def.get('method', 'GET')
-                # if len(complex_data_el.getchildren()) > 0:
-                #     value_el = complex_data_el[0]
-                #     inpt['data'] = _get_dataelement_value(value_el)
-                # else:
-                if True:
-                    inpt['data'] = _get_rawvalue_value(inpt_def, inpt['encoding'])
+                inpt['data'] = _get_rawvalue_value(inpt_def.get('data', ''), inpt['encoding'])
                 the_inputs[identifier].append(inpt)
-                continue
-
-            if data_type == 'reference':
-                inpt = {}
-                inpt['identifier'] = identifier
+            elif data_type == 'reference':
                 inpt[identifier] = inpt_def
                 inpt['href'] = inpt_def.get('href', '')
                 inpt['mimeType'] = inpt_def.get('mimeType', None)
@@ -654,17 +641,11 @@ def get_inputs_from_json(jdoc):
                 inpt['body'] = inpt_def.get('body', '')
                 inpt['bodyreference'] = inpt_def.get('bodyreference', '')
                 the_inputs[identifier].append(inpt)
-                continue
-
-            if data_type == 'bbox':
-                # Using OWSlib BoundingBox
-                from owslib.ows import BoundingBox
-                bbox_datas = inpt_def
-                for bbox_data in bbox_datas:
-                    bbox_data_el = bbox_data
-                    bbox = BoundingBox(bbox_data_el)
-                    the_inputs[identifier].append(bbox)
-                    LOGGER.debug("parse bbox: {},{},{},{}".format(bbox.minx, bbox.miny, bbox.maxx, bbox.maxy))
+            elif data_type == 'bbox':
+                inpt['data'] = inpt_def['bbox']
+                inpt['crs'] = inpt_def.get('crs', 'urn:ogc:def:crs:EPSG::4326')
+                inpt['dimensions'] = inpt_def.get('dimensions', 2)
+                the_inputs[identifier].append(inpt)
     return the_inputs
 
 
