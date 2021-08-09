@@ -6,4 +6,5 @@ python-dateutil
 requests
 SQLAlchemy
 werkzeug
+MarkupSafe
 humanize
