@@ -5,10 +5,11 @@
 import tempfile
 from pathlib import Path
 
-import lxml.etree
+import lxml
+from pywps import xml_util as etree
 import requests
 from werkzeug.test import Client
-from werkzeug.wrappers import BaseResponse
+from werkzeug.wrappers import Response
 from pywps import __version__
 from pywps import Process
 from pywps.inout import LiteralInput, LiteralOutput, ComplexInput, ComplexOutput, BoundingBoxInput, BoundingBoxOutput
@@ -93,17 +94,17 @@ class WpsClient(Client):
 
     def post_xml(self, *args, **kwargs):
         doc = kwargs.pop('doc')
-        data = lxml.etree.tostring(doc, pretty_print=True)
+        data = etree.tostring(doc, pretty_print=True)
         kwargs['data'] = data
         return self.post(*args, **kwargs)
 
 
-class WpsTestResponse(BaseResponse):
+class WpsTestResponse(Response):
 
     def __init__(self, *args):
         super(WpsTestResponse, self).__init__(*args)
         if re.match(r'text/xml(;\s*charset=.*)?', self.headers.get('Content-Type')):
-            self.xml = lxml.etree.fromstring(self.get_data())
+            self.xml = etree.fromstring(self.get_data())
 
     def xpath(self, path):
         version = self.xml.attrib["version"]

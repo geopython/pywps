@@ -4,7 +4,6 @@
 ##################################################################
 
 import unittest
-import lxml.etree
 from pywps.app import WPSRequest
 import tempfile
 import datetime

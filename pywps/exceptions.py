@@ -14,7 +14,7 @@ http://lists.opengeospatial.org/pipermail/wps-dev/2013-October/000335.html
 
 from werkzeug.wrappers import Response
 from werkzeug.exceptions import HTTPException
-from werkzeug.utils import escape
+from markupsafe import escape
 
 import logging
 

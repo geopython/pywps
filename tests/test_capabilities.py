@@ -4,13 +4,11 @@
 ##################################################################
 
 import unittest
-import lxml
-import lxml.etree
 from pywps import configuration
 from pywps.app import Process, Service
 from pywps.app.Common import Metadata
 from pywps import get_ElementMakerForVersion
-from pywps.tests import assert_pywps_version, client_for, assert_wps_version
+from pywps.tests import client_for, assert_wps_version
 
 WPS, OWS = get_ElementMakerForVersion("1.0.0")
 
