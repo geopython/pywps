@@ -5,7 +5,7 @@
 
 import unittest
 import pytest
-import lxml.etree
+from pywps import xml_util as etree
 import json
 import tempfile
 import os.path
@@ -13,16 +13,14 @@ from pywps import Service, Process, LiteralOutput, LiteralInput,\
     BoundingBoxOutput, BoundingBoxInput, Format, ComplexInput, ComplexOutput, FORMATS
 from pywps.validator.base import emptyvalidator
 from pywps.validator.complexvalidator import validategml
-from pywps.validator.mode import MODE
 from pywps.exceptions import InvalidParameterValue
-from pywps import get_inputs_from_xml, get_output_from_xml
+from pywps import get_inputs_from_xml
 from pywps import E, get_ElementMakerForVersion
 from pywps.app.basic import get_xpath_ns
 from pywps.tests import client_for, assert_response_success, assert_response_success_json
 from pywps import configuration
 
 from io import StringIO
-from owslib.ows import BoundingBox
 
 try:
     import netCDF4
@@ -228,7 +226,7 @@ def get_output(doc):
                 output[identifier_el.text] = data_el[0].text
             else:  # XML children
                 ch = list(data_el[0])[0]
-                output[identifier_el.text] = lxml.etree.tostring(ch)
+                output[identifier_el.text] = etree.tostring(ch)
 
     return output
 
@@ -700,7 +698,7 @@ class ExecuteXmlParserTest(unittest.TestCase):
                         WPS.ComplexData(the_data, mimeType='text/foobar')))))
         rv = get_inputs_from_xml(request_doc)
         self.assertEqual(rv['name'][0]['mimeType'], 'text/foobar')
-        rv_doc = lxml.etree.parse(StringIO(rv['name'][0]['data'])).getroot()
+        rv_doc = etree.parse(StringIO(rv['name'][0]['data'])).getroot()
         self.assertEqual(rv_doc.tag, 'TheData')
         self.assertEqual(rv_doc.text, 'hello world')
 

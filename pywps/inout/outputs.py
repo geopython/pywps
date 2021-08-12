@@ -7,7 +7,7 @@ WPS Output classes
 """
 from typing import Optional, Sequence, Dict, Union
 
-import lxml.etree as etree
+from pywps import xml_util as etree
 import os
 import re
 from pywps.app.Common import Metadata

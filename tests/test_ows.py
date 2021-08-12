@@ -9,8 +9,6 @@ __date__ = "10-03-2015"
 import os
 import tempfile
 import unittest
-import lxml.etree
-import sys
 from pywps import Service, Process, ComplexInput, ComplexOutput, Format, FORMATS, get_format
 from pywps.dependencies import ogr
 from pywps.exceptions import NoApplicableCode
