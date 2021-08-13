@@ -61,7 +61,6 @@ def test_assync_inout():
         version="1.0.0"
     )
     resp = client.post_xml(doc=request_doc)
-    print(resp.data)
     assert resp.status_code == 200
 
     # TODO:
