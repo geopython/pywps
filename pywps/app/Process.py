@@ -471,7 +471,7 @@ class Process(object):
                 for outpt in self.outputs:
                     if outpt.identifier == wps_outpt:
                         outpt.as_reference = is_reference
-                        if isinstance(outpt, ComplexOutput) and mimetype is not None:
+                        if isinstance(outpt, ComplexOutput) and mimetype:
                             data_format = [f for f in outpt.supported_formats if f.mime_type == mimetype]
                             if len(data_format) == 0:
                                 raise InvalidParameterValue(
