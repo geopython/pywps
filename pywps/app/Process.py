@@ -457,7 +457,7 @@ class Process(object):
             for wps_outpt in wps_request.outputs:
 
                 is_reference = wps_request.outputs[wps_outpt].get('asReference', 'false')
-                mimetype = wps_request.outputs[wps_outpt].get('mimetype', '')
+                mimetype = wps_request.outputs[wps_outpt].get('mimetype', None)
                 if is_reference.lower() == 'true':
                     # check if store is supported
                     if self.store_supported == 'false':
@@ -471,9 +471,9 @@ class Process(object):
                 for outpt in self.outputs:
                     if outpt.identifier == wps_outpt:
                         outpt.as_reference = is_reference
-                        if isinstance(outpt, ComplexOutput) and mimetype != '':
+                        if isinstance(outpt, ComplexOutput) and mimetype is not None:
                             data_format = [f for f in outpt.supported_formats if f.mime_type == mimetype]
                             if len(data_format) == 0:
                                 raise InvalidParameterValue(
-                                    'MimeType ' + mimetype + ' not valid')
+                                    f"MimeType {mimetype} not valid")
                             outpt.data_format = data_format[0]
