@@ -13,5 +13,4 @@ The PyWPS Project Steering Committee will release patches for security vulnerabi
 | ------- | ------------------ |
 | 4.5.x | :white_check_mark: |
 | 4.4.x | :white_check_mark: |
-| 4.2.x | :white_check_mark: |
-| < 4.2 | previous versions | :x:                |
+| < 4.4 | previous versions | :x:                |
