@@ -491,8 +491,13 @@ class WPSRequest(object):
                     inpt_def = {"data": inpt_def}
                 if 'identifier' not in inpt_def:
                     inpt_def['identifier'] = identifier
-                inpt = input_from_json(inpt_def)
-                self.inputs[identifier].append(inpt)
+                try:
+                    inpt = input_from_json(inpt_def)
+                    self.inputs[identifier].append(inpt)
+                except Exception as e:
+                    LOGGER.warning(e)
+                    LOGGER.warning(f'skipping input: {identifier}')
+                    pass
 
 
 def get_inputs_from_xml(doc):
