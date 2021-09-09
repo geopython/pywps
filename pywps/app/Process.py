@@ -458,6 +458,9 @@ class Process(object):
 
                 is_reference = wps_request.outputs[wps_outpt].get('asReference', 'false')
                 mimetype = wps_request.outputs[wps_outpt].get('mimetype', '')
+                if not isinstance(mimetype, str):
+                    mimetype = ''
+
                 if is_reference.lower() == 'true':
                     # check if store is supported
                     if self.store_supported == 'false':
