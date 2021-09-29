@@ -87,7 +87,7 @@ class WPSRequest(object):
         try:
             doc = etree.fromstring(self.http_request.get_data())
         except Exception as e:
-            raise NoApplicableCode(e.msg)
+            raise NoApplicableCode(str(e))
 
         operation = doc.tag
         version = get_version_from_ns(doc.nsmap[doc.prefix])
