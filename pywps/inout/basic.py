@@ -249,9 +249,9 @@ class IOHandler(object):
         value = value or getattr(self, '_default')
         value_type = value_type or getattr(self, '_default_type')
 
-        if self.min_occurs == 0:
+        if value:
             # only set default when a value is optional
-            if value:
+            if self.min_occurs == 0:
                 if value_type == SOURCE_TYPE.DATA:
                     self.data = value
                 elif value_type == SOURCE_TYPE.MEMORY:
@@ -262,9 +262,8 @@ class IOHandler(object):
                     self.stream = value
                 elif value_type == SOURCE_TYPE.URL:
                     self.url = value
-        else:
-            # when a value is requried the default value will be ignored
-            if value:
+            else:
+                # when a value is requried the default value will be ignored
                 LOGGER.warning(
                     "The given default value will not be used"
                     " because is is required to provide a value.")
