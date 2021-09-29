@@ -108,7 +108,7 @@ class WPSRequest(object):
             try:
                 doc = etree.fromstring(self.http_request.get_data())
             except Exception as e:
-                raise NoApplicableCode(e.msg)
+                raise NoApplicableCode(str(e))
             operation = doc.tag
             version = get_version_from_ns(doc.nsmap[doc.prefix])
             self.set_version(version)
@@ -122,7 +122,7 @@ class WPSRequest(object):
             try:
                 jdoc = json.loads(self.http_request.get_data())
             except Exception as e:
-                raise NoApplicableCode(e.msg)
+                raise NoApplicableCode(str(e))
             if self.identifier is not None:
                 jdoc = {'inputs': jdoc}
             else:
