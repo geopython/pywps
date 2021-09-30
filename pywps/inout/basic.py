@@ -250,16 +250,23 @@ class IOHandler(object):
         value_type = value_type or getattr(self, '_default_type')
 
         if value:
-            if value_type == SOURCE_TYPE.DATA:
-                self.data = value
-            elif value_type == SOURCE_TYPE.MEMORY:
-                raise NotImplementedError
-            elif value_type == SOURCE_TYPE.FILE:
-                self.file = value
-            elif value_type == SOURCE_TYPE.STREAM:
-                self.stream = value
-            elif value_type == SOURCE_TYPE.URL:
-                self.url = value
+            # only set default when a value is optional
+            if self.min_occurs == 0:
+                if value_type == SOURCE_TYPE.DATA:
+                    self.data = value
+                elif value_type == SOURCE_TYPE.MEMORY:
+                    raise NotImplementedError
+                elif value_type == SOURCE_TYPE.FILE:
+                    self.file = value
+                elif value_type == SOURCE_TYPE.STREAM:
+                    self.stream = value
+                elif value_type == SOURCE_TYPE.URL:
+                    self.url = value
+            else:
+                # when a value is requried the default value will be ignored
+                LOGGER.warning(
+                    "The given default value will not be used"
+                    " because is is required to provide a value.")
 
     def _build_file_name(self, href=''):
         """Return a file name for the local system."""
