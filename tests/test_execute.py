@@ -126,6 +126,7 @@ def create_complex_proces():
                        ComplexInput(
                            'complex',
                            'Complex input',
+                           min_occurs=0,
                            default="DEFAULT COMPLEX DATA",
                            supported_formats=[frmt])
                    ],
