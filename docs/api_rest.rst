@@ -33,14 +33,14 @@ The default mimetype (output format) can be set by adding `&f=json` or `&f=xml` 
 
 GET GetCapabilities Request URL:
 
-.. code-block::
+.. code-block:: json
 
     http://localhost:5000/processes/?service=WPS
     http://localhost:5000/wps/?request=GetCapabilities&service=WPS&f=json
 
 GET GetCapabilities Response:
 
-.. code-block::
+.. code-block:: json
 
     {
       "pywps_version": "4.5.0",
@@ -113,14 +113,14 @@ GET GetCapabilities Response:
 
 GET DescribeProcess Request URL:
 
-.. code-block::
+.. code-block:: json
 
     http://localhost:5000/processes/say_hello?service=WPS
     http://localhost:5000/wps/?request=DescribeProcess&service=WPS&identifier=say_hello&version=1.0.0&f=json
 
 GET DescribeProcess Response:
 
-.. code-block::
+.. code-block:: json
 
     {
       "pywps_version": "4.5.0",
@@ -178,13 +178,13 @@ GET DescribeProcess Response:
 
 GET Execute Request URL:
 
-.. code-block::
+.. code-block:: json
 
     http://localhost:5000/wps?/service=wps&version=1.0.0&request=execute&Identifier=say_hello&storeExecuteResponse=true&DataInputs=name=Dude&f=json
 
 GET Execute Response:
 
-.. code-block::
+.. code-block:: json
 
     {
         "status": {
@@ -200,13 +200,13 @@ GET Execute Response:
 
 GET Execute Request URL (Raw output):
 
-.. code-block::
+.. code-block:: json
 
     http://localhost:5000/wps?/service=wps&version=1.0.0&request=execute&Identifier=say_hello&storeExecuteResponse=true&DataInputs=name=Dude&RawDataOutput=output
 
 GET Execute Response:
 
-.. code-block::
+.. code-block:: json
 
     Hello Dude
 
@@ -224,13 +224,13 @@ Example of a `Say Hello` POST request:
 
 POST Execute Request URL:
 
-.. code-block::
+.. code-block:: json
 
     http://localhost:5000/jobs
 
 POST Execute Request Body:
 
-.. code-block::
+.. code-block:: json
 
     {
         "identifier": "say_hello",
@@ -241,7 +241,7 @@ POST Execute Request Body:
 
 POST Execute Response:
 
-.. code-block::
+.. code-block:: json
 
     {
         "status": {
@@ -260,7 +260,7 @@ Example of a `Say Hello` POST request with raw output:
 
 POST Execute Request Body:
 
-.. code-block::
+.. code-block:: json
 
     {
         "identifier": "say_hello",
@@ -273,7 +273,7 @@ POST Execute Request Body:
 
 POST Execute Response:
 
-.. code-block::
+.. code-block:: json
 
     Hello Dude
 
@@ -281,13 +281,13 @@ Alternatively, the `identifier` and optionally the raw output name can be encode
 
 POST Execute Request URL (with `identifier`):
 
-.. code-block::
+.. code-block:: json
 
     http://localhost:5000/jobs/say_hello
 
 POST Execute Request Body:
 
-.. code-block::
+.. code-block:: json
 
     {
         "name": "Dude"
@@ -295,7 +295,7 @@ POST Execute Request Body:
 
 POST Execute Response:
 
-.. code-block::
+.. code-block:: json
 
     {
         "status": {
@@ -311,13 +311,13 @@ POST Execute Response:
 
 POST Execute Request URL (with `identifier` and output name):
 
-.. code-block::
+.. code-block:: json
 
     http://localhost:5000/jobs/say_hello/output
 
 POST Execute Request Body:
 
-.. code-block::
+.. code-block:: json
 
     {
         "name": "Dude"
@@ -325,14 +325,14 @@ POST Execute Request Body:
 
 POST Execute Response:
 
-.. code-block::
+.. code-block:: json
 
     Hello Dude
 
 
 Example for a reference input:
 
-.. code-block::
+.. code-block:: json
 
     "raster": {
         "type": "reference",
@@ -342,7 +342,7 @@ Example for a reference input:
 Example for a BoundingBox input:
 (bbox default axis order is yx (EPSG:4326), i.e. miny, minx, maxy, maxx)
 
-.. code-block::
+.. code-block:: json
 
     "extent": {
         "type": "bbox",
@@ -353,7 +353,7 @@ Example for a BoundingBox input:
 Example for a ComplexInput input:
 (the data is a standard GeoJSON)
 
-.. code-block::
+.. code-block:: json
 
     "cutline": {
         "type": "complex",
