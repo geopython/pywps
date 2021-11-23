@@ -20,13 +20,16 @@ jobs:
       name: Setup Python ${{ matrix.python-version }}
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Set env variable
+      env:
+        GDAL_VERSION: ${{gdal-config --version}}
     - name: Install requirements 📦
       run: |
         pip3 install pip --upgrade
         pip3 install -r requirements.txt
         pip3 install -r requirements-dev.txt
         pip3 install -r requirements-extra.txt
-        pip3 install -r requirements-gdal.txt
+        pip3 install gdal==$GDAL_VERSION
     - name: run tests ⚙️
       run: pytest -v tests
     - name: run coveralls ⚙️
