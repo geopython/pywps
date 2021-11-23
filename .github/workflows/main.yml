@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: [3.7, 3.8, 3.9]
     env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         COVERALLS_SERVICE_NAME: github
@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install packages
       run: |
-        sudo apt-get update && sudo apt-get -y install gdal-bin libgdal-dev libnetcdf-dev libhdf5-dev
+        sudo apt-get update && sudo apt-get -y install libnetcdf-dev libhdf5-dev
     - uses: actions/setup-python@v2
       name: Setup Python ${{ matrix.python-version }}
       with:
@@ -26,17 +26,16 @@ jobs:
         pip3 install -r requirements.txt
         pip3 install -r requirements-dev.txt
         pip3 install -r requirements-extra.txt
-        pip3 install -r requirements-gdal.txt
     - name: run tests ⚙️
       run: pytest -v tests
     - name: run coveralls ⚙️
       run: coveralls
-      if: matrix.python-version == 3.6
+      if: matrix.python-version == 3.7
     - name: build docs 🏗️
       run: |
         pip3 install -e .
         cd docs && make html
-      if: matrix.python-version == 3.6
+      if: matrix.python-version == 3.7
     - name: run flake8 ⚙️
       run: flake8 pywps
-      if: matrix.python-version == 3.6
+      if: matrix.python-version == 3.7

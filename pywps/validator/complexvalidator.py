@@ -35,7 +35,7 @@ def validategml(data_input, mode):
     `MODE.SIMPLE`
         the mimetype will be checked
     `MODE.STRICT`
-        `GDAL/OGR <http://gdal.org/>`_ is used for getting the proper format.
+        `Fiona` is used for getting the proper format.
     `MODE.VERYSTRICT`
         the :class:`lxml.etree` is used along with given input `schema` and the
         GML file is properly validated against given schema.
@@ -55,11 +55,11 @@ def validategml(data_input, mode):
 
     if mode >= MODE.STRICT:
 
-        from pywps.dependencies import ogr
-        data_source = ogr.Open(data_input.file)
-        if data_source:
-            passed = (data_source.GetDriver().GetName() == "GML")
-        else:
+        try:
+            import fiona
+            data_source = fiona.open(data_input.file)
+            passed = (data_source.driver == "GML")
+        except Exception:
             passed = False
 
     if mode >= MODE.VERYSTRICT:
@@ -89,7 +89,7 @@ def validategpx(data_input, mode):
     `MODE.SIMPLE`
         the mimetype will be checked
     `MODE.STRICT`
-        `GDAL/OGR <http://gdal.org/>`_ is used for getting the proper format.
+        `Fiona` is used for getting the proper format.
     `MODE.VERYSTRICT`
         the :class:`lxml.etree` is used along with given input `schema` and the
         GPX file is properly validated against given schema.
@@ -109,11 +109,11 @@ def validategpx(data_input, mode):
 
     if mode >= MODE.STRICT:
 
-        from pywps.dependencies import ogr
-        data_source = ogr.Open(data_input.file)
-        if data_source:
-            passed = (data_source.GetDriver().GetName() == "GPX")
-        else:
+        try:
+            import fiona
+            data_source = fiona.open(data_input.file)
+            passed = (data_source.driver == "GPX")
+        except Exception:
             passed = False
 
     if mode >= MODE.VERYSTRICT:
@@ -249,11 +249,11 @@ def validategeojson(data_input, mode):
 
     if mode >= MODE.STRICT:
 
-        from pywps.dependencies import ogr
-        data_source = ogr.Open(data_input.file)
-        if data_source:
-            passed = (data_source.GetDriver().GetName() == "GeoJSON")
-        else:
+        try:
+            import fiona
+            data_source = fiona.open(data_input.file)
+            passed = (data_source.driver == "GeoJSON")
+        except Exception:
             passed = False
 
     if mode >= MODE.VERYSTRICT:
@@ -317,22 +317,11 @@ def validateshapefile(data_input, mode):
 
     if mode >= MODE.STRICT:
 
-        from pywps.dependencies import ogr
-
-        import zipfile
-        z = zipfile.ZipFile(data_input.file)
-        shape_name = None
-        for name in z.namelist():
-            z.extract(name, data_input.tempdir)
-            if os.path.splitext(name)[1].lower() == '.shp':
-                shape_name = name
-
-        if shape_name:
-            data_source = ogr.Open(os.path.join(data_input.tempdir, shape_name))
-
-        if data_source:
-            passed = (data_source.GetDriver().GetName() == "ESRI Shapefile")
-        else:
+        try:
+            import fiona
+            sf = fiona.open(data_input.file)
+            passed = (sf.driver == "ESRI Shapefile")
+        except Exception:
             passed = False
 
     return passed
@@ -357,10 +346,10 @@ def validategeotiff(data_input, mode):
     if mode >= MODE.STRICT:
 
         try:
-            from pywps.dependencies import osgeo # noqa
-            data_source = osgeo.gdal.Open(data_input.file)
-            passed = (data_source.GetDriver().ShortName == "GTiff")
-        except ImportError:
+            from geotiff import GeoTiff
+            data_source = GeoTiff(data_input.file)
+            passed = (data_source.crs_code > 0)
+        except Exception:
             passed = False
 
     return passed
