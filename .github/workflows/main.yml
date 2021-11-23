@@ -22,7 +22,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install requirements 📦
       env:
-        GDAL_VERSION: ${{gdal-config --version}}
+        GDAL_VERSION: gdal-config --version
       run: |
         pip3 install pip --upgrade
         pip3 install -r requirements.txt
