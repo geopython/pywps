@@ -10,7 +10,6 @@ import os
 import tempfile
 import unittest
 from pywps import Service, Process, ComplexInput, ComplexOutput, Format, FORMATS, get_format
-# from pywps.dependencies import ogr
 from pywps.exceptions import NoApplicableCode
 from pywps import get_ElementMakerForVersion
 import pywps.configuration as config
@@ -26,39 +25,6 @@ def create_feature():
 
     def feature(request, response):
         input = request.inputs['input'][0].file
-        # What do we need to assert a Complex input?
-        # assert type(input) is str
-
-        # open the input file
-        # try:
-        #     inSource = ogr.Open(input)
-        # except Exception as e:
-        #     return "Could not open given vector file: {}".format(e)
-        # inLayer = inSource.GetLayer()
-        #
-        # # create output file
-        # out = 'point'
-        # outPath = os.path.join(tempfile.gettempdir(), out)
-        #
-        # driver = ogr.GetDriverByName('GML')
-        # outSource = driver.CreateDataSource(
-        #     outPath,
-        #     ["XSISCHEMAURI=http://schemas.opengis.net/gml/2.1.2/feature.xsd"])
-        # outLayer = outSource.CreateLayer(out, None, ogr.wkbUnknown)
-        #
-        # # get the first feature
-        # inFeature = inLayer.GetNextFeature()
-        # inGeometry = inFeature.GetGeometryRef()
-        #
-        # # make the buffer
-        # buff = inGeometry.Buffer(float(100000))
-        #
-        # # create output feature to the file
-        # outFeature = ogr.Feature(feature_def=outLayer.GetLayerDefn())
-        # outFeature.SetGeometryDirectly(buff)
-        # outLayer.CreateFeature(outFeature)
-        # outFeature.Destroy()
-
         response.outputs['output'].data_format = FORMATS.GML
         response.outputs['output'].file = input
         return response
