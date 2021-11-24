@@ -113,7 +113,7 @@ def validategpx(data_input, mode):
             import fiona
             data_source = fiona.open(data_input.file)
             passed = (data_source.driver == "GPX")
-        except Exception:
+        except (ModuleNotFoundError, ImportError):
             passed = False
 
     if mode >= MODE.VERYSTRICT:
@@ -253,7 +253,7 @@ def validategeojson(data_input, mode):
             import fiona
             data_source = fiona.open(data_input.file)
             passed = (data_source.driver == "GeoJSON")
-        except Exception:
+        except (ModuleNotFoundError, ImportError):
             passed = False
 
     if mode >= MODE.VERYSTRICT:
@@ -321,7 +321,7 @@ def validateshapefile(data_input, mode):
             import fiona
             sf = fiona.open(data_input.file)
             passed = (sf.driver == "ESRI Shapefile")
-        except Exception:
+        except (ModuleNotFoundError, ImportError):
             passed = False
 
     return passed
@@ -349,7 +349,7 @@ def validategeotiff(data_input, mode):
             from geotiff import GeoTiff
             data_source = GeoTiff(data_input.file)
             passed = (data_source.crs_code > 0)
-        except Exception:
+        except (ModuleNotFoundError, ImportError):
             passed = False
 
     return passed
