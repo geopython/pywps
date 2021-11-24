@@ -8,27 +8,32 @@
 
 import unittest
 import pytest
-import sys
-from pywps.validator.complexvalidator import *
+from pywps.validator.mode import MODE
+from pywps.validator.complexvalidator import (
+    validategml,
+    # validategpx,
+    # validatexml,
+    validatejson,
+    validategeojson,
+    validateshapefile,
+    validategeotiff,
+    validatenetcdf,
+    validatedods,
+)
 from pywps.inout.formats import FORMATS
 from pywps import ComplexInput
 from pywps.inout.basic import SOURCE_TYPE
 import tempfile
 import os
 
-try:
-    import osgeo
-except ImportError:
-    WITH_GDAL = False
-else:
-    WITH_GDAL = True
 
 try:
-    import netCDF4
+    import netCDF4  # noqa
 except ImportError:
     WITH_NC4 = False
 else:
     WITH_NC4 = True
+
 
 def get_input(name, schema, mime_type):
 
@@ -36,6 +41,7 @@ def get_input(name, schema, mime_type):
         mimetype = 'text/plain'
         schema = None
         units = None
+
         def validate(self, data):
             return True
 
@@ -67,20 +73,17 @@ class ValidateTest(unittest.TestCase):
     def setUp(self):
         pass
 
-
     def tearDown(self):
         pass
 
-    @unittest.skip('long')
     def test_gml_validator(self):
         """Test GML validator
         """
         gml_input = get_input('gml/point.gml', 'point.xsd', FORMATS.GML.mime_type)
         self.assertTrue(validategml(gml_input, MODE.NONE), 'NONE validation')
         self.assertTrue(validategml(gml_input, MODE.SIMPLE), 'SIMPLE validation')
-        if WITH_GDAL:
-            self.assertTrue(validategml(gml_input, MODE.STRICT), 'STRICT validation')
-            self.assertTrue(validategml(gml_input, MODE.VERYSTRICT), 'VERYSTRICT validation')
+        self.assertTrue(validategml(gml_input, MODE.STRICT), 'STRICT validation')
+        self.assertTrue(validategml(gml_input, MODE.VERYSTRICT), 'VERYSTRICT validation')
         gml_input.stream.close()
 
     def test_json_validator(self):
@@ -99,9 +102,8 @@ class ValidateTest(unittest.TestCase):
                                   FORMATS.GEOJSON.mime_type)
         self.assertTrue(validategeojson(geojson_input, MODE.NONE), 'NONE validation')
         self.assertTrue(validategeojson(geojson_input, MODE.SIMPLE), 'SIMPLE validation')
-        if WITH_GDAL:
-            self.assertTrue(validategeojson(geojson_input, MODE.STRICT), 'STRICT validation')
-            self.assertTrue(validategeojson(geojson_input, MODE.VERYSTRICT), 'VERYSTRICT validation')
+        self.assertTrue(validategeojson(geojson_input, MODE.STRICT), 'STRICT validation')
+        self.assertTrue(validategeojson(geojson_input, MODE.VERYSTRICT), 'VERYSTRICT validation')
         geojson_input.stream.close()
 
     def test_shapefile_validator(self):
@@ -111,8 +113,7 @@ class ValidateTest(unittest.TestCase):
                 FORMATS.SHP.mime_type)
         self.assertTrue(validateshapefile(shapefile_input, MODE.NONE), 'NONE validation')
         self.assertTrue(validateshapefile(shapefile_input, MODE.SIMPLE), 'SIMPLE validation')
-        if WITH_GDAL:
-            self.assertTrue(validateshapefile(shapefile_input, MODE.STRICT), 'STRICT validation')
+        self.assertTrue(validateshapefile(shapefile_input, MODE.STRICT), 'STRICT validation')
         shapefile_input.stream.close()
 
     def test_geotiff_validator(self):
@@ -122,8 +123,6 @@ class ValidateTest(unittest.TestCase):
                                   FORMATS.GEOTIFF.mime_type)
         self.assertTrue(validategeotiff(geotiff_input, MODE.NONE), 'NONE validation')
         self.assertTrue(validategeotiff(geotiff_input, MODE.SIMPLE), 'SIMPLE validation')
-        if not WITH_GDAL:
-            self.skipTest('GDAL not Installed')
         self.assertTrue(validategeotiff(geotiff_input, MODE.STRICT), 'STRICT validation')
         geotiff_input.stream.close()
 
@@ -161,11 +160,11 @@ class ValidateTest(unittest.TestCase):
                                      default_type=SOURCE_TYPE.URL,
                                      mode=MODE.SIMPLE)
 
-
     def test_fail_validator(self):
         fake_input = get_input('point.xsd', 'point.xsd', FORMATS.SHP.mime_type)
         self.assertFalse(validategml(fake_input, MODE.SIMPLE), 'SIMPLE validation invalid')
         fake_input.stream.close()
+
 
 def load_tests(loader=None, tests=None, pattern=None):
     if not loader:
