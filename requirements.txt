@@ -8,3 +8,5 @@ SQLAlchemy
 werkzeug
 MarkupSafe
 humanize
+geotiff
+fiona
