@@ -59,7 +59,7 @@ def validategml(data_input, mode):
             import fiona
             data_source = fiona.open(data_input.file)
             passed = (data_source.driver == "GML")
-        except Exception:
+        except (ModuleNotFoundError, ImportError):
             passed = False
 
     if mode >= MODE.VERYSTRICT:
