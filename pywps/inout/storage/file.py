@@ -69,6 +69,14 @@ class FileStorage(CachedStorage):
         self.copy_function = copy_function
 
     def _do_store(self, output):
+        """Copy output to final storage location.
+
+        - Create output directory
+        - Check available file space
+        - Create output file name, taking care of possible duplicates
+        - Copy / link output in work directory to output directory
+        - Return store type, output path and output URL
+        """
         import platform
         import math
         import tempfile
@@ -77,6 +85,11 @@ class FileStorage(CachedStorage):
         file_name = output.file
 
         request_uuid = output.uuid or uuid.uuid1()
+
+        # Create a target folder for each request
+        target = os.path.join(self.target, str(request_uuid))
+        if not os.path.exists(target):
+            os.makedirs(target)
 
         # st.blksize is not available in windows, skips the validation on windows
         if platform.system() != 'Windows':
@@ -90,11 +103,6 @@ class FileStorage(CachedStorage):
 
             if avail_size < actual_file_size:
                 raise NotEnoughStorage('Not enough space in {} to store {}'.format(self.target, file_name))
-
-        # create a target folder for each request
-        target = os.path.join(self.target, str(request_uuid))
-        if not os.path.exists(target):
-            os.makedirs(target)
 
         # build output name
         output_name, suffix = _build_output_name(output)
@@ -116,7 +124,7 @@ class FileStorage(CachedStorage):
         url = self.url("{}/{}".format(request_uuid, just_file_name))
         LOGGER.info('File output URI: {}'.format(url))
 
-        return (STORE_TYPE.PATH, output_name, url)
+        return STORE_TYPE.PATH, output_name, url
 
     @staticmethod
     def copy(src, dst, copy_function=None):
@@ -134,7 +142,7 @@ class FileStorage(CachedStorage):
             try:
                 os.link(src, dst)
             except Exception:
-                LOGGER.warn("Could not create hardlink. Fallback to copy.")
+                LOGGER.warning("Could not create hardlink. Fallback to copy.")
                 FileStorage.copy(src, dst)
         else:
             shutil.copy2(src, dst)
