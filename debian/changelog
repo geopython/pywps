@@ -1,3 +1,17 @@
+pywps (4.5.1) trusty; urgency=medium
+
+  * Fix app/Process.py to cope with None mimetype (#620)
+  * Add security policy (#621)
+  * Better error handling in WPSRequest.json() (#622)
+  * Fix output mimetype assuming string (#626)
+  * Resolve invalid Exception.msg unknown attribute (#629)
+  * An input default value is only set when min_occurs==0 (#631)
+  * Fix Sphinx build for UbuntuGIS packages (#634)
+  * Remove gdal from dependencies (#638)
+  * Fix bug triggered when storage requires the creation of recursive directories (#636)
+
+ -- Carsten Ehbrecht <ehbrecht@dkrz.de>  Mon, 29 Nov 2021 18:00:00 +0000
+
 pywps (4.5.0) trusty; urgency=medium
 
   * Initial implementation of OGC API - Processes / REST API (#612, #614)
