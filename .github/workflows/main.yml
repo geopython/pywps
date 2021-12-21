@@ -15,27 +15,34 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install packages
       run: |
-        sudo apt-get update && sudo apt-get -y install libnetcdf-dev libhdf5-dev
+        sudo apt-get update
+        sudo apt-get -y install libnetcdf-dev libhdf5-dev
     - uses: actions/setup-python@v2
       name: Setup Python ${{ matrix.python-version }}
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install requirements 📦
-      run: |
-        pip3 install pip --upgrade
-        pip3 install -r requirements.txt
-        pip3 install -r requirements-dev.txt
-        pip3 install -r requirements-extra.txt
-    - name: run tests ⚙️
-      run: pytest -v tests
-    - name: run coveralls ⚙️
-      run: coveralls
+#    - name: Install requirements 📦
+#      run: |
+#        pip install pip --upgrade
+#        pip install -r requirements.txt
+#        pip install -r requirements-dev.txt
+#        pip install -r requirements-extra.txt
+    - name: Install tox
+      run: pip install tox
+    - name: Run tests ⚙️
+      run: pytest -v tests --cov
+    - name: Run coveralls ⚙️
       if: matrix.python-version == 3.7
-    - name: build docs 🏗️
+      uses: coverallsapp/github-action@master
+      with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build docs 🏗️
       run: |
-        pip3 install -e .
+        pip install -e .
         cd docs && make html
       if: matrix.python-version == 3.7
-    - name: run flake8 ⚙️
-      run: flake8 pywps
+    - name: Run flake8 ⚙️
+      run: |
+        pip install flake8
+        flake8 pywps
       if: matrix.python-version == 3.7
