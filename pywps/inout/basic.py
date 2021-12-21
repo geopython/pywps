@@ -1010,7 +1010,7 @@ class ComplexInput(BasicIO, BasicComplex, IOHandler):
         except Exception:
             # TODO: handle os.symlink on windows
             # raise NoApplicableCode("Could not link file reference: {}".format(e))
-            LOGGER.warn("Could not link file reference")
+            LOGGER.warning("Could not link file reference")
             shutil.copy2(inpt_file, tmp_file)
 
         return tmp_file
