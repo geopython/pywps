@@ -7,10 +7,16 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
-    env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        COVERALLS_SERVICE_NAME: github
+        include:
+          - tox-env: py37-extra
+            python-version: 3.7
+          - tox-env: py38-extra
+            python-version: 3.8
+          - tox-env: py39-extra
+            python-version: 3.9
+#    env:
+#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        COVERALLS_SERVICE_NAME: github
     steps:
     - uses: actions/checkout@v2
     - name: Install packages
@@ -29,8 +35,8 @@ jobs:
 #        pip install -r requirements-extra.txt
     - name: Install tox
       run: pip install tox
-    - name: Run tests ⚙️
-      run: pytest -v tests --cov
+    - name: Run tests with tox ⚙️
+      run: tox -e ${{ matrix.tox-env }}
     - name: Run coveralls ⚙️
       if: matrix.python-version == 3.7
       uses: coverallsapp/github-action@master
