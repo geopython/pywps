@@ -43,9 +43,7 @@ jobs:
       run: tox -e ${{ matrix.tox-env }}
     - name: Run coveralls ⚙️
       if: matrix.python-version == 3.7
-      uses: coverallsapp/github-action@master
-      with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+      uses: AndreMiras/coveralls-python-action@develop
     - name: Build docs 🏗️
       run: |
         pip install -e .
