@@ -45,10 +45,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install packages 📦
-        run: |
-          sudo apt-get update
-          sudo apt-get -y install libnetcdf-dev libhdf5-dev
       - uses: actions/setup-python@v2
         name: Setup Python 3.7
         with:
