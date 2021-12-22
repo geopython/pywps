@@ -46,7 +46,7 @@ jobs:
       uses: AndreMiras/coveralls-python-action@develop
     - name: Build docs 🏗️
       run: |
-        pip install -e .
+        pip install -e .[dev]
         cd docs && make html
       if: matrix.python-version == 3.7
     - name: Run flake8 ⚙️
