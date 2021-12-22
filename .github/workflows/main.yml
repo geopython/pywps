@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  main:
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -18,12 +18,9 @@ jobs:
             python-version: 3.8
           - tox-env: py39-extra
             python-version: 3.9
-#    env:
-#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        COVERALLS_SERVICE_NAME: github
     steps:
     - uses: actions/checkout@v2
-    - name: Install packages
+    - name: Install packages 📦
       run: |
         sudo apt-get update
         sudo apt-get -y install libnetcdf-dev libhdf5-dev
@@ -31,26 +28,32 @@ jobs:
       name: Setup Python ${{ matrix.python-version }}
       with:
         python-version: ${{ matrix.python-version }}
-#    - name: Install requirements 📦
-#      run: |
-#        pip install pip --upgrade
-#        pip install -r requirements.txt
-#        pip install -r requirements-dev.txt
-#        pip install -r requirements-extra.txt
-    - name: Install tox
+    - name: Run flake8 ⚙️
+      run: |
+        pip install flake8
+        flake8 pywps
+      if: matrix.python-version == 3.7
+    - name: Install tox 📦
       run: pip install tox
     - name: Run tests with tox ⚙️
       run: tox -e ${{ matrix.tox-env }}
     - name: Run coveralls ⚙️
       if: matrix.python-version == 3.7
       uses: AndreMiras/coveralls-python-action@develop
-    - name: Build docs 🏗️
-      run: |
-        pip install -e .[dev]
-        cd docs && make html
-      if: matrix.python-version == 3.7
-    - name: Run flake8 ⚙️
-      run: |
-        pip install flake8
-        flake8 pywps
-      if: matrix.python-version == 3.7
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install packages 📦
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install libnetcdf-dev libhdf5-dev
+      - uses: actions/setup-python@v2
+        name: Setup Python 3.7
+        with:
+          python-version: 3.7
+      - name: Build docs 🏗️
+        run: |
+          pip install -e .[dev]
+          cd docs && make html
