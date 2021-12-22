@@ -10,9 +10,10 @@ from pywps.tests import assert_pywps_version, client_for
 
 import re
 
-VERSION="1.0.0"
+VERSION = "1.0.0"
 WPS, OWS = get_ElementMakerForVersion(VERSION)
 xpath_ns = get_xpath_ns(VERSION)
+
 
 class ExceptionsTest(unittest.TestCase):
 
@@ -24,7 +25,7 @@ class ExceptionsTest(unittest.TestCase):
         exception_el = resp.xpath('/ows:ExceptionReport/ows:Exception')[0]
         assert exception_el.attrib['exceptionCode'] == 'InvalidParameterValue'
         assert resp.status_code == 400
-        assert re.match('text/xml(;\s*charset=.*)?', resp.headers['Content-Type'])
+        assert re.match(r'text/xml(;\s*charset=.*)?', resp.headers['Content-Type'])
         assert_pywps_version(resp)
 
     def test_missing_parameter_value(self):
@@ -32,20 +33,21 @@ class ExceptionsTest(unittest.TestCase):
         exception_el = resp.xpath('/ows:ExceptionReport/ows:Exception')[0]
         assert exception_el.attrib['exceptionCode'] == 'MissingParameterValue'
         assert resp.status_code == 400
-        assert re.match('text/xml(;\s*charset=.*)?', resp.headers['Content-Type'])
+        assert re.match(r'text/xml(;\s*charset=.*)?', resp.headers['Content-Type'])
 
     def test_missing_request(self):
         resp = self.client.get("?service=wps")
         exception_el = resp.xpath('/ows:ExceptionReport/ows:Exception/ows:ExceptionText')[0]
         # should mention something about a request
         assert 'request' in exception_el.text
-        assert re.match('text/xml(;\s*charset=.*)?', resp.headers['Content-Type'])
+        assert re.match(r'text/xml(;\s*charset=.*)?', resp.headers['Content-Type'])
 
     def test_bad_request(self):
         resp = self.client.get("?service=wps&request=xyz")
         exception_el = resp.xpath('/ows:ExceptionReport/ows:Exception')[0]
         assert exception_el.attrib['exceptionCode'] == 'OperationNotSupported'
-        assert re.match('text/xml(;\s*charset=.*)?', resp.headers['Content-Type'])
+        assert re.match(r'text/xml(;\s*charset=.*)?', resp.headers['Content-Type'])
+
 
 def load_tests(loader=None, tests=None, pattern=None):
     if not loader:
