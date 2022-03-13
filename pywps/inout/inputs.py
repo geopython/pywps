@@ -243,7 +243,7 @@ class ComplexInput(basic.ComplexInput):
                 else:
                     # Otherwise we assume all other formats are unsafe and need to be enclosed in a CDATA tag.
                     if isinstance(self.data, bytes):
-                        out = self.data.encode(self.data_format.encoding or 'utf-8')
+                        out = self.data.decode(self.data_format.encoding or 'utf-8')
                     else:
                         out = self.data
 
