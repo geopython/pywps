@@ -11,6 +11,7 @@ from werkzeug.exceptions import MethodNotAllowed
 from pywps import get_ElementMakerForVersion
 import base64
 import datetime
+from owslib.crs import Crs
 from pywps.app.basic import get_xpath_ns, parse_http_url
 from pywps.inout.inputs import input_from_json
 from pywps.exceptions import NoApplicableCode, OperationNotSupported, MissingParameterValue, VersionNegotiationFailed, \
@@ -438,6 +439,8 @@ class WPSRequest(object):
             def default(self, obj):
                 if isinstance(obj, datetime.date) or isinstance(obj, datetime.time):
                     encoded_object = obj.isoformat()
+                elif isinstance(obj, Crs):
+                    encoded_object = str(obj)
                 else:
                     encoded_object = json.JSONEncoder.default(self, obj)
                 return encoded_object
