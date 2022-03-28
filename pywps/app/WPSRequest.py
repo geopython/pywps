@@ -11,7 +11,6 @@ from werkzeug.exceptions import MethodNotAllowed
 from pywps import get_ElementMakerForVersion
 import base64
 import datetime
-from owslib.crs import Crs
 from pywps.app.basic import get_xpath_ns, parse_http_url
 from pywps.inout.inputs import input_from_json
 from pywps.exceptions import NoApplicableCode, OperationNotSupported, MissingParameterValue, VersionNegotiationFailed, \
@@ -439,8 +438,6 @@ class WPSRequest(object):
             def default(self, obj):
                 if isinstance(obj, datetime.date) or isinstance(obj, datetime.time):
                     encoded_object = obj.isoformat()
-                elif isinstance(obj, Crs):
-                    encoded_object = str(obj)
                 else:
                     encoded_object = json.JSONEncoder.default(self, obj)
                 return encoded_object
@@ -578,7 +575,8 @@ def get_inputs_from_xml(doc):
                 inpt = {}
                 inpt['identifier'] = identifier_el.text
                 inpt['data'] = [bbox.minx, bbox.miny, bbox.maxx, bbox.maxy]
-                inpt['crs'] = bbox.crs
+                # The BBox crs is not returned as a string but as oswlib.crs.Crs. This would cause JSON encoding errors
+                inpt['crs'] = str(bbox.crs)
                 inpt['dimensions'] = bbox.dimensions
                 the_inputs[identifier].append(inpt)
     return the_inputs
