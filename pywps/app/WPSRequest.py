@@ -575,8 +575,7 @@ def get_inputs_from_xml(doc):
                 inpt = {}
                 inpt['identifier'] = identifier_el.text
                 inpt['data'] = [bbox.minx, bbox.miny, bbox.maxx, bbox.maxy]
-                # The BBox crs is not returned as a string but as oswlib.crs.Crs. This would cause JSON encoding errors
-                inpt['crs'] = str(bbox.crs)
+                inpt['crs'] = bbox.crs.getcodeurn()
                 inpt['dimensions'] = bbox.dimensions
                 the_inputs[identifier].append(inpt)
     return the_inputs
