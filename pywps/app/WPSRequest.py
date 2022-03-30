@@ -575,7 +575,7 @@ def get_inputs_from_xml(doc):
                 inpt = {}
                 inpt['identifier'] = identifier_el.text
                 inpt['data'] = [bbox.minx, bbox.miny, bbox.maxx, bbox.maxy]
-                inpt['crs'] = bbox.crs
+                inpt['crs'] = bbox.crs.getcodeurn() if bbox.crs else None
                 inpt['dimensions'] = bbox.dimensions
                 the_inputs[identifier].append(inpt)
     return the_inputs

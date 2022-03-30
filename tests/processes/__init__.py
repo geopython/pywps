@@ -4,7 +4,7 @@
 ##################################################################
 
 from pywps import Process
-from pywps.inout import LiteralInput, LiteralOutput
+from pywps.inout import LiteralInput, LiteralOutput, BoundingBoxInput, BoundingBoxOutput
 from pywps.inout.literaltypes import ValuesReference
 
 
@@ -70,4 +70,32 @@ class InOut(Process):
     def inout(request, response):
         a_string = request.inputs['string'][0].data
         response.outputs['string'].data = "".format(a_string)
+        return response
+
+
+class BBox(Process):
+    def __init__(self):
+        super(BBox, self).__init__(
+            self.bbox,
+            identifier='bbox_test',
+            title='BBox Test',
+            inputs=[
+                BoundingBoxInput(
+                    'area',
+                    'An area',
+                    abstract='Define the area of interest',
+                    crss=['epsg:4326', 'epsg:3857'],
+                    min_occurs=1,
+                    max_occurs=1
+                ),
+            ],
+            outputs=[
+                BoundingBoxOutput('extent', 'Extent', crss=['epsg:4326', 'epsg:3857'])
+            ]
+        )
+
+    @staticmethod
+    def bbox(request, response):
+        area = request.inputs['area'][0].data
+        response.outputs['extent'].data = area
         return response

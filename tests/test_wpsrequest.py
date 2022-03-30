@@ -8,6 +8,7 @@ from pywps.app import WPSRequest
 import tempfile
 import datetime
 import json
+from owslib.crs import Crs
 
 from pywps.inout.literaltypes import AnyValue
 
@@ -115,6 +116,46 @@ class WPSRequestTest(unittest.TestCase):
         self.assertEqual(self.request.inputs['datetime'][0].data, datetime.datetime(2017, 4, 20, 12), 'Datatime set')
         self.assertEqual(self.request.inputs['date'][0].data, datetime.date(2017, 4, 20), 'Data set')
         self.assertEqual(self.request.inputs['time'][0].data, datetime.time(9, 0, 0), 'Time set')
+
+    def test_json_inout_bbox(self):
+        obj = {
+            'operation': 'getcapabilities',
+            'version': '1.0.0',
+            'language': 'eng',
+            'identifier': 'arghhhh',
+            'identifiers': 'arghhhh',  # TODO: why identifierS?
+            'store_execute': True,
+            'status': True,
+            'lineage': True,
+            'inputs': {
+                'bbox': [{
+                    'identifier': 'bbox',
+                    'type': 'bbox',
+                    'bbox': '6.117602,46.176194,6.22283,46.275832',
+                    'crs': 'urn:ogc:def:crs:EPSG::4326',
+                    'crss': ['epsg:4326'],
+                    'dimensions': 2,
+                    'translations': None
+                }],
+            },
+            'outputs': {},
+            'raw': False
+        }
+
+        self.request = WPSRequest()
+        self.request.json = obj
+
+        self.assertEqual(self.request.inputs['bbox'][0].data, [6.117602, 46.176194, 6.22283, 46.275832], 'BBox data set')
+        self.assertTrue(isinstance(self.request.inputs['bbox'][0].crs, str), 'CRS is a string')
+        self.assertEqual(self.request.inputs['bbox'][0].crs, 'epsg:4326', 'CRS data correctly parsed')
+
+        # dump to json and reload
+        dump = self.request.json
+        self.request.json = json.loads(dump)
+
+        self.assertEqual(self.request.inputs['bbox'][0].data, [6.117602, 46.176194, 6.22283, 46.275832], 'BBox data set')
+        self.assertTrue(isinstance(self.request.inputs['bbox'][0].crs, str), 'CRS is a string')
+        self.assertEqual(self.request.inputs['bbox'][0].crs, 'epsg:4326', 'CRS data correctly parsed')
 
 
 def load_tests(loader=None, tests=None, pattern=None):
