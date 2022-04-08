@@ -26,7 +26,7 @@ See [requirements.txt](requirements.txt) file
 ```bash
 pip install -r requirements-dev.txt
 # run unit tests
-python -m unittest tests
+python -m pytest tests
 # run code coverage
 python -m coverage run --source=pywps -m unittest tests
 python -m coverage report -m
