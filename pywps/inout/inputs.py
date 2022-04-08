@@ -2,7 +2,7 @@
 # Copyright 2018 Open Source Geospatial Foundation and others    #
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
-
+import base64
 import re
 from pywps import xml_util as etree
 
@@ -220,12 +220,15 @@ class ComplexInput(basic.ComplexInput):
             instance.url = json_input['href']
         elif json_input.get('data'):
             data = json_input['data']
-            # remove cdata tag if it exists (issue #553)
-            if isinstance(data, str):
-                match = CDATA_PATTERN.match(data)
-                if match:
-                    data = match.group(1)
-            instance.data = data
+            if data_format.encoding == 'base64':
+                instance.data = base64.b64decode(data)
+            else:
+                # remove cdata tag if it exists (issue #553)
+                if isinstance(data, str):
+                    match = CDATA_PATTERN.match(data)
+                    if match:
+                        data = match.group(1)
+                instance.data = data
 
         return instance
 
