@@ -284,6 +284,13 @@ class SerializationComplexInputTest(unittest.TestCase):
         self.assertEqual(complex2.prop, 'data')
         self.assertEqual(complex.data, complex2.data)
 
+    def test_complex_input_binary_data(self):
+        complex = self.make_complex_input()
+        complex.data = b"some data"
+        # the data is enclosed by a CDATA tag in json
+        assert complex.json['data'] == '<![CDATA[some data]]>'
+        self.assertEqual(complex.prop, 'data')
+
     def test_complex_input_stream(self):
         complex = self.make_complex_input()
         complex.stream = StringIO("{'name': 'test', 'input1': ']]'}")
