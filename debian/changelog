@@ -1,3 +1,14 @@
+pywps (4.5.2) trusty; urgency=medium
+
+  * Fix test section in README.md about pytest (#653)
+  * Fix ComplexInput.from_json to handle data_format.encoding="base64" (#652)
+  * Fix invalide use of encode on bytes object (#651)
+  * Fix JSON encoding of CRS type in BoundingBox (#610)
+  * Modernize CI using Tox, add a "[dev]" recipe, re-enable coveralls (#643)
+  * Fix deprecated logging.warn() call (#642)
+
+ -- Carsten Ehbrecht <ehbrecht@dkrz.de>  Wed, 13 Apr 2022 18:00:00 +0000
+
 pywps (4.5.1) trusty; urgency=medium
 
   * Fix app/Process.py to cope with None mimetype (#620)
