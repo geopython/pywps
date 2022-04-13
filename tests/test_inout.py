@@ -291,6 +291,34 @@ class SerializationComplexInputTest(unittest.TestCase):
         assert complex.json['data'] == '<![CDATA[some data]]>'
         self.assertEqual(complex.prop, 'data')
 
+    def test_complex_input_data_with_binary_data_format(self):
+        complex = inout.inputs.ComplexInput(
+            identifier="complexinput",
+            title='MyComplex',
+            abstract='My complex input',
+            keywords=['kw1', 'kw2'],
+            workdir=self.tmp_dir,
+            supported_formats=[FORMATS.ZIP],
+            metadata=[Metadata("special data")],
+            default="/some/file/path",
+            default_type=SOURCE_TYPE.FILE,
+            translations={"fr-CA": {"title": "Mon input", "abstract": "Une description"}},
+            data_format=FORMATS.ZIP
+        )
+        complex.as_reference = False
+        complex.method = "GET"
+        complex.max_size = 1000
+        complex.data = b"some data"
+        # the data is enclosed by a CDATA tag in json
+        assert complex.json['data'] == 'c29tZSBkYXRh'
+        # dump to json and load it again
+        complex2 = inout.inputs.ComplexInput.from_json(complex.json)
+
+        self.assert_complex_equals(complex, complex2)
+        self.assertEqual(complex.prop, 'data')
+        self.assertEqual(complex2.prop, 'data')
+        self.assertEqual(complex.data, complex2.data)
+
     def test_complex_input_stream(self):
         complex = self.make_complex_input()
         complex.stream = StringIO("{'name': 'test', 'input1': ']]'}")
