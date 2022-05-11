@@ -16,9 +16,8 @@ from pywps.dblog import ProcessInstance
 class DBLogTest(unittest.TestCase):
     """DBGLog test cases"""
 
-    def setUp(self):
-
-        self.database = configuration.get_config_value('logging', 'database')
+    def tearDown(self) -> None:
+        configuration.load_configuration()
 
     def test_0_dblog(self):
         """Test pywps.formats.Format class
@@ -30,18 +29,18 @@ class DBLogTest(unittest.TestCase):
         session = get_session()
         null_time_end = session.query(ProcessInstance).filter(ProcessInstance.time_end == None)
         self.assertEqual(null_time_end.count(), 0,
-                         'There are no unfinished processes loged')
+                         'There are no unfinished processes logged')
 
         null_status = session.query(ProcessInstance).filter(ProcessInstance.status == None)
         self.assertEqual(null_status.count(), 0,
-                         'There are no processes without status loged')
+                         'There are no processes without status logged')
 
         null_percent = session.query(ProcessInstance).filter(ProcessInstance.percent_done == None)
         self.assertEqual(null_percent.count(), 0,
-                         'There are no processes without percent loged')
+                         'There are no processes without percent logged')
 
-        null_percent = session.query(ProcessInstance).filter(ProcessInstance.percent_done < 100)
-        self.assertEqual(null_percent.count(), 0,
+        unfinished = session.query(ProcessInstance).filter(ProcessInstance.percent_done < 100)
+        self.assertEqual(unfinished.count(), 0,
                          'There are no unfinished processes')
 
 def load_tests(loader=None, tests=None, pattern=None):

@@ -34,6 +34,9 @@ def fake_output(tmp_path):
 
 class TestStorageBuilder():
 
+    def teardown_class(cls):
+        configuration.load_configuration()
+
     def test_default_storage(self):
         storage = StorageBuilder.buildStorage()
         assert isinstance(storage, FileStorage)

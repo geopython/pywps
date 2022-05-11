@@ -19,13 +19,12 @@ WPS, OWS = get_ElementMakerForVersion(VERSION)
 
 class ExecuteTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.mode = configuration.CONFIG.get('processing', 'mode')
         configuration.CONFIG.set('processing', 'mode', 'distributed')
 
     def tearDown(self) -> None:
-        configuration.CONFIG.set('processing', 'mode', self.mode)
+        configuration.load_configuration()
 
-    def test_assync(self):
+    def test_async(self):
         client = client_for(Service(processes=[Sleep()]))
         wps = WPSExecution()
 
