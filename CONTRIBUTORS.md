@@ -10,6 +10,7 @@
 * @jonas-eberle Jonas Eberle
 * @cehbrecht Carsten Ehbrecht
 * @idanmiara Idan Miara
+* @huard David Huard
 
 # Contributor to older versions of PyWPS (< 4.x)
 
