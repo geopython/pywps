@@ -128,6 +128,19 @@ def store_status(uuid, wps_status, message=None, status_percentage=None):
     session.close()
 
 
+def update_pid(uuid, pid):
+    """Update actual pid for the uuid processing
+    """
+    session = get_session()
+
+    requests = session.query(ProcessInstance).filter_by(uuid=str(uuid))
+    if requests.count():
+        request = requests.one()
+        request.pid = pid
+        session.commit()
+    session.close()
+
+
 def _get_identifier(request):
     """Get operation identifier
     """
