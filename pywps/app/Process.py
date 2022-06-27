@@ -194,6 +194,11 @@ class Process(object):
 
         running, stored = dblog.get_process_counts()
 
+        if maxparallel != -1 and running >= maxparallel:
+            # Try to check for crashed process
+            dblog.cleanup_crashed_process()
+            running, stored = dblog.get_process_counts()
+
         # async
         if async_:
 
