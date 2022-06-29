@@ -236,7 +236,7 @@ def get_session():
     return _SESSION_MAKER()
 
 
-def store_process(uuid, request):
+def store_process(request):
     """Save given request under given UUID for later usage
     """
 
@@ -244,7 +244,7 @@ def store_process(uuid, request):
     request_json = request.json
     # the BLOB type requires bytes on Python 3
     request_json = request_json.encode('utf-8')
-    request = RequestInstance(uuid=str(uuid), request=request_json)
+    request = RequestInstance(uuid=str(request.uuid), request=request_json)
     session.add(request)
     session.commit()
     session.close()

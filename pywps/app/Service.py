@@ -134,7 +134,7 @@ class Service(object):
                 if stored >= maxprocesses and maxprocesses != -1:
                     raise ServerBusy('Maximum number of processes in queue reached. Please try later.')
                 LOGGER.debug("Store process in job queue, uuid={}".format(process.uuid))
-                dblog.store_process(process.uuid, wps_request)
+                dblog.store_process(wps_request)
                 wps_response._update_status(WPS_STATUS.ACCEPTED, 'PyWPS Process stored in job queue', 0)
 
         # not async
