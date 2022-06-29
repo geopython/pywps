@@ -266,8 +266,9 @@ class Service(object):
 
         return wps_response
 
-    def _parse_and_execute(self, process, wps_request, uuid):
-        """Parse and execute request
+    @staticmethod
+    def _parse_request_inputs(process, wps_request):
+        """Parse input data for the given process and update wps_request accordingly
         """
 
         LOGGER.debug('Checking if all mandatory inputs have been passed')
@@ -307,6 +308,12 @@ class Service(object):
                         inpt.identifier, inpt.identifier)
 
         wps_request.inputs = data_inputs
+        return wps_request
+
+    def _parse_and_execute(self, process, wps_request, uuid):
+        """Parse and execute request
+        """
+        wps_request = Service._parse_request_inputs(process, wps_request)
 
         process.setup_outputs_from_wps_request(wps_request)
 
