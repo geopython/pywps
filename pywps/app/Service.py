@@ -20,7 +20,8 @@ from pywps.inout.inputs import ComplexInput, LiteralInput, BoundingBoxInput
 from pywps.dblog import log_request, store_status
 from pywps.response.status import WPS_STATUS
 from pywps.response.execute import ExecuteResponse
-from pywps.response import get_response
+from pywps.response.describe import DescribeResponse
+from pywps.response.capabilities import CapabilitiesResponse
 from pywps import dblog
 from pywps.exceptions import (StorageNotSupported, OperationNotSupported, MissingParameterValue, FileURLNotSupported,
                               ServerBusy, NoApplicableCode,
@@ -85,15 +86,10 @@ class Service(object):
                 LOGGER.addHandler(logging.NullHandler())
 
     def get_capabilities(self, wps_request, uuid):
-
-        response_cls = response.get_response("capabilities")
-        return response_cls(wps_request, uuid, version=wps_request.version, processes=self.processes)
+        return CapabilitiesResponse(wps_request, uuid, version=wps_request.version, processes=self.processes)
 
     def describe(self, wps_request, uuid, identifiers):
-
-        response_cls = response.get_response("describe")
-        return response_cls(wps_request, uuid, processes=self.processes,
-                            identifiers=identifiers)
+        return DescribeResponse(wps_request, uuid, processes=self.processes, identifiers=identifiers)
 
     # Return more or less accurate counts, if no concurrency
     def _get_accurate_process_counts(self):
@@ -165,8 +161,7 @@ class Service(object):
         process = process.new_instance(wps_request)
         if fetch_inputs:
             wps_request = Service._parse_request_inputs(process, wps_request)
-        response_cls = get_response("execute")
-        wps_response = response_cls(wps_request, process=process, uuid=process.uuid)
+        wps_response = ExecuteResponse(wps_request, process=process, uuid=process.uuid)
         # Store status file if the process is asynchronous
         wps_response.store_status_file = wps_request.is_async
         return process, wps_request, wps_response
