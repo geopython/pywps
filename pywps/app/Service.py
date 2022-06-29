@@ -98,7 +98,7 @@ class Service(object):
         """
         self._set_grass()
         process, wps_request = self.prepare_process_for_execution(wps_request)
-        return self._parse_and_execute(process, wps_request, wps_request.uuid)
+        return self._parse_and_execute(process, wps_request)
 
     def prepare_process_for_execution(self, wps_request: WPSRequest):
         """Prepare the process identified by ``identifier`` for execution.
@@ -132,7 +132,7 @@ class Service(object):
         except Exception as e:
             LOGGER.exception("Could not run stored process. {}".format(e))
 
-    def execute_instance(self, process : Process, wps_request: WPSRequest, uuid):
+    def execute_instance(self, process : Process, wps_request: WPSRequest):
         response_cls = get_response("execute")
         wps_response = response_cls(wps_request, process=process, uuid=process.uuid)
 
@@ -297,11 +297,11 @@ class Service(object):
 
         return wps_request
 
-    def _parse_and_execute(self, process, wps_request, uuid):
+    def _parse_and_execute(self, process, wps_request):
         """Parse and execute request
         """
 
-        wps_response = self.execute_instance(process, wps_request, uuid)
+        wps_response = self.execute_instance(process, wps_request)
         return wps_response
 
     @staticmethod
