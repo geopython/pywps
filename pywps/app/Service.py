@@ -95,6 +95,15 @@ class Service(object):
         return response_cls(wps_request, uuid, processes=self.processes,
                             identifiers=identifiers)
 
+    # Return more or less accurate counts, if no concurrency
+    def _get_accurate_process_counts(self):
+        running, stored = dblog.get_process_counts()
+        if self.maxparallel != -1 and running >= self.maxparallel:
+            # Try to check for crashed process
+            dblog.cleanup_crashed_process()
+            running, stored = dblog.get_process_counts()
+        return running, stored
+
     def execute(self, wps_request: WPSRequest):
         """Parse and perform Execute WPS request call
 
@@ -113,12 +122,7 @@ class Service(object):
 
         LOGGER.debug('Check if updating of status is not required then no need to spawn a process')
 
-        running, stored = dblog.get_process_counts()
-
-        if self.maxparallel != -1 and running >= self.maxparallel:
-            # Try to check for crashed process
-            dblog.cleanup_crashed_process()
-            running, stored = dblog.get_process_counts()
+        running, stored = self._get_accurate_process_counts()
 
         # async
         if wps_request.is_async:
@@ -168,7 +172,7 @@ class Service(object):
             stored_request = dblog.pop_first_stored()
             if not stored_request:
                 LOGGER.debug("No stored request found")
-                return
+                return False
 
             (uuid, request_json) = (stored_request.uuid, stored_request.request)
             request_json = request_json.decode('utf-8')
@@ -180,6 +184,7 @@ class Service(object):
             self._run_async(process, new_wps_request, new_wps_response)
         except Exception as e:
             LOGGER.exception("Could not run stored process. {}".format(e))
+        return True
 
     # This function may not raise exception and must return a valid wps_response
     # Failure must be reported as wps_response.status = WPS_STATUS.FAILED
