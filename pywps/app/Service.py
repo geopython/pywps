@@ -107,7 +107,42 @@ class Service(object):
 
         LOGGER.debug('Check if updating of status is not required then no need to spawn a process')
 
-        wps_response = self._execute_process(process, wps_request.is_async, wps_request, wps_response)
+        maxparallel = int(config.get_config_value('server', 'parallelprocesses'))
+
+        running, stored = dblog.get_process_counts()
+
+        if maxparallel != -1 and running >= maxparallel:
+            # Try to check for crashed process
+            dblog.cleanup_crashed_process()
+            running, stored = dblog.get_process_counts()
+
+        # async
+        if wps_request.is_async:
+
+            # run immedietly
+            LOGGER.debug("Running processes: {} of {} allowed parallelprocesses".format(running, maxparallel))
+            LOGGER.debug("Stored processes: {}".format(stored))
+
+            if running < maxparallel or maxparallel == -1:
+                wps_response._update_status(WPS_STATUS.ACCEPTED, "PyWPS Request accepted", 0)
+                LOGGER.debug("Accepted request {}".format(process.uuid))
+                self._run_async(process, wps_request, wps_response)
+
+            # try to store for later usage
+            else:
+                maxprocesses = int(config.get_config_value('server', 'maxprocesses'))
+                if stored >= maxprocesses and maxprocesses != -1:
+                    raise ServerBusy('Maximum number of processes in queue reached. Please try later.')
+                LOGGER.debug("Store process in job queue, uuid={}".format(process.uuid))
+                dblog.store_process(process.uuid, wps_request)
+                wps_response._update_status(WPS_STATUS.ACCEPTED, 'PyWPS Process stored in job queue', 0)
+
+        # not async
+        else:
+            if running >= maxparallel and maxparallel != -1:
+                raise ServerBusy('Maximum number of parallel running processes reached. Please try later.')
+            wps_response._update_status(WPS_STATUS.ACCEPTED, "PyWPS Request accepted", 0)
+            wps_response = process.run_process(wps_request, wps_response)
 
         return wps_response
 
@@ -142,53 +177,6 @@ class Service(object):
             self._run_async(process, new_wps_request, new_wps_response)
         except Exception as e:
             LOGGER.exception("Could not run stored process. {}".format(e))
-
-    def _execute_process(self, process, async_, wps_request, wps_response):
-        """Uses :module:`pywps.processing` module for sending process to
-        background BUT first, check for maxprocesses configuration value
-
-        :param async_: run in asynchronous mode
-        :return: wps_response or None
-        """
-
-        maxparallel = int(config.get_config_value('server', 'parallelprocesses'))
-
-        running, stored = dblog.get_process_counts()
-
-        if maxparallel != -1 and running >= maxparallel:
-            # Try to check for crashed process
-            dblog.cleanup_crashed_process()
-            running, stored = dblog.get_process_counts()
-
-        # async
-        if async_:
-
-            # run immedietly
-            LOGGER.debug("Running processes: {} of {} allowed parallelprocesses".format(running, maxparallel))
-            LOGGER.debug("Stored processes: {}".format(stored))
-
-            if running < maxparallel or maxparallel == -1:
-                wps_response._update_status(WPS_STATUS.ACCEPTED, "PyWPS Request accepted", 0)
-                LOGGER.debug("Accepted request {}".format(process.uuid))
-                self._run_async(process, wps_request, wps_response)
-
-            # try to store for later usage
-            else:
-                maxprocesses = int(config.get_config_value('server', 'maxprocesses'))
-                if stored >= maxprocesses and maxprocesses != -1:
-                    raise ServerBusy('Maximum number of processes in queue reached. Please try later.')
-                LOGGER.debug("Store process in job queue, uuid={}".format(process.uuid))
-                dblog.store_process(process.uuid, wps_request)
-                wps_response._update_status(WPS_STATUS.ACCEPTED, 'PyWPS Process stored in job queue', 0)
-
-        # not async
-        else:
-            if running >= maxparallel and maxparallel != -1:
-                raise ServerBusy('Maximum number of parallel running processes reached. Please try later.')
-            wps_response._update_status(WPS_STATUS.ACCEPTED, "PyWPS Request accepted", 0)
-            wps_response = process.run_process(wps_request, wps_response)
-
-        return wps_response
 
     # This function may not raise exception and must return a valid wps_response
     # Failure must be reported as wps_response.status = WPS_STATUS.FAILED
