@@ -29,6 +29,7 @@ class WPSRequestTest(unittest.TestCase):
 
         obj = {
             'uuid': str(uuid.uuid1()),
+            'is_async': False,
             'operation': 'getcapabilities',
             'version': '1.0.0',
             'language': 'eng',
@@ -69,6 +70,7 @@ class WPSRequestTest(unittest.TestCase):
     def test_json_inout_datetime(self):
         obj = {
             'uuid': str(uuid.uuid1()),
+            'is_async': False,
             'operation': 'getcapabilities',
             'version': '1.0.0',
             'language': 'eng',
@@ -121,6 +123,7 @@ class WPSRequestTest(unittest.TestCase):
     def test_json_inout_bbox(self):
         obj = {
             'uuid': str(uuid.uuid1()),
+            'is_async': False,
             'operation': 'getcapabilities',
             'version': '1.0.0',
             'language': 'eng',

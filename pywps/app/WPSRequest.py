@@ -48,6 +48,7 @@ class WPSRequest(object):
         # Generate uuid if not loaded from json
         self.uuid = uuid.uuid1()
 
+        self.is_async = False
         self.operation = None
         self.version = None
         self.api = None
@@ -473,7 +474,8 @@ class WPSRequest(object):
             'lineage': self.lineage,
             'inputs': dict((i, [inpt.json for inpt in self.inputs[i]]) for i in self.inputs),
             'outputs': self.outputs,
-            'raw': self.raw
+            'raw': self.raw,
+            'is_async': self.is_async
         }
 
         return json.dumps(obj, allow_nan=False, cls=ExtendedJSONEncoder)
@@ -486,6 +488,7 @@ class WPSRequest(object):
         """
 
         self.uuid = uuid.UUID(value.get('uuid'))
+        self.is_async = value.get('is_async')
         self._from_json_request(value)
 
     def _from_json_request(self, value):

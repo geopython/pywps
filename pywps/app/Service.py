@@ -127,7 +127,6 @@ class Service(object):
             process = self.prepare_process_for_execution(process_identifier)
             process._set_uuid(uuid)
             process._setup_status_storage()
-            process.async_ = True
             process.setup_outputs_from_wps_request(new_wps_request)
             new_wps_response = ExecuteResponse(new_wps_request, process=process, uuid=uuid)
             new_wps_response.store_status_file = True
@@ -138,27 +137,15 @@ class Service(object):
     def execute_instance(self, process, wps_request, uuid):
         process._set_uuid(uuid)
         process._setup_status_storage()
-        process.async_ = False
         response_cls = get_response("execute")
         wps_response = response_cls(wps_request, process=process, uuid=process.uuid)
 
-        LOGGER.debug('Check if status storage and updating are supported by this process')
-        if wps_request.store_execute == 'true':
-            if process.store_supported != 'true':
-                raise StorageNotSupported('Process does not support the storing of the execute response')
-
-            if wps_request.status == 'true':
-                if process.status_supported != 'true':
-                    raise OperationNotSupported('Process does not support the updating of status')
-
-                wps_response.store_status_file = True
-                process.async_ = True
-            else:
-                wps_response.store_status_file = False
+        # Store status file if the process is asynchronous
+        wps_response.store_status_file = wps_request.is_async
 
         LOGGER.debug('Check if updating of status is not required then no need to spawn a process')
 
-        wps_response = self._execute_process(process, process.async_, wps_request, wps_response)
+        wps_response = self._execute_process(process, wps_request.is_async, wps_request, wps_response)
 
         return wps_response
 
@@ -300,6 +287,19 @@ class Service(object):
                 raise MissingParameterValue(inpt.identifier, inpt.identifier)
 
         wps_request.inputs = data_inputs
+
+        LOGGER.debug('Check if status storage and updating are supported by this process')
+        wps_request.is_async = False
+        if wps_request.store_execute == 'true':
+            if process.store_supported != 'true':
+                raise StorageNotSupported('Process does not support the storing of the execute response')
+
+            if wps_request.status == 'true':
+                if process.status_supported != 'true':
+                    raise OperationNotSupported('Process does not support the updating of status')
+
+                wps_request.is_async = True
+
         return wps_request
 
     def _parse_and_execute(self, process, wps_request, uuid):
