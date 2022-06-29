@@ -127,12 +127,12 @@ class Process(object):
         # so that processes are not overriding each other
         # just for execute
         process = copy.deepcopy(self)
+        process.setup_outputs_from_wps_request(wps_request)
         workdir = os.path.abspath(config.get_config_value('server', 'workdir'))
         tempdir = tempfile.mkdtemp(prefix='pywps_process_', dir=workdir)
         process.set_workdir(tempdir)
         process._set_uuid(wps_request.uuid)
         process._setup_status_storage()
-        process.setup_outputs_from_wps_request(wps_request)
         return process
 
     def _set_uuid(self, uuid):

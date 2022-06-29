@@ -313,6 +313,7 @@ class ExecuteTest(unittest.TestCase):
             }]}
             raw = False
             outputs = {}
+            store_execute = False
             language = "en-US"
 
         request = FakeRequest()
