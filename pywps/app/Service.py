@@ -18,6 +18,9 @@ from pywps.inout.inputs import ComplexInput, LiteralInput, BoundingBoxInput
 from pywps.dblog import log_request, store_status
 from pywps import response
 from pywps.response.status import WPS_STATUS
+from pywps.response.execute import ExecuteResponse
+from pywps import dblog
+import json
 
 from collections import deque, OrderedDict
 import os
@@ -98,6 +101,34 @@ class Service(object):
         tempdir = tempfile.mkdtemp(prefix='pywps_process_', dir=workdir)
         process.set_workdir(tempdir)
         return process
+
+    def launch_next_process(self):
+        """Look at the queue of async process, if the queue is not empty launch the next pending request.
+        """
+        try:
+            LOGGER.debug("Checking for stored requests")
+
+            stored_request = dblog.pop_first_stored()
+            if not stored_request:
+                LOGGER.debug("No stored request found")
+                return
+
+            (uuid, request_json) = (stored_request.uuid, stored_request.request)
+            request_json = request_json.decode('utf-8')
+            LOGGER.debug("Launching the stored request {}".format(str(uuid)))
+            new_wps_request = WPSRequest()
+            new_wps_request.json = json.loads(request_json)
+            process_identifier = new_wps_request.identifier
+            process = self.prepare_process_for_execution(process_identifier)
+            process._set_uuid(uuid)
+            process._setup_status_storage()
+            process.async_ = True
+            process.setup_outputs_from_wps_request(new_wps_request)
+            new_wps_response = ExecuteResponse(new_wps_request, process=process, uuid=uuid)
+            new_wps_response.store_status_file = True
+            process._run_async(new_wps_request, new_wps_response)
+        except Exception as e:
+            LOGGER.exception("Could not run stored process. {}".format(e))
 
     def _parse_and_execute(self, process, wps_request, uuid):
         """Parse and execute request

@@ -8,13 +8,11 @@ import os
 from pywps.translations import lower_case_dict
 import sys
 import traceback
-import json
 import shutil
 
 from pywps import dblog
 from pywps.response import get_response
 from pywps.response.status import WPS_STATUS
-from pywps.response.execute import ExecuteResponse
 from pywps.app.WPSRequest import WPSRequest
 from pywps.inout.inputs import input_from_json
 from pywps.inout.outputs import output_from_json
@@ -295,37 +293,10 @@ class Process(object):
 
         finally:
             # The run of the next pending request if finished here, weather or not it successful
-            self.launch_next_process()
+            self.service.launch_next_process()
 
         return wps_response
 
-    def launch_next_process(self):
-        """Look at the queue of async process, if the queue is not empty launch the next pending request.
-        """
-        try:
-            LOGGER.debug("Checking for stored requests")
-
-            stored_request = dblog.pop_first_stored()
-            if not stored_request:
-                LOGGER.debug("No stored request found")
-                return
-
-            (uuid, request_json) = (stored_request.uuid, stored_request.request)
-            request_json = request_json.decode('utf-8')
-            LOGGER.debug("Launching the stored request {}".format(str(uuid)))
-            new_wps_request = WPSRequest()
-            new_wps_request.json = json.loads(request_json)
-            process_identifier = new_wps_request.identifier
-            process = self.service.prepare_process_for_execution(process_identifier)
-            process._set_uuid(uuid)
-            process._setup_status_storage()
-            process.async_ = True
-            process.setup_outputs_from_wps_request(new_wps_request)
-            new_wps_response = ExecuteResponse(new_wps_request, process=process, uuid=uuid)
-            new_wps_response.store_status_file = True
-            process._run_async(new_wps_request, new_wps_response)
-        except Exception as e:
-            LOGGER.exception("Could not run stored process. {}".format(e))
 
     def clean(self):
         """Clean the process working dir and other temporary files
