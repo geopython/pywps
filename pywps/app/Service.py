@@ -134,7 +134,7 @@ class Service(object):
         if wps_request.is_async:
             if running < self.maxparallel or self.maxparallel == -1:
                 # Run immediately
-                process, wps_request, wps_response = self.prepare_process_for_execution(process, wps_request)
+                process, wps_request, wps_response = self.prepare_process_for_execution(process, wps_request, True)
                 wps_response._update_status(WPS_STATUS.ACCEPTED, "PyWPS Request accepted", 0)
                 LOGGER.debug("Accepted request {}".format(process.uuid))
                 self._run_async(process, wps_request, wps_response)
@@ -145,7 +145,7 @@ class Service(object):
                 if stored >= self.maxprocesses and self.maxprocesses != -1:
                     raise ServerBusy('Maximum number of processes in queue reached. Please try later.')
                 LOGGER.debug("Store process in job queue, uuid={}".format(process.uuid))
-                process, wps_request, wps_response = self.prepare_process_for_execution(process, wps_request)
+                process, wps_request, wps_response = self.prepare_process_for_execution(process, wps_request, True)
                 dblog.store_process(wps_request)
                 wps_response._update_status(WPS_STATUS.ACCEPTED, 'PyWPS Process stored in job queue', 0)
                 return wps_response
@@ -153,17 +153,18 @@ class Service(object):
             if running >= self.maxparallel and self.maxparallel != -1:
                 raise ServerBusy('Maximum number of parallel running processes reached. Please try later.')
 
-            process, wps_request, wps_response = self.prepare_process_for_execution(process, wps_request)
+            process, wps_request, wps_response = self.prepare_process_for_execution(process, wps_request, True)
             wps_response._update_status(WPS_STATUS.ACCEPTED, "PyWPS Request accepted", 0)
             wps_response = process.run_process(wps_request, wps_response)
             return wps_response
 
-    def prepare_process_for_execution(self, process: Process, wps_request: WPSRequest):
+    def prepare_process_for_execution(self, process: Process, wps_request: WPSRequest, fetch_inputs=False):
         """Prepare the process identified by ``identifier`` for execution.
         """
         self._set_grass()
         process = process.new_instance(wps_request)
-        wps_request = Service._parse_request_inputs(process, wps_request)
+        if fetch_inputs:
+            wps_request = Service._parse_request_inputs(process, wps_request)
         response_cls = get_response("execute")
         wps_response = response_cls(wps_request, process=process, uuid=process.uuid)
         # Store status file if the process is asynchronous
@@ -184,11 +185,12 @@ class Service(object):
             (uuid, request_json) = (stored_request.uuid, stored_request.request)
             request_json = request_json.decode('utf-8')
             LOGGER.debug("Launching the stored request {}".format(str(uuid)))
-            new_wps_request = WPSRequest(json=json.loads(request_json))
-            process, new_wps_request = self.prepare_process_for_execution(new_wps_request)
-            new_wps_response = ExecuteResponse(new_wps_request, process=process, uuid=uuid)
-            new_wps_response.store_status_file = True
-            self._run_async(process, new_wps_request, new_wps_response)
+            wps_request = WPSRequest(json=json.loads(request_json))
+            process = self.processes.get(wps_request.identifier, None)
+            if process is None:
+                raise InvalidParameterValue("Unknown process '{}'".format(wps_request.identifier), 'Identifier')
+            process, wps_request, wps_response = self.prepare_process_for_execution(process, wps_request, False)
+            self._run_async(process, wps_request, wps_response)
         except Exception as e:
             LOGGER.exception("Could not run stored process. {}".format(e))
         return True
