@@ -68,6 +68,12 @@ class Service(object):
         if cfgfiles:
             config.load_configuration(cfgfiles)
 
+        # Maximum running processes
+        self.maxparallel = int(config.get_config_value('server', 'parallelprocesses'))
+
+        # Maximum queued processes
+        self.maxprocesses = int(config.get_config_value('server', 'maxprocesses'))
+
         if config.get_config_value('logging', 'file') and config.get_config_value('logging', 'level'):
             LOGGER.setLevel(getattr(logging, config.get_config_value('logging', 'level')))
             if not LOGGER.handlers:  # hasHandlers in Python 3.x
@@ -107,11 +113,9 @@ class Service(object):
 
         LOGGER.debug('Check if updating of status is not required then no need to spawn a process')
 
-        maxparallel = int(config.get_config_value('server', 'parallelprocesses'))
-
         running, stored = dblog.get_process_counts()
 
-        if maxparallel != -1 and running >= maxparallel:
+        if self.maxparallel != -1 and running >= self.maxparallel:
             # Try to check for crashed process
             dblog.cleanup_crashed_process()
             running, stored = dblog.get_process_counts()
@@ -120,18 +124,17 @@ class Service(object):
         if wps_request.is_async:
 
             # run immedietly
-            LOGGER.debug("Running processes: {} of {} allowed parallelprocesses".format(running, maxparallel))
+            LOGGER.debug("Running processes: {} of {} allowed parallelprocesses".format(running, self.maxparallel))
             LOGGER.debug("Stored processes: {}".format(stored))
 
-            if running < maxparallel or maxparallel == -1:
+            if running < self.maxparallel or self.maxparallel == -1:
                 wps_response._update_status(WPS_STATUS.ACCEPTED, "PyWPS Request accepted", 0)
                 LOGGER.debug("Accepted request {}".format(process.uuid))
                 self._run_async(process, wps_request, wps_response)
 
             # try to store for later usage
             else:
-                maxprocesses = int(config.get_config_value('server', 'maxprocesses'))
-                if stored >= maxprocesses and maxprocesses != -1:
+                if stored >= self.maxprocesses and self.maxprocesses != -1:
                     raise ServerBusy('Maximum number of processes in queue reached. Please try later.')
                 LOGGER.debug("Store process in job queue, uuid={}".format(process.uuid))
                 dblog.store_process(wps_request)
@@ -139,7 +142,7 @@ class Service(object):
 
         # not async
         else:
-            if running >= maxparallel and maxparallel != -1:
+            if running >= self.maxparallel and self.maxparallel != -1:
                 raise ServerBusy('Maximum number of parallel running processes reached. Please try later.')
             wps_response._update_status(WPS_STATUS.ACCEPTED, "PyWPS Request accepted", 0)
             wps_response = process.run_process(wps_request, wps_response)
