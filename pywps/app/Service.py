@@ -98,7 +98,7 @@ class Service(object):
         """
         self._set_grass()
         process, wps_request = self.prepare_process_for_execution(wps_request)
-        return self._parse_and_execute(process, wps_request)
+        return self.execute_instance(process, wps_request)
 
     def prepare_process_for_execution(self, wps_request: WPSRequest):
         """Prepare the process identified by ``identifier`` for execution.
@@ -296,13 +296,6 @@ class Service(object):
                 wps_request.is_async = True
 
         return wps_request
-
-    def _parse_and_execute(self, process, wps_request):
-        """Parse and execute request
-        """
-
-        wps_response = self.execute_instance(process, wps_request)
-        return wps_response
 
     @staticmethod
     def create_complex_inputs(source, inputs):
