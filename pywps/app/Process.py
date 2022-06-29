@@ -212,6 +212,22 @@ class Process(object):
         for outpt in self.outputs:
             outpt.workdir = workdir
 
+    def is_async(self, wps_request: WPSRequest):
+        """Check and return if the request is async
+        Raise Exception if the request is not compatible with the process
+        """
+        wps_request.is_async = False
+        if wps_request.store_execute == 'true':
+            if self.store_supported != 'true':
+                raise StorageNotSupported('Process does not support the storing of the execute response')
+
+            if wps_request.status == 'true':
+                if self.status_supported != 'true':
+                    raise OperationNotSupported('Process does not support the updating of status')
+
+                return True
+        return False
+
     def _set_grass(self, wps_request):
         """Handle given grass_location parameter of the constructor
 

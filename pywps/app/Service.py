@@ -118,6 +118,7 @@ class Service(object):
         :param wps_request: pywps.WPSRequest structure with parsed inputs, still in memory
         :param uuid: string identifier of the request
         """
+
         self._set_grass()
         process, wps_request = self.prepare_process_for_execution(wps_request)
 
@@ -285,16 +286,7 @@ class Service(object):
         wps_request.inputs = data_inputs
 
         LOGGER.debug('Check if status storage and updating are supported by this process')
-        wps_request.is_async = False
-        if wps_request.store_execute == 'true':
-            if process.store_supported != 'true':
-                raise StorageNotSupported('Process does not support the storing of the execute response')
-
-            if wps_request.status == 'true':
-                if process.status_supported != 'true':
-                    raise OperationNotSupported('Process does not support the updating of status')
-
-                wps_request.is_async = True
+        wps_request.is_async = process.is_async(wps_request)
 
         return wps_request
 
