@@ -98,7 +98,18 @@ class Service(object):
         """
         self._set_grass()
         process, wps_request = self.prepare_process_for_execution(wps_request)
-        return self.execute_instance(process, wps_request)
+
+        response_cls = get_response("execute")
+        wps_response = response_cls(wps_request, process=process, uuid=process.uuid)
+
+        # Store status file if the process is asynchronous
+        wps_response.store_status_file = wps_request.is_async
+
+        LOGGER.debug('Check if updating of status is not required then no need to spawn a process')
+
+        wps_response = self._execute_process(process, wps_request.is_async, wps_request, wps_response)
+
+        return wps_response
 
     def prepare_process_for_execution(self, wps_request: WPSRequest):
         """Prepare the process identified by ``identifier`` for execution.
@@ -131,19 +142,6 @@ class Service(object):
             self._run_async(process, new_wps_request, new_wps_response)
         except Exception as e:
             LOGGER.exception("Could not run stored process. {}".format(e))
-
-    def execute_instance(self, process : Process, wps_request: WPSRequest):
-        response_cls = get_response("execute")
-        wps_response = response_cls(wps_request, process=process, uuid=process.uuid)
-
-        # Store status file if the process is asynchronous
-        wps_response.store_status_file = wps_request.is_async
-
-        LOGGER.debug('Check if updating of status is not required then no need to spawn a process')
-
-        wps_response = self._execute_process(process, wps_request.is_async, wps_request, wps_response)
-
-        return wps_response
 
     def _execute_process(self, process, async_, wps_request, wps_response):
         """Uses :module:`pywps.processing` module for sending process to
