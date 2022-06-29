@@ -244,7 +244,7 @@ class Service(object):
 
         finally:
             # The run of the next pending request if finished here, weather or not it successful
-            self.launch_next_process()
+            self._try_run_stored_processes()
 
         return wps_response
 
