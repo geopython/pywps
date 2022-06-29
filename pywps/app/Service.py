@@ -104,6 +104,13 @@ class Service(object):
             running, stored = dblog.get_process_counts()
         return running, stored
 
+    def _try_run_stored_processes(self):
+        running, stored = self._get_accurate_process_counts()
+        while running < self.maxparallel:
+            if not self.launch_next_process():
+                break
+            running, stored = self._get_accurate_process_counts()
+
     def execute(self, wps_request: WPSRequest):
         """Parse and perform Execute WPS request call
 
@@ -451,6 +458,9 @@ class Service(object):
 
     # May not raise exceptions, this function must return a valid werkzeug.wrappers.Response.
     def call(self, http_request):
+
+        # Before running the current request try to run older async request
+        self._try_run_stored_processes()
 
         try:
             # This try block handle Exception generated before the request is accepted. Once the request is accepted
