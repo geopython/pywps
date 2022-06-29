@@ -9,6 +9,8 @@ from pywps.translations import lower_case_dict
 import sys
 import traceback
 import shutil
+import copy
+import tempfile
 
 from pywps import dblog
 from pywps.response.status import WPS_STATUS
@@ -119,7 +121,16 @@ class Process(object):
         new_process.set_workdir(value['workdir'])
         return new_process
 
-
+    def new_instance(self):
+        """Generate a new instance of that process with a new temporary directory"""
+        # make deep copy of the process instance
+        # so that processes are not overriding each other
+        # just for execute
+        process = copy.deepcopy(self)
+        workdir = os.path.abspath(config.get_config_value('server', 'workdir'))
+        tempdir = tempfile.mkdtemp(prefix='pywps_process_', dir=workdir)
+        process.set_workdir(tempdir)
+        return process
 
     def _set_uuid(self, uuid):
         """Set uuid and status location path and url

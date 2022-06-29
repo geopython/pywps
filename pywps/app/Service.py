@@ -101,18 +101,10 @@ class Service(object):
     def prepare_process_for_execution(self, identifier):
         """Prepare the process identified by ``identifier`` for execution.
         """
-        try:
-            process = self.processes[identifier]
-        except KeyError:
+        process = self.processes.get(identifier, None)
+        if process is None:
             raise InvalidParameterValue("Unknown process '{}'".format(identifier), 'Identifier')
-        # make deep copy of the process instance
-        # so that processes are not overriding each other
-        # just for execute
-        process = copy.deepcopy(process)
-        workdir = os.path.abspath(config.get_config_value('server', 'workdir'))
-        tempdir = tempfile.mkdtemp(prefix='pywps_process_', dir=workdir)
-        process.set_workdir(tempdir)
-        return process
+        return process.new_instance()
 
     def launch_next_process(self):
         """Look at the queue of async process, if the queue is not empty launch the next pending request.
