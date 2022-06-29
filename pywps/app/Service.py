@@ -10,7 +10,10 @@ from typing import Sequence, Optional, Dict
 from werkzeug.exceptions import HTTPException
 from werkzeug.wrappers import Request, Response
 from urllib.parse import urlparse
+
+import pywps
 from pywps.app.WPSRequest import WPSRequest
+from pywps.app.Process import Process
 import pywps.configuration as config
 
 from pywps.inout.inputs import ComplexInput, LiteralInput, BoundingBoxInput
@@ -266,7 +269,7 @@ class Service(object):
         return wps_response
 
     @staticmethod
-    def _parse_request_inputs(process, wps_request):
+    def _parse_request_inputs(process: Process, wps_request: WPSRequest):
         """Parse input data for the given process and update wps_request accordingly
         """
 
