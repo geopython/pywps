@@ -267,6 +267,7 @@ class ExecuteTest(unittest.TestCase):
 
         class FakeRequest():
             identifier = 'my_opendap_process'
+            uuid = 'fakeuuid'
             service = 'wps'
             operation = 'execute'
             version = '1.0.0'
@@ -282,7 +283,7 @@ class ExecuteTest(unittest.TestCase):
 
         request = FakeRequest()
 
-        resp = service.execute('my_opendap_process', request, 'fakeuuid')
+        resp = service.execute(request)
         self.assertEqual(resp.outputs['conventions'].data, 'CF-1.0')
         self.assertEqual(resp.outputs['outdods'].url, href)
         self.assertTrue(resp.outputs['outdods'].as_reference)
@@ -300,7 +301,8 @@ class ExecuteTest(unittest.TestCase):
         self.assertTrue(service.processes['my_complex_process'])
 
         class FakeRequest():
-            identifier = 'complex_process'
+            identifier = 'my_complex_process'
+            uuid = 'fakeuuid'
             service = 'wps'
             operation = 'execute'
             version = '1.0.0'
@@ -309,12 +311,14 @@ class ExecuteTest(unittest.TestCase):
                 'mimeType': 'text/gml',
                 'data': 'the data'
             }]}
+            raw = False
+            outputs = {}
             language = "en-US"
 
         request = FakeRequest()
 
         try:
-            service.execute('my_complex_process', request, 'fakeuuid')
+            service.execute(request)
         except InvalidParameterValue as e:
             self.assertEqual(e.locator, 'mimeType')
 
@@ -357,7 +361,8 @@ class ExecuteTest(unittest.TestCase):
         self.assertTrue(service.processes['my_complex_process'])
 
         class FakeRequest():
-            identifier = 'complex_process'
+            identifier = 'my_complex_process'
+            uuid = 'fakeuuid'
             service = 'wps'
             operation = 'execute'
             version = '1.0.0'
@@ -369,7 +374,7 @@ class ExecuteTest(unittest.TestCase):
             language = "en-US"
 
         request = FakeRequest()
-        response = service.execute('my_complex_process', request, 'fakeuuid')
+        response = service.execute(request)
         self.assertEqual(response.outputs['complex'].data, 'DEFAULT COMPLEX DATA')
 
     def test_output_mimetype(self):
@@ -389,6 +394,7 @@ class ExecuteTest(unittest.TestCase):
                 }}
 
             identifier = 'get_mimetype_process'
+            uuid = 'fakeuuid'
             service = 'wps'
             operation = 'execute'
             version = '1.0.0'
@@ -400,13 +406,13 @@ class ExecuteTest(unittest.TestCase):
 
         # valid mimetype
         request = FakeRequest('text/plain+test')
-        response = service.execute('get_mimetype_process', request, 'fakeuuid')
+        response = service.execute(request)
         self.assertEqual(response.outputs['mimetype'].data, 'text/plain+test')
 
         # non valid mimetype
         request = FakeRequest('text/xml')
         with self.assertRaises(InvalidParameterValue):
-            response = service.execute('get_mimetype_process', request, 'fakeuuid')
+            response = service.execute(request)
 
     def test_metalink(self):
         client = client_for(Service(processes=[create_metalink_process()]))

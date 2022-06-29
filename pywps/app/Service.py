@@ -89,7 +89,7 @@ class Service(object):
         return response_cls(wps_request, uuid, processes=self.processes,
                             identifiers=identifiers)
 
-    def execute(self, identifier, wps_request, uuid):
+    def execute(self, wps_request: WPSRequest):
         """Parse and perform Execute WPS request call
 
         :param identifier: process identifier string
@@ -97,16 +97,18 @@ class Service(object):
         :param uuid: string identifier of the request
         """
         self._set_grass()
-        process = self.prepare_process_for_execution(identifier)
-        return self._parse_and_execute(process, wps_request, uuid)
+        process, wps_request = self.prepare_process_for_execution(wps_request)
+        return self._parse_and_execute(process, wps_request, wps_request.uuid)
 
-    def prepare_process_for_execution(self, identifier):
+    def prepare_process_for_execution(self, wps_request: WPSRequest):
         """Prepare the process identified by ``identifier`` for execution.
         """
-        process = self.processes.get(identifier, None)
+        process = self.processes.get(wps_request.identifier, None)
         if process is None:
-            raise InvalidParameterValue("Unknown process '{}'".format(identifier), 'Identifier')
-        return process.new_instance()
+            raise InvalidParameterValue("Unknown process '{}'".format(wps_request.identifier), 'Identifier')
+        process = process.new_instance(wps_request)
+        Service._parse_request_inputs(process, wps_request)
+        return process, wps_request
 
     def launch_next_process(self):
         """Look at the queue of async process, if the queue is not empty launch the next pending request.
@@ -123,20 +125,14 @@ class Service(object):
             request_json = request_json.decode('utf-8')
             LOGGER.debug("Launching the stored request {}".format(str(uuid)))
             new_wps_request = WPSRequest(json=json.loads(request_json), preprocessors=self.preprocessors)
-            process_identifier = new_wps_request.identifier
-            process = self.prepare_process_for_execution(process_identifier)
-            process._set_uuid(uuid)
-            process._setup_status_storage()
-            process.setup_outputs_from_wps_request(new_wps_request)
+            process, new_wps_request = self.prepare_process_for_execution(new_wps_request)
             new_wps_response = ExecuteResponse(new_wps_request, process=process, uuid=uuid)
             new_wps_response.store_status_file = True
             self._run_async(process, new_wps_request, new_wps_response)
         except Exception as e:
             LOGGER.exception("Could not run stored process. {}".format(e))
 
-    def execute_instance(self, process, wps_request, uuid):
-        process._set_uuid(uuid)
-        process._setup_status_storage()
+    def execute_instance(self, process : Process, wps_request: WPSRequest, uuid):
         response_cls = get_response("execute")
         wps_response = response_cls(wps_request, process=process, uuid=process.uuid)
 
@@ -258,7 +254,6 @@ class Service(object):
     def _parse_request_inputs(process: Process, wps_request: WPSRequest):
         """Parse input data for the given process and update wps_request accordingly
         """
-
         LOGGER.debug('Checking if all mandatory inputs have been passed')
         data_inputs = {}
         for inpt in process.inputs:
@@ -305,9 +300,6 @@ class Service(object):
     def _parse_and_execute(self, process, wps_request, uuid):
         """Parse and execute request
         """
-        wps_request = Service._parse_request_inputs(process, wps_request)
-
-        process.setup_outputs_from_wps_request(wps_request)
 
         wps_response = self.execute_instance(process, wps_request, uuid)
         return wps_response
@@ -460,11 +452,7 @@ class Service(object):
                     response._update_status(WPS_STATUS.SUCCEEDED, '', 100)
 
                 elif wps_request.operation == 'execute':
-                    response = self.execute(
-                        wps_request.identifier,
-                        wps_request,
-                        wps_request.uuid
-                    )
+                    response = self.execute(wps_request)
                 return response
             except Exception as e:
                 # This ensure that logged request get terminated in case of exception while the request is not

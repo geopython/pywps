@@ -121,7 +121,7 @@ class Process(object):
         new_process.set_workdir(value['workdir'])
         return new_process
 
-    def new_instance(self):
+    def new_instance(self, wps_request: WPSRequest):
         """Generate a new instance of that process with a new temporary directory"""
         # make deep copy of the process instance
         # so that processes are not overriding each other
@@ -130,6 +130,9 @@ class Process(object):
         workdir = os.path.abspath(config.get_config_value('server', 'workdir'))
         tempdir = tempfile.mkdtemp(prefix='pywps_process_', dir=workdir)
         process.set_workdir(tempdir)
+        process._set_uuid(wps_request.uuid)
+        process._setup_status_storage()
+        process.setup_outputs_from_wps_request(wps_request)
         return process
 
     def _set_uuid(self, uuid):
