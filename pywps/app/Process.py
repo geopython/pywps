@@ -164,9 +164,7 @@ class Process(object):
     def status_url(self):
         return self.status_store.url(self.status_filename)
 
-    # This function may not raise exception and must return a valid wps_response
-    # Failure must be reported as wps_response.status = WPS_STATUS.FAILED
-    def _run_process(self, wps_request, wps_response):
+    def run_process(self, wps_request, wps_response):
         self._set_grass(wps_request)
         # if required set HOME to the current working directory.
         if config.get_config_value('server', 'sethomedir') is True:

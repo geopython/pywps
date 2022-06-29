@@ -204,7 +204,7 @@ class Service(object):
             if running >= maxparallel and maxparallel != -1:
                 raise ServerBusy('Maximum number of parallel running processes reached. Please try later.')
             wps_response._update_status(WPS_STATUS.ACCEPTED, "PyWPS Request accepted", 0)
-            wps_response = process._run_process(wps_request, wps_response)
+            wps_response = process.run_process(wps_request, wps_response)
 
         return wps_response
 
@@ -226,7 +226,7 @@ class Service(object):
         # Update the actual pid of current process to check if failed latter
         dblog.update_pid(process.uuid, os.getpid())
         try:
-            wps_response = process._run_process(wps_request, wps_response)
+            wps_response = process.run_process(wps_request, wps_response)
         except Exception as e:
             traceback.print_exc()
             LOGGER.debug('Retrieving file and line number where exception occurred')
