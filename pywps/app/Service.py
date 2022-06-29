@@ -289,13 +289,13 @@ class Service(object):
             else:
 
                 if isinstance(inpt, ComplexInput):
-                    data_inputs[inpt.identifier] = self.create_complex_inputs(
+                    data_inputs[inpt.identifier] = Service.create_complex_inputs(
                         inpt, request_inputs)
                 elif isinstance(inpt, LiteralInput):
-                    data_inputs[inpt.identifier] = self.create_literal_inputs(
+                    data_inputs[inpt.identifier] = Service.create_literal_inputs(
                         inpt, request_inputs)
                 elif isinstance(inpt, BoundingBoxInput):
-                    data_inputs[inpt.identifier] = self.create_bbox_inputs(
+                    data_inputs[inpt.identifier] = Service.create_bbox_inputs(
                         inpt, request_inputs)
 
         for inpt in process.inputs:
@@ -313,7 +313,8 @@ class Service(object):
         wps_response = self.execute_instance(process, wps_request, uuid)
         return wps_response
 
-    def create_complex_inputs(self, source, inputs):
+    @staticmethod
+    def create_complex_inputs(source, inputs):
         """Create new ComplexInput as clone of original ComplexInput
         because of inputs can be more than one, take it just as Prototype.
 
@@ -352,7 +353,8 @@ class Service(object):
             raise MissingParameterValue(description=description, locator=source.identifier)
         return outinputs
 
-    def create_literal_inputs(self, source, inputs):
+    @staticmethod
+    def create_literal_inputs(source, inputs):
         """ Takes the http_request and parses the input to objects
         :return collections.deque:
         """
@@ -407,7 +409,8 @@ class Service(object):
             os.putenv('PYTHONPATH', os.environ.get('PYTHONPATH'))
             sys.path.insert(0, python_path)
 
-    def create_bbox_inputs(self, source, inputs):
+    @staticmethod
+    def create_bbox_inputs(source, inputs):
         """ Takes the http_request and parses the input to objects
         :return collections.deque:
         """
