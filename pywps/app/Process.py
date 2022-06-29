@@ -157,62 +157,20 @@ class Process(object):
     # This function may not raise exception and must return a valid wps_response
     # Failure must be reported as wps_response.status = WPS_STATUS.FAILED
     def _run_process(self, wps_request, wps_response):
-        LOGGER.debug("Started processing request: {} with pid: {}".format(self.uuid, os.getpid()))
-        # Update the actual pid of current process to check if failed latter
-        dblog.update_pid(self.uuid, os.getpid())
-        try:
-            self._set_grass(wps_request)
-            # if required set HOME to the current working directory.
-            if config.get_config_value('server', 'sethomedir') is True:
-                os.environ['HOME'] = self.workdir
-                LOGGER.info('Setting HOME to current working directory: {}'.format(os.environ['HOME']))
-            LOGGER.debug('ProcessID={}, HOME={}'.format(self.uuid, os.environ.get('HOME')))
-            wps_response._update_status(WPS_STATUS.STARTED, 'PyWPS Process started', 0)
-            self.handler(wps_request, wps_response)  # the user must update the wps_response.
-            # Ensure process termination
-            if wps_response.status != WPS_STATUS.SUCCEEDED and wps_response.status != WPS_STATUS.FAILED:
-                # if (not wps_response.status_percentage) or (wps_response.status_percentage != 100):
-                LOGGER.debug('Updating process status to 100% if everything went correctly')
-                wps_response._update_status(WPS_STATUS.SUCCEEDED, f'PyWPS Process {self.title} finished', 100)
-        except Exception as e:
-            traceback.print_exc()
-            LOGGER.debug('Retrieving file and line number where exception occurred')
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            found = False
-            while not found:
-                # search for the _handler method
-                m_name = exc_tb.tb_frame.f_code.co_name
-                if m_name == '_handler':
-                    found = True
-                else:
-                    if exc_tb.tb_next is not None:
-                        exc_tb = exc_tb.tb_next
-                    else:
-                        # if not found then take the first
-                        exc_tb = sys.exc_info()[2]
-                        break
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            method_name = exc_tb.tb_frame.f_code.co_name
-
-            # update the process status to display process failed
-
-            msg = 'Process error: method={}.{}, line={}, msg={}'.format(fname, method_name, exc_tb.tb_lineno, e)
-            LOGGER.error(msg)
-            # In case of a ProcessError use the validated exception message.
-            if isinstance(e, ProcessError):
-                msg = "Process error: {}".format(e)
-            # Only in debug mode we use the log message including the traceback ...
-            elif config.get_config_value("logging", "level") != "DEBUG":
-                # ... otherwise we use a sparse common error message.
-                msg = 'Process failed, please check server error log'
-            wps_response._update_status(WPS_STATUS.FAILED, msg, 100)
-
-        finally:
-            # The run of the next pending request if finished here, weather or not it successful
-            self.service.launch_next_process()
-
+        self._set_grass(wps_request)
+        # if required set HOME to the current working directory.
+        if config.get_config_value('server', 'sethomedir') is True:
+            os.environ['HOME'] = self.workdir
+            LOGGER.info('Setting HOME to current working directory: {}'.format(os.environ['HOME']))
+        LOGGER.debug('ProcessID={}, HOME={}'.format(self.uuid, os.environ.get('HOME')))
+        wps_response._update_status(WPS_STATUS.STARTED, 'PyWPS Process started', 0)
+        self.handler(wps_request, wps_response)  # the user must update the wps_response.
+        # Ensure process termination
+        if wps_response.status != WPS_STATUS.SUCCEEDED and wps_response.status != WPS_STATUS.FAILED:
+            # if (not wps_response.status_percentage) or (wps_response.status_percentage != 100):
+            LOGGER.debug('Updating process status to 100% if everything went correctly')
+            wps_response._update_status(WPS_STATUS.SUCCEEDED, f'PyWPS Process {self.title} finished', 100)
         return wps_response
-
 
     def clean(self):
         """Clean the process working dir and other temporary files

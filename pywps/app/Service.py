@@ -22,7 +22,7 @@ from pywps import dblog
 from pywps.exceptions import (StorageNotSupported, OperationNotSupported, MissingParameterValue, FileURLNotSupported,
                               ServerBusy, NoApplicableCode,
                               InvalidParameterValue)
-
+from pywps.app.exceptions import ProcessError
 import json
 
 from collections import deque, OrderedDict
@@ -32,9 +32,19 @@ import sys
 import uuid
 import copy
 import shutil
-
+import traceback
 
 LOGGER = logging.getLogger("PYWPS")
+
+
+# Handle one request
+class ServiceInstance(object):
+    def __init__(self, service, process):
+        self.service = service
+        self.process = process
+
+    def _run_process(self, wps_request, wps_response):
+        self.service._run_process(self.process, wps_request, wps_response)
 
 
 class Service(object):
@@ -212,11 +222,58 @@ class Service(object):
     def _run_async(self, process, wps_request, wps_response):
         import pywps.processing
         xprocess = pywps.processing.Process(
-            process=process,
+            process=ServiceInstance(self, process),
             wps_request=wps_request,
             wps_response=wps_response)
         LOGGER.debug("Starting process for request: {}".format(process.uuid))
         xprocess.start()
+
+    # This function may not raise exception and must return a valid wps_response
+    # Failure must be reported as wps_response.status = WPS_STATUS.FAILED
+    def _run_process(self, process, wps_request, wps_response):
+        LOGGER.debug("Started processing request: {} with pid: {}".format(process.uuid, os.getpid()))
+        # Update the actual pid of current process to check if failed latter
+        dblog.update_pid(process.uuid, os.getpid())
+        try:
+            wps_response = process._run_process(wps_request, wps_response)
+        except Exception as e:
+            traceback.print_exc()
+            LOGGER.debug('Retrieving file and line number where exception occurred')
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            found = False
+            while not found:
+                # search for the _handler method
+                m_name = exc_tb.tb_frame.f_code.co_name
+                if m_name == '_handler':
+                    found = True
+                else:
+                    if exc_tb.tb_next is not None:
+                        exc_tb = exc_tb.tb_next
+                    else:
+                        # if not found then take the first
+                        exc_tb = sys.exc_info()[2]
+                        break
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            method_name = exc_tb.tb_frame.f_code.co_name
+
+            # update the process status to display process failed
+
+            msg = 'Process error: method={}.{}, line={}, msg={}'.format(fname, method_name, exc_tb.tb_lineno, e)
+            LOGGER.error(msg)
+            # In case of a ProcessError use the validated exception message.
+            if isinstance(e, ProcessError):
+                msg = "Process error: {}".format(e)
+            # Only in debug mode we use the log message including the traceback ...
+            elif config.get_config_value("logging", "level") != "DEBUG":
+                # ... otherwise we use a sparse common error message.
+                msg = 'Process failed, please check server error log'
+            wps_response._update_status(WPS_STATUS.FAILED, msg, 100)
+
+        finally:
+            # The run of the next pending request if finished here, weather or not it successful
+            self.launch_next_process()
+
+        return wps_response
 
     def _parse_and_execute(self, process, wps_request, uuid):
         """Parse and execute request
