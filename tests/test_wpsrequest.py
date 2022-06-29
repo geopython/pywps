@@ -8,6 +8,7 @@ from pywps.app import WPSRequest
 import tempfile
 import datetime
 import json
+import uuid
 from owslib.crs import Crs
 
 from pywps.inout.literaltypes import AnyValue
@@ -27,6 +28,7 @@ class WPSRequestTest(unittest.TestCase):
     def test_json_in(self):
 
         obj = {
+            'uuid': str(uuid.uuid1()),
             'operation': 'getcapabilities',
             'version': '1.0.0',
             'language': 'eng',
@@ -66,6 +68,7 @@ class WPSRequestTest(unittest.TestCase):
 
     def test_json_inout_datetime(self):
         obj = {
+            'uuid': str(uuid.uuid1()),
             'operation': 'getcapabilities',
             'version': '1.0.0',
             'language': 'eng',
@@ -117,6 +120,7 @@ class WPSRequestTest(unittest.TestCase):
 
     def test_json_inout_bbox(self):
         obj = {
+            'uuid': str(uuid.uuid1()),
             'operation': 'getcapabilities',
             'version': '1.0.0',
             'language': 'eng',

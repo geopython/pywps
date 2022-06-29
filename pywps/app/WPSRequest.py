@@ -20,6 +20,7 @@ from pywps.configuration import wps_strict
 from pywps import get_version_from_ns
 
 import json
+import uuid
 from urllib.parse import unquote
 
 LOGGER = logging.getLogger("PYWPS")
@@ -43,6 +44,9 @@ class WPSRequest(object):
         if "json" in kwargs:
             self.json = kwargs["json"]
             return
+
+        # Generate uuid if not loaded from json
+        self.uuid = uuid.uuid1()
 
         self.operation = None
         self.version = None
@@ -156,7 +160,7 @@ class WPSRequest(object):
 
             if self.preprocess_request is not None:
                 jdoc = self.preprocess_request(jdoc, http_request=http_request)
-            self.json = jdoc
+            self._from_json_request(jdoc)
 
             version = jdoc.get('version')
             self.set_version(version)
@@ -456,6 +460,7 @@ class WPSRequest(object):
                 return encoded_object
 
         obj = {
+            'uuid': str(self.uuid),
             'operation': self.operation,
             'version': self.version,
             'api': self.api,
@@ -480,6 +485,10 @@ class WPSRequest(object):
         :param value: the json (not string) representation
         """
 
+        self.uuid = uuid.UUID(value.get('uuid'))
+        self._from_json_request(value)
+
+    def _from_json_request(self, value):
         self.operation = value.get('operation')
         self.version = value.get('version')
         self.api = value.get('api')
