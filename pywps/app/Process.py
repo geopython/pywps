@@ -156,17 +156,6 @@ class Process(object):
 
     # This function may not raise exception and must return a valid wps_response
     # Failure must be reported as wps_response.status = WPS_STATUS.FAILED
-    def _run_async(self, wps_request, wps_response):
-        import pywps.processing
-        process = pywps.processing.Process(
-            process=self,
-            wps_request=wps_request,
-            wps_response=wps_response)
-        LOGGER.debug("Starting process for request: {}".format(self.uuid))
-        process.start()
-
-    # This function may not raise exception and must return a valid wps_response
-    # Failure must be reported as wps_response.status = WPS_STATUS.FAILED
     def _run_process(self, wps_request, wps_response):
         LOGGER.debug("Started processing request: {} with pid: {}".format(self.uuid, os.getpid()))
         # Update the actual pid of current process to check if failed latter

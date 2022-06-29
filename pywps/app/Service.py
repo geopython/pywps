@@ -129,7 +129,7 @@ class Service(object):
             process.setup_outputs_from_wps_request(new_wps_request)
             new_wps_response = ExecuteResponse(new_wps_request, process=process, uuid=uuid)
             new_wps_response.store_status_file = True
-            process._run_async(new_wps_request, new_wps_response)
+            self._run_async(process, new_wps_request, new_wps_response)
         except Exception as e:
             LOGGER.exception("Could not run stored process. {}".format(e))
 
@@ -187,7 +187,7 @@ class Service(object):
             if running < maxparallel or maxparallel == -1:
                 wps_response._update_status(WPS_STATUS.ACCEPTED, "PyWPS Request accepted", 0)
                 LOGGER.debug("Accepted request {}".format(process.uuid))
-                process._run_async(wps_request, wps_response)
+                self._run_async(process, wps_request, wps_response)
 
             # try to store for later usage
             else:
@@ -206,6 +206,17 @@ class Service(object):
             wps_response = process._run_process(wps_request, wps_response)
 
         return wps_response
+
+    # This function may not raise exception and must return a valid wps_response
+    # Failure must be reported as wps_response.status = WPS_STATUS.FAILED
+    def _run_async(self, process, wps_request, wps_response):
+        import pywps.processing
+        xprocess = pywps.processing.Process(
+            process=process,
+            wps_request=wps_request,
+            wps_response=wps_response)
+        LOGGER.debug("Starting process for request: {}".format(process.uuid))
+        xprocess.start()
 
     def _parse_and_execute(self, process, wps_request, uuid):
         """Parse and execute request
