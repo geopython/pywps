@@ -28,8 +28,21 @@ default_version = '1.0.0'
 
 class WPSRequest(object):
 
-    def __init__(self, http_request=None, preprocessors=None):
-        self.http_request = http_request
+    def __init__(self, **kwargs):
+        """Create a new WPS request, valid kwargs are:
+            - http_request: The http request used
+            - preprocessors: preprocessors list
+            - json: a json string
+        """
+
+        # TODO: Remove self.http_request because it usage is insane
+        self.http_request = kwargs.get("http_request", None)
+
+        self.preprocessors = kwargs.get("preprocessors", {})
+
+        if "json" in kwargs:
+            self.json = kwargs["json"]
+            return
 
         self.operation = None
         self.version = None
@@ -48,11 +61,11 @@ class WPSRequest(object):
         self.WPS = None
         self.OWS = None
         self.xpath_ns = None
-        self.preprocessors = preprocessors or dict()
         self.preprocess_request = None
         self.preprocess_response = None
 
-        if http_request:
+        if "http_request" in kwargs:
+            http_request = kwargs["http_request"]
             d = parse_http_url(http_request)
             self.operation = d.get('operation')
             self.identifier = d.get('identifier')
@@ -60,7 +73,7 @@ class WPSRequest(object):
             self.api = d.get('api')
             self.default_mimetype = d.get('default_mimetype')
             request_parser = self._get_request_parser_method(http_request.method)
-            request_parser()
+            request_parser(http_request)
 
     def _get_request_parser_method(self, method):
 
@@ -71,12 +84,12 @@ class WPSRequest(object):
         else:
             raise MethodNotAllowed()
 
-    def _get_request(self):
+    def _get_request(self, http_request):
         """HTTP GET request parser
         """
 
         # service shall be WPS
-        service = _get_get_param(self.http_request, 'service', None if wps_strict else 'wps')
+        service = _get_get_param(http_request, 'service', None if wps_strict else 'wps')
         if service:
             if str(service).lower() != 'wps':
                 raise InvalidParameterValue(
@@ -84,29 +97,29 @@ class WPSRequest(object):
         else:
             raise MissingParameterValue('service', 'service')
 
-        self.operation = _get_get_param(self.http_request, 'request', self.operation)
+        self.operation = _get_get_param(http_request, 'request', self.operation)
 
-        language = _get_get_param(self.http_request, 'language')
+        language = _get_get_param(http_request, 'language')
         self.check_and_set_language(language)
 
         request_parser = self._get_request_parser(self.operation)
-        request_parser(self.http_request)
+        request_parser(http_request)
 
-    def _post_request(self):
+    def _post_request(self, http_request):
         """HTTP GET request parser
         """
         # check if input file size was not exceeded
         maxsize = configuration.get_config_value('server', 'maxrequestsize')
         maxsize = configuration.get_size_mb(maxsize) * 1024 * 1024
-        if self.http_request.content_length > maxsize:
+        if http_request.content_length > maxsize:
             raise FileSizeExceeded('File size for input exceeded.'
                                    ' Maximum request size allowed: {} megabytes'.format(maxsize / 1024 / 1024))
 
-        content_type = self.http_request.content_type or []  # or self.http_request.mimetype
+        content_type = http_request.content_type or []  # or http_request.mimetype
         json_input = 'json' in content_type
         if not json_input:
             try:
-                doc = etree.fromstring(self.http_request.get_data())
+                doc = etree.fromstring(http_request.get_data())
             except Exception as e:
                 raise NoApplicableCode(str(e))
             operation = doc.tag
@@ -120,7 +133,7 @@ class WPSRequest(object):
             request_parser(doc)
         else:
             try:
-                jdoc = json.loads(self.http_request.get_data())
+                jdoc = json.loads(http_request.get_data())
             except Exception as e:
                 raise NoApplicableCode(str(e))
             if self.identifier is not None:
@@ -142,7 +155,7 @@ class WPSRequest(object):
             jdoc['default_mimetype'] = self.default_mimetype
 
             if self.preprocess_request is not None:
-                jdoc = self.preprocess_request(jdoc, http_request=self.http_request)
+                jdoc = self.preprocess_request(jdoc, http_request=http_request)
             self.json = jdoc
 
             version = jdoc.get('version')

@@ -57,8 +57,7 @@ class WPSRequestTest(unittest.TestCase):
             'raw': False
         }
 
-        self.request = WPSRequest()
-        self.request.json = obj
+        self.request = WPSRequest(json=obj)
 
         self.assertEqual(self.request.inputs['myliteral'][0].data, 1, 'Data are in the file')
         self.assertEqual(self.request.inputs['myin'][0].data, 'ahoj', 'Data are in the file')
@@ -102,8 +101,7 @@ class WPSRequestTest(unittest.TestCase):
             'raw': False
         }
 
-        self.request = WPSRequest()
-        self.request.json = obj
+        self.request = WPSRequest(json=obj)
 
         self.assertEqual(self.request.inputs['datetime'][0].data, datetime.datetime(2017, 4, 20, 12), 'Datatime set')
         self.assertEqual(self.request.inputs['date'][0].data, datetime.date(2017, 4, 20), 'Data set')
@@ -142,8 +140,7 @@ class WPSRequestTest(unittest.TestCase):
             'raw': False
         }
 
-        self.request = WPSRequest()
-        self.request.json = obj
+        self.request = WPSRequest(json=obj)
 
         self.assertEqual(self.request.inputs['bbox'][0].data, [6.117602, 46.176194, 6.22283, 46.275832], 'BBox data set')
         self.assertTrue(isinstance(self.request.inputs['bbox'][0].crs, str), 'CRS is a string')

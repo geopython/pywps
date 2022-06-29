@@ -120,8 +120,7 @@ class Service(object):
             (uuid, request_json) = (stored_request.uuid, stored_request.request)
             request_json = request_json.decode('utf-8')
             LOGGER.debug("Launching the stored request {}".format(str(uuid)))
-            new_wps_request = WPSRequest()
-            new_wps_request.json = json.loads(request_json)
+            new_wps_request = WPSRequest(json=json.loads(request_json), preprocessors=self.preprocessors)
             process_identifier = new_wps_request.identifier
             process = self.prepare_process_for_execution(process_identifier)
             process._set_uuid(uuid)
@@ -444,7 +443,7 @@ class Service(object):
             LOGGER.debug('Setting PYWPS_CFG to {}'.format(environ_cfg))
             os.environ['PYWPS_CFG'] = environ_cfg
 
-        wps_request = WPSRequest(http_request, self.preprocessors)
+        wps_request = WPSRequest(http_request=http_request, preprocessors=self.preprocessors)
         LOGGER.info('Request: {}'.format(wps_request.operation))
         if wps_request.operation in ['getcapabilities',
                                      'describeprocess',
