@@ -12,14 +12,17 @@ from werkzeug.wrappers import Request, Response
 from urllib.parse import urlparse
 from pywps.app.WPSRequest import WPSRequest
 import pywps.configuration as config
-from pywps.exceptions import MissingParameterValue, NoApplicableCode, InvalidParameterValue, FileSizeExceeded, \
-    StorageNotSupported, FileURLNotSupported
+
 from pywps.inout.inputs import ComplexInput, LiteralInput, BoundingBoxInput
 from pywps.dblog import log_request, store_status
-from pywps import response
 from pywps.response.status import WPS_STATUS
 from pywps.response.execute import ExecuteResponse
+from pywps.response import get_response
 from pywps import dblog
+from pywps.exceptions import (StorageNotSupported, OperationNotSupported, MissingParameterValue, FileURLNotSupported,
+                              ServerBusy, NoApplicableCode,
+                              InvalidParameterValue)
+
 import json
 
 from collections import deque, OrderedDict
@@ -130,6 +133,33 @@ class Service(object):
         except Exception as e:
             LOGGER.exception("Could not run stored process. {}".format(e))
 
+    def execute_instance(self, process, wps_request, uuid):
+        process._set_uuid(uuid)
+        process._setup_status_storage()
+        process.async_ = False
+        response_cls = get_response("execute")
+        wps_response = response_cls(wps_request, process=process, uuid=process.uuid)
+
+        LOGGER.debug('Check if status storage and updating are supported by this process')
+        if wps_request.store_execute == 'true':
+            if process.store_supported != 'true':
+                raise StorageNotSupported('Process does not support the storing of the execute response')
+
+            if wps_request.status == 'true':
+                if process.status_supported != 'true':
+                    raise OperationNotSupported('Process does not support the updating of status')
+
+                wps_response.store_status_file = True
+                process.async_ = True
+            else:
+                wps_response.store_status_file = False
+
+        LOGGER.debug('Check if updating of status is not required then no need to spawn a process')
+
+        wps_response = process._execute_process(process.async_, wps_request, wps_response)
+
+        return wps_response
+
     def _parse_and_execute(self, process, wps_request, uuid):
         """Parse and execute request
         """
@@ -174,7 +204,7 @@ class Service(object):
 
         process.setup_outputs_from_wps_request(wps_request)
 
-        wps_response = process.execute(wps_request, uuid)
+        wps_response = self.execute_instance(process, wps_request, uuid)
         return wps_response
 
     def create_complex_inputs(self, source, inputs):

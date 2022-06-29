@@ -11,7 +11,6 @@ import traceback
 import shutil
 
 from pywps import dblog
-from pywps.response import get_response
 from pywps.response.status import WPS_STATUS
 from pywps.app.WPSRequest import WPSRequest
 from pywps.inout.inputs import input_from_json
@@ -121,32 +120,7 @@ class Process(object):
         new_process.set_workdir(value['workdir'])
         return new_process
 
-    def execute(self, wps_request, uuid):
-        self._set_uuid(uuid)
-        self._setup_status_storage()
-        self.async_ = False
-        response_cls = get_response("execute")
-        wps_response = response_cls(wps_request, process=self, uuid=self.uuid)
 
-        LOGGER.debug('Check if status storage and updating are supported by this process')
-        if wps_request.store_execute == 'true':
-            if self.store_supported != 'true':
-                raise StorageNotSupported('Process does not support the storing of the execute response')
-
-            if wps_request.status == 'true':
-                if self.status_supported != 'true':
-                    raise OperationNotSupported('Process does not support the updating of status')
-
-                wps_response.store_status_file = True
-                self.async_ = True
-            else:
-                wps_response.store_status_file = False
-
-        LOGGER.debug('Check if updating of status is not required then no need to spawn a process')
-
-        wps_response = self._execute_process(self.async_, wps_request, wps_response)
-
-        return wps_response
 
     def _set_uuid(self, uuid):
         """Set uuid and status location path and url
