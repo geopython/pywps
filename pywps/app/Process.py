@@ -73,7 +73,6 @@ class Process(object):
         self.workdir = None
         self._grass_mapset = None
         self.grass_location = grass_location
-        self.service = None
         self.translations = lower_case_dict(translations)
 
         if store_supported:

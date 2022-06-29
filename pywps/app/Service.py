@@ -109,7 +109,6 @@ class Service(object):
         # so that processes are not overriding each other
         # just for execute
         process = copy.deepcopy(process)
-        process.service = self
         workdir = os.path.abspath(config.get_config_value('server', 'workdir'))
         tempdir = tempfile.mkdtemp(prefix='pywps_process_', dir=workdir)
         process.set_workdir(tempdir)
