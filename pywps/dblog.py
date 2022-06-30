@@ -206,11 +206,7 @@ def get_session():
 
     with lock:
         database = configuration.get_config_value('logging', 'database')
-        echo = True
-        level = configuration.get_config_value('logging', 'level')
-        level_name = logging.getLevelName(level)
-        if isinstance(level_name, int) and level_name >= logging.INFO:
-            echo = False
+        echo = configuration.get_config_value('logging', 'database_echo') == 'true'
         try:
             if ":memory:" in database:
                 engine = sqlalchemy.create_engine(database,

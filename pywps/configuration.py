@@ -115,6 +115,7 @@ def load_configuration(cfgfiles=None):
     CONFIG.set('logging', 'file', '')
     CONFIG.set('logging', 'level', 'DEBUG')
     CONFIG.set('logging', 'database', 'sqlite:///:memory:')
+    CONFIG.set('logging', 'database_echo', 'false')
     CONFIG.set('logging', 'prefix', 'pywps_')
     CONFIG.set('logging', 'format', '%(asctime)s] [%(levelname)s] file=%(pathname)s line=%(lineno)s module=%(module)s function=%(funcName)s %(message)s')  # noqa
 
