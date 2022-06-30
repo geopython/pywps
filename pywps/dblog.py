@@ -113,6 +113,7 @@ def pop_first_stored():
             request = None
 
         session.commit()
+    session.close()
     return request
 
 
