@@ -101,11 +101,8 @@ class Service(object):
         return running, stored
 
     def _try_run_stored_processes(self):
-        running, stored = self._get_accurate_process_counts()
-        while running < self.maxparallel:
-            if not self.launch_next_process():
-                break
-            running, stored = self._get_accurate_process_counts()
+        while self.launch_next_process():
+            pass
 
     def execute(self, wps_request: WPSRequest):
         """Parse and perform Execute WPS request call
@@ -172,7 +169,7 @@ class Service(object):
         try:
             LOGGER.debug("Checking for stored requests")
 
-            stored_request = dblog.pop_first_stored()
+            stored_request = dblog.pop_first_stored_with_limit(self.maxparallel)
             if not stored_request:
                 LOGGER.debug("No stored request found")
                 return False

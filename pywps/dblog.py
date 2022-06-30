@@ -116,6 +116,60 @@ def pop_first_stored():
     return request
 
 
+def pop_first_stored_with_limit(target_limit):
+    """Gets n first stored process to reach target_count
+    """
+    session = get_session()
+
+    # Cleanup crashed request
+    if sys.platform == "linux":
+        running = session.query(ProcessInstance) \
+            .filter(ProcessInstance.status.in_([WPS_STATUS.STARTED, WPS_STATUS.PAUSED]))
+
+        failed = []
+        for uuid, pid in ((p.uuid, p.pid) for p in running):
+            # No process with this pid, the process has crashed
+            if not os.path.exists(os.path.join("/proc", str(pid))):
+                failed.append(uuid)
+                continue
+
+            # If we can't read the environ, that mean the process belong another user
+            # which mean that this is not our process, thus our process has crashed
+            # this not work because root is the user for the apache
+            # if not os.access(os.path.join("/proc", str(pid), "environ"), os.R_OK):
+            #     failed.append(uuid)
+            #     continue
+
+        for uuid in failed:
+            store_status(uuid, WPS_STATUS.FAILED, "Process crashed", 100)
+
+        running = session.query(ProcessInstance) \
+            .filter(ProcessInstance.status.in_([WPS_STATUS.STARTED, WPS_STATUS.PAUSED]))
+
+        if running.count() >= target_limit:
+            return None
+
+        request = session.query(RequestInstance).first()
+
+        if request:
+            delete_count = session.query(RequestInstance).filter_by(uuid=request.uuid).delete()
+            if delete_count == 0:
+                LOGGER.debug("WARNING should not happen: Another thread or process took the same stored request")
+                request = None
+
+            # Ensure the process is marked as started to be included in running_count
+            process_instance = session.query(ProcessInstance).filter_by(uuid=str(request.uuid)).one()
+            if process_instance:
+                process_instance.pid = os.getpid()
+                process_instance.time_end = datetime.datetime.now()
+                process_instance.message = 'PyWPS Process started'
+                process_instance.status = WPS_STATUS.STARTED
+
+            session.commit()
+        session.close()
+    return request
+
+
 def store_status(uuid, wps_status, message=None, status_percentage=None):
     """Writes response to database
     """
