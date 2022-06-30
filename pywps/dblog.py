@@ -58,6 +58,7 @@ class RequestInstance(Base):
     __tablename__ = '{}stored_requests'.format(_tableprefix)
 
     uuid = Column(VARCHAR(255), primary_key=True, nullable=False)
+    timestamp = Column(DateTime(), nullable=False)
     request = Column(LargeBinary, nullable=False)
 
 
@@ -149,7 +150,9 @@ def pop_first_stored_with_limit(target_limit):
         if running.count() >= target_limit:
             return None
 
-        request = session.query(RequestInstance).first()
+        request = session.query(RequestInstance) \
+            .order_by(RequestInstance.timestamp.asc()) \
+            .first()
 
         if request:
             delete_count = session.query(RequestInstance).filter_by(uuid=request.uuid).delete()
@@ -294,7 +297,7 @@ def store_process(request):
     request_json = request.json
     # the BLOB type requires bytes on Python 3
     request_json = request_json.encode('utf-8')
-    request = RequestInstance(uuid=str(request.uuid), request=request_json)
+    request = RequestInstance(uuid=str(request.uuid), request=request_json, timestamp=datetime.datetime.now())
     session.add(request)
     session.commit()
     session.close()
