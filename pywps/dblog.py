@@ -12,6 +12,7 @@ import sys
 
 from pywps import configuration
 from pywps.exceptions import NoApplicableCode
+
 import sqlite3
 import datetime
 import pickle
@@ -90,9 +91,7 @@ def get_process_counts():
     stored_query = session.query(RequestInstance.uuid)
     running_count = (
         session.query(ProcessInstance)
-        .filter(ProcessInstance.percent_done < 100)
-        .filter(ProcessInstance.percent_done > -1)
-        .filter(~ProcessInstance.uuid.in_(stored_query))
+        .filter(ProcessInstance.status.in_([WPS_STATUS.STARTED, WPS_STATUS.PAUSED]))
         .count()
     )
     stored_count = stored_query.count()
