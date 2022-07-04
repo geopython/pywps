@@ -30,7 +30,7 @@ from pywps.validator.base import emptyvalidator
 from pywps.exceptions import InvalidParameterValue
 from pywps.validator.mode import MODE
 from pywps.inout.basic import UOM
-from pywps.inout.storage.file import FileStorageBuilder
+from pywps.inout.storage.database import DatabaseStorage
 from pywps.tests import service_ok
 from pywps.translations import get_translation
 
@@ -554,9 +554,9 @@ class ComplexOutputTest(unittest.TestCase):
                       'request=GetFeature&' \
                       'typename=continents&maxfeatures=2'
         self.complex_out.url = wfsResource
-        self.complex_out.storage = FileStorageBuilder().build()
-        url = self.complex_out.get_url()
-        self.assertEqual('file', urlparse(url).scheme)
+        self.complex_out.storage = DatabaseStorage()
+        url = self.complex_out.ensure_storage()
+        self.assertEqual('http', urlparse(url).scheme)
 
     def test_json(self):
         new_output = inout.outputs.ComplexOutput.from_json(self.complex_out.json)

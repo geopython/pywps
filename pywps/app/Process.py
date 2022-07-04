@@ -22,7 +22,7 @@ from pywps.exceptions import (StorageNotSupported, OperationNotSupported,
                               ServerBusy, NoApplicableCode,
                               InvalidParameterValue)
 from pywps.app.exceptions import ProcessError
-from pywps.inout.storage.builder import StorageBuilder
+from pywps.inout.storage import new_storage
 from pywps.inout.outputs import ComplexOutput
 import importlib
 
@@ -147,7 +147,8 @@ class Process(object):
             outpt.uuid = uuid
 
     def _setup_status_storage(self):
-        self._status_store = StorageBuilder.buildStorage()
+        self._status_store = new_storage()
+        self._status_store.export(str(self._status_store.uuid)+".xml", "application/xml")
 
     @property
     def status_store(self):
@@ -157,7 +158,7 @@ class Process(object):
 
     @property
     def status_location(self):
-        return self.status_store.location(self.status_filename)
+        return self.status_store.url
 
     @property
     def status_filename(self):
@@ -165,7 +166,7 @@ class Process(object):
 
     @property
     def status_url(self):
-        return self.status_store.url(self.status_filename)
+        return self.status_store.url
 
     def run_process(self, wps_request, wps_response):
         self._set_grass(wps_request)

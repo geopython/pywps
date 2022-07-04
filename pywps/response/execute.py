@@ -89,10 +89,8 @@ class ExecuteResponse(WPSResponse):
         # TODO: check if file/directory is still present, maybe deleted in mean time
         try:
             # update the status xml file
-            self.process.status_store.write(
-                self.doc,
-                self.process.status_filename,
-                data_format=FORMATS.XML)
+            with self.process.status_store.open("w", "utf-8") as f:
+                f.write(self.doc)
         except Exception as e:
             raise NoApplicableCode('Writing Response Document failed with : {}'.format(e))
 
@@ -159,7 +157,7 @@ class ExecuteResponse(WPSResponse):
 
         if self.store_status_file:
             if self.process.status_location:
-                data["status_location"] = self.process.status_url
+                data["status_location"] = self.process.status_location
 
         if self.status == WPS_STATUS.ACCEPTED:
             self.message = 'PyWPS Process {} accepted'.format(self.process.identifier)
