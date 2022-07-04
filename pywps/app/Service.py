@@ -18,6 +18,7 @@ import pywps.configuration as config
 
 from pywps.inout.inputs import ComplexInput, LiteralInput, BoundingBoxInput
 from pywps.dblog import log_request, store_status
+from pywps.inout.storage import get_storage_instance
 from pywps.response.status import WPS_STATUS
 from pywps.response.execute import ExecuteResponse
 from pywps.response.describe import DescribeResponse
@@ -401,6 +402,22 @@ class Service(object):
 
         return outinputs
 
+    @staticmethod
+    def _process_files(http_request):
+        if http_request.method != "GET":
+            return Response("Method Not Allowed", status=405)
+        file_uuid = http_request.args.get('uuid', None)
+        if file_uuid is None:
+            raise NoApplicableCode("Invalid uuid for files request", code=500)
+        store = get_storage_instance(file_uuid)
+        if store is None:
+            raise NoApplicableCode("Invalid uuid for files request", code=500)
+        if store.mimetype is None:
+            raise NoApplicableCode("Invalid uuid for files request", code=500)
+        return Response(store.open("r"),
+                        mimetype=store.mimetype,
+                        headers={'Content-Disposition': f'attachment; filename="{store.pretty_filename}"'})
+
     def _process_wps(self, http_request):
         """
         Process WPS request
@@ -455,7 +472,7 @@ class Service(object):
             # Exeception from CapabilityResponse and DescribeResponse are always catched by this try ... except close
             # because they never have status.
 
-            p = re.compile("^/(wps|api|processes|jobs)(/.+)?$")
+            p = re.compile("^/(wps|api|processes|jobs|files)(/.+)?$")
 
             m = p.match(http_request.path)
             if m is None:
@@ -464,6 +481,8 @@ class Service(object):
             # TODO: make sane dispatch
             if m.group(1) in ['wps', 'api', 'processes', 'jobs']:
                 return self._process_wps(http_request)
+            elif m.group(1) == 'files':
+                return Service._process_files(http_request)
             else:
                 return Response("Not Found", status=404)
 
