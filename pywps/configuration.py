@@ -92,7 +92,7 @@ def load_configuration(cfgfiles=None):
     # If this flag is enabled PyWPS will remove the process temporary workdir
     # after process has finished.
     CONFIG.set('server', 'cleantempdir', 'true')
-    CONFIG.set('server', 'storagetype', 'file')
+    CONFIG.set('server', 'storagetype', 'FileStorage')
     # File storage outputs can be copied, moved or linked
     # from the workdir to the output folder.
     # Allowed functions: "copy", "move", "link" (default "copy")
