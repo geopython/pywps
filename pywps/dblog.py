@@ -28,6 +28,8 @@ from sqlalchemy.pool import NullPool, StaticPool
 
 from pywps.response.status import WPS_STATUS
 
+from types import SimpleNamespace as ns
+
 LOGGER = logging.getLogger('PYWPS')
 _SESSION_MAKER = None
 
@@ -60,6 +62,17 @@ class RequestInstance(Base):
     uuid = Column(VARCHAR(255), primary_key=True, nullable=False)
     timestamp = Column(DateTime(), nullable=False)
     request = Column(LargeBinary, nullable=False)
+
+
+class StorageRecord(Base):
+    __tablename__ = '{}storage_records'.format(_tableprefix)
+
+    uuid = Column(VARCHAR(255), primary_key=True, nullable=False)
+    type = Column(VARCHAR(255), nullable=False)
+    pretty_filename = Column(VARCHAR(255), nullable=True)
+    mimetype = Column(VARCHAR(255), nullable=True)
+    timestamp = Column(DateTime(), nullable=False)
+    data = Column(LargeBinary, nullable=False)
 
 
 def log_request(uuid, request):
@@ -187,6 +200,47 @@ def store_status(uuid, wps_status, message=None, status_percentage=None):
         request.status = wps_status
         session.commit()
     session.close()
+
+
+# Update or create a store instance
+def update_storage_record(store_instance):
+    session = get_session()
+    r = session.query(StorageRecord).filter_by(uuid=str(store_instance.uuid))
+    if r.count():
+        store_instance_record = r.one()
+        store_instance_record.type = store_instance.__class__.__name__
+        store_instance_record.pretty_filename = store_instance.pretty_filename
+        store_instance_record.mimetype = store_instance.mimetype
+        store_instance_record.data = store_instance.dump()
+    else:
+        store_instance_record = StorageRecord(
+            uuid=str(store_instance.uuid),
+            type=store_instance.__class__.__name__,
+            timestamp=datetime.datetime.now(),
+            pretty_filename=store_instance.pretty_filename,
+            mimetype=store_instance.mimetype,
+            data=store_instance.dump()
+        )
+        session.add(store_instance_record)
+    session.commit()
+    session.close()
+
+
+# Get store instance data from uuid
+def get_storage_record(uuid):
+    session = get_session()
+    r = session.query(StorageRecord).filter_by(uuid=str(uuid))
+    if r.count():
+        store_instance_record = r.one()
+        # Copy store_instance_record content to unlink data from session
+        # TODO: get dynamic list of attributes
+        attrs = ["uuid", "type", "timestamp", "pretty_filename", "mimetype", "data"]
+        store_instance_record = ns(**{k: getattr(store_instance_record, k) for k in attrs})
+        store_instance_record.data = store_instance_record.data
+        session.close()
+        return store_instance_record
+    session.close()
+    return None
 
 
 def update_pid(uuid, pid):
