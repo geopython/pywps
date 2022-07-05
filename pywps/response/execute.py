@@ -46,8 +46,8 @@ class ExecuteResponse(WPSResponse):
         self.store_status_file = False
 
         # select the output mimetype
-        self.mimetype = select_response_mimetype(
-            self.wps_request.http_request.accept_mimetypes, self.wps_request.default_mimetype)
+        accept_mimetypes = getattr(self.wps_request.http_request, 'accept_mimetypes', None)
+        self.mimetype = select_response_mimetype(accept_mimetypes, self.wps_request.default_mimetype)
 
     # override WPSResponse._update_status
     def _update_status(self, status, message, status_percentage, clean=True):
