@@ -6,6 +6,7 @@
 XML tools
 """
 
+import re
 import logging
 from typing import Optional, Tuple
 
@@ -106,42 +107,46 @@ def parse_http_url(http_request) -> dict:
         identifier - the process identifier
         output_ids - if exist then it selects raw output with the name output_ids
     """
-    operation = api = identifier = output_ids = default_mimetype = base_url = None
-    if http_request:
-        parts = str(http_request.path[1:]).split('/')
-        i = 0
-        if len(parts) > i:
-            base_url = parts[i].lower()
-            if base_url == 'wps':
-                default_mimetype = 'xml'
-            elif base_url in ['api', 'processes', 'jobs']:
-                default_mimetype = 'json'
-            i += 1
-            if base_url == 'api':
-                api = parts[i]
-                i += 1
-            if len(parts) > i:
-                identifier = parts[i]
-                i += 1
-                if len(parts) > i:
-                    output_ids = parts[i]
-                    if not output_ids:
-                        output_ids = None
-    if base_url in ['jobs', 'api']:
-        operation = 'execute'
-    elif base_url == 'processes':
-        operation = 'describeprocess' if identifier else 'getcapabilities'
+
     d = {}
-    if operation:
-        d['operation'] = operation
-    if identifier:
-        d['identifier'] = identifier
-    if output_ids:
-        d['output_ids'] = output_ids
-    if default_mimetype:
-        d['default_mimetype'] = default_mimetype
-    if api:
-        d['api'] = api
-    if base_url:
-        d['base_url'] = base_url
-    return d
+
+    if http_request is None:
+        return d
+
+    p = re.compile("^/(wps|api|processes|jobs)(/.+)?$")
+    m = p.match(http_request.path)
+
+    if m is None:
+        return d
+
+    base_url = m.group(1)
+    if m.group(2) is not None:
+        args = re.findall("/([^/]+)", m.groups(2))
+    else:
+        args = []
+
+    d['base_url'] = base_url
+
+    if base_url == 'wps':
+        d['default_mimetype'] = 'application/xml'
+        return d
+
+    if base_url == 'api':
+        d['operation'] = 'execute'
+        d['default_mimetype'] = 'application/json'
+        d.update(dict(zip(['api', 'identifier', 'output_ids'], args)))
+        return d
+
+    if base_url == 'jobs':
+        d['operation'] = 'execute'
+        d['default_mimetype'] = 'application/json'
+        d.update(dict(zip(['identifier', 'output_ids'], args)))
+        return d
+
+    if base_url == 'processes':
+        d['operation'] = 'describeprocess' if len(args) == 0 else 'getcapabilities'
+        d['default_mimetype'] = 'json'
+        d.update(dict(zip(['identifier', 'output_ids'], args)))
+        return d
+
+    return dict()
