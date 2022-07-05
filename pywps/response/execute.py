@@ -153,6 +153,13 @@ class ExecuteResponse(WPSResponse):
 
     @property
     def json(self):
+        if self.status == WPS_STATUS.SUCCEEDED and \
+                hasattr(self.wps_request, 'preprocess_response') and \
+                self.wps_request.preprocess_response:
+            self.outputs = self.wps_request.preprocess_response(self.outputs,
+                                                                request=self.wps_request,
+                                                                http_request=self.wps_request.http_request)
+            
         data = {}
         data["language"] = self.wps_request.language
         data["service_instance"] = self._get_serviceinstance()
@@ -210,12 +217,6 @@ class ExecuteResponse(WPSResponse):
         return response
 
     def _construct_doc(self):
-        if self.status == WPS_STATUS.SUCCEEDED and \
-                hasattr(self.wps_request, 'preprocess_response') and \
-                self.wps_request.preprocess_response:
-            self.outputs = self.wps_request.preprocess_response(self.outputs,
-                                                                request=self.wps_request,
-                                                                http_request=self.wps_request.http_request)
         doc = self.json
         try:
             json_response, mimetype = get_response_type(
