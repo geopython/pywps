@@ -7,9 +7,13 @@ import logging
 import tempfile
 from typing import Sequence, Optional, Dict
 
+from .basic import select_response_mimetype
+
 from werkzeug.exceptions import HTTPException
 from werkzeug.wrappers import Request, Response
 from urllib.parse import urlparse
+
+from pywps.response.status import StatusResponse
 
 import pywps
 from pywps.app.WPSRequest import WPSRequest
@@ -418,6 +422,19 @@ class Service(object):
                         mimetype=store.mimetype,
                         headers={'Content-Disposition': f'attachment; filename="{store.pretty_filename}"'})
 
+    @staticmethod
+    def _process_status(http_request):
+        if http_request.method != "GET":
+            return Response("Method Not Allowed", status=405)
+        process_uuid = http_request.args.get('uuid', None)
+        if process_uuid is None:
+            raise NoApplicableCode("Invalid uuid for status request", code=500)
+        status = dblog.get_status_record(process_uuid)
+        if status is None:
+            raise NoApplicableCode("Invalid uuid for status request", code=500)
+        mimetype = select_response_mimetype(http_request.accept_mimetypes, None)
+        return StatusResponse(status.data, mimetype)
+
     def _process_wps(self, http_request):
         """
         Process WPS request
@@ -472,7 +489,7 @@ class Service(object):
             # Exeception from CapabilityResponse and DescribeResponse are always catched by this try ... except close
             # because they never have status.
 
-            p = re.compile("^/(wps|api|processes|jobs|files)(/.+)?$")
+            p = re.compile("^/(wps|api|processes|jobs|files|status)(/.+)?$")
 
             m = p.match(http_request.path)
             if m is None:
@@ -483,6 +500,8 @@ class Service(object):
                 return self._process_wps(http_request)
             elif m.group(1) == 'files':
                 return Service._process_files(http_request)
+            elif m.group(1) == 'status':
+                return Service._process_status(http_request)
             else:
                 return Response("Not Found", status=404)
 
