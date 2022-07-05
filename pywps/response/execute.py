@@ -7,6 +7,8 @@ import json
 import logging
 import time
 from werkzeug.wrappers import Request
+
+import pywps.dblog
 from pywps import get_ElementMakerForVersion
 from pywps.app.basic import get_response_type, get_json_indent, get_default_response_mimetype
 from pywps.exceptions import NoApplicableCode
@@ -59,6 +61,7 @@ class ExecuteResponse(WPSResponse):
         self._update_status_doc()
         if self.store_status_file:
             self._update_status_file()
+            pywps.dblog.update_status_record(self.uuid, self.json)
         if clean:
             if self.status == WPS_STATUS.SUCCEEDED or self.status == WPS_STATUS.FAILED:
                 LOGGER.debug("clean workdir: status={}".format(status))
