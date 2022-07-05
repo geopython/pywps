@@ -10,7 +10,7 @@ from werkzeug.wrappers import Request
 
 import pywps.dblog
 from pywps import get_ElementMakerForVersion
-from pywps.app.basic import get_response_type, get_json_indent, get_default_response_mimetype
+from pywps.app.basic import select_response_mimetype, get_json_indent, get_default_response_mimetype
 from pywps.exceptions import NoApplicableCode
 import pywps.configuration as config
 from werkzeug.wrappers import Response
@@ -46,7 +46,7 @@ class ExecuteResponse(WPSResponse):
         self.store_status_file = False
 
         # select the output mimetype
-        self.mimetype = get_response_type(
+        self.mimetype = select_response_mimetype(
             self.wps_request.http_request.accept_mimetypes, self.wps_request.default_mimetype)
 
     # override WPSResponse._update_status

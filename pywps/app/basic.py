@@ -55,7 +55,7 @@ def get_json_indent():
     return json_ident if json_ident >= 0 else None
 
 
-def get_response_type(accept_mimetypes, default_mimetype) -> str:
+def select_response_mimetype(accept_mimetypes, default_mimetype) -> str:
     """
     This function determinate if the response should be JSON or XML based on
     the accepted mimetypes of the request and the default mimetype provided,

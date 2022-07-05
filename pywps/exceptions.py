@@ -22,7 +22,7 @@ from markupsafe import escape
 import logging
 
 from pywps import __version__
-from pywps.app.basic import get_json_indent, get_response_type, parse_http_url
+from pywps.app.basic import get_json_indent, select_response_mimetype, parse_http_url
 
 __author__ = "Alex Morega & Calin Ciociu"
 
@@ -74,7 +74,7 @@ class NoApplicableCode(HTTPException):
         default_mimetype = None if not request else request.args.get('f', None)
         if default_mimetype is None:
             default_mimetype = parse_http_url(request).get('default_mimetype')
-        mimetype = get_response_type(accept_mimetypes, default_mimetype)
+        mimetype = select_response_mimetype(accept_mimetypes, default_mimetype)
         if mimetype == 'application/json':
             doc = json.dumps(args, indent=get_json_indent())
         else:

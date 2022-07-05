@@ -2,7 +2,7 @@ import json
 
 from werkzeug.wrappers import Request
 import pywps.configuration as config
-from pywps.app.basic import make_response, get_response_type, get_json_indent
+from pywps.app.basic import make_response, select_response_mimetype, get_json_indent
 from .basic import WPSResponse
 from pywps import __version__
 from pywps.exceptions import NoApplicableCode
@@ -68,7 +68,7 @@ class CapabilitiesResponse(WPSResponse):
 
     def _construct_doc(self):
         doc = self.json
-        mimetype = get_response_type(
+        mimetype = select_response_mimetype(
             self.wps_request.http_request.accept_mimetypes, self.wps_request.default_mimetype)
         if mimetype == 'application/json':
             doc = json.dumps(self._render_json_response(doc), indent=get_json_indent())
