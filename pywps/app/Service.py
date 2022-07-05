@@ -426,6 +426,7 @@ class Service(object):
     def _process_status(http_request):
         if http_request.method != "GET":
             return Response("Method Not Allowed", status=405)
+        dblog.cleanup_crashed_process()
         process_uuid = http_request.args.get('uuid', None)
         if process_uuid is None:
             raise NoApplicableCode("Invalid uuid for status request", code=500)
