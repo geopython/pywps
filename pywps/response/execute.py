@@ -159,7 +159,8 @@ class ExecuteResponse(WPSResponse):
             self.outputs = self.wps_request.preprocess_response(self.outputs,
                                                                 request=self.wps_request,
                                                                 http_request=self.wps_request.http_request)
-            
+            self.preprocess_response = None
+
         data = {}
         data["language"] = self.wps_request.language
         data["service_instance"] = self._get_serviceinstance()
