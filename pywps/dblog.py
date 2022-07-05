@@ -75,6 +75,17 @@ class StorageRecord(Base):
     data = Column(LargeBinary, nullable=False)
 
 
+class StatusRecord(Base):
+    __tablename__ = '{}status_records'.format(_tableprefix)
+
+    # Process uuid
+    uuid = Column(VARCHAR(255), primary_key=True, nullable=False)
+    # Time stamp for creation time
+    timestamp = Column(DateTime(), nullable=False)
+    # json data used in template
+    data = Column(LargeBinary, nullable=False)
+
+
 def log_request(uuid, request):
     """Write OGC WPS request (only the necessary parts) to database logging
     system
@@ -239,6 +250,42 @@ def get_storage_record(uuid):
         store_instance_record.data = store_instance_record.data
         session.close()
         return store_instance_record
+    session.close()
+    return None
+
+
+# Update or create a store instance
+def update_status_record(uuid, data):
+    session = get_session()
+    r = session.query(StatusRecord).filter_by(uuid=str(uuid))
+    if r.count():
+        status_record = r.one()
+        status_record.timestamp = datetime.datetime.now()
+        status_record.data = json.dumps(data).encode("utf-8")
+    else:
+        status_record = StatusRecord(
+            uuid=str(uuid),
+            timestamp=datetime.datetime.now(),
+            data=json.dumps(data).encode("utf-8")
+        )
+        session.add(status_record)
+    session.commit()
+    session.close()
+
+
+# Get store instance data from uuid
+def get_status_record(uuid):
+    session = get_session()
+    r = session.query(StatusRecord).filter_by(uuid=str(uuid))
+    if r.count():
+        status_record = r.one()
+        # Ensure new item
+        # TODO: get dynamic list of attributes
+        attrs = ["uuid", "timestamp", "data"]
+        status_record = ns(**{k: getattr(status_record, k) for k in attrs})
+        status_record.data = json.loads(status_record.data.decode("utf-8"))
+        session.close()
+        return status_record
     session.close()
     return None
 
