@@ -83,14 +83,17 @@ python demo.py
 
 4. Run via web browser
 
-    `http://localhost/pywps/?service=WPS&request=GetCapabilities&version=1.0.0`
+    `http://localhost/pywps/wps?service=WPS&request=GetCapabilities&version=1.0.0`
 
 5. Run in command line:
 
     ```bash
-    curl 'http://localhost/pywps/?service=WPS&request=GetCapabilities&version=1.0.0'
+    curl 'http://localhost/pywps/wps?service=WPS&request=GetCapabilities&version=1.0.0'
     ```
 
+# Notes
+
+Pywps know add `/wps` at the end of server url as default endpoint for wps. It also use several other endpoint such as `/api`.
 
 # Issues
 
