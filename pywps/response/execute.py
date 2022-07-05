@@ -45,6 +45,10 @@ class ExecuteResponse(WPSResponse):
         self.outputs = {o.identifier: o for o in self.process.outputs}
         self.store_status_file = False
 
+        # select the output mimetype
+        self.json_response, self.mimetype = get_response_type(
+            self.wps_request.http_request.accept_mimetypes, self.wps_request.default_mimetype)
+
     # override WPSResponse._update_status
     def _update_status(self, status, message, status_percentage, clean=True):
         """
@@ -219,23 +223,15 @@ class ExecuteResponse(WPSResponse):
 
     def _construct_doc(self):
         doc = self.json
-        try:
-            json_response, mimetype = get_response_type(
-                self.wps_request.http_request.accept_mimetypes, self.wps_request.default_mimetype)
-        except Exception:
-            mimetype = get_default_response_mimetype()
-            json_response = 'json' in mimetype
-        if json_response:
+        if self.json_response:
             doc = json.dumps(self._render_json_response(doc), cls=ArrayEncoder, indent=get_json_indent())
         else:
             template = self.template_env.get_template(self.version + '/execute/main.xml')
             doc = template.render(**doc)
-        return doc, mimetype
+        return doc, self.mimetype
 
     @Request.application
     def __call__(self, request):
-        accept_json_response, accepted_mimetype = get_response_type(
-            self.wps_request.http_request.accept_mimetypes, self.wps_request.default_mimetype)
         if self.wps_request.raw:
             if self.status == WPS_STATUS.FAILED:
                 return NoApplicableCode(self.message)
@@ -263,7 +259,7 @@ class ExecuteResponse(WPSResponse):
                     mimetype = self.wps_request.outputs[wps_output_identifier].get('mimetype', None)
                 if not isinstance(response, (str, bytes, bytearray)):
                     if not mimetype:
-                        mimetype = accepted_mimetype
+                        mimetype = self.mimetype
                     json_response = mimetype and 'json' in mimetype
                     if json_response:
                         mimetype = 'application/json'
@@ -279,4 +275,4 @@ class ExecuteResponse(WPSResponse):
         else:
             if not self.doc:
                 return NoApplicableCode("Output was not generated")
-            return Response(self.doc, mimetype=accepted_mimetype)
+            return Response(self.doc, mimetype=self.mimetype)
