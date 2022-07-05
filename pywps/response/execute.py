@@ -16,7 +16,7 @@ import pywps.configuration as config
 from werkzeug.wrappers import Response
 
 from pywps.inout.array_encode import ArrayEncoder
-from pywps.response.status import WPS_STATUS
+from pywps.response.status import WPS_STATUS, StatusResponse
 from .basic import WPSResponse
 from pywps.inout.formats import FORMATS
 from pywps.inout.outputs import ComplexOutput
@@ -274,6 +274,4 @@ class ExecuteResponse(WPSResponse):
                                 headers={'Content-Disposition': 'attachment; filename="{}"'
                                          .format(wps_output_identifier + suffix)})
         else:
-            if not self.doc:
-                return NoApplicableCode("Output was not generated")
-            return Response(self.doc, mimetype=self.mimetype)
+            return StatusResponse(self.json, self.mimetype)
