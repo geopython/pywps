@@ -65,14 +65,19 @@ def select_response_mimetype(accept_mimetypes, default_mimetype) -> str:
     :param default_mimetype: "text/xml", "application/json"
     :return: The selected mimetype
     """
-    accept_json = \
-        accept_mimetypes.accept_json or \
-        accept_mimetypes.best is None or \
-        'json' in accept_mimetypes.best.lower()
-    accept_xhtml = \
-        accept_mimetypes.accept_xhtml or \
-        accept_mimetypes.best is None or \
-        'xml' in accept_mimetypes.best.lower()
+    if accept_mimetypes is not None:
+        accept_json = \
+            accept_mimetypes.accept_json or \
+            accept_mimetypes.best is None or \
+            'json' in accept_mimetypes.best.lower()
+        accept_xhtml = \
+            accept_mimetypes.accept_xhtml or \
+            accept_mimetypes.best is None or \
+            'xml' in accept_mimetypes.best.lower()
+    else:
+        # If accept_mimetype is not define, accept all response
+        accept_json = True
+        accept_xhtml = True
     if not default_mimetype:
         default_mimetype = get_default_response_mimetype()
     json_is_default = 'json' in default_mimetype or '*' in default_mimetype
