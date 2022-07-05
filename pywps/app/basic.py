@@ -55,7 +55,7 @@ def get_json_indent():
     return json_ident if json_ident >= 0 else None
 
 
-def get_response_type(accept_mimetypes, default_mimetype) -> Tuple[bool, str]:
+def get_response_type(accept_mimetypes, default_mimetype) -> str:
     """
     This function determinate if the response should be JSON or XML based on
     the accepted mimetypes of the request and the default mimetype provided,
@@ -63,9 +63,7 @@ def get_response_type(accept_mimetypes, default_mimetype) -> Tuple[bool, str]:
 
     :param accept_mimetypes: determinate which mimetypes are accepted
     :param default_mimetype: "text/xml", "application/json"
-    :return: Tuple[bool, str] -
-        bool - True: The response type is JSON, False: Otherwise - XML
-        str - The output mimetype
+    :return: The selected mimetype
     """
     accept_json = \
         accept_mimetypes.accept_json or \
@@ -81,7 +79,7 @@ def get_response_type(accept_mimetypes, default_mimetype) -> Tuple[bool, str]:
     json_response = (accept_json and (not accept_xhtml or json_is_default)) or \
                     (json_is_default and accept_json == accept_xhtml)
     mimetype = 'application/json' if json_response else 'text/xml' if accept_xhtml else ''
-    return json_response, mimetype
+    return mimetype
 
 
 def parse_http_url(http_request) -> dict:

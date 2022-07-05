@@ -46,7 +46,7 @@ class ExecuteResponse(WPSResponse):
         self.store_status_file = False
 
         # select the output mimetype
-        self.json_response, self.mimetype = get_response_type(
+        self.mimetype = get_response_type(
             self.wps_request.http_request.accept_mimetypes, self.wps_request.default_mimetype)
 
     # override WPSResponse._update_status
@@ -223,7 +223,7 @@ class ExecuteResponse(WPSResponse):
 
     def _construct_doc(self):
         doc = self.json
-        if self.json_response:
+        if self.mimetype == 'application/json':
             doc = json.dumps(self._render_json_response(doc), cls=ArrayEncoder, indent=get_json_indent())
         else:
             template = self.template_env.get_template(self.version + '/execute/main.xml')

@@ -74,8 +74,8 @@ class NoApplicableCode(HTTPException):
         default_mimetype = None if not request else request.args.get('f', None)
         if default_mimetype is None:
             default_mimetype = parse_http_url(request).get('default_mimetype')
-        json_response, mimetype = get_response_type(accept_mimetypes, default_mimetype)
-        if json_response:
+        mimetype = get_response_type(accept_mimetypes, default_mimetype)
+        if mimetype == 'application/json':
             doc = json.dumps(args, indent=get_json_indent())
         else:
             doc = str((
