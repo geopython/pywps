@@ -59,7 +59,7 @@ class ExecuteTest(unittest.TestCase):
             ),
             version="1.0.0"
         )
-        resp = client.post_xml(doc=request_doc)
+        resp = client.post_xml('/wps', doc=request_doc)
         assert_response_accepted(resp)
 
         # TODO:

@@ -93,7 +93,7 @@ class DescribeProcessTest(unittest.TestCase):
         self.client = client_for(Service(processes=processes))
 
     def test_get_request_all_args(self):
-        resp = self.client.get('?Request=DescribeProcess&service=wps&version=1.0.0&identifier=all')
+        resp = self.client.get('/wps?Request=DescribeProcess&service=wps&version=1.0.0&identifier=all')
         identifiers = [desc.identifier for desc in get_describe_result(resp)]
         metadata = [desc.metadata for desc in get_describe_result(resp)]
 
@@ -103,20 +103,20 @@ class DescribeProcessTest(unittest.TestCase):
         assert 'hello metadata' in [item for sublist in metadata for item in sublist]
 
     def test_get_request_zero_args(self):
-        resp = self.client.get('?Request=DescribeProcess&version=1.0.0&service=wps')
+        resp = self.client.get('/wps?Request=DescribeProcess&version=1.0.0&service=wps')
         assert resp.status_code == 400
 
     def test_get_request_nonexisting_process_args(self):
-        resp = self.client.get('?Request=DescribeProcess&version=1.0.0&service=wps&identifier=NONEXISTINGPROCESS')
+        resp = self.client.get('/wps?Request=DescribeProcess&version=1.0.0&service=wps&identifier=NONEXISTINGPROCESS')
         assert resp.status_code == 400
 
     def test_post_request_zero_args(self):
         request_doc = WPS.DescribeProcess()
-        resp = self.client.post_xml(doc=request_doc)
+        resp = self.client.post_xml('/wps', doc=request_doc)
         assert resp.status_code == 400
 
     def test_get_one_arg(self):
-        resp = self.client.get('?service=wps&version=1.0.0&Request=DescribeProcess&identifier=hello')
+        resp = self.client.get('/wps?service=wps&version=1.0.0&Request=DescribeProcess&identifier=hello')
         assert [pr.identifier for pr in get_describe_result(resp)] == ['hello']
 
     def test_post_one_arg(self):
@@ -124,7 +124,7 @@ class DescribeProcessTest(unittest.TestCase):
             OWS.Identifier('hello'),
             version='1.0.0'
         )
-        resp = self.client.post_xml(doc=request_doc)
+        resp = self.client.post_xml('/wps', doc=request_doc)
         assert resp.status_code == 200
 
     def test_post_two_args(self):
@@ -133,7 +133,7 @@ class DescribeProcessTest(unittest.TestCase):
             OWS.Identifier('ping'),
             version='1.0.0'
         )
-        resp = self.client.post_xml(doc=request_doc)
+        resp = self.client.post_xml('/wps', doc=request_doc)
         result = get_describe_result(resp)
         # print(b"\n".join(resp.response).decode("utf-8"))
         assert [pr.identifier for pr in result] == ['hello', 'ping']
@@ -201,7 +201,7 @@ class DescribeProcessTranslationsTest(unittest.TestCase):
         configuration.CONFIG.set('server', 'language', 'en-US')
 
     def test_get_describe_translations(self):
-        resp = self.client.get('?Request=DescribeProcess&service=wps&version=1.0.0&identifier=all&language=fr-CA')
+        resp = self.client.get('/wps?Request=DescribeProcess&service=wps&version=1.0.0&identifier=all&language=fr-CA')
 
         assert resp.xpath('/wps:ProcessDescriptions/@xml:lang')[0] == "fr-CA"
 
@@ -227,7 +227,7 @@ class DescribeProcessInputTest(unittest.TestCase):
 
     def describe_process(self, process):
         client = client_for(Service(processes=[process]))
-        resp = client.get('?service=wps&version=1.0.0&Request=DescribeProcess&identifier={}'.format(process.identifier))
+        resp = client.get('/wps?service=wps&version=1.0.0&Request=DescribeProcess&identifier={}'.format(process.identifier))
         [result] = get_describe_result(resp)
         return result
 
