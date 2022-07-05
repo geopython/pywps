@@ -56,7 +56,7 @@ class CapabilitiesResponse(WPSResponse):
                 'instructions': config.get_config_value('metadata:main', 'contact_instructions'),
                 'role': config.get_config_value('metadata:main', 'contact_role')
             },
-            'serviceurl': config.get_config_value('server', 'url'),
+            'serviceurl': config.get_config_value('server', 'url').rstrip('/') + '/wps',
             'languages': config.get_config_value('server', 'language').split(','),
             'language': self.wps_request.language,
             'processes': processes
