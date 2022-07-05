@@ -169,6 +169,7 @@ class ExecuteResponse(WPSResponse):
         data["language"] = self.wps_request.language
         data["service_instance"] = self._get_serviceinstance()
         data["process"] = self.process.json
+        data["version"] = self.version
 
         if self.store_status_file:
             if self.process.status_location:
