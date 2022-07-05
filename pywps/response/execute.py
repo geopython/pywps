@@ -62,9 +62,7 @@ class ExecuteResponse(WPSResponse):
         """
         super(ExecuteResponse, self)._update_status(status, message, status_percentage)
         LOGGER.debug("_update_status: status={}, clean={}".format(status, clean))
-        self._update_status_doc()
         if self.store_status_file:
-            self._update_status_file()
             pywps.dblog.update_status_record(self.uuid, self.json)
         if clean:
             if self.status == WPS_STATUS.SUCCEEDED or self.status == WPS_STATUS.FAILED:
@@ -84,22 +82,6 @@ class ExecuteResponse(WPSResponse):
         if status_percentage is None:
             status_percentage = self.status_percentage
         self._update_status(self.status, message, status_percentage, False)
-
-    def _update_status_doc(self):
-        try:
-            # rebuild the doc
-            self.doc, self.content_type = self._construct_doc()
-        except Exception as e:
-            raise NoApplicableCode('Building Response Document failed with : {}'.format(e))
-
-    def _update_status_file(self):
-        # TODO: check if file/directory is still present, maybe deleted in mean time
-        try:
-            # update the status xml file
-            with self.process.status_store.open("w", "utf-8") as f:
-                f.write(self.doc)
-        except Exception as e:
-            raise NoApplicableCode('Writing Response Document failed with : {}'.format(e))
 
     def _process_accepted(self):
         percent = int(self.status_percentage)
@@ -204,32 +186,6 @@ class ExecuteResponse(WPSResponse):
 
                 data["output_definitions"] = [self.outputs[o].json for o in self.outputs]
         return data
-
-    @staticmethod
-    def _render_json_response(jdoc):
-        response = dict()
-        response['status'] = jdoc['status']
-        out = jdoc['process']['outputs']
-        d = {}
-        for val in out:
-            id = val.get('identifier')
-            if id is None:
-                continue
-            type = val.get('type')
-            key = 'bbox' if type == 'bbox' else 'data'
-            if key in val:
-                d[id] = val[key]
-        response['outputs'] = d
-        return response
-
-    def _construct_doc(self):
-        doc = self.json
-        if self.mimetype == 'application/json':
-            doc = json.dumps(self._render_json_response(doc), cls=ArrayEncoder, indent=get_json_indent())
-        else:
-            template = self.template_env.get_template(self.version + '/execute/main.xml')
-            doc = template.render(**doc)
-        return doc, self.mimetype
 
     @Request.application
     def __call__(self, request):

@@ -71,9 +71,6 @@ class Process(object):
         self.inputs = inputs if inputs is not None else []
         self.outputs = outputs if outputs is not None else []
         self.uuid = None
-        self._status_store = None
-        # self.status_location = ''
-        # self.status_url = ''
         self.workdir = None
         self._grass_mapset = None
         self.grass_location = grass_location
@@ -134,7 +131,6 @@ class Process(object):
         tempdir = tempfile.mkdtemp(prefix='pywps_process_', dir=workdir)
         process.set_workdir(tempdir)
         process._set_uuid(wps_request.uuid)
-        process._setup_status_storage()
         return process
 
     def _set_uuid(self, uuid):
@@ -147,16 +143,6 @@ class Process(object):
 
         for outpt in self.outputs:
             outpt.uuid = uuid
-
-    def _setup_status_storage(self):
-        self._status_store = new_storage()
-        self._status_store.export(str(self._status_store.uuid)+".xml", "application/xml")
-
-    @property
-    def status_store(self):
-        if self._status_store is None:
-            self._setup_status_storage()
-        return self._status_store
 
     @property
     def status_location(self):
