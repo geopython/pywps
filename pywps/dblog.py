@@ -166,7 +166,7 @@ def pop_first_stored_with_limit(target_limit):
             #     continue
 
         for uuid in failed:
-            store_status(uuid, WPS_STATUS.FAILED, "Process crashed", 100)
+            _set_process_failed(uuid)
 
         running = session.query(ProcessInstance) \
             .filter(ProcessInstance.status.in_([WPS_STATUS.STARTED, WPS_STATUS.PAUSED]))
@@ -303,6 +303,26 @@ def update_pid(uuid, pid):
     session.close()
 
 
+def _set_process_failed(uuid):
+    store_status(uuid, WPS_STATUS.FAILED, "Process crashed", 100)
+    session = get_session()
+    # Update status record
+    r = session.query(StatusRecord).filter_by(uuid=str(uuid))
+    if r.count():
+        status_record = r.one()
+        data = json.loads(status_record.data.decode("utf-8"))
+        data["status"].update({
+            "status": "failed",
+            "code": "ProcessCrashed",
+            "locator": "None",
+            "message": "Process crashed"
+        })
+        LOGGER.debug(str(data))
+        status_record.data = json.dumps(data).encode("utf-8")
+    session.commit()
+    session.close()
+
+
 def cleanup_crashed_process():
     # TODO: implement other platform
     if sys.platform != "linux":
@@ -318,6 +338,8 @@ def cleanup_crashed_process():
 
     failed = []
     running = [(p.uuid, p.pid) for p in running_cur]
+    session.close()
+
     for uuid, pid in running:
         # No process with this pid, the process has crashed
         if not os.path.exists(os.path.join("/proc", str(pid))):
@@ -333,7 +355,7 @@ def cleanup_crashed_process():
         pass
 
     for uuid in failed:
-        store_status(uuid, WPS_STATUS.FAILED, "Process crashed", 100)
+        _set_process_failed(uuid)
 
     session.close()
 
