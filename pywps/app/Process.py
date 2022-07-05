@@ -26,6 +26,8 @@ from pywps.inout.storage import new_storage
 from pywps.inout.outputs import ComplexOutput
 import importlib
 
+from pywps import configuration
+
 
 LOGGER = logging.getLogger("PYWPS")
 
@@ -158,7 +160,8 @@ class Process(object):
 
     @property
     def status_location(self):
-        return self.status_store.url
+        base_url = configuration.get_config_value('server', 'url').rstrip('/')
+        return f'{base_url}/status?uuid={self.uuid}'
 
     @property
     def status_filename(self):
@@ -166,7 +169,7 @@ class Process(object):
 
     @property
     def status_url(self):
-        return self.status_store.url
+        return self.status_location
 
     def run_process(self, wps_request, wps_response):
         self._set_grass(wps_request)
