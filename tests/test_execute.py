@@ -266,6 +266,8 @@ class ExecuteTest(unittest.TestCase):
         """
 
         class FakeRequest():
+            http_request = None
+            default_mimetype = None
             identifier = 'my_opendap_process'
             uuid = 'fakeuuid'
             service = 'wps'
@@ -301,6 +303,8 @@ class ExecuteTest(unittest.TestCase):
         self.assertTrue(service.processes['my_complex_process'])
 
         class FakeRequest():
+            http_request = None
+            default_mimetype = None
             identifier = 'my_complex_process'
             uuid = 'fakeuuid'
             service = 'wps'
@@ -362,6 +366,8 @@ class ExecuteTest(unittest.TestCase):
         self.assertTrue(service.processes['my_complex_process'])
 
         class FakeRequest():
+            http_request = None
+            default_mimetype = None
             identifier = 'my_complex_process'
             uuid = 'fakeuuid'
             service = 'wps'
@@ -394,6 +400,8 @@ class ExecuteTest(unittest.TestCase):
                     'data': 'the data'
                 }}
 
+            http_request = None
+            default_mimetype = None
             identifier = 'get_mimetype_process'
             uuid = 'fakeuuid'
             service = 'wps'
