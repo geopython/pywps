@@ -3,7 +3,7 @@ import json
 from werkzeug.wrappers import Request
 import pywps.configuration as config
 from pywps.app.basic import make_response, get_response_type, get_json_indent
-from pywps.response import WPSResponse
+from .basic import WPSResponse
 from pywps import __version__
 from pywps.exceptions import NoApplicableCode
 import os

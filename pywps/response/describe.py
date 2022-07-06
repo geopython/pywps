@@ -6,7 +6,7 @@ from pywps.app.basic import make_response, get_response_type, get_json_indent
 from pywps.exceptions import NoApplicableCode
 from pywps.exceptions import MissingParameterValue
 from pywps.exceptions import InvalidParameterValue
-from pywps.response import WPSResponse
+from .basic import WPSResponse
 from pywps import __version__
 import os
 
