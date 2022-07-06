@@ -4,7 +4,7 @@
 ##################################################################
 
 """
-Implementation of logging for PyWPS-4
+Database interface for PyWPS-4
 """
 
 import logging
