@@ -394,30 +394,29 @@ def get_session():
     if _SESSION_MAKER:
         return _SESSION_MAKER()
 
-    with _get_lock():
-        database = configuration.get_config_value('logging', 'database')
-        echo = configuration.get_config_value('logging', 'database_echo') == 'true'
-        try:
-            if ":memory:" in database:
-                engine = sqlalchemy.create_engine(database,
-                                                  echo=echo,
-                                                  connect_args={'check_same_thread': False},
-                                                  poolclass=StaticPool)
-            elif database.startswith("sqlite"):
-                engine = sqlalchemy.create_engine(database,
-                                                  echo=echo,
-                                                  connect_args={'check_same_thread': False},
-                                                  poolclass=NullPool)
-            else:
-                engine = sqlalchemy.create_engine(database, echo=echo, poolclass=NullPool)
-        except sqlalchemy.exc.SQLAlchemyError as e:
-            raise NoApplicableCode("Could not connect to database: {}".format(e.message))
+    database = configuration.get_config_value('logging', 'database')
+    echo = configuration.get_config_value('logging', 'database_echo') == 'true'
+    try:
+        if ":memory:" in database:
+            engine = sqlalchemy.create_engine(database,
+                                              echo=echo,
+                                              connect_args={'check_same_thread': False},
+                                              poolclass=StaticPool)
+        elif database.startswith("sqlite"):
+            engine = sqlalchemy.create_engine(database,
+                                              echo=echo,
+                                              connect_args={'check_same_thread': False},
+                                              poolclass=NullPool)
+        else:
+            engine = sqlalchemy.create_engine(database, echo=echo, poolclass=NullPool)
+    except sqlalchemy.exc.SQLAlchemyError as e:
+        raise NoApplicableCode("Could not connect to database: {}".format(e.message))
 
-        Session = sessionmaker(bind=engine)
-        ProcessInstance.metadata.create_all(engine)
-        RequestInstance.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+    ProcessInstance.metadata.create_all(engine)
+    RequestInstance.metadata.create_all(engine)
 
-        _SESSION_MAKER = Session
+    _SESSION_MAKER = Session
 
     return _SESSION_MAKER()
 
