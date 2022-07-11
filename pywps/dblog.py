@@ -38,7 +38,8 @@ _schema = configuration.get_config_value('logging', 'schema')
 
 Base = declarative_base()
 
-lock = Lock()
+# Use custom lock scheme for the database because there is no unified database lock mechanism
+_db_lock = None
 
 
 class ProcessInstance(Base):
@@ -329,6 +330,7 @@ def cleanup_crashed_process():
         return
 
     session = get_session()
+
     stored_query = session.query(RequestInstance.uuid)
     running_cur = (
         session.query(ProcessInstance)
@@ -375,6 +377,14 @@ def _get_identifier(request):
         return None
 
 
+def _get_lock():
+    global _db_lock
+    if _db_lock is None:
+        # Default lock work accross all forked process, but does not work with multiple process
+        _db_lock = Lock()
+    return _db_lock
+
+
 def get_session():
     """Get Connection for database
     """
@@ -384,7 +394,7 @@ def get_session():
     if _SESSION_MAKER:
         return _SESSION_MAKER()
 
-    with lock:
+    with _get_lock():
         database = configuration.get_config_value('logging', 'database')
         echo = configuration.get_config_value('logging', 'database_echo') == 'true'
         try:
