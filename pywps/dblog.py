@@ -30,6 +30,8 @@ from pywps.response.status import WPS_STATUS
 
 from types import SimpleNamespace as ns
 
+from .util import FileLock
+
 LOGGER = logging.getLogger('PYWPS')
 _SESSION_MAKER = None
 
@@ -372,8 +374,12 @@ def _get_identifier(request):
 def _get_lock():
     global _db_lock
     if _db_lock is None:
-        # Default lock work accross all forked process, but does not work with multiple process
-        _db_lock = Lock()
+        lock_filename = configuration.get_config_value('logging', 'database_filelock')
+        if lock_filename == 'none':
+            # Default lock work accross all forked process, but does not work with multiple process
+            _db_lock = Lock()
+        else:
+            _db_lock = FileLock(lock_filename)
     return _db_lock
 
 
