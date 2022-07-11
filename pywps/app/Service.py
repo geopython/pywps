@@ -190,6 +190,7 @@ class Service(object):
             self._run_async(process, wps_request, wps_response)
         except Exception as e:
             LOGGER.exception("Could not run stored process. {}".format(e))
+            return False
         return True
 
     # This function may not raise exception and must return a valid wps_response
