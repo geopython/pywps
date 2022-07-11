@@ -9,9 +9,16 @@
 import unittest
 
 from pywps import configuration
-from pywps.dblog import get_session
+from pywps.dblog import log_request
 from pywps.dblog import ProcessInstance
 
+from types import SimpleNamespace as ns
+
+fake_request = ns(
+    version = '1.0.0',
+    operation = 'execute',
+    identifier = 'dummy_identifier'
+)
 
 class DBLogTest(unittest.TestCase):
     """DBGLog test cases"""
@@ -20,29 +27,11 @@ class DBLogTest(unittest.TestCase):
 
         self.database = configuration.get_config_value('logging', 'database')
 
-    def test_0_dblog(self):
-        """Test pywps.formats.Format class
-        """
-        session = get_session()
-        self.assertTrue(session)
+    def test_log_request(self):
+        log_request("0bf3cd00-0102-11ed-8421-e4b97ac7e02e", fake_request)
+        log_request("0bf3cd00-0102-11ed-8421-e4b97ac7e03e", fake_request)
+        log_request("0bf3cd00-0102-11ed-8421-e4b97ac7e04e", fake_request)
 
-    def test_db_content(self):
-        session = get_session()
-        null_time_end = session.query(ProcessInstance).filter(ProcessInstance.time_end == None)
-        self.assertEqual(null_time_end.count(), 0,
-                         'There are no unfinished processes loged')
-
-        null_status = session.query(ProcessInstance).filter(ProcessInstance.status == None)
-        self.assertEqual(null_status.count(), 0,
-                         'There are no processes without status loged')
-
-        null_percent = session.query(ProcessInstance).filter(ProcessInstance.percent_done == None)
-        self.assertEqual(null_percent.count(), 0,
-                         'There are no processes without percent loged')
-
-        null_percent = session.query(ProcessInstance).filter(ProcessInstance.percent_done < 100)
-        self.assertEqual(null_percent.count(), 0,
-                         'There are no unfinished processes')
 
 def load_tests(loader=None, tests=None, pattern=None):
     """Load local tests
