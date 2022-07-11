@@ -42,6 +42,18 @@ Base = declarative_base()
 _db_lock = None
 
 
+class guard_session:
+    def __init__(self, func):
+        self.unsafe = func
+
+    def __call__(self, *args, **kwargs):
+        with _get_lock():
+            session = _get_session()
+            r = self.unsafe(session, *args, **kwargs)
+            session.close()
+        return r
+
+
 class ProcessInstance(Base):
     __tablename__ = '{}requests'.format(_tableprefix)
 
@@ -87,7 +99,8 @@ class StatusRecord(Base):
     data = Column(LargeBinary, nullable=False)
 
 
-def log_request(uuid, request):
+@guard_session
+def log_request(session, uuid, request):
     """Write OGC WPS request (only the necessary parts) to database logging
     system
     """
@@ -98,22 +111,19 @@ def log_request(uuid, request):
     time_start = datetime.datetime.now()
     identifier = _get_identifier(request)
 
-    session = get_session()
     request = ProcessInstance(
         uuid=str(uuid), pid=pid, operation=operation, version=version,
         time_start=time_start, identifier=identifier)
 
     session.add(request)
     session.commit()
-    session.close()
     # NoApplicableCode("Could commit to database: {}".format(e.message))
 
 
-def get_process_counts():
+@guard_session
+def get_process_counts(session):
     """Returns running and stored process counts and
     """
-
-    session = get_session()
     stored_query = session.query(RequestInstance.uuid)
     running_count = (
         session.query(ProcessInstance)
@@ -121,14 +131,13 @@ def get_process_counts():
         .count()
     )
     stored_count = stored_query.count()
-    session.close()
     return running_count, stored_count
 
 
-def pop_first_stored():
+@guard_session
+def pop_first_stored(session):
     """Gets the first stored process and delete it from the stored_requests table
     """
-    session = get_session()
     request = session.query(RequestInstance).first()
 
     if request:
@@ -138,15 +147,13 @@ def pop_first_stored():
             request = None
 
         session.commit()
-    session.close()
     return request
 
 
-def pop_first_stored_with_limit(target_limit):
+@guard_session
+def pop_first_stored_with_limit(session, target_limit):
     """Gets n first stored process to reach target_count
     """
-    session = get_session()
-
     # Cleanup crashed request
     if sys.platform == "linux":
         running = session.query(ProcessInstance) \
@@ -167,7 +174,7 @@ def pop_first_stored_with_limit(target_limit):
             #     continue
 
         for uuid in failed:
-            _set_process_failed(uuid)
+            set_process_failed.unsafe(session, uuid)
 
         running = session.query(ProcessInstance) \
             .filter(ProcessInstance.status.in_([WPS_STATUS.STARTED, WPS_STATUS.PAUSED]))
@@ -194,15 +201,13 @@ def pop_first_stored_with_limit(target_limit):
                 process_instance.status = WPS_STATUS.STARTED
 
             session.commit()
-        session.close()
     return request
 
 
-def store_status(uuid, wps_status, message=None, status_percentage=None):
+@guard_session
+def store_status(session, uuid, wps_status, message=None, status_percentage=None):
     """Writes response to database
     """
-    session = get_session()
-
     requests = session.query(ProcessInstance).filter_by(uuid=str(uuid))
     if requests.count():
         request = requests.one()
@@ -211,12 +216,11 @@ def store_status(uuid, wps_status, message=None, status_percentage=None):
         request.percent_done = status_percentage
         request.status = wps_status
         session.commit()
-    session.close()
 
 
 # Update or create a store instance
-def update_storage_record(store_instance):
-    session = get_session()
+@guard_session
+def update_storage_record(session, store_instance):
     r = session.query(StorageRecord).filter_by(uuid=str(store_instance.uuid))
     if r.count():
         store_instance_record = r.one()
@@ -235,12 +239,11 @@ def update_storage_record(store_instance):
         )
         session.add(store_instance_record)
     session.commit()
-    session.close()
 
 
 # Get store instance data from uuid
-def get_storage_record(uuid):
-    session = get_session()
+@guard_session
+def get_storage_record(session, uuid):
     r = session.query(StorageRecord).filter_by(uuid=str(uuid))
     if r.count():
         store_instance_record = r.one()
@@ -249,15 +252,13 @@ def get_storage_record(uuid):
         attrs = ["uuid", "type", "timestamp", "pretty_filename", "mimetype", "data"]
         store_instance_record = ns(**{k: getattr(store_instance_record, k) for k in attrs})
         store_instance_record.data = store_instance_record.data
-        session.close()
         return store_instance_record
-    session.close()
     return None
 
 
 # Update or create a store instance
-def update_status_record(uuid, data):
-    session = get_session()
+@guard_session
+def update_status_record(session, uuid, data):
     r = session.query(StatusRecord).filter_by(uuid=str(uuid))
     if r.count():
         status_record = r.one()
@@ -271,12 +272,11 @@ def update_status_record(uuid, data):
         )
         session.add(status_record)
     session.commit()
-    session.close()
 
 
 # Get store instance data from uuid
-def get_status_record(uuid):
-    session = get_session()
+@guard_session
+def get_status_record(session, uuid):
     r = session.query(StatusRecord).filter_by(uuid=str(uuid))
     if r.count():
         status_record = r.one()
@@ -285,28 +285,24 @@ def get_status_record(uuid):
         attrs = ["uuid", "timestamp", "data"]
         status_record = ns(**{k: getattr(status_record, k) for k in attrs})
         status_record.data = json.loads(status_record.data.decode("utf-8"))
-        session.close()
         return status_record
-    session.close()
     return None
 
 
-def update_pid(uuid, pid):
+@guard_session
+def update_pid(session, uuid, pid):
     """Update actual pid for the uuid processing
     """
-    session = get_session()
-
     requests = session.query(ProcessInstance).filter_by(uuid=str(uuid))
     if requests.count():
         request = requests.one()
         request.pid = pid
         session.commit()
-    session.close()
 
 
-def _set_process_failed(uuid):
-    store_status(uuid, WPS_STATUS.FAILED, "Process crashed", 100)
-    session = get_session()
+@guard_session
+def set_process_failed(session, uuid):
+    store_status.unsafe(session, uuid, WPS_STATUS.FAILED, "Process crashed", 100)
     # Update status record
     r = session.query(StatusRecord).filter_by(uuid=str(uuid))
     if r.count():
@@ -321,15 +317,13 @@ def _set_process_failed(uuid):
         LOGGER.debug(str(data))
         status_record.data = json.dumps(data).encode("utf-8")
     session.commit()
-    session.close()
 
 
-def cleanup_crashed_process():
+@guard_session
+def cleanup_crashed_process(session):
     # TODO: implement other platform
     if sys.platform != "linux":
         return
-
-    session = get_session()
 
     stored_query = session.query(RequestInstance.uuid)
     running_cur = (
@@ -340,7 +334,6 @@ def cleanup_crashed_process():
 
     failed = []
     running = [(p.uuid, p.pid) for p in running_cur]
-    session.close()
 
     for uuid, pid in running:
         # No process with this pid, the process has crashed
@@ -357,11 +350,10 @@ def cleanup_crashed_process():
         pass
 
     for uuid in failed:
-        _set_process_failed(uuid)
-
-    session.close()
+        set_process_failed.unsafe(session, uuid)
 
 
+# TODO: move this to request object.
 def _get_identifier(request):
     """Get operation identifier
     """
@@ -385,7 +377,7 @@ def _get_lock():
     return _db_lock
 
 
-def get_session():
+def _get_session():
     """Get Connection for database
     """
     LOGGER.debug('Initializing database connection')
@@ -421,15 +413,13 @@ def get_session():
     return _SESSION_MAKER()
 
 
-def store_process(request):
+@guard_session
+def store_process(session, request):
     """Save given request under given UUID for later usage
     """
-
-    session = get_session()
     request_json = request.json
     # the BLOB type requires bytes on Python 3
     request_json = request_json.encode('utf-8')
     request = RequestInstance(uuid=str(request.uuid), request=request_json, timestamp=datetime.datetime.now())
     session.add(request)
     session.commit()
-    session.close()
