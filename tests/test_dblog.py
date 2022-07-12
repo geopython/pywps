@@ -85,6 +85,12 @@ class DBLogTest(unittest.TestCase):
         assert s.mimetype == fake_storage.mimetype
         assert s.data == fake_storage.dump()
 
+    def test_status(self):
+        dblog.update_status_record("fbf3cd00-0102-11ed-8421-e4b97ac7e02e", "somedata")
+        s = dblog.get_status_record("fbf3cd00-0102-11ed-8421-e4b97ac7e02e")
+        assert s.uuid == "fbf3cd00-0102-11ed-8421-e4b97ac7e02e"
+        assert s.data == "somedata"
+
 
 def load_tests(loader=None, tests=None, pattern=None):
     """Load local tests
