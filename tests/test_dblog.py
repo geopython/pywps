@@ -9,15 +9,20 @@
 import unittest
 
 from pywps import configuration
-from pywps.dblog import log_request
-from pywps.dblog import ProcessInstance
+import pywps.dblog as dblog
 
 from types import SimpleNamespace as ns
+import json
 
 fake_request = ns(
     version = '1.0.0',
     operation = 'execute',
     identifier = 'dummy_identifier'
+)
+
+fake_process = ns(
+    uuid="0bf3cd00-0102-11ed-8421-e4b97ac7e08e",
+    json=json.dumps({"identifier": "something"})
 )
 
 class DBLogTest(unittest.TestCase):
@@ -28,9 +33,42 @@ class DBLogTest(unittest.TestCase):
         self.database = configuration.get_config_value('logging', 'database')
 
     def test_log_request(self):
-        log_request("0bf3cd00-0102-11ed-8421-e4b97ac7e02e", fake_request)
-        log_request("0bf3cd00-0102-11ed-8421-e4b97ac7e03e", fake_request)
-        log_request("0bf3cd00-0102-11ed-8421-e4b97ac7e04e", fake_request)
+        dblog.log_request("0bf3cd00-0102-11ed-8421-e4b97ac7e02e", fake_request)
+        dblog.log_request("0bf3cd00-0102-11ed-8421-e4b97ac7e03e", fake_request)
+        dblog.log_request("0bf3cd00-0102-11ed-8421-e4b97ac7e04e", fake_request)
+
+        running, stored = dblog.get_process_counts()
+        assert running == 0
+        assert stored == 0
+
+        dblog.store_status("0bf3cd00-0102-11ed-8421-e4b97ac7e03e", dblog.WPS_STATUS.ACCEPTED, "accepted", 10)
+
+        running, stored = dblog.get_process_counts()
+        assert running == 0
+        assert stored == 0
+
+        dblog.store_status("0bf3cd00-0102-11ed-8421-e4b97ac7e04e", dblog.WPS_STATUS.STARTED, "started", 10)
+        dblog.update_pid("0bf3cd00-0102-11ed-8421-e4b97ac7e04e", 10)
+
+        running, stored = dblog.get_process_counts()
+        assert running == 1
+        assert stored == 0
+
+        dblog.store_status(fake_process.uuid, dblog.WPS_STATUS.ACCEPTED, "accepted", 10)
+        dblog.store_process(fake_process)
+
+        running, stored = dblog.get_process_counts()
+        assert running == 1
+        assert stored == 1
+
+        p = dblog.pop_first_stored()
+        assert p.uuid == fake_process.uuid
+
+        running, stored = dblog.get_process_counts()
+        assert running == 1
+        assert stored == 0
+
+
 
 
 def load_tests(loader=None, tests=None, pattern=None):
