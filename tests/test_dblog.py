@@ -91,6 +91,32 @@ class DBLogTest(unittest.TestCase):
         assert s.uuid == "fbf3cd00-0102-11ed-8421-e4b97ac7e02e"
         assert s.data == "somedata"
 
+    def test_crashed_process(self):
+        fake_process_status_data = {
+            "process": {"uuid": "0cf3cd00-0102-11ed-8421-e4b97ac7e02e"},
+            "status": {
+                "status": "started",
+                "time": "2022-07-11T17:07:18Z",
+                "percent_done": "10",
+                "message": "PyWPS Process Started"
+            }
+        }
+
+        dblog.log_request(fake_process_status_data["process"]["uuid"], fake_request)
+        dblog.store_status(fake_process_status_data["process"]["uuid"], dblog.WPS_STATUS.STARTED, "accepted", 10)
+        dblog.update_pid(fake_process_status_data["process"]["uuid"], -1) # some invalid pid
+        dblog.update_status_record(fake_process_status_data["process"]["uuid"], fake_process_status_data)
+
+        s = dblog.get_status_record(fake_process_status_data["process"]["uuid"])
+        assert s.uuid == fake_process_status_data["process"]["uuid"]
+        assert s.data['status']['status'] == 'started'
+
+        dblog.cleanup_crashed_process()
+
+        s = dblog.get_status_record(fake_process_status_data["process"]["uuid"])
+        assert s.uuid == fake_process_status_data["process"]["uuid"]
+        assert s.data['status']['status'] == 'failed'
+
 
 def load_tests(loader=None, tests=None, pattern=None):
     """Load local tests
