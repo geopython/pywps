@@ -95,7 +95,7 @@ Request and response objects
       A MultiDict object containing input values sent by the client.
 
 
-.. autoclass:: pywps.response.WPSResponse
+.. autoclass:: pywps.response.basic.WPSResponse
     :members:
 
     .. attribute:: status
