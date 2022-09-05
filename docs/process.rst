@@ -53,7 +53,7 @@ The instance of a *Process* needs following attributes to be configured:
 :outputs:
     list of process outputs
 :handler:
-    method which recieves :class:`pywps.app.WPSRequest` and :class:`pywps.response.WPSResponse` as inputs.
+    method which recieves :class:`pywps.app.WPSRequest` and :class:`pywps.response.basic.WPSResponse` as inputs.
 
 Example vector buffer process
 =============================
@@ -118,12 +118,12 @@ Next we create a new list variables for inputs and outputs.
 
 Next we define the *handler* method. In it, *geospatial analysis
 may happen*. The method gets a :class:`pywps.app.WPSRequest` and a
-:class:`pywps.response.WPSResponse` object as parameters. In our case, we
+:class:`pywps.response.basic.WPSResponse` object as parameters. In our case, we
 calculate the buffer around each vector feature using
 `GDAL/OGR library <https://gdal.org>`_. We will not got much into the details,
 what you should note is how to get input data from the
 :class:`pywps.app.WPSRequest` object and how to set data as outputs in the
-:class:`pywps.response.WPSResponse` object.
+:class:`pywps.response.basic.WPSResponse` object.
 
 .. literalinclude:: demobuffer.py
    :language: python

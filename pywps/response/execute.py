@@ -15,7 +15,7 @@ from werkzeug.wrappers import Response
 
 from pywps.inout.array_encode import ArrayEncoder
 from pywps.response.status import WPS_STATUS
-from pywps.response import WPSResponse
+from .basic import WPSResponse
 from pywps.inout.formats import FORMATS
 from pywps.inout.outputs import ComplexOutput
 

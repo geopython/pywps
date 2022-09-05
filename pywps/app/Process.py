@@ -194,6 +194,11 @@ class Process(object):
 
         running, stored = dblog.get_process_counts()
 
+        if maxparallel != -1 and running >= maxparallel:
+            # Try to check for crashed process
+            dblog.cleanup_crashed_process()
+            running, stored = dblog.get_process_counts()
+
         # async
         if async_:
 
@@ -238,7 +243,9 @@ class Process(object):
     # This function may not raise exception and must return a valid wps_response
     # Failure must be reported as wps_response.status = WPS_STATUS.FAILED
     def _run_process(self, wps_request, wps_response):
-        LOGGER.debug("Started processing request: {}".format(self.uuid))
+        LOGGER.debug("Started processing request: {} with pid: {}".format(self.uuid, os.getpid()))
+        # Update the actual pid of current process to check if failed latter
+        dblog.update_pid(self.uuid, os.getpid())
         try:
             self._set_grass(wps_request)
             # if required set HOME to the current working directory.
