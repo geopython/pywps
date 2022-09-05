@@ -56,19 +56,19 @@ class Process(object):
         e.g. {"fr-CA": {"title": "Mon titre", "abstract": "Une description"}}
     """
 
-    def __init__(self, handler, identifier, title, abstract='', keywords=[], profile=[],
-                 metadata=[], inputs=[], outputs=[], version='None', store_supported=False,
+    def __init__(self, handler, identifier, title, abstract='', keywords=None, profile=None,
+                 metadata=None, inputs=None, outputs=None, version='None', store_supported=False,
                  status_supported=False, grass_location=None, translations=None):
         self.identifier = identifier
         self.handler = handler
         self.title = title
         self.abstract = abstract
-        self.keywords = keywords
-        self.metadata = metadata
-        self.profile = profile
+        self.keywords = keywords if keywords is not None else []
+        self.metadata = metadata if metadata is not None else []
+        self.profile = profile if profile is not None else []
         self.version = version
-        self.inputs = inputs
-        self.outputs = outputs
+        self.inputs = inputs if inputs is not None else []
+        self.outputs = outputs if outputs is not None else []
         self.uuid = None
         self._status_store = None
         # self.status_location = ''
