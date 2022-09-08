@@ -2,7 +2,7 @@ import json
 
 from werkzeug.wrappers import Request
 import pywps.configuration as config
-from pywps.app.basic import make_response, get_response_type, get_json_indent
+from pywps.app.basic import make_response, select_response_mimetype, get_json_indent
 from pywps.exceptions import NoApplicableCode
 from pywps.exceptions import MissingParameterValue
 from pywps.exceptions import InvalidParameterValue
@@ -52,9 +52,9 @@ class DescribeResponse(WPSResponse):
             raise MissingParameterValue('Missing parameter value "identifier"', 'identifier')
 
         doc = self.json
-        json_response, mimetype = get_response_type(
+        mimetype = select_response_mimetype(
             self.wps_request.http_request.accept_mimetypes, self.wps_request.default_mimetype)
-        if json_response:
+        if mimetype == 'application/json':
             doc = json.dumps(self._render_json_response(doc), indent=get_json_indent())
         else:
             template = self.template_env.get_template(self.version + '/describe/main.xml')

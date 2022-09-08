@@ -2,7 +2,7 @@ import json
 
 from werkzeug.wrappers import Request
 import pywps.configuration as config
-from pywps.app.basic import make_response, get_response_type, get_json_indent
+from pywps.app.basic import make_response, select_response_mimetype, get_json_indent
 from .basic import WPSResponse
 from pywps import __version__
 from pywps.exceptions import NoApplicableCode
@@ -56,7 +56,7 @@ class CapabilitiesResponse(WPSResponse):
                 'instructions': config.get_config_value('metadata:main', 'contact_instructions'),
                 'role': config.get_config_value('metadata:main', 'contact_role')
             },
-            'serviceurl': config.get_config_value('server', 'url'),
+            'serviceurl': config.get_config_value('server', 'url').rstrip('/') + '/wps',
             'languages': config.get_config_value('server', 'language').split(','),
             'language': self.wps_request.language,
             'processes': processes
@@ -68,9 +68,9 @@ class CapabilitiesResponse(WPSResponse):
 
     def _construct_doc(self):
         doc = self.json
-        json_response, mimetype = get_response_type(
+        mimetype = select_response_mimetype(
             self.wps_request.http_request.accept_mimetypes, self.wps_request.default_mimetype)
-        if json_response:
+        if mimetype == 'application/json':
             doc = json.dumps(self._render_json_response(doc), indent=get_json_indent())
         else:
             template = self.template_env.get_template(self.version + '/capabilities/main.xml')

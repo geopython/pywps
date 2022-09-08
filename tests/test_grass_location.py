@@ -73,7 +73,7 @@ class GRASSTests(unittest.TestCase):
             version='1.0.0'
         )
 
-        resp = client.post_xml(doc=request_doc)
+        resp = client.post_xml('/wps', doc=request_doc)
         assert_response_success(resp)
 
     def test_file_based_location(self):
@@ -94,7 +94,7 @@ class GRASSTests(unittest.TestCase):
                         {'{http://www.w3.org/1999/xlink}href': href}))),
             version='1.0.0')
 
-        resp = client.post_xml(doc=request_doc)
+        resp = client.post_xml('/wps', doc=request_doc)
         assert_response_success(resp)
 
 

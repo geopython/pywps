@@ -60,7 +60,7 @@ def test_assync_inout():
         ),
         version="1.0.0"
     )
-    resp = client.post_xml(doc=request_doc)
+    resp = client.post_xml('/wps', doc=request_doc)
     assert resp.status_code == 200
 
     # TODO:

@@ -261,12 +261,15 @@ class ExecuteTest(unittest.TestCase):
             ),
             version='1.0.0'
         )
-        resp = client.post_xml(doc=request_doc)
+        resp = client.post_xml('/wps', doc=request_doc)
         assert_response_success(resp)
         """
 
         class FakeRequest():
+            http_request = None
+            default_mimetype = None
             identifier = 'my_opendap_process'
+            uuid = 'fakeuuid'
             service = 'wps'
             operation = 'execute'
             version = '1.0.0'
@@ -282,7 +285,7 @@ class ExecuteTest(unittest.TestCase):
 
         request = FakeRequest()
 
-        resp = service.execute('my_opendap_process', request, 'fakeuuid')
+        resp = service.execute(request)
         self.assertEqual(resp.outputs['conventions'].data, 'CF-1.0')
         self.assertEqual(resp.outputs['outdods'].url, href)
         self.assertTrue(resp.outputs['outdods'].as_reference)
@@ -300,7 +303,10 @@ class ExecuteTest(unittest.TestCase):
         self.assertTrue(service.processes['my_complex_process'])
 
         class FakeRequest():
-            identifier = 'complex_process'
+            http_request = None
+            default_mimetype = None
+            identifier = 'my_complex_process'
+            uuid = 'fakeuuid'
             service = 'wps'
             operation = 'execute'
             version = '1.0.0'
@@ -309,12 +315,15 @@ class ExecuteTest(unittest.TestCase):
                 'mimeType': 'text/gml',
                 'data': 'the data'
             }]}
+            raw = False
+            outputs = {}
+            store_execute = False
             language = "en-US"
 
         request = FakeRequest()
 
         try:
-            service.execute('my_complex_process', request, 'fakeuuid')
+            service.execute(request)
         except InvalidParameterValue as e:
             self.assertEqual(e.locator, 'mimeType')
 
@@ -357,7 +366,10 @@ class ExecuteTest(unittest.TestCase):
         self.assertTrue(service.processes['my_complex_process'])
 
         class FakeRequest():
-            identifier = 'complex_process'
+            http_request = None
+            default_mimetype = None
+            identifier = 'my_complex_process'
+            uuid = 'fakeuuid'
             service = 'wps'
             operation = 'execute'
             version = '1.0.0'
@@ -369,7 +381,7 @@ class ExecuteTest(unittest.TestCase):
             language = "en-US"
 
         request = FakeRequest()
-        response = service.execute('my_complex_process', request, 'fakeuuid')
+        response = service.execute(request)
         self.assertEqual(response.outputs['complex'].data, 'DEFAULT COMPLEX DATA')
 
     def test_output_mimetype(self):
@@ -388,7 +400,10 @@ class ExecuteTest(unittest.TestCase):
                     'data': 'the data'
                 }}
 
+            http_request = None
+            default_mimetype = None
             identifier = 'get_mimetype_process'
+            uuid = 'fakeuuid'
             service = 'wps'
             operation = 'execute'
             version = '1.0.0'
@@ -400,27 +415,27 @@ class ExecuteTest(unittest.TestCase):
 
         # valid mimetype
         request = FakeRequest('text/plain+test')
-        response = service.execute('get_mimetype_process', request, 'fakeuuid')
+        response = service.execute(request)
         self.assertEqual(response.outputs['mimetype'].data, 'text/plain+test')
 
         # non valid mimetype
         request = FakeRequest('text/xml')
         with self.assertRaises(InvalidParameterValue):
-            response = service.execute('get_mimetype_process', request, 'fakeuuid')
+            response = service.execute(request)
 
     def test_metalink(self):
         client = client_for(Service(processes=[create_metalink_process()]))
-        resp = client.get('?Request=Execute&identifier=multiple-outputs')
+        resp = client.get('/wps?Request=Execute&identifier=multiple-outputs')
         assert resp.status_code == 400
 
     def test_missing_process_error(self):
         client = client_for(Service(processes=[create_ultimate_question()]))
-        resp = client.get('?Request=Execute&identifier=foo')
+        resp = client.get('/wps?Request=Execute&identifier=foo')
         assert resp.status_code == 400
 
     def test_get_with_no_inputs(self):
         client = client_for(Service(processes=[create_ultimate_question()]))
-        resp = client.get('?service=wps&version=1.0.0&Request=Execute&identifier=ultimate_question')
+        resp = client.get('/wps?service=wps&version=1.0.0&Request=Execute&identifier=ultimate_question')
         assert_response_success(resp)
 
         assert get_output(resp.xml) == {'outvalue': '42'}
@@ -438,11 +453,11 @@ class ExecuteTest(unittest.TestCase):
             version=request['version']
         )
 
-        resp = client.post_xml(doc=request_doc)
+        resp = client.post_xml('/wps', doc=request_doc)
         assert_response_success(resp)
         assert get_output(resp.xml) == result
 
-        resp = client.post_json(doc=request)
+        resp = client.post_json('/wps', doc=request)
         assert_response_success_json(resp, result)
 
     def test_post_with_string_input(self):
@@ -466,11 +481,11 @@ class ExecuteTest(unittest.TestCase):
             ),
             version=request['version']
         )
-        resp = client.post_xml(doc=request_doc)
+        resp = client.post_xml('/wps', doc=request_doc)
         assert_response_success(resp)
         assert get_output(resp.xml) == result
 
-        resp = client.post_json(doc=request)
+        resp = client.post_json('/wps', doc=request)
         assert_response_success_json(resp, result)
 
     def test_bbox(self):
@@ -488,7 +503,7 @@ class ExecuteTest(unittest.TestCase):
             ),
             version='1.0.0'
         )
-        resp = client.post_xml(doc=request_doc)
+        resp = client.post_xml('/wps', doc=request_doc)
         assert_response_success(resp)
 
         [output] = xpath_ns(resp.xml, '/wps:ExecuteResponse'
@@ -520,7 +535,7 @@ class ExecuteTest(unittest.TestCase):
         )
         result = {'outbbox': bbox}
 
-        resp = client.post_json(doc=request)
+        resp = client.post_json('/wps', doc=request)
         assert_response_success_json(resp, result)
 
     def test_geojson_input_rest(self):
@@ -543,7 +558,7 @@ class ExecuteTest(unittest.TestCase):
         )
         result = {'complex': p}
 
-        resp = client.post_json(doc=request)
+        resp = client.post_json('/wps', doc=request)
         assert_response_success_json(resp, result)
 
     def test_output_response_dataType(self):
@@ -558,7 +573,7 @@ class ExecuteTest(unittest.TestCase):
             ),
             version='1.0.0'
         )
-        resp = client.post_xml(doc=request_doc)
+        resp = client.post_xml('/wps', doc=request_doc)
         el = next(resp.xml.iter('{http://www.opengis.net/wps/1.0.0}LiteralData'))
         assert el.attrib['dataType'] == 'string'
 
@@ -592,7 +607,7 @@ class AllowedInputReferenceExecuteTest(unittest.TestCase):
         )
         result = {'complex': p}
 
-        resp = client.post_json(doc=request)
+        resp = client.post_json('/wps', doc=request)
         assert_response_success_json(resp, result)
 
 
@@ -624,7 +639,7 @@ class ExecuteTranslationsTest(unittest.TestCase):
             version='1.0.0',
             language='fr-CA',
         )
-        resp = client.post_xml(doc=request_doc)
+        resp = client.post_xml('/wps', doc=request_doc)
 
         assert resp.xpath('/wps:ExecuteResponse/@xml:lang')[0] == "fr-CA"
 

@@ -2,6 +2,7 @@
 # Copyright 2018 Open Source Geospatial Foundation and others    #
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
+import io
 import json
 from pathlib import PurePath
 
@@ -1111,11 +1112,19 @@ class ComplexOutput(BasicIO, BasicComplex, IOHandler):
         if self._storage is None:
             self._storage = storage
 
-    # TODO: refactor ?
-    def get_url(self):
-        """Return URL pointing to data
-        """
-        # TODO: it is not obvious that storing happens here
-        (_, _, url) = self.storage.store(self)
-        # url = self.storage.url(self)
-        return url
+    # Ensure the storage of handled data to be able to expose it to with url
+    # return the corresponding url
+    def ensure_storage(self):
+        # Copy data to the storage
+        with self.stream as fi:
+            # TODO: sanitise self.stream to always provide a binary stream.
+            encoding = None
+            if isinstance(fi, io.StringIO):
+                encoding = "utf-8"
+            with self._storage.open("w", encoding) as fo:
+                s = fi.read(4096)
+                while len(s) > 0:
+                    fo.write(s)
+                    s = fi.read(4096)
+                # TODO: For now the __exit__ is not implemented properly
+        return self._storage.export(self.identifier + self.data_format.extension, self.data_format.mime_type)

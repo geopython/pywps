@@ -17,17 +17,17 @@ class BadRequestTest(unittest.TestCase):
 
     def test_bad_http_verb(self):
         client = client_for(Service())
-        resp = client.put('')
-        assert resp.status_code == 405  # method not allowed
+        resp = client.put('/wps')
+        assert resp.status_code == 405  # Not found
 
     def test_bad_request_type_with_get(self):
         client = client_for(Service())
-        resp = client.get('?Request=foo')
+        resp = client.get('/wps?Request=foo')
         assert resp.status_code == 400
 
     def test_bad_service_type_with_get(self):
         client = client_for(Service())
-        resp = client.get('?service=foo')
+        resp = client.get('/wps?service=foo')
 
         exception = resp.xpath('/ows:ExceptionReport'
                                '/ows:Exception')
@@ -38,7 +38,7 @@ class BadRequestTest(unittest.TestCase):
     def test_bad_request_type_with_post(self):
         client = client_for(Service())
         request_doc = WPS.Foo()
-        resp = client.post_xml('', doc=request_doc)
+        resp = client.post_xml('/wps', doc=request_doc)
         assert resp.status_code == 400
 
 
@@ -97,20 +97,20 @@ class CapabilitiesTest(unittest.TestCase):
         assert len(metadatas) == 2
 
     def test_get_request(self):
-        resp = self.client.get('?Request=GetCapabilities&service=WpS')
+        resp = self.client.get('/wps?Request=GetCapabilities&service=WpS')
         self.check_capabilities_response(resp)
 
         # case insesitive check
-        resp = self.client.get('?request=getcapabilities&service=wps')
+        resp = self.client.get('/wps?request=getcapabilities&service=wps')
         self.check_capabilities_response(resp)
 
     def test_post_request(self):
         request_doc = WPS.GetCapabilities()
-        resp = self.client.post_xml(doc=request_doc)
+        resp = self.client.post_xml('/wps', doc=request_doc)
         self.check_capabilities_response(resp)
 
     def test_get_bad_version(self):
-        resp = self.client.get('?request=getcapabilities&service=wps&acceptversions=2001-123')
+        resp = self.client.get('/wps?request=getcapabilities&service=wps&acceptversions=2001-123')
         exception = resp.xpath('/ows:ExceptionReport'
                                '/ows:Exception')
         assert resp.status_code == 400
@@ -119,7 +119,7 @@ class CapabilitiesTest(unittest.TestCase):
     def test_post_bad_version(self):
         acceptedVersions_doc = OWS.AcceptVersions(OWS.Version('2001-123'))
         request_doc = WPS.GetCapabilities(acceptedVersions_doc)
-        resp = self.client.post_xml(doc=request_doc)
+        resp = self.client.post_xml('/wps', doc=request_doc)
         exception = resp.xpath('/ows:ExceptionReport'
                                '/ows:Exception')
 
@@ -127,11 +127,11 @@ class CapabilitiesTest(unittest.TestCase):
         assert exception[0].attrib['exceptionCode'] == 'VersionNegotiationFailed'
 
     def test_version(self):
-        resp = self.client.get('?service=WPS&request=GetCapabilities&version=1.0.0')
+        resp = self.client.get('/wps?service=WPS&request=GetCapabilities&version=1.0.0')
         assert_wps_version(resp)
 
     def test_version2(self):
-        resp = self.client.get('?service=WPS&request=GetCapabilities&acceptversions=2.0.0')
+        resp = self.client.get('/wps?service=WPS&request=GetCapabilities&acceptversions=2.0.0')
         assert_wps_version(resp, version="2.0.0")
 
 
@@ -164,7 +164,7 @@ class CapabilitiesTranslationsTest(unittest.TestCase):
         configuration.CONFIG.set('server', 'language', 'en-US')
 
     def test_get_translated(self):
-        resp = self.client.get('?Request=GetCapabilities&service=wps&language=fr-CA')
+        resp = self.client.get('/wps?Request=GetCapabilities&service=wps&language=fr-CA')
 
         assert resp.xpath('/wps:Capabilities/@xml:lang')[0] == "fr-CA"
 

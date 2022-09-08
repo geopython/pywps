@@ -111,7 +111,7 @@ class ExecuteTests(unittest.TestCase):
                     OWS.Identifier('output'))),
             version='1.0.0'
         )
-        resp = client.post_xml(doc=request_doc)
+        resp = client.post_xml('/wps', doc=request_doc)
 
         assert_response_success(resp)
         # Other things to assert:
@@ -136,7 +136,7 @@ class ExecuteTests(unittest.TestCase):
                 WPS.Output(
                     OWS.Identifier('output'))),
             version='1.0.0')
-        resp = client.post_xml(doc=request_doc)
+        resp = client.post_xml('/wps', doc=request_doc)
         assert_response_success(resp)
         # Other things to assert:
         # . the inclusion of output

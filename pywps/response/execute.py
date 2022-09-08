@@ -7,14 +7,16 @@ import json
 import logging
 import time
 from werkzeug.wrappers import Request
+
+import pywps.dblog
 from pywps import get_ElementMakerForVersion
-from pywps.app.basic import get_response_type, get_json_indent, get_default_response_mimetype
+from pywps.app.basic import select_response_mimetype, get_json_indent, get_default_response_mimetype
 from pywps.exceptions import NoApplicableCode
 import pywps.configuration as config
 from werkzeug.wrappers import Response
 
 from pywps.inout.array_encode import ArrayEncoder
-from pywps.response.status import WPS_STATUS
+from pywps.response.status import WPS_STATUS, StatusResponse
 from .basic import WPSResponse
 from pywps.inout.formats import FORMATS
 from pywps.inout.outputs import ComplexOutput
@@ -43,6 +45,10 @@ class ExecuteResponse(WPSResponse):
         self.outputs = {o.identifier: o for o in self.process.outputs}
         self.store_status_file = False
 
+        # select the output mimetype
+        accept_mimetypes = getattr(self.wps_request.http_request, 'accept_mimetypes', None)
+        self.mimetype = select_response_mimetype(accept_mimetypes, self.wps_request.default_mimetype)
+
     # override WPSResponse._update_status
     def _update_status(self, status, message, status_percentage, clean=True):
         """
@@ -56,9 +62,8 @@ class ExecuteResponse(WPSResponse):
         """
         super(ExecuteResponse, self)._update_status(status, message, status_percentage)
         LOGGER.debug("_update_status: status={}, clean={}".format(status, clean))
-        self._update_status_doc()
         if self.store_status_file:
-            self._update_status_file()
+            pywps.dblog.update_status_record(self.uuid, self.json)
         if clean:
             if self.status == WPS_STATUS.SUCCEEDED or self.status == WPS_STATUS.FAILED:
                 LOGGER.debug("clean workdir: status={}".format(status))
@@ -77,24 +82,6 @@ class ExecuteResponse(WPSResponse):
         if status_percentage is None:
             status_percentage = self.status_percentage
         self._update_status(self.status, message, status_percentage, False)
-
-    def _update_status_doc(self):
-        try:
-            # rebuild the doc
-            self.doc, self.content_type = self._construct_doc()
-        except Exception as e:
-            raise NoApplicableCode('Building Response Document failed with : {}'.format(e))
-
-    def _update_status_file(self):
-        # TODO: check if file/directory is still present, maybe deleted in mean time
-        try:
-            # update the status xml file
-            self.process.status_store.write(
-                self.doc,
-                self.process.status_filename,
-                data_format=FORMATS.XML)
-        except Exception as e:
-            raise NoApplicableCode('Writing Response Document failed with : {}'.format(e))
 
     def _process_accepted(self):
         percent = int(self.status_percentage)
@@ -152,14 +139,23 @@ class ExecuteResponse(WPSResponse):
 
     @property
     def json(self):
+        if self.status == WPS_STATUS.SUCCEEDED and \
+                hasattr(self.wps_request, 'preprocess_response') and \
+                self.wps_request.preprocess_response:
+            self.outputs = self.wps_request.preprocess_response(self.outputs,
+                                                                request=self.wps_request,
+                                                                http_request=self.wps_request.http_request)
+            self.preprocess_response = None
+
         data = {}
         data["language"] = self.wps_request.language
         data["service_instance"] = self._get_serviceinstance()
         data["process"] = self.process.json
+        data["version"] = self.version
 
         if self.store_status_file:
             if self.process.status_location:
-                data["status_location"] = self.process.status_url
+                data["status_location"] = self.process.status_location
 
         if self.status == WPS_STATUS.ACCEPTED:
             self.message = 'PyWPS Process {} accepted'.format(self.process.identifier)
@@ -191,48 +187,8 @@ class ExecuteResponse(WPSResponse):
                 data["output_definitions"] = [self.outputs[o].json for o in self.outputs]
         return data
 
-    @staticmethod
-    def _render_json_response(jdoc):
-        response = dict()
-        response['status'] = jdoc['status']
-        out = jdoc['process']['outputs']
-        d = {}
-        for val in out:
-            id = val.get('identifier')
-            if id is None:
-                continue
-            type = val.get('type')
-            key = 'bbox' if type == 'bbox' else 'data'
-            if key in val:
-                d[id] = val[key]
-        response['outputs'] = d
-        return response
-
-    def _construct_doc(self):
-        if self.status == WPS_STATUS.SUCCEEDED and \
-                hasattr(self.wps_request, 'preprocess_response') and \
-                self.wps_request.preprocess_response:
-            self.outputs = self.wps_request.preprocess_response(self.outputs,
-                                                                request=self.wps_request,
-                                                                http_request=self.wps_request.http_request)
-        doc = self.json
-        try:
-            json_response, mimetype = get_response_type(
-                self.wps_request.http_request.accept_mimetypes, self.wps_request.default_mimetype)
-        except Exception:
-            mimetype = get_default_response_mimetype()
-            json_response = 'json' in mimetype
-        if json_response:
-            doc = json.dumps(self._render_json_response(doc), cls=ArrayEncoder, indent=get_json_indent())
-        else:
-            template = self.template_env.get_template(self.version + '/execute/main.xml')
-            doc = template.render(**doc)
-        return doc, mimetype
-
     @Request.application
     def __call__(self, request):
-        accept_json_response, accepted_mimetype = get_response_type(
-            self.wps_request.http_request.accept_mimetypes, self.wps_request.default_mimetype)
         if self.wps_request.raw:
             if self.status == WPS_STATUS.FAILED:
                 return NoApplicableCode(self.message)
@@ -260,7 +216,7 @@ class ExecuteResponse(WPSResponse):
                     mimetype = self.wps_request.outputs[wps_output_identifier].get('mimetype', None)
                 if not isinstance(response, (str, bytes, bytearray)):
                     if not mimetype:
-                        mimetype = accepted_mimetype
+                        mimetype = self.mimetype
                     json_response = mimetype and 'json' in mimetype
                     if json_response:
                         mimetype = 'application/json'
@@ -274,6 +230,4 @@ class ExecuteResponse(WPSResponse):
                                 headers={'Content-Disposition': 'attachment; filename="{}"'
                                          .format(wps_output_identifier + suffix)})
         else:
-            if not self.doc:
-                return NoApplicableCode("Output was not generated")
-            return Response(self.doc, mimetype=accepted_mimetype)
+            return StatusResponse(self.json, self.mimetype)

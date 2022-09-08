@@ -96,7 +96,7 @@ class RawInput(unittest.TestCase):
                                inputs=[('complex', ComplexDataInput(data, mimeType=fmt.mime_type,
                                                                     encoding=fmt.encoding))],
                                mode='sync')
-        resp = client.post_xml(doc=doc)
+        resp = client.post_xml('/wps', doc=doc)
         assert_response_success(resp)
         wps.parseResponse(resp.xml)
         out = wps.processOutputs[0].data[0]
