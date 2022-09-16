@@ -99,3 +99,38 @@ class BBox(Process):
         area = request.inputs['area'][0].data
         response.outputs['extent'].data = area
         return response
+
+
+class Sleep(Process):
+    """A long running process, just sleeping."""
+    def __init__(self):
+        inputs = [
+            LiteralInput('seconds', title='Seconds', data_type='float')
+        ]
+        outputs = [
+            LiteralOutput('finished', title='Finished', data_type='boolean')
+        ]
+
+        super(Sleep, self).__init__(
+            self._handler,
+            identifier='sleep',
+            title='Sleep',
+            abstract='Wait for specified number of seconds.',
+            inputs=inputs,
+            outputs=outputs,
+            store_supported=True,
+            status_supported=True
+        )
+
+    @staticmethod
+    def _handler(request, response):
+        import time
+
+        seconds = request.inputs['seconds'][0].data
+        step = seconds / 3
+        for i in range(3):
+            response.update_status('Sleep in progress...', i / 3 * 100)
+            time.sleep(step)
+
+        response.outputs['finished'].data = "True"
+        return response
