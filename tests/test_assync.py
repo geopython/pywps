@@ -52,12 +52,17 @@ class ExecuteTest(unittest.TestCase):
         p = Path(url[6:])
 
         # Poll the process until it completes
-        while wps.status != 'ProcessSucceeded':
+        total_time = 0
+        sleep_time = .01
+        while wps.status not in ["ProcessSucceeded", "ProcessFailed"]:
             resp = p.read_bytes()
             if resp:
                 wps.checkStatus(response=resp, sleepSecs=0.01)
             else:
-                time.sleep(.01)
+                time.sleep(sleep_time)
+                total_time += sleep_time
+            if total_time > 1:
+                raise TimeoutError
 
         assert wps.status == 'ProcessSucceeded'
 
