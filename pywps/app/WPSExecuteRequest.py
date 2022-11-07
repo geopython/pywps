@@ -12,6 +12,13 @@ from collections import deque
 LOGGER = logging.getLogger("PYWPS")
 
 
+# The WPSExecuteRequest is used a user interface within the Process._handler to
+# allow user to get WPS request inputs using
+# WPSExecuteRequest.inputs['identifier']. It is also used to get some meta data
+# from the requested inputs.
+#
+# It is not intended to be serializable to json. and json proporties is disable
+# on purpose.
 class WPSExecuteRequest(object):
 
     def __init__(self, process, wps_request):
@@ -55,6 +62,7 @@ class WPSExecuteRequest(object):
 
     @property
     def json(self):
+        # Raise exception on purpose. Do not implement this function !
         raise NotImplementedError("WPSExectuteRequest is not serialisable to json")
 
     # Fall back to attibute of WPSRequest
