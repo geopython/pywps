@@ -12,6 +12,7 @@ import sys
 import traceback
 
 from pywps.app.WPSExecuteRequest import WPSExecuteRequest
+from pywps.app.WPSExecuteResponse import WPSExecuteResponse
 from pywps.inout.inputs import input_from_json
 from pywps.inout.outputs import output_from_json
 import pywps.configuration as config
@@ -131,8 +132,7 @@ class Process(object):
         self._set_uuid(uuid)
         self._setup_status_storage()
         self.async_ = False
-        response_cls = get_response("execute")
-        wps_response = response_cls(wps_request, process=self, uuid=self.uuid)
+        wps_response = WPSExecuteResponse(self, wps_request, self.uuid)
 
         LOGGER.debug('Check if status storage and updating are supported by this process')
         if wps_request.store_execute == 'true':
@@ -327,8 +327,7 @@ class Process(object):
             process._set_uuid(uuid)
             process._setup_status_storage()
             process.async_ = True
-            process.setup_outputs_from_wps_request(new_wps_request)
-            new_wps_response = ExecuteResponse(new_wps_request, process=process, uuid=uuid)
+            new_wps_response = WPSExecuteResponse(process, new_wps_request, uuid)
             new_wps_response.store_status_file = True
             process._run_async(new_wps_request, new_wps_response)
         except Exception as e:
