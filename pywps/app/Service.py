@@ -16,7 +16,7 @@ from urllib.parse import urlparse
 from werkzeug.exceptions import HTTPException
 from werkzeug.wrappers import Request, Response
 from pywps.app.WPSExecuteRequest import WPSExecuteRequest
-from pywps.response.execute import ExecuteResponse
+from pywps.response.execute import ExecuteResponse, ExecuteRawResponse
 import pywps.configuration as config
 from pywps import response
 from pywps.app.WPSRequest import WPSRequest
@@ -108,7 +108,10 @@ class Service(object):
         wps_request = WPSExecuteRequest(process, wps_request)
 
         wps_response = process.execute(wps_request, uuid)
-        return ExecuteResponse(wps_response)
+        if wps_request.wps_request.raw:
+            return ExecuteRawResponse(wps_response)
+        else:
+            return ExecuteResponse(wps_response)
 
     def _set_grass(self):
         """Set environment variables needed for GRASS GIS support
