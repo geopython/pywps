@@ -11,6 +11,9 @@ import shutil
 import sys
 import traceback
 
+from pywps.app.WPSExecuteRequest import WPSExecuteRequest
+from pywps.inout.inputs import input_from_json
+from pywps.inout.outputs import output_from_json
 import pywps.configuration as config
 from pywps import dblog
 from pywps.app.exceptions import ProcessError
@@ -220,7 +223,7 @@ class Process(object):
                 if stored >= maxprocesses and maxprocesses != -1:
                     raise ServerBusy('Maximum number of processes in queue reached. Please try later.')
                 LOGGER.debug("Store process in job queue, uuid={}".format(self.uuid))
-                dblog.store_process(self.uuid, wps_request)
+                dblog.store_process(self.uuid, wps_request.wps_request)
                 wps_response._update_status(WPS_STATUS.ACCEPTED, 'PyWPS Process stored in job queue', 0)
 
         # not async
@@ -320,6 +323,7 @@ class Process(object):
             new_wps_request.json = json.loads(request_json)
             process_identifier = new_wps_request.identifier
             process = self.service.prepare_process_for_execution(process_identifier)
+            new_wps_request = WPSExecuteRequest(process, new_wps_request)
             process._set_uuid(uuid)
             process._setup_status_storage()
             process.async_ = True

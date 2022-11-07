@@ -11,6 +11,7 @@ import tempfile
 import pywps.configuration as config
 from pywps import Process, WPSRequest
 from pywps.response.execute import ExecuteResponse
+from pywps.app.WPSExecuteRequest import WPSExecuteRequest
 
 LOGGER = logging.getLogger("PYWPS")
 
@@ -84,7 +85,7 @@ class Job(object):
             return job
 
     def run(self):
-        getattr(self.process, self.method)(self.wps_request, self.wps_response)
+        getattr(self.process, self.method)(WPSExecuteRequest(self.process, self.wps_request), self.wps_response)
 
 
 class JobLauncher(object):

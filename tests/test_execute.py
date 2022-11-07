@@ -19,6 +19,7 @@ from pywps import E, get_ElementMakerForVersion
 from pywps.app.basic import get_xpath_ns
 from pywps.tests import client_for, assert_response_success, assert_response_success_json
 from pywps import configuration
+from pywps.app.WPSExecuteRequest import WPSExecuteRequest
 
 from io import StringIO
 
@@ -319,7 +320,7 @@ class ExecuteTest(TestBase):
             self.assertEqual(e.locator, 'mimeType')
 
         request.inputs['complex'][0]['mimeType'] = 'application/gml'
-        parsed_inputs = service.create_complex_inputs(my_process.inputs[0],
+        parsed_inputs = WPSExecuteRequest.create_complex_inputs(my_process.inputs[0],
                                                       request.inputs['complex'])
 
         # TODO parse outputs and their validators too
@@ -328,7 +329,7 @@ class ExecuteTest(TestBase):
 
         request.inputs['complex'][0]['mimeType'] = 'application/xml+gml'
         try:
-            parsed_inputs = service.create_complex_inputs(my_process.inputs[0],
+            parsed_inputs = WPSExecuteRequest.create_complex_inputs(my_process.inputs[0],
                                                           request.inputs['complex'])
         except InvalidParameterValue as e:
             self.assertEqual(e.locator, 'mimeType')
@@ -343,7 +344,7 @@ class ExecuteTest(TestBase):
 
         my_process.inputs[0].supported_formats = [frmt]
         my_process.inputs[0].data_format = Format(mime_type='application/xml+gml')
-        parsed_inputs = service.create_complex_inputs(my_process.inputs[0],
+        parsed_inputs = WPSExecuteRequest.create_complex_inputs(my_process.inputs[0],
                                                       request.inputs['complex'])
 
         self.assertEqual(parsed_inputs[0].data_format.validate, validategml)

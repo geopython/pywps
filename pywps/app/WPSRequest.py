@@ -443,7 +443,7 @@ class WPSRequest(object):
             'store_execute': self.store_execute,
             'status': self.status,
             'lineage': self.lineage,
-            'inputs': dict((i, [inpt.json for inpt in self.inputs[i]]) for i in self.inputs),
+            'inputs': self.inputs,
             'outputs': self.outputs,
             'raw': self.raw
         }
@@ -469,25 +469,7 @@ class WPSRequest(object):
         self.lineage = value.get('lineage', False)
         self.outputs = value.get('outputs')
         self.raw = value.get('raw', False)
-        self.inputs = {}
-
-        for identifier in value.get('inputs', []):
-            inpt_defs = value['inputs'][identifier]
-            if not isinstance(inpt_defs, (list, tuple)):
-                inpt_defs = [inpt_defs]
-            self.inputs[identifier] = []
-            for inpt_def in inpt_defs:
-                if not isinstance(inpt_def, dict):
-                    inpt_def = {"data": inpt_def}
-                if 'identifier' not in inpt_def:
-                    inpt_def['identifier'] = identifier
-                try:
-                    inpt = input_from_json(inpt_def)
-                    self.inputs[identifier].append(inpt)
-                except Exception as e:
-                    LOGGER.warning(e)
-                    LOGGER.warning(f'skipping input: {identifier}')
-                    pass
+        self.inputs = value.get('inputs', [])
 
 
 def get_inputs_from_xml(doc):
