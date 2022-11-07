@@ -119,6 +119,23 @@ class BBoxProcessingTest(TestBase):
         self.dummy_process._set_uuid(self.uuid)
         self.dummy_process.set_workdir(self.workdir)
         self.wps_request = WPSRequest()
+        self.wps_request.json = {
+            'operation': 'execute',
+            'version': '1.0.0',
+            'language': 'eng',
+            'identifier': 'bbox_test',
+            'store_execute': True,
+            'status': True,
+            'lineage': False,
+            'inputs': {
+                'area': [{
+                    'identifier': 'area',
+                    'data': [0, 1, 2, 3]
+                }]
+            },
+            'outputs': { },
+            'raw': False
+        }
         self.wps_response = ExecuteResponse(WPSExecuteResponse(self.dummy_process,
                                             self.wps_request, self.uuid))
         self.job = Job(
