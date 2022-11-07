@@ -99,7 +99,7 @@ class WPSExecuteRequest(object):
                 len(outinputs),
             )
             raise MissingParameterValue(description=description, locator=source.identifier)
-        return outinputs
+        return list(outinputs)
 
     @staticmethod
     def create_literal_inputs(source, inputs):
@@ -129,7 +129,7 @@ class WPSExecuteRequest(object):
             )
             raise MissingParameterValue(description, locator=source.identifier)
 
-        return outinputs
+        return list(outinputs)
 
     @staticmethod
     def create_bbox_inputs(source, inputs):
@@ -154,4 +154,4 @@ class WPSExecuteRequest(object):
             )
             raise MissingParameterValue(description=description, locator=source.identifier)
 
-        return outinputs
+        return list(outinputs)
