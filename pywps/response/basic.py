@@ -4,15 +4,10 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pywps import WPSRequest
 
-import os
-
-from jinja2 import Environment, PackageLoader
-
 from pywps.dblog import store_status
-from pywps.translations import get_translation
-
-from . import RelEnvironment
+from pywps.response import TEMPLATE_ENV
 from .status import WPS_STATUS
+import os
 
 
 class WPSResponse(object):
@@ -27,12 +22,7 @@ class WPSResponse(object):
         self.doc = None
         self.content_type = None
         self.version = version
-        self.template_env = RelEnvironment(
-            loader=PackageLoader('pywps', 'templates'),
-            trim_blocks=True, lstrip_blocks=True,
-            autoescape=True,
-        )
-        self.template_env.globals.update(get_translation=get_translation)
+        self.template_env = TEMPLATE_ENV
 
     def _update_status(self, status, message, status_percentage):
         """
