@@ -31,6 +31,13 @@ LOGGER = logging.getLogger("PYWPS")
 WPS, OWS = get_ElementMakerForVersion("1.0.0")
 
 
+# WPSExecuteResponse is crafted as an interface for the user. The user can
+# provide outputs within Process._handler using
+# WPSExecuteResponse.outputs['identifier']. The structure also provide output
+# metadata such as the requested mimetype for ComplexOutput
+#
+# This structure is not expect to be serialized. The json property is used as
+# input for the execute template and should stay like this.
 class WPSExecuteResponse(object):
 
     def __init__(self, process, wps_request, uuid, **kwargs):
