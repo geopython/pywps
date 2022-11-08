@@ -489,8 +489,8 @@ def get_inputs_from_xml(doc):
             inpt = {
                 'identifier': identifier_el.text,
                 'data': str(value_el.text),
-                'uom': value_el.attrib.get('uom', ''),
-                'datatype': value_el.attrib.get('datatype', '')
+                'uom': value_el.attrib.get('uom', None),
+                'datatype': value_el.attrib.get('datatype', None)
             }
             the_inputs[identifier].append(inpt)
             continue
@@ -501,10 +501,12 @@ def get_inputs_from_xml(doc):
             inpt = {
                 'identifier': identifier_el.text,
                 'mimeType': complex_data_el.attrib.get('mimeType', None),
-                'encoding': complex_data_el.attrib.get('encoding', '').lower(),
-                'schema': complex_data_el.attrib.get('schema', ''),
-                'method': complex_data_el.attrib.get('method', 'GET')
+                'encoding': complex_data_el.attrib.get('encoding', None),
+                'schema': complex_data_el.attrib.get('schema', None),
+                'method': complex_data_el.attrib.get('method', None)
             }
+            if inpt['encoding'] is not None:
+                inpt['encoding'] = inpt['encoding'].lower()
 
             if len(complex_data_el.getchildren()) > 0:
                 value_el = complex_data_el[0]
@@ -523,10 +525,10 @@ def get_inputs_from_xml(doc):
                 'identifier': identifier_el.text,
                 identifier_el.text: reference_data_el.text,
                 'href': reference_data_el.attrib.get(
-                    '{http://www.w3.org/1999/xlink}href', ''
+                    '{http://www.w3.org/1999/xlink}href', None
                 ),
                 'mimeType': reference_data_el.attrib.get('mimeType', None),
-                'method': reference_data_el.attrib.get('method', 'GET')
+                'method': reference_data_el.attrib.get('method', None)
             }
             header_element = xpath_ns(reference_data_el, './wps:Header')
             if header_element:
@@ -572,9 +574,9 @@ def get_output_from_xml(doc):
             outpt = {
                 identifier_el.text: '',
                 'mimetype': output_el.attrib.get('mimeType', None),
-                'encoding': output_el.attrib.get('encoding', ''),
-                'schema': output_el.attrib.get('schema', ''),
-                'uom': output_el.attrib.get('uom', ''),
+                'encoding': output_el.attrib.get('encoding', None),
+                'schema': output_el.attrib.get('schema', None),
+                'uom': output_el.attrib.get('uom', None),
                 'asReference': output_el.attrib.get('asReference', 'false')
             }
             the_output[identifier_el.text] = outpt
@@ -585,9 +587,9 @@ def get_output_from_xml(doc):
             outpt = {
                 identifier_el.text: '',
                 'mimetype': output_el.attrib.get('mimeType', None),
-                'encoding': output_el.attrib.get('encoding', ''),
-                'schema': output_el.attrib.get('schema', ''),
-                'uom': output_el.attrib.get('uom', '')
+                'encoding': output_el.attrib.get('encoding', None),
+                'schema': output_el.attrib.get('schema', None),
+                'uom': output_el.attrib.get('uom', None)
             }
             the_output[identifier_el.text] = outpt
 
