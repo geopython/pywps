@@ -112,6 +112,14 @@ class WPSExecuteResponse(object):
         """
         self._update_stored_status(status, message, status_percentage)
 
+        if self.status == WPS_STATUS.SUCCEEDED and \
+                getattr(self.wps_request, 'preprocess_response', None):
+            self.outputs = self.wps_request.preprocess_response(self.outputs,
+                                                                request=self.wps_request,
+                                                                http_request=self.wps_request.http_request)
+            # Avoid multiple apply of preprocess_response
+            self.wps_request.preprocess_response = None
+
         LOGGER.debug("_update_status: status={}, clean={}".format(status, clean))
         self._update_status_doc()
         if self.store_status_file:

@@ -129,12 +129,6 @@ class ExecuteResponse(WPSResponse):
         return response
 
     def _construct_doc(self):
-        if self.status == WPS_STATUS.SUCCEEDED and \
-                hasattr(self.wps_request, 'preprocess_response') and \
-                self.wps_request.preprocess_response:
-            self.outputs = self.wps_request.preprocess_response(self.outputs,
-                                                                request=self.wps_request,
-                                                                http_request=self.wps_request.http_request)
         doc = self.wps_execute_response.as_json_for_execute_template()
         try:
             json_response, mimetype = get_response_type(
