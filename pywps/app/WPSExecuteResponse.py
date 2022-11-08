@@ -13,7 +13,7 @@ from pywps import get_ElementMakerForVersion
 from pywps.app.basic import get_response_type, get_json_indent, get_default_response_mimetype
 import pywps.configuration as config
 from werkzeug.wrappers import Response
-from pywps.dblog import store_status
+from pywps.dblog import store_status, update_status_record
 from pywps.inout.array_encode import ArrayEncoder
 from pywps.response.status import WPS_STATUS
 from pywps.inout.formats import FORMATS
@@ -111,6 +111,7 @@ class WPSExecuteResponse(object):
         This method is *only* called by pywps internally.
         """
         self._update_stored_status(status, message, status_percentage)
+        update_status_record(self.uuid, self.as_json_for_execute_template())
 
         if self.status == WPS_STATUS.SUCCEEDED and \
                 getattr(self.wps_request, 'preprocess_response', None):
