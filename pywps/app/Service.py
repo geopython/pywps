@@ -16,9 +16,8 @@ from urllib.parse import urlparse
 from werkzeug.exceptions import HTTPException
 from werkzeug.wrappers import Request, Response
 from pywps.app.WPSExecuteRequest import WPSExecuteRequest
-from pywps.response.execute import StatusResponse, ExecuteRawResponse
+from pywps.response import CapabilitiesResponse, DescribeResponse, ExecuteRawResponse, StatusResponse
 import pywps.configuration as config
-from pywps import response
 from pywps.app.WPSRequest import WPSRequest
 from pywps.dblog import log_request, store_status
 from pywps.exceptions import (
@@ -64,15 +63,10 @@ class Service(object):
                 LOGGER.addHandler(logging.NullHandler())
 
     def get_capabilities(self, wps_request, uuid):
-
-        response_cls = response.get_response("capabilities")
-        return response_cls(wps_request, uuid, version=wps_request.version, processes=self.processes)
+        return CapabilitiesResponse(wps_request, uuid, version=wps_request.version, processes=self.processes)
 
     def describe(self, wps_request, uuid, identifiers):
-
-        response_cls = response.get_response("describe")
-        return response_cls(wps_request, uuid, processes=self.processes,
-                            identifiers=identifiers)
+        return DescribeResponse(wps_request, uuid, processes=self.processes, identifiers=identifiers)
 
     def execute(self, identifier, wps_request, uuid):
         """Parse and perform Execute WPS request call

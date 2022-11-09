@@ -1,11 +1,3 @@
-
-
-def get_response(operation):
-
-    from .capabilities import CapabilitiesResponse
-    from .describe import DescribeResponse
-
-    if operation == "capabilities":
-        return CapabilitiesResponse
-    elif operation == "describe":
-        return DescribeResponse
+from pywps.response.capabilities import CapabilitiesResponse
+from pywps.response.describe import DescribeResponse
+from pywps.response.execute import ExecuteRawResponse, StatusResponse
