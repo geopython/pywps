@@ -295,13 +295,14 @@ class LiteralOutput(basic.LiteralOutput):
             "title": self.title,
             "abstract": self.abstract,
             "keywords": self.keywords,
-            "data": self.data,
             "data_type": self.data_type,
             "type": "literal",
             "uoms": [u.json for u in self.uoms],
             "translations": self.translations,
         }
 
+        if self.data is not None:
+            data['data'] = str(self.data)
         if self.uom:
             data["uom"] = self.uom.json
 
