@@ -55,6 +55,7 @@ class WPSRequest(object):
         self.preprocessors = preprocessors or dict()
         self.preprocess_request = None
         self.preprocess_response = None
+        self.requested_status_uuid = None
 
         if http_request:
             d = parse_http_url(http_request)
@@ -156,6 +157,15 @@ class WPSRequest(object):
             request_parser = self._post_json_request_parser()
             request_parser(jdoc)
 
+    def parse_get_status(self, http_request):
+        """Parse GET GetCapabilities request
+        """
+
+        # Required to store the request in database
+        self.set_version('1.0.0')
+
+        self.requested_status_uuid = _get_get_param(http_request, 'uuid')
+
     def parse_get_getcapabilities(self, http_request):
         """Parse GET GetCapabilities request."""
         acceptedversions = _get_get_param(http_request, 'acceptversions')
@@ -222,6 +232,8 @@ class WPSRequest(object):
             return self.parse_get_describeprocess
         elif self.operation == 'execute':
             return self.parse_get_execute
+        elif self.operation == 'status':
+            return self.parse_get_status
         else:
             raise OperationNotSupported(
                 'Unknown request {}'.format(self.operation), operation)

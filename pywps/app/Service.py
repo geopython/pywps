@@ -62,6 +62,14 @@ class Service(object):
             if not LOGGER.handlers:
                 LOGGER.addHandler(logging.NullHandler())
 
+    def get_status(self, wps_request, uuid):
+        try:
+            _, mimetype = get_response_type(wps_request.http_request.accept_mimetypes,
+                                            wps_request.default_mimetype)
+        except Exception:
+            mimetype = get_default_response_mimetype()
+        return StatusResponse(wps_request.version, wps_request.requested_status_uuid, mimetype)
+
     def get_capabilities(self, wps_request, uuid):
         return CapabilitiesResponse(wps_request, uuid, version=wps_request.version, processes=self.processes)
 
@@ -164,7 +172,8 @@ class Service(object):
             LOGGER.info('Request: {}'.format(wps_request.operation))
             if wps_request.operation in ['getcapabilities',
                                          'describeprocess',
-                                         'execute']:
+                                         'execute',
+                                         'status']:
                 log_request(request_uuid, wps_request)
                 try:
                     response = None
@@ -182,6 +191,8 @@ class Service(object):
                             wps_request,
                             request_uuid
                         )
+                    elif wps_request.operation == 'status':
+                        response = self.get_status(wps_request, request_uuid)
                     return response
                 except Exception as e:
                     # This ensure that logged request get terminated in case of exception while the request is not
