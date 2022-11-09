@@ -29,7 +29,6 @@ from pywps.exceptions import (
 from pywps.inout.outputs import ComplexOutput
 from pywps.inout.storage.builder import StorageBuilder
 from pywps.response import get_response
-from pywps.response.execute import ExecuteResponse
 from pywps.response.status import WPS_STATUS
 from pywps.translations import lower_case_dict
 

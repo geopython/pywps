@@ -370,7 +370,8 @@ class ExecuteTest(TestBase):
             language = "en-US"
 
         request = FakeRequest()
-        response = service.execute('my_complex_process', request, 'fakeuuid')
+        request = WPSExecuteRequest(my_process, request)
+        response = my_process.execute(request, 'fakeuuid')
         self.assertEqual(response.outputs['complex'].data, 'DEFAULT COMPLEX DATA')
 
     def test_output_mimetype(self):
@@ -401,13 +402,15 @@ class ExecuteTest(TestBase):
 
         # valid mimetype
         request = FakeRequest('text/plain+test')
-        response = service.execute('get_mimetype_process', request, 'fakeuuid')
+        request = WPSExecuteRequest(my_process, request)
+        response = my_process.execute(request, 'fakeuuid')
         self.assertEqual(response.outputs['mimetype'].data, 'text/plain+test')
 
         # non valid mimetype
         request = FakeRequest('text/xml')
         with self.assertRaises(InvalidParameterValue):
-            response = service.execute('get_mimetype_process', request, 'fakeuuid')
+            request = WPSExecuteRequest(my_process, request)
+            response = my_process.execute(request, 'fakeuuid')
 
     def test_metalink(self):
         client = client_for(Service(processes=[create_metalink_process()]))

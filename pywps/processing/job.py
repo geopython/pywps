@@ -10,7 +10,6 @@ import tempfile
 
 import pywps.configuration as config
 from pywps import Process, WPSRequest
-from pywps.response.execute import ExecuteResponse
 from pywps.app.WPSExecuteRequest import WPSExecuteRequest
 from pywps.app.WPSExecuteResponse import WPSExecuteResponse
 

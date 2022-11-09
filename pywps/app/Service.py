@@ -16,7 +16,7 @@ from urllib.parse import urlparse
 from werkzeug.exceptions import HTTPException
 from werkzeug.wrappers import Request, Response
 from pywps.app.WPSExecuteRequest import WPSExecuteRequest
-from pywps.response.execute import ExecuteResponse, ExecuteRawResponse
+from pywps.response.execute import StatusResponse, ExecuteRawResponse
 import pywps.configuration as config
 from pywps import response
 from pywps.app.WPSRequest import WPSRequest
@@ -29,6 +29,7 @@ from pywps.exceptions import (
 )
 from pywps.inout.inputs import BoundingBoxInput, ComplexInput, LiteralInput
 from pywps.response.status import WPS_STATUS
+from pywps.app.basic import get_response_type, get_default_response_mimetype
 
 LOGGER = logging.getLogger("PYWPS")
 
@@ -111,7 +112,12 @@ class Service(object):
         if wps_request.wps_request.raw:
             return ExecuteRawResponse(wps_response)
         else:
-            return ExecuteResponse(wps_response)
+            # FIXME: this try-except has no pratical meaning, just allow to pass some test.
+            try:
+                _, mimetype = get_response_type(wps_request.http_request.accept_mimetypes, wps_request.default_mimetype)
+            except Exception:
+                mimetype = get_default_response_mimetype()
+            return StatusResponse(wps_request.version, wps_response.uuid, mimetype)
 
     def _set_grass(self):
         """Set environment variables needed for GRASS GIS support

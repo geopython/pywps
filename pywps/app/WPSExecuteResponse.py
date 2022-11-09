@@ -18,7 +18,7 @@ from pywps.inout.array_encode import ArrayEncoder
 from pywps.response.status import WPS_STATUS
 from pywps.inout.formats import FORMATS
 from pywps.inout.outputs import ComplexOutput
-from pywps.response.execute import ExecuteResponse
+from pywps.response.execute import StatusResponse
 from pywps.exceptions import (StorageNotSupported, OperationNotSupported,
                               ServerBusy, NoApplicableCode,
                               InvalidParameterValue)
@@ -147,8 +147,9 @@ class WPSExecuteResponse(object):
     def _update_status_doc(self):
         try:
             # rebuild the doc
-            response = ExecuteResponse(self)
-            self.doc, self.content_type = response._construct_doc()
+            self.doc = StatusResponse(self.wps_request.version, self.uuid,
+                                      get_default_response_mimetype()).get_data(as_text=True)
+            self.content_type = get_default_response_mimetype()
         except Exception as e:
             raise NoApplicableCode('Building Response Document failed with : {}'.format(e))
 

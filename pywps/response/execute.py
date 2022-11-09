@@ -21,6 +21,7 @@ from pywps.app.basic import (
 from pywps.exceptions import NoApplicableCode
 from pywps.inout.array_encode import ArrayEncoder
 from pywps.inout.formats import FORMATS
+from pywps.response.basic import TEMPLATE_ENV
 from pywps.response.status import WPS_STATUS
 
 from .basic import WPSResponse
@@ -93,9 +94,9 @@ class ExecuteRawResponse(WPSResponse):
                                      .format(wps_output_identifier + suffix)})
 
 
-class ExecuteResponse(WPSResponse):
+class StatusResponse(Response):
 
-    def __init__(self, wps_execute_response):
+    def __init__(self, version, uuid, mimetype):
         """constructor
 
         :param pywps.app.WPSRequest.WPSRequest wps_request:
@@ -103,13 +104,18 @@ class ExecuteResponse(WPSResponse):
         :param uuid: string this request uuid
         """
 
-        super(ExecuteResponse, self).__init__(wps_execute_response.wps_request, wps_execute_response.uuid)
+        from pywps.dblog import get_status_record
+        r = get_status_record(uuid)
+        if not r:
+            return NoApplicableCode("Output was not generated")
 
-        self.wps_execute_response = wps_execute_response
+        if 'json' in mimetype:
+            doc = json.dumps(self._render_json_response(r.data), cls=ArrayEncoder, indent=get_json_indent())
+        else:
+            template = TEMPLATE_ENV.get_template(version + '/execute/main.xml')
+            doc = template.render(**r.data)
 
-    # Fallback to self.wps_execute_response attribute
-    def __getattr__(self, item):
-        return getattr(self.wps_execute_response, item)
+        super().__init__(doc, mimetype=mimetype)
 
     @staticmethod
     def _render_json_response(jdoc):
@@ -127,31 +133,3 @@ class ExecuteResponse(WPSResponse):
                 d[id] = val[key]
         response['outputs'] = d
         return response
-
-    def _construct_doc(self):
-        from pywps.dblog import get_status_record
-        r = get_status_record(self.wps_execute_response.uuid)
-        if not r:
-            return NoApplicableCode("Output was not generated")
-        doc = r.data
-        try:
-            json_response, mimetype = get_response_type(
-                self.wps_request.http_request.accept_mimetypes, self.wps_request.default_mimetype)
-        except Exception:
-            mimetype = get_default_response_mimetype()
-            json_response = 'json' in mimetype
-        if json_response:
-            doc = json.dumps(self._render_json_response(doc), cls=ArrayEncoder, indent=get_json_indent())
-        else:
-            template = self.template_env.get_template(self.version + '/execute/main.xml')
-            doc = template.render(**doc)
-        return doc, mimetype
-
-    @Request.application
-    def __call__(self, request):
-        accept_json_response, accepted_mimetype = get_response_type(
-            self.wps_request.http_request.accept_mimetypes, self.wps_request.default_mimetype)
-        doc, mimetypes = self._construct_doc()
-        if not doc:
-            return NoApplicableCode("Output was not generated")
-        return Response(doc, mimetype=accepted_mimetype)

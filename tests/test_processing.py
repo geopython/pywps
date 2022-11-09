@@ -16,7 +16,6 @@ import pywps.processing
 from pywps.processing.job import Job
 from pywps.processing.basic import MultiProcessing
 from pywps.app import WPSRequest
-from pywps.response.execute import ExecuteResponse
 from pywps.app.WPSExecuteResponse import WPSExecuteResponse
 
 from processes import Greeter, InOut, BBox
@@ -35,8 +34,8 @@ class GreeterProcessingTest(TestBase):
         self.dummy_process._set_uuid(self.uuid)
         self.dummy_process.set_workdir(self.workdir)
         self.wps_request = WPSRequest()
-        self.wps_response = ExecuteResponse(WPSExecuteResponse(self.dummy_process,
-                                            self.wps_request, self.uuid))
+        self.wps_response = WPSExecuteResponse(self.dummy_process,
+                                               self.wps_request, self.uuid)
         self.job = Job(
             process=self.dummy_process,
             wps_request=self.wps_request,
@@ -82,8 +81,8 @@ class InOutProcessingTest(TestBase):
         self.dummy_process._set_uuid(self.uuid)
         self.dummy_process.set_workdir(self.workdir)
         self.wps_request = WPSRequest()
-        self.wps_response = ExecuteResponse(WPSExecuteResponse(self.dummy_process,
-                                            self.wps_request, self.uuid))
+        self.wps_response = WPSExecuteResponse(self.dummy_process,
+                                               self.wps_request, self.uuid)
         self.job = Job(
             process=self.dummy_process,
             wps_request=self.wps_request,
@@ -136,8 +135,8 @@ class BBoxProcessingTest(TestBase):
             'outputs': { },
             'raw': False
         }
-        self.wps_response = ExecuteResponse(WPSExecuteResponse(self.dummy_process,
-                                            self.wps_request, self.uuid))
+        self.wps_response = WPSExecuteResponse(self.dummy_process,
+                                               self.wps_request, self.uuid)
         self.job = Job(
             process=self.dummy_process,
             wps_request=self.wps_request,
