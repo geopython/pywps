@@ -524,7 +524,7 @@ class MetaLink:
 
     def _load_template(self):
         from jinja2 import PackageLoader
-        from pywps.response import TEMPLATE_ENV
+        from pywps.response.basic import TEMPLATE_ENV
         self._template = TEMPLATE_ENV.get_template(self._xml_template)
 
 
