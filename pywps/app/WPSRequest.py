@@ -156,62 +156,58 @@ class WPSRequest(object):
             request_parser = self._post_json_request_parser()
             request_parser(jdoc)
 
+    def parse_get_getcapabilities(self, http_request):
+        """Parse GET GetCapabilities request."""
+        acceptedversions = _get_get_param(http_request, 'acceptversions')
+        self.check_accepted_versions(acceptedversions)
+        self.default_mimetype = _get_get_param(http_request, 'f', self.default_mimetype)
+
+    def parse_get_describeprocess(self, http_request):
+        """Parse GET DescribeProcess request."""
+        version = _get_get_param(http_request, 'version')
+        self.check_and_set_version(version)
+
+        self.identifiers = _get_get_param(
+            http_request, 'identifier', self.identifiers, aslist=True)
+        if self.identifiers is None and self.identifier is not None:
+            self.identifiers = [self.identifier]
+        self.default_mimetype = _get_get_param(http_request, 'f', self.default_mimetype)
+
+    def parse_get_execute(self, http_request):
+        """Parse GET Execute request."""
+        version = _get_get_param(http_request, 'version')
+        self.check_and_set_version(version)
+
+        self.identifier = _get_get_param(http_request, 'identifier', self.identifier)
+        self.store_execute = _get_get_param(
+            http_request, 'storeExecuteResponse', 'false')
+        self.status = _get_get_param(http_request, 'status', 'false')
+        self.lineage = _get_get_param(
+            http_request, 'lineage', 'false')
+        self.inputs = get_data_from_kvp(
+            _get_get_param(http_request, 'DataInputs'), 'DataInputs')
+        if self.inputs is None:
+            self.inputs = {}
+
+        # take responseDocument preferably
+        raw, output_ids = False, _get_get_param(http_request, 'ResponseDocument')
+        if output_ids is None:
+            raw, output_ids = True, _get_get_param(http_request, 'RawDataOutput')
+        if output_ids is not None:
+            self.raw, self.output_ids = raw, output_ids
+        elif self.raw is None:
+            self.raw = self.output_ids is not None
+
+        self.default_mimetype = _get_get_param(http_request, 'f', self.default_mimetype)
+        self.outputs = get_data_from_kvp(self.output_ids) or {}
+        if self.raw:
+            # executeResponse XML will not be stored and no updating of
+            # status
+            self.store_execute = 'false'
+            self.status = 'false'
+
     def _get_request_parser(self, operation):
         """Factory function returning proper parsing function."""
-
-        wpsrequest = self
-
-        def parse_get_getcapabilities(http_request):
-            """Parse GET GetCapabilities request."""
-
-            acceptedversions = _get_get_param(http_request, 'acceptversions')
-            wpsrequest.check_accepted_versions(acceptedversions)
-            wpsrequest.default_mimetype = _get_get_param(http_request, 'f', wpsrequest.default_mimetype)
-
-        def parse_get_describeprocess(http_request):
-            """Parse GET DescribeProcess request
-            """
-            version = _get_get_param(http_request, 'version')
-            wpsrequest.check_and_set_version(version)
-
-            wpsrequest.identifiers = _get_get_param(
-                http_request, 'identifier', wpsrequest.identifiers, aslist=True)
-            if wpsrequest.identifiers is None and self.identifier is not None:
-                wpsrequest.identifiers = [wpsrequest.identifier]
-            wpsrequest.default_mimetype = _get_get_param(http_request, 'f', wpsrequest.default_mimetype)
-
-        def parse_get_execute(http_request):
-            """Parse GET Execute request."""
-            version = _get_get_param(http_request, 'version')
-            wpsrequest.check_and_set_version(version)
-
-            wpsrequest.identifier = _get_get_param(http_request, 'identifier', wpsrequest.identifier)
-            wpsrequest.store_execute = _get_get_param(
-                http_request, 'storeExecuteResponse', 'false')
-            wpsrequest.status = _get_get_param(http_request, 'status', 'false')
-            wpsrequest.lineage = _get_get_param(
-                http_request, 'lineage', 'false')
-            wpsrequest.inputs = get_data_from_kvp(
-                _get_get_param(http_request, 'DataInputs'), 'DataInputs')
-            if self.inputs is None:
-                self.inputs = {}
-
-            # take responseDocument preferably
-            raw, output_ids = False, _get_get_param(http_request, 'ResponseDocument')
-            if output_ids is None:
-                raw, output_ids = True, _get_get_param(http_request, 'RawDataOutput')
-            if output_ids is not None:
-                wpsrequest.raw, wpsrequest.output_ids = raw, output_ids
-            elif wpsrequest.raw is None:
-                wpsrequest.raw = wpsrequest.output_ids is not None
-
-            wpsrequest.default_mimetype = _get_get_param(http_request, 'f', wpsrequest.default_mimetype)
-            wpsrequest.outputs = get_data_from_kvp(wpsrequest.output_ids) or {}
-            if wpsrequest.raw:
-                # executeResponse XML will not be stored and no updating of
-                # status
-                wpsrequest.store_execute = 'false'
-                wpsrequest.status = 'false'
 
         if operation:
             self.operation = operation.lower()
@@ -221,11 +217,11 @@ class WPSRequest(object):
             self.operation = 'execute'
 
         if self.operation == 'getcapabilities':
-            return parse_get_getcapabilities
+            return self.parse_get_getcapabilities
         elif self.operation == 'describeprocess':
-            return parse_get_describeprocess
+            return self.parse_get_describeprocess
         elif self.operation == 'execute':
-            return parse_get_execute
+            return self.parse_get_execute
         else:
             raise OperationNotSupported(
                 'Unknown request {}'.format(self.operation), operation)
