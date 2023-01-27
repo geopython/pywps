@@ -8,3 +8,4 @@ Sphinx
 twine
 wheel
 bump2version
+tox>=4.0

@@ -34,7 +34,7 @@ jobs:
         flake8 pywps
       if: matrix.python-version == 3.7
     - name: Install tox 📦
-      run: pip install tox
+      run: pip install "tox>=4.0"
     - name: Run tests with tox ⚙️
       run: tox -e ${{ matrix.tox-env }}
     - name: Run coveralls ⚙️
