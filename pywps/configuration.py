@@ -43,7 +43,7 @@ class EnvInterpolation(configparser.BasicInterpolation):
     ==> http://localhost/wps
 
 
-    See code is an adaption from the configuation parsing in the pycsw
+    This code is an adaption from the configuation parsing in the pycsw
     project.
     See also
     - https://github.com/geopython/pycsw/blob/3.0.0-alpha3/pycsw/core/util.py
