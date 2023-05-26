@@ -3,7 +3,7 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-"""Tests for parsing env variables."""
+"""Tests for the configuration."""
 
 import os
 import unittest
