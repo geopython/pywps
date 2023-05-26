@@ -27,6 +27,36 @@ LOGGER = logging.getLogger("PYWPS")
 wps_strict = True
 
 
+class EnvInterpolation(configparser.BasicInterpolation):
+    """
+    Configuration parser class to allow env variable interpolation.
+
+    With this interpolator it is possible to use env variables as
+    part of the values in an cfg file.
+
+    Example (given an env variable HOSTNAME=localhost):
+
+    [server]
+    url = http://${HOSTNAME}/wps
+
+
+    ==> http://localhost/wps
+
+
+    See code is an adaption from the configuation parsing in the pycsw
+    project.
+    See also
+    - https://github.com/geopython/pycsw/blob/3.0.0-alpha3/pycsw/core/util.py
+    - https://stackoverflow.com/a/49529659
+
+    """
+
+    def before_get(self, parser, section, option, value, defaults):
+        """Expand env variables when returning values."""
+        value = super().before_get(parser, section, option, value, defaults)
+        return os.path.expandvars(value)
+
+
 def get_config_value(section, option, default_value=''):
     """Get desired value from  configuration files
 
@@ -67,7 +97,7 @@ def load_configuration(cfgfiles=None):
     global CONFIG
 
     LOGGER.info('loading configuration')
-    CONFIG = configparser.ConfigParser(os.environ)
+    CONFIG = configparser.ConfigParser(os.environ, interpolation=EnvInterpolation())
 
     LOGGER.debug('setting default values')
     CONFIG.add_section('server')
