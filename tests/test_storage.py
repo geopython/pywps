@@ -11,7 +11,6 @@ from pywps.inout.storage.s3 import S3Storage
 from pywps import configuration
 
 from pathlib import Path
-import unittest
 import tempfile
 
 

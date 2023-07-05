@@ -10,10 +10,8 @@ from pywps.inout.basic import ComplexOutput
 from pywps.util import file_uri
 
 from pywps import configuration, FORMATS
-from urllib.parse import urlparse
 
 import tempfile
-import os
 
 import unittest
 

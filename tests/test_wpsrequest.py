@@ -8,7 +8,6 @@ from pywps.app import WPSRequest
 import tempfile
 import datetime
 import json
-from owslib.crs import Crs
 
 from pywps.inout.literaltypes import AnyValue
 
