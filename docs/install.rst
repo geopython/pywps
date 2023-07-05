@@ -46,7 +46,7 @@ Using pip
         automatically in the system.  This might require superuser permissions
         (e.g. *sudo* in Debian based systems)::
 
-            $ sudo pip install -e git+https://github.com/geopython/pywps.git@main#egg=pywps-dev
+            $ sudo pip install -e git+https://github.com/geopython/pywps.git@main#egg=pywps
 
 .. todo::
 
