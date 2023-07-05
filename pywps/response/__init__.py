@@ -7,7 +7,7 @@ from jinja2 import Environment
 class RelEnvironment(Environment):
     """Override join_path() to enable relative template paths."""
     def join_path(self, template, parent):
-        return os.path.dirname(parent).joinpath(template)
+        return os.path.dirname(parent) + '/' + template
 
 
 def get_response(operation):
