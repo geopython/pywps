@@ -17,10 +17,16 @@ import os
 from multiprocessing import Lock
 
 import sqlalchemy
-from sqlalchemy.ext.declarative import declarative_base
+
 from sqlalchemy import Column, Integer, String, VARCHAR, Float, DateTime, LargeBinary
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool, StaticPool
+
+try:
+    from sqlalchemy.orm import declarative_base
+except ImportError:
+    from sqlalchemy.ext.declarative import declarative_base
+
 
 from pywps.response.status import WPS_STATUS
 
