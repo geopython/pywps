@@ -12,10 +12,7 @@ import sys
 
 from pywps import configuration
 from pywps.exceptions import NoApplicableCode
-import sqlite3
 import datetime
-import pickle
-import json
 import os
 from multiprocessing import Lock
 

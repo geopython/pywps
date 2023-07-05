@@ -3,8 +3,7 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-"""Literaltypes are used for LiteralInputs, to make sure, input data are OK
-"""
+"""Literaltypes are used for LiteralInputs, to make sure input data are OK."""
 from urllib.parse import urlparse
 from dateutil.parser import parse as date_parser
 import datetime
@@ -193,7 +192,7 @@ def convert(data_type, data):
     """Convert data to target value
     """
 
-    convert = LITERAL_DATA_TYPES.get(data_type, None)
+    convert = LITERAL_DATA_TYPES.get(data_type, None)  # noqa
     if convert is None:
         raise InvalidParameterValue(
             "Invalid data_type value of LiteralInput "
@@ -208,7 +207,7 @@ def convert(data_type, data):
 
 @register_convert_type('boolean')
 def convert_boolean(inpt):
-    """Return boolean value from input boolean input
+    """Return boolean value from input boolean input.
 
     >>> convert_boolean('1')
     True
@@ -232,14 +231,14 @@ def convert_boolean(inpt):
                 val = False
             else:
                 val = True
-        except Exception:
+        except (ValueError, TypeError):
             val = True
     return val
 
 
 @register_convert_type('float')
 def convert_float(inpt):
-    """Return float value from inpt
+    """Return float value from input.
 
     >>> convert_float('1')
     1.0
@@ -250,7 +249,7 @@ def convert_float(inpt):
 
 @register_convert_type('integer')
 def convert_integer(inpt):
-    """Return integer value from input inpt
+    """Return integer value from input input.
 
     >>> convert_integer('1.0')
     1
@@ -261,7 +260,7 @@ def convert_integer(inpt):
 
 @register_convert_type('string')
 def convert_string(inpt):
-    """Return string value from input lit_input
+    """Return string value from input lit_input.
 
     >>> convert_string(1)
     '1'
@@ -272,7 +271,7 @@ def convert_string(inpt):
 @register_convert_type('nonNegativeInteger')
 @register_convert_type('positiveInteger')
 def convert_positiveInteger(inpt):
-    """Return value of input"""
+    """Return value of input."""
 
     inpt = convert_integer(inpt)
     if inpt < 0:
@@ -284,7 +283,7 @@ def convert_positiveInteger(inpt):
 
 @register_convert_type('anyURI')
 def convert_anyURI(inpt):
-    """Return value of input
+    """Return value of input.
 
     :rtype: url components
     """
@@ -300,10 +299,9 @@ def convert_anyURI(inpt):
 
 @register_convert_type('time')
 def convert_time(inpt):
-    """Return value of input
-    time formating assumed according to ISO standard:
+    """Return value of input time formatting assumed according to ISO standard.
 
-    https://www.w3.org/TR/xmlschema-2/#time
+    * https://www.w3.org/TR/xmlschema-2/#time
 
     Examples: 12:00:00
 
@@ -316,10 +314,9 @@ def convert_time(inpt):
 
 @register_convert_type('date')
 def convert_date(inpt):
-    """Return value of input
-    date formating assumed according to ISO standard:
+    """Return value of input date formatting assumed according to ISO standard.
 
-    https://www.w3.org/TR/xmlschema-2/#date
+    * https://www.w3.org/TR/xmlschema-2/#date
 
     Examples: 2016-09-20
 
@@ -332,8 +329,7 @@ def convert_date(inpt):
 
 @register_convert_type('dateTime')
 def convert_datetime(inpt):
-    """Return value of input
-    dateTime formating assumed according to ISO standard:
+    """Return value of input dateTime formatting assumed according to ISO standard.
 
     * http://www.w3.org/TR/NOTE-datetime
     * https://www.w3.org/TR/xmlschema-2/#dateTime
@@ -372,7 +368,7 @@ def convert_angle(inpt):
 
 
 def make_allowedvalues(allowed_values):
-    """convert given value list to AllowedValue objects
+    """Convert given value list to AllowedValue objects.
 
     :return: list of pywps.inout.literaltypes.AllowedValue
     """
@@ -412,8 +408,7 @@ def make_allowedvalues(allowed_values):
 
 
 def is_anyvalue(value):
-    """Check for any value object of given value
-    """
+    """Check for any value object of given value."""
 
     is_av = False
 
@@ -430,8 +425,7 @@ def is_anyvalue(value):
 
 
 def is_values_reference(value):
-    """Check for ValuesReference in given value
-    """
+    """Check for ValuesReference in given value."""
 
     check = False
 

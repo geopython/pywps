@@ -32,13 +32,13 @@ def _build_output_name(output):
         suffix = output.data_format.extension
     _, file_name = os.path.split(prefix)
     output_name = file_name + suffix
-    return (output_name, suffix)
+    return output_name, suffix
 
 
 class FileStorage(CachedStorage):
     """File storage implementation, stores data to file system
 
-    >>> import ConfigParser
+    >>> from configparser import ConfigParser
     >>> config = ConfigParser.RawConfigParser()
     >>> config.add_section('FileStorage')
     >>> config.set('FileStorage', 'target', './')
@@ -55,8 +55,8 @@ class FileStorage(CachedStorage):
     ...         tiff_file.close()
     ...         return 'file.tiff'
     >>> fake_out = FakeOutput()
-    >>> (type, path, url) = store.store(fake_out)
-    >>> type == STORE_TYPE.PATH
+    >>> (store_type, path, url) = store.store(fake_out)
+    >>> store_type == STORE_TYPE.PATH
     True
     """
 
@@ -148,9 +148,7 @@ class FileStorage(CachedStorage):
             shutil.copy2(src, dst)
 
     def write(self, data, destination, data_format=None):
-        """
-        Write data to self.target
-        """
+        """Write data to self.target."""
         if not os.path.exists(os.path.dirname(self.target)):
             os.makedirs(self.target)
 
@@ -179,8 +177,7 @@ class FileStorage(CachedStorage):
 
 
 def get_free_space(folder):
-    """ Return folder/drive free space (in bytes)
-    """
+    """Return folder/drive free space (in bytes)."""
     import platform
 
     if platform.system() == 'Windows':

@@ -5,7 +5,7 @@
 
 from .s3 import S3StorageBuilder
 from .file import FileStorageBuilder
-import pywps.configuration as wpsConfig
+import pywps.configuration as wpsConfig  # noqa
 
 STORAGE_MAP = {
     's3': S3StorageBuilder,

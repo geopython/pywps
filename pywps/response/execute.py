@@ -17,7 +17,6 @@ from pywps.inout.array_encode import ArrayEncoder
 from pywps.response.status import WPS_STATUS
 from .basic import WPSResponse
 from pywps.inout.formats import FORMATS
-from pywps.inout.outputs import ComplexOutput
 
 import urllib.parse as urlparse
 from urllib.parse import urlencode
@@ -152,10 +151,11 @@ class ExecuteResponse(WPSResponse):
 
     @property
     def json(self):
-        data = {}
-        data["language"] = self.wps_request.language
-        data["service_instance"] = self._get_serviceinstance()
-        data["process"] = self.process.json
+        data = {
+            "language": self.wps_request.language,
+            "service_instance": self._get_serviceinstance(),
+            "process": self.process.json
+        }
 
         if self.store_status_file:
             if self.process.status_location:

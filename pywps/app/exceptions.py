@@ -3,9 +3,7 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-"""
-Process exceptions raised intentionally in processes to provide information for users.
-"""
+"""Process exceptions raised intentionally in processes to provide information for users."""
 
 import re
 

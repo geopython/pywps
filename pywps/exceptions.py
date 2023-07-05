@@ -8,7 +8,7 @@ OGC OWS and WPS Exceptions
 
 Based on OGC OWS, WPS and
 
-http://lists.opengeospatial.org/pipermail/wps-dev/2013-October/000335.html
+https://lists.ogc.org/pipermail/wps-dev/2013-October/000335.html
 """
 
 import json

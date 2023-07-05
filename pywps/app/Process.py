@@ -16,8 +16,6 @@ from pywps.response import get_response
 from pywps.response.status import WPS_STATUS
 from pywps.response.execute import ExecuteResponse
 from pywps.app.WPSRequest import WPSRequest
-from pywps.inout.inputs import input_from_json
-from pywps.inout.outputs import output_from_json
 import pywps.configuration as config
 from pywps.exceptions import (StorageNotSupported, OperationNotSupported,
                               ServerBusy, NoApplicableCode,
@@ -38,7 +36,7 @@ class Process(object):
                     :class:`pywps.app.WPSRequest` argument and return a
                     :class:`pywps.app.WPSResponse` object.
     :param string identifier: Name of this process.
-    :param string title: Human readable title of process.
+    :param string title: Human-readable title of process.
     :param string abstract: Brief narrative description of the process.
     :param list keywords: Keywords that characterize a process.
     :param inputs: List of inputs accepted by this process. They
@@ -357,17 +355,15 @@ class Process(object):
             outpt.workdir = workdir
 
     def _set_grass(self, wps_request):
-        """Handle given grass_location parameter of the constructor
+        """Handle given grass_location parameter of the constructor.
 
-        location is either directory name, 'epsg:1234' form or a georeferenced
-        file
+        location is either directory name, 'epsg:1234' form or a geo-referenced file.
 
-        in the first case, new temporary mapset within the location will be
-        created
+        In the first case, new temporary mapset within the location will be created.
 
-        in the second case, location will be created in self.workdir
+        In the second case, location will be created in self.workdir.
 
-        the mapset should be deleted automatically using self.clean() method
+        The mapset should be deleted automatically using self.clean() method
         """
         if self.grass_location:
 
@@ -376,8 +372,7 @@ class Process(object):
             from grass.script import core as grass
             from grass.script import setup as gsetup
 
-            # HOME needs to be set - and that is usually not the case for httpd
-            # server
+            # HOME needs to be set - and that is usually not the case for httpd server
             os.environ['HOME'] = self.workdir
 
             # GISRC envvariable needs to be set

@@ -6,7 +6,6 @@ from pywps.app.basic import make_response, get_response_type, get_json_indent
 from .basic import WPSResponse
 from pywps import __version__
 from pywps.exceptions import NoApplicableCode
-import os
 
 
 class CapabilitiesResponse(WPSResponse):

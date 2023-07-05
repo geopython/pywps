@@ -8,7 +8,6 @@ from pywps.exceptions import MissingParameterValue
 from pywps.exceptions import InvalidParameterValue
 from .basic import WPSResponse
 from pywps import __version__
-import os
 
 
 class DescribeResponse(WPSResponse):

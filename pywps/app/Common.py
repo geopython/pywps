@@ -12,7 +12,7 @@ class Metadata(object):
     """
     ows:Metadata content model.
 
-    :param title: Metadata title, human readable string
+    :param title: Metadata title, human-readable string
     :param href: fully qualified URL
     :param role: fully qualified URL
     :param type_: fully qualified URL
@@ -70,7 +70,7 @@ class MetadataUrl(Metadata):
 
     Useful to avoid Sphinx "Duplicate explicit target name" warning.
 
-    See https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#anonymous-hyperlinks.
+    See: https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#anonymous-hyperlinks.
 
     Meant to use in documentation only, not needed in the xml response, nor being serialized or
     deserialized to/from json.  So that's why it is not directly in the base class.

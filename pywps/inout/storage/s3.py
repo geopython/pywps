@@ -35,22 +35,22 @@ def _build_s3_file_path(prefix, filename):
 
 
 def _build_extra_args(public=False, encrypt=False, mime_type=''):
-    extraArgs = dict()
+    extra_args = dict()
 
     if public:
-        extraArgs['ACL'] = 'public-read'
+        extra_args['ACL'] = 'public-read'
     if encrypt:
-        extraArgs['ServerSideEncryption'] = 'AES256'
+        extra_args['ServerSideEncryption'] = 'AES256'
 
-    extraArgs['ContentType'] = mime_type
+    extra_args['ContentType'] = mime_type
 
-    return extraArgs
+    return extra_args
 
 
 class S3Storage(StorageAbstract):
     """
     Implements a simple class to store files on AWS S3
-    Can optionally set the outputs to be publically readable
+    Can optionally set the outputs to be publicly readable
     and can also encrypt files at rest
     """
     def __init__(self, bucket, prefix, public_access, encrypt, region):
@@ -67,14 +67,15 @@ class S3Storage(StorageAbstract):
         waiter.wait(Bucket=self.bucket, Key=filename)
 
     def uploadData(self, data, filename, extraArgs):
-        """
+        """Creates or updates a file on S3 in the bucket specified in the server configuration.
+
+        The key of the created object will be equal to the
+        configured prefix with the destination parameter appended.
+
         :param data: Data to upload to S3
         :param filename: name of the file to upload to s3
-                         will be appened to the configured prefix
+                         will be appended to the configured prefix
         :returns: url to access the uploaded file
-        Creates or updates a file on S3 in the bucket specified in the server
-        configuration. The key of the created object will be equal to the
-        configured prefix with the destination parameter appended.
         """
         import boto3
 
@@ -89,12 +90,11 @@ class S3Storage(StorageAbstract):
         return url
 
     def uploadFileToS3(self, filename, extraArgs):
-        """
+        """Uploads a file from the local filesystem to AWS S3.
+
         :param filename: Path to file on local filesystem
         :returns: url to access the uploaded file
-        Uploads a file from the local filesystem to AWS S3
         """
-        url = ''
         with open(filename, "rb") as data:
             s3_path = _build_s3_file_path(self.prefix, os.path.basename(filename))
             url = self.uploadData(data, s3_path, extraArgs)
@@ -109,11 +109,11 @@ class S3Storage(StorageAbstract):
         """
         filename = output.file
         s3_path = _build_s3_file_path(self.prefix, os.path.basename(filename))
-        extraArgs = _build_extra_args(
+        extra_args = _build_extra_args(
             public=self.public,
             encrypt=self.encrypt,
             mime_type=output.data_format.mime_type)
-        url = self.uploadFileToS3(filename, extraArgs)
+        url = self.uploadFileToS3(filename, extra_args)
         return (STORE_TYPE.S3, s3_path, url)
 
     def write(self, data, destination, data_format=None):
@@ -131,11 +131,11 @@ class S3Storage(StorageAbstract):
         # Get MimeType from format if it exists
         mime_type = data_format.mime_type if data_format is not None else ''
         s3_path = _build_s3_file_path(self.prefix, destination)
-        extraArgs = _build_extra_args(
+        extra_args = _build_extra_args(
             public=self.public,
             encrypt=self.encrypt,
             mime_type=mime_type)
-        return self.uploadData(data, s3_path, extraArgs)
+        return self.uploadData(data, s3_path, extra_args)
 
     def url(self, destination):
         """

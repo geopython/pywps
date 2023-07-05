@@ -35,9 +35,9 @@ class WPSResponse(object):
         Update status report of currently running process instance
 
         :param str message: Message you need to share with the client
-        :param int status_percentage: Percent done (number betwen <0-100>)
+        :param int status_percentage: Percent done (number between <0-100>)
         :param pywps.response.status.WPS_STATUS status: process status - user should usually
-            ommit this parameter
+            omit this parameter
         """
         self.message = message
         self.status = status
