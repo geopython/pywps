@@ -10,6 +10,7 @@
 * @jonas-eberle Jonas Eberle
 * @cehbrecht Carsten Ehbrecht
 * @idanmiara Idan Miara
+* @Zeitsperre Trevor James Smith
 
 # Contributor to older versions of PyWPS (< 4.x)
 
