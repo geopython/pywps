@@ -3,8 +3,6 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-import sys
-
 try:
     from setuptools import setup
 except ImportError:
@@ -59,6 +57,8 @@ CONFIG = {
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Topic :: Scientific/Engineering :: GIS",
     ],
     "install_requires": INSTALL_REQUIRES,
