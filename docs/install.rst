@@ -3,31 +3,39 @@
 Installation
 ============
 
-.. note:: PyWPS is not tested on the MS Windows platform. Please join the
-    development team if you need this platform to be supported. This is mainly 
-    because of the lack of a multiprocessing library.  It is used to process 
-    asynchronous execution, i.e., when making requests storing the response 
-    document and updating a status document displaying the progress of 
-    execution.
+.. note:: PyWPS is not tested on the Microsoft Windows platform. Please join the development team
+    if you need this platform to be supported. This is mainly because of the lack of a multiprocessing
+    library. It is used to process asynchronous execution, i.e., when making requests storing the response
+    document and updating a status document displaying the progress of execution.
 
 
 Dependencies and requirements
 -----------------------------
 
-PyWPS runs on Python 2.7, 3.3 or higher. PyWPS is currently tested and
-developed on Linux (mostly Ubuntu).  In the documentation we take this 
-distribution as reference.
+PyWPS runs on Python 3.7 or higher. PyWPS is currently tested and developed on Linux (mostly Ubuntu).
+In the documentation we take this distribution as reference.
 
 Prior to installing PyWPS, Git and the Python bindings for GDAL must be
-installed in the system.  In Debian based systems these packages can be
+installed in the system. On Debian based systems, these packages can be
 installed with a tool like *apt*::
 
     $ sudo apt-get install git python-gdal
 
-Alternatively, if GDAL is already installed on your system you can
-install the GDAL Python bindings via pip with::
+Alternatively, if GDAL is already installed on your system you can install the GDAL Python bindings via pip with::
 
-    $ pip install GDAL==1.10.0 --global-option=build_ext --global-option="-I/usr/include/gdal"
+    # Determine version of GDAL installed on your system
+    $ export GDAL_VERSION="$(gdal-config --version)"
+    # Install GDAL Python bindings
+    $ pip install gdal==$GDAL_VERSION --global-option=build_ext --global-option="-I/usr/include/gdal"
+
+.. Warning::
+    If you are using setuptools 63.0 or higher, you need to install the
+    GDAL Python bindings with the following command::
+
+        # Determine version of GDAL installed on your system
+        $ export GDAL_VERSION="$(gdal-config --version)"
+        # Install GDAL Python bindings
+        $ pip install --upgrade --force-reinstall --no-cache-dir gdal==$GDAL_VERSION --no-binary gdal
 
 Download and install
 --------------------
@@ -38,7 +46,7 @@ Using pip
         automatically in the system.  This might require superuser permissions
         (e.g. *sudo* in Debian based systems)::
 
-            $ sudo pip install -e git+https://github.com/geopython/pywps.git@master#egg=pywps-dev
+            $ sudo pip install -e git+https://github.com/geopython/pywps.git@main#egg=pywps-dev
 
 .. todo::
 
@@ -61,7 +69,7 @@ Manual installation
 
         To install PyWPS system-wide run::
 
-            $ sudo python setup.py install
+            $ sudo pip install .
 
 For Developers
         Installation of the source code using Git and Python's virtualenv tool::
@@ -75,7 +83,7 @@ For Developers
         Then install the package dependencies using pip as described in the Manual installation section. To install
         PyWPS::
 
-            $ python setup.py install
+            $ pip install .
 
         Note that installing PyWPS via a virtualenv environment keeps the installation of PyWPS and its
         dependencies isolated to the virtual environment and does not affect other parts of the system.  This

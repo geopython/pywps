@@ -17,7 +17,7 @@ Install PyWPS 4
 
 Using pip: 
 
-    $ sudo pip install -e git+https://github.com/geopython/pywps.git@master#egg=pywps
+    $ sudo pip install -e git+https://github.com/geopython/pywps.git@main#egg=pywps
 
 Or in alternative install it manually:
 
@@ -25,7 +25,7 @@ Or in alternative install it manually:
     
     $ cd pywps/
     
-    $ sudo python setup.py install
+    $ sudo pip install .
 
 Install example service
 -----------------------
