@@ -28,7 +28,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get -y install libnetcdf-dev libhdf5-dev
-    - uses: actions/setup-python@v3
+    - uses: actions/setup-python@v4
       name: Setup Python ${{ matrix.python-version }}
       with:
         python-version: ${{ matrix.python-version }}
@@ -48,8 +48,8 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         name: Setup Python 3.7
         with:
           python-version: 3.7
