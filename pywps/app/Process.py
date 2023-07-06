@@ -181,7 +181,9 @@ class Process(object):
         return self.status_store.url(self.status_filename)
 
     def _execute_process(self, async_, wps_request, wps_response):
-        """Uses :module:`pywps.processing` module for sending process to
+        """
+
+        Uses :module:`pywps.processing` module for sending process to
         background BUT first, check for maxprocesses configuration value
 
         :param async_: run in asynchronous mode
@@ -220,7 +222,7 @@ class Process(object):
 
         # not async
         else:
-            if running >= maxparallel and maxparallel != -1:
+            if running >= maxparallel != -1:
                 raise ServerBusy('Maximum number of parallel running processes reached. Please try later.')
             wps_response._update_status(WPS_STATUS.ACCEPTED, "PyWPS Request accepted", 0)
             wps_response = self._run_process(wps_request, wps_response)
@@ -438,8 +440,10 @@ class Process(object):
                 grass.run_command('g.gisenv', set="MAPSET=%s" % mapset_name)
 
             else:
+                # FIXME: This will fail as location is not set.
                 raise NoApplicableCode('Location does exists or does not seem '
-                                       'to be in "EPSG:XXXX" form nor is it existing directory: {}'.format(location))
+                                       'to be in "EPSG:XXXX" form nor is it existing directory: '
+                                       '{}'.format(location))
 
             # set _grass_mapset attribute - will be deleted once handler ends
             self._grass_mapset = mapset_name

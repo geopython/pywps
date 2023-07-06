@@ -7,7 +7,7 @@ XML tools
 """
 
 import logging
-from typing import Optional, Tuple
+from typing import Tuple
 
 from werkzeug.wrappers import Response
 import pywps.configuration as config
@@ -16,8 +16,9 @@ LOGGER = logging.getLogger('PYWPS')
 
 
 def get_xpath_ns(version):
-    """Get xpath namespace for specified WPS version
-    currently 1.0.0 or 2.0.0 are supported
+    """Get xpath namespace for specified WPS version.
+
+    Versions 1.0.0 or 2.0.0 are supported.
     """
 
     def xpath_ns(ele, path):
@@ -30,13 +31,15 @@ def get_xpath_ns(version):
         elif version == "2.0.0":
             from pywps import namespaces200
             nsp = namespaces200
+        else:
+            raise NotImplementedError(version)
         return ele.xpath(path, namespaces=nsp)
 
     return xpath_ns
 
 
 def make_response(doc, content_type):
-    """response serializer"""
+    """Response serializer."""
     if not content_type:
         content_type = get_default_response_mimetype()
     response = Response(doc, content_type=content_type)

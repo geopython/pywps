@@ -9,8 +9,7 @@ LOGGER = logging.getLogger("PYWPS")
 
 
 class Metadata(object):
-    """
-    ows:Metadata content model.
+    """ows:Metadata content model.
 
     :param title: Metadata title, human-readable string
     :param href: fully qualified URL
@@ -36,8 +35,7 @@ class Metadata(object):
 
     @property
     def json(self):
-        """Get JSON representation of the metadata
-        """
+        """Get JSON representation of the metadata."""
         data = {
             'title': self.title,
             'href': self.href,

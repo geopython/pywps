@@ -8,12 +8,11 @@ import tempfile
 from typing import Sequence, Optional, Dict
 
 from werkzeug.exceptions import HTTPException
-from werkzeug.wrappers import Request, Response
+from werkzeug.wrappers import Request
 from urllib.parse import urlparse
 from pywps.app.WPSRequest import WPSRequest
 import pywps.configuration as config
-from pywps.exceptions import MissingParameterValue, NoApplicableCode, InvalidParameterValue, FileSizeExceeded, \
-    StorageNotSupported, FileURLNotSupported
+from pywps.exceptions import MissingParameterValue, NoApplicableCode, InvalidParameterValue, FileURLNotSupported
 from pywps.inout.inputs import ComplexInput, LiteralInput, BoundingBoxInput
 from pywps.dblog import log_request, store_status
 from pywps import response
@@ -24,16 +23,15 @@ import os
 import sys
 import uuid
 import copy
-import shutil
 
 
 LOGGER = logging.getLogger("PYWPS")
 
 
 class Service(object):
+    """The top-level object that represents a WPS service.
 
-    """ The top-level object that represents a WPS service. It's a WSGI
-    application.
+    A WSGI application.
 
     :param processes: A list of :class:`~Process` objects that are
                       provided by this service.
