@@ -9,9 +9,8 @@ import logging
 from decimal import Decimal
 
 from pywps.inout.literaltypes import AnyValue, NoValue, ValuesReference
-from pywps.validator.mode import MODE
 from pywps.validator.allowed_value import ALLOWEDVALUETYPE, RANGECLOSURETYPE
-
+from pywps.validator.mode import MODE
 
 LOGGER = logging.getLogger('PYWPS')
 

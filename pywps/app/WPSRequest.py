@@ -3,24 +3,28 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-import logging
-
-import lxml
-from pywps import xml_util as etree
-from werkzeug.exceptions import MethodNotAllowed
-from pywps import get_ElementMakerForVersion
 import base64
 import datetime
-from pywps.app.basic import get_xpath_ns, parse_http_url
-from pywps.inout.inputs import input_from_json
-from pywps.exceptions import NoApplicableCode, OperationNotSupported, MissingParameterValue, VersionNegotiationFailed, \
-    InvalidParameterValue, FileSizeExceeded
-from pywps import configuration
-from pywps.configuration import wps_strict
-from pywps import get_version_from_ns
-
 import json
+import logging
 from urllib.parse import unquote
+
+import lxml
+from werkzeug.exceptions import MethodNotAllowed
+
+from pywps import configuration, get_ElementMakerForVersion, get_version_from_ns
+from pywps import xml_util as etree
+from pywps.app.basic import get_xpath_ns, parse_http_url
+from pywps.configuration import wps_strict
+from pywps.exceptions import (
+    FileSizeExceeded,
+    InvalidParameterValue,
+    MissingParameterValue,
+    NoApplicableCode,
+    OperationNotSupported,
+    VersionNegotiationFailed,
+)
+from pywps.inout.inputs import input_from_json
 
 LOGGER = logging.getLogger("PYWPS")
 default_version = '1.0.0'

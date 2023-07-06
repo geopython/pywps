@@ -11,8 +11,8 @@
 # based on Web Processing Service Best Practices Discussion Paper, OGC 12-029
 # http://opengeospatial.org/standards/wps
 
-from collections import namedtuple
 import mimetypes
+from collections import namedtuple
 from typing import Optional, Sequence, Union
 
 _FORMATS = namedtuple('FORMATS', 'GEOJSON, JSON, SHP, GML, GPX, METALINK, META4, KML, KMZ, GEOTIFF,'

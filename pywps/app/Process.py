@@ -3,28 +3,31 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
+import importlib
+import json
 import logging
 import os
-from pywps.translations import lower_case_dict
+import shutil
 import sys
 import traceback
-import json
-import shutil
 
-from pywps import dblog
-from pywps.response import get_response
-from pywps.response.status import WPS_STATUS
-from pywps.response.execute import ExecuteResponse
-from pywps.app.WPSRequest import WPSRequest
 import pywps.configuration as config
-from pywps.exceptions import (StorageNotSupported, OperationNotSupported,
-                              ServerBusy, NoApplicableCode,
-                              InvalidParameterValue)
+from pywps import dblog
 from pywps.app.exceptions import ProcessError
-from pywps.inout.storage.builder import StorageBuilder
+from pywps.app.WPSRequest import WPSRequest
+from pywps.exceptions import (
+    InvalidParameterValue,
+    NoApplicableCode,
+    OperationNotSupported,
+    ServerBusy,
+    StorageNotSupported,
+)
 from pywps.inout.outputs import ComplexOutput
-import importlib
-
+from pywps.inout.storage.builder import StorageBuilder
+from pywps.response import get_response
+from pywps.response.execute import ExecuteResponse
+from pywps.response.status import WPS_STATUS
+from pywps.translations import lower_case_dict
 
 LOGGER = logging.getLogger("PYWPS")
 
@@ -371,6 +374,7 @@ class Process(object):
 
             import random
             import string
+
             from grass.script import core as grass
             from grass.script import setup as gsetup
 

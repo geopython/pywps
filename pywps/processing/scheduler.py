@@ -3,13 +3,14 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
+import logging
 import os
+
 import pywps.configuration as config
-from pywps.processing.basic import Processing
 from pywps.exceptions import SchedulerNotAvailable
+from pywps.processing.basic import Processing
 from pywps.response.status import WPS_STATUS
 
-import logging
 LOGGER = logging.getLogger("PYWPS")
 
 

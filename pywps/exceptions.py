@@ -12,14 +12,13 @@ https://lists.ogc.org/pipermail/wps-dev/2013-October/000335.html
 """
 
 import json
+import logging
 
+from markupsafe import escape
 from werkzeug.datastructures import MIMEAccept
+from werkzeug.exceptions import HTTPException
 from werkzeug.http import parse_accept_header
 from werkzeug.wrappers import Response
-from werkzeug.exceptions import HTTPException
-from markupsafe import escape
-
-import logging
 
 from pywps import __version__
 from pywps.app.basic import get_json_indent, get_response_type, parse_http_url

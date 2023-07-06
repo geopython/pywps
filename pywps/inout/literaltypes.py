@@ -4,14 +4,15 @@
 ##################################################################
 
 """Literaltypes are used for LiteralInputs, to make sure input data are OK."""
-from urllib.parse import urlparse
-from dateutil.parser import parse as date_parser
 import datetime
-from pywps.exceptions import InvalidParameterValue
-from pywps.validator.allowed_value import RANGECLOSURETYPE
-from pywps.validator.allowed_value import ALLOWEDVALUETYPE
-
 import logging
+from urllib.parse import urlparse
+
+from dateutil.parser import parse as date_parser
+
+from pywps.exceptions import InvalidParameterValue
+from pywps.validator.allowed_value import ALLOWEDVALUETYPE, RANGECLOSURETYPE
+
 LOGGER = logging.getLogger('PYWPS')
 
 LITERAL_DATA_TYPES = dict()

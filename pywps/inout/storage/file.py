@@ -6,13 +6,13 @@
 import logging
 import os
 from urllib.parse import urljoin
-from pywps.exceptions import NotEnoughStorage, FileStorageError
+
 from pywps import configuration as config
+from pywps.exceptions import FileStorageError, NotEnoughStorage
 from pywps.inout.basic import IOHandler
 
-from . import CachedStorage
+from . import STORE_TYPE, CachedStorage
 from .implementationbuilder import StorageImplementationBuilder
-from . import STORE_TYPE
 
 LOGGER = logging.getLogger('PYWPS')
 
@@ -77,8 +77,8 @@ class FileStorage(CachedStorage):
         - Copy / link output in work directory to output directory
         - Return store type, output path and output URL
         """
-        import platform
         import math
+        import platform
         import tempfile
         import uuid
 

@@ -3,6 +3,6 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 Translations = Optional[Dict[str, Dict[str, str]]]

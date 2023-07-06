@@ -1,6 +1,5 @@
 from lxml import etree as _etree
 
-
 PARSER = _etree.XMLParser(
     resolve_entities=False,
 )

@@ -7,26 +7,24 @@
 Implementation of logging for PyWPS-4
 """
 
-import logging
-import sys
-
-from pywps import configuration
-from pywps.exceptions import NoApplicableCode
 import datetime
+import logging
 import os
+import sys
 from multiprocessing import Lock
 
 import sqlalchemy
-
-from sqlalchemy import Column, Integer, String, VARCHAR, Float, DateTime, LargeBinary
+from sqlalchemy import VARCHAR, Column, DateTime, Float, Integer, LargeBinary, String
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool, StaticPool
+
+from pywps import configuration
+from pywps.exceptions import NoApplicableCode
 
 try:
     from sqlalchemy.orm import declarative_base
 except ImportError:
     from sqlalchemy.ext.declarative import declarative_base
-
 
 from pywps.response.status import WPS_STATUS
 

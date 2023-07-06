@@ -2,42 +2,49 @@
 # Copyright 2018 Open Source Geospatial Foundation and others    #
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
-import json
-from pathlib import PurePath
-
-from pywps.inout.formats import Supported_Formats
-from pywps.inout.types import Translations
-from pywps.translations import lower_case_dict
-from io import StringIO
-import os
-from io import open
-import shutil
-import requests
-import tempfile
-import logging
-import pywps.configuration as config
-from pywps.inout.literaltypes import (LITERAL_DATA_TYPES, convert,
-                                      make_allowedvalues, is_anyvalue,
-                                      is_values_reference)
-from pywps import OGCUNIT
-from pywps.validator.mode import MODE
-from pywps.validator.base import emptyvalidator
-from pywps.validator import get_validator
-from pywps.validator.literalvalidator import (validate_value,
-                                              validate_anyvalue,
-                                              validate_allowed_values,
-                                              validate_values_reference)
-from pywps.exceptions import NoApplicableCode, InvalidParameterValue, FileSizeExceeded, \
-    FileURLNotSupported
-from urllib.parse import urlparse
 import base64
+import json
+import logging
+import os
+import shutil
+import tempfile
+import weakref
 from collections import namedtuple
 from copy import deepcopy
-from io import BytesIO
+from io import BytesIO, StringIO, open
+from pathlib import PurePath
+from urllib.parse import urlparse
+
 import humanize
+import requests
 
-import weakref
-
+import pywps.configuration as config
+from pywps import OGCUNIT
+from pywps.exceptions import (
+    FileSizeExceeded,
+    FileURLNotSupported,
+    InvalidParameterValue,
+    NoApplicableCode,
+)
+from pywps.inout.formats import Supported_Formats
+from pywps.inout.literaltypes import (
+    LITERAL_DATA_TYPES,
+    convert,
+    is_anyvalue,
+    is_values_reference,
+    make_allowedvalues,
+)
+from pywps.inout.types import Translations
+from pywps.translations import lower_case_dict
+from pywps.validator import get_validator
+from pywps.validator.base import emptyvalidator
+from pywps.validator.literalvalidator import (
+    validate_allowed_values,
+    validate_anyvalue,
+    validate_value,
+    validate_values_reference,
+)
+from pywps.validator.mode import MODE
 
 _SOURCE_TYPE = namedtuple('SOURCE_TYPE', 'MEMORY, FILE, STREAM, DATA, URL')
 SOURCE_TYPE = _SOURCE_TYPE(0, 1, 2, 3, 4)

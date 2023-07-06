@@ -1,13 +1,17 @@
 import json
 
 from werkzeug.wrappers import Request
+
 import pywps.configuration as config
-from pywps.app.basic import make_response, get_response_type, get_json_indent
-from pywps.exceptions import NoApplicableCode
-from pywps.exceptions import MissingParameterValue
-from pywps.exceptions import InvalidParameterValue
-from .basic import WPSResponse
 from pywps import __version__
+from pywps.app.basic import get_json_indent, get_response_type, make_response
+from pywps.exceptions import (
+    InvalidParameterValue,
+    MissingParameterValue,
+    NoApplicableCode,
+)
+
+from .basic import WPSResponse
 
 
 class DescribeResponse(WPSResponse):

@@ -3,13 +3,13 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-import pywps.configuration as wpsConfig
-from . import StorageAbstract
-from .implementationbuilder import StorageImplementationBuilder
-from . import STORE_TYPE
-
-import os
 import logging
+import os
+
+import pywps.configuration as wpsConfig
+
+from . import STORE_TYPE, StorageAbstract
+from .implementationbuilder import StorageImplementationBuilder
 
 LOGGER = logging.getLogger('PYWPS')
 

@@ -10,6 +10,7 @@ import logging
 from typing import Tuple
 
 from werkzeug.wrappers import Response
+
 import pywps.configuration as config
 
 LOGGER = logging.getLogger('PYWPS')

@@ -7,15 +7,15 @@
 
 
 import logging
-
-from pywps.validator.mode import MODE
-from pywps.inout.formats import FORMATS
-from lxml.etree import XMLSchema
-from pywps import xml_util as etree
-from urllib.request import urlopen
 import mimetypes
 import os
+from urllib.request import urlopen
 
+from lxml.etree import XMLSchema
+
+from pywps import xml_util as etree
+from pywps.inout.formats import FORMATS
+from pywps.validator.mode import MODE
 
 LOGGER = logging.getLogger('PYWPS')
 
@@ -257,8 +257,9 @@ def validategeojson(data_input, mode):
 
     if mode >= MODE.VERYSTRICT:
 
-        import jsonschema
         import json
+
+        import jsonschema
 
         # this code comes from
         # https://github.com/om-henners/GeoJSON_Validation/blob/master/geojsonvalidation/geojson_validation.py

@@ -3,27 +3,31 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
+import copy
 import logging
+import os
+import sys
 import tempfile
-from typing import Sequence, Optional, Dict
+import uuid
+from collections import OrderedDict, deque
+from typing import Dict, Optional, Sequence
+from urllib.parse import urlparse
 
 from werkzeug.exceptions import HTTPException
 from werkzeug.wrappers import Request
-from urllib.parse import urlparse
-from pywps.app.WPSRequest import WPSRequest
+
 import pywps.configuration as config
-from pywps.exceptions import MissingParameterValue, NoApplicableCode, InvalidParameterValue, FileURLNotSupported
-from pywps.inout.inputs import ComplexInput, LiteralInput, BoundingBoxInput
-from pywps.dblog import log_request, store_status
 from pywps import response
+from pywps.app.WPSRequest import WPSRequest
+from pywps.dblog import log_request, store_status
+from pywps.exceptions import (
+    FileURLNotSupported,
+    InvalidParameterValue,
+    MissingParameterValue,
+    NoApplicableCode,
+)
+from pywps.inout.inputs import BoundingBoxInput, ComplexInput, LiteralInput
 from pywps.response.status import WPS_STATUS
-
-from collections import deque, OrderedDict
-import os
-import sys
-import uuid
-import copy
-
 
 LOGGER = logging.getLogger("PYWPS")
 

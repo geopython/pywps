@@ -5,19 +5,19 @@
 """
 WPS Output classes
 """
-from typing import Optional, Sequence, Dict, Union
-
-from pywps import xml_util as etree
 import os
 import re
+from typing import Dict, Optional, Sequence, Union
+
+from pywps import configuration as config
+from pywps import xml_util as etree
 from pywps.app.Common import Metadata
 from pywps.exceptions import InvalidParameterValue
 from pywps.inout import basic
+from pywps.inout.formats import FORMATS, Format, Supported_Formats
 from pywps.inout.storage.file import FileStorageBuilder
 from pywps.inout.types import Translations
 from pywps.validator.mode import MODE
-from pywps import configuration as config
-from pywps.inout.formats import Format, Supported_Formats, FORMATS
 
 
 class BoundingBoxOutput(basic.BBoxOutput):
@@ -523,8 +523,9 @@ class MetaLink:
         return config.get_config_value('server', 'url')
 
     def _load_template(self):
-        from pywps.response import RelEnvironment
         from jinja2 import PackageLoader
+
+        from pywps.response import RelEnvironment
 
         template_env = RelEnvironment(
             loader=PackageLoader('pywps', 'templates'),

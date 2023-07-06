@@ -3,9 +3,10 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-from .s3 import S3StorageBuilder
-from .file import FileStorageBuilder
 import pywps.configuration as wpsConfig  # noqa
+
+from .file import FileStorageBuilder
+from .s3 import S3StorageBuilder
 
 STORAGE_MAP = {
     's3': S3StorageBuilder,

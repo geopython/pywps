@@ -8,7 +8,6 @@
 import logging
 import re
 
-
 LOGGER = logging.getLogger('PYWPS')
 
 DEFAULT_ALLOWED_CHARS = ".:!?=,;-_/"

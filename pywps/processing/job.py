@@ -3,15 +3,15 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
+import json
+import logging
 import os
 import tempfile
+
 import pywps.configuration as config
 from pywps import Process, WPSRequest
 from pywps.response.execute import ExecuteResponse
 
-import json
-
-import logging
 LOGGER = logging.getLogger("PYWPS")
 
 

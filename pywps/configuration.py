@@ -7,13 +7,13 @@
 Reads the PyWPS configuration file
 """
 
-import logging
-import sys
-import os
-import tempfile
-import pywps
-
 import configparser
+import logging
+import os
+import sys
+import tempfile
+
+import pywps
 
 __author__ = "Calin Ciociu"
 
