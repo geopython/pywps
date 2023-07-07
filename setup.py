@@ -3,12 +3,9 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+import sys
 
-from setuptools import find_packages
+from setuptools import find_packages, setup
 
 with open("VERSION.txt") as ff:
     VERSION = ff.read().strip()
