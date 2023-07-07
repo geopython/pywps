@@ -1,11 +1,12 @@
+bump2version
 coverage
 coveralls
-pytest
-pytest-cov
+docutils
 flake8
 pylint
-Sphinx
+pytest
+pytest-cov
+sphinx
+tox>=4.0
 twine
 wheel
-bump2version
-tox>=4.0

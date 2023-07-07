@@ -7,13 +7,13 @@
 Reads the PyWPS configuration file
 """
 
-import logging
-import sys
-import os
-import tempfile
-import pywps
-
 import configparser
+import logging
+import os
+import sys
+import tempfile
+
+import pywps
 
 __author__ = "Calin Ciociu"
 
@@ -34,6 +34,8 @@ def get_config_value(section, option, default_value=''):
     :type section: string
     :param option: option in the section
     :type option: string
+    :param default_value: default value for configuration
+    :type default_value: string
     :returns: value found in the configuration file
     """
 
@@ -58,6 +60,7 @@ def get_config_value(section, option, default_value=''):
 
 def load_configuration(cfgfiles=None):
     """Load PyWPS configuration from configuration files.
+
     The later configuration file in the array overwrites configuration
     from the first.
 
@@ -191,15 +194,17 @@ def _check_config():
 
 
 def _get_default_config_files_location():
-    """Get the locations of the standard configuration files. These are
+    """Get the locations of the standard configuration files.
+
+    These are:
     Unix/Linux:
         1. `/etc/pywps.cfg`
         2. `$HOME/.pywps.cfg`
     Windows:
         1. `pywps\\etc\\default.cfg`
-
     Both:
         1. `$PYWPS_CFG environment variable`
+
     :returns: configuration files
     :rtype: list of strings
     """

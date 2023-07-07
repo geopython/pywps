@@ -3,13 +3,14 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
+import logging
 import os
+
 import pywps.configuration as config
-from pywps.processing.basic import Processing
 from pywps.exceptions import SchedulerNotAvailable
+from pywps.processing.basic import Processing
 from pywps.response.status import WPS_STATUS
 
-import logging
 LOGGER = logging.getLogger("PYWPS")
 
 
@@ -19,7 +20,7 @@ class Scheduler(Processing):
     like slurm, grid-engine and torque. It uses the drmaa python library
     as client to launch jobs on a scheduler system.
 
-    See: http://drmaa-python.readthedocs.io/en/latest/index.html
+    See: https://drmaa-python.readthedocs.io/en/latest/index.html
     """
 
     def start(self):

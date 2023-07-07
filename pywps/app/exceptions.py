@@ -3,17 +3,14 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-"""
-Process exceptions raised intentionally in processes to provide information for users.
-"""
-
-import re
-
-DEFAULT_ALLOWED_CHARS = ".:!?=,;-_/"
+"""Process exceptions raised intentionally in processes to provide information for users."""
 
 import logging
+import re
 
 LOGGER = logging.getLogger('PYWPS')
+
+DEFAULT_ALLOWED_CHARS = ".:!?=,;-_/"
 
 
 def format_message(text, min_length=3, max_length=300, allowed_chars=None):
@@ -30,11 +27,13 @@ def format_message(text, min_length=3, max_length=300, allowed_chars=None):
 
 
 class ProcessError(Exception):
-    """:class:`pywps.app.exceptions.ProcessError` is an :class:`Exception`
-    you can intentionally raise in a process
-    to provide a user-friendly error message.
+    """ProcessError class.
+
+    :class:`pywps.app.exceptions.ProcessError` is an :class:`Exception`
+    you can intentionally raise in a process to provide a user-friendly error message.
+
     The error message gets formatted (3<= message length <=300) and only
-    alpha numeric characters and a few special characters are allowed.
+    alphanumeric characters and a few special characters are allowed.
     """
     default_msg = 'Sorry, process failed. Please check server error log.'
 

@@ -8,10 +8,8 @@ from pywps.inout.storage import STORE_TYPE
 from pywps.inout.basic import ComplexOutput
 
 from pywps import configuration, FORMATS
-from urllib.parse import urlparse
 
 import tempfile
-import os
 
 import unittest
 from unittest.mock import patch

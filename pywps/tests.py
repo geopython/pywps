@@ -3,23 +3,28 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 import json
+import logging
+import re
 import tempfile
 from pathlib import Path
 
 import lxml
-from pywps import xml_util as etree
 import requests
 from werkzeug.test import Client
 from werkzeug.wrappers import Response
-from pywps import __version__
-from pywps import Process
-from pywps.inout import LiteralInput, LiteralOutput, ComplexInput, ComplexOutput, BoundingBoxInput, BoundingBoxOutput
-from pywps.inout import Format
+
+from pywps import Process, __version__
+from pywps import xml_util as etree
 from pywps.app.Common import Metadata, MetadataUrl
-
-import re
-
-import logging
+from pywps.inout import (
+    BoundingBoxInput,
+    BoundingBoxOutput,
+    ComplexInput,
+    ComplexOutput,
+    Format,
+    LiteralInput,
+    LiteralOutput,
+)
 
 logging.disable(logging.CRITICAL)
 

@@ -3,15 +3,15 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
+import json
+import logging
 import os
 import tempfile
+
 import pywps.configuration as config
 from pywps import Process, WPSRequest
 from pywps.response.execute import ExecuteResponse
 
-import json
-
-import logging
 LOGGER = logging.getLogger("PYWPS")
 
 
@@ -75,7 +75,6 @@ class Job(object):
             fp.write(self.json)
             LOGGER.debug("dumped job status to {}".format(filename))
             return filename
-        return None
 
     @classmethod
     def load(cls, filename):
@@ -83,7 +82,6 @@ class Job(object):
         with open(filename, 'r') as fp:
             job = Job.from_json(json.load(fp))
             return job
-        return None
 
     def run(self):
         getattr(self.process, self.method)(self.wps_request, self.wps_response)

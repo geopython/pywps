@@ -5,19 +5,19 @@
 """
 WPS Output classes
 """
-from typing import Optional, Sequence, Dict, Union
-
-from pywps import xml_util as etree
 import os
 import re
+from typing import Dict, Optional, Sequence, Union
+
+from pywps import configuration as config
+from pywps import xml_util as etree
 from pywps.app.Common import Metadata
 from pywps.exceptions import InvalidParameterValue
 from pywps.inout import basic
+from pywps.inout.formats import FORMATS, Format, Supported_Formats
 from pywps.inout.storage.file import FileStorageBuilder
 from pywps.inout.types import Translations
 from pywps.validator.mode import MODE
-from pywps import configuration as config
-from pywps.inout.formats import Format, Supported_Formats, FORMATS
 
 
 class BoundingBoxOutput(basic.BBoxOutput):
@@ -52,8 +52,7 @@ class BoundingBoxOutput(basic.BBoxOutput):
 
     @property
     def json(self):
-        """Get JSON representation of the output
-        """
+        """Get JSON representation of the output."""
         return {
             'identifier': self.identifier,
             'title': self.title,
@@ -130,8 +129,7 @@ class ComplexOutput(basic.ComplexOutput):
 
     @property
     def json(self):
-        """Get JSON representation of the output
-        """
+        """Get JSON representation of the output."""
         data = {
             "identifier": self.identifier,
             "title": self.title,
@@ -197,8 +195,7 @@ class ComplexOutput(basic.ComplexOutput):
         return instance
 
     def _json_reference(self, data):
-        """Return Reference node
-        """
+        """Return Reference node."""
         data["type"] = "reference"
 
         # get_url will create the file and return the url for it
@@ -240,7 +237,7 @@ class ComplexOutput(basic.ComplexOutput):
                                 data["data"] = out
                             else:
                                 # Check if the data does not contain ]]> patern if is safe to use CDATA
-                                # other wise we fallback to base64 encoding.
+                                # otherwise we fall back to base64 encoding.
                                 if not re.search('\\]\\]>', out):
                                     data["data"] = '<![CDATA[{}]]>'.format(out)
                                 else:
@@ -255,8 +252,8 @@ class ComplexOutput(basic.ComplexOutput):
                         if CDATA_PATTERN.match(out):
                             data["data"] = out
                         else:
-                            # Check if the data does not contain ]]> patern if is safe to use CDATA
-                            # other wise we fallback to base64 encoding.
+                            # Check if the data does not contain ]]> pattern if is safe to use CDATA
+                            # otherwise we fall back to base64 encoding.
                             if not re.search('\\]\\]>', out):
                                 data["data"] = '<![CDATA[{}]]>'.format(out)
                             else:
@@ -272,7 +269,7 @@ class LiteralOutput(basic.LiteralOutput):
     :param str title: Title of the input
     :param pywps.inout.literaltypes.LITERAL_DATA_TYPES data_type: data type
     :param str abstract: Input abstract
-    :param str uoms: units
+    :param list uoms: units
     :param pywps.validator.mode.MODE mode: validation mode (none to strict)
     :param metadata: List of metadata advertised by this process. They
                      should be :class:`pywps.app.Common.Metadata` objects.
@@ -341,8 +338,8 @@ class MetaFile:
     def __init__(self, identity=None, description=None, fmt=None):
         """Create a `MetaFile` object.
 
-        :param str identity: human readable identity.
-        :param str description: human readable file description.
+        :param str identity: human-readable identity.
+        :param str description: human-readable file description.
         :param pywps.FORMAT fmt: file mime type.
 
         The content of each metafile is set like `ComplexOutputs`, ie
@@ -463,8 +460,8 @@ class MetaLink:
                  workdir=None, checksums=False):
         """Create a MetaLink v3.0 instance.
 
-        :param str identity: human readable identity.
-        :param str description: human readable file description.
+        :param str identity: human-readable identity.
+        :param str description: human-readable file description.
         :param str publisher: The name of the file's publisher.
         :param tuple files: Sequence of files to include in Metalink. Can also be added using `append`.
         :param str workdir: Work directory to store temporary files.
@@ -526,8 +523,9 @@ class MetaLink:
         return config.get_config_value('server', 'url')
 
     def _load_template(self):
-        from pywps.response import RelEnvironment
         from jinja2 import PackageLoader
+
+        from pywps.response import RelEnvironment
 
         template_env = RelEnvironment(
             loader=PackageLoader('pywps', 'templates'),

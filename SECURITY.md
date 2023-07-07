@@ -10,7 +10,7 @@ to **geopython-security nospam @ lists.osgeo.org** - (remove the blanks and 'nos
 The PyWPS Project Steering Committee will release patches for security vulnerabilities for the following versions:
 
 | Version | Supported          |
-| ------- | ------------------ |
-| 4.5.x | :white_check_mark: |
-| 4.4.x | :white_check_mark: |
-| < 4.4 | previous versions | :x:                |
+|---------|--------------------|
+| 4.5.x   | :white_check_mark: |
+| 4.4.x   | :white_check_mark: |
+| < 4.4   | previous versions  |

@@ -6,21 +6,24 @@
 import json
 import logging
 import time
-from werkzeug.wrappers import Request
-from pywps import get_ElementMakerForVersion
-from pywps.app.basic import get_response_type, get_json_indent, get_default_response_mimetype
-from pywps.exceptions import NoApplicableCode
-import pywps.configuration as config
-from werkzeug.wrappers import Response
-
-from pywps.inout.array_encode import ArrayEncoder
-from pywps.response.status import WPS_STATUS
-from .basic import WPSResponse
-from pywps.inout.formats import FORMATS
-from pywps.inout.outputs import ComplexOutput
-
 import urllib.parse as urlparse
 from urllib.parse import urlencode
+
+from werkzeug.wrappers import Request, Response
+
+import pywps.configuration as config
+from pywps import get_ElementMakerForVersion
+from pywps.app.basic import (
+    get_default_response_mimetype,
+    get_json_indent,
+    get_response_type,
+)
+from pywps.exceptions import NoApplicableCode
+from pywps.inout.array_encode import ArrayEncoder
+from pywps.inout.formats import FORMATS
+from pywps.response.status import WPS_STATUS
+
+from .basic import WPSResponse
 
 LOGGER = logging.getLogger("PYWPS")
 
@@ -152,10 +155,11 @@ class ExecuteResponse(WPSResponse):
 
     @property
     def json(self):
-        data = {}
-        data["language"] = self.wps_request.language
-        data["service_instance"] = self._get_serviceinstance()
-        data["process"] = self.process.json
+        data = {
+            "language": self.wps_request.language,
+            "service_instance": self._get_serviceinstance(),
+            "process": self.process.json
+        }
 
         if self.store_status_file:
             if self.process.status_location:

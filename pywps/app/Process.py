@@ -3,30 +3,31 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
+import importlib
+import json
 import logging
 import os
-from pywps.translations import lower_case_dict
+import shutil
 import sys
 import traceback
-import json
-import shutil
 
-from pywps import dblog
-from pywps.response import get_response
-from pywps.response.status import WPS_STATUS
-from pywps.response.execute import ExecuteResponse
-from pywps.app.WPSRequest import WPSRequest
-from pywps.inout.inputs import input_from_json
-from pywps.inout.outputs import output_from_json
 import pywps.configuration as config
-from pywps.exceptions import (StorageNotSupported, OperationNotSupported,
-                              ServerBusy, NoApplicableCode,
-                              InvalidParameterValue)
+from pywps import dblog
 from pywps.app.exceptions import ProcessError
-from pywps.inout.storage.builder import StorageBuilder
+from pywps.app.WPSRequest import WPSRequest
+from pywps.exceptions import (
+    InvalidParameterValue,
+    NoApplicableCode,
+    OperationNotSupported,
+    ServerBusy,
+    StorageNotSupported,
+)
 from pywps.inout.outputs import ComplexOutput
-import importlib
-
+from pywps.inout.storage.builder import StorageBuilder
+from pywps.response import get_response
+from pywps.response.execute import ExecuteResponse
+from pywps.response.status import WPS_STATUS
+from pywps.translations import lower_case_dict
 
 LOGGER = logging.getLogger("PYWPS")
 
@@ -38,7 +39,7 @@ class Process(object):
                     :class:`pywps.app.WPSRequest` argument and return a
                     :class:`pywps.app.WPSResponse` object.
     :param string identifier: Name of this process.
-    :param string title: Human readable title of process.
+    :param string title: Human-readable title of process.
     :param string abstract: Brief narrative description of the process.
     :param list keywords: Keywords that characterize a process.
     :param inputs: List of inputs accepted by this process. They
@@ -183,7 +184,9 @@ class Process(object):
         return self.status_store.url(self.status_filename)
 
     def _execute_process(self, async_, wps_request, wps_response):
-        """Uses :module:`pywps.processing` module for sending process to
+        """
+
+        Uses :module:`pywps.processing` module for sending process to
         background BUT first, check for maxprocesses configuration value
 
         :param async_: run in asynchronous mode
@@ -222,7 +225,7 @@ class Process(object):
 
         # not async
         else:
-            if running >= maxparallel and maxparallel != -1:
+            if running >= maxparallel != -1:
                 raise ServerBusy('Maximum number of parallel running processes reached. Please try later.')
             wps_response._update_status(WPS_STATUS.ACCEPTED, "PyWPS Request accepted", 0)
             wps_response = self._run_process(wps_request, wps_response)
@@ -357,27 +360,25 @@ class Process(object):
             outpt.workdir = workdir
 
     def _set_grass(self, wps_request):
-        """Handle given grass_location parameter of the constructor
+        """Handle given grass_location parameter of the constructor.
 
-        location is either directory name, 'epsg:1234' form or a georeferenced
-        file
+        location is either directory name, 'epsg:1234' form or a geo-referenced file.
 
-        in the first case, new temporary mapset within the location will be
-        created
+        In the first case, new temporary mapset within the location will be created.
 
-        in the second case, location will be created in self.workdir
+        In the second case, location will be created in self.workdir.
 
-        the mapset should be deleted automatically using self.clean() method
+        The mapset should be deleted automatically using self.clean() method
         """
         if self.grass_location:
 
             import random
             import string
+
             from grass.script import core as grass
             from grass.script import setup as gsetup
 
-            # HOME needs to be set - and that is usually not the case for httpd
-            # server
+            # HOME needs to be set - and that is usually not the case for httpd server
             os.environ['HOME'] = self.workdir
 
             # GISRC envvariable needs to be set
@@ -443,8 +444,10 @@ class Process(object):
                 grass.run_command('g.gisenv', set="MAPSET=%s" % mapset_name)
 
             else:
+                # FIXME: This will fail as location is not set.
                 raise NoApplicableCode('Location does exists or does not seem '
-                                       'to be in "EPSG:XXXX" form nor is it existing directory: {}'.format(location))
+                                       'to be in "EPSG:XXXX" form nor is it existing directory: '
+                                       '{}'.format(location))
 
             # set _grass_mapset attribute - will be deleted once handler ends
             self._grass_mapset = mapset_name

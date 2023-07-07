@@ -1,14 +1,18 @@
 from abc import abstractmethod
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from pywps import WPSRequest
 
+import os
+
+from jinja2 import Environment, PackageLoader
+
 from pywps.dblog import store_status
+from pywps.translations import get_translation
+
 from . import RelEnvironment
 from .status import WPS_STATUS
-from pywps.translations import get_translation
-from jinja2 import Environment, PackageLoader
-import os
 
 
 class WPSResponse(object):
@@ -35,9 +39,9 @@ class WPSResponse(object):
         Update status report of currently running process instance
 
         :param str message: Message you need to share with the client
-        :param int status_percentage: Percent done (number betwen <0-100>)
+        :param int status_percentage: Percent done (number between <0-100>)
         :param pywps.response.status.WPS_STATUS status: process status - user should usually
-            ommit this parameter
+            omit this parameter
         """
         self.message = message
         self.status = status

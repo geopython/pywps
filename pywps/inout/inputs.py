@@ -4,15 +4,15 @@
 ##################################################################
 import base64
 import re
-from pywps import xml_util as etree
+from copy import deepcopy
 
+from pywps import xml_util as etree
 from pywps.app.Common import Metadata
 from pywps.exceptions import InvalidParameterValue
-from pywps.inout.formats import Format
 from pywps.inout import basic
-from copy import deepcopy
+from pywps.inout.formats import Format
+from pywps.inout.literaltypes import AllowedValue, AnyValue, NoValue, ValuesReference
 from pywps.validator.mode import MODE
-from pywps.inout.literaltypes import AnyValue, NoValue, ValuesReference, AllowedValue
 
 CDATA_PATTERN = re.compile(r'<!\[CDATA\[(.*?)\]\]>')
 

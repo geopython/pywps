@@ -40,7 +40,7 @@ def get_translation(obj, attribute, language):
 def lower_case_dict(translations=None):
     """Returns a new dict, with its keys converted to lowercase.
 
-    :param dict[str, Any] translations: A dictionnary to be converted.
+    :param dict[str, Any] translations: A dictionary to be converted.
     """
     if translations is None:
         return

@@ -3,26 +3,25 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-"""Validator classes are used for ComplexInputs, to validate the content
-"""
+"""Validator classes are used for ComplexInputs, to validate the content"""
 
 
 import logging
-
-from pywps.validator.mode import MODE
-from pywps.inout.formats import FORMATS
-from lxml.etree import XMLSchema
-from pywps import xml_util as etree
-from urllib.request import urlopen
 import mimetypes
 import os
+from urllib.request import urlopen
 
+from lxml.etree import XMLSchema
+
+from pywps import xml_util as etree
+from pywps.inout.formats import FORMATS
+from pywps.validator.mode import MODE
 
 LOGGER = logging.getLogger('PYWPS')
 
 
 def validategml(data_input, mode):
-    """GML validation function
+    """GML validation function.
 
     :param data_input: :class:`ComplexInput`
     :param pywps.validator.mode.MODE mode:
@@ -76,7 +75,7 @@ def validategml(data_input, mode):
 
 
 def validategpx(data_input, mode):
-    """GPX validation function
+    """GPX validation function.
 
     :param data_input: :class:`ComplexInput`
     :param pywps.validator.mode.MODE mode:
@@ -130,7 +129,7 @@ def validategpx(data_input, mode):
 
 
 def validatexml(data_input, mode):
-    """XML validation function
+    """XML validation function.
 
     :param data_input: :class:`ComplexInput`
     :param pywps.validator.mode.MODE mode:
@@ -176,7 +175,7 @@ def validatexml(data_input, mode):
 
 
 def validatejson(data_input, mode):
-    """JSON validation function
+    """JSON validation function.
 
     :param data_input: :class:`ComplexInput`
     :param pywps.validator.mode.MODE mode:
@@ -221,16 +220,16 @@ def validatejson(data_input, mode):
 def validategeojson(data_input, mode):
     """GeoJSON validation example
 
-    >>> import StringIO
+    >>> from io import StringIO
     >>> class FakeInput(object):
     ...     json = open('point.geojson','w')
     ...     json.write('''{"type":"Feature", "properties":{}, "geometry":{"type":"Point", "coordinates":[8.5781228542328, 22.87500500679]}, "crs":{"type":"name", "properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}}}''')  # noqa
     ...     json.close()
     ...     file = 'point.geojson'
-    >>> class fake_data_format(object):
+    >>> class FakeDataFormat(object):
     ...     mimetype = 'application/geojson'
     >>> fake_input = FakeInput()
-    >>> fake_input.data_format = fake_data_format()
+    >>> fake_input.data_format = FakeDataFormat()
     >>> validategeojson(fake_input, MODE.SIMPLE)
     True
     """
@@ -258,8 +257,9 @@ def validategeojson(data_input, mode):
 
     if mode >= MODE.VERYSTRICT:
 
-        import jsonschema
         import json
+
+        import jsonschema
 
         # this code comes from
         # https://github.com/om-henners/GeoJSON_Validation/blob/master/geojsonvalidation/geojson_validation.py
@@ -299,9 +299,7 @@ def validategeojson(data_input, mode):
 
 
 def validateshapefile(data_input, mode):
-    """ESRI Shapefile validation example
-
-    """
+    """ESRI Shapefile validation example."""
 
     LOGGER.info('validating Shapefile; Mode: {}'.format(mode))
     passed = False
@@ -328,8 +326,7 @@ def validateshapefile(data_input, mode):
 
 
 def validategeotiff(data_input, mode):
-    """GeoTIFF validation example
-    """
+    """GeoTIFF validation example."""
 
     LOGGER.info('Validating Shapefile; Mode: {}'.format(mode))
     passed = False
@@ -347,6 +344,7 @@ def validategeotiff(data_input, mode):
 
         try:
             from geotiff import GeoTiff
+
             data_source = GeoTiff(data_input.file)
             passed = (data_source.crs_code > 0)
         except (ModuleNotFoundError, ImportError):
@@ -356,8 +354,7 @@ def validategeotiff(data_input, mode):
 
 
 def validatenetcdf(data_input, mode):
-    """netCDF validation.
-    """
+    """NetCDF validation."""
 
     LOGGER.info('Validating netCDF; Mode: {}'.format(mode))
     passed = False
@@ -388,8 +385,7 @@ def validatenetcdf(data_input, mode):
 
 
 def validatedods(data_input, mode):
-    """OPeNDAP validation.
-        """
+    """OPeNDAP validation."""
 
     LOGGER.info('Validating OPeNDAP; Mode: {}'.format(mode))
     passed = False
@@ -419,8 +415,7 @@ def validatedods(data_input, mode):
 
 
 def _get_schemas_home():
-    """Get path to schemas directory
-    """
+    """Get path to schemas directory."""
     schema_dir = os.path.join(
         os.path.abspath(
             os.path.dirname(__file__)
