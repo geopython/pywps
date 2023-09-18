@@ -12,28 +12,28 @@ import tempfile
 import configparser
 import pywps.configuration as config
 
-from tests import test_capabilities
-from tests import test_configuration
-from tests import test_describe
-from tests import test_execute
-from tests import test_exceptions
-from tests import test_inout
-from tests import test_literaltypes
-from tests import validator
-from tests import test_ows
-from tests import test_formats
-from tests import test_dblog
-from tests import test_wpsrequest
-from tests import test_service
-from tests import test_process
-from tests import test_processing
-from tests import test_assync
-from tests import test_grass_location
-from tests import test_storage
-from tests import test_filestorage
-from tests import test_s3storage
-from tests.validator import test_complexvalidators
-from tests.validator import test_literalvalidators
+import test_capabilities
+import test_configuration
+import test_describe
+import test_execute
+import test_exceptions
+import test_inout
+import test_literaltypes
+import validator
+import test_ows
+import test_formats
+import test_dblog
+import test_wpsrequest
+import test_service
+import test_process
+import test_processing
+import test_assync
+import test_grass_location
+import test_storage
+import test_filestorage
+import test_s3storage
+from validator import test_complexvalidators
+from validator import test_literalvalidators
 
 
 def find_grass():

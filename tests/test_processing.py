@@ -18,7 +18,7 @@ from pywps.processing.basic import MultiProcessing
 from pywps.app import WPSRequest
 from pywps.response.execute import ExecuteResponse
 
-from .processes import Greeter, InOut, BBox
+from processes import Greeter, InOut, BBox
 
 
 class GreeterProcessingTest(unittest.TestCase):

@@ -201,7 +201,7 @@ def create_mimetype_process():
 
 
 def create_metalink_process():
-    from .processes.metalinkprocess import MultipleOutputs
+    from processes.metalinkprocess import MultipleOutputs
     return MultipleOutputs()
 
 
