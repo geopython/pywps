@@ -29,6 +29,7 @@ except ImportError:
 from pywps.response.status import WPS_STATUS
 
 LOGGER = logging.getLogger('PYWPS')
+_SESSION_MAKER_DATABASE = None
 _SESSION_MAKER = None
 
 _tableprefix = configuration.get_config_value('logging', 'prefix')
@@ -200,13 +201,19 @@ def get_session():
     """Get Connection for database
     """
     LOGGER.debug('Initializing database connection')
-    global _SESSION_MAKER
+    global _SESSION_MAKER, _SESSION_MAKER_DATABASE
+
+    database = configuration.get_config_value('logging', 'database')
+
+    # Check if database has changed, and clear session maker if needed
+    if _SESSION_MAKER_DATABASE != database:
+        _SESSION_MAKER_DATABASE = None
+        _SESSION_MAKER = None
 
     if _SESSION_MAKER:
         return _SESSION_MAKER()
 
     with lock:
-        database = configuration.get_config_value('logging', 'database')
         echo = True
         level = configuration.get_config_value('logging', 'level')
         level_name = logging.getLevelName(level)
@@ -232,6 +239,7 @@ def get_session():
         ProcessInstance.metadata.create_all(engine)
         RequestInstance.metadata.create_all(engine)
 
+        _SESSION_MAKER_DATABASE = database
         _SESSION_MAKER = Session
 
     return _SESSION_MAKER()
