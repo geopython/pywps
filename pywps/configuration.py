@@ -115,33 +115,19 @@ def load_configuration(cfgfiles=None):
     outputpath = tempfile.gettempdir()
     CONFIG.set('server', 'outputurl', file_uri(outputpath))
     CONFIG.set('server', 'outputpath', outputpath)
-    # list of allowed input paths (file url input) seperated by ':'
     CONFIG.set('server', 'allowedinputpaths', '')
     CONFIG.set('server', 'workdir', tempfile.gettempdir())
     CONFIG.set('server', 'parallelprocesses', '2')
-    # If this flag is enabled it will set the HOME environment
-    # for each process to its current workdir (a temp folder).
     CONFIG.set('server', 'sethomedir', 'false')
-    # If this flag is enabled PyWPS will remove the process temporary workdir
-    # after process has finished.
     CONFIG.set('server', 'cleantempdir', 'true')
     CONFIG.set('server', 'storagetype', 'file')
-    # File storage outputs can be copied, moved or linked
-    # from the workdir to the output folder.
-    # Allowed functions: "copy", "move", "link" (default "copy")
     CONFIG.set('server', 'storage_copy_function', 'copy')
-
-    # handles the default mimetype for requests.
-    # available options: "text/xml", "application/json"
     CONFIG.set("server", "default_mimetype", "text/xml")
-
-    # default json indentation for responses.
     CONFIG.set("server", "json_indent", "2")
 
     CONFIG.add_section('processing')
     CONFIG.set('processing', 'mode', 'default')
     CONFIG.set('processing', 'path', os.path.dirname(os.path.realpath(sys.argv[0])))
-    # https://github.com/natefoo/slurm-drmaa
     CONFIG.set('processing', 'drmaa_native_specification', '')
 
     CONFIG.add_section('logging')
