@@ -88,21 +88,16 @@ def get_config_value(section, option, default_value=''):
     return value
 
 
-def load_configuration(cfgfiles=None):
-    """Load PyWPS configuration from configuration files.
-
-    The later configuration file in the array overwrites configuration
-    from the first.
-
-    :param cfgfiles: list of configuration files
-    """
+def load_hardcoded_configuration():
+    """Load PyWPS hardcoded configuration."""
 
     global CONFIG
 
-    LOGGER.info('loading configuration')
+    LOGGER.debug('loading harcoded configuration')
     CONFIG = configparser.ConfigParser(os.environ, interpolation=EnvInterpolation())
 
-    LOGGER.debug('setting default values')
+    tmpdir = tempfile.gettempdir()
+
     CONFIG.add_section('server')
     CONFIG.set('server', 'encoding', 'utf-8')
     CONFIG.set('server', 'language', 'en-US')
@@ -110,13 +105,12 @@ def load_configuration(cfgfiles=None):
     CONFIG.set('server', 'maxprocesses', '30')
     CONFIG.set('server', 'maxsingleinputsize', '1mb')
     CONFIG.set('server', 'maxrequestsize', '3mb')
-    CONFIG.set('server', 'temp_path', tempfile.gettempdir())
+    CONFIG.set('server', 'temp_path', tmpdir)
     CONFIG.set('server', 'processes_path', '')
-    outputpath = tempfile.gettempdir()
-    CONFIG.set('server', 'outputurl', file_uri(outputpath))
-    CONFIG.set('server', 'outputpath', outputpath)
+    CONFIG.set('server', 'outputurl', file_uri(tmpdir))
+    CONFIG.set('server', 'outputpath', tmpdir)
     CONFIG.set('server', 'allowedinputpaths', '')
-    CONFIG.set('server', 'workdir', tempfile.gettempdir())
+    CONFIG.set('server', 'workdir', tmpdir)
     CONFIG.set('server', 'parallelprocesses', '2')
     CONFIG.set('server', 'sethomedir', 'false')
     CONFIG.set('server', 'cleantempdir', 'true')
@@ -170,6 +164,20 @@ def load_configuration(cfgfiles=None):
     CONFIG.set('s3', 'public', 'false')
     CONFIG.set('s3', 'encrypt', 'false')
     CONFIG.set('s3', 'region', '')
+
+
+def load_configuration(cfgfiles=None):
+    """Load PyWPS configuration from configuration files.
+
+    The later configuration file in the array overwrites configuration
+    from the first.
+
+    :param cfgfiles: list of configuration files
+    """
+
+    global CONFIG
+
+    load_hardcoded_configuration()
 
     if not cfgfiles:
         cfgfiles = _get_default_config_files_location()
