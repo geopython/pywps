@@ -122,6 +122,8 @@ class ConvertorTest(TestBase):
             convert_anyURI("ftp:///deep/path/;params?query#fragment")
 
 def load_tests(loader=None, tests=None, pattern=None):
+    import unittest
+
     if not loader:
         loader = unittest.TestLoader()
     suite_list = [

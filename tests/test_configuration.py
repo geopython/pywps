@@ -41,6 +41,8 @@ class TestEnvInterpolation(TestBase):
 
 def load_tests(loader=None, tests=None, pattern=None):
     """Load the tests and return the test suite for this file."""
+    import unittest
+
     if not loader:
         loader = unittest.TestLoader()
     suite_list = [

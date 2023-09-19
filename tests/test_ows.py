@@ -143,6 +143,8 @@ class ExecuteTests(TestBase):
 
 
 def load_tests(loader=None, tests=None, pattern=None):
+    import unittest
+
     if not loader:
         loader = unittest.TestLoader()
     suite_list = [
