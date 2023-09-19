@@ -6,7 +6,7 @@
 """Unit tests for complex validator
 """
 
-import unittest
+from basic import TestBase
 import pytest
 from pywps.validator.mode import MODE
 from pywps.validator.complexvalidator import (
@@ -35,51 +35,44 @@ else:
     WITH_NC4 = True
 
 
-def get_input(name, schema, mime_type):
-
-    class FakeFormat(object):
-        mimetype = 'text/plain'
-        schema = None
-        units = None
-
-        def validate(self, data):
-            return True
-
-    class FakeInput(object):
-        tempdir = tempfile.mkdtemp()
-        file = os.path.join(
-            os.path.abspath(os.path.dirname(__file__)),
-            '..', 'data', name)
-        format = FakeFormat()
-
-    class data_format(object):
-        file = os.path.join(
-            os.path.abspath(os.path.dirname(__file__)),
-            '..', 'data', str(schema))
-
-    fake_input = FakeInput()
-    fake_input.stream = open(fake_input.file)
-    fake_input.data_format = data_format()
-    if schema:
-        fake_input.data_format.schema = 'file://' + fake_input.data_format.file
-    fake_input.data_format.mime_type = mime_type
-
-    return fake_input
-
-
-class ValidateTest(unittest.TestCase):
+class ValidateTest(TestBase):
     """Complex validator test cases"""
 
-    def setUp(self):
-        pass
+    def get_input(self, name, schema, mime_type):
 
-    def tearDown(self):
-        pass
+        class FakeFormat(object):
+            mimetype = 'text/plain'
+            schema = None
+            units = None
+
+            def validate(self, data):
+                return True
+
+        class FakeInput(object):
+            tempdir = tempfile.mkdtemp(dir=self.tmpdir.name)
+            file = os.path.join(
+                os.path.abspath(os.path.dirname(__file__)),
+                '..', 'data', name)
+            format = FakeFormat()
+
+        class data_format(object):
+            file = os.path.join(
+                os.path.abspath(os.path.dirname(__file__)),
+                '..', 'data', str(schema))
+
+        fake_input = FakeInput()
+        fake_input.stream = open(fake_input.file)
+        fake_input.data_format = data_format()
+        if schema:
+            fake_input.data_format.schema = 'file://' + fake_input.data_format.file
+        fake_input.data_format.mime_type = mime_type
+
+        return fake_input
 
     def test_gml_validator(self):
         """Test GML validator
         """
-        gml_input = get_input('gml/point.gml', 'point.xsd', FORMATS.GML.mime_type)
+        gml_input = self.get_input('gml/point.gml', 'point.xsd', FORMATS.GML.mime_type)
         self.assertTrue(validategml(gml_input, MODE.NONE), 'NONE validation')
         self.assertTrue(validategml(gml_input, MODE.SIMPLE), 'SIMPLE validation')
         self.assertTrue(validategml(gml_input, MODE.STRICT), 'STRICT validation')
@@ -89,7 +82,7 @@ class ValidateTest(unittest.TestCase):
     def test_json_validator(self):
         """Test GeoJSON validator
         """
-        json_input = get_input('json/point.geojson', None, FORMATS.JSON.mime_type)
+        json_input = self.get_input('json/point.geojson', None, FORMATS.JSON.mime_type)
         self.assertTrue(validatejson(json_input, MODE.NONE), 'NONE validation')
         self.assertTrue(validatejson(json_input, MODE.SIMPLE), 'SIMPLE validation')
         self.assertTrue(validatejson(json_input, MODE.STRICT), 'STRICT validation')
@@ -98,7 +91,7 @@ class ValidateTest(unittest.TestCase):
     def test_geojson_validator(self):
         """Test GeoJSON validator
         """
-        geojson_input = get_input('json/point.geojson', 'json/schema/geojson.json',
+        geojson_input = self.get_input('json/point.geojson', 'json/schema/geojson.json',
                                   FORMATS.GEOJSON.mime_type)
         self.assertTrue(validategeojson(geojson_input, MODE.NONE), 'NONE validation')
         self.assertTrue(validategeojson(geojson_input, MODE.SIMPLE), 'SIMPLE validation')
@@ -109,7 +102,7 @@ class ValidateTest(unittest.TestCase):
     def test_shapefile_validator(self):
         """Test ESRI Shapefile validator
         """
-        shapefile_input = get_input('shp/point.shp.zip', None,
+        shapefile_input = self.get_input('shp/point.shp.zip', None,
                 FORMATS.SHP.mime_type)
         self.assertTrue(validateshapefile(shapefile_input, MODE.NONE), 'NONE validation')
         self.assertTrue(validateshapefile(shapefile_input, MODE.SIMPLE), 'SIMPLE validation')
@@ -119,7 +112,7 @@ class ValidateTest(unittest.TestCase):
     def test_geotiff_validator(self):
         """Test GeoTIFF validator
         """
-        geotiff_input = get_input('geotiff/dem.tiff', None,
+        geotiff_input = self.get_input('geotiff/dem.tiff', None,
                                   FORMATS.GEOTIFF.mime_type)
         self.assertTrue(validategeotiff(geotiff_input, MODE.NONE), 'NONE validation')
         self.assertTrue(validategeotiff(geotiff_input, MODE.SIMPLE), 'SIMPLE validation')
@@ -129,7 +122,7 @@ class ValidateTest(unittest.TestCase):
     def test_netcdf_validator(self):
         """Test netCDF validator
         """
-        netcdf_input = get_input('netcdf/time.nc', None, FORMATS.NETCDF.mime_type)
+        netcdf_input = self.get_input('netcdf/time.nc', None, FORMATS.NETCDF.mime_type)
         self.assertTrue(validatenetcdf(netcdf_input, MODE.NONE), 'NONE validation')
         self.assertTrue(validatenetcdf(netcdf_input, MODE.SIMPLE), 'SIMPLE validation')
         netcdf_input.stream.close()
@@ -161,7 +154,7 @@ class ValidateTest(unittest.TestCase):
                                      mode=MODE.SIMPLE)
 
     def test_fail_validator(self):
-        fake_input = get_input('point.xsd', 'point.xsd', FORMATS.SHP.mime_type)
+        fake_input = self.get_input('point.xsd', 'point.xsd', FORMATS.SHP.mime_type)
         self.assertFalse(validategml(fake_input, MODE.SIMPLE), 'SIMPLE validation invalid')
         fake_input.stream.close()
 

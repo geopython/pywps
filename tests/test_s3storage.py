@@ -3,29 +3,25 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
+from basic import TestBase
 from pywps.inout.storage.s3 import S3StorageBuilder, S3Storage
 from pywps.inout.storage import STORE_TYPE
 from pywps.inout.basic import ComplexOutput
 
 from pywps import configuration, FORMATS
 
-import tempfile
-
-import unittest
 from unittest.mock import patch
 
 
-class S3StorageTests(unittest.TestCase):
-
-    def setUp(self):
-        self.tmp_dir = tempfile.mkdtemp()
+class S3StorageTests(TestBase):
 
     @patch('pywps.inout.storage.s3.S3Storage.uploadData')
     def test_store(self, uploadData):
         configuration.CONFIG.set('s3', 'bucket', 'notrealbucket')
         configuration.CONFIG.set('s3', 'prefix', 'wps')
         storage = S3StorageBuilder().build()
-        output = ComplexOutput('testme', 'Test', supported_formats=[FORMATS.TEXT], workdir=self.tmp_dir)
+        output = ComplexOutput('testme', 'Test', supported_formats=[FORMATS.TEXT],
+                               workdir=configuration.get_config_value('server', 'workdir'))
         output.data = "Hello World!"
 
         store_type, filename, url = storage.store(output)

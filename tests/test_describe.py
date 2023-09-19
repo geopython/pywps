@@ -3,7 +3,8 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-import unittest
+from basic import TestBase
+
 import pytest
 from collections import namedtuple
 from pywps import Process, Service, LiteralInput, ComplexInput, BoundingBoxInput
@@ -76,9 +77,11 @@ def get_describe_result(resp):
     return result
 
 
-class DescribeProcessTest(unittest.TestCase):
+class DescribeProcessTest(TestBase):
 
     def setUp(self):
+        super().setUp()
+
         def hello(request):
             pass
 
@@ -139,9 +142,11 @@ class DescribeProcessTest(unittest.TestCase):
         assert [pr.identifier for pr in result] == ['hello', 'ping']
 
 
-class DescribeProcessTranslationsTest(unittest.TestCase):
+class DescribeProcessTranslationsTest(TestBase):
 
     def setUp(self):
+        super().setUp()
+
         configuration.get_config_value('server', 'language')
         configuration.CONFIG.set('server', 'language', 'en-US,fr-CA')
         self.client = client_for(
@@ -197,9 +202,6 @@ class DescribeProcessTranslationsTest(unittest.TestCase):
             )
         )
 
-    def tearDown(self):
-        configuration.CONFIG.set('server', 'language', 'en-US')
-
     def test_get_describe_translations(self):
         resp = self.client.get('?Request=DescribeProcess&service=wps&version=1.0.0&identifier=all&language=fr-CA')
 
@@ -223,7 +225,7 @@ class DescribeProcessTranslationsTest(unittest.TestCase):
         assert output_abstracts == ["Description", "Description"]
 
 
-class DescribeProcessInputTest(unittest.TestCase):
+class DescribeProcessInputTest(TestBase):
 
     def describe_process(self, process):
         client = client_for(Service(processes=[process]))
@@ -271,7 +273,7 @@ class DescribeProcessInputTest(unittest.TestCase):
         assert result.inputs == [('the_number', 'literal', 'integer', "0")]
 
 
-class InputDescriptionTest(unittest.TestCase):
+class InputDescriptionTest(TestBase):
 
     def test_literal_integer_input(self):
         literal = LiteralInput('foo', 'Literal foo', data_type='positiveInteger',
@@ -334,7 +336,7 @@ class InputDescriptionTest(unittest.TestCase):
         assert data["dimensions"] == 2
 
 
-class OutputDescriptionTest(unittest.TestCase):
+class OutputDescriptionTest(TestBase):
 
     @pytest.mark.skip(reason="not working")
     def test_literal_output(self):

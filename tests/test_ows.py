@@ -6,9 +6,9 @@
 __author__ = "Luis de Sousa"
 __date__ = "10-03-2015"
 
+from basic import TestBase
 import os
 import tempfile
-import unittest
 from pywps import Service, Process, ComplexInput, ComplexOutput, Format, FORMATS, get_format
 from pywps.exceptions import NoApplicableCode
 from pywps import get_ElementMakerForVersion
@@ -21,76 +21,75 @@ wcsResource = 'https://demo.mapserver.org/cgi-bin/wcs?service=WCS&version=1.0.0&
 WPS, OWS = get_ElementMakerForVersion("1.0.0")
 
 
-def create_feature():
+class ExecuteTests(TestBase):
 
-    def feature(request, response):
-        input = request.inputs['input'][0].file
-        response.outputs['output'].data_format = FORMATS.GML
-        response.outputs['output'].file = input
-        return response
+    def create_feature(self):
 
-    return Process(handler=feature,
-                   identifier='feature',
-                   title='Process Feature',
-                   inputs=[ComplexInput(
-                       'input',
-                       title='Input',
-                       supported_formats=[get_format('GML')])],
-                   outputs=[ComplexOutput(
-                       'output',
-                       title='Output',
-                       supported_formats=[get_format('GML')])])
+        def feature(request, response):
+            input = request.inputs['input'][0].file
+            response.outputs['output'].data_format = FORMATS.GML
+            response.outputs['output'].file = input
+            return response
 
+        return Process(handler=feature,
+                       identifier='feature',
+                       title='Process Feature',
+                       inputs=[ComplexInput(
+                           'input',
+                           title='Input',
+                           supported_formats=[get_format('GML')])],
+                       outputs=[ComplexOutput(
+                           'output',
+                           title='Output',
+                           supported_formats=[get_format('GML')])])
 
-def create_sum_one():
+    def create_sum_one(self):
 
-    def sum_one(request, response):
-        input = request.inputs['input'][0].file
-        # What do we need to assert a Complex input?
-        # assert type(input) is str
+        def sum_one(request, response):
+            input = request.inputs['input'][0].file
+            # What do we need to assert a Complex input?
+            # assert type(input) is str
 
-        import grass.script as grass
+            import grass.script as grass
 
-        # Import the raster and set the region
-        if grass.run_command("r.in.gdal", flags="o", out="input",
-                             input=input, quiet=True) != 0:
-            raise NoApplicableCode("Could not import cost map. "
-                                   "Please check the WCS service.")
+            # Import the raster and set the region
+            if grass.run_command("r.in.gdal", flags="o", out="input",
+                                 input=input, quiet=True) != 0:
+                raise NoApplicableCode("Could not import cost map. "
+                                       "Please check the WCS service.")
 
-        if grass.run_command("g.region", flags="a", rast="input") != 0:
-            raise NoApplicableCode("Could not set GRASS region.")
+            if grass.run_command("g.region", flags="a", rast="input") != 0:
+                raise NoApplicableCode("Could not set GRASS region.")
 
-        # Add 1
-        if grass.mapcalc("$output = $input + $value", output="output",
-                         input="input", value=1.0, quiet=True):
-            raise NoApplicableCode("Could not use GRASS map calculator.")
+            # Add 1
+            if grass.mapcalc("$output = $input + $value", output="output",
+                             input="input", value=1.0, quiet=True):
+                raise NoApplicableCode("Could not use GRASS map calculator.")
 
-        # Export the result
-        _, out = tempfile.mkstemp()
-        os.environ['GRASS_VERBOSE'] = '-1'
-        if grass.run_command("r.out.gdal", flags="f", input="output",
-                             type="UInt16", output=out, overwrite=True) != 0:
-            raise NoApplicableCode("Could not export result from GRASS.")
-        del os.environ['GRASS_VERBOSE']
+            # Export the result
+            _, out = tempfile.mkstemp(dir=self.tmpdir.name)
+            os.environ['GRASS_VERBOSE'] = '-1'
+            if grass.run_command("r.out.gdal", flags="f", input="output",
+                                 type="UInt16", output=out,
+                                 overwrite=True) != 0:
+                raise NoApplicableCode("Could not export result from GRASS.")
+            del os.environ['GRASS_VERBOSE']
 
-        response.outputs['output'].file = out
-        return response
+            response.outputs['output'].file = out
+            return response
 
-    return Process(handler=sum_one,
-                   identifier='sum_one',
-                   title='Process Sum One',
-                   inputs=[ComplexInput(
-                       'input',
-                       title='Input',
-                       supported_formats=[Format('image/img')])],
-                   outputs=[ComplexOutput(
-                       'output',
-                       title='Output',
-                       supported_formats=[get_format('GEOTIFF')])],
-                   grass_location='epsg:4326')
-
-
-class ExecuteTests(unittest.TestCase):
+        return Process(handler=sum_one,
+                       identifier='sum_one',
+                       title='Process Sum One',
+                       inputs=[ComplexInput(
+                           'input',
+                           title='Input',
+                           supported_formats=[Format('image/img')])],
+                       outputs=[ComplexOutput(
+                           'output',
+                           title='Output',
+                           supported_formats=[get_format('GEOTIFF')])],
+                       grass_location='epsg:4326')
 
     def test_wfs(self):
         if not service_ok('https://demo.mapserver.org'):
@@ -124,7 +123,7 @@ class ExecuteTests(unittest.TestCase):
         if not service_ok('https://demo.mapserver.org'):
             self.skipTest("mapserver is unreachable")
 
-        client = client_for(Service(processes=[create_sum_one()]))
+        client = client_for(Service(processes=[self.create_sum_one()]))
         request_doc = WPS.Execute(
             OWS.Identifier('sum_one'),
             WPS.DataInputs(

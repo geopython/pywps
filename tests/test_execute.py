@@ -3,11 +3,11 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-import unittest
+from basic import TestBase
 import pytest
 from pywps import xml_util as etree
 import json
-import tempfile
+
 import os.path
 from pywps import Service, Process, LiteralOutput, LiteralInput,\
     BoundingBoxOutput, BoundingBoxInput, Format, ComplexInput, ComplexOutput, FORMATS
@@ -232,7 +232,7 @@ def get_output(doc):
     return output
 
 
-class ExecuteTest(unittest.TestCase):
+class ExecuteTest(TestBase):
     """Test for Exeucte request KVP request"""
 
     @pytest.mark.xfail(reason="test.opendap.org is offline")
@@ -563,14 +563,12 @@ class ExecuteTest(unittest.TestCase):
         assert el.attrib['dataType'] == 'string'
 
 
-class AllowedInputReferenceExecuteTest(unittest.TestCase):
+class AllowedInputReferenceExecuteTest(TestBase):
 
     def setUp(self):
+        super().setUp()
         self.allowedinputpaths = configuration.get_config_value('server', 'allowedinputpaths')
         configuration.CONFIG.set('server', 'allowedinputpaths', DATA_DIR)
-
-    def tearDown(self):
-        configuration.CONFIG.set('server', 'allowedinputpaths', self.allowedinputpaths)
 
     def test_geojson_input_reference_rest(self):
         geojson = os.path.join(DATA_DIR, 'json', 'point.geojson')
@@ -596,14 +594,12 @@ class AllowedInputReferenceExecuteTest(unittest.TestCase):
         assert_response_success_json(resp, result)
 
 
-class ExecuteTranslationsTest(unittest.TestCase):
+class ExecuteTranslationsTest(TestBase):
 
     def setUp(self):
+        super().setUp()
         configuration.get_config_value('server', 'language')
         configuration.CONFIG.set('server', 'language', 'en-US,fr-CA')
-
-    def tearDown(self):
-        configuration.CONFIG.set('server', 'language', 'en-US')
 
     def test_translations(self):
         client = client_for(Service(processes=[create_translated_greeter()]))
@@ -649,7 +645,7 @@ class ExecuteTranslationsTest(unittest.TestCase):
         assert output_abstract == ["Description"]
 
 
-class ExecuteXmlParserTest(unittest.TestCase):
+class ExecuteXmlParserTest(TestBase):
     """Tests for Execute request XML Parser
     """
 
@@ -796,7 +792,7 @@ class ExecuteXmlParserTest(unittest.TestCase):
         from pywps.inout.basic import ComplexInput
 
         h = ComplexInput('ci')
-        h.workdir = workdir = tempfile.mkdtemp()
+        h.workdir = workdir = configuration.get_config_value('server', 'workdir')
 
         self.assertEqual(
             h._build_file_name('http://path/to/test.txt'),

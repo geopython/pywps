@@ -6,18 +6,18 @@
 """Unit tests for dblog
 """
 
-import unittest
+from basic import TestBase
 
 from pywps import configuration
 from pywps.dblog import get_session
 from pywps.dblog import ProcessInstance
 
 
-class DBLogTest(unittest.TestCase):
+class DBLogTest(TestBase):
     """DBGLog test cases"""
 
     def setUp(self):
-
+        super().setUp()
         self.database = configuration.get_config_value('logging', 'database')
 
     def test_0_dblog(self):

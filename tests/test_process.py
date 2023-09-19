@@ -6,7 +6,7 @@
 """Test process
 """
 
-import unittest
+from basic import TestBase
 
 from pywps import Process
 from pywps.app.Common import Metadata
@@ -38,9 +38,10 @@ class DoNothing(Process):
         pass
 
 
-class ProcessTestCase(unittest.TestCase):
+class ProcessTestCase(TestBase):
 
     def setUp(self):
+        super().setUp()
         self.process = DoNothing()
 
     def test_get_input_title(self):

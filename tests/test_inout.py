@@ -7,11 +7,11 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
+from basic import TestBase
 
 import requests
 import os
 import tempfile
-import unittest
 import json
 from pywps import inout
 import base64
@@ -42,16 +42,14 @@ def get_data_format(mime_type):
     return Format(mime_type=mime_type, validate=get_validator(mime_type))
 
 
-class IOHandlerTest(unittest.TestCase):
+class IOHandlerTest(TestBase):
     """IOHandler test cases"""
 
     def setUp(self):
-        tmp_dir = tempfile.mkdtemp()
+        super().setUp()
+        tmp_dir = self.tmpdir.name
         self.iohandler = IOHandler(workdir=tmp_dir)
         self._value = 'lalala'
-
-    def tearDown(self):
-        pass
 
     def test_basic_IOHandler(self):
         """Test basic IOHandler"""
@@ -120,7 +118,7 @@ class IOHandlerTest(unittest.TestCase):
 
     def test_file(self):
         """Test file input IOHandler"""
-        (fd, tmp_file) = tempfile.mkstemp()
+        (fd, tmp_file) = tempfile.mkstemp(dir=self.tmpdir.name)
         source = tmp_file
         file_handler = open(tmp_file, 'w')
         file_handler.write(self._value)
@@ -143,12 +141,12 @@ class IOHandlerTest(unittest.TestCase):
 
     def test_workdir(self):
         """Test workdir"""
-        workdir = tempfile.mkdtemp()
+        workdir = tempfile.mkdtemp(dir=self.tmpdir.name)
         self.iohandler.workdir = workdir
         self.assertTrue(os.path.isdir(self.iohandler.workdir))
 
         # make another
-        workdir = tempfile.mkdtemp()
+        workdir = tempfile.mkdtemp(dir=self.tmpdir.name)
         self.iohandler.workdir = workdir
         self.assertTrue(os.path.isdir(self.iohandler.workdir))
 
@@ -185,11 +183,12 @@ class IOHandlerTest(unittest.TestCase):
         self.assertTrue(_is_textfile(geojson))
 
 
-class ComplexInputTest(unittest.TestCase):
+class ComplexInputTest(TestBase):
     """ComplexInput test cases"""
 
     def setUp(self):
-        self.tmp_dir = tempfile.mkdtemp()
+        super().setUp()
+        self.tmp_dir = self.tmpdir.name
         data_format = get_data_format('application/json')
         self.complex_in = inout.inputs.ComplexInput(identifier="complexinput",
                                                     title='MyComplex',
@@ -220,11 +219,12 @@ class ComplexInputTest(unittest.TestCase):
         self.assertIsInstance(self.complex_in.supported_formats[0], Format)
 
 
-class SerializationComplexInputTest(unittest.TestCase):
+class SerializationComplexInputTest(TestBase):
     """ComplexInput test cases"""
 
     def setUp(self):
-        self.tmp_dir = tempfile.mkdtemp()
+        super().setUp()
+        self.tmp_dir = self.tmpdir.name
 
     def make_complex_input(self):
         complex = inout.inputs.ComplexInput(
@@ -340,11 +340,12 @@ class SerializationComplexInputTest(unittest.TestCase):
         self.assertEqual(complex.prop, 'url')
 
 
-class SerializationLiteralInputTest(unittest.TestCase):
+class SerializationLiteralInputTest(TestBase):
     """LiteralInput test cases"""
 
     def setUp(self):
-        self.tmp_dir = tempfile.mkdtemp()
+        super().setUp()
+        self.tmp_dir = self.tmpdir.name
 
     def make_literal_input(self):
         literal = inout.inputs.LiteralInput(
@@ -393,11 +394,12 @@ class SerializationLiteralInputTest(unittest.TestCase):
         self.assert_literal_equals(literal, literal2)
 
 
-class SerializationBoundingBoxInputTest(unittest.TestCase):
+class SerializationBoundingBoxInputTest(TestBase):
     """LiteralInput test cases"""
 
     def setUp(self):
-        self.tmp_dir = tempfile.mkdtemp()
+        super().setUp()
+        self.tmp_dir = self.tmpdir.name
 
     def make_bbox_input(self):
         bbox = inout.inputs.BoundingBoxInput(
@@ -440,11 +442,12 @@ class SerializationBoundingBoxInputTest(unittest.TestCase):
         self.assert_bbox_equals(bbox, bbox2)
 
 
-class DodsComplexInputTest(unittest.TestCase):
+class DodsComplexInputTest(TestBase):
     """ComplexInput test cases"""
 
     def setUp(self):
-        self.tmp_dir = tempfile.mkdtemp()
+        super().setUp()
+        self.tmp_dir = self.tmpdir.name
         data_format = get_data_format('application/x-ogc-dods')
         self.complex_in = ComplexInput(identifier="complexinput",
                                        title='MyComplex',
@@ -473,11 +476,12 @@ class DodsComplexInputTest(unittest.TestCase):
         self.assertIsInstance(self.complex_in, ComplexInput)
 
 
-class ComplexOutputTest(unittest.TestCase):
+class ComplexOutputTest(TestBase):
     """ComplexOutput test cases"""
 
     def setUp(self):
-        tmp_dir = tempfile.mkdtemp()
+        super().setUp()
+        tmp_dir = self.tmpdir.name
         data_format = get_data_format('application/json')
         self.complex_out = inout.outputs.ComplexOutput(
             identifier="complexoutput",
@@ -568,10 +572,11 @@ class ComplexOutputTest(unittest.TestCase):
         )
 
 
-class SimpleHandlerTest(unittest.TestCase):
+class SimpleHandlerTest(TestBase):
     """SimpleHandler test cases"""
 
     def setUp(self):
+        super().setUp()
 
         data_type = 'integer'
 
@@ -584,10 +589,11 @@ class SimpleHandlerTest(unittest.TestCase):
         self.assertEqual(convert(self.simple_handler.data_type, '1'), 1)
 
 
-class LiteralInputTest(unittest.TestCase):
+class LiteralInputTest(TestBase):
     """LiteralInput test cases"""
 
     def setUp(self):
+        super().setUp()
 
         self.literal_input = inout.inputs.LiteralInput(
             identifier="literalinput",
@@ -690,10 +696,11 @@ class LiteralInputTest(unittest.TestCase):
         assert identifier == self.literal_input.identifier
 
 
-class LiteralOutputTest(unittest.TestCase):
+class LiteralOutputTest(TestBase):
     """LiteralOutput test cases"""
 
     def setUp(self):
+        super().setUp()
 
         self.literal_output = inout.outputs.LiteralOutput(
             "literaloutput",
@@ -725,11 +732,11 @@ class LiteralOutputTest(unittest.TestCase):
         )
 
 
-class BBoxInputTest(unittest.TestCase):
+class BBoxInputTest(TestBase):
     """BountingBoxInput test cases"""
 
     def setUp(self):
-
+        super().setUp()
         self.bbox_input = inout.inputs.BoundingBoxInput(
             "bboxinput",
             title="BBox input",
@@ -758,10 +765,11 @@ class BBoxInputTest(unittest.TestCase):
         )
 
 
-class BBoxOutputTest(unittest.TestCase):
+class BBoxOutputTest(TestBase):
     """BoundingBoxOutput test cases"""
 
     def setUp(self):
+        super().setUp()
         self.bbox_out = inout.outputs.BoundingBoxOutput(
             "bboxoutput",
             title="BBox output",
@@ -790,8 +798,11 @@ class BBoxOutputTest(unittest.TestCase):
         )
 
 
-class TestMetaLink(unittest.TestCase):
-    tmp_dir = tempfile.mkdtemp()
+class TestMetaLink(TestBase):
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.tmp_dir = self.tmpdir.name
 
     def metafile(self):
         mf = MetaFile('identifier', 'title', fmt=FORMATS.JSON)

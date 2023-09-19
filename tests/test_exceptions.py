@@ -3,7 +3,7 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-import unittest
+from basic import TestBase
 from pywps import Service, get_ElementMakerForVersion
 from pywps.app.basic import get_xpath_ns
 from pywps.tests import assert_pywps_version, client_for
@@ -15,9 +15,10 @@ WPS, OWS = get_ElementMakerForVersion(VERSION)
 xpath_ns = get_xpath_ns(VERSION)
 
 
-class ExceptionsTest(unittest.TestCase):
+class ExceptionsTest(TestBase):
 
     def setUp(self):
+        super().setUp()
         self.client = client_for(Service(processes=[]))
 
     def test_invalid_parameter_value(self):

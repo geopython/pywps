@@ -5,7 +5,7 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-import unittest
+from basic import TestBase
 import datetime
 from pywps.inout.literaltypes import (
     convert_integer,
@@ -21,10 +21,11 @@ from pywps.inout.literaltypes import (
 )
 
 
-class ValuesReferenceTest(unittest.TestCase):
+class ValuesReferenceTest(TestBase):
     """ValuesReference test cases"""
 
     def setUp(self):
+        super().setUp()
         self.reference = "https://en.wikipedia.org/w/api.php?action=opensearch&search=scotland&format=json"
 
     def test_json(self):
@@ -34,7 +35,7 @@ class ValuesReferenceTest(unittest.TestCase):
         self.assertEqual(new_val_ref.reference, self.reference)
 
 
-class ConvertorTest(unittest.TestCase):
+class ConvertorTest(TestBase):
     """IOHandler test cases"""
 
     def test_integer(self):

@@ -3,7 +3,7 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-import unittest
+from basic import TestBase
 from pywps.app import WPSRequest
 import tempfile
 import datetime
@@ -12,12 +12,13 @@ import json
 from pywps.inout.literaltypes import AnyValue
 
 
-class WPSRequestTest(unittest.TestCase):
+class WPSRequestTest(TestBase):
 
     def setUp(self):
+        super().setUp()
 
         self.request = WPSRequest()
-        self.tempfile = tempfile.mktemp()
+        self.tempfile = tempfile.mktemp(dir=self.tmpdir.name)
 
         x = open(self.tempfile, 'w')
         x.write("ahoj")

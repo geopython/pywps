@@ -3,7 +3,7 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-import unittest
+from basic import TestBase
 from pywps import configuration
 from pywps.app import Process, Service
 from pywps.app.Common import Metadata
@@ -13,7 +13,7 @@ from pywps.tests import client_for, assert_wps_version
 WPS, OWS = get_ElementMakerForVersion("1.0.0")
 
 
-class BadRequestTest(unittest.TestCase):
+class BadRequestTest(TestBase):
 
     def test_bad_http_verb(self):
         client = client_for(Service())
@@ -42,9 +42,11 @@ class BadRequestTest(unittest.TestCase):
         assert resp.status_code == 400
 
 
-class CapabilitiesTest(unittest.TestCase):
+class CapabilitiesTest(TestBase):
 
     def setUp(self):
+        super().setUp()
+
         def pr1(): pass
         def pr2(): pass
         self.client = client_for(
@@ -136,9 +138,9 @@ class CapabilitiesTest(unittest.TestCase):
         assert_wps_version(resp, version="2.0.0")
 
 
-class CapabilitiesTranslationsTest(unittest.TestCase):
+class CapabilitiesTranslationsTest(TestBase):
     def setUp(self):
-        configuration.load_configuration()
+        super().setUp()
         configuration.CONFIG.set('server', 'language', 'en-US,fr-CA')
         self.client = client_for(
             Service(
@@ -160,9 +162,6 @@ class CapabilitiesTranslationsTest(unittest.TestCase):
                 ]
             )
         )
-
-    def tearDown(self):
-        configuration.CONFIG.set('server', 'language', 'en-US')
 
     def test_get_translated(self):
         resp = self.client.get('?Request=GetCapabilities&service=WPS&language=fr-CA')

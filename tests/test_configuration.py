@@ -5,13 +5,13 @@
 
 """Tests for the configuration."""
 
+from basic import TestBase
 import os
-import unittest
 
 from pywps import configuration
 
 
-class TestEnvInterpolation(unittest.TestCase):
+class TestEnvInterpolation(TestBase):
     """Test cases for env variable interpolation within the configuration."""
 
     def test_expand_user(self):

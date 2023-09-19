@@ -3,7 +3,7 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-import unittest
+from basic import TestBase
 import pytest
 import time
 from pywps import Service, configuration
@@ -18,14 +18,13 @@ VERSION = "1.0.0"
 WPS, OWS = get_ElementMakerForVersion(VERSION)
 
 
-class ExecuteTest(unittest.TestCase):
+class ExecuteTest(TestBase):
+
     def setUp(self) -> None:
+        super().setUp()
         # Running processes using the MultiProcessing scheduler and a file-based database
         configuration.CONFIG.set('processing', 'mode', 'distributed')
-        configuration.CONFIG.set("logging", "database", "sqlite:////tmp/test-pywps-logs.sqlite3")
 
-    def tearDown(self) -> None:
-        configuration.load_configuration()
 
     def test_async(self):
         client = client_for(Service(processes=[Sleep()]))
@@ -47,9 +46,10 @@ class ExecuteTest(unittest.TestCase):
 
         # Parse response to extract the status file path
         url = resp.xml.xpath("//@statusLocation")[0]
+        print(url)
 
         # OWSlib only reads from URLs, not local files. So we need to read the response manually.
-        p = Path(url[6:])
+        p = Path(configuration.get_config_value('server', 'outputpath')) / url.split('/')[-1]
 
         # Poll the process until it completes
         total_time = 0
