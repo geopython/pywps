@@ -12,6 +12,7 @@ import logging
 import os
 import sys
 import json
+import time
 
 from types import SimpleNamespace
 from multiprocessing import Lock
@@ -197,19 +198,48 @@ def update_status_record(uuid, data):
         session.commit()
 
 
+def force_failed_status(uuid):
+    with current_session as session:
+        r = session.query(StatusRecord).filter_by(uuid=str(uuid))
+        if r.count() < 1:
+            return
+        status_record = r.one()
+        data = json.loads(status_record.data.decode("utf-8"))
+        data['status'] = {
+            "status": "failed",
+            "time": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime()),
+            "message": "Process has crashed"
+        }
+        status_record.timestamp = datetime.datetime.now()
+        status_record.data = json.dumps(data).encode("utf-8")
+        session.commit()
+
+
 # Get store instance data from uuid
 def get_status_record(uuid):
     with current_session as session:
+        if sys.platform == "linux":
+            # Check if the current process is fail
+            r = session.query(ProcessInstance).filter_by(uuid=str(uuid))
+            # If no process instance is found then there is no status records
+            if r.count() < 1:
+                return None
+            process_record = r.one()
+            if process_record.status not in {WPS_STATUS.FAILED, WPS_STATUS.SUCCEEDED}:
+                if not os.path.exists(os.path.join("/proc", str(process_record.pid))):
+                    store_status(process_record.uuid, WPS_STATUS.FAILED, "Process crashed", 100)
+                    force_failed_status(process_record.uuid)
+
         r = session.query(StatusRecord).filter_by(uuid=str(uuid))
-        if r.count():
-            status_record = r.one()
-            # Ensure new item to avoid change in database
-            # FIXME: There is a better solution ?
-            attrs = ["uuid", "timestamp", "data"]
-            status_record = SimpleNamespace(**{k: getattr(status_record, k) for k in attrs})
-            status_record.data = json.loads(status_record.data.decode("utf-8"))
-            return status_record
-        return None
+        if r.count() < 1:
+            return None
+        status_record = r.one()
+        # Ensure new item to avoid change in database
+        # FIXME: There is a better solution ?
+        attrs = ["uuid", "timestamp", "data"]
+        status_record = SimpleNamespace(**{k: getattr(status_record, k) for k in attrs})
+        status_record.data = json.loads(status_record.data.decode("utf-8"))
+        return status_record
 
 
 def update_pid(uuid, pid):
