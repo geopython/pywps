@@ -40,6 +40,42 @@ Base = declarative_base()
 lock = Lock()
 
 
+class SessionManager:
+    """Implement ref counted session, and close session automaticaly
+
+    This SessionManager allow to call all dblog function recursively
+
+    Usage:
+
+    >>> with current_session as session:
+    ...     [...]
+    ...     pass
+
+    Nested with statement will reuse the session and only one session.close()
+    will be issued and it will be issued in any case, even on return or
+    exception within 'with' statement
+    """
+    def __init__(self):
+        self._session = None
+        self._handler_count = 0
+
+    def __enter__(self):
+        self._handler_count += 1
+        if self._session is None:
+            self._session = get_session()
+        return self._session
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._handler_count -= 1
+        if self._handler_count <= 0:
+            self._session.close()
+            self._session = None
+        return False
+
+
+current_session = SessionManager()
+
+
 class ProcessInstance(Base):
     __tablename__ = '{}requests'.format(_tableprefix)
 
@@ -73,14 +109,12 @@ def log_request(uuid, request):
     time_start = datetime.datetime.now()
     identifier = _get_identifier(request)
 
-    session = get_session()
-    request = ProcessInstance(
-        uuid=str(uuid), pid=pid, operation=operation, version=version,
-        time_start=time_start, identifier=identifier)
-
-    session.add(request)
-    session.commit()
-    session.close()
+    with current_session as session:
+        request = ProcessInstance(
+            uuid=str(uuid), pid=pid, operation=operation, version=version,
+            time_start=time_start, identifier=identifier)
+        session.add(request)
+        session.commit()
     # NoApplicableCode("Could commit to database: {}".format(e.message))
 
 
@@ -88,63 +122,58 @@ def get_process_counts():
     """Returns running and stored process counts and
     """
 
-    session = get_session()
-    stored_query = session.query(RequestInstance.uuid)
-    running_count = (
-        session.query(ProcessInstance)
-        .filter(ProcessInstance.percent_done < 100)
-        .filter(ProcessInstance.percent_done > -1)
-        .filter(~ProcessInstance.uuid.in_(stored_query))
-        .count()
-    )
-    stored_count = stored_query.count()
-    session.close()
-    return running_count, stored_count
+    with current_session as session:
+        stored_query = session.query(RequestInstance.uuid)
+        running_count = (
+            session.query(ProcessInstance)
+            .filter(ProcessInstance.percent_done < 100)
+            .filter(ProcessInstance.percent_done > -1)
+            .filter(~ProcessInstance.uuid.in_(stored_query))
+            .count()
+        )
+        stored_count = stored_query.count()
+        return running_count, stored_count
 
 
 def pop_first_stored():
     """Gets the first stored process and delete it from the stored_requests table
     """
-    session = get_session()
-    request = session.query(RequestInstance).first()
+    with current_session as session:
+        request = session.query(RequestInstance).first()
 
-    if request:
-        delete_count = session.query(RequestInstance).filter_by(uuid=request.uuid).delete()
-        if delete_count == 0:
-            LOGGER.debug("Another thread or process took the same stored request")
-            request = None
+        if request:
+            delete_count = session.query(RequestInstance).filter_by(uuid=request.uuid).delete()
+            if delete_count == 0:
+                LOGGER.debug("Another thread or process took the same stored request")
+                request = None
 
-        session.commit()
-    return request
+            session.commit()
+        return request
 
 
 def store_status(uuid, wps_status, message=None, status_percentage=None):
     """Writes response to database
     """
-    session = get_session()
-
-    requests = session.query(ProcessInstance).filter_by(uuid=str(uuid))
-    if requests.count():
-        request = requests.one()
-        request.time_end = datetime.datetime.now()
-        request.message = str(message)
-        request.percent_done = status_percentage
-        request.status = wps_status
-        session.commit()
-    session.close()
+    with current_session as session:
+        requests = session.query(ProcessInstance).filter_by(uuid=str(uuid))
+        if requests.count():
+            request = requests.one()
+            request.time_end = datetime.datetime.now()
+            request.message = str(message)
+            request.percent_done = status_percentage
+            request.status = wps_status
+            session.commit()
 
 
 def update_pid(uuid, pid):
     """Update actual pid for the uuid processing
     """
-    session = get_session()
-
-    requests = session.query(ProcessInstance).filter_by(uuid=str(uuid))
-    if requests.count():
-        request = requests.one()
-        request.pid = pid
-        session.commit()
-    session.close()
+    with current_session as session:
+        requests = session.query(ProcessInstance).filter_by(uuid=str(uuid))
+        if requests.count():
+            request = requests.one()
+            request.pid = pid
+            session.commit()
 
 
 def cleanup_crashed_process():
@@ -152,34 +181,32 @@ def cleanup_crashed_process():
     if sys.platform != "linux":
         return
 
-    session = get_session()
-    stored_query = session.query(RequestInstance.uuid)
-    running_cur = (
-        session.query(ProcessInstance)
-        .filter(ProcessInstance.status.in_([WPS_STATUS.STARTED, WPS_STATUS.PAUSED]))
-        .filter(~ProcessInstance.uuid.in_(stored_query))
-    )
+    with current_session as session:
+        stored_query = session.query(RequestInstance.uuid)
+        running_cur = (
+            session.query(ProcessInstance)
+            .filter(ProcessInstance.status.in_([WPS_STATUS.STARTED, WPS_STATUS.PAUSED]))
+            .filter(~ProcessInstance.uuid.in_(stored_query))
+        )
 
-    failed = []
-    running = [(p.uuid, p.pid) for p in running_cur]
-    for uuid, pid in running:
-        # No process with this pid, the process has crashed
-        if not os.path.exists(os.path.join("/proc", str(pid))):
-            failed.append(uuid)
-            continue
+        failed = []
+        running = [(p.uuid, p.pid) for p in running_cur]
+        for uuid, pid in running:
+            # No process with this pid, the process has crashed
+            if not os.path.exists(os.path.join("/proc", str(pid))):
+                failed.append(uuid)
+                continue
 
-        # If we can't read the environ, that mean the process belong another user
-        # which mean that this is not our process, thus our process has crashed
-        # this not work because root is the user for the apache
-        # if not os.access(os.path.join("/proc", str(pid), "environ"), os.R_OK):
-        #     failed.append(uuid)
-        #     continue
-        pass
+            # If we can't read the environ, that mean the process belong another user
+            # which mean that this is not our process, thus our process has crashed
+            # this not work because root is the user for the apache
+            # if not os.access(os.path.join("/proc", str(pid), "environ"), os.R_OK):
+            #     failed.append(uuid)
+            #     continue
+            pass
 
-    for uuid in failed:
-        store_status(uuid, WPS_STATUS.FAILED, "Process crashed", 100)
-
-    session.close()
+        for uuid in failed:
+            store_status(uuid, WPS_STATUS.FAILED, "Process crashed", 100)
 
 
 def _get_identifier(request):
@@ -249,11 +276,10 @@ def store_process(uuid, request):
     """Save given request under given UUID for later usage
     """
 
-    session = get_session()
-    request_json = request.json
-    # the BLOB type requires bytes on Python 3
-    request_json = request_json.encode('utf-8')
-    request = RequestInstance(uuid=str(uuid), request=request_json)
-    session.add(request)
-    session.commit()
-    session.close()
+    with current_session as session:
+        request_json = request.json
+        # the BLOB type requires bytes on Python 3
+        request_json = request_json.encode('utf-8')
+        request = RequestInstance(uuid=str(uuid), request=request_json)
+        session.add(request)
+        session.commit()
