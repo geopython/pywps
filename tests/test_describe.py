@@ -38,6 +38,25 @@ def get_default_value(el):
     return default
 
 
+def get_single_uom(el):
+    ows = el.nsmap["ows"]
+    unit = el.text
+    href = el.attrib[f"{{{ows}}}reference"]
+    return {"uom": unit, "reference": href}
+
+
+def get_supported_uoms(el):
+    uoms = xpath_ns(el, './UOMs')
+    if not uoms:
+        return None
+    uom_default = xpath_ns(uoms[0], './Default')[0]
+    uom_support = xpath_ns(uoms[0], './Supported')[0]
+    return {
+        "default": get_single_uom(xpath_ns(uom_default, './ows:UOM')[0]),
+        "supported": [get_single_uom(uom) for uom in xpath_ns(uom_support, './ows:UOM')]
+    }
+
+
 xpath_ns = get_xpath_ns("1.0.0")
 
 
@@ -61,7 +80,8 @@ def get_describe_result(resp):
                 [data_type_el] = xpath_ns(literal_data_el, './ows:DataType')
                 default = get_default_value(literal_data_el)
                 data_type = get_data_type(data_type_el)
-                inputs.append((input_identifier, 'literal', data_type, default))
+                uoms = get_supported_uoms(literal_data_el)
+                inputs.append((input_identifier, 'literal', data_type, default, uoms))
             elif complex_data_el_list:
                 [complex_data_el] = complex_data_el_list
                 formats = []
@@ -244,7 +264,7 @@ class DescribeProcessInputTest(unittest.TestCase):
                 Metadata('process metadata 2', 'http://example.org/2')]
         )
         result = self.describe_process(hello_process)
-        assert result.inputs == [('the_name', 'literal', 'string', None)]
+        assert result.inputs == [('the_name', 'literal', 'string', None, None)]
         assert result.metadata == ['process metadata 1', 'process metadata 2']
 
     def test_one_literal_integer_input(self):
@@ -256,7 +276,26 @@ class DescribeProcessInputTest(unittest.TestCase):
                                                      'Input number',
                                                      data_type='positiveInteger')])
         result = self.describe_process(hello_process)
-        assert result.inputs == [('the_number', 'literal', 'positiveInteger', None)]
+        assert result.inputs == [('the_number', 'literal', 'positiveInteger', None, None)]
+
+    def test_multi_uoms_literal_float_input(self):
+        def hello(request):
+            pass
+        hello_process = Process(hello, 'hello',
+                                'Process Hello',
+                                inputs=[LiteralInput('the_number',
+                                                     'Input number',
+                                                     data_type='float',
+                                                     uoms=['metre', 'feet'])])
+        result = self.describe_process(hello_process)
+        uoms = {
+            'default': {'uom': 'metre', 'reference': OGCUNIT['metre']},
+            'supported': [
+                {'uom': 'metre', 'reference': OGCUNIT['metre']},
+                {'uom': 'feet', 'reference': OGCUNIT['feet']}
+            ]
+        }
+        assert result.inputs == [('the_number', 'literal', 'float', None, uoms)]
 
     def test_one_literal_integer_default_zero(self):
         def hello(request):
@@ -268,7 +307,7 @@ class DescribeProcessInputTest(unittest.TestCase):
                                                      data_type='integer',
                                                      default=0)])
         result = self.describe_process(hello_process)
-        assert result.inputs == [('the_number', 'literal', 'integer', "0")]
+        assert result.inputs == [('the_number', 'literal', 'integer', "0", None)]
 
 
 class InputDescriptionTest(unittest.TestCase):
@@ -287,7 +326,7 @@ class InputDescriptionTest(unittest.TestCase):
             'foo',
             'Foo',
             data_type='integer',
-            uoms=['metre'],
+            uoms=['metre', 'feet'],
             allowed_values=(
                 1, 2, (5, 10), (12, 4, 24),
                 AllowedValue(
@@ -301,6 +340,9 @@ class InputDescriptionTest(unittest.TestCase):
         assert len(data["allowed_values"]) == 5
         assert data["allowed_values"][0]["value"] == 1
         assert data["allowed_values"][0]["range_closure"] == "closed"
+        assert data["uom"] == {"uom": "metre", "reference": OGCUNIT["metre"]}
+        assert data["uoms"][0] == {"uom": "metre", "reference": OGCUNIT["metre"]}
+        assert data["uoms"][1] == {"uom": "feet", "reference": OGCUNIT["feet"]}
 
     def test_complex_input_identifier(self):
         complex_in = ComplexInput('foo', 'Complex foo', keywords=['kw1', 'kw2'], supported_formats=[Format('bar/baz')])
