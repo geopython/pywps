@@ -77,7 +77,7 @@ class UOM(object):
         self.reference = reference
 
         if self.reference is None:
-            self.reference = OGCUNIT[self.uom]
+            self.reference = OGCUNIT.get(self.uom, '')
 
     @property
     def json(self):

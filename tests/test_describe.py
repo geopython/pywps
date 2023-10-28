@@ -10,6 +10,7 @@ from pywps import Process, Service, LiteralInput, ComplexInput, BoundingBoxInput
 from pywps import LiteralOutput, ComplexOutput, BoundingBoxOutput
 from pywps import get_ElementMakerForVersion, OGCTYPE, Format, NAMESPACES, OGCUNIT
 from pywps.inout.literaltypes import LITERAL_DATA_TYPES
+from pywps.inout.basic import UOM
 from pywps.app.basic import get_xpath_ns
 from pywps.app.Common import Metadata
 from pywps.inout.literaltypes import AllowedValue
@@ -41,7 +42,7 @@ def get_default_value(el):
 def get_single_uom(el):
     ows = el.nsmap["ows"]
     unit = el.text
-    href = el.attrib[f"{{{ows}}}reference"]
+    href = el.attrib.get(f"{{{ows}}}reference")
     return {"uom": unit, "reference": href}
 
 
@@ -286,13 +287,20 @@ class DescribeProcessInputTest(unittest.TestCase):
                                 inputs=[LiteralInput('the_number',
                                                      'Input number',
                                                      data_type='float',
-                                                     uoms=['metre', 'feet'])])
+                                                     uoms=[
+                                                         'metre',
+                                                         'feet',
+                                                         'undef',
+                                                         UOM('pixel', 'http://schema.com/#pixel'),
+                                                     ])])
         result = self.describe_process(hello_process)
         uoms = {
             'default': {'uom': 'metre', 'reference': OGCUNIT['metre']},
             'supported': [
                 {'uom': 'metre', 'reference': OGCUNIT['metre']},
-                {'uom': 'feet', 'reference': OGCUNIT['feet']}
+                {'uom': 'feet', 'reference': OGCUNIT['feet']},
+                {'uom': 'undef', 'reference': None},  # no mapping to known OGC URN
+                {'uom': 'pixel', 'reference': 'http://schema.com/#pixel'},
             ]
         }
         assert result.inputs == [('the_number', 'literal', 'float', None, uoms)]
