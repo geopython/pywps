@@ -12,6 +12,8 @@ from pywps.tests import client_for, assert_response_accepted, assert_response_su
 from .processes import Sleep
 from owslib.wps import WPSExecution
 from pathlib import Path
+from tempfile import TemporaryDirectory
+from pywps import dblog
 
 VERSION = "1.0.0"
 
@@ -20,12 +22,19 @@ WPS, OWS = get_ElementMakerForVersion(VERSION)
 
 class ExecuteTest(unittest.TestCase):
     def setUp(self) -> None:
+
+        # Create temporary directory to create test database.
+        self.tmpdir = TemporaryDirectory()
+
         # Running processes using the MultiProcessing scheduler and a file-based database
         configuration.CONFIG.set('processing', 'mode', 'distributed')
-        configuration.CONFIG.set("logging", "database", "sqlite:////tmp/test-pywps-logs.sqlite3")
+
+        configuration.CONFIG.set("logging", "database", f"sqlite:///{self.tmpdir.name}/test-pywps-logs.sqlite3")
 
     def tearDown(self) -> None:
+        # Cleanup temporary database
         configuration.load_configuration()
+        self.tmpdir.cleanup()
 
     def test_async(self):
         client = client_for(Service(processes=[Sleep()]))
