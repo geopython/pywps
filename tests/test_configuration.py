@@ -29,13 +29,11 @@ class TestEnvInterpolation(TestBase):
         del os.environ[self.test_key]
         super().tearDown()
 
-    @pytest.mark.skip(reason="not working with tox")
     def test_expand_user(self):
         """Ensure we can parse a value with the $USER entry."""
         configuration.CONFIG.read_string(f"[envinterpolationsection]\nuser=${self.test_key}")
         assert self.test_value == configuration.CONFIG["envinterpolationsection"]["user"]
 
-    @pytest.mark.xfail(reason="not working with tox")
     def test_expand_user_with_some_text(self):
         """Ensure we can parse a value with the $USER entry and some more text."""
         new_user = "new_" + self.test_value

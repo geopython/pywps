@@ -34,7 +34,6 @@ class ExecuteTest(TestBase):
         configuration.load_configuration()
         self.tmpdir.cleanup()
 
-    @pytest.mark.xfail(reason="fails on python>=3.8")
     def test_async(self):
         client = client_for(Service(processes=[Sleep()]))
         wps = WPSExecution()
