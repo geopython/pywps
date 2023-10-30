@@ -22,7 +22,7 @@ class TestEnvInterpolation(unittest.TestCase):
         configuration.CONFIG.read_string("[envinterpolationsection]\nuser=$USER")
         assert user == configuration.CONFIG["envinterpolationsection"]["user"]
 
-    @pytest.mark.skip(reason="not working with tox")
+    @pytest.mark.xfail(reason="not working with tox")
     def test_expand_user_with_some_text(self):
         """Ensure we can parse a value with the $USER entry and some more text."""
         user = os.environ.get("USER")

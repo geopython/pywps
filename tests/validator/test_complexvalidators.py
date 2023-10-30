@@ -95,7 +95,7 @@ class ValidateTest(unittest.TestCase):
         self.assertTrue(validatejson(json_input, MODE.STRICT), 'STRICT validation')
         json_input.stream.close()
 
-    @pytest.mark.skip(reason="fails on python>=3.8")
+    @pytest.mark.xfail(reason="fails on python>=3.8")
     def test_geojson_validator(self):
         """Test GeoJSON validator
         """
