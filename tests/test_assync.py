@@ -27,13 +27,6 @@ class ExecuteTest(TestBase):
         # Running processes using the MultiProcessing scheduler and a file-based database
         configuration.CONFIG.set('processing', 'mode', 'distributed')
 
-        configuration.CONFIG.set("logging", "database", f"sqlite:///{self.tmpdir.name}/test-pywps-logs.sqlite3")
-
-    def tearDown(self) -> None:
-        # Cleanup temporary database
-        configuration.load_configuration()
-        self.tmpdir.cleanup()
-
     def test_async(self):
         client = client_for(Service(processes=[Sleep()]))
         wps = WPSExecution()

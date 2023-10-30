@@ -7,8 +7,8 @@
 
 from basic import TestBase
 import os
-import unittest
-import pytest
+
+import random
 
 from pywps import configuration
 
