@@ -12,6 +12,8 @@ from pywps.tests import client_for, assert_response_accepted, assert_response_su
 from processes import Sleep
 from owslib.wps import WPSExecution
 from pathlib import Path
+from tempfile import TemporaryDirectory
+from pywps import dblog
 
 VERSION = "1.0.0"
 
@@ -24,7 +26,6 @@ class ExecuteTest(TestBase):
         super().setUp()
         # Running processes using the MultiProcessing scheduler and a file-based database
         configuration.CONFIG.set('processing', 'mode', 'distributed')
-
 
     def test_async(self):
         client = client_for(Service(processes=[Sleep()]))
