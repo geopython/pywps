@@ -1,3 +1,5 @@
+from basic import TestBase
+
 from pywps import xml_util as etree
 
 from io import StringIO

@@ -6,7 +6,7 @@
 """Unit tests for literal validator
 """
 
-import unittest
+from basic import TestBase
 from pywps.validator.literalvalidator import *
 from pywps.inout.literaltypes import AllowedValue, AnyValue, ValuesReference
 
@@ -24,14 +24,8 @@ def get_input(allowed_values, data=1):
     return fake_input
 
 
-class ValidateTest(unittest.TestCase):
+class ValidateTest(TestBase):
     """Literal validator test cases"""
-
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
 
     def test_value_validator(self):
         """Test simple validator for string, integer, etc"""
@@ -123,6 +117,8 @@ class ValidateTest(unittest.TestCase):
 
 
 def load_tests(loader=None, tests=None, pattern=None):
+    import unittest
+
     if not loader:
         loader = unittest.TestLoader()
     suite_list = [

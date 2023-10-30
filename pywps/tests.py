@@ -212,6 +212,3 @@ def assert_wps_version(response, version="1.0.0"):
                           '/ows:ServiceTypeVersion')
     found_version = elem[0].text
     assert version == found_version
-    tmp = Path(tempfile.mkdtemp())
-    with open(tmp / "out.xml", "wb") as out:
-        out.writelines(response.response)

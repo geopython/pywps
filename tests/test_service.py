@@ -1,10 +1,10 @@
-import unittest
+from basic import TestBase
 
 from pywps.app.Service import _validate_file_input
 from pywps.exceptions import FileURLNotSupported
 
 
-class ServiceTest(unittest.TestCase):
+class ServiceTest(TestBase):
 
     def test_validate_file_input(self):
         try:
@@ -16,6 +16,8 @@ class ServiceTest(unittest.TestCase):
 
 
 def load_tests(loader=None, tests=None, pattern=None):
+    import unittest
+
     if not loader:
         loader = unittest.TestLoader()
     suite_list = [

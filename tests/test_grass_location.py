@@ -3,7 +3,8 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-import unittest
+from basic import TestBase
+
 import pywps.configuration as config
 from pywps import Service, Process, ComplexInput, get_format, \
     get_ElementMakerForVersion
@@ -55,11 +56,13 @@ def grass_file_based_location():
                    grass_location="complexinput:input1")
 
 
-class GRASSTests(unittest.TestCase):
+class GRASSTests(TestBase):
     """Test creating GRASS locations and mapsets in different ways."""
 
     def setUp(self):
         """Skip test if GRASS is not installed on the machine."""
+        super().setUp()
+
         if not config.CONFIG.get('grass', 'gisbase'):
             self.skipTest('GRASS lib not found')
 
@@ -100,6 +103,8 @@ class GRASSTests(unittest.TestCase):
 
 def load_tests(loader=None, tests=None, pattern=None):
     """Load tests."""
+    import unittest
+
     if not loader:
         loader = unittest.TestLoader()
     suite_list = [

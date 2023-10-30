@@ -3,14 +3,11 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-import unittest
+from basic import TestBase
 from pywps.app.exceptions import format_message, ProcessError, DEFAULT_ALLOWED_CHARS
 
 
-class AppExceptionsTest(unittest.TestCase):
-
-    def setUp(self):
-        pass
+class AppExceptionsTest(TestBase):
 
     def test_format_message(self):
         assert format_message('no data available') == 'no data available'
