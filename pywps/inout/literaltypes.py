@@ -388,7 +388,7 @@ def make_allowedvalues(allowed_values):
             # value is an instance of one of the allowed classes
             new_allowedvalues.append(value)
 
-        elif type(value) == tuple or type(value) == list:
+        elif isinstance(value, (tuple, list)):
             spacing = None
             if len(value) == 2:
                 minval = value[0]

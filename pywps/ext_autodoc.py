@@ -121,7 +121,7 @@ class ProcessDocumenter(ClassDocumenter):
         for m in obj.metadata:
             if isinstance(m, Metadata):
                 title, href = m.title, m.href
-            elif type(m) == dict:
+            elif isinstance(m, dict):
                 title, href = m['title'], m['href']
             else:
                 title, href = None, None
