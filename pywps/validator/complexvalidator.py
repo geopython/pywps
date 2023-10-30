@@ -260,35 +260,22 @@ def validategeojson(data_input, mode):
         import json
 
         import jsonschema
+        import referencing
 
         # this code comes from
         # https://github.com/om-henners/GeoJSON_Validation/blob/master/geojsonvalidation/geojson_validation.py
+        schema_uri = "http://json-schema.org/geojson"
         schema_home = os.path.join(_get_schemas_home(), "geojson")
-        base_schema = os.path.join(schema_home, "geojson.json")
 
-        with open(base_schema) as fh:
-            geojson_base = json.load(fh)
+        registry = referencing.Registry()
 
-        with open(os.path.join(schema_home, "crs.json")) as fh:
-            crs_json = json.load(fh)
+        for fn in ["geojson.json", "crs.json", "bbox.json", "geometry.json"]:
+            with open(os.path.join(schema_home, fn)) as fh:
+                schema_data = json.load(fh)
+                registry = registry.with_resource(f"{schema_uri}/{fn}",
+                                                  referencing.Resource(schema_data, referencing.jsonschema.DRAFT4))
 
-        with open(os.path.join(schema_home, "bbox.json")) as fh:
-            bbox_json = json.load(fh)
-
-        with open(os.path.join(schema_home, "geometry.json")) as fh:
-            geometry_json = json.load(fh)
-
-        cached_json = {
-            "http://json-schema.org/geojson/crs.json": crs_json,
-            "http://json-schema.org/geojson/bbox.json": bbox_json,
-            "http://json-schema.org/geojson/geometry.json": geometry_json
-        }
-
-        resolver = jsonschema.RefResolver(
-            "http://json-schema.org/geojson/geojson.json",
-            geojson_base, store=cached_json)
-
-        validator = jsonschema.Draft4Validator(geojson_base, resolver=resolver)
+        validator = jsonschema.Draft4Validator({"$ref": f"{schema_uri}/geojson.json"}, registry=registry)
         try:
             validator.validate(json.loads(data_input.stream.read()))
             passed = True
