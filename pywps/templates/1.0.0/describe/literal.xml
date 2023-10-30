@@ -2,11 +2,11 @@
                 {% if put.uom %}
                 <UOMs>
                     <Default>
-                        <ows:UOM {%if put.uom %}ows:reference="{{ put.uom.reference }}"{% endif %}>{{ put.uom.uom }}</ows:UOM>
+                        <ows:UOM {%if put.uom.reference %}ows:reference="{{ put.uom.reference }}"{% endif %}>{{ put.uom.uom }}</ows:UOM>
                     </Default>
                     <Supported>
                         {% for uom in put.uoms %}
-                        <ows:UOM ows:reference="{{ put.uom.reference }}">{{ put.uom.uom }}</ows:UOM>
+                        <ows:UOM {%if uom.reference %}ows:reference="{{ uom.reference }}"{% endif %}>{{ uom.uom }}</ows:UOM>
                         {% endfor %}
                     </Supported>
                 </UOMs>
