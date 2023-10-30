@@ -2,6 +2,8 @@
 # Copyright 2018 Open Source Geospatial Foundation and others    #
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
+from basic import TestBase
+
 from pathlib import Path
 
 from pywps.inout.storage.file import FileStorageBuilder, FileStorage, _build_output_name
@@ -11,15 +13,12 @@ from pywps.util import file_uri
 
 from pywps import configuration, FORMATS
 
-import tempfile
 
-import unittest
-
-
-class FileStorageTests(unittest.TestCase):
+class FileStorageTests(TestBase):
 
     def setUp(self):
-        self.tmp_dir = tempfile.mkdtemp()
+        super().setUp()
+        self.tmp_dir = self.tmpdir.name
 
     def test_build_output_name(self):
         storage = FileStorageBuilder().build()
@@ -85,6 +84,8 @@ class FileStorageTests(unittest.TestCase):
 def load_tests(loader=None, tests=None, pattern=None):
     """Load local tests
     """
+    import unittest
+
     if not loader:
         loader = unittest.TestLoader()
     suite_list = [

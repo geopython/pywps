@@ -88,21 +88,16 @@ def get_config_value(section, option, default_value=''):
     return value
 
 
-def load_configuration(cfgfiles=None):
-    """Load PyWPS configuration from configuration files.
-
-    The later configuration file in the array overwrites configuration
-    from the first.
-
-    :param cfgfiles: list of configuration files
-    """
+def load_hardcoded_configuration():
+    """Load PyWPS hardcoded configuration."""
 
     global CONFIG
 
-    LOGGER.info('loading configuration')
+    LOGGER.debug('loading harcoded configuration')
     CONFIG = configparser.ConfigParser(os.environ, interpolation=EnvInterpolation())
 
-    LOGGER.debug('setting default values')
+    tmpdir = tempfile.gettempdir()
+
     CONFIG.add_section('server')
     CONFIG.set('server', 'encoding', 'utf-8')
     CONFIG.set('server', 'language', 'en-US')
@@ -110,38 +105,23 @@ def load_configuration(cfgfiles=None):
     CONFIG.set('server', 'maxprocesses', '30')
     CONFIG.set('server', 'maxsingleinputsize', '1mb')
     CONFIG.set('server', 'maxrequestsize', '3mb')
-    CONFIG.set('server', 'temp_path', tempfile.gettempdir())
+    CONFIG.set('server', 'temp_path', tmpdir)
     CONFIG.set('server', 'processes_path', '')
-    outputpath = tempfile.gettempdir()
-    CONFIG.set('server', 'outputurl', file_uri(outputpath))
-    CONFIG.set('server', 'outputpath', outputpath)
-    # list of allowed input paths (file url input) seperated by ':'
+    CONFIG.set('server', 'outputurl', file_uri(tmpdir))
+    CONFIG.set('server', 'outputpath', tmpdir)
     CONFIG.set('server', 'allowedinputpaths', '')
-    CONFIG.set('server', 'workdir', tempfile.gettempdir())
+    CONFIG.set('server', 'workdir', tmpdir)
     CONFIG.set('server', 'parallelprocesses', '2')
-    # If this flag is enabled it will set the HOME environment
-    # for each process to its current workdir (a temp folder).
     CONFIG.set('server', 'sethomedir', 'false')
-    # If this flag is enabled PyWPS will remove the process temporary workdir
-    # after process has finished.
     CONFIG.set('server', 'cleantempdir', 'true')
     CONFIG.set('server', 'storagetype', 'file')
-    # File storage outputs can be copied, moved or linked
-    # from the workdir to the output folder.
-    # Allowed functions: "copy", "move", "link" (default "copy")
     CONFIG.set('server', 'storage_copy_function', 'copy')
-
-    # handles the default mimetype for requests.
-    # available options: "text/xml", "application/json"
     CONFIG.set("server", "default_mimetype", "text/xml")
-
-    # default json indentation for responses.
     CONFIG.set("server", "json_indent", "2")
 
     CONFIG.add_section('processing')
     CONFIG.set('processing', 'mode', 'default')
     CONFIG.set('processing', 'path', os.path.dirname(os.path.realpath(sys.argv[0])))
-    # https://github.com/natefoo/slurm-drmaa
     CONFIG.set('processing', 'drmaa_native_specification', '')
 
     CONFIG.add_section('logging')
@@ -184,6 +164,20 @@ def load_configuration(cfgfiles=None):
     CONFIG.set('s3', 'public', 'false')
     CONFIG.set('s3', 'encrypt', 'false')
     CONFIG.set('s3', 'region', '')
+
+
+def load_configuration(cfgfiles=None):
+    """Load PyWPS configuration from configuration files.
+
+    The later configuration file in the array overwrites configuration
+    from the first.
+
+    :param cfgfiles: list of configuration files
+    """
+
+    global CONFIG
+
+    load_hardcoded_configuration()
 
     if not cfgfiles:
         cfgfiles = _get_default_config_files_location()

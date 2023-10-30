@@ -1,6 +1,6 @@
 """Test embedding different file formats and different encodings within the <Data> tag."""
 
-import unittest
+from basic import TestBase
 import os
 from pywps import get_ElementMakerForVersion
 from pywps.app.basic import get_xpath_ns
@@ -66,7 +66,7 @@ def get_data(fn, encoding=None):
         return data
 
 
-class RawInput(unittest.TestCase):
+class RawInput(TestBase):
 
     def make_request(self, name, fn, fmt):
         """Create XML request embedding encoded data."""

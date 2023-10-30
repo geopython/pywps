@@ -3,6 +3,7 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
+from basic import TestBase
 from pywps import Service, Process, LiteralInput, ComplexOutput
 from pywps import FORMATS
 from pywps import get_ElementMakerForVersion
@@ -37,32 +38,34 @@ def create_inout():
                    )
 
 
-def test_assync_inout():
-    client = client_for(Service(processes=[create_inout()]))
-    request_doc = WPS.Execute(
-        OWS.Identifier('inout'),
-        WPS.DataInputs(
-            WPS.Input(
-                OWS.Identifier('text'),
-                WPS.Data(
-                    WPS.LiteralData(
-                        "Hello World"
+class TestAsyncInout(TestBase):
+
+    def test_assync_inout(self):
+        client = client_for(Service(processes=[create_inout()]))
+        request_doc = WPS.Execute(
+            OWS.Identifier('inout'),
+            WPS.DataInputs(
+                WPS.Input(
+                    OWS.Identifier('text'),
+                    WPS.Data(
+                        WPS.LiteralData(
+                            "Hello World"
+                        )
                     )
                 )
-            )
-        ),
-        WPS.ResponseForm(
-            WPS.ResponseDocument(
-                WPS.Output(
-                    OWS.Identifier("text")
+            ),
+            WPS.ResponseForm(
+                WPS.ResponseDocument(
+                    WPS.Output(
+                        OWS.Identifier("text")
+                    ),
                 ),
             ),
-        ),
-        version="1.0.0"
-    )
-    resp = client.post_xml(doc=request_doc)
-    assert resp.status_code == 200
+            version="1.0.0"
+        )
+        resp = client.post_xml(doc=request_doc)
+        assert resp.status_code == 200
 
-    # TODO:
-    # . extract the status URL from the response
-    # . send a status request
+        # TODO:
+        # . extract the status URL from the response
+        # . send a status request

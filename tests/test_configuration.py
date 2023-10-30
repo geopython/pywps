@@ -5,6 +5,7 @@
 
 """Tests for the configuration."""
 
+from basic import TestBase
 import os
 import unittest
 import pytest
@@ -12,22 +13,33 @@ import pytest
 from pywps import configuration
 
 
-class TestEnvInterpolation(unittest.TestCase):
+class TestEnvInterpolation(TestBase):
     """Test cases for env variable interpolation within the configuration."""
+    test_value = "SOME_RANDOM_VALUE"
+
+    def setUp(self) -> None:
+        super().setUp()
+        # Generate an unused environment key
+        self.test_key = "SOME_RANDOM_KEY"
+        while self.test_key in os.environ:
+            self.test_key = "".join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ", k=32))
+        os.environ[self.test_key] = self.test_value
+
+    def tearDown(self) -> None:
+        del os.environ[self.test_key]
+        super().tearDown()
 
     @pytest.mark.skip(reason="not working with tox")
     def test_expand_user(self):
         """Ensure we can parse a value with the $USER entry."""
-        user = os.environ.get("USER")
-        configuration.CONFIG.read_string("[envinterpolationsection]\nuser=$USER")
-        assert user == configuration.CONFIG["envinterpolationsection"]["user"]
+        configuration.CONFIG.read_string(f"[envinterpolationsection]\nuser=${self.test_key}")
+        assert self.test_value == configuration.CONFIG["envinterpolationsection"]["user"]
 
     @pytest.mark.xfail(reason="not working with tox")
     def test_expand_user_with_some_text(self):
         """Ensure we can parse a value with the $USER entry and some more text."""
-        user = os.environ.get("USER")
-        new_user = "new_" + user
-        configuration.CONFIG.read_string("[envinterpolationsection]\nuser=new_${USER}")
+        new_user = "new_" + self.test_value
+        configuration.CONFIG.read_string(f"[envinterpolationsection]\nuser=new_${{{self.test_key}}}")
         assert new_user == configuration.CONFIG["envinterpolationsection"]["user"]
 
     def test_dont_expand_value_without_env_variable(self):
@@ -44,6 +56,8 @@ class TestEnvInterpolation(unittest.TestCase):
 
 def load_tests(loader=None, tests=None, pattern=None):
     """Load the tests and return the test suite for this file."""
+    import unittest
+
     if not loader:
         loader = unittest.TestLoader()
     suite_list = [

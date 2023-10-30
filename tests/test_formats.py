@@ -5,7 +5,7 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-import unittest
+from basic import TestBase
 
 from pywps.inout.formats import Format, get_format, FORMATS
 from pywps.app.basic import get_xpath_ns
@@ -14,10 +14,11 @@ from pywps.app.basic import get_xpath_ns
 xpath_ns = get_xpath_ns("1.0.0")
 
 
-class FormatsTest(unittest.TestCase):
+class FormatsTest(TestBase):
     """Formats test cases"""
 
     def setUp(self):
+        super().setUp()
 
         def validate(self, inpt, level=None):
             """fake validate method
@@ -25,9 +26,6 @@ class FormatsTest(unittest.TestCase):
             return True
 
         self.validate = validate
-
-    def tearDown(self):
-        pass
 
     def test_format_class(self):
         """Test pywps.formats.Format class
@@ -114,6 +112,8 @@ class FormatsTest(unittest.TestCase):
 def load_tests(loader=None, tests=None, pattern=None):
     """Load local tests
     """
+    import unittest
+
     if not loader:
         loader = unittest.TestLoader()
     suite_list = [
