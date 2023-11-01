@@ -12,8 +12,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - tox-env: py37-extra
-            python-version: "3.7"
           - tox-env: py38-extra
             python-version: "3.8"
           - tox-env: py39-extra
@@ -36,13 +34,13 @@ jobs:
       run: |
         pip install flake8
         flake8 pywps
-      if: matrix.python-version == 3.7
+      if: matrix.python-version == 3.8
     - name: Install tox 📦
       run: pip install "tox>=4.0"
     - name: Run tests with tox ⚙️
       run: tox -e ${{ matrix.tox-env }}
     - name: Run coveralls ⚙️
-      if: matrix.python-version == 3.7
+      if: matrix.python-version == 3.8
       uses: AndreMiras/coveralls-python-action@develop
 
   docs:
@@ -50,9 +48,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
-        name: Setup Python 3.7
+        name: Setup Python 3.8
         with:
-          python-version: 3.7
+          python-version: 3.8
       - name: Build docs 🏗️
         run: |
           pip install -e .[dev]
