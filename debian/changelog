@@ -1,3 +1,23 @@
+pywps (4.6.0) trusty; urgency=medium
+
+  * Skip support for Python 3.7
+  * Update validate geojson (#680).
+  * Sanitize test suite (#684, #683, #682, #681).
+  * Support Python3.10/3.11, documentation fixes, and general codebase cleanup (#677).
+  * Extended env variable interpolation (#675)
+  * Don't use deprecated distutils module (#672).
+  * Fixed tox.ini parameter passenv (#670).
+  * Improve the implementation of pywps.inout.literaltypes (#668).
+  * Fix tests/test_capabilities.py with correct check of request case (#665).
+  * Activate async test (#664).
+  * Move Sleep process definition (#663). 
+  * Remove use of mutable as default value in Process.__init__ (#660).
+  * Better handle of crashed processes (#659).
+  * Change coveralls branch from master to main (#655).
+
+ -- Carsten Ehbrecht <ehbrecht@dkrz.de>  Wed, 01 Nov 2023 18:00:00 +0000
+
+
 pywps (4.5.2) trusty; urgency=medium
 
   * Fix test section in README.md about pytest (#653)
