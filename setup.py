@@ -3,8 +3,6 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
-import sys
-
 from setuptools import find_packages, setup
 
 with open("VERSION.txt") as ff:
