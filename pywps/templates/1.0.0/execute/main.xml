@@ -10,7 +10,7 @@
         {% if wsdl %}
         <wps:WSDL xlink:href="{{ process.wsdl }}"/>
         {% endif %}
-	</wps:Process>
+    </wps:Process>
     <wps:Status creationTime="{{ status.time }}">
         {% if status.status == "accepted" %}
         <wps:ProcessAccepted percentCompleted="{{ status.percent_done }}">{{ status.message }}</wps:ProcessAccepted>
@@ -29,39 +29,39 @@
             </wps:ExceptionReport>
         </wps:ProcessFailed>
         {% endif %}
-	</wps:Status>
+    </wps:Status>
     {% if lineage %}
     {% if input_definitions %}
-	<wps:DataInputs>
+    <wps:DataInputs>
         {% for input in input_definitions %}
-		<wps:Input>
+        <wps:Input>
             <ows:Identifier>{{ input.identifier }}</ows:Identifier>
             <ows:Title>{{ get_translation(input, "title", language) }}</ows:Title>
             <ows:Abstract>{{ get_translation(input, "abstract", language) }}</ows:Abstract>
             {% if input.type == "complex" %}
-			<wps:Data>
+            <wps:Data>
                     <wps:ComplexData mimeType="{{ input.mimetype }}" encoding="{{ input.encoding }}" schema="{{ input.schema }}">{{ input.data | safe }}</wps:ComplexData>
-			</wps:Data>
+            </wps:Data>
             {% elif input.type == "literal" %}
-			<wps:Data>
+            <wps:Data>
                 <wps:LiteralData {% if input.uom %}uom="{{ input.uom.reference }}"{% endif %}>{{ input.data }}</wps:LiteralData>
-			</wps:Data>
+            </wps:Data>
             {% elif input.type == "bbox" %}
-			<wps:Data>
+            <wps:Data>
                 <wps:BoundingBoxData crs="{{ input.crs }}" dimensions="{{ input.dimensions }}">
                     <ows:LowerCorner>{% for c in input.ll %} {{ c }} {% endfor %}</ows:LowerCorner>
                     <ows:UpperCorner>{% for c in input.ur %} {{ c }} {% endfor %}</ows:UpperCorner>
                 </wps:BoundingBoxData>
-			</wps:Data>
+            </wps:Data>
             {% elif input.type == "reference" %}
             <wps:Reference xlink:href="{{ input.href }}" method="{{ input.method }}" mimeType="{{ input.mimetype }}" encoding="{{ input.encoding }}" schema="{{ input.schema }}"/>
             {% endif %}
-		</wps:Input>
+        </wps:Input>
         {% endfor %}
-	</wps:DataInputs>
+    </wps:DataInputs>
     {% endif %}
     {% if output_definitions %}
-	<wps:OutputDefinitions>
+    <wps:OutputDefinitions>
         {% for output in output_definitions %}
         {% if output.type in ["complex", "reference"] %}
         <wps:Output mimeType="{{ output.mimetype }}" encoding="{{ output.encoding }}" schema="{{ output.schema }}" asReference="{{ output.asreference }}">
@@ -71,38 +71,38 @@
             <ows:Identifier>{{ output.identifier }}</ows:Identifier>
             <ows:Title>{{ get_translation(output, "title", language) }}</ows:Title>
             <ows:Abstract>{{ get_translation(output, "abstract", language) }}</ows:Abstract>
-		</wps:Output>
+        </wps:Output>
         {% endfor %}
-	</wps:OutputDefinitions>
+    </wps:OutputDefinitions>
     {% endif %}
     {% endif %}
     {% if outputs %}
-	<wps:ProcessOutputs>
+    <wps:ProcessOutputs>
         {% for output in outputs %}
-		<wps:Output>
+        <wps:Output>
             <ows:Identifier>{{ output.identifier }}</ows:Identifier>
             <ows:Title>{{ get_translation(output, "title", language) }}</ows:Title>
             <ows:Abstract>{{ get_translation(output, "abstract", language) }}</ows:Abstract>
             {% if output.type == "reference" %}
             <wps:Reference href="{{ output.href }}" mimeType="{{ output.mimetype }}" encoding="{{ output.encoding }}" schema="{{ output.schema }}"/>
             {% elif output.type == "complex" %}
-			<wps:Data>
+            <wps:Data>
                     <wps:ComplexData mimeType="{{ output.mimetype }}" encoding="{{ output.encoding }}" schema="{{ output.schema }}">{{ output.data | safe }}</wps:ComplexData>
-			</wps:Data>
+            </wps:Data>
             {% elif output.type == "literal" %}
-			<wps:Data>
+            <wps:Data>
                 <wps:LiteralData {% if output.uom %}uom="{{ output.uom.reference }}"{% endif %} dataType="{{ output.data_type }}">{{ output.data }}</wps:LiteralData>
-			</wps:Data>
+            </wps:Data>
             {% elif output.type == "bbox" %}
-			<wps:Data>
+            <wps:Data>
                     <wps:BoundingBoxData crs="{{ output.crs }}" dimensions="{{ output.dimensions }}">
                         <ows:LowerCorner>{% for c in output.ll %} {{ c }} {% endfor %}</ows:LowerCorner>
                         <ows:UpperCorner>{% for c in output.ur %} {{ c }} {% endfor %}</ows:UpperCorner>
                     </wps:BoundingBoxData>
-			</wps:Data>
+            </wps:Data>
             {% endif %}
-		</wps:Output>
+        </wps:Output>
         {% endfor %}
-	</wps:ProcessOutputs>
+    </wps:ProcessOutputs>
     {% endif %}
 </wps:ExecuteResponse>
