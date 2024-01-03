@@ -5,6 +5,11 @@
 # Required
 version: 2
 
+# Make additional formats available for download
+formats:
+  - pdf
+  - epub
+
 # Set the version of Python and other tools you might need
 build:
   os: ubuntu-22.04
