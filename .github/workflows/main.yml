@@ -1,4 +1,4 @@
-name: build ⚙️
+name: Build PyWPS ⚙️
 
 on:
   push:
@@ -7,7 +7,28 @@ on:
   pull_request:
 
 jobs:
+  lint:
+    name: Linting Suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel previous runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          access_token: ${{ github.token }}
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - name: Install tox
+        run: |
+          pip install tox>=4.0
+      - name: Run linting suite ⚙️
+        run: |
+          tox -e lint
+
   test:
+    name: Testing with Python${{ matrix.python-version }}
+    needs: lint
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -21,20 +42,15 @@ jobs:
           - tox-env: py311-extra
             python-version: "3.11"
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Install packages 📦
       run: |
         sudo apt-get update
         sudo apt-get -y install libnetcdf-dev libhdf5-dev
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       name: Setup Python ${{ matrix.python-version }}
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Run flake8 ⚙️
-      run: |
-        pip install flake8
-        flake8 pywps
-      if: matrix.python-version == 3.8
     - name: Install tox 📦
       run: pip install "tox>=4.0"
     - name: Run tests with tox ⚙️
@@ -44,14 +60,16 @@ jobs:
       uses: AndreMiras/coveralls-python-action@develop
 
   docs:
+    name: Build docs 🏗️
+    needs: lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         name: Setup Python 3.8
         with:
           python-version: 3.8
-      - name: Build docs 🏗️
+      - name: Build documentation 🏗️
         run: |
           pip install -e .[dev]
           cd docs && make html
