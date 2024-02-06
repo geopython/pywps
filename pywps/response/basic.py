@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pywps import WPSRequest
 
-from pywps.dblog import store_status
 from pywps.response.status import WPS_STATUS
 import os
 
@@ -49,6 +48,7 @@ class WPSResponse(object):
         :param pywps.response.status.WPS_STATUS status: process status - user should usually
             omit this parameter
         """
+        from pywps.dblog import store_status
         self.message = message
         self.status = status
         self.status_percentage = status_percentage
