@@ -128,7 +128,8 @@ class Process(object):
 
     def execute(self, wps_request, uuid):
         self._set_uuid(uuid)
-        self._setup_status_storage()
+        if config.get_config_value('server', 'keep_status_file'):
+            self._setup_status_storage()
         self.async_ = False
         wps_response = WPSExecuteResponse(self, wps_request, self.uuid)
 

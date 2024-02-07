@@ -122,9 +122,10 @@ class WPSExecuteResponse(object):
             self.wps_request.preprocess_response = None
 
         LOGGER.debug("_update_status: status={}, clean={}".format(status, clean))
-        self._update_status_doc()
-        if self.store_status_file:
-            self._update_status_file()
+        if config.get_config_value('server', 'keep_status_file'):
+            self._update_status_doc()
+            if self.store_status_file:
+                self._update_status_file()
         if clean:
             if self.status == WPS_STATUS.SUCCEEDED or self.status == WPS_STATUS.FAILED:
                 LOGGER.debug("clean workdir: status={}".format(status))
@@ -232,8 +233,7 @@ class WPSExecuteResponse(object):
         }
 
         if self.store_status_file:
-            if self.process.status_location:
-                data["status_location"] = self.process.status_url
+            data["status_location"] = self.process.status_url
 
         if self.status == WPS_STATUS.ACCEPTED:
             self.message = 'PyWPS Process {} accepted'.format(self.process.identifier)
