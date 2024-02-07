@@ -184,7 +184,7 @@ class Process(object):
     @property
     def status_url(self):
         base_url = config.get_config_value('server', 'url')
-        return f"{base_url}?service=WPS&request=status&uuid={self.uuid}"
+        return f"{base_url}/status?uuid={self.uuid}"
 
     def _execute_process(self, async_, wps_request, wps_response):
         """

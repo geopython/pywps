@@ -52,6 +52,6 @@ class ExecuteTest(TestBase):
 
         # Parse url because we do not have real server
         url = urlparse(url)
-        resp = client.get(f'{url.path}?{url.query}')
+        resp = client.open(base_url='/wps', path='/status', method='GET', query_string=url.query)
         assert_response_success(resp)
 

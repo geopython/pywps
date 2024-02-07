@@ -62,13 +62,15 @@ class Service(object):
             if not LOGGER.handlers:
                 LOGGER.addHandler(logging.NullHandler())
 
-    def get_status(self, wps_request, uuid):
+    def get_status(self, http_request):
         try:
-            _, mimetype = get_response_type(wps_request.http_request.accept_mimetypes,
-                                            wps_request.default_mimetype)
+            _, mimetype = get_response_type(http_request.accept_mimetypes,
+                                            "text/xml")
         except Exception:
             mimetype = get_default_response_mimetype()
-        return StatusResponse(wps_request.version, wps_request.requested_status_uuid, mimetype)
+        from urllib.parse import parse_qs
+        request = parse_qs(http_request.environ["QUERY_STRING"])
+        return StatusResponse(request.get("version", ["1.0.0"])[0], request["uuid"][0], mimetype)
 
     def get_capabilities(self, wps_request, uuid):
         return CapabilitiesResponse(wps_request, uuid, version=wps_request.version, processes=self.processes)
@@ -168,39 +170,44 @@ class Service(object):
                 LOGGER.debug('Setting PYWPS_CFG to {}'.format(environ_cfg))
                 os.environ['PYWPS_CFG'] = environ_cfg
 
-            wps_request = WPSRequest(http_request, self.preprocessors)
-            LOGGER.info('Request: {}'.format(wps_request.operation))
-            if wps_request.operation in ['getcapabilities',
-                                         'describeprocess',
-                                         'execute',
-                                         'status']:
-                log_request(request_uuid, wps_request)
+            if http_request.environ["PATH_INFO"] == "/status":
                 try:
-                    response = None
-                    if wps_request.operation == 'getcapabilities':
-                        response = self.get_capabilities(wps_request, request_uuid)
-                        response._update_status(WPS_STATUS.SUCCEEDED, '', 100)
-
-                    elif wps_request.operation == 'describeprocess':
-                        response = self.describe(wps_request, request_uuid, wps_request.identifiers)
-                        response._update_status(WPS_STATUS.SUCCEEDED, '', 100)
-
-                    elif wps_request.operation == 'execute':
-                        response = self.execute(
-                            wps_request.identifier,
-                            wps_request,
-                            request_uuid
-                        )
-                    elif wps_request.operation == 'status':
-                        response = self.get_status(wps_request, request_uuid)
-                    return response
+                    return self.get_status(http_request)
                 except Exception as e:
-                    # This ensure that logged request get terminated in case of exception while the request is not
-                    # accepted
-                    store_status(request_uuid, WPS_STATUS.FAILED, 'Request rejected due to exception', 100)
+                    store_status(request_uuid, WPS_STATUS.FAILED,
+                                 'Request rejected due to exception', 100)
                     raise e
             else:
-                raise RuntimeError("Unknown operation {}".format(wps_request.operation))
+                wps_request = WPSRequest(http_request, self.preprocessors)
+                LOGGER.info('Request: {}'.format(wps_request.operation))
+                if wps_request.operation in ['getcapabilities',
+                                             'describeprocess',
+                                             'execute']:
+                    log_request(request_uuid, wps_request)
+                    try:
+                        response = None
+                        if wps_request.operation == 'getcapabilities':
+                            response = self.get_capabilities(wps_request, request_uuid)
+                            response._update_status(WPS_STATUS.SUCCEEDED, '', 100)
+
+                        elif wps_request.operation == 'describeprocess':
+                            response = self.describe(wps_request, request_uuid, wps_request.identifiers)
+                            response._update_status(WPS_STATUS.SUCCEEDED, '', 100)
+
+                        elif wps_request.operation == 'execute':
+                            response = self.execute(
+                                wps_request.identifier,
+                                wps_request,
+                                request_uuid
+                            )
+                        return response
+                    except Exception as e:
+                        # This ensure that logged request get terminated in case of exception while the request is not
+                        # accepted
+                        store_status(request_uuid, WPS_STATUS.FAILED, 'Request rejected due to exception', 100)
+                        raise e
+                else:
+                    raise RuntimeError("Unknown operation {}".format(wps_request.operation))
 
         except NoApplicableCode as e:
             return e

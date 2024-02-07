@@ -54,7 +54,7 @@ class ExecuteTest(TestBase):
         total_time = 0
         sleep_time = .01
         while wps.status not in ["ProcessSucceeded", "ProcessFailed"]:
-            resp = client.get(f'{url.path}?{url.query}').data
+            resp = client.open(base_url='/wps', path='/status', method='GET', query_string=url.query).data
             if resp:
                 wps.checkStatus(response=resp, sleepSecs=0.01)
             else:
