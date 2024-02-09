@@ -11,6 +11,10 @@ import shutil
 import sys
 import traceback
 
+from pywps.app.WPSExecuteRequest import WPSExecuteRequest
+from pywps.app.WPSExecuteResponse import WPSExecuteResponse
+from pywps.inout.inputs import input_from_json
+from pywps.inout.outputs import output_from_json
 import pywps.configuration as config
 from pywps import dblog
 from pywps.app.exceptions import ProcessError
@@ -24,8 +28,6 @@ from pywps.exceptions import (
 )
 from pywps.inout.outputs import ComplexOutput
 from pywps.inout.storage.builder import StorageBuilder
-from pywps.response import get_response
-from pywps.response.execute import ExecuteResponse
 from pywps.response.status import WPS_STATUS
 from pywps.translations import lower_case_dict
 
@@ -126,10 +128,10 @@ class Process(object):
 
     def execute(self, wps_request, uuid):
         self._set_uuid(uuid)
-        self._setup_status_storage()
+        if config.get_config_value('server', 'keep_status_file'):
+            self._setup_status_storage()
         self.async_ = False
-        response_cls = get_response("execute")
-        wps_response = response_cls(wps_request, process=self, uuid=self.uuid)
+        wps_response = WPSExecuteResponse(self, wps_request, self.uuid)
 
         LOGGER.debug('Check if status storage and updating are supported by this process')
         if wps_request.store_execute == 'true':
@@ -181,7 +183,8 @@ class Process(object):
 
     @property
     def status_url(self):
-        return self.status_store.url(self.status_filename)
+        base_url = config.get_config_value('server', 'url')
+        return f"{base_url}/status?uuid={self.uuid}"
 
     def _execute_process(self, async_, wps_request, wps_response):
         """
@@ -220,7 +223,7 @@ class Process(object):
                 if stored >= maxprocesses and maxprocesses != -1:
                     raise ServerBusy('Maximum number of processes in queue reached. Please try later.')
                 LOGGER.debug("Store process in job queue, uuid={}".format(self.uuid))
-                dblog.store_process(self.uuid, wps_request)
+                dblog.store_process(self.uuid, wps_request.wps_request)
                 wps_response._update_status(WPS_STATUS.ACCEPTED, 'PyWPS Process stored in job queue', 0)
 
         # not async
@@ -320,11 +323,11 @@ class Process(object):
             new_wps_request.json = json.loads(request_json)
             process_identifier = new_wps_request.identifier
             process = self.service.prepare_process_for_execution(process_identifier)
+            new_wps_request = WPSExecuteRequest(process, new_wps_request)
             process._set_uuid(uuid)
             process._setup_status_storage()
             process.async_ = True
-            process.setup_outputs_from_wps_request(new_wps_request)
-            new_wps_response = ExecuteResponse(new_wps_request, process=process, uuid=uuid)
+            new_wps_response = WPSExecuteResponse(process, new_wps_request, uuid)
             new_wps_response.store_status_file = True
             process._run_async(new_wps_request, new_wps_response)
         except Exception as e:

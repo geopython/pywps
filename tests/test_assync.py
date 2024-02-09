@@ -11,9 +11,7 @@ from pywps import get_ElementMakerForVersion
 from pywps.tests import client_for, assert_response_accepted, assert_response_success
 from processes import Sleep
 from owslib.wps import WPSExecution
-from pathlib import Path
-from tempfile import TemporaryDirectory
-from pywps import dblog
+from urllib.parse import urlparse
 
 VERSION = "1.0.0"
 
@@ -50,13 +48,13 @@ class ExecuteTest(TestBase):
         print(url)
 
         # OWSlib only reads from URLs, not local files. So we need to read the response manually.
-        p = Path(configuration.get_config_value('server', 'outputpath')) / url.split('/')[-1]
+        url = urlparse(url)
 
         # Poll the process until it completes
         total_time = 0
         sleep_time = .01
         while wps.status not in ["ProcessSucceeded", "ProcessFailed"]:
-            resp = p.read_bytes()
+            resp = client.open(base_url='/wps', path='/status', method='GET', query_string=url.query).data
             if resp:
                 wps.checkStatus(response=resp, sleepSecs=0.01)
             else:

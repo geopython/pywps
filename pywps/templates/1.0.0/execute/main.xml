@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
+{% macro safe_attr(name, value) -%}
+{% if value %}{{ name }}="{{value}}"{% endif %}
+{%- endmacro %}
 <wps:ExecuteResponse xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 ../wpsExecute_response.xsd" service="WPS" version="1.0.0" xml:lang="{{ language }}" serviceInstance="{{ service_instance }}" statusLocation="{{ status_location }}">
     <wps:Process wps:processVersion="{{ process.version }}">
         <ows:Identifier>{{ process.identifier }}</ows:Identifier>
@@ -40,7 +43,7 @@
             <ows:Abstract>{{ get_translation(input, "abstract", language) }}</ows:Abstract>
             {% if input.type == "complex" %}
             <wps:Data>
-                    <wps:ComplexData mimeType="{{ input.mimetype }}" encoding="{{ input.encoding }}" schema="{{ input.schema }}">{{ input.data | safe }}</wps:ComplexData>
+                    <wps:ComplexData {{ safe_attr('mimeType', input.mimetype) }} {{ safe_attr('encoding', input.encoding) }} {{ safe_attr('schema', input.schema) }}>{{ input.data | safe }}</wps:ComplexData>
             </wps:Data>
             {% elif input.type == "literal" %}
             <wps:Data>
@@ -48,13 +51,13 @@
             </wps:Data>
             {% elif input.type == "bbox" %}
             <wps:Data>
-                <wps:BoundingBoxData crs="{{ input.crs }}" dimensions="{{ input.dimensions }}">
+                <wps:BoundingBoxData {{ safe_attr('crs', input.crs) }} {{ safe_attr('dimensions', input.dimensions) }}>
                     <ows:LowerCorner>{% for c in input.ll %} {{ c }} {% endfor %}</ows:LowerCorner>
                     <ows:UpperCorner>{% for c in input.ur %} {{ c }} {% endfor %}</ows:UpperCorner>
                 </wps:BoundingBoxData>
             </wps:Data>
             {% elif input.type == "reference" %}
-            <wps:Reference xlink:href="{{ input.href }}" method="{{ input.method }}" mimeType="{{ input.mimetype }}" encoding="{{ input.encoding }}" schema="{{ input.schema }}"/>
+            <wps:Reference {{ safe_attr('xlink:href', input.href) }} {{ safe_attr('method', input.method) }} {{ safe_attr('mimeType', input.mimetype) }} {{ safe_attr('encoding', input.encoding) }} {{ safe_attr('schema', input.schema) }}/>
             {% endif %}
         </wps:Input>
         {% endfor %}
@@ -64,7 +67,7 @@
     <wps:OutputDefinitions>
         {% for output in output_definitions %}
         {% if output.type in ["complex", "reference"] %}
-        <wps:Output mimeType="{{ output.mimetype }}" encoding="{{ output.encoding }}" schema="{{ output.schema }}" asReference="{{ output.asreference }}">
+        <wps:Output {{ safe_attr('mimeType', output.mimetype) }} {{ safe_attr('encoding', output.encoding) }} {{ safe_attr('schema', output.schema) }} {{ safe_attr('asReference', output.asreference) }}>
         {% else %}
         <wps:Output>
         {% endif %}
@@ -84,10 +87,10 @@
             <ows:Title>{{ get_translation(output, "title", language) }}</ows:Title>
             <ows:Abstract>{{ get_translation(output, "abstract", language) }}</ows:Abstract>
             {% if output.type == "reference" %}
-            <wps:Reference href="{{ output.href }}" mimeType="{{ output.mimetype }}" encoding="{{ output.encoding }}" schema="{{ output.schema }}"/>
+            <wps:Reference {{ safe_attr('href', output.href) }} {{ safe_attr('mimeType', output.mimetype) }} {{ safe_attr('encoding', output.encoding) }} {{ safe_attr('schema', output.schema) }}/>
             {% elif output.type == "complex" %}
             <wps:Data>
-                    <wps:ComplexData mimeType="{{ output.mimetype }}" encoding="{{ output.encoding }}" schema="{{ output.schema }}">{{ output.data | safe }}</wps:ComplexData>
+                    <wps:ComplexData {{ safe_attr('mimeType', output.mimetype) }} {{ safe_attr('encoding', output.encoding) }} {{ safe_attr('schema', output.schema) }}>{{ output.data | safe }}</wps:ComplexData>
             </wps:Data>
             {% elif output.type == "literal" %}
             <wps:Data>
@@ -95,7 +98,7 @@
             </wps:Data>
             {% elif output.type == "bbox" %}
             <wps:Data>
-                    <wps:BoundingBoxData crs="{{ output.crs }}" dimensions="{{ output.dimensions }}">
+                    <wps:BoundingBoxData {{ safe_attr('crs', output.crs) }} {{ safe_attr('dimensions', output.dimensions) }}>
                         <ows:LowerCorner>{% for c in output.ll %} {{ c }} {% endfor %}</ows:LowerCorner>
                         <ows:UpperCorner>{% for c in output.ur %} {{ c }} {% endfor %}</ows:UpperCorner>
                     </wps:BoundingBoxData>

@@ -11,6 +11,10 @@ import datetime
 import logging
 import os
 import sys
+import json
+import time
+
+from types import SimpleNamespace
 from multiprocessing import Lock
 
 import sqlalchemy
@@ -40,6 +44,42 @@ Base = declarative_base()
 lock = Lock()
 
 
+class SessionManager:
+    """Implement ref counted session, and close session automaticaly
+
+    This SessionManager allow to call all dblog function recursively
+
+    Usage:
+
+    >>> with current_session as session:
+    ...     [...]
+    ...     pass
+
+    Nested with statement will reuse the session and only one session.close()
+    will be issued and it will be issued in any case, even on return or
+    exception within 'with' statement
+    """
+    def __init__(self):
+        self._session = None
+        self._handler_count = 0
+
+    def __enter__(self):
+        self._handler_count += 1
+        if self._session is None:
+            self._session = get_session()
+        return self._session
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._handler_count -= 1
+        if self._handler_count <= 0:
+            self._session.close()
+            self._session = None
+        return False
+
+
+current_session = SessionManager()
+
+
 class ProcessInstance(Base):
     __tablename__ = '{}requests'.format(_tableprefix)
 
@@ -62,6 +102,17 @@ class RequestInstance(Base):
     request = Column(LargeBinary, nullable=False)
 
 
+class StatusRecord(Base):
+    __tablename__ = '{}status_records'.format(_tableprefix)
+
+    # Process uuid
+    uuid = Column(VARCHAR(255), primary_key=True, nullable=False)
+    # Time stamp for creation time
+    timestamp = Column(DateTime(), nullable=False)
+    # json data used in template
+    data = Column(LargeBinary, nullable=False)
+
+
 def log_request(uuid, request):
     """Write OGC WPS request (only the necessary parts) to database logging
     system
@@ -73,14 +124,12 @@ def log_request(uuid, request):
     time_start = datetime.datetime.now()
     identifier = _get_identifier(request)
 
-    session = get_session()
-    request = ProcessInstance(
-        uuid=str(uuid), pid=pid, operation=operation, version=version,
-        time_start=time_start, identifier=identifier)
-
-    session.add(request)
-    session.commit()
-    session.close()
+    with current_session as session:
+        request = ProcessInstance(
+            uuid=str(uuid), pid=pid, operation=operation, version=version,
+            time_start=time_start, identifier=identifier)
+        session.add(request)
+        session.commit()
     # NoApplicableCode("Could commit to database: {}".format(e.message))
 
 
@@ -88,63 +137,120 @@ def get_process_counts():
     """Returns running and stored process counts and
     """
 
-    session = get_session()
-    stored_query = session.query(RequestInstance.uuid)
-    running_count = (
-        session.query(ProcessInstance)
-        .filter(ProcessInstance.percent_done < 100)
-        .filter(ProcessInstance.percent_done > -1)
-        .filter(~ProcessInstance.uuid.in_(stored_query))
-        .count()
-    )
-    stored_count = stored_query.count()
-    session.close()
-    return running_count, stored_count
+    with current_session as session:
+        stored_query = session.query(RequestInstance.uuid)
+        running_count = (
+            session.query(ProcessInstance)
+            .filter(ProcessInstance.percent_done < 100)
+            .filter(ProcessInstance.percent_done > -1)
+            .filter(~ProcessInstance.uuid.in_(stored_query))
+            .count()
+        )
+        stored_count = stored_query.count()
+        return running_count, stored_count
 
 
 def pop_first_stored():
     """Gets the first stored process and delete it from the stored_requests table
     """
-    session = get_session()
-    request = session.query(RequestInstance).first()
+    with current_session as session:
+        request = session.query(RequestInstance).first()
 
-    if request:
-        delete_count = session.query(RequestInstance).filter_by(uuid=request.uuid).delete()
-        if delete_count == 0:
-            LOGGER.debug("Another thread or process took the same stored request")
-            request = None
+        if request:
+            delete_count = session.query(RequestInstance).filter_by(uuid=request.uuid).delete()
+            if delete_count == 0:
+                LOGGER.debug("Another thread or process took the same stored request")
+                request = None
 
-        session.commit()
-    return request
+            session.commit()
+        return request
 
 
 def store_status(uuid, wps_status, message=None, status_percentage=None):
     """Writes response to database
     """
-    session = get_session()
+    with current_session as session:
+        requests = session.query(ProcessInstance).filter_by(uuid=str(uuid))
+        if requests.count():
+            request = requests.one()
+            request.time_end = datetime.datetime.now()
+            request.message = str(message)
+            request.percent_done = status_percentage
+            request.status = wps_status
+            session.commit()
 
-    requests = session.query(ProcessInstance).filter_by(uuid=str(uuid))
-    if requests.count():
-        request = requests.one()
-        request.time_end = datetime.datetime.now()
-        request.message = str(message)
-        request.percent_done = status_percentage
-        request.status = wps_status
+
+# Update or create a store instance
+def update_status_record(uuid, data):
+    with current_session as session:
+        r = session.query(StatusRecord).filter_by(uuid=str(uuid))
+        if r.count():
+            status_record = r.one()
+            status_record.timestamp = datetime.datetime.now()
+            status_record.data = json.dumps(data).encode("utf-8")
+        else:
+            status_record = StatusRecord(
+                uuid=str(uuid),
+                timestamp=datetime.datetime.now(),
+                data=json.dumps(data).encode("utf-8")
+            )
+            session.add(status_record)
         session.commit()
-    session.close()
+
+
+def force_failed_status(uuid):
+    with current_session as session:
+        r = session.query(StatusRecord).filter_by(uuid=str(uuid))
+        if r.count() < 1:
+            return
+        status_record = r.one()
+        data = json.loads(status_record.data.decode("utf-8"))
+        data['status'] = {
+            "status": "failed",
+            "time": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime()),
+            "message": "Process has crashed"
+        }
+        status_record.timestamp = datetime.datetime.now()
+        status_record.data = json.dumps(data).encode("utf-8")
+        session.commit()
+
+
+# Get store instance data from uuid
+def get_status_record(uuid):
+    with current_session as session:
+        if sys.platform == "linux":
+            # Check if the current process is fail
+            r = session.query(ProcessInstance).filter_by(uuid=str(uuid))
+            # If no process instance is found then there is no status records
+            if r.count() < 1:
+                return None
+            process_record = r.one()
+            if process_record.status not in {WPS_STATUS.FAILED, WPS_STATUS.SUCCEEDED}:
+                if not os.path.exists(os.path.join("/proc", str(process_record.pid))):
+                    store_status(process_record.uuid, WPS_STATUS.FAILED, "Process crashed", 100)
+                    force_failed_status(process_record.uuid)
+
+        r = session.query(StatusRecord).filter_by(uuid=str(uuid))
+        if r.count() < 1:
+            return None
+        status_record = r.one()
+        # Ensure new item to avoid change in database
+        # FIXME: There is a better solution ?
+        attrs = ["uuid", "timestamp", "data"]
+        status_record = SimpleNamespace(**{k: getattr(status_record, k) for k in attrs})
+        status_record.data = json.loads(status_record.data.decode("utf-8"))
+        return status_record
 
 
 def update_pid(uuid, pid):
     """Update actual pid for the uuid processing
     """
-    session = get_session()
-
-    requests = session.query(ProcessInstance).filter_by(uuid=str(uuid))
-    if requests.count():
-        request = requests.one()
-        request.pid = pid
-        session.commit()
-    session.close()
+    with current_session as session:
+        requests = session.query(ProcessInstance).filter_by(uuid=str(uuid))
+        if requests.count():
+            request = requests.one()
+            request.pid = pid
+            session.commit()
 
 
 def cleanup_crashed_process():
@@ -152,34 +258,32 @@ def cleanup_crashed_process():
     if sys.platform != "linux":
         return
 
-    session = get_session()
-    stored_query = session.query(RequestInstance.uuid)
-    running_cur = (
-        session.query(ProcessInstance)
-        .filter(ProcessInstance.status.in_([WPS_STATUS.STARTED, WPS_STATUS.PAUSED]))
-        .filter(~ProcessInstance.uuid.in_(stored_query))
-    )
+    with current_session as session:
+        stored_query = session.query(RequestInstance.uuid)
+        running_cur = (
+            session.query(ProcessInstance)
+            .filter(ProcessInstance.status.in_([WPS_STATUS.STARTED, WPS_STATUS.PAUSED]))
+            .filter(~ProcessInstance.uuid.in_(stored_query))
+        )
 
-    failed = []
-    running = [(p.uuid, p.pid) for p in running_cur]
-    for uuid, pid in running:
-        # No process with this pid, the process has crashed
-        if not os.path.exists(os.path.join("/proc", str(pid))):
-            failed.append(uuid)
-            continue
+        failed = []
+        running = [(p.uuid, p.pid) for p in running_cur]
+        for uuid, pid in running:
+            # No process with this pid, the process has crashed
+            if not os.path.exists(os.path.join("/proc", str(pid))):
+                failed.append(uuid)
+                continue
 
-        # If we can't read the environ, that mean the process belong another user
-        # which mean that this is not our process, thus our process has crashed
-        # this not work because root is the user for the apache
-        # if not os.access(os.path.join("/proc", str(pid), "environ"), os.R_OK):
-        #     failed.append(uuid)
-        #     continue
-        pass
+            # If we can't read the environ, that mean the process belong another user
+            # which mean that this is not our process, thus our process has crashed
+            # this not work because root is the user for the apache
+            # if not os.access(os.path.join("/proc", str(pid), "environ"), os.R_OK):
+            #     failed.append(uuid)
+            #     continue
+            pass
 
-    for uuid in failed:
-        store_status(uuid, WPS_STATUS.FAILED, "Process crashed", 100)
-
-    session.close()
+        for uuid in failed:
+            store_status(uuid, WPS_STATUS.FAILED, "Process crashed", 100)
 
 
 def _get_identifier(request):
@@ -238,6 +342,7 @@ def get_session():
         Session = sessionmaker(bind=engine)
         ProcessInstance.metadata.create_all(engine)
         RequestInstance.metadata.create_all(engine)
+        StatusRecord.metadata.create_all(engine)
 
         _SESSION_MAKER_DATABASE = database
         _SESSION_MAKER = Session
@@ -249,11 +354,10 @@ def store_process(uuid, request):
     """Save given request under given UUID for later usage
     """
 
-    session = get_session()
-    request_json = request.json
-    # the BLOB type requires bytes on Python 3
-    request_json = request_json.encode('utf-8')
-    request = RequestInstance(uuid=str(uuid), request=request_json)
-    session.add(request)
-    session.commit()
-    session.close()
+    with current_session as session:
+        request_json = request.json
+        # the BLOB type requires bytes on Python 3
+        request_json = request_json.encode('utf-8')
+        request = RequestInstance(uuid=str(uuid), request=request_json)
+        session.add(request)
+        session.commit()

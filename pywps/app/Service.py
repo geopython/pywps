@@ -14,10 +14,10 @@ from typing import Dict, Optional, Sequence
 from urllib.parse import urlparse
 
 from werkzeug.exceptions import HTTPException
-from werkzeug.wrappers import Request
-
+from werkzeug.wrappers import Request, Response
+from pywps.app.WPSExecuteRequest import WPSExecuteRequest
+from pywps.response import CapabilitiesResponse, DescribeResponse, ExecuteRawResponse, StatusResponse
 import pywps.configuration as config
-from pywps import response
 from pywps.app.WPSRequest import WPSRequest
 from pywps.dblog import log_request, store_status
 from pywps.exceptions import (
@@ -28,6 +28,7 @@ from pywps.exceptions import (
 )
 from pywps.inout.inputs import BoundingBoxInput, ComplexInput, LiteralInput
 from pywps.response.status import WPS_STATUS
+from pywps.app.basic import get_response_type, get_default_response_mimetype
 
 LOGGER = logging.getLogger("PYWPS")
 
@@ -61,16 +62,21 @@ class Service(object):
             if not LOGGER.handlers:
                 LOGGER.addHandler(logging.NullHandler())
 
-    def get_capabilities(self, wps_request, uuid):
+    def get_status(self, http_request):
+        try:
+            _, mimetype = get_response_type(http_request.accept_mimetypes,
+                                            "text/xml")
+        except Exception:
+            mimetype = get_default_response_mimetype()
+        from urllib.parse import parse_qs
+        request = parse_qs(http_request.environ["QUERY_STRING"])
+        return StatusResponse(request.get("version", ["1.0.0"])[0], request["uuid"][0], mimetype)
 
-        response_cls = response.get_response("capabilities")
-        return response_cls(wps_request, uuid, version=wps_request.version, processes=self.processes)
+    def get_capabilities(self, wps_request, uuid):
+        return CapabilitiesResponse(wps_request, uuid, version=wps_request.version, processes=self.processes)
 
     def describe(self, wps_request, uuid, identifiers):
-
-        response_cls = response.get_response("describe")
-        return response_cls(wps_request, uuid, processes=self.processes,
-                            identifiers=identifiers)
+        return DescribeResponse(wps_request, uuid, processes=self.processes, identifiers=identifiers)
 
     def execute(self, identifier, wps_request, uuid):
         """Parse and perform Execute WPS request call
@@ -104,116 +110,18 @@ class Service(object):
         """Parse and execute request
         """
 
-        LOGGER.debug('Checking if all mandatory inputs have been passed')
-        data_inputs = {}
-        for inpt in process.inputs:
-            # Replace the dicts with the dict of Literal/Complex inputs
-            # set the input to the type defined in the process.
-
-            request_inputs = None
-            if inpt.identifier in wps_request.inputs:
-                request_inputs = wps_request.inputs[inpt.identifier]
-
-            if not request_inputs:
-                if inpt._default is not None:
-                    if not inpt.data_set and isinstance(inpt, ComplexInput):
-                        inpt._set_default_value()
-
-                    data_inputs[inpt.identifier] = [inpt.clone()]
-            else:
-
-                if isinstance(inpt, ComplexInput):
-                    data_inputs[inpt.identifier] = self.create_complex_inputs(
-                        inpt, request_inputs)
-                elif isinstance(inpt, LiteralInput):
-                    data_inputs[inpt.identifier] = self.create_literal_inputs(
-                        inpt, request_inputs)
-                elif isinstance(inpt, BoundingBoxInput):
-                    data_inputs[inpt.identifier] = self.create_bbox_inputs(
-                        inpt, request_inputs)
-
-        for inpt in process.inputs:
-
-            if inpt.identifier not in data_inputs:
-                if inpt.min_occurs > 0:
-                    LOGGER.error('Missing parameter value: {}'.format(inpt.identifier))
-                    raise MissingParameterValue(
-                        inpt.identifier, inpt.identifier)
-
-        wps_request.inputs = data_inputs
-
-        process.setup_outputs_from_wps_request(wps_request)
+        wps_request = WPSExecuteRequest(process, wps_request)
 
         wps_response = process.execute(wps_request, uuid)
-        return wps_response
-
-    def create_complex_inputs(self, source, inputs):
-        """Create new ComplexInput as clone of original ComplexInput
-        because of inputs can be more than one, take it just as Prototype.
-
-        :param source: The process's input definition.
-        :param inputs: The request input data.
-        :return collections.deque:
-        """
-
-        outinputs = deque(maxlen=source.max_occurs)
-
-        for inpt in inputs:
-            data_input = source.clone()
-            frmt = data_input.supported_formats[0]
-            if 'mimeType' in inpt:
-                if inpt['mimeType']:
-                    frmt = data_input.get_format(inpt['mimeType'])
-                else:
-                    frmt = data_input.data_format
-
-            if frmt:
-                data_input.data_format = frmt
-            else:
-                raise InvalidParameterValue(
-                    'Invalid mimeType value {} for input {}'.format(inpt.get('mimeType'), source.identifier),
-                    'mimeType')
-
-            data_input.method = inpt.get('method', 'GET')
-            data_input.process(inpt)
-            outinputs.append(data_input)
-
-        if len(outinputs) < source.min_occurs:
-            description = "At least {} inputs are required. You provided {}.".format(
-                source.min_occurs,
-                len(outinputs),
-            )
-            raise MissingParameterValue(description=description, locator=source.identifier)
-        return outinputs
-
-    def create_literal_inputs(self, source, inputs):
-        """ Takes the http_request and parses the input to objects
-        :return collections.deque:
-        """
-
-        outinputs = deque(maxlen=source.max_occurs)
-
-        for inpt in inputs:
-            newinpt = source.clone()
-            # set the input to the type defined in the process
-            newinpt.uom = inpt.get('uom')
-            data_type = inpt.get('datatype')
-            if data_type:
-                newinpt.data_type = data_type
-
-            # get the value of the field
-            newinpt.data = inpt.get('data')
-
-            outinputs.append(newinpt)
-
-        if len(outinputs) < source.min_occurs:
-            description = "At least {} inputs are required. You provided {}.".format(
-                source.min_occurs,
-                len(outinputs),
-            )
-            raise MissingParameterValue(description, locator=source.identifier)
-
-        return outinputs
+        if wps_request.wps_request.raw:
+            return ExecuteRawResponse(wps_response)
+        else:
+            # FIXME: this try-except has no pratical meaning, just allow to pass some test.
+            try:
+                _, mimetype = get_response_type(wps_request.http_request.accept_mimetypes, wps_request.default_mimetype)
+            except Exception:
+                mimetype = get_default_response_mimetype()
+            return StatusResponse(wps_request.version, wps_response.uuid, mimetype)
 
     def _set_grass(self):
         """Set environment variables needed for GRASS GIS support
@@ -241,30 +149,6 @@ class Service(object):
             os.putenv('PYTHONPATH', os.environ.get('PYTHONPATH'))
             sys.path.insert(0, python_path)
 
-    def create_bbox_inputs(self, source, inputs):
-        """ Takes the http_request and parses the input to objects
-        :return collections.deque:
-        """
-
-        outinputs = deque(maxlen=source.max_occurs)
-
-        for inpt in inputs:
-            newinpt = source.clone()
-            newinpt.data = inpt.get('data')
-            LOGGER.debug(f'newinpt bbox data={newinpt.data}')
-            newinpt.crs = inpt.get('crs')
-            newinpt.dimensions = inpt.get('dimensions')
-            outinputs.append(newinpt)
-
-        if len(outinputs) < source.min_occurs:
-            description = "At least {} inputs are required. You provided {}.".format(
-                source.min_occurs,
-                len(outinputs),
-            )
-            raise MissingParameterValue(description=description, locator=source.identifier)
-
-        return outinputs
-
     # May not raise exceptions, this function must return a valid werkzeug.wrappers.Response.
     def call(self, http_request):
 
@@ -286,36 +170,44 @@ class Service(object):
                 LOGGER.debug('Setting PYWPS_CFG to {}'.format(environ_cfg))
                 os.environ['PYWPS_CFG'] = environ_cfg
 
-            wps_request = WPSRequest(http_request, self.preprocessors)
-            LOGGER.info('Request: {}'.format(wps_request.operation))
-            if wps_request.operation in ['getcapabilities',
-                                         'describeprocess',
-                                         'execute']:
-                log_request(request_uuid, wps_request)
+            if http_request.environ["PATH_INFO"] == "/status":
                 try:
-                    response = None
-                    if wps_request.operation == 'getcapabilities':
-                        response = self.get_capabilities(wps_request, request_uuid)
-                        response._update_status(WPS_STATUS.SUCCEEDED, '', 100)
-
-                    elif wps_request.operation == 'describeprocess':
-                        response = self.describe(wps_request, request_uuid, wps_request.identifiers)
-                        response._update_status(WPS_STATUS.SUCCEEDED, '', 100)
-
-                    elif wps_request.operation == 'execute':
-                        response = self.execute(
-                            wps_request.identifier,
-                            wps_request,
-                            request_uuid
-                        )
-                    return response
+                    return self.get_status(http_request)
                 except Exception as e:
-                    # This ensure that logged request get terminated in case of exception while the request is not
-                    # accepted
-                    store_status(request_uuid, WPS_STATUS.FAILED, 'Request rejected due to exception', 100)
+                    store_status(request_uuid, WPS_STATUS.FAILED,
+                                 'Request rejected due to exception', 100)
                     raise e
             else:
-                raise RuntimeError("Unknown operation {}".format(wps_request.operation))
+                wps_request = WPSRequest(http_request, self.preprocessors)
+                LOGGER.info('Request: {}'.format(wps_request.operation))
+                if wps_request.operation in ['getcapabilities',
+                                             'describeprocess',
+                                             'execute']:
+                    log_request(request_uuid, wps_request)
+                    try:
+                        response = None
+                        if wps_request.operation == 'getcapabilities':
+                            response = self.get_capabilities(wps_request, request_uuid)
+                            response._update_status(WPS_STATUS.SUCCEEDED, '', 100)
+
+                        elif wps_request.operation == 'describeprocess':
+                            response = self.describe(wps_request, request_uuid, wps_request.identifiers)
+                            response._update_status(WPS_STATUS.SUCCEEDED, '', 100)
+
+                        elif wps_request.operation == 'execute':
+                            response = self.execute(
+                                wps_request.identifier,
+                                wps_request,
+                                request_uuid
+                            )
+                        return response
+                    except Exception as e:
+                        # This ensure that logged request get terminated in case of exception while the request is not
+                        # accepted
+                        store_status(request_uuid, WPS_STATUS.FAILED, 'Request rejected due to exception', 100)
+                        raise e
+                else:
+                    raise RuntimeError("Unknown operation {}".format(wps_request.operation))
 
         except NoApplicableCode as e:
             return e

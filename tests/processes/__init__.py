@@ -33,6 +33,8 @@ class Greeter(Process):
     def __init__(self):
         super(Greeter, self).__init__(
             self.greeter,
+            store_supported="true",
+            status_supported="true",
             identifier='greeter',
             title='Greeter',
             inputs=[LiteralInput('name', 'Input name', data_type='string')],

@@ -19,6 +19,7 @@ from pywps import E, get_ElementMakerForVersion
 from pywps.app.basic import get_xpath_ns
 from pywps.tests import client_for, assert_response_success, assert_response_success_json
 from pywps import configuration
+from pywps.app.WPSExecuteRequest import WPSExecuteRequest
 
 from io import StringIO
 
@@ -319,7 +320,7 @@ class ExecuteTest(TestBase):
             self.assertEqual(e.locator, 'mimeType')
 
         request.inputs['complex'][0]['mimeType'] = 'application/gml'
-        parsed_inputs = service.create_complex_inputs(my_process.inputs[0],
+        parsed_inputs = WPSExecuteRequest.create_complex_inputs(my_process.inputs[0],
                                                       request.inputs['complex'])
 
         # TODO parse outputs and their validators too
@@ -328,7 +329,7 @@ class ExecuteTest(TestBase):
 
         request.inputs['complex'][0]['mimeType'] = 'application/xml+gml'
         try:
-            parsed_inputs = service.create_complex_inputs(my_process.inputs[0],
+            parsed_inputs = WPSExecuteRequest.create_complex_inputs(my_process.inputs[0],
                                                           request.inputs['complex'])
         except InvalidParameterValue as e:
             self.assertEqual(e.locator, 'mimeType')
@@ -343,7 +344,7 @@ class ExecuteTest(TestBase):
 
         my_process.inputs[0].supported_formats = [frmt]
         my_process.inputs[0].data_format = Format(mime_type='application/xml+gml')
-        parsed_inputs = service.create_complex_inputs(my_process.inputs[0],
+        parsed_inputs = WPSExecuteRequest.create_complex_inputs(my_process.inputs[0],
                                                       request.inputs['complex'])
 
         self.assertEqual(parsed_inputs[0].data_format.validate, validategml)
@@ -369,7 +370,8 @@ class ExecuteTest(TestBase):
             language = "en-US"
 
         request = FakeRequest()
-        response = service.execute('my_complex_process', request, 'fakeuuid')
+        request = WPSExecuteRequest(my_process, request)
+        response = my_process.execute(request, 'fakeuuid')
         self.assertEqual(response.outputs['complex'].data, 'DEFAULT COMPLEX DATA')
 
     def test_output_mimetype(self):
@@ -400,13 +402,15 @@ class ExecuteTest(TestBase):
 
         # valid mimetype
         request = FakeRequest('text/plain+test')
-        response = service.execute('get_mimetype_process', request, 'fakeuuid')
+        request = WPSExecuteRequest(my_process, request)
+        response = my_process.execute(request, 'fakeuuid')
         self.assertEqual(response.outputs['mimetype'].data, 'text/plain+test')
 
         # non valid mimetype
         request = FakeRequest('text/xml')
         with self.assertRaises(InvalidParameterValue):
-            response = service.execute('get_mimetype_process', request, 'fakeuuid')
+            request = WPSExecuteRequest(my_process, request)
+            response = my_process.execute(request, 'fakeuuid')
 
     def test_metalink(self):
         client = client_for(Service(processes=[create_metalink_process()]))
