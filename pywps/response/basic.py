@@ -5,7 +5,7 @@ if TYPE_CHECKING:
     from pywps import WPSRequest
 
 from pywps.dblog import store_status
-from .status import WPS_STATUS
+from pywps.response.status import WPS_STATUS
 import os
 
 from jinja2 import Environment, PackageLoader
