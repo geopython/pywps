@@ -175,7 +175,7 @@ def load_configuration(cfgfiles=None):
     :param cfgfiles: list of configuration files
     """
 
-    global CONFIG
+    global CONFIG  # noqa
 
     load_hardcoded_configuration()
 
@@ -200,7 +200,7 @@ def load_configuration(cfgfiles=None):
 def _check_config():
     """Check some configuration values
     """
-    global CONFIG
+    global CONFIG  # noqa
 
     def checkdir(confid):
 
