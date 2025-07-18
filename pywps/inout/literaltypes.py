@@ -32,7 +32,7 @@ def register_convert_type(name):
     """
 
     def _register_convert_type(function):
-        global LITERAL_DATA_TYPES
+        global LITERAL_DATA_TYPES  # noqa
         LITERAL_DATA_TYPES[name] = function
         return function
 
