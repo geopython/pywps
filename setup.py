@@ -49,7 +49,6 @@ CONFIG = {
         "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
@@ -59,7 +58,7 @@ CONFIG = {
     "extras_require": dict(
         dev=DEV_REQUIRES,
     ),
-    "python_requires": ">=3.8,<4",
+    "python_requires": ">=3.9,<4",
     "packages": find_packages(exclude=["docs", "tests.*", "tests"]),
     "include_package_data": True,
     "scripts": [],
