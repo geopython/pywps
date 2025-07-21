@@ -123,6 +123,7 @@ def load_hardcoded_configuration():
     CONFIG.set('processing', 'mode', 'default')
     CONFIG.set('processing', 'path', os.path.dirname(os.path.realpath(sys.argv[0])))
     CONFIG.set('processing', 'drmaa_native_specification', '')
+    CONFIG.set('processing', 'multiprocessing_start_method', '')
 
     CONFIG.add_section('logging')
     CONFIG.set('logging', 'file', '')

@@ -94,5 +94,12 @@ from pywps.inout.formats import FORMATS, Format, get_format
 from pywps.inout.inputs import BoundingBoxInput, ComplexInput, LiteralInput
 from pywps.inout.outputs import BoundingBoxOutput, ComplexOutput, LiteralOutput
 
+
+# apply patch for multiprocessing issue
+from pywps._multiprocessing_patch import patch_multiprocessing_start_method
+
+patch_multiprocessing_start_method()
+
+
 if __name__ == "__main__":
     pass
