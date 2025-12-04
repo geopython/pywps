@@ -17,4 +17,7 @@ dependencies:
  - geotiff
  # tests
  - pytest
+ - ruff >=0.5.7
+ # docs
+ - sphinx >=7.0.0
  
