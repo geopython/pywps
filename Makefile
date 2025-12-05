@@ -71,7 +71,7 @@ clean-docs: ## remove documentation artifacts
 
 lint: ## check style with ruff
 	@echo "Running code style checks ..."
-	@bash -c 'ruff check src tests docs'
+	@bash -c 'ruff check pywps'
 
 ## Testing targets:
 
