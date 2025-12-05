@@ -11,17 +11,26 @@ the Open Geospatial Consortium. PyWPS is written in Python.
 
 [![Join the chat at https://gitter.im/geopython/pywps](https://badges.gitter.im/geopython/pywps.svg)](https://gitter.im/geopython/pywps?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-# License
+## License
 
 As of PyWPS 4.0.0, PyWPS is released under an
 [MIT](https://en.wikipedia.org/wiki/MIT_License) license
 (see [LICENSE.txt](LICENSE.txt)).
 
-# Dependencies
+## Dependencies
 
 See [requirements.txt](requirements.txt) file
 
-# Run tests
+## Install
+
+Install it from GitHub:
+```bash
+$ git clone https://github.com/geopython/pywps.git
+$ cd pywps/
+$ pip install .
+```
+
+## Run tests
 
 ```bash
 pip install -r requirements-dev.txt
@@ -32,9 +41,13 @@ python -m coverage run --source=pywps -m unittest tests
 python -m coverage report -m
 ```
 
-# Run web application
+## Quick Guide with Conda
 
-## Example service
+Using git 
+
+## Run web application
+
+### Example service
 
 Clone the example service after having installed PyWPS:
 
@@ -44,7 +57,9 @@ cd pywps-flask
 python demo.py
 ```
 
-## Apache configuration
+Access example service: http://localhost:5000
+
+### Apache configuration
 
 1. Enable WSGI extension
 
@@ -92,7 +107,7 @@ python demo.py
     ```
 
 
-# Issues
+## Issues
 
 On Windows PyWPS does not support multiprocessing which is used when making
 requests storing the response document and updating the status to displaying
