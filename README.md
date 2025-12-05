@@ -43,7 +43,31 @@ python -m coverage report -m
 
 ## Quick Guide with Conda
 
-Using git 
+Checkout source from GitHub:
+```bash
+$ git clone https://github.com/geopython/pywps.git
+$ cd pywps/
+```
+
+Build conda environment:
+```bash
+conda env create -f environment.yml
+```
+
+Install pywps:
+```bash
+make install
+```
+
+Or the development version:
+```bash
+make develop
+```
+
+Run tests:
+```bash
+make tests
+```
 
 ## Run web application
 
