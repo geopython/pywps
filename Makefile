@@ -95,10 +95,10 @@ docs: clean-docs ## generate Sphinx HTML documentation, including API docs
 
 ## Deployment targets:
 
-dist: clean ## builds source and wheel package
-	python -m flit build
-	ls -l dist
+# dist: clean ## builds source and wheel package
+# 	python -m flit build
+# 	ls -l dist
 
-release: dist ## package and upload a release
-	python -m flit publish dist/*
+# release: dist ## package and upload a release
+# 	python -m flit publish dist/*
 
