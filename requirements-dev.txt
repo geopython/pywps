@@ -2,7 +2,7 @@ bump2version
 coverage
 coveralls
 docutils
-flake8
+ruff
 pylint
 pytest
 pytest-cov

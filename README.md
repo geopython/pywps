@@ -7,21 +7,31 @@ the Open Geospatial Consortium. PyWPS is written in Python.
 [![Build Status](https://github.com/geopython/pywps/actions/workflows/main.yml/badge.svg)](https://github.com/geopython/pywps/actions/workflows/main.yml)
 [![Coverage Status](https://coveralls.io/repos/github/geopython/pywps/badge.svg?branch=main)](https://coveralls.io/github/geopython/pywps?branch=main)
 [![PyPI](https://img.shields.io/pypi/dm/pywps.svg)](https://pypi.org/project/pywps/)
+[![Conda](https://anaconda.org/conda-forge/pywps/badges/version.svg)](https://anaconda.org/channels/conda-forge/packages/pywps/overview)
 [![GitHub license](https://img.shields.io/github/license/geopython/pywps.svg)]()
 
 [![Join the chat at https://gitter.im/geopython/pywps](https://badges.gitter.im/geopython/pywps.svg)](https://gitter.im/geopython/pywps?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-# License
+## License
 
 As of PyWPS 4.0.0, PyWPS is released under an
 [MIT](https://en.wikipedia.org/wiki/MIT_License) license
 (see [LICENSE.txt](LICENSE.txt)).
 
-# Dependencies
+## Dependencies
 
 See [requirements.txt](requirements.txt) file
 
-# Run tests
+## Install
+
+Install it from GitHub:
+```bash
+$ git clone https://github.com/geopython/pywps.git
+$ cd pywps/
+$ pip install .
+```
+
+## Run tests
 
 ```bash
 pip install -r requirements-dev.txt
@@ -32,9 +42,37 @@ python -m coverage run --source=pywps -m unittest tests
 python -m coverage report -m
 ```
 
-# Run web application
+## Quick Guide with Conda
 
-## Example service
+Checkout source from GitHub:
+```bash
+$ git clone https://github.com/geopython/pywps.git
+$ cd pywps/
+```
+
+Build conda environment:
+```bash
+conda env create -f environment.yml
+```
+
+Install pywps:
+```bash
+make install
+```
+
+Or the development version:
+```bash
+make develop
+```
+
+Run tests:
+```bash
+make tests
+```
+
+## Run web application
+
+### Example service
 
 Clone the example service after having installed PyWPS:
 
@@ -44,7 +82,9 @@ cd pywps-flask
 python demo.py
 ```
 
-## Apache configuration
+Access example service: http://localhost:5000
+
+### Apache configuration
 
 1. Enable WSGI extension
 
@@ -92,7 +132,7 @@ python demo.py
     ```
 
 
-# Issues
+## Issues
 
 On Windows PyWPS does not support multiprocessing which is used when making
 requests storing the response document and updating the status to displaying

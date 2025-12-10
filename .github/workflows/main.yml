@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.9"
+          python-version: "3.10"
       - name: Install tox
         run: |
           pip install tox>=4.0
@@ -33,12 +33,14 @@ jobs:
     strategy:
       matrix:
         include:
-          - tox-env: py39-extra
-            python-version: "3.9"
           - tox-env: py310-extra
             python-version: "3.10"
           - tox-env: py311-extra
             python-version: "3.11"
+          - tox-env: py312-extra
+            python-version: "3.12"
+          - tox-env: py313-extra
+            python-version: "3.13"
     steps:
     - uses: actions/checkout@v4
     - name: Install packages 📦
@@ -54,7 +56,7 @@ jobs:
     - name: Run tests with tox ⚙️
       run: tox -e ${{ matrix.tox-env }}
     - name: Run coveralls ⚙️
-      if: matrix.python-version == 3.9
+      if: matrix.python-version == 3.10
       uses: AndreMiras/coveralls-python-action@develop
 
   docs:
@@ -64,9 +66,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        name: Setup Python 3.9
+        name: Setup Python 3.10
         with:
-          python-version: 3.9
+          python-version: "3.10"
       - name: Build documentation 🏗️
         run: |
           pip install -e .[dev]

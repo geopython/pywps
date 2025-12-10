@@ -223,7 +223,7 @@ def validategeojson(data_input, mode):
     >>> from io import StringIO
     >>> class FakeInput(object):
     ...     json = open('point.geojson','w')
-    ...     json.write('''{"type":"Feature", "properties":{}, "geometry":{"type":"Point", "coordinates":[8.5781228542328, 22.87500500679]}, "crs":{"type":"name", "properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}}}''')  # noqa
+    ...     json.write('''{"type":"Feature", "properties":{}, "geometry":{"type":"Point", "coordinates":[8.5781228542328, 22.87500500679]}, "crs":{"type":"name", "properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}}}''')
     ...     json.close()
     ...     file = 'point.geojson'
     >>> class FakeDataFormat(object):
@@ -232,7 +232,7 @@ def validategeojson(data_input, mode):
     >>> fake_input.data_format = FakeDataFormat()
     >>> validategeojson(fake_input, MODE.SIMPLE)
     True
-    """
+    """ # noqa
 
     LOGGER.info('validating GeoJSON; Mode: {}'.format(mode))
     passed = False
