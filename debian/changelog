@@ -1,3 +1,16 @@
+pywps (4.7.0) trusty; urgency=medium
+
+  * Skipped support for Python 3.8 and 3.9.
+  * Added support for Python 3.12 and 3.13.
+  * Security upgrade of numpy (#695) and urllib (#693).
+  * Added conda support (#696).
+  * Fixed linting (#694).
+  * Reconfigure CI and documentation (#692).
+  * Improve the content of default-config.cfg (#691).
+  * Uniform tab/spaces in WPS templates (#690).
+  
+ -- Carsten Ehbrecht <ehbrecht@dkrz.de>  Wed, 11 Dec 2025 18:00:00 +0000
+
 pywps (4.6.0) trusty; urgency=medium
 
   * Skip support for Python 3.7
