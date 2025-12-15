@@ -235,6 +235,7 @@ def get_output(doc):
 class ExecuteTest(TestBase):
     """Test for Exeucte request KVP request"""
 
+    @pytest.mark.online
     @pytest.mark.xfail(reason="test.opendap.org is offline")
     def test_dods(self):
         if not WITH_NC4:
