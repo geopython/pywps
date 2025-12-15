@@ -9,7 +9,7 @@ pywps (4.7.0) trusty; urgency=medium
   * Improve the content of default-config.cfg (#691).
   * Uniform tab/spaces in WPS templates (#690).
   
- -- Carsten Ehbrecht <ehbrecht@dkrz.de>  Wed, 11 Dec 2025 18:00:00 +0000
+ -- Carsten Ehbrecht <ehbrecht@dkrz.de>  Mon, 15 Dec 2025 18:00:00 +0000
 
 pywps (4.6.0) trusty; urgency=medium
 
