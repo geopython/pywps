@@ -64,3 +64,12 @@ class DetachProcessing(Processing):
             pass
         # Ensure to stop ourself here what ever append.
         os._exit(0)
+
+
+class NoAsyncProcessing(Processing):
+    """
+    :class:`NoAsyncProcessing` Faking multiprocessing for testing purpose
+    """
+
+    def start(self):
+        getattr(self.job.process, self.job.method)(self.job.wps_request, self.job.wps_response)

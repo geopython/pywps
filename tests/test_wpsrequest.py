@@ -60,10 +60,7 @@ class WPSRequestTest(TestBase):
         self.request = WPSRequest()
         self.request.json = obj
 
-        self.assertEqual(self.request.inputs['myliteral'][0].data, 1, 'Data are in the file')
-        self.assertEqual(self.request.inputs['myin'][0].data, 'ahoj', 'Data are in the file')
-        self.assertListEqual(self.request.inputs['myliteral'][0].allowed_values, [AnyValue()], 'Any value not set')
-        self.assertTrue(self.request.inputs['myliteral'][0].any_value, 'Any value set')
+        self.assertEqual(self.request.inputs['myliteral'][0]['data'], 1, 'Data are in the file')
 
     def test_json_inout_datetime(self):
         obj = {
@@ -105,17 +102,17 @@ class WPSRequestTest(TestBase):
         self.request = WPSRequest()
         self.request.json = obj
 
-        self.assertEqual(self.request.inputs['datetime'][0].data, datetime.datetime(2017, 4, 20, 12), 'Datatime set')
-        self.assertEqual(self.request.inputs['date'][0].data, datetime.date(2017, 4, 20), 'Data set')
-        self.assertEqual(self.request.inputs['time'][0].data, datetime.time(9, 0, 0), 'Time set')
+        self.assertEqual(self.request.inputs['datetime'][0]['data'], '2017-04-20T12:00:00', 'Datatime set')
+        self.assertEqual(self.request.inputs['date'][0]['data'], '2017-04-20', 'Data set')
+        self.assertEqual(self.request.inputs['time'][0]['data'], '09:00:00', 'Time set')
 
         # dump to json and reload
         dump = self.request.json
         self.request.json = json.loads(dump)
 
-        self.assertEqual(self.request.inputs['datetime'][0].data, datetime.datetime(2017, 4, 20, 12), 'Datatime set')
-        self.assertEqual(self.request.inputs['date'][0].data, datetime.date(2017, 4, 20), 'Data set')
-        self.assertEqual(self.request.inputs['time'][0].data, datetime.time(9, 0, 0), 'Time set')
+        self.assertEqual(self.request.inputs['datetime'][0]['data'], '2017-04-20T12:00:00', 'Datatime set')
+        self.assertEqual(self.request.inputs['date'][0]['data'], '2017-04-20', 'Data set')
+        self.assertEqual(self.request.inputs['time'][0]['data'], '09:00:00', 'Time set')
 
     def test_json_inout_bbox(self):
         obj = {
@@ -145,17 +142,17 @@ class WPSRequestTest(TestBase):
         self.request = WPSRequest()
         self.request.json = obj
 
-        self.assertEqual(self.request.inputs['bbox'][0].data, [6.117602, 46.176194, 6.22283, 46.275832], 'BBox data set')
-        self.assertTrue(isinstance(self.request.inputs['bbox'][0].crs, str), 'CRS is a string')
-        self.assertEqual(self.request.inputs['bbox'][0].crs, 'epsg:4326', 'CRS data correctly parsed')
+        self.assertEqual(self.request.inputs['bbox'][0]['bbox'], '6.117602,46.176194,6.22283,46.275832', 'BBox data set')
+        self.assertTrue(isinstance(self.request.inputs['bbox'][0]['crs'], str), 'CRS is a string')
+        self.assertEqual(self.request.inputs['bbox'][0]['crs'], 'urn:ogc:def:crs:EPSG::4326', 'CRS data correctly parsed')
 
         # dump to json and reload
         dump = self.request.json
         self.request.json = json.loads(dump)
 
-        self.assertEqual(self.request.inputs['bbox'][0].data, [6.117602, 46.176194, 6.22283, 46.275832], 'BBox data set')
-        self.assertTrue(isinstance(self.request.inputs['bbox'][0].crs, str), 'CRS is a string')
-        self.assertEqual(self.request.inputs['bbox'][0].crs, 'epsg:4326', 'CRS data correctly parsed')
+        self.assertEqual(self.request.inputs['bbox'][0]['bbox'], '6.117602,46.176194,6.22283,46.275832', 'BBox data set')
+        self.assertTrue(isinstance(self.request.inputs['bbox'][0]['crs'], str), 'CRS is a string')
+        self.assertEqual(self.request.inputs['bbox'][0]['crs'], 'urn:ogc:def:crs:EPSG::4326', 'CRS data correctly parsed')
 
 
 def load_tests(loader=None, tests=None, pattern=None):

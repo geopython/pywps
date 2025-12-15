@@ -9,7 +9,7 @@ import pywps.configuration as config
 
 # api only
 from pywps.processing.basic import Processing  # noqa: F401
-from pywps.processing.basic import DetachProcessing, MultiProcessing
+from pywps.processing.basic import DetachProcessing, MultiProcessing, NoAsyncProcessing
 from pywps.processing.job import Job  # noqa: F401
 from pywps.processing.scheduler import Scheduler
 
@@ -17,6 +17,7 @@ LOGGER = logging.getLogger("PYWPS")
 
 MULTIPROCESSING = 'multiprocessing'
 DETACHPROCESSING = 'detachprocessing'
+NOASYNCPROCESSING = 'noasyncprocessing'
 SCHEDULER = 'scheduler'
 DEFAULT = MULTIPROCESSING
 
@@ -34,6 +35,8 @@ def Process(process, wps_request, wps_response):
         process = Scheduler(process, wps_request, wps_response)
     elif mode == DETACHPROCESSING:
         process = DetachProcessing(process, wps_request, wps_response)
+    elif mode == NOASYNCPROCESSING:
+        process = NoAsyncProcessing(process, wps_request, wps_response)
     else:
         process = MultiProcessing(process, wps_request, wps_response)
 

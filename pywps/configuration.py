@@ -118,6 +118,7 @@ def load_hardcoded_configuration():
     CONFIG.set('server', 'storage_copy_function', 'copy')
     CONFIG.set("server", "default_mimetype", "text/xml")
     CONFIG.set("server", "json_indent", "2")
+    CONFIG.set("server", "keep_status_file", "false")
 
     CONFIG.add_section('processing')
     CONFIG.set('processing', 'mode', 'default')

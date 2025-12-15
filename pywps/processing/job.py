@@ -10,7 +10,8 @@ import tempfile
 
 import pywps.configuration as config
 from pywps import Process, WPSRequest
-from pywps.response.execute import ExecuteResponse
+from pywps.app.WPSExecuteRequest import WPSExecuteRequest
+from pywps.app.WPSExecuteResponse import WPSExecuteResponse
 
 LOGGER = logging.getLogger("PYWPS")
 
@@ -57,10 +58,10 @@ class Job(object):
         process = Process.from_json(value['process'])
         wps_request = WPSRequest()
         wps_request.json = json.loads(value['wps_request'])
-        wps_response = ExecuteResponse(
-            wps_request=wps_request,
-            uuid=process.uuid,
-            process=process)
+        wps_response = WPSExecuteResponse(
+            process,
+            wps_request,
+            process.uuid)
         wps_response.store_status_file = True
         new_job = Job(
             process=Process.from_json(value['process']),
@@ -84,7 +85,7 @@ class Job(object):
             return job
 
     def run(self):
-        getattr(self.process, self.method)(self.wps_request, self.wps_response)
+        getattr(self.process, self.method)(WPSExecuteRequest(self.process, self.wps_request), self.wps_response)
 
 
 class JobLauncher(object):

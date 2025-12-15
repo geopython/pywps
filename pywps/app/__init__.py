@@ -8,3 +8,4 @@ from pywps.app.Service import Service  # noqa: F401
 from pywps.app.WPSRequest import WPSRequest  # noqa: F401
 from pywps.app.WPSRequest import get_inputs_from_xml  # noqa: F401
 from pywps.app.WPSRequest import get_output_from_xml  # noqa: F401
+from pywps.app.WPSExecuteRequest import WPSExecuteRequest

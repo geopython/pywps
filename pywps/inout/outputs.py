@@ -295,13 +295,14 @@ class LiteralOutput(basic.LiteralOutput):
             "title": self.title,
             "abstract": self.abstract,
             "keywords": self.keywords,
-            "data": self.data,
             "data_type": self.data_type,
             "type": "literal",
             "uoms": [u.json for u in self.uoms],
             "translations": self.translations,
         }
 
+        if self.data is not None:
+            data['data'] = str(self.data)
         if self.uom:
             data["uom"] = self.uom.json
 
@@ -524,15 +525,8 @@ class MetaLink:
 
     def _load_template(self):
         from jinja2 import PackageLoader
-
-        from pywps.response import RelEnvironment
-
-        template_env = RelEnvironment(
-            loader=PackageLoader('pywps', 'templates'),
-            trim_blocks=True, lstrip_blocks=True,
-            autoescape=True, )
-
-        self._template = template_env.get_template(self._xml_template)
+        from pywps.response.basic import TEMPLATE_ENV
+        self._template = TEMPLATE_ENV.get_template(self._xml_template)
 
 
 class MetaLink4(MetaLink):
