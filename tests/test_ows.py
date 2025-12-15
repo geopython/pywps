@@ -14,6 +14,7 @@ from pywps.exceptions import NoApplicableCode
 from pywps import get_ElementMakerForVersion
 import pywps.configuration as config
 from pywps.tests import client_for, assert_response_success, service_ok
+import pytest
 
 wfsResource = 'https://demo.mapserver.org/cgi-bin/wfs?service=WFS&version=1.1.0&request=GetFeature&typename=continents&maxfeatures=10'  # noqa
 wcsResource = 'https://demo.mapserver.org/cgi-bin/wcs?service=WCS&version=1.0.0&request=GetCoverage&coverage=ndvi&crs=EPSG:4326&bbox=-92,42,-85,45&format=image/tiff&width=400&height=300'  # noqa
@@ -91,6 +92,7 @@ class ExecuteTests(TestBase):
                            supported_formats=[get_format('GEOTIFF')])],
                        grass_location='epsg:4326')
 
+    @pytest.mark.online
     def test_wfs(self):
         if not service_ok('https://demo.mapserver.org'):
             self.skipTest("mapserver is unreachable")
@@ -117,6 +119,7 @@ class ExecuteTests(TestBase):
         # . the inclusion of output
         # . the type of output
 
+    @pytest.mark.online
     def test_wcs(self):
         if not config.CONFIG.get('grass', 'gisbase'):
             self.skipTest('GRASS lib not found')

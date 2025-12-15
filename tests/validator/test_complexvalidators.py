@@ -69,6 +69,7 @@ class ValidateTest(TestBase):
 
         return fake_input
 
+    @pytest.mark.online
     def test_gml_validator(self):
         """Test GML validator
         """
@@ -79,6 +80,7 @@ class ValidateTest(TestBase):
         # self.assertTrue(validategml(gml_input, MODE.VERYSTRICT), 'VERYSTRICT validation')
         gml_input.stream.close()
 
+    @pytest.mark.online
     @pytest.mark.xfail(reason="gml verystrict validation fails")
     def test_gml_validator_verystrict(self):
         """Test GML validator
@@ -117,6 +119,7 @@ class ValidateTest(TestBase):
         self.assertTrue(validateshapefile(shapefile_input, MODE.STRICT), 'STRICT validation')
         shapefile_input.stream.close()
 
+    @pytest.mark.geotiff
     def test_geotiff_validator(self):
         """Test GeoTIFF validator
         """
@@ -141,6 +144,7 @@ class ValidateTest(TestBase):
         else:
             self.assertFalse(validatenetcdf(netcdf_input, MODE.STRICT), 'STRICT validation')
 
+    @pytest.mark.online
     @pytest.mark.xfail(reason="test.opendap.org is offline")
     def test_dods_validator(self):
         opendap_input = ComplexInput('dods', 'opendap test', [FORMATS.DODS,])
