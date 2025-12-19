@@ -22,12 +22,11 @@ from pywps import configuration
 
 from io import StringIO
 
+netCDF4 = None
 try:
     import netCDF4
 except ImportError:
-    WITH_NC4 = False
-else:
-    WITH_NC4 = True
+    pass
 
 DATA_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'data')
 
@@ -236,10 +235,9 @@ class ExecuteTest(TestBase):
     """Test for Exeucte request KVP request"""
 
     @pytest.mark.online
-    @pytest.mark.xfail(reason="test.opendap.org is offline")
+    @pytest.mark.requires_netcdf4
+    @pytest.mark.skipif(netCDF4 is None, reason='netCDF4 libraries are required for this test')
     def test_dods(self):
-        if not WITH_NC4:
-            self.skipTest('netCDF4 not installed')
         my_process = create_complex_nc_process()
         service = Service(processes=[my_process])
 
@@ -282,8 +280,11 @@ class ExecuteTest(TestBase):
             language = "en-US"
 
         request = FakeRequest()
-
         resp = service.execute('my_opendap_process', request, 'fakeuuid')
+
+        if resp.outputs["conventions"].data is None:
+            pytest.xfail("Network is likely unavailable or test.opendap.org is offline")
+
         self.assertEqual(resp.outputs['conventions'].data, 'CF-1.0')
         self.assertEqual(resp.outputs['outdods'].url, href)
         self.assertTrue(resp.outputs['outdods'].as_reference)

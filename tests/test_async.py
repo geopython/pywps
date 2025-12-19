@@ -12,8 +12,6 @@ from pywps.tests import client_for, assert_response_accepted, assert_response_su
 from processes import Sleep
 from owslib.wps import WPSExecution
 from pathlib import Path
-from tempfile import TemporaryDirectory
-from pywps import dblog
 
 VERSION = "1.0.0"
 
@@ -27,7 +25,6 @@ class ExecuteTest(TestBase):
         # Running processes using the MultiProcessing scheduler and a file-based database
         configuration.CONFIG.set('processing', 'mode', 'distributed')
 
-    @pytest.mark.xfail(reason="async fails")
     def test_async(self):
         client = client_for(Service(processes=[Sleep()]))
         wps = WPSExecution()
@@ -48,7 +45,6 @@ class ExecuteTest(TestBase):
 
         # Parse response to extract the status file path
         url = resp.xml.xpath("//@statusLocation")[0]
-        print(url)
 
         # OWSlib only reads from URLs, not local files. So we need to read the response manually.
         p = Path(configuration.get_config_value('server', 'outputpath')) / url.split('/')[-1]

@@ -27,12 +27,23 @@ import tempfile
 import os
 
 
+netCDF4 = None
 try:
-    import netCDF4  # noqa
+    import netCDF4
 except ImportError:
-    WITH_NC4 = False
-else:
-    WITH_NC4 = True
+    pass
+
+geotiff = None
+try:
+    import geotiff
+except ImportError:
+    pass
+
+fiona = None
+try:
+    import fiona
+except (ImportError, ModuleNotFoundError):
+    pass
 
 
 class ValidateTest(TestBase):
@@ -70,9 +81,10 @@ class ValidateTest(TestBase):
         return fake_input
 
     @pytest.mark.online
+    @pytest.mark.requires_fiona
+    @pytest.mark.skipif(fiona is None, reason="fiona libraries are required for this test")
     def test_gml_validator(self):
-        """Test GML validator
-        """
+        """Test GML validator"""
         gml_input = self.get_input('gml/point.gml', 'point.xsd', FORMATS.GML.mime_type)
         self.assertTrue(validategml(gml_input, MODE.NONE), 'NONE validation')
         self.assertTrue(validategml(gml_input, MODE.SIMPLE), 'SIMPLE validation')
@@ -81,26 +93,39 @@ class ValidateTest(TestBase):
         gml_input.stream.close()
 
     @pytest.mark.online
+    @pytest.mark.skipif(fiona is not None, reason="fiona libraries must not be installed for this test")
+    def test_no_gml_validator(self):
+        """Test GML validator"""
+        gml_input = self.get_input('gml/point.gml', 'point.xsd', FORMATS.GML.mime_type)
+        self.assertTrue(validategml(gml_input, MODE.NONE), 'NONE validation')
+        self.assertTrue(validategml(gml_input, MODE.SIMPLE), 'SIMPLE validation')
+        self.assertFalse(validategml(gml_input, MODE.STRICT), 'STRICT validation')
+        # self.assertTrue(validategml(gml_input, MODE.VERYSTRICT), 'VERYSTRICT validation')
+        gml_input.stream.close()
+
+    @pytest.mark.online
+    @pytest.mark.requires_fiona
     @pytest.mark.xfail(reason="gml verystrict validation fails")
+    @pytest.mark.skipif(fiona is None, reason="fiona libraries are required for this test")
     def test_gml_validator_verystrict(self):
-        """Test GML validator
-        """
+        """Test GML validator"""
         gml_input = self.get_input('gml/point.gml', 'point.xsd', FORMATS.GML.mime_type)
         self.assertTrue(validategml(gml_input, MODE.VERYSTRICT), 'VERYSTRICT validation')
         gml_input.stream.close()
 
+
     def test_json_validator(self):
-        """Test GeoJSON validator
-        """
+        """Test GeoJSON validator"""
         json_input = self.get_input('json/point.geojson', None, FORMATS.JSON.mime_type)
         self.assertTrue(validatejson(json_input, MODE.NONE), 'NONE validation')
         self.assertTrue(validatejson(json_input, MODE.SIMPLE), 'SIMPLE validation')
         self.assertTrue(validatejson(json_input, MODE.STRICT), 'STRICT validation')
         json_input.stream.close()
 
+    @pytest.mark.requires_fiona
+    @pytest.mark.skipif(fiona is None, reason="fiona libraries are required for this test")
     def test_geojson_validator(self):
-        """Test GeoJSON validator
-        """
+        """Test GeoJSON validator"""
         geojson_input = self.get_input('json/point.geojson', 'json/schema/geojson.json',
                                   FORMATS.GEOJSON.mime_type)
         self.assertTrue(validategeojson(geojson_input, MODE.NONE), 'NONE validation')
@@ -109,9 +134,26 @@ class ValidateTest(TestBase):
         self.assertTrue(validategeojson(geojson_input, MODE.VERYSTRICT), 'VERYSTRICT validation')
         geojson_input.stream.close()
 
+
+    @pytest.mark.skipif(fiona is not None, reason="fiona libraries must not be installed for this test")
+    def test_no_geojson_validator(self):
+        """Test GeoJSON validator"""
+        geojson_input = self.get_input('json/point.geojson', 'json/schema/geojson.json',
+                                  FORMATS.GEOJSON.mime_type)
+        self.assertTrue(validategeojson(geojson_input, MODE.NONE), 'NONE validation')
+        self.assertTrue(validategeojson(geojson_input, MODE.SIMPLE), 'SIMPLE validation')
+
+        self.assertFalse(validategeojson(geojson_input, MODE.STRICT), 'STRICT validation')
+
+        # FIXME: MODE.VERYSTRICT should fail here
+        self.assertTrue(validategeojson(geojson_input, MODE.VERYSTRICT), 'VERYSTRICT validation')
+
+        geojson_input.stream.close()
+
+    @pytest.mark.requires_fiona
+    @pytest.mark.skipif(fiona is None, reason="fiona libraries are required for this test")
     def test_shapefile_validator(self):
-        """Test ESRI Shapefile validator
-        """
+        """Test ESRI Shapefile validator"""
         shapefile_input = self.get_input('shp/point.shp.zip', None,
                 FORMATS.SHP.mime_type)
         self.assertTrue(validateshapefile(shapefile_input, MODE.NONE), 'NONE validation')
@@ -119,10 +161,30 @@ class ValidateTest(TestBase):
         self.assertTrue(validateshapefile(shapefile_input, MODE.STRICT), 'STRICT validation')
         shapefile_input.stream.close()
 
-    @pytest.mark.geotiff
+    @pytest.mark.skipif(fiona is not None, reason="fiona libraries must not be installed for this test")
+    def test_no_shapefile_validator(self):
+        """Test ESRI Shapefile validator"""
+        shapefile_input = self.get_input('shp/point.shp.zip', None,
+                FORMATS.SHP.mime_type)
+        self.assertTrue(validateshapefile(shapefile_input, MODE.NONE), 'NONE validation')
+        self.assertTrue(validateshapefile(shapefile_input, MODE.SIMPLE), 'SIMPLE validation')
+        self.assertFalse(validateshapefile(shapefile_input, MODE.STRICT), 'STRICT validation')
+        shapefile_input.stream.close()
+
+    @pytest.mark.skipif(geotiff is not None, reason="geotiff libraries must not be installed for this test")
+    def test_no_geotiff_validator(self):
+        """Test GeoTIFF validator"""
+        geotiff_input = self.get_input('geotiff/dem.tiff', None,
+                                  FORMATS.GEOTIFF.mime_type)
+        self.assertTrue(validategeotiff(geotiff_input, MODE.NONE), 'NONE validation')
+        self.assertTrue(validategeotiff(geotiff_input, MODE.SIMPLE), 'SIMPLE validation')
+        self.assertFalse(validategeotiff(geotiff_input, MODE.STRICT), 'STRICT validation')
+        geotiff_input.stream.close()
+
+    @pytest.mark.requires_geotiff
+    @pytest.mark.skipif(geotiff is None, reason="geotiff libraries are required for this test")
     def test_geotiff_validator(self):
-        """Test GeoTIFF validator
-        """
+        """Test GeoTIFF validator"""
         geotiff_input = self.get_input('geotiff/dem.tiff', None,
                                   FORMATS.GEOTIFF.mime_type)
         self.assertTrue(validategeotiff(geotiff_input, MODE.NONE), 'NONE validation')
@@ -130,40 +192,56 @@ class ValidateTest(TestBase):
         self.assertTrue(validategeotiff(geotiff_input, MODE.STRICT), 'STRICT validation')
         geotiff_input.stream.close()
 
+    @pytest.mark.requires_netcdf4
+    @pytest.mark.skipif(netCDF4 is None, reason="NetCDF4 libraries are required for this test")
     def test_netcdf_validator(self):
-        """Test netCDF validator
-        """
+        """Test netCDF validator"""
         netcdf_input = self.get_input('netcdf/time.nc', None, FORMATS.NETCDF.mime_type)
         self.assertTrue(validatenetcdf(netcdf_input, MODE.NONE), 'NONE validation')
         self.assertTrue(validatenetcdf(netcdf_input, MODE.SIMPLE), 'SIMPLE validation')
         netcdf_input.stream.close()
-        if WITH_NC4:
-            self.assertTrue(validatenetcdf(netcdf_input, MODE.STRICT), 'STRICT validation')
-            netcdf_input.file = 'grub.nc'
-            self.assertFalse(validatenetcdf(netcdf_input, MODE.STRICT))
-        else:
-            self.assertFalse(validatenetcdf(netcdf_input, MODE.STRICT), 'STRICT validation')
+
+        self.assertTrue(validatenetcdf(netcdf_input, MODE.STRICT), 'STRICT validation')
+        netcdf_input.file = 'grub.nc'
+        self.assertFalse(validatenetcdf(netcdf_input, MODE.STRICT))
+
+    @pytest.mark.skipif(netCDF4 is not None, reason="NetCDF4 libraries must not be installed for this test")
+    def test_no_netcdf_validator(self):
+        """Test netCDF validator"""
+        netcdf_input = self.get_input('netcdf/time.nc', None, FORMATS.NETCDF.mime_type)
+        self.assertTrue(validatenetcdf(netcdf_input, MODE.NONE), 'NONE validation')
+        self.assertTrue(validatenetcdf(netcdf_input, MODE.SIMPLE), 'SIMPLE validation')
+        netcdf_input.stream.close()
+
+        self.assertFalse(validatenetcdf(netcdf_input, MODE.STRICT), 'STRICT validation')
 
     @pytest.mark.online
-    @pytest.mark.xfail(reason="test.opendap.org is offline")
+    @pytest.mark.requires_netcdf4
+    @pytest.mark.skipif(netCDF4 is None, reason="NetCDF4 libraries are required for this test")
     def test_dods_validator(self):
         opendap_input = ComplexInput('dods', 'opendap test', [FORMATS.DODS,])
         opendap_input.url = "http://test.opendap.org:80/opendap/netcdf/examples/sresa1b_ncar_ccsm3_0_run1_200001.nc"
         self.assertTrue(validatedods(opendap_input, MODE.NONE), 'NONE validation')
         self.assertTrue(validatedods(opendap_input, MODE.SIMPLE), 'SIMPLE validation')
 
-        if WITH_NC4:
-            self.assertTrue(validatedods(opendap_input, MODE.STRICT), 'STRICT validation')
-            opendap_input.url = 'Faulty url'
-            self.assertFalse(validatedods(opendap_input, MODE.STRICT))
-        else:
-            self.assertFalse(validatedods(opendap_input, MODE.STRICT), 'STRICT validation')
+        self.assertTrue(validatedods(opendap_input, MODE.STRICT), 'STRICT validation')
+        opendap_input.url = 'Faulty url'
+        self.assertFalse(validatedods(opendap_input, MODE.STRICT))
 
+    @pytest.mark.online
+    @pytest.mark.skipif(netCDF4 is not None, reason="NetCDF4 libraries must not be installed for this test")
     def test_dods_default(self):
         opendap_input = ComplexInput('dods', 'opendap test', [FORMATS.DODS,],
                                      default='http://test.opendap.org',
                                      default_type=SOURCE_TYPE.URL,
                                      mode=MODE.SIMPLE)
+        opendap_input.url = "http://test.opendap.org:80/opendap/netcdf/examples/sresa1b_ncar_ccsm3_0_run1_200001.nc"
+        self.assertTrue(validatedods(opendap_input, MODE.NONE), 'NONE validation')
+        self.assertTrue(validatedods(opendap_input, MODE.SIMPLE), 'SIMPLE validation')
+
+        with pytest.warns(UserWarning) as record:
+            self.assertFalse(validatedods(opendap_input, MODE.STRICT), 'STRICT validation')
+            assert "Complex validation requires netCDF4 support." in record[0].message.args[0]
 
     def test_fail_validator(self):
         fake_input = self.get_input('point.xsd', 'point.xsd', FORMATS.SHP.mime_type)

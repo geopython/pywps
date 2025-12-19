@@ -4,7 +4,7 @@
 ##################################################################
 
 from basic import TestBase
-from pywps.inout.storage.s3 import S3StorageBuilder, S3Storage
+from pywps.inout.storage.s3 import S3StorageBuilder
 from pywps.inout.storage import STORE_TYPE
 from pywps.inout.basic import ComplexOutput
 
@@ -41,7 +41,7 @@ class S3StorageTests(TestBase):
         configuration.CONFIG.set('s3', 'prefix', 'wps')
         storage = S3StorageBuilder().build()
 
-        url = storage.write('Bar Baz', 'out.txt', data_format=FORMATS.TEXT)
+        storage.write('Bar Baz', 'out.txt', data_format=FORMATS.TEXT)
 
         called_args = uploadData.call_args[0]
 
