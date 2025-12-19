@@ -25,8 +25,8 @@ with open("requirements.txt") as fr:
 with open("requirements-dev.txt") as frd:
     DEV_REQUIRES = frd.read().splitlines()
 
-with open("requirements-extras.txt") as frd:
-    EXTRAS_REQUIRES = frd.read().splitlines()
+with open("requirements-extra.txt") as frd:
+    EXTRA_REQUIRES = frd.read().splitlines()
 
 CONFIG = {
     "name": "pywps",
@@ -61,7 +61,7 @@ CONFIG = {
     "install_requires": INSTALL_REQUIRES,
     "extras_require": dict(
         dev=DEV_REQUIRES,
-        extras=EXTRAS_REQUIRES,
+        extra=EXTRA_REQUIRES,
     ),
     "python_requires": ">=3.10,<4",
     "packages": find_packages(exclude=["docs", "tests.*", "tests"]),
