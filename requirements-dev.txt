@@ -1,12 +1,11 @@
 bump2version
 coverage
-coveralls
 docutils
 ruff
 pylint
 pytest
 pytest-cov
 sphinx
-tox>=4.0
+tox>=4.30.3
 twine
 wheel
