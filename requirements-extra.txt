@@ -1,1 +1,5 @@
 netCDF4
+fiona
+geotiff
+tifffile<=2025.5.10
+zarr<3.0

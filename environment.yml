@@ -12,9 +12,12 @@ dependencies:
  - urllib3 >=2.5.0
  - markupsafe >=3.0.3
  - numpy >=1.22.2
- - zarr <3
+ # extras
  - fiona
  - geotiff
+ - netcdf4
+ - tifffile <=2025.5.10
+ - zarr <3.0
  # tests
  - pytest
  - ruff >=0.5.7
