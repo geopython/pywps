@@ -27,7 +27,7 @@ import test_wpsrequest
 import test_service
 import test_process
 import test_processing
-import test_assync
+import test_async
 import test_grass_location
 import test_storage
 import test_filestorage
@@ -92,7 +92,7 @@ def load_tests(loader=None, tests=None, pattern=None):
         test_service.load_tests(),
         test_process.load_tests(),
         test_processing.load_tests(),
-        test_assync.load_tests(),
+        test_async.load_tests(),
         test_grass_location.load_tests(),
         test_storage.load_tests(),
         test_filestorage.load_tests(),
