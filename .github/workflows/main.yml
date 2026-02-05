@@ -44,12 +44,12 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Install packages 📦 (Linux)
-        if: ${{ matrix.os == "ubuntu" }}
+        if: ${{ matrix.os == 'ubuntu' }}
         run: |
           sudo apt-get update
           sudo apt-get -y install libnetcdf-dev libhdf5-dev
       - name: Install packages 📦 (macOS)
-        if: ${{ matrix.os == "macos" }}
+        if: ${{ matrix.os == 'macos' }}
         uses: tecolicom/actions-use-homebrew-tools@b9c066b79607fa3d71e0be05d7003bb75fd9ff34 # v1.3
         with:
           tools: hdf5 netcdf
