@@ -28,6 +28,12 @@ with open("requirements-dev.txt") as frd:
 with open("requirements-extra.txt") as frd:
     EXTRA_REQUIRES = frd.read().splitlines()
 
+with open("requirements-processing.txt") as frd:
+    PROCESSING_REQUIRES = frd.read().splitlines()
+
+with open("requirements-s3.txt") as frd:
+    S3_REQUIRES = frd.read().splitlines()
+
 CONFIG = {
     "name": "pywps",
     "version": VERSION,
@@ -62,6 +68,8 @@ CONFIG = {
     "extras_require": dict(
         dev=DEV_REQUIRES,
         extra=EXTRA_REQUIRES,
+        processing=PROCESSING_REQUIRES,
+        s3=S3_REQUIRES
     ),
     "python_requires": ">=3.10,<4",
     "packages": find_packages(exclude=["docs", "tests.*", "tests"]),

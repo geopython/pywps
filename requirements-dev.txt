@@ -1,10 +1,10 @@
 bump2version
 coverage
 docutils
-ruff
 pylint
 pytest
 pytest-cov
+ruff>=0.14.0
 sphinx
 tox>=4.30.3
 twine
