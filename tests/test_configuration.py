@@ -9,6 +9,7 @@ from basic import TestBase
 import os
 
 import random
+import pytest
 
 from pywps import configuration
 
@@ -51,7 +52,6 @@ class TestEnvInterpolation(TestBase):
         configuration.CONFIG.read_string("[envinterpolationsection]\nuser=" + key)
         assert key == configuration.CONFIG["envinterpolationsection"]["user"]
 
-
 def load_tests(loader=None, tests=None, pattern=None):
     """Load the tests and return the test suite for this file."""
     import unittest
@@ -62,3 +62,17 @@ def load_tests(loader=None, tests=None, pattern=None):
         loader.loadTestsFromTestCase(TestEnvInterpolation),
     ]
     return unittest.TestSuite(suite_list)
+
+
+@pytest.mark.parametrize(
+"input_value, expected",
+[
+    ("1024k", 1.0),
+    ("2g", 2048.0),
+    ("20MB", 20.0),
+    ("1GB", 1024.0),      # case-insensitive
+    ("104857600B", 100.0),
+],
+)
+def test_get_size(input_value, expected):
+    assert configuration.get_size_mb(input_value) == expected
