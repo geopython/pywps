@@ -19,7 +19,6 @@ import test_execute
 import test_exceptions
 import test_inout
 import test_literaltypes
-import validator
 import test_ows
 import test_formats
 import test_dblog

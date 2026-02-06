@@ -10,7 +10,7 @@ import platform
 from pywps import Service, configuration
 from pywps import get_ElementMakerForVersion
 from pywps.tests import client_for, assert_response_accepted, assert_response_success
-from processes import Sleep
+from common import Sleep
 from owslib.wps import WPSExecution
 from pathlib import Path
 
