@@ -26,7 +26,7 @@ class ExecuteTest(TestBase):
         # Running processes using the MultiProcessing scheduler and a file-based database
         configuration.CONFIG.set('processing', 'mode', 'distributed')
 
-    @pytest.mark.xfail(platform.system == "Darwin", reason="Response failures on macOS.")
+    @pytest.mark.xfail(platform.system() == "Darwin", reason="Response failures on macOS.")
     def test_async(self):
         client = client_for(Service(processes=[Sleep()]))
         wps = WPSExecution()
