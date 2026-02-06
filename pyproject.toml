@@ -1,11 +1,124 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools>=80", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "pywps"
+description = "PyWPS is an implementation of the Web Processing Service standard from the Open Geospatial Consortium. PyWPS is written in Python."
+readme = { file = "README.md", content-type = "text/markdown" }
+license = { text = "MIT" }
+authors = [
+  { name = "Jachym Cepicky", email = "jachym.cepicky@gmail.com" }
+]
+maintainers = [
+  { name = "Jachym Cepicky", email = "jachym.cepicky@gmail.com" }
+]
+keywords = ["PyWPS", "WPS", "OGC", "processing"]
+requires-python = ">=3.10,<4"
+dynamic = ["version"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Environment :: Web Environment",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: GIS",
+]
+urls = {Homepage = "https://pywps.org", Repository = "https://github.com/geopython/pywps"}
+dependencies = [
+  "humanize >=4.5.0",
+  "jinja2 >=3.1.0",
+  "jsonschema >=4.20.0",
+  "lxml >=6.0.2",
+  "markupsafe >=3.0.3",
+  "numpy >=1.22.2", # not directly required, pinned by Snyk to avoid a vulnerability
+  "owslib >=0.35.0",
+  "python-dateutil",
+  "requests >=2.32.5",
+  "sqlalchemy >=2.0.44",
+  "urllib3 >=2.5.0", # not directly required, pinned by Snyk to avoid a vulnerability
+  "werkzeug >=3.1.4",
+]
+
+[project.optional-dependencies]
+dev = [
+  "bump-my-version",
+  "coverage",
+  "docutils",
+  "pylint",
+  "pytest",
+  "pytest-cov",
+  "ruff >=0.14.0",
+  "sphinx",
+  "tox >=4.30.3",
+  "twine",
+  "wheel"
+]
+extra = [
+  "fiona",
+  "geotiff",
+  "netCDF4",
+  "tifffile <=2025.5.10",
+  "zarr <3.0"]
+processing = ["drmaa"]
+s3 = ["boto3"]
+
+[project.scripts]
+joblauncher = "pywps.processing.job:launcher"
+
+[tool.bumpversion]
+current_version = "4.7.0"
+commit = false
+tag = false
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
+serialize = ["{major}.{minor}.{patch}"]
+
+[[tool.bumpversion.files]]
+filename = "pywps/__init__.py"
+search = '__version__ = "{current_version}"'
+replace = '__version__ = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "VERSION.txt"
+search = "{current_version}"
+replace = "{new_version}"
+
+[tool.coverage.run]
+relative_files = true
+
+[tool.pytest.ini_options]
+addopts = [
+  "--import-mode=importlib",
+]
+xfail_strict = true
+pythonpath = ["tests"]
+testpaths = ["tests"]
+markers = [
+  "online: marks tests requiring network",
+  "requires_fiona: marks tests requiring fiona module",
+  "requires_geotiff: marks tests requiring geotiff module",
+  "requires_netcdf4: marks tests requiring netcdf4 module",
+]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+exclude = ["docs", "tests", "tests.*"]
+
+[tool.setuptools.dynamic]
+version = { file = ["VERSION.txt"] }
 
 [tool.ruff]
 lint.select = ["E", "W", "F", "C90"]   # Flake8-equivalent rule families
 lint.ignore = ["F401", "E402", "C901"]
-
 line-length = 120
 exclude = ["tests"]
 
