@@ -12,7 +12,7 @@ Installation
 Dependencies and requirements
 -----------------------------
 
-PyWPS runs on Python 3.7 or higher. PyWPS is currently tested and developed on Linux (mostly Ubuntu).
+PyWPS runs on Python 3.10 or higher. PyWPS is currently tested and developed on Linux (mostly Ubuntu).
 In the documentation we take this distribution as reference.
 
 Prior to installing PyWPS, Git and the Python bindings for GDAL must be
@@ -61,15 +61,9 @@ Manual installation
             $ tar zxf pywps-x.y.z.tar.gz
             $ cd pywps-x.y.z/
 
-        Then install the package dependencies using pip::
+        To install PyWPS system-wide with all dependencies run::
 
-            $ pip install -r requirements.txt
-            $ pip install -r requirements-gdal.txt  # for GDAL Python bindings (if python-gdal is not already installed by `apt-get`)
-            $ pip install -r requirements-dev.txt  # for developer tasks
-
-        To install PyWPS system-wide run::
-
-            $ sudo pip install .
+            $ sudo pip install ".[dev,extra] # for developer tasks and GDAL Python bindings (if python-gdal is not already installed by `apt-get`)
 
 For Developers
         Installation of the source code using Git and Python's virtualenv tool::
