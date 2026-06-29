@@ -3,7 +3,6 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 from basic import TestBase
-import pytest
 
 from pywps.inout.storage.builder import StorageBuilder
 from pywps.inout.storage.file import FileStorage
@@ -58,3 +57,18 @@ class TestFileStorageBuilder(TestBase):
         fn = FakeOutput(self.tmpdir.name)
         storage.store(fn)
         assert os.path.exists(self.opath)
+
+
+def load_tests(loader=None, tests=None, pattern=None):
+    """Load local tests
+    """
+    import unittest
+
+    if not loader:
+        loader = unittest.TestLoader()
+    suite_list = [
+        loader.loadTestsFromTestCase(TestDefaultStorageBuilder),
+        loader.loadTestsFromTestCase(TestS3StorageBuilder),
+        loader.loadTestsFromTestCase(TestFileStorageBuilder)
+    ]
+    return unittest.TestSuite(suite_list)

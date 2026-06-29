@@ -275,16 +275,21 @@ def get_size_mb(mbsize):
 
     import re
 
-    units = re.compile("[gmkb].*")
-    newsize = float(re.sub(units, '', size))
+    match = re.fullmatch(r"([0-9]*\.?[0-9]+)\s*(g|m|k|gb|mb|b)?", size)
+    if not match:
+        raise ValueError(f"Invalid size format: {mbsize}")
 
-    if size.find("g") > -1:
-        newsize *= 1024
-    elif size.find("m") > -1:
-        newsize *= 1
-    elif size.find("k") > -1:
-        newsize /= 1024
-    else:
-        newsize *= 1
-    LOGGER.debug('Calculated real size of {} is {}'.format(mbsize, newsize))
-    return newsize
+    value = float(match.group(1))
+    unit = match.group(2)
+
+    if unit in ("g", "gb"):
+        value *= 1024
+    elif unit in ("m", "mb"):
+        value *= 1
+    elif unit in ("k", "kb"):
+        value /= 1024
+    elif unit in ("b"):
+        value /= 1024**2
+
+    LOGGER.debug('Calculated real size of {} is {}'.format(mbsize, value))
+    return value
