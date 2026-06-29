@@ -11,19 +11,26 @@ concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     name: Linting Suite
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up Python3.10
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: "3.10"
-          cache: 'pip'
-      - name: Install tox
+          cache: pip
+      - name: Install CI libraries
         run: |
-          pip install tox>=4.30.3
+          python -m pip install --require-hashes -r CI/requirements_ci.txt
       - name: Run linting suite ⚙️
         run: |
           tox -e lint
@@ -31,44 +38,56 @@ jobs:
   test:
     name: Testing with (Python${{ matrix.python-version }}, ${{ matrix.os }})
     needs: lint
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         python-version: [ "3.10", "3.11", "3.12", "3.13" ]
-        os: ["ubuntu"]
+        os: ["ubuntu-latest"]
         include:
           # - python-version: "3.11"
           #   os: "windows"
           - python-version: "3.11"
-            os: "macos"
+            os: "macos-latest"
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
       - name: Install packages 📦 (Linux)
-        if: ${{ matrix.os == 'ubuntu' }}
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
           sudo apt-get update
           sudo apt-get -y install libnetcdf-dev libhdf5-dev
       - name: Install packages 📦 (macOS)
-        if: ${{ matrix.os == 'macos' }}
+        if: ${{ matrix.os == 'macos-latest' }}
         uses: tecolicom/actions-use-homebrew-tools@b9c066b79607fa3d71e0be05d7003bb75fd9ff34 # v1.3
         with:
           tools: hdf5 netcdf
           cache: "yes"
-      - uses: actions/setup-python@v6
-        name: Setup Python ${{ matrix.python-version }}
+      
+      - name: Set up Python${{ matrix.python-version }}
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip'
-      - name: Install tox 📦
+          cache: pip
+      
+      - name: Install CI libraries
         run: |
-          python -m pip install "tox>=4.30.3" "tox-gh>=1.5"
+          python -m pip install --require-hashes -r CI/requirements_ci.txt
+      
       - name: Run tests with tox ⚙️
         run: |
           tox
         env:
           TOX_GH_MAJOR_MINOR: ${{ matrix.python-version }}
+      
+      - name: Trust Coveralls Homebrew tap # Homebrew v6.0 requirement; Remove when coverallsapp/github-action >2.3.7
+        if: matrix.os == 'macos'
+        run: |
+          brew trust coverallsapp/coveralls
       - name: Report Coverage
-        uses: coverallsapp/github-action@v2
+        uses: coverallsapp/github-action@5cbfd81b66ca5d10c19b062c04de0199c215fb6e # v2.3.7
         with:
           flag-name: run-${{ matrix.python-version }}
           parallel: true
@@ -78,16 +97,21 @@ jobs:
     needs: lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
-        name: Setup Python 3.10
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up Python3.10
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: "3.10"
-          cache: 'pip'
+          cache: pip
+      - name: Install CI libraries
+        run: |
+          python -m pip install --require-hashes -r CI/requirements_ci.txt
       - name: Build documentation 🏗️
         run: |
-          pip install -e .[dev]
-          cd docs && make html
+          tox -e docs
 
   finish:
     name: Finish
@@ -99,6 +123,6 @@ jobs:
       pull-requests: write
     steps:
       - name: Coveralls Finished
-        uses: coverallsapp/github-action@v2
+        uses: coverallsapp/github-action@5cbfd81b66ca5d10c19b062c04de0199c215fb6e # v2.3.7
         with:
           parallel-finished: true
