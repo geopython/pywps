@@ -4,13 +4,14 @@
 ##################################################################
 
 import sys
+import datetime
 
 project = u'PyWPS'
 
 license = ('This work is licensed under a Creative Commons Attribution 4.0 '
            'International License')
 
-copyright = ('Copyright (C) 2014-2016 PyWPS Development Team, '
+copyright = (f'Copyright (C) 2014-{datetime.datetime.now().year} PyWPS Development Team, '
              'represented by Jachym Cepicky.')
 copyright += license
 
@@ -31,7 +32,7 @@ extensions = [
 ]
 
 exclude_patterns = ['_build']
-source_suffix = '.rst'
+source_suffix = {'.rst': 'restructuredtext'}
 master_doc = 'index'
 
 pygments_style = 'sphinx'
