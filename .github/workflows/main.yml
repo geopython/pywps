@@ -83,7 +83,7 @@ jobs:
           TOX_GH_MAJOR_MINOR: ${{ matrix.python-version }}
       
       - name: Trust Coveralls Homebrew tap # Homebrew v6.0 requirement; Remove when coverallsapp/github-action >2.3.7
-        if: matrix.os == 'macos'
+        if: matrix.os == 'macos-latest'
         run: |
           brew trust coverallsapp/coveralls
       - name: Report Coverage
