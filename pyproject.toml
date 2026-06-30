@@ -57,7 +57,7 @@ dev = [
   "pytest-cov",
   "ruff >=0.14.0",
   "sphinx",
-  "tox >=4.30.3",
+  "tox >=4.56.1",
   "twine",
   "wheel"
 ]
