@@ -40,7 +40,7 @@ The scheduler extension uses the `DRMAA`_
 library to talk to the different scheduler systems. Install the additional
 Python dependencies using pip::
 
-  $ pip install -r requirements-processing.txt  # drmaa
+  $ pip install ".[processing]"  # drmaa
 
 If you are using the `conda <https://conda.io/docs/>`_ package manager you can
 install the dependencies with::
@@ -94,7 +94,6 @@ Slurm.
 
 Docker Container Extension
 ---------------------------
-
 
 .. todo:: This extension is on our wish list. In can be used to encapsulate
   and control the execution of a process. It enhances also the use case of

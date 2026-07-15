@@ -150,7 +150,7 @@ for stable releases and managed exclusively by the PyWPS team.
   # clone the repository locally
   $ git clone git@github.com:USERNAME/pywps.git
   $ cd pywps
-  $ pip install -e . && pip install -r requirements.txt
+  $ pip install -e .
 
   # add the main PyWPS development branch to keep up to date with upstream changes
   $ git remote add upstream https://github.com/geopython/pywps.git

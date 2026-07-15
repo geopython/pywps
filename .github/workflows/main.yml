@@ -6,70 +6,99 @@ on:
       - main
   pull_request:
 
+concurrency:
+  # For a given workflow, if we push to the same branch, cancel all previous builds on that branch except on main.
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   lint:
     name: Linting Suite
     runs-on: ubuntu-latest
     steps:
-      - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.11.0
-        with:
-          access_token: ${{ github.token }}
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.10"
+          cache: 'pip'
       - name: Install tox
         run: |
-          pip install tox>=4.0
+          pip install tox>=4.30.3
       - name: Run linting suite ⚙️
         run: |
           tox -e lint
 
   test:
-    name: Testing with Python${{ matrix.python-version }}
+    name: Testing with (Python${{ matrix.python-version }}, ${{ matrix.os }})
     needs: lint
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
+        python-version: [ "3.10", "3.11", "3.12", "3.13" ]
+        os: ["ubuntu"]
         include:
-          - tox-env: py310-extra
-            python-version: "3.10"
-          - tox-env: py311-extra
-            python-version: "3.11"
-          - tox-env: py312-extra
-            python-version: "3.12"
-          - tox-env: py313-extra
-            python-version: "3.13"
+          # - python-version: "3.11"
+          #   os: "windows"
+          - python-version: "3.11"
+            os: "macos"
     steps:
-    - uses: actions/checkout@v4
-    - name: Install packages 📦
-      run: |
-        sudo apt-get update
-        sudo apt-get -y install libnetcdf-dev libhdf5-dev
-    - uses: actions/setup-python@v5
-      name: Setup Python ${{ matrix.python-version }}
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install tox 📦
-      run: pip install "tox>=4.0"
-    - name: Run tests with tox ⚙️
-      run: tox -e ${{ matrix.tox-env }}
-    - name: Run coveralls ⚙️
-      if: matrix.python-version == 3.10
-      uses: AndreMiras/coveralls-python-action@develop
+      - uses: actions/checkout@v6
+      - name: Install packages 📦 (Linux)
+        if: ${{ matrix.os == 'ubuntu' }}
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install libnetcdf-dev libhdf5-dev
+      - name: Install packages 📦 (macOS)
+        if: ${{ matrix.os == 'macos' }}
+        uses: tecolicom/actions-use-homebrew-tools@b9c066b79607fa3d71e0be05d7003bb75fd9ff34 # v1.3
+        with:
+          tools: hdf5 netcdf
+          cache: "yes"
+      - uses: actions/setup-python@v6
+        name: Setup Python ${{ matrix.python-version }}
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+      - name: Install tox 📦
+        run: |
+          python -m pip install "tox>=4.30.3" "tox-gh>=1.5"
+      - name: Run tests with tox ⚙️
+        run: |
+          tox
+        env:
+          TOX_GH_MAJOR_MINOR: ${{ matrix.python-version }}
+      - name: Report Coverage
+        uses: coverallsapp/github-action@v2
+        with:
+          flag-name: run-${{ matrix.python-version }}
+          parallel: true
 
   docs:
     name: Build docs 🏗️
     needs: lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         name: Setup Python 3.10
         with:
           python-version: "3.10"
+          cache: 'pip'
       - name: Build documentation 🏗️
         run: |
           pip install -e .[dev]
           cd docs && make html
+
+  finish:
+    name: Finish
+    needs:
+      - test
+      - docs
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Coveralls Finished
+        uses: coverallsapp/github-action@v2
+        with:
+          parallel-finished: true

@@ -15,6 +15,7 @@ import tempfile
 import json
 from pywps import inout
 import base64
+import pytest
 
 from pywps import Format, FORMATS
 from pywps.app.Common import Metadata
@@ -128,6 +129,7 @@ class IOHandlerTest(TestBase):
         with self.assertRaises(TypeError):
             self.iohandler[0].data = '5'
 
+    @pytest.mark.online
     def test_url(self):
         if not service_ok('https://demo.mapserver.org'):
             self.skipTest("mapserver is unreachable")
@@ -552,6 +554,7 @@ class ComplexOutputTest(TestBase):
         b = self.complex_out.base64
         self.assertEqual(base64.b64decode(b).decode(), self.data)
 
+    @pytest.mark.online
     def test_url_handler(self):
         wfsResource = 'http://demo.mapserver.org/cgi-bin/wfs?' \
                       'service=WFS&version=1.1.0&' \
@@ -798,6 +801,7 @@ class BBoxOutputTest(TestBase):
         )
 
 
+@pytest.mark.online
 class TestMetaLink(TestBase):
 
     def setUp(self) -> None:

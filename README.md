@@ -20,7 +20,7 @@ As of PyWPS 4.0.0, PyWPS is released under an
 
 ## Dependencies
 
-See [requirements.txt](requirements.txt) file
+See [pyproject.toml](pyproject.toml) file
 
 ## Install
 
@@ -34,11 +34,11 @@ $ pip install .
 ## Run tests
 
 ```bash
-pip install -r requirements-dev.txt
+pip install ".[dev]"
 # run unit tests
 python -m pytest tests
 # run code coverage
-python -m coverage run --source=pywps -m unittest tests
+python -m coverage run --source=pywps -m pytest
 python -m coverage report -m
 ```
 
