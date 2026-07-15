@@ -68,6 +68,7 @@ jobs:
         env:
           TOX_GH_MAJOR_MINOR: ${{ matrix.python-version }}
       - name: Report Coverage
+        if: ${{ matrix.os == 'ubuntu' }}
         uses: coverallsapp/github-action@v2
         with:
           flag-name: run-${{ matrix.python-version }}
