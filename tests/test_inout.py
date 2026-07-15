@@ -284,6 +284,17 @@ class SerializationComplexInputTest(TestBase):
             with self.assertRaises(FileURLNotSupported):
                 inout.inputs.ComplexInput.from_json(complex.json)
 
+    def test_complex_input_file_url_outside_allowed_paths(self):
+        complex = self.make_complex_input()
+        with tempfile.TemporaryDirectory(prefix="pywps_not_allowed_") as outside_dir:
+            some_file = os.path.join(outside_dir, "some_file.txt")
+            with open(some_file, "w") as f:
+                f.write("some data")
+            complex.url = f"file:{some_file}"
+
+            with self.assertRaises(FileURLNotSupported):
+                inout.inputs.ComplexInput.from_json(complex.json)
+
     def test_complex_input_data(self):
         complex = self.make_complex_input()
         complex.data = "some data"

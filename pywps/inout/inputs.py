@@ -6,6 +6,7 @@ import base64
 import re
 from copy import deepcopy
 from pathlib import Path
+from urllib.parse import urlparse
 
 from pywps import xml_util as etree
 from pywps.app.Common import Metadata
@@ -220,7 +221,10 @@ class ComplexInput(basic.ComplexInput):
                 instance._validate_file_input(Path(json_input['file']).absolute().as_uri())
             instance.file = json_input['file']
         elif json_input.get('href'):
-            instance.url = json_input['href']
+            href = json_input['href']
+            if validate_file and urlparse(href).scheme == 'file':
+                instance._validate_file_input(href)
+            instance.url = href
         elif json_input.get('data'):
             data = json_input['data']
             if data_format.encoding == 'base64':
