@@ -5,6 +5,7 @@
 import base64
 import re
 from copy import deepcopy
+from pathlib import Path
 
 from pywps import xml_util as etree
 from pywps.app.Common import Metadata
@@ -185,7 +186,7 @@ class ComplexInput(basic.ComplexInput):
         return data
 
     @classmethod
-    def from_json(cls, json_input):
+    def from_json(cls, json_input, validate_file=True):
         data_format = json_input.get('data_format')
         if data_format is not None:
             data_format = Format(
@@ -215,6 +216,8 @@ class ComplexInput(basic.ComplexInput):
         )
         instance.as_reference = json_input.get('asreference', False)
         if json_input.get('file'):
+            if validate_file:
+                instance._validate_file_input(Path(json_input['file']).absolute().as_uri())
             instance.file = json_input['file']
         elif json_input.get('href'):
             instance.url = json_input['href']
@@ -377,10 +380,10 @@ class LiteralInput(basic.LiteralInput):
         return deepcopy(self)
 
 
-def input_from_json(json_data):
+def input_from_json(json_data, validate_file=True):
     data_type = json_data.get('type', 'literal')
     if data_type in ['complex', 'reference']:
-        inpt = ComplexInput.from_json(json_data)
+        inpt = ComplexInput.from_json(json_data, validate_file=validate_file)
     elif data_type == 'literal':
         inpt = LiteralInput.from_json(json_data)
     elif data_type == 'bbox':

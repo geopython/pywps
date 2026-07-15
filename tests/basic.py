@@ -21,6 +21,7 @@ class TestBase(unittest.TestCase):
         set('server', 'temp_path', f"{self.tmpdir.name}/temp_path")
         set('server', 'outputpath', f"{self.tmpdir.name}/outputpath")
         set('server', 'workdir', f"{self.tmpdir.name}/workdir")
+        set('server', 'allowedinputpaths', self.tmpdir.name)
 
         set('logging', 'level', 'DEBUG')
         set('logging', 'file', f"{self.tmpdir.name}/logging-file.log")
