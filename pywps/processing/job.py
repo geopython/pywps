@@ -56,7 +56,8 @@ class Job(object):
         """
         process = Process.from_json(value['process'])
         wps_request = WPSRequest()
-        wps_request.json = json.loads(value['wps_request'])
+        # This request was saved by PyWPS, so it is trusted.
+        wps_request.restore_json(json.loads(value['wps_request']))
         wps_response = ExecuteResponse(
             wps_request=wps_request,
             uuid=process.uuid,
