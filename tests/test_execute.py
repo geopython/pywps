@@ -142,6 +142,24 @@ def create_complex_proces(mime_type: str = 'gml'):
                    ])
 
 
+def create_complex_input_process():
+    def handler(request, response):
+        response.outputs['text'].data = request.inputs['complex'][0].data
+        return response
+
+    return Process(
+        handler=handler,
+        identifier='complex_input_process',
+        title='Complex input process',
+        inputs=[ComplexInput(
+            'complex',
+            'Complex input',
+            supported_formats=[FORMATS.TEXT],
+        )],
+        outputs=[LiteralOutput('text', 'Text output')],
+    )
+
+
 def create_complex_nc_process():
     def complex_proces(request, response):
         from pywps.dependencies import netCDF4 as nc
@@ -446,6 +464,27 @@ class ExecuteTest(TestBase):
 
         resp = client.post_json(doc=request)
         assert_response_success_json(resp, result)
+
+    def test_json_file_is_validated(self):
+        request = {
+            'identifier': 'complex_input_process',
+            'version': '1.0.0',
+            'inputs': {
+                'complex': {
+                    'type': 'complex',
+                    'file': '/etc/passwd',
+                    'mimeType': 'text/plain',
+                    'data_format': {'mime_type': 'text/plain'},
+                    'supported_formats': [{'mime_type': 'text/plain'}],
+                },
+            },
+        }
+        client = client_for(Service(processes=[create_complex_input_process()]))
+
+        resp = client.post_json(doc=request)
+
+        assert resp.status_code == 400
+        assert json.loads(resp.data)['name'] == 'FileURLNotSupported'
 
     def test_post_with_string_input(self):
         request = {

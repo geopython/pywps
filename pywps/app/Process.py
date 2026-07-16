@@ -317,7 +317,8 @@ class Process(object):
             request_json = request_json.decode('utf-8')
             LOGGER.debug("Launching the stored request {}".format(str(uuid)))
             new_wps_request = WPSRequest()
-            new_wps_request.json = json.loads(request_json)
+            # This request was saved by PyWPS, so it is trusted.
+            new_wps_request.restore_json(json.loads(request_json))
             process_identifier = new_wps_request.identifier
             process = self.service.prepare_process_for_execution(process_identifier)
             process._set_uuid(uuid)

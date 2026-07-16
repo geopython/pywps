@@ -92,6 +92,7 @@ replace = "{new_version}"
 
 [tool.coverage.run]
 relative_files = true
+omit = ["pywps/templates/*"]
 
 [tool.pytest.ini_options]
 addopts = [
@@ -121,4 +122,3 @@ lint.select = ["E", "W", "F", "C90"]   # Flake8-equivalent rule families
 lint.ignore = ["F401", "E402", "C901"]
 line-length = 120
 exclude = ["tests"]
-

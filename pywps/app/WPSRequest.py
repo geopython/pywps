@@ -17,6 +17,7 @@ from pywps import xml_util as etree
 from pywps.app.basic import get_xpath_ns, parse_http_url
 from pywps.configuration import wps_strict
 from pywps.exceptions import (
+    FileURLNotSupported,
     FileSizeExceeded,
     InvalidParameterValue,
     MissingParameterValue,
@@ -145,7 +146,8 @@ class WPSRequest(object):
 
             if self.preprocess_request is not None:
                 jdoc = self.preprocess_request(jdoc, http_request=self.http_request)
-            self.json = jdoc
+            # Load client input and validate any local file paths.
+            self.load_json(jdoc)
 
             version = jdoc.get('version')
             self.set_version(version)
@@ -456,6 +458,21 @@ class WPSRequest(object):
 
         :param value: the json (not string) representation
         """
+        self.load_json(value)
+
+    def load_json(self, value):
+        """Load a request and validate its input file paths."""
+        self._set_json(value, validate_file=True)
+
+    def restore_json(self, value):
+        """Restore a request previously saved by PyWPS.
+
+        Input files are already in the job work directory and do not need to
+        be checked against ``allowedinputpaths`` again.
+        """
+        self._set_json(value, validate_file=False)
+
+    def _set_json(self, value, validate_file=True):
 
         self.operation = value.get('operation')
         self.version = value.get('version')
@@ -482,8 +499,10 @@ class WPSRequest(object):
                 if 'identifier' not in inpt_def:
                     inpt_def['identifier'] = identifier
                 try:
-                    inpt = input_from_json(inpt_def)
+                    inpt = input_from_json(inpt_def, validate_file=validate_file)
                     self.inputs[identifier].append(inpt)
+                except FileURLNotSupported:
+                    raise
                 except Exception as e:
                     LOGGER.warning(e)
                     LOGGER.warning(f'skipping input: {identifier}')
