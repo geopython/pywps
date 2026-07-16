@@ -28,7 +28,7 @@ from pywps.inout.outputs import MetaFile, MetaLink, MetaLink4
 from io import StringIO
 from urllib.parse import urlparse
 from pywps.validator.base import emptyvalidator
-from pywps.exceptions import InvalidParameterValue
+from pywps.exceptions import FileURLNotSupported, InvalidParameterValue
 from pywps.validator.mode import MODE
 from pywps.inout.basic import UOM
 from pywps.inout.storage.file import FileStorageBuilder
@@ -272,6 +272,28 @@ class SerializationComplexInputTest(TestBase):
         self.assertEqual(complex2.prop, 'file')
         self.assertEqual(complex.file, complex2.file)
         self.assertEqual(complex.data, complex2.data)
+
+    def test_complex_input_file_outside_allowed_paths(self):
+        complex = self.make_complex_input()
+        with tempfile.TemporaryDirectory(prefix="pywps_not_allowed_") as outside_dir:
+            some_file = os.path.join(outside_dir, "some_file.txt")
+            with open(some_file, "w") as f:
+                f.write("some data")
+            complex.file = some_file
+
+            with self.assertRaises(FileURLNotSupported):
+                inout.inputs.ComplexInput.from_json(complex.json)
+
+    def test_complex_input_file_url_outside_allowed_paths(self):
+        complex = self.make_complex_input()
+        with tempfile.TemporaryDirectory(prefix="pywps_not_allowed_") as outside_dir:
+            some_file = os.path.join(outside_dir, "some_file.txt")
+            with open(some_file, "w") as f:
+                f.write("some data")
+            complex.url = f"file:{some_file}"
+
+            with self.assertRaises(FileURLNotSupported):
+                inout.inputs.ComplexInput.from_json(complex.json)
 
     def test_complex_input_data(self):
         complex = self.make_complex_input()
