@@ -18,7 +18,9 @@ from typing import Optional, Sequence, Union
 _FORMATS = namedtuple('FORMATS', 'GEOJSON, JSON, SHP, GML, GPX, METALINK, META4, KML, KMZ, GEOTIFF,'
                                  'WCS, WCS100, WCS110, WCS20, WFS, WFS100,'
                                  'WFS110, WFS20, WMS, WMS130, WMS110,'
-                                 'WMS100, TEXT, DODS, NETCDF, NCML, LAZ, LAS, ZIP,'
+                                 'WMS100, TEXT, DODS, NETCDF, NCML, '
+                                 'LAS, LASJSON, LASXML, LAZ, '
+                                 'ZIP, '
                                  'XML, CSV')
 
 
@@ -192,8 +194,10 @@ FORMATS = _FORMATS(
     Format('application/x-ogc-dods', extension='.nc'),
     Format('application/x-netcdf', extension='.nc', encoding='base64'),
     Format('application/ncML+xml', extension='.ncml', schema="ncml/2.2/ncml-2.2.xsd"),
-    Format('application/octet-stream', extension='.laz'),
-    Format('application/octet-stream', extension='.las'),
+    Format('application/vdn.las', extension='.las', encoding='binary'),
+    Format('application/vdn.las.las+json', extension='.lasjson', encoding='binary'),
+    Format('application/vnd.las.las+xml', extension='.lasxml', encoding='binary'),
+    Format('application/vdn.laszip', extension='.laz', encoding='binary'),
     Format('application/zip', extension='.zip', encoding='base64'),
     Format('application/xml', extension='.xml'),
     Format('text/csv', extension='.csv'),
