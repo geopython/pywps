@@ -10,7 +10,7 @@ formats:
   - epub
 
 build:
-  os: "ubuntu-24.04"
+  os: "ubuntu-26.04"
   tools:
     python: "3.11"  # Use standard CPython version; `mambaforge-22.9` is not valid here
 
