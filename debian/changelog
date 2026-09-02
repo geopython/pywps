@@ -1,3 +1,14 @@
+pywps (4.8.0) trusty; urgency=medium
+
+  * Tests that require specific optional libraries have been marked as such (#699).
+  * Packaging now uses pyprojec.toml and adheres to PEPs 517 and 621 (#701).
+  * Now supports explicit path validation for complex inputs (#704).
+  * LAS/LAZ point cloud formats now better supported (#702).
+  * CI testing now uses explicit commit hashes for Actions and Python CI dependencies (#703).
+  * Project now uses Trusted Publisher for deploying packages to PyPI. (#709).
+
+ -- Trevor James Smith <10819524+Zeitsperre@users.noreply.github.com>  Wed, 02 Sep 2026 21:00:00 +0000
+
 pywps (4.7.0) trusty; urgency=medium
 
   * Skipped support for Python 3.8 and 3.9.
