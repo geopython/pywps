@@ -26,6 +26,7 @@ from pywps import ComplexInput
 from pywps.inout.basic import SOURCE_TYPE
 import tempfile
 import os
+import requests
 
 
 HAS_NETCDF4 = bool(ilu.find_spec("netCDF4"))
@@ -211,7 +212,12 @@ class ValidateTest(TestBase):
         self.assertTrue(validatedods(opendap_input, MODE.NONE), 'NONE validation')
         self.assertTrue(validatedods(opendap_input, MODE.SIMPLE), 'SIMPLE validation')
 
-        self.assertTrue(validatedods(opendap_input, MODE.STRICT), 'STRICT validation')
+        r = requests.head(opendap_input.url)
+        if r.status_code == 200:
+            self.assertTrue(validatedods(opendap_input, MODE.STRICT), 'STRICT validation')
+        else:
+            pass # site unavailable
+
         opendap_input.url = 'Faulty url'
         self.assertFalse(validatedods(opendap_input, MODE.STRICT))
 
