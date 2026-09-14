@@ -7,7 +7,7 @@ pywps (4.8.0) trusty; urgency=medium
   * CI testing now uses explicit commit hashes for Actions and Python CI dependencies (#703).
   * Project now uses Trusted Publisher for deploying packages to PyPI. (#709).
 
- -- Trevor James Smith <10819524+Zeitsperre@users.noreply.github.com>  Wed, 02 Sep 2026 21:00:00 +0000
+ -- Trevor James Smith <10819524+Zeitsperre@users.noreply.github.com>  Mon, 14 Sep 2026 21:00:00 +0000
 
 pywps (4.7.0) trusty; urgency=medium
 
