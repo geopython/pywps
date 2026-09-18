@@ -26,7 +26,7 @@ class ExecuteTest(TestBase):
         # Running processes using the MultiProcessing scheduler and a file-based database
         configuration.CONFIG.set('processing', 'mode', 'distributed')
 
-    @pytest.mark.xfail(reason="WPS request sometimes returns 500 Internal Server Error depending on infrastructure.")
+    @pytest.mark.xfail(reason="WPS request sometimes returns 500 Internal Server Error depending on infrastructure.", strict=False)
     def test_async(self):
         client = client_for(Service(processes=[Sleep()]))
         wps = WPSExecution()
