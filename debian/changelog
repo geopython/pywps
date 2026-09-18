@@ -1,3 +1,9 @@
+pywps (4.8.1) trusty; urgency=medium
+
+  * Async test that was failing for Debian builds has been marked xfail. (#711).
+
+ -- Trevor James Smith <smith.trevorj@ouranos.ca>  Mon, 21 Sep 2026 21:00:00 +0000
+
 pywps (4.8.0) trusty; urgency=medium
 
   * Tests that require specific optional libraries have been marked as such (#699).
