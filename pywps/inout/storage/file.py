@@ -31,6 +31,13 @@ def _build_output_name(output):
     if not suffix:
         suffix = output.data_format.extension
     _, file_name = os.path.split(prefix)
+
+    # Avoid misleading names for outputs: if the file name is the generic
+    # 'input' (the default used when downloading URL resources), use the
+    # output identifier instead so the reference URL is meaningful.
+    if file_name == 'input' and getattr(output, 'identifier', None):
+        file_name = output.identifier
+
     output_name = file_name + suffix
     return output_name, suffix
 
