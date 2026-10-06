@@ -19,6 +19,12 @@ class DBLogTest(TestBase):
     def setUp(self):
         super().setUp()
         self.database = configuration.get_config_value('logging', 'database')
+        # Ensure a clean slate: other tests may have left rows in the
+        # process-instance table, which would make the content assertions
+        # below fail when the suite runs in a different order.
+        session = get_session()
+        session.query(ProcessInstance).delete()
+        session.commit()
 
     def test_0_dblog(self):
         """Test pywps.formats.Format class
