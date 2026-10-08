@@ -3,7 +3,9 @@
 # licensed under MIT, Please consult LICENSE.txt for details     #
 ##################################################################
 
+import os
 import sys
+import time
 import datetime
 
 project = u'PyWPS'
@@ -11,7 +13,11 @@ project = u'PyWPS'
 license = ('This work is licensed under a Creative Commons Attribution 4.0 '
            'International License')
 
-copyright = (f'Copyright (C) 2014-{datetime.datetime.now().year} PyWPS Development Team, '
+build_date = datetime.datetime.fromtimestamp(
+    int(os.environ.get('SOURCE_DATE_EPOCH', time.time())),
+    tz=datetime.timezone.utc,
+)
+copyright = (f'Copyright (C) 2014-{build_date.year} PyWPS Development Team, '
              'represented by Jachym Cepicky.')
 copyright += license
 
