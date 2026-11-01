@@ -112,7 +112,7 @@ markers = [
 include-package-data = true
 
 [tool.setuptools.packages.find]
-exclude = ["docs", "tests", "tests.*"]
+include = ["pywps*"]
 
 [tool.setuptools.dynamic]
 version = { file = ["VERSION.txt"] }
